@@ -184,7 +184,7 @@ class SyncManager {
             subscriberOnNewAssets,
         } = this.syncConfig;
 
-        const web3Service = await Web3Service();
+        const web3Service = await Web3Service({ networkId });
         const currentBlock = await web3Service.eth.getBlockNumber();
         let newLastSyncedBlock = lastSyncedBlock;
         const fromBlock = lastSyncedBlock + 1;

@@ -66,6 +66,7 @@ export default async function syncUserInfo(args, ctx) {
             user.address,
             privateKey,
             user.linkedPublicKey,
+            networkId,
         );
     }
 
