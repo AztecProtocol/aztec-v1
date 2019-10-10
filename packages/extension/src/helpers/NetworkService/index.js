@@ -1,3 +1,3 @@
 import NetworkService from './factory';
 
-export default async (networkId, account) => NetworkService.create(networkId, account);
+export default async options => NetworkService.create(options);

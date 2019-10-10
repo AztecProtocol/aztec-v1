@@ -1,5 +1,4 @@
 import abi from 'web3-eth-abi';
-import Web3Service from '~helpers/NetworkService';
 import {
     IZkAssetConfig,
 } from '~config/contracts';

@@ -12,6 +12,7 @@ import {
     IZkAssetConfig,
 } from '~/config/contracts';
 import NetworkService from '~helpers/NetworkService/factory';
+import getGanacheNetworkId from '~utils/getGanacheNetworkId';
 
 const configureWeb3Networks = async () => {
     const providerUrlGanache = await get('__providerUrl');
@@ -31,7 +32,7 @@ const configureWeb3Networks = async () => {
         NETWORKS.KOVAN,
     ].map(networkName => Provider.infuraConfig(networkName, infuraProjectId));
 
-    const ganacheNetworkId = Object.keys(ACEConfig.config.networks).pop();
+    const ganacheNetworkId = getGanacheNetworkId();
     const {
         networkName: ganacheNetworkName,
     } = NETWORKS.GANACHE;

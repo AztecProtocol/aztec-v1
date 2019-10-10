@@ -14,7 +14,7 @@ export default async function fetchAccount({
         };
     }
 
-    const web3Service = await Web3Service(networkId);
+    const web3Service = await Web3Service({ networkId });
 
     const eventName = AZTECAccountRegistryConfig.events.registerExtension;
 
@@ -52,7 +52,6 @@ export default async function fetchAccount({
             account,
         };
     } catch (error) {
-        console.log(error);
         return {
             error,
             account: null,

@@ -14,7 +14,7 @@ const subscribe = async ({
     networkId,
     fromAssets = null,
 } = {}) => {
-    if (!networkId && networkId !== 0) {
+    if (!networkId) {
         errorLog("'networkId' cannot be empty in assets subscription");
         return null;
     }
@@ -22,7 +22,7 @@ const subscribe = async ({
     const {
         abi,
         subscribe: subscribeOn,
-    } = (await Web3Service()).eth;
+    } = (await Web3Service({ networkId })).eth;
 
     const eventsTopics = [
         IZkAssetConfig.events.createNote,

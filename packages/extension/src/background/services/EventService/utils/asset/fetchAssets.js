@@ -16,7 +16,7 @@ export default async function fetchAssets({
             assets: null,
         };
     }
-    const web3Service = await Web3Service(networkId);
+    const web3Service = await Web3Service({ networkId });
     const eventName = ACEConfig.events.сreateNoteRegistry;
 
     const options = {
