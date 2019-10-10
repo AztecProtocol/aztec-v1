@@ -1,4 +1,4 @@
-// import Web3Service from '~background/services/NetworkService';
+// import Web3Service from '~helpers/NetworkService';
 // import decodeNoteLogs from '../services/EventService/utils/helpers/decodeNoteLogs';
 // import {
 //     saveNotes
@@ -7,7 +7,7 @@
 //     IZkAssetConfig,
 // } from '~config/contracts';
 // import { infuraHttpProviderURI } from '~background/helpers/InfuraTestCreds';
-// import NetworkService from '~background/services/NetworkService/factory';
+// import NetworkService from '~helpers/NetworkService/factory';
 // import {
 //     AZTECAccountRegistryConfig,
 //     ACEConfig,
@@ -29,8 +29,8 @@
 //     contractsConfigs: contractsConfigs,
 // };
 
-// const optionsForAllEvents = (address) => {
-//     const { abi } = Web3Service().eth;
+// const optionsForAllEvents = async (address) => {
+//     const { abi } = (await Web3Service()).eth;
 
 //     const eventsTopics = [
 //         IZkAssetConfig.events.createNote,
@@ -65,9 +65,9 @@
 //     let assetEventsEmitterAddress = '0x99b8385e3d95c13e7239ef2382f71d810b1c623a';
 
 //     // given
-//     const options = optionsForAllEvents(assetEventsEmitterAddress);
+//     const options = await optionsForAllEvents(assetEventsEmitterAddress);
 //     const eventsTopics = options.topics[0];
-//     const { getPastLogs } = Web3Service().eth;
+//     const { getPastLogs } = (await Web3Service()).eth;
 
 //     // action
 //     const tStart = performance.now();

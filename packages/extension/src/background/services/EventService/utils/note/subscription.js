@@ -1,4 +1,4 @@
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import {
     IZkAssetConfig,
 } from '~config/contracts';
@@ -22,7 +22,7 @@ const subscribe = async ({
     const {
         abi,
         subscribe: subscribeOn,
-    } = Web3Service(networkId).eth;
+    } = (await Web3Service()).eth;
 
     const eventsTopics = [
         IZkAssetConfig.events.createNote,

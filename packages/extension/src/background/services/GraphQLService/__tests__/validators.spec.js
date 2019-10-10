@@ -15,7 +15,7 @@ import {
     validateAccount,
     validateDomain,
 } from '../validators';
-import configureFactory from '~background/services/NetworkService/__tests__/helpers/configureFactory';
+import configureFactory from '~helpers/NetworkService/__tests__/helpers/configureFactory';
 
 jest.mock('~utils/storage');
 

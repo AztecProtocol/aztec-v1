@@ -1,4 +1,4 @@
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import {
     ACEConfig,
 } from '~config/contracts';
@@ -45,7 +45,7 @@ const subscribe = async ({
         fromBlock,
     };
 
-    const subscription = await Web3Service()
+    const subscription = (await Web3Service())
         .useContract(ACEConfig.name)
         .events(eventName)
         .subscribe(options, (error) => {

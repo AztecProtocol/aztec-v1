@@ -11,6 +11,7 @@ import {
 import {
     permissionError,
 } from '~utils/error';
+import NetworkService from '~helpers/NetworkService/factory';
 import enableAssetForDomain from './enableAssetForDomain';
 
 const AuthService = {
@@ -64,6 +65,7 @@ const AuthService = {
         };
     },
     setNetworkId: async (networkId) => {
+        NetworkService.setNetworkId(networkId);
         await set({
             networkId,
         });

@@ -7,7 +7,7 @@ import ERC20Mintable from '../../../../../../build/contracts/ERC20Mintable';
 import ZkAssetOwnable from '../../../../../../build/contracts/ZkAssetOwnable';
 import JoinSplit from '../../../../../../build/contracts/JoinSplit';
 
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import asyncMap from '~utils/asyncMap';
 import fetchNotes from '../fetchNotes';
 import decodeNoteLogs from '../note/helpers/decodeNoteLogs';
@@ -18,7 +18,7 @@ import {
     AZTECAccountRegistryConfig,
     ACEConfig,
 } from '~/config/contracts';
-import NetworkService from '~background/services/NetworkService/factory';
+import NetworkService from '~helpers/NetworkService/factory';
 import {
     errorLog,
     log,

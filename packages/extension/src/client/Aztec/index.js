@@ -32,6 +32,11 @@ class Aztec {
             // Time to reload your interface with accounts[0]!
             await this.enable();
         });
+
+        window.ethereum.on('networkChanged', async (networkId) => {
+            if (!this.enabled) return;
+            await this.enable();
+        });
         this.setupStreams();
     }
 
