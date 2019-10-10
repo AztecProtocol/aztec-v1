@@ -30,4 +30,7 @@ const mockDb = {
 export default {
     local: mockDb,
     sync: mockDb,
+    onChanged: {
+        addListener: () => {},
+    },
 };
