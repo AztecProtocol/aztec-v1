@@ -249,11 +249,12 @@ describe('ZkAsset', () => {
 
         await createBulkAssets([asset], networkId);
 
-        NoteService.initWithUser(
-            userAddress,
-            privateKey,
-            linkedPublicKey,
-        );
+        // NoteService.initWithUser(
+        //     userAddress,
+        //     privateKey,
+        //     linkedPublicKey,
+        //     networkId,
+        // );
 
         // Action
         const tStart = performance.now();
@@ -294,6 +295,7 @@ describe('ZkAsset', () => {
             userAddress,
             privateKey,
             linkedPublicKey,
+            networkId,
         );
 
         await NoteService.syncAsset(

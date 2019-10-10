@@ -7,6 +7,7 @@ export default async function mergeWithLatestAsset(
     userAddress,
     linkedPrivateKey,
     prevAssetNoteDataMappinig,
+    networkId,
 ) {
     const ownerKey = await addressModel.keyOf({
         address: userAddress,
@@ -33,6 +34,8 @@ export default async function mergeWithLatestAsset(
         userAddress,
         linkedPrivateKey,
         assetId,
+        null,
+        networkId,
     );
 
     return {
