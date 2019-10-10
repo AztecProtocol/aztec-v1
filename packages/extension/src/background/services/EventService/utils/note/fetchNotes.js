@@ -11,9 +11,10 @@ export default async function fetchNotes({
     fromBlock,
     fromAssets = null,
     toBlock = 'latest',
+    networkId,
 } = {}) {
-    const web3Service = await NetworkService();
-    const { abi, getPastLogs } = (await NetworkService()).eth;
+    const web3Service = await NetworkService(networkId);
+    const { abi, getPastLogs } = web3Service.eth;
 
     const eventsTopics = [
         IZkAssetConfig.events.createNote,

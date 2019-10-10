@@ -37,17 +37,18 @@ class NetworkSwitcher {
 
     networksConfigs = {};
 
-    ensureWeb3Service = async (account) => {
-        if (!this.networkId) {
+    ensureWeb3Service = async (networkId, account) => {
+        if (!networkId && !this.networkId) {
             const resp = await get('networkId');
             this.networkId = resp;
         }
-        const config = this.networksConfigs[this.networkId];
+        const networkIdToUse = networkId || this.networkId;
+        const config = this.networksConfigs[networkIdToUse];
         if (!config) {
-            errorLog(`No network config for such networkId: ${this.networkId}`);
+            errorLog(`No network config for such networkId: ${networkIdToUse}`);
             return;
         }
-        if (this.web3ServicesByNetworks[this.networkId]) {
+        if (this.web3ServicesByNetworks[networkIdToUse]) {
             return;
         }
         const {
@@ -74,7 +75,7 @@ class NetworkSwitcher {
                 service.registerContract(contractConfig);
             }
         }
-        this.web3ServicesByNetworks[this.networkId] = service;
+        this.web3ServicesByNetworks[networkIdToUse] = service;
     };
 
     setConfigs(networksConfigs) {
@@ -113,9 +114,9 @@ class NetworkSwitcher {
         };
     }
 
-    async create(account) {
-        await this.ensureWeb3Service(account);
-        return this.web3ServicesByNetworks[this.networkId];
+    async create(networkId, account) {
+        await this.ensureWeb3Service(networkId, account);
+        return this.web3ServicesByNetworks[networkId || this.networkId];
     }
 }
 
