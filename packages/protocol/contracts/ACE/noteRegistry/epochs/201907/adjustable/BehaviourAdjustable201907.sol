@@ -51,7 +51,7 @@ contract BehaviourAdjustable201907 is Behaviour201907 {
         ,) = _proofOutputs.get(1).extractProofOutput();
 
         (, bytes32 oldTotalNoteHash, ) = oldTotal.get(0).extractNote();
-        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total burned note does not match");
+        require(oldTotalNoteHash == registry.confidentialTotalMinted, "provided total minted note does not match");
         (, bytes32 newTotalNoteHash, ) = newTotal.get(0).extractNote();
         setConfidentialTotalMinted(newTotalNoteHash);
 
