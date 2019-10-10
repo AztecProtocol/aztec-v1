@@ -14,6 +14,7 @@ import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
 import ProfileSvg from '~ui/components/ProfileSvg';
+import AztecSvg from '~ui/components/AztecSvg';
 import colorSchemes from './config/colorSchemes';
 import shapeGenerators from './config/shapeGenerators';
 import styles from './icon.scss';
@@ -49,23 +50,11 @@ const ProfileIcon = ({
 
     let iconNode;
     if (type === 'aztec') {
-        const style = themeStyleMapping[theme];
-
         iconNode = (
-            <Avatar
-                className={classnames(
-                    {
-                        [wrapperClassName]: !tooltip,
-                        [styles['with-icon']]: !src,
-                    },
-                )}
-                src={src}
-                alt={alt}
-                iconName="crop_square"
+            <AztecSvg
+                className={!tooltip ? className : ''}
+                theme={theme}
                 size={size}
-                shape="circular"
-                layer={1}
-                {...style}
             />
         );
     } else if (!type || src) {
