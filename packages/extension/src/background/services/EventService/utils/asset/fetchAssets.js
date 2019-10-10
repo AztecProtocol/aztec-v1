@@ -1,4 +1,4 @@
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import {
     ACEConfig,
 } from '~config/contracts';
@@ -16,7 +16,7 @@ export default async function fetchAssets({
             assets: null,
         };
     }
-
+    const web3Service = await Web3Service();
     const eventName = ACEConfig.events.сreateNoteRegistry;
 
     const options = {
@@ -31,7 +31,7 @@ export default async function fetchAssets({
     }
 
     try {
-        const data = await Web3Service()
+        const data = await web3Service
             .useContract(ACEConfig.name)
             .events(eventName)
             .where(options);

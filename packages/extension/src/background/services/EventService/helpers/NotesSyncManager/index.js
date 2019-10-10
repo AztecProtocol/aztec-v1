@@ -3,7 +3,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import {
     fetchNotes,
     saveNotes,
@@ -162,9 +162,8 @@ class SyncManager {
             onProggressChange,
             onFailure,
         } = progressCallbacks;
-
-
-        const currentBlock = await Web3Service(networkId).eth.getBlockNumber();
+        const web3Service = await Web3Service();
+        const currentBlock = await web3Service.eth.getBlockNumber();
         const fromBlock = lastSyncedBlock + 1;
         const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
 

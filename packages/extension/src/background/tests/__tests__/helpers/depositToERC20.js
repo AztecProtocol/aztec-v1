@@ -1,7 +1,7 @@
 import {
     log,
 } from '~utils/log';
-import Web3Service from '~utils/Web3Service';
+import Web3Service from '~helpers/NetworkService';
 
 export default async function depositToERC20({
     amount,
@@ -9,7 +9,8 @@ export default async function depositToERC20({
     erc20Address,
 }) {
     log(`Minting ERC20 with amount = ${amount}...`);
-    await Web3Service
+    const web3Service = await Web3Service();
+    await web3Service
         .useContract('ERC20')
         .at(erc20Address)
         .method('mint')
@@ -18,10 +19,10 @@ export default async function depositToERC20({
             amount,
         );
 
-    const aceAddress = Web3Service.contract('ACE').address;
+    const aceAddress = web3Service.contract('ACE').address;
 
     log(`Appoving ACE to spend ${amount} from ERC20...`);
-    await Web3Service
+    await web3Service
         .useContract('ERC20')
         .at(erc20Address)
         .method('approve')

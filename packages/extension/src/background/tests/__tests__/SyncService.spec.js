@@ -7,7 +7,7 @@ import ERC20Mintable from '../../../../build/contracts/ERC20Mintable';
 import ZkAssetOwnable from '../../../../build/contracts/ZkAssetOwnable';
 import JoinSplit from '../../../../build/contracts/JoinSplit';
 
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import { fetchNotes } from '../../services/EventService/utils/note';
 import {
     createBulkAssets,
@@ -16,7 +16,7 @@ import {
     AZTECAccountRegistryConfig,
     ACEConfig,
 } from '~config/contracts';
-import Web3ServiceFactory from '~background/services/NetworkService/factory';
+import Web3ServiceFactory from '~helpers/NetworkService/factory';
 import createNewAsset from './helpers/createNewAsset';
 import mint from './helpers/mint';
 import approve from './helpers/approve';
@@ -86,9 +86,9 @@ describe('ZkAsset', () => {
         account = await getSenderAccount(sender);
 
         configureWeb3Service();
-        web3Service = Web3Service(networkId, sender);
-
+        web3Service = await Web3Service(sender);
         const aceAddress = web3Service.contract('ACE').address;
+
         log(`aceAddress: ${aceAddress}`);
 
         await Account.add(account, { networkId });

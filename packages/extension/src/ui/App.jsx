@@ -11,7 +11,6 @@ import ZkAssetMintable from '../../build/protocol/ZkAssetMintable.json';
 import ZkAssetBurnable from '../../build/protocol/ZkAssetBurnable.json';
 import Route from '~uiModules/components/Route';
 import ConnectionService from '~ui/services/ConnectionService';
-import Web3Service from '~ui/services/Web3Service';
 import ActionService from '~uiModules/services/ActionService';
 import apis from '~uiModules/apis';
 import i18n from '~ui/helpers/i18n';
@@ -22,19 +21,8 @@ import routes from '~ui/config/routes';
 import actions from '~ui/config/actions';
 import './styles/guacamole.css';
 import './styles/_reset.scss';
-
-const initWeb3 = async () => {
-    await Web3Service.init({
-        provider: 'http://localhost:8545',
-    });
-    Web3Service.registerContract(AZTECAccountRegistry);
-    Web3Service.registerInterface(ZkAssetMintable, {
-        name: 'ZkAsset',
-    });
-    Web3Service.registerInterface(ZkAssetBurnable, {
-        name: 'ZkAssetBurnable',
-    });
-};
+import configureWeb3Networks from '~utils/configureWeb3Networks';
+import Web3Service from '~helpers/NetworkService';
 
 class App extends PureComponent {
     constructor(props) {
@@ -61,7 +49,7 @@ class App extends PureComponent {
 
     async componentDidMount() {
         ConnectionService.openConnection();
-        await initWeb3();
+        await configureWeb3Networks();
         this.loadInitialStates();
     }
 
@@ -118,10 +106,10 @@ class App extends PureComponent {
                 } = actions[type] || {});
             }
         }
-
+        const web3Service = await Web3Service();
         const {
             address,
-        } = Web3Service.account;
+        } = web3Service.account;
         const currentAccount = {
             address,
         };

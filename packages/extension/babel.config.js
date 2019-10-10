@@ -24,6 +24,7 @@ module.exports = {
                     '~background': './src/background',
                     '~content': './src/content',
                     '~client': './src/client',
+                    '~helpers': './src/helpers',
                     '~ui': './src/ui',
                     '~': './src',
                 },

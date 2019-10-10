@@ -1,4 +1,4 @@
-import NetworkService from '~background/services/NetworkService';
+import NetworkService from '~helpers/NetworkService';
 import {
     IZkAssetConfig,
 } from '~config/contracts';
@@ -11,9 +11,9 @@ export default async function fetchNotes({
     fromBlock,
     fromAssets = null,
     toBlock = 'latest',
-    networkId,
 } = {}) {
-    const { abi, getPastLogs } = NetworkService().eth;
+    const web3Service = await NetworkService();
+    const { abi, getPastLogs } = (await NetworkService()).eth;
 
     const eventsTopics = [
         IZkAssetConfig.events.createNote,
@@ -39,7 +39,7 @@ export default async function fetchNotes({
 
     try {
         const rawLogs = await getPastLogs(options);
-        const groupedNotes = decodeNoteLogs(eventsTopics, rawLogs, networkId);
+        const groupedNotes = decodeNoteLogs(eventsTopics, rawLogs);
 
         return {
             error: null,
