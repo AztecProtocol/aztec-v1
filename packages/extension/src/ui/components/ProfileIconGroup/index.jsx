@@ -2,30 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
-    AvatarGroup,
-} from '@aztec/guacamole-ui';
-import {
     themeType,
-    profileType,
+    profileShape,
 } from '~ui/config/propTypes';
-import {
-    avatarSizesMap,
-} from '~ui/styles/guacamole-vars';
-import {
-    themeStyleMapping,
-    typeIconMapping,
-} from '~ui/components/ProfileIcon';
-import styles from '~ui/components/ProfileIcon/icon.scss';
-import Tooltip from './Tooltip';
-
-const groupStyleMapping = {
-    primary: {
-        background: 'transparent',
-    },
-    white: {
-        background: 'white',
-    },
-};
+import ProfileIcon from '~ui/components/ProfileIcon';
+import MoreItems from './MoreItems';
+import styles from './profiles.scss';
 
 const ProfileIconGroup = ({
     className,
@@ -33,70 +15,71 @@ const ProfileIconGroup = ({
     size,
     icons,
     moreItems,
-}) => {
-    const style = groupStyleMapping[theme];
-    const {
-        tooltipBackground,
-        ...iconStyle
-    } = themeStyleMapping[theme];
-
-    const avatars = icons.map(({
-        type,
-        ...icon
-    }) => {
-        const {
-            name: iconName,
-        } = typeIconMapping[type] || {};
-
-        return {
-            ...iconStyle,
-            ...icon,
-            iconName,
-            className: classnames(
-                styles[`theme-${theme}`],
-                styles[`size-${size}`],
-                {
-                    [styles['wrapped-asset-icon']]: type === 'asset',
-                    [styles['with-icon']]: !icon.src,
-                },
-            ),
-        };
-    });
-    if (moreItems && moreItems.length) {
-        const tooltipNode = (
-            <Tooltip
-                items={moreItems}
+}) => (
+    <div
+        className={classnames(
+            className,
+            styles.group,
+            styles[`group-${size}`],
+            styles[`theme-${theme}`],
+        )}
+    >
+        {icons.map(({
+            profile,
+            tooltip,
+        }, i) => (
+            <div
+                key={+i}
+                className={classnames(
+                    styles.icon,
+                    {
+                        [styles.interactive]: tooltip,
+                    },
+                )}
+            >
+                <ProfileIcon
+                    {...profile}
+                    theme={theme}
+                    size={size}
+                    tooltip={tooltip}
+                />
+            </div>
+        ))}
+        {moreItems && moreItems.length > 0 && (
+            <ProfileIcon
+                className={classnames(
+                    styles.icon,
+                    styles.interactive,
+                )}
+                theme={theme}
+                size={size}
+                alt={`+${moreItems.length}`}
+                tooltip={(
+                    <MoreItems
+                        className={styles.moreItems}
+                        items={moreItems}
+                    />
+                )}
             />
-        );
-        avatars.push({
-            ...iconStyle,
-            alt: `+${moreItems.length}`,
-            tooltip: tooltipNode,
-        });
-    }
-
-    return (
-        <AvatarGroup
-            {...style}
-            className={className}
-            avatars={avatars}
-            size={size}
-            layer={1}
-            tooltipBackground={tooltipBackground}
-        />
-    );
-};
+        )}
+    </div>
+);
 
 ProfileIconGroup.propTypes = {
     className: PropTypes.string,
     theme: themeType,
-    size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
+    size: PropTypes.string,
     icons: PropTypes.arrayOf(PropTypes.shape({
-        type: profileType,
-        src: PropTypes.string,
-        alt: PropTypes.string,
+        profile: profileShape.isRequired,
+        tooltip: PropTypes.oneOfType([
+            PropTypes.element,
+            PropTypes.string,
+        ]),
     })).isRequired,
-    moreItems: PropTypes.arrayOf(PropTypes.string),
+    moreItems: PropTypes.arrayOf(PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.element,
+    ])),
 };
 
 ProfileIconGroup.defaultProps = {

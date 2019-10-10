@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    assetShape,
+} from '~ui/config/propTypes';
+import {
     formatValue,
 } from '~ui/utils/asset';
 import {
@@ -15,6 +18,7 @@ import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
 import Transaction from '~ui/views/handlers/Transaction';
 import Connection from '~ui/components/Connection';
+import ListItem from '~ui/components/ListItem';
 
 const steps = [
     {
@@ -66,13 +70,30 @@ const SendTransaction = ({
     const {
         code,
         address: assetAddress,
+        tokenAddress,
     } = asset;
 
     const [firstTransaction, ...rest] = transactions;
     const moreItems = rest.map(({
         amount,
         to,
-    }) => `${formatAddress(to, 6, 4)} (+${formatValue(code, amount)})`);
+    }, i) => (
+        <ListItem
+            key={+i}
+            profile={{
+                type: 'user',
+                address: to,
+            }}
+            content={formatAddress(to, 6, 4)}
+            size="xxs"
+            footnote={(
+                <Text
+                    text={`+${formatValue(asset.code, amount)}`}
+                    color="green"
+                />
+            )}
+        />
+    ));
 
     const initialData = {
         assetAddress: asset.address,
@@ -94,13 +115,30 @@ const SendTransaction = ({
             <Connection
                 theme="white"
                 from={{
-                    type: 'asset',
-                    src: asset.icon,
-                    alt: code,
+                    profile: {
+                        type: 'asset',
+                        address: assetAddress,
+                        tokenAddress,
+                    },
                     description: formatAddress(assetAddress, 6, 4),
                 }}
                 to={{
-                    type: 'user',
+                    profile: {
+                        type: 'user',
+                        address: firstTransaction.to,
+                    },
+                    tooltip: (
+                        <ListItem
+                            content={formatAddress(firstTransaction.to, 6, 4)}
+                            size="xxs"
+                            footnote={(
+                                <Text
+                                    text={`+${formatValue(asset.code, firstTransaction.amount)}`}
+                                    color="green"
+                                />
+                            )}
+                        />
+                    ),
                     description: formatAddress(firstTransaction.to, 6, 4),
                     moreItems,
                 }}
@@ -131,11 +169,7 @@ const SendTransaction = ({
 };
 
 SendTransaction.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-        icon: PropTypes.string,
-    }).isRequired,
+    asset: assetShape.isRequired,
     sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,

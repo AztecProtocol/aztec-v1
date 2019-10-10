@@ -14,15 +14,19 @@ import SummaryLink from '~ui/components/SummaryLink';
 
 const AssetSummaryLink = ({
     className,
+    address,
+    tokenAddress,
     code,
-    icon,
     balance,
     onClick,
 }) => (
     <SummaryLink
         className={className}
-        assetCode={code}
-        assetIcon={icon}
+        profile={{
+            type: 'asset',
+            address,
+            tokenAddress,
+        }}
         onClick={onClick}
         hasButton={!!onClick}
     >
@@ -54,8 +58,9 @@ const AssetSummaryLink = ({
 
 AssetSummaryLink.propTypes = {
     className: PropTypes.string,
+    address: PropTypes.string.isRequired,
+    tokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
-    icon: PropTypes.string,
     balance: PropTypes.number.isRequired,
     onClick: PropTypes.func,
 };
@@ -63,7 +68,6 @@ AssetSummaryLink.propTypes = {
 AssetSummaryLink.defaultProps = {
     className: '',
     code: '',
-    icon: '',
     onClick: null,
 };
 

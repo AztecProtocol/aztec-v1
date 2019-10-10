@@ -5,13 +5,13 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import styles from './tooltip.scss';
 
-const Tooltip = ({
+const MoreItems = ({
+    className,
     items,
     numberOfVisibleItems,
 }) => (
-    <div className={styles.tooltip}>
+    <div className={className}>
         {items.slice(0, numberOfVisibleItems).map((item, i) => (
             <Block
                 key={`${item}_${+i}`}
@@ -24,7 +24,10 @@ const Tooltip = ({
             </Block>
         ))}
         {(items.length > numberOfVisibleItems) && (
-            <Block padding="xxs">
+            <Block
+                padding="xxs"
+                align="center"
+            >
                 <Text
                     text={i18n.t('and.more.count', items.length - numberOfVisibleItems)}
                     size="xxs"
@@ -35,13 +38,18 @@ const Tooltip = ({
     </div>
 );
 
-Tooltip.propTypes = {
-    items: PropTypes.arrayOf(PropTypes.string).isRequired,
+MoreItems.propTypes = {
+    className: PropTypes.string,
+    items: PropTypes.arrayOf(PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.element,
+    ])).isRequired,
     numberOfVisibleItems: PropTypes.number,
 };
 
-Tooltip.defaultProps = {
+MoreItems.defaultProps = {
+    className: '',
     numberOfVisibleItems: 3,
 };
 
-export default Tooltip;
+export default MoreItems;

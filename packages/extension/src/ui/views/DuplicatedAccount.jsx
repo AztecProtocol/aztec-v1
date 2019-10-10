@@ -37,6 +37,7 @@ const DuplicatedAccount = ({
             theme="white"
             from={{
                 type: 'user',
+                address,
             }}
             to={{
                 type: 'aztec',

@@ -8,17 +8,16 @@ import {
     TextInput,
     Icon,
 } from '@aztec/guacamole-ui';
-import ProfileSvg from '~ui/components/ProfileSvg';
-import {
-    baseColors,
-} from '~ui/components/ProfileSvg/utils/generateSvgProps';
+import ProfileIcon from '~ui/components/ProfileIcon';
+import colorSchemes from '~ui/components/ProfileIcon/config/colorSchemes';
 
-const DemoAddress = () => {
+const DemoAddress = ({ type }) => { // eslint-disable-line react/prop-types
     const [demoAddress, updateDemoAddress] = useState('');
     return (
         <FlexBox valign="center">
             <Block padding="m">
-                <ProfileSvg
+                <ProfileIcon
+                    type={type}
                     address={demoAddress}
                     size="l"
                 />
@@ -43,10 +42,13 @@ const DemoAddress = () => {
 };
 
 const Icons = ({
+    type,
     addresses,
 }) => (
     <Block padding="m l">
-        <DemoAddress />
+        <DemoAddress
+            type={type}
+        />
         <Block padding="m 0">
             {addresses.map(addr => (
                 <Block
@@ -54,7 +56,8 @@ const Icons = ({
                     padding="m"
                     inline
                 >
-                    <ProfileSvg
+                    <ProfileIcon
+                        type={type}
                         address={addr}
                         size="l"
                     />
@@ -62,7 +65,7 @@ const Icons = ({
             ))}
         </Block>
         <Block padding="m">
-            {baseColors.map(colorCode => (
+            {colorSchemes[type].map(colorCode => (
                 <Block
                     key={colorCode}
                     inline
@@ -78,10 +81,12 @@ const Icons = ({
 );
 
 Icons.propTypes = {
+    type: PropTypes.string,
     addresses: PropTypes.arrayOf(PropTypes.string),
 };
 
 Icons.defaultProps = {
+    type: 'user',
     addresses: [],
 };
 

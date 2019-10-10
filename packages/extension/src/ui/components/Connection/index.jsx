@@ -14,7 +14,7 @@ import {
 } from '~ui/styles/guacamole-vars';
 import {
     themeType,
-    profileType,
+    profileShape,
 } from '~ui/config/propTypes';
 import styles from './connection.scss';
 
@@ -30,15 +30,22 @@ const Connection = ({
     const {
         title: fromTitle,
         description: fromDesc,
-        ...fromIcon
+        profile: fromProfile,
+        tooltip: fromTooltip,
     } = from;
     const {
         title: toTitle,
         description: toDesc,
+        profile: toProfile,
+        tooltip: toTooltip,
         moreItems,
-        ...toIcon
     } = to;
-    const toIcons = [toIcon];
+    const toIcons = [
+        {
+            profile: toProfile,
+            tooltip: toTooltip,
+        },
+    ];
 
     return (
         <div
@@ -66,9 +73,10 @@ const Connection = ({
                     valign="center"
                 >
                     <ProfileIcon
+                        {...fromProfile}
+                        fromTooltip={fromTooltip}
                         theme={theme}
                         size={size}
-                        {...fromIcon}
                     />
                     <FlexBox valign="center">
                         <Block padding="xs">
@@ -151,9 +159,11 @@ Connection.propTypes = {
     actionIconName: PropTypes.string,
     actionIconColor: PropTypes.string,
     from: PropTypes.shape({
-        type: profileType,
-        src: PropTypes.string,
-        alt: PropTypes.string,
+        profile: profileShape.isRequired,
+        tooltip: PropTypes.oneOfType([
+            PropTypes.element,
+            PropTypes.string,
+        ]),
         title: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.node,
@@ -164,9 +174,11 @@ Connection.propTypes = {
         ]),
     }).isRequired,
     to: PropTypes.shape({
-        type: profileType,
-        src: PropTypes.string,
-        alt: PropTypes.string,
+        profile: profileShape.isRequired,
+        tooltip: PropTypes.oneOfType([
+            PropTypes.element,
+            PropTypes.string,
+        ]),
         title: PropTypes.oneOfType([
             PropTypes.string,
             PropTypes.node,
@@ -175,7 +187,10 @@ Connection.propTypes = {
             PropTypes.string,
             PropTypes.node,
         ]),
-        moreItems: PropTypes.arrayOf(PropTypes.string),
+        moreItems: PropTypes.arrayOf(PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.element,
+        ])),
     }).isRequired,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
 };

@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    assetShape,
+} from '~ui/config/propTypes';
+import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
@@ -61,7 +64,11 @@ const MintTransaction = ({
     const {
         code,
         address: assetAddress,
+        tokenAddress,
     } = asset;
+    const {
+        address: userAddress,
+    } = user;
 
     const ticketHeader = (
         <div>
@@ -77,11 +84,13 @@ const MintTransaction = ({
                 theme="white"
                 from={{
                     type: 'user',
-                    description: formatAddress(user.address, 6, 4),
+                    address: userAddress,
+                    description: formatAddress(userAddress, 6, 4),
                 }}
                 to={{
                     type: 'asset',
-                    src: asset.icon,
+                    address: assetAddress,
+                    tokenAddress,
                     alt: code,
                     description: formatAddress(assetAddress, 6, 4),
                 }}
@@ -118,11 +127,7 @@ const MintTransaction = ({
 };
 
 MintTransaction.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-        icon: PropTypes.string,
-    }).isRequired,
+    asset: assetShape.isRequired,
     user: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,

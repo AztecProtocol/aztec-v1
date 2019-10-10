@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    assetShape,
+} from '~ui/config/propTypes';
+import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
@@ -64,7 +67,6 @@ const DepositTransaction = ({
         code,
         address: assetAddress,
         tokenAddress,
-        icon,
     } = asset;
 
     const initialData = {
@@ -89,15 +91,20 @@ const DepositTransaction = ({
             <Connection
                 theme="white"
                 from={{
-                    type: 'token',
-                    src: icon,
-                    alt: code,
+                    profile: {
+                        type: 'token',
+                        address: assetAddress,
+                        tokenAddress,
+                        alt: code,
+                    },
                     description: formatAddress(tokenAddress, 6, 4),
                 }}
                 to={{
-                    type: 'asset',
-                    src: icon,
-                    alt: code,
+                    profile: {
+                        type: 'asset',
+                        address: assetAddress,
+                        tokenAddress,
+                    },
                     description: formatAddress(assetAddress, 6, 4),
                 }}
                 size="s"
@@ -127,12 +134,7 @@ const DepositTransaction = ({
 };
 
 DepositTransaction.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        tokenAddress: PropTypes.string.isRequired,
-        code: PropTypes.string,
-        icon: PropTypes.string,
-    }).isRequired,
+    asset: assetShape.isRequired,
     from: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,

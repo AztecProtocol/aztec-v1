@@ -7,13 +7,15 @@ import {
     Block,
     Icon,
 } from '@aztec/guacamole-ui';
+import {
+    profileShape,
+} from '~ui/config/propTypes';
 import ProfileIcon from '~ui/components/ProfileIcon';
 import styles from './link.scss';
 
 const SummaryLink = ({
     className,
-    assetCode,
-    assetIcon,
+    profile,
     children,
     hasButton,
     onClick,
@@ -31,9 +33,7 @@ const SummaryLink = ({
                 padding="s"
             >
                 <ProfileIcon
-                    type="asset"
-                    src={assetIcon}
-                    alt={assetCode}
+                    {...profile}
                     size="s"
                 />
             </Block>
@@ -54,8 +54,7 @@ const SummaryLink = ({
 
 SummaryLink.propTypes = {
     className: PropTypes.string,
-    assetCode: PropTypes.string,
-    assetIcon: PropTypes.string,
+    profile: profileShape.isRequired,
     children: PropTypes.node,
     hasButton: PropTypes.bool,
     onClick: PropTypes.func,
@@ -63,8 +62,6 @@ SummaryLink.propTypes = {
 
 SummaryLink.defaultProps = {
     className: '',
-    assetCode: '',
-    assetIcon: '',
     children: null,
     hasButton: false,
     onClick: null,
