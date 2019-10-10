@@ -5,6 +5,7 @@ export default async function mergeRecoveredWithStorage(
     userAddress,
     linkedPrivateKey,
     prevAssetNoteDataMappinig,
+    networkId,
 ) {
     const assetNoteDataMapping = {};
 
@@ -18,6 +19,7 @@ export default async function mergeRecoveredWithStorage(
             linkedPrivateKey,
             assetId,
             prevLastSynced,
+            networkId,
         );
     }));
 
