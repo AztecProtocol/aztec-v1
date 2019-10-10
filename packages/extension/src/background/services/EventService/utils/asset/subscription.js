@@ -34,7 +34,7 @@ const subscribe = async ({
     fromBlock,
     networkId,
 } = {}) => {
-    if (!networkId && networkId !== 0) {
+    if (!networkId) {
         errorLog("'networkId' cannot be empty in assets subscription");
         return null;
     }
@@ -45,7 +45,7 @@ const subscribe = async ({
         fromBlock,
     };
 
-    const subscription = (await Web3Service())
+    const subscription = (await Web3Service({ networkId }))
         .useContract(ACEConfig.name)
         .events(eventName)
         .subscribe(options, (error) => {

@@ -162,7 +162,7 @@ class SyncManager {
             onProggressChange,
             onFailure,
         } = progressCallbacks;
-        const web3Service = await Web3Service();
+        const web3Service = await Web3Service({ networkId });
         const currentBlock = await web3Service.eth.getBlockNumber();
         const fromBlock = lastSyncedBlock + 1;
         const toBlock = Math.min(fromBlock + blocksPerRequest, currentBlock);
