@@ -10,12 +10,14 @@ describe('CacheManager', () => {
 
     it('add items to queue without exceeding capacity', () => {
         expect(manager.priorityQueue.length).toBe(0);
+        expect(manager.isFull()).toBe(false);
         expect(manager.cache).toEqual({});
 
         manager.add('a', 1);
         manager.add('b', 2);
         manager.add('c', 3);
         expect(manager.priorityQueue.length).toBe(3);
+        expect(manager.isFull()).toBe(true);
         expect(manager.cache).toEqual({
             a: 1,
             b: 2,
@@ -74,23 +76,23 @@ describe('CacheManager', () => {
             b: 2,
         });
 
-        manager.remove('a');
+        expect(manager.remove('a')).toBe(1);
         expect(manager.priorityQueue.length).toBe(1);
         expect(manager.cache).toEqual({
             b: 2,
         });
 
-        manager.remove('a');
+        expect(manager.remove('a')).toBe(undefined);
         expect(manager.priorityQueue.length).toBe(1);
         expect(manager.cache).toEqual({
             b: 2,
         });
 
-        manager.remove('b');
+        expect(manager.remove('b')).toBe(2);
         expect(manager.priorityQueue.length).toBe(0);
         expect(manager.cache).toEqual({});
 
-        manager.remove('a');
+        expect(manager.remove('a')).toBe(undefined);
         expect(manager.priorityQueue.length).toBe(0);
         expect(manager.cache).toEqual({});
     });
@@ -123,6 +125,21 @@ describe('CacheManager', () => {
 
         manager.increasePriority('a');
         expect(manager.getTop()).toBe('a');
+    });
+
+    it('has method getBottom to return the key with the lowest priority', () => {
+        manager.add('a', 1);
+        manager.add('b', 2);
+        expect(manager.getBottom()).toBe('a');
+
+        manager.remove('a');
+        expect(manager.getBottom()).toBe('b');
+
+        manager.add('c', 3);
+        expect(manager.getBottom()).toBe('b');
+
+        manager.increasePriority('b');
+        expect(manager.getBottom()).toBe('c');
     });
 
     it('move an item to higest priority', () => {
