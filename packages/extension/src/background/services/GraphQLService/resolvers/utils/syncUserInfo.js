@@ -18,8 +18,7 @@ export default async function syncUserInfo(args, ctx) {
         session: {
             pwDerivedKey,
         },
-        // TODO: remove default value, when it will be passed here.
-        networkId = 0,
+        networkId,
     } = ctx;
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);

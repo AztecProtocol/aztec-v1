@@ -1,4 +1,4 @@
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 
 const sendTransaction = async (data) => {
     const {
@@ -13,7 +13,7 @@ const sendTransaction = async (data) => {
         },
     } = data;
 
-    const web3Service = Web3Service();
+    const web3Service = await Web3Service();
 
     const receipt = await web3Service
         .useContract(contract, contractAddress)

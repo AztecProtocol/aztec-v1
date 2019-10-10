@@ -1,4 +1,4 @@
-import Web3Service from '~background/services/NetworkService';
+import Web3Service from '~helpers/NetworkService';
 import {
     IZkAssetConfig,
 } from '~config/contracts';
