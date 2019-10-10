@@ -36,15 +36,11 @@ export default async function syncAssetNoteData(
         blockNumber: lastSyncedBlock = 0,
     } = Note.get({ networkId }, lastSynced);
 
-    const noteHashes = (await Note.query({ networkId })
-        .where({
-            owner: ownerAddress,
-            asset: assetId,
-            status: NOTE_STATUS.CREATED,
-        })
+    const ownerAssetStatus = `${ownerAddress}_${assetId}_${NOTE_STATUS.CREATED}`;
+    const noteHashes = await Note.query({ networkId })
+        .where({ ownerAssetStatus })
         .and(n => n.blockNumber >= lastSyncedBlock && n.noteHash !== lastSynced)
-        .toArray())
-        .map(({ noteHash }) => noteHash);
+        .primaryKeys();
 
     await asyncForEach(noteHashes, async (noteHash) => {
         const accessId = getNoteAccessId(ownerAddress, noteHash);
