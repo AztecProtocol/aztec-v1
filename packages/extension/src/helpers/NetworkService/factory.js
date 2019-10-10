@@ -9,6 +9,7 @@ import {
 } from '~utils/log';
 
 
+
 // The goals of the web3 service
 // In the background
 // 1. return to the developer the correct Web3Instance with contract ABI's and addresses for interacting with the same
@@ -37,7 +38,10 @@ class NetworkSwitcher {
 
     networksConfigs = {};
 
-    ensureWeb3Service = async (networkId, account) => {
+    ensureWeb3Service = async ({
+        networkId,
+        account,
+    }) => {
         if (!networkId && !this.networkId) {
             const resp = await get('networkId');
             this.networkId = resp;
@@ -114,8 +118,11 @@ class NetworkSwitcher {
         };
     }
 
-    async create(networkId, account) {
-        await this.ensureWeb3Service(networkId, account);
+    async create(options = {}) {
+        const {
+            networkId,
+        } = options;
+        await this.ensureWeb3Service(options);
         return this.web3ServicesByNetworks[networkId || this.networkId];
     }
 }

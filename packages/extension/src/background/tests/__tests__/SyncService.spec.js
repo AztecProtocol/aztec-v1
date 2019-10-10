@@ -2,7 +2,9 @@ import devUtils from '@aztec/dev-utils';
 import bn128 from '@aztec/bn128';
 import aztec from 'aztec.js';
 import TestAuthService from './helpers/AuthService';
-
+import {
+    set,
+} from '~utils/storage';
 import ERC20Mintable from '../../../../build/contracts/ERC20Mintable';
 import ZkAssetOwnable from '../../../../build/contracts/ZkAssetOwnable';
 import JoinSplit from '../../../../build/contracts/JoinSplit';
@@ -12,11 +14,6 @@ import { fetchNotes } from '../../services/EventService/utils/note';
 import {
     createBulkAssets,
 } from '../../services/EventService/utils/asset';
-import {
-    AZTECAccountRegistryConfig,
-    ACEConfig,
-} from '~config/contracts';
-import Web3ServiceFactory from '~helpers/NetworkService/factory';
 import createNewAsset from './helpers/createNewAsset';
 import mint from './helpers/mint';
 import approve from './helpers/approve';
@@ -31,6 +28,8 @@ import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
 import getSenderAccount from './helpers/senderAccount';
+import configureWeb3Networks from '~utils/configureWeb3Networks';
+import getGanacheNetworkId from '~utils/getGanacheNetworkId';
 
 
 jest.mock('~utils/storage');
@@ -44,15 +43,15 @@ const {
 
 
 describe('ZkAsset', () => {
-    const networkId = 0;
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 3500;
+    const prepopulateNotesCount = 25;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
     const scalingFactor = 1;
     const depositAmount = prepopulateNotesCount * eachNoteBalance;
     const sender = TestAuthService.getAccount();
+    const networkId = getGanacheNetworkId();
 
     let account;
     let erc20Address;
@@ -61,32 +60,20 @@ describe('ZkAsset', () => {
     let depositProof;
     let web3Service;
 
-    const configureWeb3Service = async () => {
-        const contractsConfigs = [
-            AZTECAccountRegistryConfig.config,
-            ACEConfig.config,
-        ];
-
-        const ganacheNetworkConfig = {
-            title: 'Ganache',
-            networkId: 0,
-            providerUrl,
-            contractsConfigs,
-        };
-
-        Web3ServiceFactory.setConfigs([
-            ...[ganacheNetworkConfig],
-        ]);
-    };
-
     beforeAll(async () => {
+        await set({
+            __providerUrl: providerUrl,
+        });
         const {
             address: userAddress,
         } = sender;
         account = await getSenderAccount(sender);
 
-        configureWeb3Service();
-        web3Service = await Web3Service(sender);
+        await configureWeb3Networks();
+        web3Service = await Web3Service({
+            sender,
+            networkId,
+        });
         const aceAddress = web3Service.contract('ACE').address;
 
         log(`aceAddress: ${aceAddress}`);
