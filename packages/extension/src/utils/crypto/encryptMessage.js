@@ -6,7 +6,7 @@ import toUint8Array from './toUint8Array';
 import toHexString from './toHexString';
 import EncryptedMessage from './EncryptedMessage';
 
-export default function encryptMessage(publicKey, messsage) {
+export default function encryptMessage(publicKey, message) {
     const ephemeralKeyPair = nacl.box.keyPair();
     let pubKeyUInt8Array;
 
@@ -17,7 +17,7 @@ export default function encryptMessage(publicKey, messsage) {
         return null;
     }
 
-    const msgParamsUInt8Array = nacl.util.decodeUTF8(messsage);
+    const msgParamsUInt8Array = nacl.util.decodeUTF8(message);
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
     const encryptedMessage = nacl.box(
         msgParamsUInt8Array,
