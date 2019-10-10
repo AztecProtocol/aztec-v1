@@ -168,7 +168,6 @@ class SyncManager {
 
         let newLastSyncedBlock = lastSyncedBlock;
         let status = null;
-        console.log(`before if currentBlock: ${currentBlock}, lastSyncedBlock: ${lastSyncedBlock}, precisionDelta: ${precisionDelta}`);
         if (currentBlock > lastSyncedBlock + precisionDelta) {
             const {
                 error,

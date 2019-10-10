@@ -32,7 +32,12 @@ import latest from './latest';
 * }
 */
 export default function Model(modelConfig) {
-    const { name, version, fields } = modelConfig;
+    const {
+        name,
+        version,
+        fields,
+        autoFields: autoFieldsConfig = {},
+    } = modelConfig;
 
     if (!name) {
         errorLog('Cannot define new indexDb model, as "name" is not defined');
@@ -51,18 +56,22 @@ export default function Model(modelConfig) {
     }
 
     const dexieConfig = {};
-    dexieConfig[name] = fields.join(',');
+    const autoFields = Object.keys(autoFieldsConfig);
+    dexieConfig[name] = [
+        ...fields,
+        ...autoFields,
+    ].join(',');
 
     registerModel(db => db.version(version).stores(dexieConfig));
 
     return {
         // mutations
-        add: (item, options) => add(name, item, options),
-        bulkAdd: (items, options) => bulkAdd(name, items, options),
-        put: (items, options) => put(name, items, options),
-        bulkPut: (items, options) => bulkPut(name, items, options),
+        add: (item, options) => add(name, item, { options, modelConfig }),
+        bulkAdd: (items, options) => bulkAdd(name, items, { options, modelConfig }),
+        put: (items, options) => put(name, items, { options, modelConfig }),
+        bulkPut: (items, options) => bulkPut(name, items, { options, modelConfig }),
 
-        // querys
+        // queries
         get: (options, pk) => get(name, options, pk),
         bulkGet: (options, keys) => bulkGet(name, options, keys),
         query: options => query(name, options),

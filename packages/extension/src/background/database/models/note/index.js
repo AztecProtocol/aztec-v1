@@ -12,4 +12,7 @@ export default Model({
         'status',
         'asset', // address
     ],
+    autoFields: {
+        ownerAssetStatus: ['owner', 'asset', 'status'],
+    },
 });
