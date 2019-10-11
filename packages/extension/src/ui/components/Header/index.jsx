@@ -55,11 +55,12 @@ const Header = ({
                     align="center"
                 >
                     <Text
-                        text={title}
                         size="m"
                         weight="light"
                         textAlign="center"
-                    />
+                    >
+                        {title}
+                    </Text>
                 </Block>
                 {hasButtons && (
                     <Block
@@ -87,7 +88,7 @@ const Header = ({
 };
 
 Header.propTypes = {
-    title: PropTypes.string,
+    title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     leftIconName: PropTypes.string,
     onClickLeftIcon: PropTypes.func,
     disableOnClickLeftIcon: PropTypes.bool,

@@ -30,6 +30,7 @@ const registerDomain = async (query, connection) => {
                         name: title,
                         domain: query.domain,
                         url,
+                        ...query.data.metadata,
                     },
                     ...query.args,
                 },

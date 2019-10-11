@@ -164,7 +164,7 @@ const Popup = ({
 
 Popup.propTypes = {
     theme: themeType,
-    title: PropTypes.string,
+    title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     description: PropTypes.string,
     leftIconName: PropTypes.string,
     onClickLeftIcon: PropTypes.func,

@@ -1,6 +1,6 @@
 export default {
     permission: {
-        title: '%{domain} is requesting access to your private assets',
+        title: ' is requesting access to your private assets',
         requesting: {
             _: 'is requesting access to your assets:',
             0: 'is requesting access to your assets.',
