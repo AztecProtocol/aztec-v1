@@ -11,6 +11,7 @@ import Note from '~background/database/models/note';
 import {
     NOTE_STATUS,
 } from '~config/constants';
+import metadata from '~utils/metadata';
 
 
 export default async function syncAssetNoteData(
@@ -34,8 +35,10 @@ export default async function syncAssetNoteData(
             status: NOTE_STATUS.CREATED,
         })
         .and(n => n.blockNumber >= lastSyncedBlock && n.noteHash !== lastSynced)
-        .each(({ noteHash, access }) => {
-            const encryptedVkString = JSON.parse(access)[ownerAddress];
+        .each(({ noteHash, metadata: metadataStr }) => {
+            const {
+                viewingKey: encryptedVkString,
+            } = metadata(metadataStr).getAccess(ownerAddress);
 
             let value = 0;
             try {

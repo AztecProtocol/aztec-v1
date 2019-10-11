@@ -52,23 +52,13 @@ const decodeLog = rawLog => ({
 });
 
 const noteLog = (decodedLog) => {
-    const {
-        addresses,
-        viewingKeys,
-    } = metadata(decodedLog.metadata);
-
-    const access = {};
-    for (let i = 0; i < addresses.length; i += 1) {
-        access[addresses[i]] = viewingKeys[i];
-    }
-
     return {
         owner: decodedLog.owner,
         noteHash: decodedLog.noteHash,
         blockNumber: decodedLog.blockNumber,
         asset: decodedLog.asset,
         status: decodedLog.status,
-        access: JSON.stringify(access),
+        metadata: decodedLog.metadata,
     };
 };
 

@@ -14,7 +14,7 @@ export default async function fetchNotes({
     events = [
         IZkAssetConfig.events.createNote,
         IZkAssetConfig.events.destroyNote,
-        // IZkAssetConfig.events.updateNoteMetaData,
+        IZkAssetConfig.events.updateNoteMetaData,
     ],
     networkId,
 } = {}) {
