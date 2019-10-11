@@ -4,9 +4,6 @@ import {
     saveNotes,
 } from '../../utils/note';
 import {
-    saveAccessesFromNotes,
-} from '../../utils/access';
-import {
     warnLog,
     errorLog,
     log,
@@ -44,10 +41,7 @@ class Watcher {
                 groupedNotes,
             } = task;
 
-            await Promise.all([
-                saveNotes(groupedNotes, networkId),
-                saveAccessesFromNotes(groupedNotes, networkId),
-            ]);
+            await saveNotes(groupedNotes, networkId);
 
             const syncAddress = this.addresses.get(address);
             const lastSyncedBlock = groupedNotes.lastBlockNumber();
