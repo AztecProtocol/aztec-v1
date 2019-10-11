@@ -10,6 +10,10 @@ export default class CacheManager {
         this.capacity = capacity;
     }
 
+    isFull() {
+        return this.priorityQueue.length === this.capacity;
+    }
+
     increasePriority(key) {
         const idx = this.priorityQueue.indexOf(key);
         const nextKey = this.priorityQueue[idx + 1];
@@ -34,13 +38,17 @@ export default class CacheManager {
             return;
         }
         if (!(key in this.cache)) {
-            if (this.priorityQueue.length === this.capacity) {
+            if (this.isFull()) {
                 const toDelete = this.priorityQueue.shift();
                 delete this.cache[toDelete];
             }
             this.priorityQueue.push(key);
         }
         this.cache[key] = value;
+    }
+
+    has(key) {
+        return !!this.cache[key];
     }
 
     get(key) {
@@ -51,11 +59,17 @@ export default class CacheManager {
         return this.priorityQueue[this.priorityQueue.length - 1];
     }
 
+    getBottom() {
+        return this.priorityQueue[0];
+    }
+
     remove(key) {
+        const data = this.cache[key];
         delete this.cache[key];
         const idx = this.priorityQueue.indexOf(key);
         if (idx >= 0) {
             this.priorityQueue.splice(idx, 1);
         }
+        return data;
     }
 }

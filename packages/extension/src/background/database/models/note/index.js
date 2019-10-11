@@ -3,8 +3,8 @@ import Model from '../../helpers/Model';
 export default Model({
     name: 'note',
     version: 1,
+    pk: 'noteHash',
     fields: [
-        // Primary Key | first key is always primary key
         'noteHash',
         'owner',
         'metadata',
@@ -13,6 +13,8 @@ export default Model({
         'asset', // address
     ],
     autoFields: {
-        ownerAssetStatus: ['owner', 'asset', 'status'],
+        ownerAssetStatus: {
+            childFields: ['owner', 'asset', 'status'],
+        },
     },
 });

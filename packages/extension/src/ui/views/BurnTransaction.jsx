@@ -61,6 +61,7 @@ const BurnTransaction = ({
     const {
         code,
         address: assetAddress,
+        tokenAddress,
     } = asset;
 
     const ticketHeader = (
@@ -77,11 +78,13 @@ const BurnTransaction = ({
                 theme="white"
                 from={{
                     type: 'user',
+                    address: user.address,
                     description: formatAddress(user.address, 6, 4),
                 }}
                 to={{
                     type: 'asset',
-                    src: asset.icon,
+                    address: assetAddress,
+                    tokenAddress,
                     alt: code,
                     description: formatAddress(assetAddress, 6, 4),
                 }}
@@ -120,8 +123,8 @@ const BurnTransaction = ({
 BurnTransaction.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,
+        tokenAddress: PropTypes.string.isRequired,
         code: PropTypes.string,
-        icon: PropTypes.string,
     }).isRequired,
     user: PropTypes.shape({
         address: PropTypes.string.isRequired,

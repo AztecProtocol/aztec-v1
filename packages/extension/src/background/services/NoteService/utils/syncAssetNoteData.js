@@ -1,5 +1,3 @@
-// import assetModel from '~database/models/asset';
-// import addressModel from '~database/models/address';
 import {
     errorLog,
 } from '~utils/log';

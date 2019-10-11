@@ -5,7 +5,8 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import AddressRow from '~ui/components/AddressRow';
+import formatAddress from '~ui/utils/formatAddress';
+import ListItem from '~ui/components/ListItem';
 import apis from '~uiModules/apis';
 import Transaction from './handlers/Transaction';
 
@@ -104,11 +105,13 @@ const RegisterAddressTransaction = ({
                 />
             </Block>
             <Block padding="xs 0">
-                <AddressRow
-                    address={address}
+                <ListItem
+                    profile={{
+                        type: 'user',
+                        address,
+                    }}
+                    content={formatAddress(address, 10, 8)}
                     size="xs"
-                    prefixLength={10}
-                    suffixLength={8}
                 />
             </Block>
         </div>

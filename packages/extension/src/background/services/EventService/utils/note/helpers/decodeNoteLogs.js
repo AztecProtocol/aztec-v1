@@ -3,7 +3,7 @@ import {
     IZkAssetConfig,
 } from '~config/contracts';
 import groupBy from '~utils/groupBy';
-import { NOTE_STATUS } from '~background/config/constants';
+import { NOTE_STATUS } from '~config/constants';
 
 
 const decode = (inputs, rawLog) => {

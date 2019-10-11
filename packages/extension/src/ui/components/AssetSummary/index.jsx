@@ -15,8 +15,9 @@ import Button from '~ui/components/Button';
 
 const AssetSummary = ({
     className,
+    address,
+    tokenAddress,
     code,
-    icon,
     balance,
 }) => (
     <Block
@@ -26,8 +27,9 @@ const AssetSummary = ({
         borderRadius="xs"
     >
         <ProfileIcon
-            src={icon}
-            alt={code}
+            type="asset"
+            address={address}
+            tokenAddress={tokenAddress}
             size="l"
         />
         <Block top="m">
@@ -70,15 +72,15 @@ const AssetSummary = ({
 
 AssetSummary.propTypes = {
     className: PropTypes.string,
+    address: PropTypes.string.isRequired,
+    tokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
-    icon: PropTypes.string,
     balance: PropTypes.number.isRequired,
 };
 
 AssetSummary.defaultProps = {
     className: '',
     code: '',
-    icon: '',
 };
 
 export default AssetSummary;

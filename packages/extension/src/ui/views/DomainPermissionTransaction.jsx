@@ -5,11 +5,14 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    assetShape,
+} from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
 import Popup from '~ui/components/Popup';
 import Ticket from '~ui/components/Ticket';
-import InfoRow from '~ui/components/InfoRow';
+import ListItem from '~ui/components/ListItem';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
 
@@ -23,7 +26,7 @@ const DomainPermissionTransaction = ({
 }) => {
     const {
         name: domainName,
-        domain: url,
+        domain: domainUrl,
         iconSrc,
     } = domain;
     const [firstAsset] = assets;
@@ -32,20 +35,36 @@ const DomainPermissionTransaction = ({
     if (assets.length > 1) {
         const maxAvatars = 3;
         assets.slice(0, maxAvatars).forEach(({
+            address,
+            tokenAddress,
             code,
-            icon,
         }) => {
             icons.push({
-                src: icon,
-                alt: code.length > 2 ? code[0] : code,
-                tooltip: i18n.token(code),
+                profile: {
+                    type: 'asset',
+                    address,
+                    tokenAddress,
+                },
+                tooltip: i18n.token(code) || formatAddress(address, 12, 6),
             });
         });
         if (assets.length > maxAvatars) {
             moreItems = assets.slice(maxAvatars).map(({
                 address,
-                code,
-            }) => i18n.token(code) || formatAddress(address));
+                tokenAddress,
+            }, i) => (
+                <ListItem
+                    key={+i}
+                    className="text-code"
+                    profile={{
+                        type: 'asset',
+                        address,
+                        tokenAddress,
+                    }}
+                    content={formatAddress(address, 12, 6)}
+                    size="xxs"
+                />
+            ));
         }
     }
 
@@ -74,10 +93,27 @@ const DomainPermissionTransaction = ({
                 nowrap
             >
                 <Ticket height={4}>
-                    <InfoRow
-                        name={domainName}
-                        iconSrc={iconSrc}
-                        description={url}
+                    <ListItem
+                        profile={{
+                            type: 'domain',
+                            src: iconSrc,
+                            alt: domainName,
+                        }}
+                        content={(
+                            <div>
+                                <Text
+                                    size="m"
+                                    text={domainName}
+                                    weight="semibold"
+                                    showEllipsis
+                                />
+                                <Text
+                                    text={domainUrl}
+                                    color="label"
+                                    size="xxs"
+                                />
+                            </div>
+                        )}
                     />
                     <Block padding={firstAsset ? 'l 0' : 'xl 0 0'}>
                         <Text
@@ -86,10 +122,28 @@ const DomainPermissionTransaction = ({
                         />
                     </Block>
                     {assets.length === 1 && (
-                        <InfoRow
-                            name={i18n.token(firstAsset.code)}
-                            iconSrc={firstAsset.icon}
-                            nameHint={`(${formatAddress(firstAsset.address)})`}
+                        <ListItem
+                            profile={{
+                                type: 'asset',
+                                address: firstAsset.address,
+                                tokenAddress: firstAsset.tokenAddress,
+                            }}
+                            content={(
+                                <div>
+                                    <Text
+                                        size="s"
+                                        text={i18n.token(firstAsset.code)}
+                                        weight="semibold"
+                                        showEllipsis
+                                    />
+                                    <Text
+                                        className="text-code"
+                                        text={formatAddress(firstAsset.address, 12, 6)}
+                                        color="label"
+                                        size="xxs"
+                                    />
+                                </div>
+                            )}
                         />
                     )}
                     {assets.length > 1 && (
@@ -104,7 +158,7 @@ const DomainPermissionTransaction = ({
                 <Block padding={`${firstAsset ? 'l' : 'xl'} xl 0`}>
                     <Text
                         text={i18n.t('domain.permission.explain')}
-                        size={title.length > 65 ? 'xxs' : 'xs'}
+                        size="xxs"
                         color="label"
                     />
                 </Block>
@@ -119,11 +173,7 @@ DomainPermissionTransaction.propTypes = {
         domain: PropTypes.string.isRequired,
         iconSrc: PropTypes.string,
     }).isRequired,
-    assets: PropTypes.arrayOf(PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-        icon: PropTypes.string,
-    })),
+    assets: PropTypes.arrayOf(assetShape),
     loading: PropTypes.bool,
     success: PropTypes.bool,
     error: PropTypes.shape({

@@ -1,9 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+    assetShape,
+} from '~ui/config/propTypes';
 import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
 import Connection from '~ui/components/Connection';
+import ListItem from '~ui/components/ListItem';
 import Transaction from './handlers/Transaction';
 
 const steps = [
@@ -53,23 +57,36 @@ const NoteAccessTransaction = ({
         hash,
         asset,
     } = note;
-    const {
-        code,
-    } = asset;
     const [firstUser, ...restUsers] = accounts;
-    const moreItems = restUsers.map(({ address }) => formatAddress(address, 6, 4));
+
+    const moreItems = restUsers.map(({ address }, i) => (
+        <ListItem
+            key={+i}
+            profile={{
+                type: 'user',
+                address,
+            }}
+            content={formatAddress(address, 10, 6)}
+            size="xxs"
+        />
+    ));
 
     const ticketHeader = (
         <Connection
             theme="white"
             from={{
-                type: 'asset',
-                src: asset.icon,
-                alt: code,
+                profile: {
+                    ...asset,
+                    type: 'asset',
+                },
                 description: formatAddress(hash, 6, 4),
             }}
             to={{
-                type: 'user',
+                profile: {
+                    type: 'user',
+                    address: firstUser.address,
+                },
+                tooltip: formatAddress(firstUser.address, 16, 8),
                 description: formatAddress(firstUser.address, 6, 4),
                 moreItems,
             }}
@@ -106,11 +123,7 @@ NoteAccessTransaction.propTypes = {
     note: PropTypes.shape({
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        asset: PropTypes.shape({
-            address: PropTypes.string.isRequired,
-            code: PropTypes.string,
-            icon: PropTypes.string,
-        }).isRequired,
+        asset: assetShape.isRequired,
     }).isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({
         address: PropTypes.string.isRequired,

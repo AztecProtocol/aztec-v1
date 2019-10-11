@@ -174,7 +174,16 @@ export default {
         routes: {
             icons: {
                 path: 'icons',
-                View: Icons,
+                routes: {
+                    assets: {
+                        path: 'assets',
+                        View: Icons,
+                    },
+                    users: {
+                        path: 'users',
+                        View: Icons,
+                    },
+                },
             },
         },
     },

@@ -6,6 +6,9 @@ import {
     Offset,
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    assetShape,
+} from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import {
     formatValue,
@@ -14,8 +17,7 @@ import formatAddress from '~ui/utils/formatAddress';
 import Popup from '~ui/components/Popup';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
-import AddressRow from '~ui/components/AddressRow';
-import AssetRow from '~ui/components/AssetRow';
+import ListItem from '~ui/components/ListItem';
 import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
 
@@ -31,19 +33,6 @@ const NoteAccessConfirm = ({
         value,
         asset,
     } = note;
-    const {
-        code,
-    } = asset;
-
-    const assetInfoNode = (
-        <AssetRow
-            {...asset}
-            size="xs"
-            textSize="inherit"
-            prefixLength={6}
-            suffixLength={4}
-        />
-    );
 
     return (
         <Popup
@@ -62,18 +51,28 @@ const NoteAccessConfirm = ({
             >
                 <div>
                     <Ticket height={2}>
-                        <Offset margin="xs 0">
+                        <Offset top="xs">
+                            <ListRow
+                                title={i18n.t('asset')}
+                                content={(
+                                    <ListItem
+                                        profile={{
+                                            ...asset,
+                                            type: 'asset',
+                                        }}
+                                        content={formatAddress(asset.address, 10, 6)}
+                                        size="xxs"
+                                        textSize="inherit"
+                                    />
+                                )}
+                            />
                             <ListRow
                                 title={i18n.t('note.hash')}
                                 content={formatAddress(hash, 10, 6)}
                             />
                             <ListRow
                                 title={i18n.t('note.value')}
-                                content={formatValue(code, value)}
-                            />
-                            <ListRow
-                                title={i18n.t('asset')}
-                                content={assetInfoNode}
+                                content={formatValue(asset.code, value)}
                             />
                         </Offset>
                     </Ticket>
@@ -88,13 +87,15 @@ const NoteAccessConfirm = ({
                                     theme="white"
                                     items={accounts}
                                     renderItem={({ address }) => (
-                                        <AddressRow
-                                            address={address}
-                                            size="xs"
-                                            textSize="xxs"
-                                            prefixLength={18}
-                                            suffixLength={10}
-                                            inline
+                                        <ListItem
+                                            className="text-code"
+                                            profile={{
+                                                type: 'user',
+                                                address,
+                                            }}
+                                            content={formatAddress(address, 18, 8)}
+                                            size="xxs"
+                                            color="label"
                                         />
                                     )}
                                     itemMargin="xs 0"
@@ -108,7 +109,7 @@ const NoteAccessConfirm = ({
                 <Block padding="0 xl">
                     <Text
                         text={i18n.t('note.access.grant.explain')}
-                        size="xs"
+                        size="xxs"
                         color="label"
                     />
                 </Block>
@@ -121,11 +122,7 @@ NoteAccessConfirm.propTypes = {
     note: PropTypes.shape({
         hash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        asset: PropTypes.shape({
-            address: PropTypes.string.isRequired,
-            code: PropTypes.string,
-            icon: PropTypes.string,
-        }).isRequired,
+        asset: assetShape.isRequired,
     }).isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({
         address: PropTypes.string.isRequired,
