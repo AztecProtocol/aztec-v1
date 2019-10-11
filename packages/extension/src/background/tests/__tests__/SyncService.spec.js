@@ -44,7 +44,7 @@ const {
 
 describe('ZkAsset', () => {
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 25;
+    const prepopulateNotesCount = 3500;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -147,7 +147,7 @@ describe('ZkAsset', () => {
             amount: depositAmount,
         });
 
-        const notesPerRequest = 5;
+        const notesPerRequest = 8;
         let createdNotes = eventsInGanache.length;
 
         await web3Service
@@ -248,13 +248,6 @@ describe('ZkAsset', () => {
         }
 
         await createBulkAssets([asset], networkId);
-
-        // NoteService.initWithUser(
-        //     userAddress,
-        //     privateKey,
-        //     linkedPublicKey,
-        //     networkId,
-        // );
 
         // Action
         const tStart = performance.now();
