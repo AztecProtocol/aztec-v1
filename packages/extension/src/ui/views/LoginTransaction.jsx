@@ -11,7 +11,7 @@ import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
 import formatAddress from '~ui/utils/formatAddress';
 import Popup from '~ui/components/Popup';
-import ProfileSvg from '~ui/components/ProfileSvg';
+import ProfileIcon from '~ui/components/ProfileIcon';
 
 const inputIconMapping = {
     show: {
@@ -160,7 +160,8 @@ class LoginTransaction extends PureComponent {
                     top="l"
                     bottom="l"
                 >
-                    <ProfileSvg
+                    <ProfileIcon
+                        type="user"
                         address={address}
                     />
                     <Block

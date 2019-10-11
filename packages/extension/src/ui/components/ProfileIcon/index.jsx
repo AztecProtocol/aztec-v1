@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
     Avatar,
-    Icon,
+    Block,
     Text,
 } from '@aztec/guacamole-ui';
 import {
@@ -13,6 +13,10 @@ import {
 import {
     avatarSizesMap,
 } from '~ui/styles/guacamole-vars';
+import ProfileSvg from '~ui/components/ProfileSvg';
+import AztecSvg from '~ui/components/AztecSvg';
+import colorSchemes from './config/colorSchemes';
+import shapeGenerators from './config/shapeGenerators';
 import styles from './icon.scss';
 
 export const themeStyleMapping = {
@@ -20,41 +24,11 @@ export const themeStyleMapping = {
         background: 'transparent',
         iconBackground: 'white-lighter',
         color: 'white',
-        tooltipBackground: 'white-light',
     },
     white: {
         background: 'white',
         iconBackground: 'grey-lighter',
         color: 'grey',
-        tooltipBackground: 'grey-dark',
-    },
-};
-
-export const typeIconMapping = {
-    token: {
-        name: 'blur_on',
-    },
-    asset: {
-        name: 'blur_on',
-    },
-    user: {
-        name: 'person',
-    },
-    aztec: {
-        name: 'crop_square',
-        rotate: 45,
-    },
-};
-
-export const inlineIconMapping = {
-    token: {
-        name: 'blur_circular',
-    },
-    asset: {
-        name: 'blur_circular',
-    },
-    user: {
-        name: 'person_outline',
     },
 };
 
@@ -62,60 +36,89 @@ const ProfileIcon = ({
     className,
     theme,
     type,
+    address,
     src,
     alt,
+    tooltip,
     size,
-    inline,
 }) => {
-    const style = themeStyleMapping[theme];
-    const {
-        name: iconName,
-    } = (inline && inlineIconMapping[type])
-        || typeIconMapping[type]
-        || {};
+    const wrapperClassName = classnames(
+        className,
+        styles[`theme-${theme}`],
+        styles[`size-${size}`],
+    );
 
-    if (inline && !src) {
-        const {
-            color,
-        } = style;
-
-        if (alt) {
-            return (
-                <Text
-                    text={alt}
-                    size={size}
-                    color={color}
-                />
-            );
-        }
-        return (
-            <Icon
-                name={iconName}
+    let iconNode;
+    if (type === 'aztec') {
+        iconNode = (
+            <AztecSvg
+                className={!tooltip ? className : ''}
+                theme={theme}
                 size={size}
-                color={color}
+            />
+        );
+    } else if (!type || src) {
+        const style = themeStyleMapping[theme];
+
+        iconNode = (
+            <Avatar
+                className={classnames(
+                    {
+                        [wrapperClassName]: !tooltip,
+                        [styles['with-icon']]: !src,
+                    },
+                )}
+                src={src}
+                alt={alt}
+                size={size}
+                shape="circular"
+                layer={1}
+                {...style}
+            />
+        );
+    } else {
+        iconNode = (
+            <ProfileSvg
+                className={classnames(
+                    {
+                        [wrapperClassName]: !tooltip,
+                        [styles[`type-${type}`]]: type === 'asset',
+                    },
+                )}
+                address={address}
+                size={size}
+                alt={alt}
+                colorScheme={colorSchemes[type]}
+                shapeGenerator={shapeGenerators[type]}
             />
         );
     }
 
+    if (!tooltip) {
+        return iconNode;
+    }
+
     return (
-        <Avatar
+        <div
             className={classnames(
-                className,
-                styles[`theme-${theme}`],
-                styles[`size-${size}`],
-                {
-                    [styles['wrapped-asset-icon']]: type === 'asset',
-                    [styles['with-icon']]: !src,
-                },
+                wrapperClassName,
+                styles.interactive,
             )}
-            src={src}
-            alt={alt}
-            iconName={iconName}
-            size={size}
-            shape="circular"
-            layer={1}
-            {...style}
-        />
+        >
+            {iconNode}
+            <Block
+                className={styles.tooltip}
+            >
+                {typeof tooltip !== 'string'
+                    ? tooltip
+                    : (
+                        <Text
+                            text={tooltip}
+                            size="xxs"
+                        />
+                    )}
+            </Block>
+        </div>
     );
 };
 
@@ -123,20 +126,27 @@ ProfileIcon.propTypes = {
     className: PropTypes.string,
     theme: themeType,
     type: profileType,
+    address: PropTypes.string,
+    tokenAddress: PropTypes.string,
     src: PropTypes.string,
     alt: PropTypes.string,
+    tooltip: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.string,
+    ]),
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
-    inline: PropTypes.bool,
 };
 
 ProfileIcon.defaultProps = {
     className: '',
     theme: 'primary',
+    address: '',
+    tokenAddress: '',
     type: '',
     src: '',
     alt: '',
+    tooltip: '',
     size: 'm',
-    inline: false,
 };
 
 export default ProfileIcon;

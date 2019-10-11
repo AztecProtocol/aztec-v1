@@ -1,29 +1,8 @@
 @import '../../styles/variables';
+@import '../../styles/functions';
 
-@function rgba-to-rgb($rgba, $background: 'white') {
-  $rgb-color: rgb(red($rgba), green($rgba), blue($rgba));
-  $background-color: map-get($color-map, $background);
-  @return mix($rgb-color, $background-color, alpha($rgba) * 100%);
-}
-
-$profile-icon-bg-mapping: (
-  'white': 'grey-lighter',
-);
-
-.wrapped-asset-icon {
-  transform: scale(0.925);
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 100%;
-    background: $bg-gradient;
-    transform: scale(1.08);
-  }
+.type-asset {
+  position: relative;
 
   &:after {
     content: '';
@@ -33,45 +12,39 @@ $profile-icon-bg-mapping: (
     width: 100%;
     height: 100%;
     border-radius: 100%;
-    background: $bg-gradient;
-    transform: scale(1.08);
-    opacity: 0.1;
-    z-index: 1;
+    border: 2px solid map-get($color-map, 'primary');
   }
+}
 
-  &.theme-white {
-    &:before {
-      opacity: 0.7;
+.interactive {
+  position: relative;
+
+  &:hover {
+    .tooltip {
+      display: inline-block;
     }
   }
+}
 
-  &.with-icon {
-    i {
-      width: 100% !important;
-      height: 100% !important;
-      border-radius: 100%;
-    }
+.tooltip {
+  display: none;
+  position: absolute;
+  padding: map-get($spacing-map, 'xs') map-get($spacing-map, 's');
+  top: -(map-get($spacing-map, 's'));
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  white-space: nowrap;
+}
 
-    &.theme-primary {
-      &:after {
-        opacity: 0;
-      }
-    }
+.theme-white {
+  .tooltip {
+    background: rgba-to-rgb(map-get($color-map, 'grey-dark'));
+    color: map-get($color-map, 'white');
+  }
+}
 
-    @each $theme, $bg-name in $profile-icon-bg-mapping {
-      &.theme-#{$theme} {
-        i {
-          background: rgba-to-rgb(map-get($color-map, $bg-name));
-        }
-      }
-    }
-
-    @each $key, $size in $avatar-sizes-map {
-      &.size-#{$key} {
-        i {
-          line-height: $size;
-        }
-      }
-    }
+.theme-primary {
+  .tooltip {
+    background: rgba-to-rgb(map-get($color-map, 'white-light'));
   }
 }

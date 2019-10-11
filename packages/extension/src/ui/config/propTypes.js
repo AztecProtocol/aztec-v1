@@ -5,10 +5,10 @@ export const themeType = PropTypes.oneOf([
     'white',
 ]);
 
-export const assetType = PropTypes.shape({
+export const assetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,
+    tokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
-    icon: PropTypes.string,
 });
 
 export const profileType = PropTypes.oneOf([
@@ -17,4 +17,29 @@ export const profileType = PropTypes.oneOf([
     'asset',
     'user',
     'aztec',
+    'domain',
+]);
+
+const assetProfileShape = PropTypes.shape({
+    type: PropTypes.oneOf(['asset', 'token']),
+    address: PropTypes.string.isRequired,
+    tokenAddress: PropTypes.string.isRequired,
+});
+
+const userProfileShape = PropTypes.shape({
+    type: PropTypes.oneOf(['user']),
+    address: PropTypes.string.isRequired,
+    src: PropTypes.string,
+});
+
+const generalProfileShape = PropTypes.shape({
+    type: PropTypes.oneOf(['', 'domain', 'aztec']),
+    src: PropTypes.string,
+    alt: PropTypes.string,
+});
+
+export const profileShape = PropTypes.oneOfType([
+    assetProfileShape,
+    userProfileShape,
+    generalProfileShape,
 ]);

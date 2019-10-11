@@ -1,0 +1,52 @@
+@import '../../styles/variables';
+
+.group {
+  display: flex;
+  white-space: nowrap;
+}
+
+@each $key, $size in $avatar-sizes-map {
+  .group-#{$key} {
+    .icon {
+      & + .icon {
+        margin-left: -($size / 3);
+      }
+    }
+  }
+}
+
+.icon {
+  position: relative;
+  display: inline-block;
+  border-width: map-get($spacing-map, 'xxs');
+  border-style: solid;
+  border-radius: 100%;
+  line-height: 0;
+}
+
+.interactive {
+  &:hover {
+    z-index: 1;
+
+    .tooltip {
+      display: inline-block;
+    }
+  }
+}
+
+.theme-white {
+  $bg-color: map-get($color-map, 'white');
+  .icon {
+    border-color: $bg-color;
+  }
+
+  .interactive {
+    &:hover {
+      border-color: $bg-color;
+    }
+  }
+}
+
+.moreItems {
+  text-align: left;
+}

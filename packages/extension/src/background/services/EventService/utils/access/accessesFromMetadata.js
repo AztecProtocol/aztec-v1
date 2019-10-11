@@ -1,4 +1,3 @@
-import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
 import metadata from '~utils/metadata';
 import {
     errorLog,
@@ -8,7 +7,6 @@ export default function accessesFromMetadata(note, prevNote) {
     const {
         metadata: metadataStr,
         noteHash,
-        asset,
         blockNumber,
     } = note;
 
@@ -33,7 +31,6 @@ export default function accessesFromMetadata(note, prevNote) {
     for (let i = 0; i < addresses.length; i += 1) {
         const account = addresses[i];
         const viewingKey = viewingKeys[i];
-        const id = getNoteAccessId(account, noteHash);
 
         let prevViewingKey;
         if (prevMetadataObj) {
@@ -44,7 +41,6 @@ export default function accessesFromMetadata(note, prevNote) {
 
         if (viewingKey !== prevViewingKey) {
             noteAccesses.push({
-                id,
                 noteHash,
                 account,
                 viewingKey,

@@ -36,10 +36,15 @@ const DuplicatedAccount = ({
         <Connection
             theme="white"
             from={{
-                type: 'user',
+                profile: {
+                    type: 'user',
+                    address,
+                },
             }}
             to={{
-                type: 'aztec',
+                profile: {
+                    type: 'aztec',
+                },
             }}
             actionIconName="warning"
             actionIconColor="red"

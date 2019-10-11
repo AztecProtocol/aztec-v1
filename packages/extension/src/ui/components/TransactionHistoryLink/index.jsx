@@ -8,6 +8,9 @@ import {
     Icon,
 } from '@aztec/guacamole-ui';
 import {
+    assetShape,
+} from '~ui/config/propTypes';
+import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
@@ -39,9 +42,11 @@ const TransactionHistoryLink = ({
 }) => (
     <div className={className}>
         <SummaryLink
-            assetCode={asset.code}
-            assetIcon={asset.icon}
-            title={type}
+            profile={{
+                type: 'asset',
+                address: asset.address,
+                tokenAddress: asset.tokenAddress,
+            }}
             onClick={onClick}
         >
             <FlexBox
@@ -91,10 +96,7 @@ TransactionHistoryLink.propTypes = {
         'send',
         'withdraw',
     ]).isRequired,
-    asset: PropTypes.shape({
-        code: PropTypes.string,
-        icon: PropTypes.string,
-    }).isRequired,
+    asset: assetShape.isRequired,
     address: PropTypes.string.isRequired,
     value: PropTypes.number.isRequired,
     timestamp: PropTypes.number.isRequired,

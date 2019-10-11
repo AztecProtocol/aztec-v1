@@ -38,6 +38,7 @@ module.exports = {
         ],
         'react/jsx-indent': ['error', 4],
         'react/jsx-indent-props': ['error', 4],
+        'react/jsx-curly-brace-presence': 'off',
         'max-len': ['error', {
             code: 100,
             ignoreComments: true,

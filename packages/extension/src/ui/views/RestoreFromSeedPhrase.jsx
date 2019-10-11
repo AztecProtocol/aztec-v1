@@ -14,7 +14,7 @@ import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import formatAddress from '~ui/utils/formatAddress';
 import Popup from '~ui/components/Popup';
-import ProfileSvg from '~ui/components/ProfileSvg';
+import ProfileIcon from '~ui/components/ProfileIcon';
 
 const validateSeedPhrase = (seedPhrase) => {
     const phrases = seedPhrase
@@ -79,7 +79,8 @@ const RestoreFromSeedPhrase = ({
                 top="l"
                 bottom="l"
             >
-                <ProfileSvg
+                <ProfileIcon
+                    type="user"
                     address={address}
                 />
                 <Block

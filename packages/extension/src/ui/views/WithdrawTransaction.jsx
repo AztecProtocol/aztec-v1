@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    assetShape,
+} from '~ui/config/propTypes';
+import {
     emptyIntValue,
 } from '~ui/config/settings';
 import {
@@ -66,6 +69,7 @@ const WithdrawTransaction = ({
     const {
         code,
         address: assetAddress,
+        tokenAddress,
     } = asset;
 
     const ticketHeader = (
@@ -81,13 +85,18 @@ const WithdrawTransaction = ({
             <Connection
                 theme="white"
                 from={{
-                    type: 'asset',
-                    src: asset.icon,
-                    alt: code,
+                    profile: {
+                        type: 'asset',
+                        address: assetAddress,
+                        tokenAddress,
+                    },
                     description: formatAddress(assetAddress, 6, 4),
                 }}
                 to={{
-                    type: 'user',
+                    profile: {
+                        type: 'user',
+                        address: to,
+                    },
                     description: formatAddress(to, 6, 4),
                 }}
                 size="s"
@@ -125,11 +134,7 @@ const WithdrawTransaction = ({
 };
 
 WithdrawTransaction.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-        icon: PropTypes.string,
-    }).isRequired,
+    asset: assetShape.isRequired,
     sender: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
     amount: PropTypes.number.isRequired,

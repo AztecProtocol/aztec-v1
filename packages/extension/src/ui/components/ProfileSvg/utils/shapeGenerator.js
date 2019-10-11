@@ -1,18 +1,3 @@
-import {
-    makeRand,
-    makeRandomInt,
-} from '~utils/random';
-
-export const baseColors = [
-    '#D2EEEF',
-    '#FAF1CB',
-    '#FFDA9F',
-    '#E29579',
-    '#9FC4FF',
-    '#845C5A',
-    '#76221B',
-];
-
 const directions = [
     [1, 1],
     [1, -1],
@@ -20,18 +5,20 @@ const directions = [
     [-1, 1],
 ];
 
-export default function generateSvgProps(seed, diameter) {
-    const rand = makeRand(seed);
-    const randomInt = makeRandomInt(rand);
-
+export default function shapeGenerator({
+    diameter,
+    colorScheme,
+    rand,
+    randomInt,
+}) {
     const radius = diameter / 2;
     const diagonal = diameter * Math.sqrt(2);
 
-    const colorIndexes = Array.from({ length: baseColors.length }, (_, i) => i);
+    const colorIndexes = Array.from({ length: colorScheme.length }, (_, i) => i);
     const getColor = () => {
         const idx = randomInt(colorIndexes.length - 1);
         const [colorIdx] = colorIndexes.splice(idx, 1);
-        return baseColors[colorIdx];
+        return colorScheme[colorIdx];
     };
 
     const shapes = [];

@@ -1,0 +1,4 @@
+@function rgba-to-rgb($rgba, $background-color: #ffffff) {
+  $rgb-color: rgb(red($rgba), green($rgba), blue($rgba));
+  @return mix($rgb-color, $background-color, alpha($rgba) * 100%);
+}
