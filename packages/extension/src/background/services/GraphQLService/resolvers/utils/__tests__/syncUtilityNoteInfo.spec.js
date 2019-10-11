@@ -1,4 +1,4 @@
-import expectErrorResponse from '~helpers/expectErrorResponse';
+import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 // import GraphNodeService from '~background/services/GraphNodeService';
 import noteModel from '~database/models/note';

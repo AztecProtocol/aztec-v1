@@ -2,7 +2,7 @@ import {
     userAccount,
     registrationData,
     pwDerivedKey,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import AuthService from '~background/services/AuthService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 

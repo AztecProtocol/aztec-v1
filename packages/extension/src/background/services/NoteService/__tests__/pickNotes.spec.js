@@ -1,4 +1,4 @@
-import expectErrorResponse from '~helpers/expectErrorResponse';
+import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import pickNotes from '../utils/pickNotes';
 import generateSortedValues from '../utils/pickNotes/generateSortedValues';
 import getStartIndex from '../utils/pickNotes/getStartIndex';

@@ -1,7 +1,7 @@
 import {
     userAccount,
     registrationData,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import AuthService from '~background/services/AuthService';
 
 
@@ -13,7 +13,7 @@ export default async function keystoreData() {
         blockNumber,
     } = account;
 
-    
+
 
     return {
         keyStore,

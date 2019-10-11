@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import saveToStorage from '../utils/saveToStorage';
 import recoverFromStorage from '../utils/recoverFromStorage';

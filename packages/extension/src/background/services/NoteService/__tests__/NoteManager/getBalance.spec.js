@@ -1,7 +1,7 @@
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import NoteManager from '../../helpers/NoteManager';
 
