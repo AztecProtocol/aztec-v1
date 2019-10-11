@@ -36,15 +36,24 @@ const AUTOSYNC_STATUS = {
 
 class EventService {
     constructor() {
-        this.accounts = {};
+        this.networks = {};
         this.autosyncConfig = new Map();
+    }
+
+    currentAccounts = (
+        networkId,
+    ) => {
+        if (!this.networks[networkId]) {
+            this.networks = {};
+        }
+        return this.networks[networkId];
     }
 
     addAccountToSync = async ({
         address,
         networkId,
     }) => {
-        if (this.accounts[address]) return;
+        if (this.currentAccounts(networkId)[address]) return;
 
         const {
             error,
@@ -63,7 +72,8 @@ class EventService {
             errorLog(`Error syncing address: ${address}. Cannot find an account.`);
             return;
         }
-        this.accounts[address] = account;
+        
+        this.networks[networkId][address] = account;
 
         const config = this.autosyncConfig.get(networkId) || {};
         if (config.status === AUTOSYNC_STATUS.STARTED) {
@@ -127,7 +137,7 @@ class EventService {
     startAutoSync = async ({
         networkId,
     }) => {
-        if (!networkId && networkId !== 0) {
+        if (!networkId) {
             errorLog("'networkId' can not be empty in EventService.syncAssets()");
             return;
         }
@@ -138,7 +148,7 @@ class EventService {
             networkId,
         }, (newAssets) => {
             if (config.status === AUTOSYNC_STATUS.NOT_STARTED) return;
-            Object.values(this.accounts).forEach(({ address }) => this.syncNotes({
+            Object.values(this.currentAccounts(networkId)).forEach(({ address }) => this.syncNotes({
                 address,
                 networkId,
                 fromAssets: newAssets,
@@ -206,7 +216,7 @@ class EventService {
             errorLog("'address' can not be empty in EventService.syncEthAddress()");
             return;
         }
-        const account = this.accounts[address];
+        const account = this.currentAccounts(networkId)[address];
         if (!account) {
             errorLog('Firstly account should be added with help of "addAccountToSync"');
             return;
