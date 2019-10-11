@@ -11,16 +11,17 @@ export default async function fetchNotes({
     fromBlock,
     fromAssets = null,
     toBlock = 'latest',
+    events = [
+        IZkAssetConfig.events.createNote,
+        IZkAssetConfig.events.destroyNote,
+        IZkAssetConfig.events.updateNoteMetaData,
+    ],
     networkId,
 } = {}) {
     const web3Service = await NetworkService({ networkId });
     const { abi, getPastLogs } = web3Service.eth;
 
-    const eventsTopics = [
-        IZkAssetConfig.events.createNote,
-        IZkAssetConfig.events.destroyNote,
-        IZkAssetConfig.events.updateNoteMetaData,
-    ]
+    const eventsTopics = events
         .map(e => IZkAssetConfig.config.abi.find(({ name, type }) => name === e && type === 'event'))
         .map(abi.encodeEventSignature);
 
