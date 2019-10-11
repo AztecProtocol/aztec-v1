@@ -4,7 +4,7 @@ import {
 } from '~config/contracts';
 import groupBy from '~utils/groupBy';
 import { NOTE_STATUS } from '~config/constants';
-
+import metadata from '~utils/metadata';
 
 const decode = (inputs, rawLog) => {
     const [,
@@ -51,15 +51,26 @@ const decodeLog = rawLog => ({
     },
 });
 
-const noteLog = decodedLog => ({
-    owner: decodedLog.owner,
-    noteHash: decodedLog.noteHash,
-    metadata: decodedLog.metadata,
-    blockNumber: decodedLog.blockNumber,
-    asset: decodedLog.asset,
-    status: decodedLog.status,
-});
+const noteLog = (decodedLog) => {
+    const {
+        addresses,
+        viewingKeys,
+    } = metadata(decodedLog.metadata);
 
+    const access = {};
+    for (let i = 0; i < addresses.length; i += 1) {
+        access[addresses[i]] = viewingKeys[i];
+    }
+
+    return {
+        owner: decodedLog.owner,
+        noteHash: decodedLog.noteHash,
+        blockNumber: decodedLog.blockNumber,
+        asset: decodedLog.asset,
+        status: decodedLog.status,
+        access: JSON.stringify(access),
+    };
+};
 
 export default function decodeNoteLogs(eventsTopics, rawLogs) {
     const [
@@ -68,21 +79,17 @@ export default function decodeNoteLogs(eventsTopics, rawLogs) {
         updateNoteMetaDataTopic,
     ] = eventsTopics;
 
-
     const onlyMinedLogs = rawLogs.filter(({ blockNumber, type }) => !!blockNumber || type === 'mined');
     const groupedRawLogs = groupBy(onlyMinedLogs, l => l.topics[0]);
 
     const createNotes = (groupedRawLogs[createNoteTopic] || [])
-        .map(log => decodeLog(log).createNote())
-        .map(noteLog);
+        .map(log => noteLog(decodeLog(log).createNote()));
 
     const updateNotes = (groupedRawLogs[updateNoteMetaDataTopic] || [])
-        .map(log => decodeLog(log).updateNoteMetaData())
-        .map(noteLog);
+        .map(log => noteLog(decodeLog(log).updateNoteMetaData()));
 
     const destroyNotes = (groupedRawLogs[destroyNoteTopic] || [])
-        .map(log => decodeLog(log).destroyNote())
-        .map(noteLog);
+        .map(log => noteLog(decodeLog(log).destroyNote()));
 
     const lastBlockNumber = () => [
         createNotes[createNotes.length - 1],
