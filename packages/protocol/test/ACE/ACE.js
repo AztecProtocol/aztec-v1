@@ -13,25 +13,18 @@ const { generateFactoryId } = require('../helpers/Factory');
 
 const ACE = artifacts.require('./ACE');
 const ACETest = artifacts.require('./ACETest');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
-
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
-JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
-
-const JoinSplitFluidValidator = artifacts.require('./JoinSplitFluid');
-const JoinSplitFluidValidatorInterface = artifacts.require('./JoinSplitFluidInterface');
-JoinSplitFluidValidator.abi = JoinSplitFluidValidatorInterface.abi;
-
-const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
-
 const PublicRangeValidator = artifacts.require('./PublicRange');
 const PublicRangeValidatorInterface = artifacts.require('./PublicRangeInterface');
+
+JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 PublicRangeValidator.abi = PublicRangeValidatorInterface.abi;
 
 const aztecAccount = secp256k1.generateAccount();
 const { BOGUS_PROOF, JOIN_SPLIT_PROOF, PUBLIC_RANGE_PROOF } = proofs;
-const publicOwner = aztecAccount.address;
 
 const getNotes = async (inputNoteValues = [], outputNoteValues = []) => {
     const inputNotes = await Promise.all(
@@ -53,6 +46,7 @@ const getDefaultNotes = async () => {
 
 contract('ACE', (accounts) => {
     const sender = accounts[0];
+    const publicOwner = accounts[0];
 
     describe('Initialization', () => {
         let ace;
@@ -85,6 +79,7 @@ contract('ACE', (accounts) => {
         let joinSplitValidator;
         let publicRangeValidator;
         let proof;
+        let erc20;
 
         beforeEach(async () => {
             ace = await ACE.new({ from: sender });
@@ -94,8 +89,17 @@ contract('ACE', (accounts) => {
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
             await ace.setProof(PUBLIC_RANGE_PROOF, publicRangeValidator.address);
 
-            const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
-            proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const baseFactory = await BaseFactory.new(ace.address);
+            await ace.setFactory(generateFactoryId(1, 1, 1), baseFactory.address, { from: sender });
+
+            const scalingFactor = new BN(1);
+            const canAdjustSupply = false;
+            const canConvert = true;
+
+            erc20 = await ERC20Mintable.new();
+            await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
+                from: sender,
+            });
         });
 
         describe('Success States', () => {
@@ -112,6 +116,8 @@ contract('ACE', (accounts) => {
             });
 
             it('should validate a join-split proof', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
                 const data = proof.encodeABI(joinSplitValidator.address);
                 const { receipt } = await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
                 expect(receipt.status).to.equal(true);
@@ -122,19 +128,29 @@ contract('ACE', (accounts) => {
             it('should have a wrapper contract validate a join-split transaction', async () => {
                 const aceTest = await ACETest.new();
                 await aceTest.setACEAddress(ace.address);
+
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
                 const data = proof.encodeABI(joinSplitValidator.address);
                 const { receipt } = await aceTest.validateProof(JOIN_SPLIT_PROOF, sender, data);
                 expect(proof.eth.outputs).to.equal(receipt.logs[0].args.proofOutputs);
             });
 
             it('should validate-by-hash previously set proofs', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
                 const data = proof.encodeABI(joinSplitValidator.address);
+
                 await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
                 const result = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
                 expect(result).to.equal(true);
             });
 
             it('should not validate-by-hash not previously set proofs', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
                 const result = await ace.validateProofByHash(proofs.BOGUS_PROOF, proof.hash, sender);
                 expect(result).to.equal(false);
             });
@@ -146,6 +162,9 @@ contract('ACE', (accounts) => {
             });
 
             it('should clear previously set proofs', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
                 const data = proof.encodeABI(joinSplitValidator.address);
                 await ace.validateProof(JOIN_SPLIT_PROOF, sender, data);
                 const firstResult = await ace.validateProofByHash(JOIN_SPLIT_PROOF, proof.hash, sender);
@@ -185,6 +204,31 @@ contract('ACE', (accounts) => {
 
                 const { receipt } = await ace.validateProof(PUBLIC_RANGE_PROOF, sender, publicRangeData);
                 expect(receipt.status).to.equal(true);
+            });
+
+            it('should validatedProofs mapping to false once updateNoteRegistry() called', async () => {
+                await erc20.mint(publicOwner, 50);
+                await erc20.approve(ace.address, 50);
+
+                const inputNotes = [];
+                const outputNotes = [
+                    await note.create(aztecAccount.publicKey, 10),
+                    await note.create(aztecAccount.publicKey, 40),
+                ];
+                const publicValue = -50;
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
+                const proofData = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, sender, proofData);
+                await ace.publicApprove(sender, proof.hash, 50, { from: sender });
+
+                const validatedProofsKey = proof.validatedProofHash;
+                const validatedProofsStatus = await ace.validatedProofs.call(validatedProofsKey);
+                expect(validatedProofsStatus).to.equal(true);
+
+                await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proof.eth.output, sender);
+                const postValidatedProofsStatus = await ace.validatedProofs.call(validatedProofsKey);
+                expect(postValidatedProofsStatus).to.equal(false);
             });
         });
 
@@ -266,6 +310,9 @@ contract('ACE', (accounts) => {
             });
 
             it('should not invalidate proof if not owner', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
                 const data = proof.encodeABI(joinSplitValidator.address);
                 await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], data);
                 const opts = { from: accounts[1] };
@@ -280,6 +327,9 @@ contract('ACE', (accounts) => {
             });
 
             it('should not validate a previously validated join-split proof', async () => {
+                const { inputNotes, outputNotes, publicValue } = await getDefaultNotes();
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
                 const data = proof.encodeABI(joinSplitValidator.address);
                 await ace.validateProof(JOIN_SPLIT_PROOF, accounts[0], data);
                 await ace.invalidateProof(JOIN_SPLIT_PROOF);
@@ -297,18 +347,6 @@ contract('ACE', (accounts) => {
             });
 
             it('should not update the validatedProofs mapping for utility proofs', async () => {
-                const adjustableFactory = await AdjustableFactory.new(ace.address);
-                await ace.setFactory(generateFactoryId(1, 1, 3), adjustableFactory.address, { from: sender });
-
-                const scalingFactor = new BN(1);
-                const canAdjustSupply = true;
-                const canConvert = true;
-
-                const erc20 = await ERC20Mintable.new();
-                await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, {
-                    from: accounts[0],
-                });
-
                 // Using a public range proof as the utility proof
                 const originalNote = await note.create(aztecAccount.publicKey, 20);
                 const utilityNote = await note.create(aztecAccount.publicKey, 10);
@@ -326,6 +364,36 @@ contract('ACE', (accounts) => {
                 await ace.validateProof(PUBLIC_RANGE_PROOF, sender, publicRangeData);
                 await truffleAssert.reverts(
                     ace.updateNoteRegistry(PUBLIC_RANGE_PROOF, publicRangeData, sender),
+                    'ACE has not validated a matching proof',
+                );
+            });
+
+            it('should not allow a proof to be reused as validatedProof mapping should be cleared', async () => {
+                // First proof
+                await erc20.mint(publicOwner, 50);
+                await erc20.approve(ace.address, 50);
+
+                const inputNotes = [];
+                const outputNotes = [
+                    await note.create(aztecAccount.publicKey, 10),
+                    await note.create(aztecAccount.publicKey, 40),
+                ];
+                const publicValue = -50;
+                proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
+                const proofData = proof.encodeABI(joinSplitValidator.address);
+                await ace.validateProof(JOIN_SPLIT_PROOF, sender, proofData);
+                await ace.publicApprove(sender, proof.hash, 50, { from: sender });
+
+                const validatedProofsKey = proof.validatedProofHash;
+                await ace.validatedProofs.call(validatedProofsKey);
+
+                await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proof.eth.output, sender);
+                await ace.validatedProofs.call(validatedProofsKey);
+
+                // Attempt to reuse proof, which should now be cleared from validatedProof mapping
+                await truffleAssert.reverts(
+                    ace.updateNoteRegistry(JOIN_SPLIT_PROOF, proof.eth.output, sender),
                     'ACE has not validated a matching proof',
                 );
             });

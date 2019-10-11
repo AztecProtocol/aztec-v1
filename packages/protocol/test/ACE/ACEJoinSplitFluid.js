@@ -13,6 +13,8 @@ const { BURN_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF } = proofs;
 
 // ### Artifacts
 const ACE = artifacts.require('./ACE');
+const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 const Dividend = artifacts.require('./Dividend');
 const DividendInterface = artifacts.require('./DividendInterface');
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
@@ -22,8 +24,6 @@ const JoinSplitFluid = artifacts.require('./JoinSplitFluid');
 const JoinSplitFluidInterface = artifacts.require('./JoinSplitFluidInterface');
 const Swap = artifacts.require('./Swap');
 const SwapInterface = artifacts.require('./SwapInterface');
-const AdjustableFactory = artifacts.require('./noteRegistry/epochs/201907/adjustable/FactoryAdjustable201907');
-const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 const { generateFactoryId } = require('../helpers/Factory');
 
