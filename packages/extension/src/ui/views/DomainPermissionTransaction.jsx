@@ -12,14 +12,13 @@ import Ticket from '~ui/components/Ticket';
 import InfoRow from '~ui/components/InfoRow';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
+
 const DomainPermissionTransaction = ({
     domain,
     assets,
     loading,
     success,
-    error,
-    goNext,
-    goBack,
+    error, goNext, goBack,
     onClose,
 }) => {
     const {
@@ -50,12 +49,16 @@ const DomainPermissionTransaction = ({
         }
     }
 
-    const title = i18n.t('domain.permission.title', { domain: domainName });
-
+    const title = i18n.t('domain.permission.title');
     return (
         <Popup
             theme="white"
-            title={title}
+            title={(
+                <div>
+                    <Text weight="medium" text={domainName} />
+                    <Text text={title} />
+                </div>
+            )}
             leftIconName={goBack ? 'chevron_left' : 'close'}
             onClickLeftIcon={goBack || onClose}
             submitButtonText={i18n.t('domain.permission.grant')}

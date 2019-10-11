@@ -27,6 +27,47 @@ const isClientEvent = event => [
 ].indexOf(event.data.type) >= 0;
 
 
+function getSiteName(window) {
+    const document = window.document;
+    const siteName = document.querySelector('head > meta[property="og:site_name"]');
+    if (siteName) {
+        return siteName.content;
+    }
+
+    const siteTitle = document.querySelector('head > meta[property="og:title"]');
+    if (siteTitle) {
+        return siteTitle.content;
+    }
+
+    const metaTitle = document.querySelector('head > meta[name="title"]');
+    if (metaTitle) {
+        return metaTitle.content;
+    }
+
+    return document.title;
+}
+
+/**
+ * Extracts an icon for the site from the DOM
+ */
+function getSiteIcon(window) {
+    const document = window.document;
+
+    // Use the site's favicon if it exists
+    const shortcutIcon = document.querySelector('head > link[rel="shortcut icon"]');
+    if (shortcutIcon) {
+        return shortcutIcon.href;
+    }
+
+    // Search through available icons in no particular order
+    const icon = Array.from(document.querySelectorAll('head > link[rel="icon"]')).find(icon => Boolean(icon.href));
+    if (icon) {
+        return icon.href;
+    }
+
+    return null;
+}
+
 export default function listenMessagesFromClient() {
     const clientId = randomId();
     const backgroundPort = browser.runtime.connect({
@@ -39,6 +80,8 @@ export default function listenMessagesFromClient() {
         backgroundSubject.next(msg);
     });
 
+    let metadata;
+
 
     const source$ = fromEvent(window, 'message');
     source$.pipe(
@@ -50,7 +93,18 @@ export default function listenMessagesFromClient() {
     source$.pipe(
         filter(({ data }) => data.type === clientEvent),
         // and wait for a response that has a matching requestId
-        tap(event => backgroundPort.postMessage(event.data)),
+        tap((event) => {
+            if (!metadata) {
+                metadata = {
+                    name: getSiteName(window),
+                    icon: getSiteIcon(window),
+                };
+            }
+            backgroundPort.postMessage({
+                metadata,
+                ...event.data,
+            });
+        }),
         mergeMap(event => from(filterStream('CLIENT_RESPONSE', event.data.requestId, background$))),
         map(({ requestId, response }) => postToClientScript(requestId, response)),
     ).subscribe();
