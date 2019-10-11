@@ -1,4 +1,4 @@
-import expectErrorResponse from '~helpers/expectErrorResponse';
+import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import EventService from '~background/services/EventService';

@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import dataKey from '~utils/dataKey';
 import saveToStorage from '../utils/saveToStorage';

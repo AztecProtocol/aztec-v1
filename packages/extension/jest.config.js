@@ -6,6 +6,6 @@ module.exports = {
         './tests/setupGlobals.js',
     ],
     moduleNameMapper: {
-        '^~helpers/(.*)$': path.resolve(__dirname, 'tests/helpers/$1'),
+        '^~testHelpers/(.*)$': path.resolve(__dirname, 'tests/helpers/$1'),
     },
 };
