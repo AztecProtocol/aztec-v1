@@ -44,7 +44,7 @@ class EventService {
         networkId,
     ) => {
         if (!this.networks[networkId]) {
-            this.networks = {};
+            this.networks[networkId] = {};
         }
         return this.networks[networkId];
     }
