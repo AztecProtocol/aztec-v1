@@ -418,7 +418,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager, Chargeable {
     {
         require(_destination != address(0x0), "can not withdraw to 0x0 address");
         require(_amount <= address(this).balance, "can not withdraw more than balance");
-        _destination.transfer(address(this).balance);
+        _destination.transfer(_amount);
         return true;
     }
 }
