@@ -1,12 +1,12 @@
 import {
     userAccount,
     registrationData,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import decodeKeyStore from '~background/utils/decodeKeyStore';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
-import expectErrorResponse from '~helpers/expectErrorResponse';
+import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import {
     validateExtension,
     validateSession,

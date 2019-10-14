@@ -4,13 +4,13 @@ import {
 } from '~utils/keyvault';
 import userModel from '~database/models/user';
 import domainModel from '~database/models/domain';
-import expectErrorResponse from '~helpers/expectErrorResponse';
+import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import {
     userAccount,
     userAccount2,
     registrationData,
     password,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import AuthService from '..';
 
 jest.mock('~utils/storage');

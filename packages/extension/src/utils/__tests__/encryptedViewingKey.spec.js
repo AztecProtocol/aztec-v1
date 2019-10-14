@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import {
     REAL_VIEWING_KEY_LENGTH,
     VIEWING_KEY_LENGTH,

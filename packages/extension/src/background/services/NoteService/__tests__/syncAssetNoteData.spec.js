@@ -1,8 +1,8 @@
-import notes from '~helpers/testNotes';
+import notes from '~testHelpers/testNotes';
 import {
     userAccount,
     userAccount2,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import {
     toCode,

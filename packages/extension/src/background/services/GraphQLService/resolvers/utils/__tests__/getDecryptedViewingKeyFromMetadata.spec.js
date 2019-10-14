@@ -1,6 +1,6 @@
 import {
     userAccount,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
