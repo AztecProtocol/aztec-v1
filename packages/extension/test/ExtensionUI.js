@@ -97,8 +97,6 @@ contract.only('Extension', (accounts) => {
         console.log(bal);
 
 
-        await environment.wait(30000000);
-
         /// WITHDRAW
         const withdrawAmount = randomInt(1, depositAmount);
         await newPage.api.evaluate(async (address, withdrawAmount, senderAddress, recipientAddress) => {
@@ -112,15 +110,13 @@ contract.only('Extension', (accounts) => {
         }, zkAsset.address, withdrawAmount, user, user);
 
         const withdrawPage = await environment.getPage(target => target.url().match(/withdraw/));
+
         await withdrawPage.clickMain();
         await environment.metamask.approve();
         await withdrawPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
         erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
         expect(erc20Balance).to.equal((totalBalance - depositAmount) + withdrawAmount);
 
-
-
-        // do a withdraw
         // do a send
     });
 });
