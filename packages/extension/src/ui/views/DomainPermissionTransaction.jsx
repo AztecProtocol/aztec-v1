@@ -4,6 +4,8 @@ import {
     FlexBox,
     Block,
     Text,
+    Row,
+    Col,
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
@@ -100,19 +102,21 @@ const DomainPermissionTransaction = ({
                             alt: domainName,
                         }}
                         content={(
-                            <div>
-                                <Text
-                                    size="m"
-                                    text={domainName}
-                                    weight="semibold"
-                                    showEllipsis
-                                />
-                                <Text
-                                    text={domainUrl}
-                                    color="label"
-                                    size="xxs"
-                                />
-                            </div>
+                            <Row>
+                                <Col column={6}>
+                                    <Text
+                                        size="m"
+                                        text={domainName}
+                                        weight="semibold"
+                                        showEllipsis
+                                    />
+                                    <Text
+                                        text={domainUrl}
+                                        color="label"
+                                        size="xxs"
+                                    />
+                                </Col>
+                            </Row>
                         )}
                     />
                     <Block padding={firstAsset ? 'l 0' : 'xl 0 0'}>
