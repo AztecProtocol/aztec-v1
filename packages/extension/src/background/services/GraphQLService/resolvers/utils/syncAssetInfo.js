@@ -60,6 +60,8 @@ export default async function syncAssetInfo(args, ctx = {}) {
             },
         );
 
+        console.log('set asset!');
+
         asset = await assetModel.get({
             address,
         });
