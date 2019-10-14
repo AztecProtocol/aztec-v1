@@ -1,10 +1,10 @@
 import {
     userAccount,
     registrationData,
-} from '~helpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
-import expectErrorResponse from '~helpers/expectErrorResponse';
+import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import {
     ensureKeyvault,
     ensureAccount,

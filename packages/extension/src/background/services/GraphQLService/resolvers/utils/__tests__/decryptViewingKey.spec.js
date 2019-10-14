@@ -1,7 +1,7 @@
 import {
     userAccount,
-} from '~helpers/testUsers';
-import notes from '~helpers/testNotes';
+} from '~testHelpers/testUsers';
+import notes from '~testHelpers/testNotes';
 import {
     randomInt,
 } from '~utils/random';
