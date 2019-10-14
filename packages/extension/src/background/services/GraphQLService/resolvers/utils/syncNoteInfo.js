@@ -22,7 +22,6 @@ export default async function syncNoteInfo(args, ctx) {
         user: {
             address: userAddress,
         },
-        // TODO: remove default value, when it will be passed here.
         networkId = 0,
     } = ctx;
 
@@ -47,8 +46,7 @@ export default async function syncNoteInfo(args, ctx) {
     } = note;
     const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
     const realViewingKey = fromHexString(viewingKey).decrypt(privateKey);
-    const aztecNote = valueFromViewingKey(realViewingKey);
-    const value = valueOf(aztecNote);
+    const value = valueFromViewingKey(realViewingKey);
 
     return {
         ...note,

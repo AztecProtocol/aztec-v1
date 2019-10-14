@@ -6,16 +6,17 @@ import postToContentScript from './postToContentScript';
 import ApiError from './ApiError';
 
 const handleResponse = (response) => {
-    if (response.error) {
+    const { error, ...rest } = response;
+    console.log(response);
+    if (error) {
         throw new ApiError(response);
     }
-    const failedQuery = Object.keys(response)
-        .find(queryName => !!response[queryName].error);
-    if (failedQuery) {
-        throw new ApiError(response[failedQuery]);
+    const responseKey = Object.keys(response)
+        .find(queryName => !!response[queryName]);
+    if (rest[responseKey].error) {
+        throw new ApiError(rest);
     }
-
-    return response;
+    return rest[responseKey];
 };
 
 export default async function query({ type, args }) {

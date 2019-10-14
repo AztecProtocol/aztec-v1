@@ -1,7 +1,4 @@
 import filterStream from '~utils/filterStream';
-import {
-    dataError,
-} from '~utils/error';
 
 import proofValidation from './proofValidation';
 

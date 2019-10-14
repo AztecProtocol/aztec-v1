@@ -31,14 +31,11 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const { asset: assetResponse } = await query({
+        const { asset } = await query({
             type: 'asset',
             args: { id: this.id },
         }) || {};
 
-        const {
-            asset,
-        } = assetResponse || {};
         if (asset) {
             dataProperties.forEach((key) => {
                 this[key] = asset[key];
@@ -48,16 +45,12 @@ export default class Asset {
 
     async balance() {
         const {
-            asset: data,
+            asset,
         } = await query({
             type: 'assetBalance',
             args: { id: this.id },
         }) || {};
 
-
-        const {
-            asset,
-        } = data || {};
 
         return (asset && asset.balance) || 0;
     }

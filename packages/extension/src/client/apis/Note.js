@@ -26,29 +26,12 @@ export default class Note {
 
     async refresh() {
         const {
-            noteResponse,
-        } = await query(`
-            noteResponse: note(id: "${this.id}") {
-                note {
-                    hash
-                    value
-                    owner {
-                        address
-                    }
-                    status
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `) || {};
-
-        const {
             note,
-        } = noteResponse || {};
+        } = await query({
+            type: 'note',
+            args: { id: this.id },
+        }) || {};
+
         if (note) {
             dataProperties.forEach((key) => {
                 this[key] = note[key];
@@ -56,33 +39,20 @@ export default class Note {
         }
     }
 
+    // @dev
+    // exports an aztec.js note instance for use in proofs
+
     async export() {
         if (!this.isValid) {
             return null;
         }
-
-        const {
-            noteResponse,
-        } = await query(`
-            noteResponse: note(id: "${this.id}") {
-                note {
-                    decryptedViewingKey
-                    owner {
-                        address
-                    }
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `) || {};
-
         const {
             note,
-        } = noteResponse || {};
+        } = await query({
+            type: 'noteWithViewingKey',
+            args: { id: this.id },
+        }) || {};
+
         if (!note || !note.decryptedViewingKey) {
             return null;
         }
@@ -100,57 +70,63 @@ export default class Note {
             ? [addresses]
             : addresses;
 
-        const {
-            response,
-        } = await query(`
-            response: grantNoteAccessPermission(noteId: "${this.id}", address: "${addressList.join('')}") {
-                permission {
-                    metadata
-                    prevMetadata
-                    asset {
-                        address
-                    }
-                }
-                error {
-                    type
-                    key
-                    message
-                    response
-                }
-            }
-        `);
 
-        const {
-            permission,
-        } = response;
-        const {
-            metadata,
-            prevMetadata,
-            asset,
-        } = permission || {};
-        let updated = false;
-        if (metadata
-            && metadata !== prevMetadata
-        ) {
-            const {
-                address: zkAssetAddress,
-            } = asset;
-            try {
-                await Web3Service
-                    .useContract('ZkAsset')
-                    .at(zkAssetAddress)
-                    .method('updateNoteMetaData')
-                    .send(
-                        this.id,
-                        metadata,
-                    );
-            } catch (e) {
-                throw new ApiError(e);
-            }
-            updated = true;
-        }
+        const { permission } = await query({
+            type: 'grantNoteAccess',
+            args: {
+                id: this.id,
+                addresses,
+            },
+        }) || {};
 
-        return updated;
+        // const {
+        //     response,
+        // } = await query(`
+        //     response: grantNoteAccessPermission(noteId: "${this.id}", address: "${addressList.join('')}") {
+        //         permission {
+        //             metadata
+        //             prevMetadata
+        //             asset {
+        //                 address
+        //             }
+        //         }
+        //         error {
+        //             type
+        //             key
+        //             message
+        //             response
+        //         }
+        //     }
+        // `);
+
+        // const {
+        //     metadata,
+        //     prevMetadata,
+        //     asset,
+        // } = permission || {};
+        // let updated = false;
+        // if (metadata
+        //     && metadata !== prevMetadata
+        // ) {
+        //     const {
+        //         address: zkAssetAddress,
+        //     } = asset;
+        //     try {
+        //         await Web3Service
+        //             .useContract('ZkAsset')
+        //             .at(zkAssetAddress)
+        //             .method('updateNoteMetaData')
+        //             .send(
+        //                 this.id,
+        //                 metadata,
+        //             );
+        //     } catch (e) {
+        //         throw new ApiError(e);
+        //     }
+        //     updated = true;
+        // }
+
+        // return updated;
     }
 
     /**

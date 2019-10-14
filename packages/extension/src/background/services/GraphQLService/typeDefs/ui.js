@@ -22,9 +22,7 @@ const uiTypes = gql`
         ): User
         asset(
             id: ID!
-        ): Asset
-        account(
-            address: String!
+        ): Asset account( address: String!
         ): Account
     }
     extend type Mutation {

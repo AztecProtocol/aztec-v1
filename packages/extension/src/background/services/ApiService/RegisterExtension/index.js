@@ -22,7 +22,9 @@ const registerExtensionUi = async (query, connection) => {
 
         return {
             ...query,
-            response,
+            response: {
+                account: response,
+            },
         };
     }
     return query;
@@ -44,7 +46,10 @@ const registerExtension = async (query, connection) => {
     if (account && account.blockNumber) {
         return {
             ...query,
-            response: account,
+            response: {
+                account,
+                error: null,
+            },
         };
     }
 
