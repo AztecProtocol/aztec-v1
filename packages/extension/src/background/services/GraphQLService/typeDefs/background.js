@@ -22,11 +22,6 @@ const backgroundTypes = gql`
         error: Error
         action: Action
     }
-    type UtilityNoteApiResponse {
-      note: UtilityNote
-      error: Error
-      action: Action
-    }
     type GrantAccessApiResponse {
         permission: GrantNoteAccessPermission
         error: Error
@@ -66,16 +61,6 @@ const backgroundTypes = gql`
             currentAddress: String!
             domain: String!
         ): NoteApiResponse
-        utilityNotes(
-            where: UtilityNote_filter!
-            currentAddress: String!
-            domain: String!
-        ): NotesApiResponse
-        utilityNote(
-            id: ID!
-            currentAddress: String!
-            domain: String!
-        ): UtilityNoteApiResponse
         grantNoteAccessPermission(
             noteId: ID!
             address: String!

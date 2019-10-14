@@ -16,6 +16,7 @@ export default async function pickNotesFromBalance(args, ctx) {
     } = args;
     const {
         address: userAddress,
+        networkId
     } = ctx;
 
     const asset = await assetModel.get({

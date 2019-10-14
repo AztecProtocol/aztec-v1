@@ -13,6 +13,12 @@ export default async function fetchAccount({
             account: null,
         };
     }
+    if (!networkId) {
+        return {
+            error: new Error("'networkId' cannot be empty in fetchAccount"),
+            account: null,
+        };
+    }
 
     const web3Service = await Web3Service({ networkId });
 

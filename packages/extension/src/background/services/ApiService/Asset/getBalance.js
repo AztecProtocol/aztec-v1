@@ -1,21 +1,4 @@
-import apollo from '../../GraphQLService';
+import query from '../utils/query';
 import AssetBalanceQuery from '../../../../ui/queries/AssetBalanceQuery';
 
-export default async function asset(query) {
-    const {
-        data: { args },
-        domain,
-    } = query;
-    const { data } = await apollo.query({
-        query: AssetBalanceQuery,
-        variables: {
-            ...args,
-            domain,
-        },
-    }) || {};
-
-    return {
-        ...query,
-        response: data,
-    };
-}
+export default async request => query(request, AssetBalanceQuery);

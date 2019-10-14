@@ -11,7 +11,6 @@ import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncAssetInfo from './utils/syncAssetInfo';
 import syncNoteInfo from './utils/syncNoteInfo';
-import syncUtilityNoteInfo from './utils/syncUtilityNoteInfo';
 import base from './base';
 
 const backgroundResolvers = {
@@ -27,14 +26,6 @@ const backgroundResolvers = {
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
         })),
-        utilityNote: ensureDomainPermission(async (_, args, ctx) => ({
-            note: await syncUtilityNoteInfo(args, ctx),
-        })),
-        utilityNotes: {
-            asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ id: asset })) || asset,
-            viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
-            decryptedViewingKey: async ({ metadata }) => getDecryptedViewingKeyFromMetadata(metadata),
-        },
         grantNoteAccessPermission: ensureDomainPermission(async (_, args, ctx) => ({
             permission: await requestGrantAccess(args, ctx),
         })),

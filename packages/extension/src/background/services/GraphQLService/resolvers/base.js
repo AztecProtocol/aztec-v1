@@ -18,13 +18,9 @@ export default {
     Note: {
         asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ key: asset })) || asset,
         owner: async ({ owner }) => (typeof owner === 'string' && accountModel.get({ key: owner })) || owner,
+        viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
         decryptedViewingKey: async ({ viewingKey, owner }) => decryptViewingKey(viewingKey, owner),
         status: ({ status }) => fromCode(status),
-    },
-    UtilityNote: {
-        asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ id: asset })) || asset,
-        viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
-        decryptedViewingKey: async ({ metadata }) => getDecryptedViewingKeyFromMetadata(metadata),
     },
     Asset: {
         balance: async ({ address }) => getAssetBalance(address),

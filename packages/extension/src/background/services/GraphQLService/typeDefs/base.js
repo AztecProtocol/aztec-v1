@@ -66,14 +66,6 @@ export default gql`
         success: Boolean
         error: Error
     }
-    type UtilityNote {
-        id: ID!
-        hash: String!
-        asset: Asset!
-        metadata: String
-        viewingKey: String
-        decryptedViewingKey: String
-    }
     type GrantNoteAccessPermission {
         prevMetadata: String
         metadata: String
@@ -82,9 +74,6 @@ export default gql`
     input Account_filter {
         address: String
         address_in: [String!]
-    }
-    input UtilityNote_filter {
-        noteHash_in: [String!]
     }
     type Query {
         root: String
