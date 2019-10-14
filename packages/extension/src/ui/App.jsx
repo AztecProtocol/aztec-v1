@@ -6,9 +6,6 @@ import {
     Switch,
     withRouter,
 } from 'react-router-dom';
-import AZTECAccountRegistry from '../../build/contracts/AZTECAccountRegistry.json';
-import ZkAssetMintable from '../../build/protocol/ZkAssetMintable.json';
-import ZkAssetBurnable from '../../build/protocol/ZkAssetBurnable.json';
 import Route from '~uiModules/components/Route';
 import ConnectionService from '~ui/services/ConnectionService';
 import ActionService from '~uiModules/services/ActionService';
@@ -48,8 +45,13 @@ class App extends PureComponent {
     }
 
     async componentDidMount() {
+        const {
+            mock,
+        } = this.props;
         ConnectionService.openConnection();
-        await configureWeb3Networks();
+        if (!mock) {
+            await configureWeb3Networks();
+        }
         this.loadInitialStates();
     }
 
@@ -106,23 +108,24 @@ class App extends PureComponent {
                 } = actions[type] || {});
             }
         }
-        const web3Service = await Web3Service();
-        const {
-            address,
-        } = web3Service.account;
-        const currentAccount = {
-            address,
-        };
 
+        let currentAccount;
         const {
             mock,
         } = this.props;
-        if (mock) {
+        if (!mock) {
+            const web3Service = await Web3Service();
+            const {
+                address,
+            } = web3Service.account;
+            currentAccount = {
+                address,
+            };
+        } else if (mock) {
             this.setState({
                 nextRoute: '/',
                 loading: false,
                 action,
-                currentAccount,
             });
             return;
         }
@@ -132,7 +135,7 @@ class App extends PureComponent {
         ) {
             const {
                 linkedPublicKey: onChainLinkedPublicKey,
-            } = await apis.account.getExtensionAccount(address) || {};
+            } = await apis.account.getExtensionAccount(currentAccount.address) || {};
             currentAccount.linkedPublicKey = onChainLinkedPublicKey;
 
             const {
