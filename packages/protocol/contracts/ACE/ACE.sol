@@ -34,6 +34,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         address validatorAddress
     );
     event IncrementLatestEpoch(uint8 newLatestEpoch);
+    event SetZeroValueNoteHash(bytes32 zeroValueNoteHash);
 
     // The commonReferenceString contains one G1 group element and one G2 group element,
     // that are created via the AZTEC protocol's trusted setup. All zero-knowledge proofs supported
@@ -378,6 +379,20 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
             require(validatorAddress != address(0x0), "expected the validator address to exist");
             require(isValidatorDisabled == false, "expected the validator address to not be disabled");
         }
+    }
+
+    /**
+    * @dev Set the ZERO_VALUE_NOTE_HASH constant defined in IAZTEC. Must be done in order for 
+    * mint and burn functionality to be available in the event of a new common reference string 
+    * being added.
+    *
+    * @param zeroValueNoteHash hash of an AZTEC note created from the new common reference string 
+    * with k = 0 and a = 1. This value will replace the ZERO_VALUE_NOTE_HASH constant
+    */
+    function setZeroValueNoteHash(bytes32 zeroValueNoteHash) public {
+        require(isOwner(), "only the owner can update the latest epoch");
+        ZERO_VALUE_NOTE_HASH = zeroValueNoteHash;
+        emit SetZeroValueNoteHash(ZERO_VALUE_NOTE_HASH);
     }
 }
 

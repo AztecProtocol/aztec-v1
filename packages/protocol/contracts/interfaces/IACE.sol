@@ -60,5 +60,7 @@ interface IACE {
         uint40 destroyedOn,
         address noteOwner
     );
+
+    function setZeroNoteHash(bytes32 zeroNoteHash) external;
 }
 
