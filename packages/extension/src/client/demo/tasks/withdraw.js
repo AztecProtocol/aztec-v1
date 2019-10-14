@@ -9,6 +9,12 @@ export default async function withdraw(asset, withdrawAmount, {
     sender,
 } = {}) {
     log('Generating withdraw proof...');
+    console.log({
+        numberOfInputNotes,
+        to,
+        from,
+        sender,
+    });
     const withdrawProof = await asset.withdraw(withdrawAmount, {
         numberOfInputNotes,
         to,

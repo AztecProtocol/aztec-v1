@@ -4,10 +4,7 @@ async function createAccount() {
         throw new Error('Please initialise your environment first');
     }
 
-    let extensionPage = await environment.openExtension();
-    await extensionPage.clickMain();
-
-    let homepage = await environment.getPage(({ _targetInfo }) => _targetInfo.url === 'https://www.aztecprotocol.com/');
+    let homepage = await environment.openPage('https://www.aztecprotocol.com/');
     await homepage.initialiseAztec();
 
     await environment.metamask.approve();
