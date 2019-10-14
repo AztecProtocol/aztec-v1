@@ -416,7 +416,6 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager, Chargeable {
         public
         onlyOwner
     {
-        require(_multiplier <= 2000, "can not set the multiplier to be above 2x");
         gasMultiplier = _multiplier;
         emit SetGasMultiplier(_multiplier);
     }
