@@ -43,7 +43,7 @@ contract.only('Extension', (accounts) => {
         await environment.browser.close();
     });
 
-    it('should successfully create an AZTEC account', async () => {
+    it.only('should successfully create an AZTEC account', async () => {
         await environment.createAccount();
 
         const extensionPage = await environment.openExtension();
@@ -52,7 +52,7 @@ contract.only('Extension', (accounts) => {
         await extensionPage.close();
     });
 
-    it('should set an AZTEC asset', async () => {
+    it.only('should set an AZTEC asset', async () => {
         const homepage = Object.values(environment.openPages)
             .find(p => p.aztecContext === true);
 
@@ -63,7 +63,9 @@ contract.only('Extension', (accounts) => {
         expect(isValid).to.equal(true);
         let erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
         expect(erc20Balance).to.equal(totalBalance);
-        
+    });
+
+    it('should complete a deposit', async () => {
         /// DEPOSIT
         const depositAmount = randomInt(1, 50);
         await homepage.api.evaluate(async (address, depositAmount, senderAddress, recipientAddress) => {
@@ -91,12 +93,10 @@ contract.only('Extension', (accounts) => {
         await newPage.initialiseAztec(true);
 
         await newPage.api.evaluate(async (address) => await window.aztec.asset(address), zkAsset.address);
-        console.log(zkAsset.address);
-        console.log(depositAmount);
         const bal = await newPage.api.evaluate(async (address) => await (await window.aztec.asset(address)).balance(), zkAsset.address);
-        console.log(bal);
+    });
 
-
+    it('should complete a withdraw', async () => {
         /// WITHDRAW
         const withdrawAmount = randomInt(1, depositAmount);
         await newPage.api.evaluate(async (address, withdrawAmount, senderAddress, recipientAddress) => {
@@ -116,7 +116,9 @@ contract.only('Extension', (accounts) => {
         await withdrawPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
         erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
         expect(erc20Balance).to.equal((totalBalance - depositAmount) + withdrawAmount);
+    });
 
-        // do a send
+    it('should complete a send', async () => {
+
     });
 });
