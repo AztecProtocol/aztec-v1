@@ -72,17 +72,22 @@ contract('ZkAssetAdjustable', (accounts) => {
             scalingFactor = new BN(10);
         });
 
-        it('should complete a mint operation', async () => {
+        it.only('should complete a mint operation', async () => {
             const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
 
+            const currentNoteHash = await ace.ZERO_VALUE_NOTE_HASH.call();
+            console.log({ currentNoteHash });
+
             const sender = accounts[0];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
+            console.log({ zeroMintCounterNote });
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             const { receipt } = await zkAssetAdjustable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
             expect(receipt.status).to.equal(true);
+            expect(true).to.equal(false);
         });
 
         it('should transfer minted value out of the note registry', async () => {

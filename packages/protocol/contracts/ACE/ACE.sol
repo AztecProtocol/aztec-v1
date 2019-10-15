@@ -390,7 +390,7 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
     * with k = 0 and a = 1. This value will replace the ZERO_VALUE_NOTE_HASH constant
     */
     function setZeroValueNoteHash(bytes32 zeroValueNoteHash) public {
-        require(isOwner(), "only the owner can update the latest epoch");
+        require(isOwner(), "only the owner can update ZERO_VALUE_NOTE_HASH");
         ZERO_VALUE_NOTE_HASH = zeroValueNoteHash;
         emit SetZeroValueNoteHash(ZERO_VALUE_NOTE_HASH);
     }

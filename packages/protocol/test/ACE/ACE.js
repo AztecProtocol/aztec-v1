@@ -192,7 +192,6 @@ contract('ACE', (accounts) => {
                 expect(currentNoteHash).to.equal(constants.ZERO_VALUE_NOTE_HASH);
 
                 const newZeroNoteHash = randomHex(32);
-
                 const { receipt } = await ace.setZeroValueNoteHash(newZeroNoteHash);
                 const updatedNoteHash = await ace.ZERO_VALUE_NOTE_HASH.call();
                 expect(updatedNoteHash).to.equal(newZeroNoteHash);
