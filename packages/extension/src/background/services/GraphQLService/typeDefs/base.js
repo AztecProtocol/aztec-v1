@@ -48,7 +48,7 @@ export default gql`
     }
     type Note {
         id: ID!
-        hash: String!
+        noteHash: String!
         asset: Asset!
         owner: Account
         viewingKey: String

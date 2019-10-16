@@ -49,7 +49,7 @@ export default {
                 query,
                 args: {
                     ...data,
-                    domain: window.location.href,
+                    domain: window.location.origin,
                     currentAddress: currentUser.address,
                 },
             },

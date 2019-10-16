@@ -4,7 +4,8 @@ import { proofs } from '@aztec/dev-utils';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
-import { createNote,
+import {
+    createNote,
     createNotes,
     fromViewingKey,
     valueOf,
@@ -20,7 +21,6 @@ import RegisterExtensionMutation from '../../mutations/RegisterExtension';
 import RegisterAccountMutation from '../../mutations/RegisterAccount';
 import Web3Service from '~client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
-import UtilityNoteQuery from '../../queries/UtilityNoteQuery';
 import ApproveDomainMutatuon from '../../mutations/ApproveDomain';
 import createNoteFromBalance from './createNoteFromBalance';
 import ClientConnection from '../ClientConnectionService';
@@ -410,7 +410,7 @@ class ExtensionApi {
                     const {
                         data: { utilityNote },
                     } = await apollo.query({
-                        query: UtilityNoteQuery,
+                        // query: UtilityNoteQuery,
                         variables: {
                             id: confidentialTotalMintedHash,
                         },
@@ -531,6 +531,7 @@ class ExtensionApi {
                 domain,
             }) => {
                 // 1. we need to fetch all the utility notes
+
             },
 
             returnToClient: async ({

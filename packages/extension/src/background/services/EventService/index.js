@@ -346,6 +346,7 @@ class EventService {
             noteHash,
             fromAssets,
             networkId,
+            fromBlock: 0
         });
 
         if (!groupedNotes.isEmpty()) {

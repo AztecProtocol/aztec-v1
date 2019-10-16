@@ -11,7 +11,10 @@ export default async function getExtensionAccount(address) {
     `);
 
     if (!account || !account.linkedPublicKey) {
-        return null;
+        return {
+            address,
+            linkedPublicKey: '',
+        };
     }
 
     return account;

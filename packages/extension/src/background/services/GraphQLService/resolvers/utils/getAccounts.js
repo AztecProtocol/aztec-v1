@@ -18,35 +18,39 @@ export default async function getAccounts(args, ctx = {}) {
         networkId = 0,
     } = ctx;
 
-    const promises = [];
-    addresses.forEach((address) => {
-        const accountPromise = EventService.fetchAztecAccount({
-            address,
-            networkId,
-        });
-        promises.push(accountPromise);
-    });
 
-    let accounts = await Promise.all(promises);
-    accounts = accounts.map(({ error, account: { address, linkedPublicKey, spendingPublicKey } }) => ({
-        id: address,
+    let accounts = await Promise.all(addresses.map(address => EventService.fetchAztecAccount({
         address,
-        linkedPublicKey,
-        spendingPublicKey,
-    }));
+        networkId,
+    })));
 
 
+    accounts = accounts.map(({
+        account,
+    }) => (account));
     const onChainAccounts = accounts || [];
     const invalidAccounts = addresses
         .filter((addr) => {
             const account = onChainAccounts.find(a => a.address === addr);
             return !account || !account.linkedPublicKey;
         });
+
     if (invalidAccounts.length > 0) {
         throw argsError('account.not.linked', {
             invalidAccounts,
         });
     }
+
+    accounts = accounts.map(({
+        address,
+        linkedPublicKey,
+        spendingPublicKey,
+    }) => ({
+        id: address,
+        address,
+        linkedPublicKey,
+        spendingPublicKey,
+    }));
 
     return accounts;
 }

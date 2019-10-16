@@ -35,8 +35,8 @@ const backgroundResolvers = {
         account: ensureDomainPermission(async (_, args) => ({
             account: await userModel.get({ address: args.currentAddress }),
         })),
-        accounts: ensureDomainPermission(async (_, args) => ({
-            accounts: await getAccounts(args),
+        accounts: ensureDomainPermission(async (_, args, ctx) => ({
+            accounts: await getAccounts(args, ctx),
         })),
         subscribe: ensureDomainPermission(async (_, args) => ({
             success: ClientSubscriptionService.grantSubscription(args),

@@ -10,5 +10,6 @@ It will be able to construct proofs using this note.
 It will not be able to spend this note without your approval via MetaMask.
 `,
         },
+        invalidAccounts: 'Error: All accounts must have registered the AZTEC extension'
     },
 };

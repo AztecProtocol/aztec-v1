@@ -3,6 +3,9 @@ export default {
         create: {
             proof: 'Create Proof',
         },
+        encrypt: {
+            keys: 'Encrypt Viewing Keys',
+        },
         send: 'Send Transaction',
         approve: 'Approve Transaction',
         confirmed: 'Transaction Confirmed',

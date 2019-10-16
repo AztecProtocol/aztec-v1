@@ -1,5 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+    fetchNote,
+} from 'ui/apis/note';
+import {
+    getExtensionAccount,
+} from 'ui/apis/account';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
@@ -22,31 +28,31 @@ const handleGoNext = (step) => {
 };
 
 const NoteAccess = ({
-    note,
-    accounts,
-}) => (
-    <CombinedViews
-        Steps={Steps}
-        initialData={{
+    id,
+    addresses,
+}) => {
+    const fetchInitialData = async () => {
+        const note = await fetchNote(id);
+        const accounts = await Promise.all(addresses.map(getExtensionAccount));
+
+        return {
             note,
             accounts,
-        }}
-        onGoNext={handleGoNext}
-    />
-);
+        };
+    };
+
+    return (
+        <CombinedViews
+            Steps={Steps}
+            fetchInitialData={fetchInitialData}
+            onGoNext={handleGoNext}
+        />
+    );
+};
 
 NoteAccess.propTypes = {
-    note: PropTypes.shape({
-        hash: PropTypes.string.isRequired,
-        value: PropTypes.number.isRequired,
-        asset: PropTypes.shape({
-            address: PropTypes.string.isRequired,
-            code: PropTypes.string,
-        }).isRequired,
-    }).isRequired,
-    accounts: PropTypes.arrayOf(PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    })).isRequired,
+    id: PropTypes.string.isRequired,
+    addresses: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default NoteAccess;

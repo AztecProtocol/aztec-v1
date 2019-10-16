@@ -29,10 +29,12 @@ const NoteAccessConfirm = ({
     onClose,
 }) => {
     const {
-        hash,
+        noteHash,
         value,
         asset,
     } = note;
+
+    const invalidAccounts = accounts.some(({ linkedPublicKey }) => !linkedPublicKey);
 
     return (
         <Popup
@@ -41,7 +43,8 @@ const NoteAccessConfirm = ({
             leftIconName={goBack ? 'chevron_left' : 'close'}
             onClickLeftIcon={goBack || onClose}
             submitButtonText={i18n.t('note.access.grant')}
-            onSubmit={goNext}
+            error={invalidAccounts ? { key: 'note.access.invalidAccounts' } : undefined}
+            onSubmit={invalidAccounts ? undefined : goNext}
         >
             <FlexBox
                 direction="column"
@@ -68,7 +71,7 @@ const NoteAccessConfirm = ({
                             />
                             <ListRow
                                 title={i18n.t('note.hash')}
-                                content={formatAddress(hash, 10, 6)}
+                                content={formatAddress(noteHash, 10, 6)}
                             />
                             <ListRow
                                 title={i18n.t('note.value')}
@@ -86,7 +89,7 @@ const NoteAccessConfirm = ({
                                 <InplacePopup
                                     theme="white"
                                     items={accounts}
-                                    renderItem={({ address }) => (
+                                    renderItem={({ address, linkedPublicKey }) => (
                                         <ListItem
                                             className="text-code"
                                             profile={{
@@ -95,7 +98,7 @@ const NoteAccessConfirm = ({
                                             }}
                                             content={formatAddress(address, 18, 8)}
                                             size="xxs"
-                                            color="label"
+                                            color={linkedPublicKey ? 'label' : 'red'}
                                         />
                                     )}
                                     itemMargin="xs 0"
@@ -120,12 +123,13 @@ const NoteAccessConfirm = ({
 
 NoteAccessConfirm.propTypes = {
     note: PropTypes.shape({
-        hash: PropTypes.string.isRequired,
+        noteHash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         asset: assetShape.isRequired,
     }).isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({
-        address: PropTypes.string.isRequired,
+        address: PropTypes.string,
+        linkedPublicKey: PropTypes.string,
     })).isRequired,
     goNext: PropTypes.func.isRequired,
     goBack: PropTypes.func,

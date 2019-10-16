@@ -7,7 +7,7 @@ export const themeType = PropTypes.oneOf([
 
 export const assetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,
-    tokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
 });
 
