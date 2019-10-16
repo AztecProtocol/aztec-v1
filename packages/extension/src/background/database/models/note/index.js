@@ -6,15 +6,12 @@ export default Model({
     pk: 'noteHash',
     fields: [
         'noteHash',
-        'owner',
-        'metadata',
-        'blockNumber',
-        'status',
-        'asset', // address
+        'asset',
     ],
-    autoFields: {
-        ownerAssetStatus: {
-            childFields: ['owner', 'asset', 'status'],
-        },
-    },
+    // optionalFields: [
+    //     'owner',
+    //     'viewingKey',
+    //     'status',
+    //     'blockNumber',
+    // ],
 });

@@ -8,9 +8,6 @@ import {
     fetchNotes,
     saveNotes,
 } from '../../utils/note';
-import {
-    saveAccessesFromNotes,
-} from '../../utils/access';
 
 /* See more details about limitation
  * https://infura.io/docs/ethereum/json-rpc/eth_getLogs
@@ -188,11 +185,10 @@ class SyncManager {
                 newRetriedNumber = 0;
 
                 if (!groupedNotes.isEmpty()) {
-                    const promises = [
-                        saveNotes(groupedNotes, networkId),
-                        saveAccessesFromNotes(groupedNotes, networkId),
-                    ];
-                    await Promise.all(promises);
+                    const t0 = performance.now();
+                    await saveNotes(groupedNotes, networkId);
+                    const t1 = performance.now();
+                    console.log(`storing time: ${((t1 - t0) / 1000)} seconds.`);
                 } else {
                     this.increaseBlocksPerRequest();
                 }
