@@ -52,14 +52,13 @@ export default async function fetchNoteFromIndexedDB(options) {
     if (onChainNote) {
         const asset = await Asset.get({ networkId }, { registryOwner: onChainNote.asset });
         const {
-            addresses,
-            viewingKeys,
-        } = metadata(onChainNote.metadata);
+            access,
+        } = onChainNote;
 
-        noteAccesses = addresses.map((address, index) => ({
+        noteAccesses = Object.keys(access).map(address => packNote(onChainNote, asset, {
             address,
-            viewingKey: viewingKeys[index],
-        })).map(noteAccess => packNote(onChainNote, asset, noteAccess));
+            viewingKey: access[address],
+        }));
     }
 
     return noteAccesses.map(({
