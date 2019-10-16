@@ -22,8 +22,13 @@ const uiTypes = gql`
         ): User
         asset(
             id: ID!
-        ): Asset account( address: String!
+        ): Asset 
+        account( 
+            address: String!
         ): Account
+        note(
+            id: ID!
+        ): Note
     }
     extend type Mutation {
         login(

@@ -96,6 +96,33 @@ export default async ({ data }) => {
                 },
             };
         }
+
+        case 'metamask.zkAsset.updateNoteMetadata': {
+            const {
+                response: {
+                    response: {
+                        noteHash,
+                        assetAddress,
+                        metadata,
+                    },
+                },
+            } = data;
+
+            await Web3Service
+                .useContract('ZkAsset')
+                .at(assetAddress)
+                .method('updateNoteMetaData')
+                .send(
+                    noteHash,
+                    metadata,
+                );
+            return {
+                ...data,
+                response: {
+                    success: true,
+                },
+            };
+        }
         default: {
             break;
         }

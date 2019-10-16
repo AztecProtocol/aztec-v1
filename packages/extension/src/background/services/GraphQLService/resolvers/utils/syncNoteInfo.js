@@ -2,10 +2,14 @@ import decodePrivateKey from '~background/utils/decodePrivateKey';
 import {
     fromHexString,
 } from '~utils/encryptedViewingKey';
+import metadata from '~utils/metadata';
 import {
     valueFromViewingKey,
-    valueOf,
 } from '~utils/note';
+import {
+    argsError,
+} from '~utils/error';
+import Note from '~background/database/models/note';
 import fetchLatestNote from './fetchLatestNote';
 
 
@@ -19,20 +23,27 @@ export default async function syncNoteInfo(args, ctx) {
     }
 
     const {
-        user: {
-            address: userAddress,
-        },
+        user: { address: userAddress },
         networkId = 0,
     } = ctx;
 
-    const [note] = await fetchLatestNote({
-        account: userAddress,
-        noteId,
-        networkId,
-    }) || [];
+    let note = await Note.get({ networkId }, noteId);
+
+    const {
+        viewingKey,
+    } = metadata(note.metadata).getAccess(userAddress);
+    if (!note) {
+        [note] = await fetchLatestNote({
+            account: userAddress,
+            noteId,
+            networkId,
+        }) || [];
+    }
 
     if (!note) {
-        return null;
+        throw argsError('note.not.found', {
+            noteId,
+        });
     }
 
     const {
@@ -41,9 +52,6 @@ export default async function syncNoteInfo(args, ctx) {
             pwDerivedKey,
         },
     } = ctx;
-    const {
-        viewingKey,
-    } = note;
     const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
     const realViewingKey = fromHexString(viewingKey).decrypt(privateKey);
     const value = valueFromViewingKey(realViewingKey);

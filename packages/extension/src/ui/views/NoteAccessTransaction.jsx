@@ -12,20 +12,11 @@ import Transaction from './handlers/Transaction';
 
 const steps = [
     {
-        titleKey: 'transaction.step.create.proof',
+        titleKey: 'transaction.step.encrypt.keys',
         tasks: [
             {
-                name: 'proof',
-                run: apis.mock,
-            },
-        ],
-    },
-    {
-        titleKey: 'transaction.step.approve',
-        tasks: [
-            {
-                name: 'approve',
-                run: apis.mock,
+                name: 'encrypt',
+                run: apis.note.grantNoteAccess,
             },
         ],
     },
@@ -34,7 +25,7 @@ const steps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.mock,
+                run: apis.asset.updateNoteMetadata,
             },
         ],
     },
@@ -54,7 +45,7 @@ const NoteAccessTransaction = ({
     onClose,
 }) => {
     const {
-        hash,
+        noteHash,
         asset,
     } = note;
     const [firstUser, ...restUsers] = accounts;
@@ -79,7 +70,7 @@ const NoteAccessTransaction = ({
                     ...asset,
                     type: 'asset',
                 },
-                description: formatAddress(hash, 6, 4),
+                description: formatAddress(noteHash, 6, 4),
             }}
             to={{
                 profile: {
@@ -121,7 +112,7 @@ const NoteAccessTransaction = ({
 
 NoteAccessTransaction.propTypes = {
     note: PropTypes.shape({
-        hash: PropTypes.string.isRequired,
+        noteHash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         asset: assetShape.isRequired,
     }).isRequired,

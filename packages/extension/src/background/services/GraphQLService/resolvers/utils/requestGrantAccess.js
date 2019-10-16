@@ -12,7 +12,6 @@ import {
 } from '~utils/error';
 import EventService from '~background/services/EventService';
 
-
 const packExistingAccesses = usersAddresses => usersAddresses.map(rawAddress => ({
     account: {
         address: rawAddress,
@@ -27,7 +26,7 @@ const packUserAccess = (viewingKey, note) => ({
                 id: note.asset,
             },
         },
-        viewingKey: viewingKey,
+        viewingKey,
     },
 });
 
@@ -48,34 +47,27 @@ export default async function requestGrantAccess(args, ctx) {
         // TODO: remove default value, when it will be passed here.
         networkId = 0,
     } = ctx;
-
     const addressList = [];
     for (let i = 0; i < address.length; i += ADDRESS_LENGTH) {
         addressList.push(address.substr(i, ADDRESS_LENGTH));
     }
-
     const addressListPromises = addressList.map(rawAddress => EventService.fetchAztecAccount({
         address: rawAddress,
         networkId,
     }));
     const sharedAccountsRaw = await Promise.all(addressListPromises);
     const sharedAccounts = packSharedAccounts(sharedAccountsRaw.map(({ account }) => account));
-
     const {
         note,
     } = await EventService.fetchLatestNote({
         noteHash: noteId,
         networkId,
     });
-
     const {
         viewingKey,
     } = metadata(note.metadata).getAccess(userAddress);
     const userAccess = packUserAccess(viewingKey, note);
-
     const existingAccesses = packExistingAccesses(addressList);
-
-
     if (!userAccess || !userAccess.length) {
         throw argsError('account.noteAccess', {
             messageOptions: {
@@ -84,7 +76,6 @@ export default async function requestGrantAccess(args, ctx) {
             },
         });
     }
-
     if (!sharedAccounts
         || sharedAccounts.length !== addressList.length
     ) {
@@ -96,7 +87,6 @@ export default async function requestGrantAccess(args, ctx) {
                 invalidAccounts: addressList,
             });
         }
-
         const notFound = addressList
             .filter(addr => !sharedAccounts.find(a => a.address === addr));
         throw argsError('account.notFound.count', {
@@ -107,7 +97,6 @@ export default async function requestGrantAccess(args, ctx) {
             invalidAccounts: notFound,
         });
     }
-
     const invalidAccounts = sharedAccounts.filter(a => !a.publicKey);
     if (invalidAccounts.length === 1) {
         throw argsError('account.notFound.publicKey', {
@@ -126,7 +115,6 @@ export default async function requestGrantAccess(args, ctx) {
             invalidAccounts,
         });
     }
-
     const {
         note: {
             metadata: prevMetadataStr,
@@ -136,7 +124,6 @@ export default async function requestGrantAccess(args, ctx) {
         },
         viewingKey: userViewingKey,
     } = userAccess[0];
-
     if (existingAccesses
         && existingAccesses.length === addressList.length
     ) {
@@ -144,7 +131,6 @@ export default async function requestGrantAccess(args, ctx) {
             prevMetadataStr,
         };
     }
-
     const {
         addresses,
         viewingKeys,
@@ -161,7 +147,6 @@ export default async function requestGrantAccess(args, ctx) {
         newAddresses.push(addr);
         newViewingKeys.push(viewingKey.toString());
     });
-
     const newMetadataStr = toString({
         aztecData,
         addresses: [
@@ -173,7 +158,6 @@ export default async function requestGrantAccess(args, ctx) {
             ...newViewingKeys,
         ],
     });
-
     return {
         prevMetadataStr,
         metadata: newMetadataStr,

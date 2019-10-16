@@ -7,7 +7,7 @@ import {
 import getUserSpendingPublicKey from './utils/getUserSpendingPublicKey';
 import decryptViewingKey from './utils/decryptViewingKey';
 import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
-import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
+// import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
 import getAssetBalance from './utils/getAssetBalance';
 
 export default {
@@ -16,7 +16,7 @@ export default {
         spendingPublicKey: async () => getUserSpendingPublicKey(),
     },
     Note: {
-        asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ key: asset })) || asset,
+        asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ id: asset })) || asset,
         owner: async ({ owner }) => (typeof owner === 'string' && accountModel.get({ key: owner })) || owner,
         viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
         decryptedViewingKey: async ({ viewingKey, owner }) => decryptViewingKey(viewingKey, owner),
