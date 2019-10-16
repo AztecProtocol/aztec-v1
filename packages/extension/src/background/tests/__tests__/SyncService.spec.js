@@ -227,8 +227,6 @@ describe('ZkAsset', () => {
             linkedPublicKey,
         } = account;
 
-        log(`Sender address: ${userAddress} private key: ${privateKey}`);
-
         await EventService.addAccountToSync({
             address: userAddress,
             networkId,

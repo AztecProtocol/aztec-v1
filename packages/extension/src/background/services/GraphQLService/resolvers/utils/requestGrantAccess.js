@@ -11,8 +11,6 @@ import {
     argsError,
 } from '~utils/error';
 import EventService from '~background/services/EventService';
-import NoteAccess from '~background/database/models/noteAccess';
-import getNoteAccessId from '~background/database/models/noteAccess/getNoteAccessId';
 
 
 const packExistingAccesses = usersAddresses => usersAddresses.map(rawAddress => ({
@@ -21,7 +19,7 @@ const packExistingAccesses = usersAddresses => usersAddresses.map(rawAddress => 
     },
 }));
 
-const packUserAccess = (userAccess, note) => ({
+const packUserAccess = (viewingKey, note) => ({
     userAccess: {
         note: {
             metadata: note.metadata,
@@ -29,7 +27,7 @@ const packUserAccess = (userAccess, note) => ({
                 id: note.asset,
             },
         },
-        viewingKey: userAccess.viewingKey,
+        viewingKey: viewingKey,
     },
 });
 
@@ -51,8 +49,6 @@ export default async function requestGrantAccess(args, ctx) {
         networkId = 0,
     } = ctx;
 
-    console.log('------ Account requestGrantAccess');
-
     const addressList = [];
     for (let i = 0; i < address.length; i += ADDRESS_LENGTH) {
         addressList.push(address.substr(i, ADDRESS_LENGTH));
@@ -62,17 +58,20 @@ export default async function requestGrantAccess(args, ctx) {
         address: rawAddress,
         networkId,
     }));
-    const sahredAccounts = await Promise.all(addressListPromises);
-    const sharedAccounts = packSharedAccounts(sahredAccounts.map(({ account }) => account));
+    const sharedAccountsRaw = await Promise.all(addressListPromises);
+    const sharedAccounts = packSharedAccounts(sharedAccountsRaw.map(({ account }) => account));
 
-    const userNoteAccess = NoteAccess.get({ networkId }, getNoteAccessId(userAddress, noteId));
     const {
         note,
     } = await EventService.fetchLatestNote({
         noteHash: noteId,
         networkId,
     });
-    const userAccess = packUserAccess(userNoteAccess, note);
+
+    const {
+        viewingKey,
+    } = metadata(note.metadata).getAccess(userAddress);
+    const userAccess = packUserAccess(viewingKey, note);
 
     const existingAccesses = packExistingAccesses(addressList);
 
