@@ -3,7 +3,6 @@ import EventService from '~background/services/EventService';
 import {
     errorLog,
 } from '~utils/log';
-import metadata from '~utils/metadata';
 
 
 const packNote = (note, asset, noteAccess) => ({

@@ -185,10 +185,7 @@ class SyncManager {
                 newRetriedNumber = 0;
 
                 if (!groupedNotes.isEmpty()) {
-                    const t0 = performance.now();
                     await saveNotes(groupedNotes, networkId);
-                    const t1 = performance.now();
-                    console.log(`storing time: ${((t1 - t0) / 1000)} seconds.`);
                 } else {
                     this.increaseBlocksPerRequest();
                 }
