@@ -44,7 +44,7 @@ const {
 
 describe('ZkAsset', () => {
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 13;
+    const prepopulateNotesCount = 14;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -55,12 +55,14 @@ describe('ZkAsset', () => {
 
     let account;
     let erc20Address;
-    let zkAssetAddress = '0x3B9A9D8C3E179e2b1237873ef8841d734E465eB4';
+    let zkAssetAddress;
     let outputNotes;
     let depositProof;
     let web3Service;
 
     beforeAll(async () => {
+        zkAssetAddress = '0x0F94C9b79F3e411a5837Ff696320FEFCAd079126';
+
         await set({
             __providerUrl: providerUrl,
         });
@@ -80,24 +82,28 @@ describe('ZkAsset', () => {
 
         await Account.add(account, { networkId });
 
-        const {
-            error,
-            groupedNotes,
-        } = await fetchNotes({
-            fromBlock: 1,
-            toBlock: 'latest',
-            fromAssets: [zkAssetAddress],
-            networkId,
-        });
+        let eventsInGanacheLength = 0;
+        if (zkAssetAddress) {
+            const {
+                error,
+                groupedNotes,
+            } = await fetchNotes({
+                fromBlock: 1,
+                toBlock: 'latest',
+                fromAssets: [zkAssetAddress],
+                networkId,
+            });
 
-        if (error) {
-            errorLog('Cannot fetch all notes', error);
-            return;
+            if (error) {
+                errorLog('Cannot fetch all notes', error);
+                return;
+            }
+
+            eventsInGanacheLength = groupedNotes.allNotes().length;
         }
+        log(`Already eventsInGanache: ${eventsInGanacheLength}`);
 
-        const eventsInGanache = groupedNotes.allNotes();
-        log(`Already eventsInGanache: ${eventsInGanache.length}`);
-        if (eventsInGanache.length >= prepopulateNotesCount) return;
+        if (eventsInGanacheLength >= prepopulateNotesCount) return;
 
         await web3Service
             .useContract('ACE')
@@ -149,7 +155,7 @@ describe('ZkAsset', () => {
         });
 
         const notesPerRequest = 5;
-        let createdNotes = eventsInGanache.length;
+        let createdNotes = eventsInGanacheLength;
 
         await web3Service
             .useContract('ZkAssetOwnable')
@@ -163,9 +169,10 @@ describe('ZkAsset', () => {
         do {
             const inputNotes = [];
             const depositInputOwnerAccounts = [];
+            const notesToGenerate = Math.min(notesPerRequest, prepopulateNotesCount - createdNotes);
 
             // outputNotes with 1 balances
-            const noteValues = new Array(notesPerRequest);
+            const noteValues = new Array(notesToGenerate);
             noteValues.fill(1);
 
             try {
@@ -213,7 +220,7 @@ describe('ZkAsset', () => {
                     depositSignatures,
                 );
 
-            createdNotes += notesPerRequest;
+            createdNotes += notesToGenerate;
 
             // eslint-disable-next-line radix
             log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
