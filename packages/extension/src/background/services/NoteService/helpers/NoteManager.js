@@ -56,7 +56,7 @@ export default class NoteManager {
     }
 
     async init(ownerAddress, linkedPrivateKey, linkedPublicKey, networkId) {
-        if (ownerAddress === this.owner.address) return;
+        // if (ownerAddress === this.owner.address) return;
 
         this.syncing = true;
         this.owner = {
@@ -133,7 +133,7 @@ export default class NoteManager {
                 args,
             );
         }
-        
+
         return this[cbName](args);
     }
 
