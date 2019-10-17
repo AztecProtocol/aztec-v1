@@ -34,7 +34,8 @@ async function init(extensionPath, {
 
     environment.browser = await puppeteer.launch({
         defaultViewport: null,
-        // devtools: true,
+        devtools: true,
+        slowMo: 60,
         headless: false, // extension are allowed only in head-full mode
         args: [
             `--disable-extensions-except=${extensionPath},${metamaskPath}`,
