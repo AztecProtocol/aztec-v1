@@ -1,6 +1,7 @@
 import addressModel from '~database/models/address';
 import assetModel from '~database/models/asset';
 import noteModel from '~database/models/note';
+import Note from '~background/database/models/note';
 import syncAssetNoteData from './syncAssetNoteData';
 
 export default async function mergeWithLatestAsset(
@@ -12,19 +13,19 @@ export default async function mergeWithLatestAsset(
     const ownerKey = await addressModel.keyOf({
         address: userAddress,
     });
-    const lastEntry = await noteModel.last({
-        owner: ownerKey,
-    });
+
+    const options = {
+        filterOptions: {
+            // owner: userAddress,
+        },
+    };
+    const lastEntry = await Note.latest({ networkId }, options);
+    // console.log({ lastEntry });
     if (!lastEntry) {
         return prevAssetNoteDataMappinig;
     }
 
-    const {
-        id: assetId,
-    } = await assetModel.get({
-        key: lastEntry.asset,
-    });
-
+    const assetId = lastEntry.asset;
 
     if (prevAssetNoteDataMappinig[assetId]) {
         return prevAssetNoteDataMappinig;

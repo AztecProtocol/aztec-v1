@@ -7,11 +7,19 @@ export default Model({
     fields: [
         'noteHash',
         'asset',
+        'blockNumber',
+        'owner',
+        // 'assetOwner',
     ],
-    // optionalFields: [
-    //     'owner',
-    //     'viewingKey',
-    //     'status',
-    //     'blockNumber',
-    // ],
+    optionalFields: [
+        // 'owner',
+        // 'viewingKey',
+        // 'status',
+        // 'blockNumber',
+    ],
+    // autoFields: {
+    //     assetOwner: {
+    //         childFields: ['asset', 'owner'],
+    //     },
+    // },
 });
