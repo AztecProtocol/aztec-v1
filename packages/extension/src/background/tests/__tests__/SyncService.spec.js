@@ -44,7 +44,7 @@ const {
 
 describe('ZkAsset', () => {
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 3500;
+    const prepopulateNotesCount = 13;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -55,7 +55,7 @@ describe('ZkAsset', () => {
 
     let account;
     let erc20Address;
-    let zkAssetAddress = '0x439505a6AA1A9927b7550182d0a63dcd849E0a32';
+    let zkAssetAddress = '0x3B9A9D8C3E179e2b1237873ef8841d734E465eB4';
     let outputNotes;
     let depositProof;
     let web3Service;
@@ -86,6 +86,7 @@ describe('ZkAsset', () => {
         } = await fetchNotes({
             fromBlock: 1,
             toBlock: 'latest',
+            fromAssets: [zkAssetAddress],
             networkId,
         });
 
@@ -147,7 +148,7 @@ describe('ZkAsset', () => {
             amount: depositAmount,
         });
 
-        const notesPerRequest = 8;
+        const notesPerRequest = 5;
         let createdNotes = eventsInGanache.length;
 
         await web3Service
@@ -212,7 +213,7 @@ describe('ZkAsset', () => {
                     depositSignatures,
                 );
 
-            createdNotes += (notesPerRequest + 1);
+            createdNotes += notesPerRequest;
 
             // eslint-disable-next-line radix
             log(`Progress prepopulation: ${parseInt(createdNotes * 100 / prepopulateNotesCount)} %`);
