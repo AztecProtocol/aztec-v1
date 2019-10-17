@@ -61,7 +61,6 @@ export default async function syncUserInfo(args, ctx) {
         EventService.startAutoSync({
             networkId,
         });
-
         NoteService.initWithUser(
             user.address,
             privateKey,

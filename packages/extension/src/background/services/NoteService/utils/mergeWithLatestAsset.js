@@ -10,15 +10,16 @@ export default async function mergeWithLatestAsset(
     prevAssetNoteDataMappinig,
     networkId,
 ) {
-    const ownerKey = await addressModel.keyOf({
-        address: userAddress,
-    });
+    // const ownerKey = await addressModel.keyOf({
+    //     address: userAddress,
+    // });
 
     const options = {
         filterOptions: {
             // owner: userAddress,
         },
     };
+    // console.log({ userAddress });
     const lastEntry = await Note.latest({ networkId }, options);
     // console.log({ lastEntry });
     if (!lastEntry) {
@@ -35,7 +36,7 @@ export default async function mergeWithLatestAsset(
         userAddress,
         linkedPrivateKey,
         assetId,
-        null,
+        lastEntry.noteHash,
         networkId,
     );
 
