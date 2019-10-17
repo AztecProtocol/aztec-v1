@@ -49,7 +49,8 @@ class NetworkSwitcher {
         const networkIdToUse = networkId || this.networkId;
         const config = this.networksConfigs[networkIdToUse];
         if (!config) {
-            errorLog(`No network config for such networkId: ${networkIdToUse}`);
+            const availableIds = Object.keys(this.networksConfigs);
+            errorLog(`No network config for such networkId: ${networkIdToUse}, pls select one of: ${JSON.stringify(availableIds)}`);
             return;
         }
         if (this.web3ServicesByNetworks[networkIdToUse]) {
