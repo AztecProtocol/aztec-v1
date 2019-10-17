@@ -23,7 +23,7 @@ function randomInt(from, to = null) {
     return start + Math.floor(Math.random() * (offset + 1));
 }
 
-contract.only('Extension', (accounts) => {
+contract('Extension', (accounts) => {
     const [user] = accounts;
     const totalBalance = 10000;
     let environment;
@@ -65,8 +65,10 @@ contract.only('Extension', (accounts) => {
         expect(erc20Balance).to.equal(totalBalance);
     });
 
-    it('should complete a deposit', async () => {
+    it.only('should complete a deposit', async () => {
         /// DEPOSIT
+        const homepage = Object.values(environment.openPages)
+            .find(p => p.aztecContext === true);
         const depositAmount = randomInt(1, 50);
         await homepage.api.evaluate(async (address, depositAmount, senderAddress, recipientAddress) => {
             try {
@@ -96,7 +98,7 @@ contract.only('Extension', (accounts) => {
         const bal = await newPage.api.evaluate(async (address) => await (await window.aztec.asset(address)).balance(), zkAsset.address);
     });
 
-    it('should complete a withdraw', async () => {
+    it.only('should complete a withdraw', async () => {
         /// WITHDRAW
         const withdrawAmount = randomInt(1, depositAmount);
         await newPage.api.evaluate(async (address, withdrawAmount, senderAddress, recipientAddress) => {
