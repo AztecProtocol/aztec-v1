@@ -63,7 +63,6 @@ async function init(extensionPath, {
     return environment;
 }
 
-
 module.exports = {
     init
 };
