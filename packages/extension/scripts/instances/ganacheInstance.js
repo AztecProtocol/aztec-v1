@@ -115,7 +115,7 @@ export default function ganacheInstance({
 
     let lastMethod;
     const handleReceiveOutput = (output) => {
-        if (!verbose && output.match(/^(\s){0,}[a-z]+_(.|\s)+$/)) {
+        if (!verbose) {
             lastMethod = output;
         } else {
             if (onReceiveOutput) {

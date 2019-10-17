@@ -29,6 +29,10 @@ contract.only('Extension', (accounts) => {
     let environment;
     let zkAsset;
     let erc20;
+    let depositAmount;
+    let homepage;
+    let newPage; // do a better thing
+
     before(async () => {
         const ace = await ACE.deployed();
         erc20 = await ERC20Mintable.new();
@@ -36,7 +40,7 @@ contract.only('Extension', (accounts) => {
         await zkAsset.setProofs(1, 17);
         await erc20.mint(user, totalBalance);
         await erc20.approve(ace.address, totalBalance);
-        environment = await Environment.init(extensionPath, { debug: true, observeTime: 0 });
+        environment = await Environment.init(extensionPath, { debug: false, observeTime: 0 });
     });
 
     after(async () => {
@@ -53,7 +57,7 @@ contract.only('Extension', (accounts) => {
     });
 
     it.only('should set an AZTEC asset', async () => {
-        const homepage = Object.values(environment.openPages)
+        homepage = Object.values(environment.openPages)
             .find(p => p.aztecContext === true);
 
         const asset = await homepage.api.evaluate(async (address) => await window.aztec.asset(address), zkAsset.address);
@@ -65,9 +69,9 @@ contract.only('Extension', (accounts) => {
         expect(erc20Balance).to.equal(totalBalance);
     });
 
-    it('should complete a deposit', async () => {
+    it.only('should complete a deposit', async () => {
         /// DEPOSIT
-        const depositAmount = randomInt(1, 50);
+        depositAmount = randomInt(1, 50);
         await homepage.api.evaluate(async (address, depositAmount, senderAddress, recipientAddress) => {
             try {
                 (await window.aztec.asset(address)).deposit([{
@@ -87,13 +91,14 @@ contract.only('Extension', (accounts) => {
         erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
         expect(erc20Balance).to.equal(totalBalance - depositAmount);
 
-        const newPage = await environment.openPage('https://www.aztecprotocol.com/');
+        newPage = await environment.openPage('https://www.aztecprotocol.com/');
         await newPage.api.waitFor(() => !!window.aztec);
 
         await newPage.initialiseAztec(true);
 
         await newPage.api.evaluate(async (address) => await window.aztec.asset(address), zkAsset.address);
         const bal = await newPage.api.evaluate(async (address) => await (await window.aztec.asset(address)).balance(), zkAsset.address);
+        expect(bal).to.equal(depositAmount);
     });
 
     it('should complete a withdraw', async () => {
