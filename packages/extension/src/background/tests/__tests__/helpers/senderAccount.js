@@ -17,7 +17,7 @@ export default async function senderAccount(sender) {
     const keyStorePayload = {
         password: '5d4hl6xv5r',
         salt: 'y29qm2',
-        seedPhrase: 'topple actress bread print concert trash print kidney gadget retreat text sunny',
+        seedPhrase: 'purity crush comic cheap horn claw subway sell awkward gym blast choose',
         hdPathString: "m/44'/60'/0'/0",
     };
 
