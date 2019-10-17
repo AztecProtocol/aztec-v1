@@ -36,3 +36,4 @@ packages/extension/src/background/contracts/AZTECAccountRegistry.json
 packages/extension/src/background/contracts/AZTECAccountRegistry.json
 packages/extension/src/background/contracts/IZkAsset.json
 packages/extension/src/background/contracts/ACE.json
+packages/extension/src/test/harness
