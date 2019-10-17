@@ -49,6 +49,29 @@ module.exports = {
                 if (environment.observeTime !== 0) await environment.wait(environment.observeTime);
                 await this.api.screenshot({ path });
             },
+            aztec: async function(address, amount) {
+                console.log(`asset address: ${address}, amount: ${amount}`);
+                await this.api.waitFor(() => {
+                    return window.aztec.aztec.asset(address).balance() === amount;
+                });
+                
+                
+                // return {
+                //     asset: function(address) {
+                //         console.log(`asset address: ${address}`)
+                //         return {
+                //             balance: async (amount) => {
+                //                 console.log(`balance desired: ${amount}`)
+
+                //                 await api.waitFor(async () => {
+                //                     console.log('treid to load balance')
+                //                     return await window.aztec.asset(address).balance() === amount
+                //                 });
+                //             }
+                //         }
+                //     },
+                // }
+            },
         };
         environment.openPages[data.id] = (data);
         if (environment.debug) await data.screenshot(`${Date.now()}-open.png`);
