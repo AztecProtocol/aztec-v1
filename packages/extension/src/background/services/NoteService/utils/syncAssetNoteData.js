@@ -34,7 +34,7 @@ export default async function syncAssetNoteData(
             asset: assetId,
             status: NOTE_STATUS.CREATED,
         })
-        .and(n => n.blockNumber >= lastSyncedBlock && n.noteHash !== lastSynced)
+        .and(n => n.blockNumber >= lastSyncedBlock)
         .each(({ noteHash, metadata: metadataStr }) => {
             const {
                 viewingKey: encryptedVkString,
