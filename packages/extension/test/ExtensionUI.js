@@ -32,7 +32,6 @@ contract.only('Extension', (accounts) => {
     let erc20Balance;
     let depositAmount;
     let homepage;
-    let newPage; // do a better thing
 
     before(async () => {
         const ace = await ACE.deployed();
@@ -73,25 +72,18 @@ contract.only('Extension', (accounts) => {
     it.only('should complete a deposit', async () => {
         /// DEPOSIT
         depositAmount = randomInt(1, 50);
-        const asset = await homepage.aztec.assets[zkAsset.address];
 
-        // don't await to not block thread
-        asset.eval('deposit', [{
-            amount: depositAmount,
-            to: user,
-        }], {
-            from: user,
-            sender: user,
-        });
+        await environment.completeDeposit(
+            zkAsset.address,
+            depositAmount,
+            user,
+            true
+        );
 
-        const depositPage = await environment.getPage(target => target.url().match(/deposit/));
-        await depositPage.clickMain();
-        await environment.metamask.approve();
-        const header = await depositPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
-        erc20Balance = await asset.eval('balanceOfLinkedToken');
+        erc20Balance = await homepage.aztec.assets[zkAsset.address].eval('balanceOfLinkedToken');
         expect(erc20Balance).to.equal(totalBalance - depositAmount);
 
-        newPage = await environment.openPage('https://www.aztecprotocol.com/');
+        const newPage = await environment.openPage('https://www.aztecprotocol.com/');
         await newPage.api.waitFor(() => !!window.aztec);
 
         await newPage.initialiseAztec(true);
@@ -109,22 +101,16 @@ contract.only('Extension', (accounts) => {
     it('should complete a withdraw', async () => {
         /// WITHDRAW
         const withdrawAmount = randomInt(1, depositAmount);
-        await newPage.api.evaluate(async (address, withdrawAmount, senderAddress, recipientAddress) => {
-            try {
-                (await window.aztec.asset(address)).withdraw(withdrawAmount, {
-                    sender: senderAddress,
-                    from: senderAddress,
-                    to: recipientAddress,
-                })
-            } catch (e) {}
-        }, zkAsset.address, withdrawAmount, user, user);
 
-        const withdrawPage = await environment.getPage(target => target.url().match(/withdraw/));
+        await environment.completeWithdraw(
+            zkAsset.address,
+            withdrawAmount,
+            user,
+            user,
+            true
+        );
 
-        await withdrawPage.clickMain();
-        await environment.metamask.approve();
-        await withdrawPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
-        erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
+        erc20Balance = await homepage.aztec.assets[zkAsset.address].eval('balanceOfLinkedToken');
         expect(erc20Balance).to.equal((totalBalance - depositAmount) + withdrawAmount);
     });
 
