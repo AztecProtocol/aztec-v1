@@ -86,8 +86,41 @@ async function completeWithdraw(assetAddress, withdrawAmount, sender, recipient,
     await withdrawPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
 }
 
+async function completeSend(assetAddress, sendAmount, sender, recipient, existingPage = false) {
+    const environment = this;
+    if (!environment.browser) {
+        throw new Error('Please initialise your environment first');
+    }
+
+    let homepage;
+    if (existingPage) {
+        homepage = await environment.getPage(target => target.url().match(/.*aztecprotocol\.com/));
+        await homepage.initialiseAztec();
+    } else {
+        homepage = await environment.openPage('https://www.aztecprotocol.com/');
+    }
+
+    const asset = await homepage.aztec.setAsset(assetAddress);
+
+    // don't await to not block thread
+    asset.eval('send', [{
+        amount: sendAmount,
+        to: recipient,
+    }], {
+        from: sender,
+        sender: sender,
+    });
+
+    const sendPage = await environment.getPage(target => target.url().match(/send/));
+
+    await sendPage.clickMain();
+    await environment.metamask.approve();
+    await withdrawPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
+}
+
 module.exports = {
     createAccount,
     completeDeposit,
     completeWithdraw,
+    completeSend,
 }

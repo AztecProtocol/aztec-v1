@@ -24,13 +24,14 @@ function randomInt(from, to = null) {
 }
 
 contract.only('Extension', (accounts) => {
-    const [user] = accounts;
+    const [user, secondUser] = accounts;
     const totalBalance = 10000;
     let environment;
     let zkAsset;
     let erc20;
     let erc20Balance;
     let depositAmount;
+    let withdrawAmount;
     let homepage;
 
     before(async () => {
@@ -88,19 +89,19 @@ contract.only('Extension', (accounts) => {
 
         await newPage.initialiseAztec(true);
 
-        const newAsset = await newPage.aztec.setAsset(zkAsset.address);
+        const asset = await newPage.aztec.setAsset(zkAsset.address);
 
         // not very pretty!
         await environment.wait(500);
         await newPage.aztec.initialise(true);
 
-        const bal = await newAsset.eval('balance');
+        const bal = await asset.eval('balance');
         expect(bal).to.equal(depositAmount);
     });
 
     it('should complete a withdraw', async () => {
         /// WITHDRAW
-        const withdrawAmount = randomInt(1, depositAmount);
+        withdrawAmount = randomInt(1, depositAmount);
 
         await environment.completeWithdraw(
             zkAsset.address,
@@ -114,7 +115,19 @@ contract.only('Extension', (accounts) => {
         expect(erc20Balance).to.equal((totalBalance - depositAmount) + withdrawAmount);
     });
 
-    it('should complete a send', async () => {
+    it.only('should complete a send', async () => {
+        const sendAmount = randomInt(1, depositAmount - withdrawAmount);
+        
+        await environment.completeSend(
+            zkAsset.address,
+            sendAmount,
+            user,
+            secondUser,
+            true
+        );
 
+        const asset = await newPage.aztec.setAsset(zkAsset.address);
+        const bal = await asset.eval('balance');
+        expect(bal).to.equal((depositAmount - withdrawAmount) - sendAmount);
     });
 });
