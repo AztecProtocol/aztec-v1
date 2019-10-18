@@ -44,7 +44,7 @@ const {
 
 describe('ZkAsset', () => {
     const providerUrl = 'ws://localhost:8545';
-    const prepopulateNotesCount = 14;
+    const prepopulateNotesCount = 4500;
     const eachNoteBalance = 1;
     const epoch = 1;
     const filter = 17;
@@ -61,7 +61,7 @@ describe('ZkAsset', () => {
     let web3Service;
 
     beforeAll(async () => {
-        zkAssetAddress = '0x0F94C9b79F3e411a5837Ff696320FEFCAd079126';
+        zkAssetAddress = '0x7BD50530d2527672Cc3E5EBaB2f9333547cacB8f';
 
         await set({
             __providerUrl: providerUrl,

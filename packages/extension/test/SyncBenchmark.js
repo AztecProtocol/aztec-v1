@@ -6,6 +6,9 @@ const chai = require('chai');
 const dotenv = require('dotenv');
 const path = require('path');
 const truffleAssert = require('truffle-assertions');
+const {
+    performance,
+} = require('perf_hooks');
 
 const Environment = require('./harness');
 
@@ -13,17 +16,10 @@ const extensionPath = path.resolve(__dirname + '/../client');
 
 dotenv.config();
 
-function randomInt(from, to = null) {
-    const start = to !== null ? from : 0;
-    const offset = to !== null ? to - from : from;
-    return start + Math.floor(Math.random() * (offset + 1));
-}
 
 contract.only('SyncBenchmark', (accounts) => {
-    const [user] = accounts;
-    const totalBalance = 10000;
-    const seedPhrease = 'topple actress bread print concert trash print kidney gadget retreat text sunny';
-    const assetAddress = '0xB09f84187B9aD0DB68C680df845291C0333F21bB';
+    const seedPhrease = 'warm pink purchase relax hollow swarm digital novel avocado pig toss satoshi';
+    const assetAddress = '0x7BD50530d2527672Cc3E5EBaB2f9333547cacB8f';
     const assetBalance = 10;
 
     let environment;
@@ -40,20 +36,33 @@ contract.only('SyncBenchmark', (accounts) => {
 
         const homepage = Object.values(environment.openPages)
             .find(p => p.aztecContext === true);
+        
+        const backgroundPageTarget = await environment.getExtensionBackground();
+        const bgPage = await backgroundPageTarget.page();
+        bgPage.on('console', msg => console.log(`New message in the console: ${msg.text()}`));
 
-        // some bug we need use `enable` twice after restoring
+        const tStart = performance.now();
+        let t0 = tStart;
+        let t1;
+
+        // some bug we need use `enable` twice after restoring (start syncing into indexedDB)
         await homepage.api.evaluate(async () => window.aztec.enable());
-
-        // wait until account will be fetched
-        // await environment.wait(1000);
-
         const balance = await homepage.api.evaluate(async address => (await window.aztec.asset(address)).balance(), assetAddress);
         expect(balance).to.equal(0);
+        await environment.newLog(bgPage, 'Finished pulling notes');
+        t1 = performance.now();
 
-        await homepage.api.waitFor(async address => (await window.aztec.asset(address)).balance() !== 0, assetAddress);
+        console.log(`Syncing notes with syncNotes took: ${((t1 - t0) / 1000)} seconds.`);
 
-        // const balanceAfter = await homepage.api.evaluate(async address => window.aztec.asset(address).balance(), assetAddress);
-        // console.log(`Balance: ${balanceAfter}`);
+        // some bug we need use `enable` once more
+        await homepage.api.evaluate(async () => window.aztec.enable());
+
+        t0 = performance.now();
+        const balanceAfter = await homepage.api.evaluate(async address => (await window.aztec.asset(address)).balance(), assetAddress);
+        console.log(`balanceAfter: ${balanceAfter}`);
+        t1 = performance.now();
+
+        console.log(`Syncing notes and decryption with NoteService took: ${((t1 - t0) / 1000)} seconds.`);
     });
 
     it.only('should sync an AZTEC asset', async () => {
