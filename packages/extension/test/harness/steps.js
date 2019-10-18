@@ -77,6 +77,15 @@ module.exports = {
         if (environment.debug) await data.screenshot(`${Date.now()}-open.png`);
         return data;
     },
+    newLog: async function(page, substring) {
+        await new Promise((resolve, reject) => {
+            page.on('console', msg => {
+                if (msg.text().includes(substring)) {
+                    resolve();
+                }
+            });
+        })
+    },
     getExtensionBackground: async function(extensionName) {
         const targets = await this.browser.targets();
 

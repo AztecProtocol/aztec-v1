@@ -273,7 +273,7 @@ class EventService {
                 lastSyncedBlock,
                 assets,
             } = result;
-            log(`Finished pulling (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
+            log(`Finished pulling notes (${lastSyncedBlock} from ${blocks} blocks) for assets: ${JSON.stringify(assets)}`);
 
             if (continueWatching) {
                 watcher.appendAssets({
@@ -293,7 +293,7 @@ class EventService {
             assets,
             lastSyncedBlock,
         }) => {
-            log(`Proggress changed (${lastSyncedBlock} from ${blocks} blocks) for pulling for assets: ${JSON.stringify(assets)}`);
+            //log(`Proggress changed (${lastSyncedBlock} from ${blocks} blocks) for pulling for assets: ${JSON.stringify(assets)}`);
         };
 
         const onFailurePulling = ({
