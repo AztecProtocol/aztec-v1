@@ -1,4 +1,5 @@
 const uuid = require('uuid');
+const Aztec = require('./apis/aztec');
 
 module.exports = {
     createPageObject: async function (page, metadata) {
@@ -7,6 +8,7 @@ module.exports = {
             id: uuid.v4(),
             api: page,
             aztecContext: false,
+            aztec: undefined,
             metadata,
             clickMain: async function(selector = "button") {
                 const main = await this.api.waitFor(selector);
@@ -29,19 +31,7 @@ module.exports = {
             },
             initialiseAztec: async function(wait = false) {
                 this.aztecContext = true;
-                await this.api.waitFor(() => !!window.aztec);
-                await this.api.evaluate(async (wait) => {
-                    try {
-                        if (wait) {
-                            return window.aztec.enable();
-                        } else {
-                            window.aztec.enable();
-                            return ;
-                        }
-                    } catch (e) {
-                        console.log(e);
-                    }
-                }, wait);
+                this.aztec = await Aztec(this, wait);
             },
             screenshot: async function(fileName) {
                 const name = fileName || `${Date.now()}.png`;

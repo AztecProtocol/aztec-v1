@@ -3,7 +3,7 @@ const path = require('path');
 
 const scenarios = require('./scenarios');
 const steps = require('./steps');
-const Metamask = require('./metamask');
+const Metamask = require('./apis/metamask');
 
 async function init(extensionPath, {
     metamaskPath = path.resolve(__dirname + '/metamask-extension/'),

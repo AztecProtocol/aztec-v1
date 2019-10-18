@@ -29,6 +29,7 @@ contract.only('Extension', (accounts) => {
     let environment;
     let zkAsset;
     let erc20;
+    let erc20Balance;
     let depositAmount;
     let homepage;
     let newPage; // do a better thing
@@ -60,35 +61,34 @@ contract.only('Extension', (accounts) => {
         homepage = Object.values(environment.openPages)
             .find(p => p.aztecContext === true);
 
-        const asset = await homepage.api.evaluate(async (address) => await window.aztec.asset(address), zkAsset.address);
-        expect(asset.address).to.equal(zkAsset.address);
+        const address = zkAsset.address;
+        const asset = await homepage.aztec.setAsset(address);
         expect(asset.linkedTokenAddress).to.equal(erc20.address);
-        const isValid = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).isValid(), zkAsset.address);
+        const isValid = await asset.eval('isValid');
         expect(isValid).to.equal(true);
-        let erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
+        erc20Balance = await asset.eval('balanceOfLinkedToken');
         expect(erc20Balance).to.equal(totalBalance);
     });
 
     it.only('should complete a deposit', async () => {
         /// DEPOSIT
         depositAmount = randomInt(1, 50);
-        await homepage.api.evaluate(async (address, depositAmount, senderAddress, recipientAddress) => {
-            try {
-                (await window.aztec.asset(address)).deposit([{
-                    amount: depositAmount,
-                    to: recipientAddress,
-                }], {
-                    from: senderAddress,
-                    sender: senderAddress,
-                })
-            } catch (e) {}
-        }, zkAsset.address, depositAmount, user, user);
+        const asset = await homepage.aztec.assets[zkAsset.address];
+
+        // don't await to not block thread
+        asset.eval('deposit', [{
+            amount: depositAmount,
+            to: user,
+        }], {
+            from: user,
+            sender: user,
+        });
 
         const depositPage = await environment.getPage(target => target.url().match(/deposit/));
         await depositPage.clickMain();
         await environment.metamask.approve();
         const header = await depositPage.api.waitForXPath("//div[contains(., 'Transaction completed!')]");
-        erc20Balance = await homepage.api.evaluate(async (address) => (await window.aztec.asset(address)).balanceOfLinkedToken(), zkAsset.address);
+        erc20Balance = await asset.eval('balanceOfLinkedToken');
         expect(erc20Balance).to.equal(totalBalance - depositAmount);
 
         newPage = await environment.openPage('https://www.aztecprotocol.com/');
@@ -96,8 +96,13 @@ contract.only('Extension', (accounts) => {
 
         await newPage.initialiseAztec(true);
 
-        await newPage.api.evaluate(async (address) => await window.aztec.asset(address), zkAsset.address);
-        const bal = await newPage.api.evaluate(async (address) => await (await window.aztec.asset(address)).balance(), zkAsset.address);
+        const newAsset = await newPage.aztec.setAsset(zkAsset.address);
+
+        // not very pretty!
+        await environment.wait(500);
+        await newPage.aztec.initialise(true);
+
+        const bal = await newAsset.eval('balance');
         expect(bal).to.equal(depositAmount);
     });
 
