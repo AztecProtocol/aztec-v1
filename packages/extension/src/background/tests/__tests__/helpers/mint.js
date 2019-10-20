@@ -8,7 +8,7 @@ export default async function mint({
         .useContract('ERC20Mintable')
         .at(erc20Address)
         .method('mint')
-        .send(
+        .sendSigned(
             owner,
             amount,
         );

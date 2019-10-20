@@ -36,13 +36,14 @@ const configureWeb3Networks = async () => {
     const {
         networkName: ganacheNetworkName,
     } = NETWORKS.GANACHE;
-    const ganacheNetworkConfig = {
+    const ganacheNetworkConfigs = providerUrlGanache ? [{
         title: ganacheNetworkName,
         networkId: ganacheNetworkId,
         providerUrl: providerUrlGanache,
-    };
+    }] : [];
+
     const configs = [
-        ...[ganacheNetworkConfig],
+        ...ganacheNetworkConfigs,
         ...infuraNetworksConfigs,
     ].map(config => ({
         ...config,

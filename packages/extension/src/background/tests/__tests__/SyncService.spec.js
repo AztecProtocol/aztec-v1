@@ -73,7 +73,7 @@ describe('ZkAsset', () => {
 
         await configureWeb3Networks();
         web3Service = await Web3Service({
-            sender,
+            account: sender,
             networkId,
         });
         const aceAddress = web3Service.contract('ACE').address;
@@ -140,14 +140,14 @@ describe('ZkAsset', () => {
         }
         web3Service.registerContract(ERC20Mintable, { address: erc20Address });
 
-        mint({
+        await mint({
             web3Service,
             erc20Address,
             owner: userAddress,
             amount: depositAmount,
         });
 
-        approve({
+        await approve({
             web3Service,
             erc20Address,
             aceAddress,

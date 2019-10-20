@@ -13,7 +13,7 @@ export default async function init() {
 
         await set({
             __providerUrl: 'ws://localhost:8545',
-            __infuraProjectId: '',
+            __infuraProjectId: process.env.INFURA_API_KEY,
         });
         await domainModel.set(
             {
