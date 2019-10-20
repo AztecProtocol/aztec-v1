@@ -197,8 +197,11 @@ class Web3Service {
         });
     }
 
-    triggerMethod = async (type, method, ...args) => {
-        const { address } = this.account;
+    triggerMethod = async (type, method, contractAddress, ...args) => {
+        const { 
+            address,
+            privateKey,
+        } = this.account;
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
             && !Array.isArray(args[args.length - 1])
@@ -211,8 +214,49 @@ class Web3Service {
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: address,
+                // gas: 6500000,
+                ...methodSetting,
+            });
+        }
+
+        if (type === 'sendSigned') {
+            if (!contractAddress) {
+                errorLog('contractAddress should be passed')
+                return;
+            }
+            const encodedData = method(...methodArgs).encodeABI();
+            const estimatedGas = await method(...methodArgs).estimateGas({
+                from: address,
                 gas: 6500000,
                 ...methodSetting,
+            })
+            const tx = {
+                to: contractAddress,
+                data: encodedData,
+                gas: estimatedGas,
+                gasPrice: 4000000000, // comment it to set gasPrice automatically
+                ...methodSetting,
+            }
+
+            const signedT = await this.web3.eth.accounts.signTransaction(tx, privateKey);
+
+            return new Promise(async (resolve, reject) => {
+                this.web3.eth.sendSignedTransaction(signedT.rawTransaction).on('receipt', ({ transactionHash }) => {                    
+                    const interval = setInterval(() => {
+                        this.web3.eth.getTransactionReceipt(transactionHash, (
+                            error,
+                            transactionReceipt,
+                        ) => {
+                            if (transactionReceipt) {
+                                clearInterval(interval);
+                                resolve(transactionReceipt);
+                            } else if (error) {
+                                clearInterval(interval);
+                                reject(new Error(error));
+                            }
+                        });
+                    }, 1000);
+                });
             });
         }
 
@@ -254,10 +298,12 @@ class Web3Service {
                 if (!method) {
                     throw new Error(`Method '${methodName}' is not defined in contract '${contractName}'.`);
                 }
-
+                
+                const address = contractAddress || contract.address;
                 return {
-                    call: async (...args) => this.triggerMethod('call', method, ...args),
-                    send: async (...args) => this.triggerMethod('send', method, ...args),
+                    call: async (...args) => this.triggerMethod('call', method, null, ...args),
+                    send: async (...args) => this.triggerMethod('send', method, null, ...args),
+                    sendSigned: async (...args) => this.triggerMethod('sendSigned', method, address, ...args),
                 };
             },
             events: (eventName) => {
