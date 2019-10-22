@@ -59,8 +59,6 @@ export default async function syncAssetNoteData(
             balance += value;
             currentSynced = noteHash;
         });
-    
-    console.log(`balance after decryption: ${balance}, networkId: ${networkId}`);
 
     return {
         balance,
