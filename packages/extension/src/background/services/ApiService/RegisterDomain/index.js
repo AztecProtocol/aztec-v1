@@ -7,6 +7,9 @@ const registerDomain = async (query, connection) => {
     if (!registeredDomain) {
         const {
             webClientId,
+            data: {
+                args,
+            },
         } = query;
         const senderPort = connection.connections[webClientId];
         if (!senderPort) {
@@ -32,7 +35,7 @@ const registerDomain = async (query, connection) => {
                         url,
                         ...query.data.metadata,
                     },
-                    ...query.args,
+                    ...args,
                 },
                 requestId: query.requestId,
             },

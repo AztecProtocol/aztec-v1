@@ -6,6 +6,9 @@ const registerExtensionUi = async (query, connection) => {
     const {
         account,
         requestId,
+        data: {
+            args,
+        },
     } = query;
 
     if (account && !account.registeredAt) {
@@ -15,6 +18,7 @@ const registerExtensionUi = async (query, connection) => {
             data: {
                 response: {
                     ...account,
+                    ...args,
                 },
                 requestId,
             },

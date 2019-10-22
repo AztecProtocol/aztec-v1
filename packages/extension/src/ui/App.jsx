@@ -116,11 +116,11 @@ class App extends PureComponent {
         if (!mock) {
             const {
                 data: {
-                    address,
+                    currentAddress
                 },
             } = action;
             currentAccount = {
-                address,
+                address: currentAddress,
             };
         } else if (mock) {
             this.setState({

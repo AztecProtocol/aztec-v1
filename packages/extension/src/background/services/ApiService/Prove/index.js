@@ -28,7 +28,6 @@ const proofUi = (query, connection) => async () => {
                 proofType,
                 ...rest
             },
-
         },
     } = query;
     connection.UiActionSubject.next({
@@ -37,7 +36,7 @@ const proofUi = (query, connection) => async () => {
         clientId: query.clientId,
         data: {
             response: {
-                ...rest,
+                rest,
                 requestId: query.requestId,
             },
         },
