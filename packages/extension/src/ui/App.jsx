@@ -114,10 +114,11 @@ class App extends PureComponent {
             mock,
         } = this.props;
         if (!mock) {
-            const web3Service = await Web3Service();
             const {
-                address,
-            } = web3Service.account;
+                data: {
+                    address,
+                },
+            } = action;
             currentAccount = {
                 address,
             };

@@ -5,17 +5,18 @@ import validateUserPermission from '../utils/validateUserPermision';
 const registerExtensionUi = async (query, connection) => {
     const {
         account,
+        requestId,
     } = query;
 
-    if (account && !account.registeredAtj) {
+    if (account && !account.registeredAt) {
         connection.UiActionSubject.next({
             type: 'ui.register.extension',
-            requestId: query.requestId,
+            requestId,
             data: {
                 response: {
                     ...account,
                 },
-                requestId: query.requestId,
+                requestId,
             },
         });
         const response = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
@@ -34,9 +35,16 @@ const registerExtension = async (query, connection) => {
     const {
         data: { args },
     } = query;
+    const {
+        networkId,
+        currentAddress,
+    } = args;
 
     // We set the network id here so everything runs correctly
-    await AuthService.setNetworkId(args.networkId);
+    await AuthService.setNetworkConfig({
+        networkId,
+        currentAddress,
+    });
 
     const response = await validateUserPermission({
         ...args,

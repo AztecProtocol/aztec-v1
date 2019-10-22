@@ -30,8 +30,12 @@ class NetworkSwitcher {
         });
     }
 
-    setNetworkId(networkId) {
+    setNetworkConfig({
+        networkId,
+        currentAddress,
+    }) {
         this.networkId = networkId;
+        this.currentAddress = currentAddress;
     }
 
     web3ServicesByNetworks = {};
@@ -68,16 +72,24 @@ class NetworkSwitcher {
         } else {
             provider = new Web3.providers.HttpProvider(providerUrl);
         }
+
         await service.init({
             provider,
-            account,
+            account: account || {
+                address: this.currentAddress,
+            },
         });
         for (let i = 0; i < contractsConfigs.length; i += 1) {
-            const contractConfig = contractsConfigs[i];
+            const {
+                config: contractConfig,
+                address: contractAddress,
+            } = contractsConfigs[i];
             if (contractConfig.bytecode === '0x') {
                 service.registerInterface(contractConfig);
             } else {
-                service.registerContract(contractConfig);
+                service.registerContract(contractConfig, {
+                    address: contractAddress,
+                });
             }
         }
         this.web3ServicesByNetworks[networkIdToUse] = service;

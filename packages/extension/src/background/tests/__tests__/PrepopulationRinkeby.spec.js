@@ -31,7 +31,7 @@ import {
 
 jest.mock('~utils/storage');
 
-jest.setTimeout(500000000);
+jest.setTimeout(900000000);
 
 const {
     JoinSplitProof,

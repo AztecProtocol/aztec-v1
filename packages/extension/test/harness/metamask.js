@@ -54,6 +54,17 @@ async function Metamask() {
             page = await this.find("initialize/end-of-flow");
             await page.clickMain('.btn-primary');
         },
+        addAccount: async function(privateKey) {
+            let extension = await this.open();
+            await extension.clickMain('.account-menu__icon');
+            let btn = await extension.api.waitForXPath(`//div[contains(@class, 'menu__item__text') and contains(//div, 'Import Account')]`);
+            await btn.click();
+
+            btn = await extension.api.waitForXPath(`//div[contains(@class, 'new-account__tabs__tab') and contains(., 'Import')]`);
+            await btn.click();
+            await page.typeMain(privateKey ,'#private-key-box');
+            await extension.clickMain('.btn-secondary');
+        },
     };
 
     const page = await self

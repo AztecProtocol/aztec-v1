@@ -60,7 +60,7 @@ class SyncManager {
 
         this.config = {
             ...this.config,
-            blocksPerRequest: blocksPerRequest + byCount,
+            blocksPerRequest: blocksPerRequest + parseInt(byCount, 10),
         };
     }
 
@@ -71,7 +71,7 @@ class SyncManager {
 
         this.config = {
             ...this.config,
-            blocksPerRequest: blocksPerRequest + byCount,
+            blocksPerRequest: blocksPerRequest + parseInt(byCount, 10),
         };
     }
 

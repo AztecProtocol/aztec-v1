@@ -16,15 +16,26 @@ const extensionPath = path.resolve(__dirname + '/../client');
 
 dotenv.config();
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 contract.only('SyncBenchmark', (accounts) => {
     const seedPhrease = 'warm pink purchase relax hollow swarm digital novel avocado pig toss satoshi';
     const assetAddress = '0x7BD50530d2527672Cc3E5EBaB2f9333547cacB8f';
+    const address = '0x3339C3c842732F4DAaCf12aed335661cf4eab66b';
+    const privateKey = '0xb8a23114e720d45005b608f8741639464a341c32c61920bf341b5cbddae7651d';
     const assetBalance = 10;
 
     let environment;
     before(async () => {
-        environment = await Environment.init(extensionPath, { debug: true, observeTime: 0 });
+        environment = await Environment.init(extensionPath, {
+            debug: true,
+            observeTime: 0,
+            network: 'Rinkeby',
+        });
+        await environment.metamask.addAccount(privateKey);
     });
 
     after(async () => {
@@ -63,6 +74,8 @@ contract.only('SyncBenchmark', (accounts) => {
         t1 = performance.now();
 
         console.log(`Syncing notes and decryption with NoteService took: ${((t1 - t0) / 1000)} seconds.`);
+
+        await sleep(5000000);
     });
 
     it.only('should sync an AZTEC asset', async () => {

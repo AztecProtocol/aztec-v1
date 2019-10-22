@@ -64,8 +64,11 @@ const AuthService = {
             address,
         };
     },
-    setNetworkId: async (networkId) => {
-        NetworkService.setNetworkId(networkId);
+    setNetworkConfig: async (config) => {
+        const {
+            networkId,
+        } = config;
+        NetworkService.setNetworkConfig(config);
         await set({
             networkId,
         });

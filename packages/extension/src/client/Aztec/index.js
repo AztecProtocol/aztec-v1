@@ -9,9 +9,14 @@ import {
     Subject,
     from,
 } from 'rxjs';
-import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
+import {
+    AZTECAccountRegistryConfig,
+    ACEConfig,
+    IZkAssetConfig,
+} from '~/config/contracts';
+
+
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
-import ACE from '../../../build/protocol/ACE';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import {
     actionEvent,
@@ -72,8 +77,17 @@ class Aztec {
         }
         await Web3Service.init();
 
-        Web3Service.registerContract(AZTECAccountRegistry, {
-            address: this.contractAddresses.aztecAccountRegistry,
+        const networkId = window.ethereum.networkVersion;
+        // console.log(`enabled with networkId: ${networkId}`);
+        const {
+            config: accountRegistryContract,
+            networks: accountRegistryNetworks,
+        } = AZTECAccountRegistryConfig;
+        const accountRegistryAddress = this.contractAddresses.aztecAccountRegistry
+            || accountRegistryNetworks[networkId];
+
+        Web3Service.registerContract(accountRegistryContract, {
+            address: accountRegistryAddress,
         });
 
         const {
@@ -81,7 +95,7 @@ class Aztec {
         } = await ensureExtensionInstalled();
 
         if (registerExtensionError) {
-            throw new Error(error);
+            throw new Error(registerExtensionError);
         }
 
         const {
@@ -90,8 +104,14 @@ class Aztec {
 
         this.enabled = true;
 
-        Web3Service.registerContract(ACE, {
-            address: this.contractAddresses.ace,
+        const {
+            config: aceContract,
+            networks: ACENetworks,
+        } = ACEConfig;
+        const aceAddress = this.contractAddresses.ace || ACENetworks[networkId];
+
+        Web3Service.registerContract(aceContract, {
+            address: aceAddress,
         });
         Web3Service.registerInterface(ERC20Mintable, {
             name: 'ERC20',

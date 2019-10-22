@@ -23,7 +23,7 @@ function randomInt(from, to = null) {
     return start + Math.floor(Math.random() * (offset + 1));
 }
 
-contract('Extension', (accounts) => {
+contract.skip('Extension', (accounts) => {
     const [user] = accounts;
     const totalBalance = 10000;
     let environment;
