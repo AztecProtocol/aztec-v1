@@ -22,7 +22,6 @@ export const NOTE_STATUS = {
 
 export const NETWORKS = {
     GANACHE: {
-        id: 0,
         networkName: 'ganache',
     },
     MAIN: {

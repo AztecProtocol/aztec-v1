@@ -14,22 +14,29 @@ import {
 import NetworkService from '~helpers/NetworkService/factory';
 import getGanacheNetworkId from '~utils/getGanacheNetworkId';
 
+const contractsForNetwork = (networkId) => {
+    const contractsConfigs = [
+        AZTECAccountRegistryConfig,
+        ACEConfig,
+        IZkAssetConfig,
+    ];
+
+    return contractsConfigs.map(contractConfig => ({
+        config: contractConfig.config,
+        address: contractConfig.networks[networkId],
+    }));
+};
+
 const configureWeb3Networks = async () => {
     const providerUrlGanache = await get('__providerUrl');
     const infuraProjectId = await get('__infuraProjectId');
 
-    const contractsConfigs = [
-        AZTECAccountRegistryConfig.config,
-        ACEConfig.config,
-        IZkAssetConfig.config,
-    ];
-
     const infuraNetworksConfigs = [
-        NETWORKS.MAIN,
-        NETWORKS.ROPSTEN,
         NETWORKS.RINKEBY,
-        NETWORKS.GOERLI,
-        NETWORKS.KOVAN,
+        NETWORKS.MAIN,
+        // NETWORKS.ROPSTEN,
+        // NETWORKS.GOERLI,
+        // NETWORKS.KOVAN,
     ].map(networkName => Provider.infuraConfig(networkName, infuraProjectId));
 
     const ganacheNetworkId = getGanacheNetworkId();
@@ -47,7 +54,7 @@ const configureWeb3Networks = async () => {
         ...infuraNetworksConfigs,
     ].map(config => ({
         ...config,
-        contractsConfigs,
+        contractsConfigs: contractsForNetwork(config.networkId),
     }));
 
     NetworkService.setConfigs(configs);

@@ -5,7 +5,7 @@ class NotesSyncManagerFactory {
     managersByNetworks = {};
 
     config = {
-        blocksPerRequest: 100, // ~ per 3 months (~6000 per day)
+        blocksPerRequest: 5307319, // ~ per 3 months (~6000 per day)
         precisionDelta: 10, //
         networkId: null,
     };

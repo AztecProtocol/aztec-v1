@@ -214,7 +214,7 @@ class Web3Service {
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: address,
-                // gas: 6500000,
+                gas: 6500000,
                 ...methodSetting,
             });
         }

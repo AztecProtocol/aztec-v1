@@ -85,7 +85,7 @@ contract AZTECAccountRegistry is LibEIP712 {
         );
         require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
-        // emit event for the graph
+        // emit event EventService
         emit RegisterExtension(_account, _linkedPublicKey, _spendingPublicKey);
     }
 

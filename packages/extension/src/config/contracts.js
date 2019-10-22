@@ -9,6 +9,9 @@ export const AZTECAccountRegistryConfig = {
         registerExtension: 'RegisterExtension',
     },
     config: AZTECAccountRegistryContract,
+    networks: {
+        4: '0xa09a9a1C9aaF3F5591533a335aFcb310436828B5',
+    },
 };
 
 export const ACEConfig = {
@@ -17,6 +20,9 @@ export const ACEConfig = {
         сreateNoteRegistry: 'CreateNoteRegistry',
     },
     config: ACE,
+    networks: {
+        4: '0xA3D1E4e451AB20EA33Dc0790b78fb666d66A650D',
+    },
 };
 
 export const IZkAssetConfig = {
@@ -27,4 +33,5 @@ export const IZkAssetConfig = {
         destroyNote: 'DestroyNote',
     },
     config: IZkAsset,
+    networks: {},
 };
