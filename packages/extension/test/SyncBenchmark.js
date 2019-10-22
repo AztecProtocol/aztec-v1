@@ -23,7 +23,7 @@ function sleep(ms) {
 
 contract.only('SyncBenchmark', (accounts) => {
     const seedPhrease = 'warm pink purchase relax hollow swarm digital novel avocado pig toss satoshi';
-    const assetAddress = '0x7BD50530d2527672Cc3E5EBaB2f9333547cacB8f';
+    const assetAddress = '0xae5fEB559F4486730333cabFaa407A9e10c0E874';
     const address = '0x3339C3c842732F4DAaCf12aed335661cf4eab66b';
     const privateKey = '0xb8a23114e720d45005b608f8741639464a341c32c61920bf341b5cbddae7651d';
     const assetBalance = 10;
