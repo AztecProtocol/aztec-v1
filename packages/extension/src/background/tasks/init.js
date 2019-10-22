@@ -12,7 +12,7 @@ export default async function init() {
         // chrome.storage.local.clear();
 
         await set({
-            __providerUrl: 'https://rinkeby.infura.io/v3/09c4eed231c840d5ace14ba5389a1a7c',
+            __providerUrl: 'ws://localhost:8545',
             __infuraProjectId: '09c4eed231c840d5ace14ba5389a1a7c',
         });
 
