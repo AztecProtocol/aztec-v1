@@ -11,7 +11,8 @@ import {
 
 /* See more details about limitation
  * https://infura.io/docs/ethereum/json-rpc/eth_getLogs
-*/
+ */
+
 const infuraLimitError = {
     code: -32005,
     message: 'query returned more than 10000 results',
