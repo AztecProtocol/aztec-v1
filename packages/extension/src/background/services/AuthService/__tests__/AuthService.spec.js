@@ -242,7 +242,7 @@ describe('AuthService setters', () => {
             address,
         } = userAccount2;
 
-        expect(address).not.toBe(registrationData.address);
+        expect(address).not.toBe(userAccount.address);
 
         await AuthService.login({
             password,

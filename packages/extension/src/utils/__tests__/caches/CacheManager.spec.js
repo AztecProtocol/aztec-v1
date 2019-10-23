@@ -9,14 +9,14 @@ describe('CacheManager', () => {
     });
 
     it('add items to queue without exceeding capacity', () => {
-        expect(manager.priorityQueue.length).toBe(0);
+        expect(manager.priorityQueue.size).toBe(0);
         expect(manager.isFull()).toBe(false);
         expect(manager.cache).toEqual({});
 
         manager.add('a', 1);
         manager.add('b', 2);
         manager.add('c', 3);
-        expect(manager.priorityQueue.length).toBe(3);
+        expect(manager.priorityQueue.size).toBe(3);
         expect(manager.isFull()).toBe(true);
         expect(manager.cache).toEqual({
             a: 1,
@@ -28,7 +28,7 @@ describe('CacheManager', () => {
         expect(manager.get('c')).toBe(3);
 
         manager.add('d', 4);
-        expect(manager.priorityQueue.length).toBe(3);
+        expect(manager.priorityQueue.size).toBe(3);
         expect(manager.cache).toEqual({
             b: 2,
             c: 3,
@@ -39,7 +39,7 @@ describe('CacheManager', () => {
         expect(manager.get('d')).toBe(4);
 
         manager.add('b', 0);
-        expect(manager.priorityQueue.length).toBe(3);
+        expect(manager.priorityQueue.size).toBe(3);
         expect(manager.cache).toEqual({
             b: 0,
             c: 3,
@@ -51,65 +51,65 @@ describe('CacheManager', () => {
     it('add undefined value will remove the key', () => {
         manager.add('a', 1);
         manager.add('b', 2);
-        expect(manager.priorityQueue.length).toBe(2);
+        expect(manager.priorityQueue.size).toBe(2);
         expect(manager.cache).toEqual({
             a: 1,
             b: 2,
         });
 
         manager.add('a', undefined);
-        expect(manager.priorityQueue.length).toBe(1);
+        expect(manager.priorityQueue.size).toBe(1);
         expect(manager.cache).toEqual({
             b: 2,
         });
     });
 
     it('allow to remove items from queue', () => {
-        expect(manager.priorityQueue).toEqual([]);
+        expect(manager.priorityQueue.size).toEqual(0);
         expect(manager.cache).toEqual({});
 
         manager.add('a', 1);
         manager.add('b', 2);
-        expect(manager.priorityQueue.length).toBe(2);
+        expect(manager.priorityQueue.size).toBe(2);
         expect(manager.cache).toEqual({
             a: 1,
             b: 2,
         });
 
         expect(manager.remove('a')).toBe(1);
-        expect(manager.priorityQueue.length).toBe(1);
+        expect(manager.priorityQueue.size).toBe(1);
         expect(manager.cache).toEqual({
             b: 2,
         });
 
         expect(manager.remove('a')).toBe(undefined);
-        expect(manager.priorityQueue.length).toBe(1);
+        expect(manager.priorityQueue.size).toBe(1);
         expect(manager.cache).toEqual({
             b: 2,
         });
 
         expect(manager.remove('b')).toBe(2);
-        expect(manager.priorityQueue.length).toBe(0);
+        expect(manager.priorityQueue.size).toBe(0);
         expect(manager.cache).toEqual({});
 
         expect(manager.remove('a')).toBe(undefined);
-        expect(manager.priorityQueue.length).toBe(0);
+        expect(manager.priorityQueue.size).toBe(0);
         expect(manager.cache).toEqual({});
     });
 
     it('increase priority of an item', () => {
         manager.add('a', 1);
         manager.add('b', 2);
-        expect(manager.priorityQueue).toEqual(['a', 'b']);
+        expect(manager.priorityQueue.export()).toEqual(['b', 'a']);
 
         manager.increasePriority('a');
-        expect(manager.priorityQueue).toEqual(['b', 'a']);
+        expect(manager.priorityQueue.export()).toEqual(['a', 'b']);
 
         manager.add('c', 3);
-        expect(manager.priorityQueue).toEqual(['b', 'a', 'c']);
+        expect(manager.priorityQueue.export()).toEqual(['c', 'a', 'b']);
 
         manager.increasePriority('a');
-        expect(manager.priorityQueue).toEqual(['b', 'c', 'a']);
+        expect(manager.priorityQueue.export()).toEqual(['a', 'c', 'b']);
     });
 
     it('has method getTop to return the key with the higest priority', () => {
@@ -148,10 +148,10 @@ describe('CacheManager', () => {
         manager.add('c', 3);
         expect(manager.getTop()).toBe('c');
 
-        manager.highestPriority('a');
+        manager.moveToTop('a');
         expect(manager.getTop()).toBe('a');
 
-        manager.highestPriority('c');
+        manager.moveToTop('c');
         expect(manager.getTop()).toBe('c');
     });
 });

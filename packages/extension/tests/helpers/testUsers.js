@@ -1,37 +1,76 @@
-import {
-    KeyStore,
-} from '~utils/keyvault';
-
 export const userAccount = {
-    address: '0x7759aecfeea21244bd603009c133c8ee9fb59e29',
-    linkedPublicKey: '0x0abbf57bcdc738fac31294140f6959500465827236c5b69252247c534e4a001b',
-    linkedPrivateKey: 'bce9ac92da072db6bd5336547bb6b77f8c7e0502d468013d41235c34d7185653',
-    spendingPublicKey: '0x02f587a64247349e4f388f51175fbcd4d6daad9d967d9e646ff708f400e9a39a5d',
+    address: '0xfB95acC8D3870da3C646Ae8c3C621916De8DF42d',
+    linkedPublicKey: '0xa61d17b0dd3095664d264628a6b947721314b6999aa6a73d3c7698f041f78a4d',
+    linkedPrivateKey: 'e1ec35b90155a633ac75d0508e537a7e00fd908a5295365054001a44b4a0560c',
+    spendingPublicKey: '0x0290e0354caa04c73920339f979cfc932dd3d52ba8210fec34571bb6422930c396',
 };
 
 export const userAccount2 = {
-    address: '0x27b60ccecad263fd6ba595c68ad0e4c968ad9c67',
-    linkedPublicKey: '0xe0eeeb03914dad6dcd2384f4d14fdbbc1a538954f156a55cb8a04a6bd72b4148',
-    linkedPrivateKey: '28c7771738a58d5f6628471f96d430281033e981ccd3590362fe7db361fe3ece',
-    spendingPublicKey: '0x0359d8321e50133ce30f805519b728018ae180db0376de2f210c5570975c642bdb',
+    address: '0x61EeAd169ec67b24abee7B81Ca750b6dCA3a9CCd',
+    linkedPublicKey: '0x058d55269a83b5ea379931ac58bc3def375eab12e527708111545af46f5f9b5c',
+    linkedPrivateKey: '6a30cc7b28b037b47378522a1a370c2394b0dd2d70c6abbe5ac66c8a1d84db21',
+    spendingPublicKey: '0x02090a6b89b0588626f26babc87f2dc1e2c815b8248754bed93d837f7071411605',
 };
 
-const pwDerivedKeyStr = '{"0":35,"1":96,"2":127,"3":54,"4":16,"5":250,"6":37,"7":142,"8":252,"9":144,"10":88,"11":25,"12":144,"13":230,"14":29,"15":110,"16":162,"17":79,"18":226,"19":20,"20":67,"21":44,"22":246,"23":5,"24":145,"25":161,"26":144,"27":73,"28":152,"29":98,"30":48,"31":48}';
+export const registrationData = {
+    keyStore: {
+        salt: '2j363t',
+        hdPathString: 'm/44\'/60\'/0\'/0',
+        encSeed: {
+            encStr: 'O5zY4bwug1FuDdXFooOLgRNO5YoDFKhV4kWfDuWQrAUXIW65EDtmaCAmPSiSoSpnfPGheL6e3tyVdXA+uvZJuJWdDQ6az2OPIrJXmjCHZWcVDQzkvmpH7CvQ+PrucfbwdAzeAERocKR/GAWtrUpXbS2l2Ustq7OodK/9zK/Oz1SByt6QIHJvjg==',
+            nonce: 'rqXuJCcvFfP07MDUk5v3sjtA7hQOk67n',
+        },
+        encHdRootPriv: {
+            encStr: 'VAw+Bh38syXEsDx/J7ZjZ9bi7A5d2cD/r1VSF4xfTwHOSRHeR2nDkOrnApy1q2MVZvh4BTbKrC7zRwu8Q6Ek1zZ5grCe9v30ruhLKYmheGlETmfCJBBussuI1pjzKLYzaj8Q4Hu1hcqsSg3k1ssGkGqyRP25W1IMHnhQ9G3RWw==',
+            nonce: 'QoOtC2VAXcWSecOpdO7/Eaaxs0SQvQrt',
+        },
+        hdIndex: 1,
+        privacyKeys: {
+            publicKey: '0xa61d17b0dd3095664d264628a6b947721314b6999aa6a73d3c7698f041f78a4d',
+            encPrivKey: {
+                encStr: 'btFoyZu6ERG0fiAnbnuoHX2QYAjAJplOeg3Aq/hTJDAA70Cc8i/q6VfpTnnmOMKPJ3hkE4Zn7jkp8Hd4tbnj7pa/1inanMkIgf+xF3ReD4E=',
+                nonce: 'vtfBV0aT+tAYnZllHUS25Ukejh+mJiec',
+            },
+        },
+    },
+    pwDerivedKey: {
+        0: 21,
+        1: 226,
+        2: 28,
+        3: 149,
+        4: 191,
+        5: 15,
+        6: 237,
+        7: 208,
+        8: 177,
+        9: 210,
+        10: 69,
+        11: 239,
+        12: 96,
+        13: 52,
+        14: 22,
+        15: 178,
+        16: 104,
+        17: 217,
+        18: 228,
+        19: 116,
+        20: 113,
+        21: 232,
+        22: 70,
+        23: 218,
+        24: 51,
+        25: 255,
+        26: 0,
+        27: 238,
+        28: 218,
+        29: 26,
+        30: 186,
+        31: 208,
+    },
+};
+
+const pwDerivedKeyStr = '{"0":21,"1":226,"2":28,"3":149,"4":191,"5":15,"6":237,"7":208,"8":177,"9":210,"10":69,"11":239,"12":96,"13":52,"14":22,"15":178,"16":104,"17":217,"18":228,"19":116,"20":113,"21":232,"22":70,"23":218,"24":51,"25":255,"26":0,"27":238,"28":218,"29":26,"30":186,"31":208}';
 
 export const pwDerivedKey = new Uint8Array(Object.values(JSON.parse(pwDerivedKeyStr)));
 
-export const password = '5d4hl6xv5r';
-const seedPhrase = 'long dragon example coconut sound yard patient cool ski organ cigar myth';
-const salt = 'y29qm2';
-
-const keyStore = new KeyStore({
-    pwDerivedKey,
-    salt,
-    mnemonic: seedPhrase,
-    hdPathString: "m/44'/60'/0'/0",
-});
-
-export const registrationData = {
-    pwDerivedKey,
-    keyStore,
-};
+export const password = '5s1l4b1w5z';

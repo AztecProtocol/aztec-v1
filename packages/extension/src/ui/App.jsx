@@ -116,7 +116,7 @@ class App extends PureComponent {
         if (!mock) {
             const {
                 data: {
-                    currentAddress
+                    currentAddress,
                 },
             } = action;
             currentAccount = {

@@ -5,6 +5,7 @@ export default {
     address: 'd:{count}',
     asset: 'a:{count}',
     assetValue: '{assetKey}v:{value}',
-    userAssets: 'ua:{user}',
-    userAssetNotes: '{user}:{asset}',
+    userAssets: '{user}:{network}',
+    userAssetNotes: '{asset}:{user}:{network}',
+    userAssetPriority: 'ap:{user}:{network}',
 };

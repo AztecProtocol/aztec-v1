@@ -20,7 +20,8 @@ export default gql`
         notes {
             value
             decryptedViewingKey
-            hash
+            noteHash
+            metadata
             status
         }
         error {

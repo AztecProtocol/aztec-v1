@@ -1,5 +1,8 @@
 import aztec from 'aztec.js';
 import {
+    METADATA_AZTEC_DATA_LENGTH,
+} from '~config/constants';
+import {
     errorLog,
 } from '~utils/log';
 import {
@@ -91,10 +94,18 @@ export default async function createNoteFromBalance({
     try {
         inputNotes = await asyncMap(
             notes,
-            async ({ decryptedViewingKey }) => fromViewingKey(
+            async ({
                 decryptedViewingKey,
-                inputNotesOwner.address,
-            ),
+                metadata,
+            }) => {
+                const note = await fromViewingKey(
+                    decryptedViewingKey,
+                    inputNotesOwner.address,
+                );
+                const customData = metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2);
+                note.setMetaData(`0x${customData}`);
+                return note;
+            },
         );
     } catch {
         throw new ApiError('note.viewingKey.recover', {

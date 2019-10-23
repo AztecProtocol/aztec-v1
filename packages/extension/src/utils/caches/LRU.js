@@ -7,13 +7,13 @@ export default class LRUCache {
 
     add(key, value) {
         this.cache.add(key, value);
-        this.cache.highestPriority(key);
+        this.cache.moveToTop(key);
     }
 
     get(key) {
         const value = this.cache.get(key);
         if (value !== undefined) {
-            this.cache.highestPriority(key);
+            this.cache.moveToTop(key);
         }
         return value;
     }

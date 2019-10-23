@@ -14,14 +14,15 @@ import metadata from '~utils/metadata';
 import {
     createNote,
     valueOf,
+    valueFromViewingKey,
 } from '../note';
 
-describe('createNote', () => {
-    const {
-        spendingPublicKey,
-        address: ownerAddress,
-    } = userAccount;
+const {
+    spendingPublicKey,
+    address: ownerAddress,
+} = userAccount;
 
+describe('createNote', () => {
     const metadataLenDiff = METADATA_AZTEC_DATA_LENGTH - AZTEC_JS_METADATA_PREFIX_LENGTH;
 
     it('create an aztec note with spendingPublicKey', async () => {
@@ -98,12 +99,20 @@ describe('createNote', () => {
         const warnSpy = jest.spyOn(console, 'warn')
             .mockImplementation(msg => warnings.push(msg));
 
-        const note = await createNote(10, spendingPublicKey);
+        await createNote(10, spendingPublicKey);
 
-        expect(note.owner).not.toBe(ownerAddress);
         expect(warnings.length).toBe(1);
         expect(warnings[0]).toMatch(/owner address/i);
 
         warnSpy.mockRestore();
+    });
+});
+
+describe('valueFromViewingKey', () => {
+    it('get value of a note from real viewing key', async () => {
+        const noteValue = randomInt(100);
+        const note = await createNote(noteValue, spendingPublicKey, ownerAddress);
+        const viewingKey = note.getView();
+        expect(valueFromViewingKey(viewingKey)).toBe(noteValue);
     });
 });

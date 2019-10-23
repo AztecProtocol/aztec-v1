@@ -10,7 +10,7 @@ const formatObject = (obj) => {
     let lines = [];
     switch (typeof obj) {
         case 'string':
-            lines.push(`'${obj}'`);
+            lines.push(`'${obj.replace(/'/g, "\\'")}'`);
             break;
         case 'number':
         case 'boolean':
