@@ -1,7 +1,9 @@
-import browser from 'webextension-polyfill';
 import {
     warnLog,
 } from '~utils/log';
+import {
+    clientEvent,
+} from '~config/event';
 import {
     randomId,
 } from '~utils/random';
@@ -18,14 +20,24 @@ class ConnectionManager {
         this.clientRequestId = '';
     }
 
-    openConnection() {
+    async openConnection(source) {
         if (this.port) {
             warnLog('Connection has been established.');
             return;
         }
         this.portId = randomId();
-        this.port = browser.runtime.connect({ name: this.portId });
-        this.port.onMessage.addListener(this.handlePortResponse);
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'aztec-connection') {
+                this.port = e.ports[0];
+                this.port.onmessage = this.handlePortResponse;
+            }
+        });
+        window.opener.postMessage({
+            type: 'aztec-connection',
+            requestId: randomId(),
+            clientId: this.portId,
+            sender: 'UI_CLIENT',
+        });
     }
 
     setDefaultClientRequestId(clientRequestId) {
@@ -35,14 +47,14 @@ class ConnectionManager {
         this.clientRequestId = clientRequestId;
     }
 
-    handlePortResponse = (response) => {
+    handlePortResponse = ({ data }) => {
         const {
             requestId,
             responseId,
             data: {
                 response: returnData,
             } = {},
-        } = response;
+        } = data;
         const id = responseId || requestId;
         const callbacks = this.callbacks[id];
         if (callbacks) {
@@ -70,13 +82,16 @@ class ConnectionManager {
             requestId,
             responseId,
             clientRequestId,
+            clientId: this.portId,
             data,
         });
         this.port.postMessage({
             type,
             requestId,
             responseId,
+            clientId: this.portId,
             data,
+            sender: 'UI_CLIENT',
         });
 
         return new Promise(resolve => this.registerResponse(

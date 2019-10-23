@@ -7,4 +7,12 @@ export default function enableApi() {
     const s = document.createElement('script');
     s.src = browser.runtime.getURL('./build/bundle.client.js');
     document.body.appendChild(s);
+    const d = document.createElement('iframe');
+
+    d.src = browser.runtime.getURL('./pages/iframe.html');
+    d.style.display = 'none';
+    d.id = 'AZTECSDK';
+    d.height = 0;
+    d.width = 0;
+    document.body.appendChild(d);
 }

@@ -10,7 +10,7 @@ import ConnectionManager from './helpers/ConnectionManager';
 const manager = new ConnectionManager();
 
 export default {
-    openConnection: () => manager.openConnection(),
+    openConnection: source => manager.openConnection(source),
     setDefaultClientRequestId: id => manager.setDefaultClientRequestId(id),
     post: async ({
         clientRequestId = '',

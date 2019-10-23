@@ -27,6 +27,7 @@ import ClientActionService from '../services/ClientActionService';
 import TransactionSendingService from '../services/TransactionSendingService';
 import GraphQLService from '../services/GraphQLService';
 
+
 class Connection {
     constructor() {
         this.MessageSubject = new Subject();
@@ -80,7 +81,7 @@ class Connection {
                 const {
                     timestamp,
                 } = action;
-                return openPopup({ timestamp });
+                openPopup({ timestamp });
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
@@ -130,7 +131,6 @@ class Connection {
                 uiClientId,
                 requestId,
                 response,
-                ...rest
             }) => {
                 this.connections[uiClientId].postMessage({
                     requestId,
@@ -167,42 +167,51 @@ class Connection {
     withConnectionIds = ({
         requestId,
         senderId,
-        extension,
         data,
+        sender,
         ...rest
     }) => {
-        const {
-            uiClientId,
-            webClientId,
-        } = this.requests[requestId] || {};
+        if (!this.requests[requestId]) {
+            this.requests[requestId] = {};
+        }
 
-        this.requests[requestId] = {
-            uiClientId: extension ? senderId : uiClientId,
-            webClientId: !extension ? senderId : webClientId,
-        };
+        if (sender === 'UI_CLIENT') {
+            this.requests[requestId].uiClientId = senderId;
+        } else if (sender === 'WEB_CLIENT') {
+            this.requests[requestId].webClientId = senderId;
+        }
 
-        // TODO clear these out when the request is finished or after a timeout
 
         return {
             data,
             requestId,
+            origin,
+            sender,
             ...rest,
             ...this.requests[requestId],
         };
     }
 
-    registerClient = (client) => {
-        this.connections[client.name] = client;
-        client.onMessage.addListener(({
-            requestId,
-            ...data
-        }, sender) => {
-            this.MessageSubject.next({
-                data,
-                senderId: client.name,
-                requestId,
-                sender: sender.sender,
-            });
+    registerClient = ({
+        port,
+        data,
+        origin,
+    }) => {
+        this.connections[data.clientId] = port;
+        this.connections[data.clientId].onmessage = this.onMessage;
+    }
+
+    onMessage = ({
+        origin,
+        source,
+        data,
+    }) => {
+        this.MessageSubject.next({
+            data,
+            senderId: data.clientId,
+            requestId: data.requestId,
+            origin: data.domain || origin,
+            sender: data.sender,
         });
     }
 

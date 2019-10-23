@@ -1,23 +1,13 @@
-import browser from 'webextension-polyfill';
-import {
-    errorLog,
-} from '~utils/log';
-
-export default function get(keys, {
-    sync = false,
-} = {}) {
-    return new Promise((resolve, reject) => {
-        browser.storage[sync ? 'sync' : 'local']
-            .get(keys)
-            .then((values) => {
-                const result = values && typeof keys === 'string'
-                    ? values[keys]
-                    : values;
-                resolve(result);
-            })
-            .catch((error) => {
-                errorLog(error);
-                reject();
-            });
+export default function get(keys) {
+    if (typeof keys === 'string') {
+        const value = localStorage.getItem(keys);
+        return value ? JSON.parse(value) : null;
+    }
+    return new Promise((resolve) => {
+        resolve(keys.reduce((obj, str) => {
+            const value = localStorage.getItem(str);
+            obj[str] = value ? JSON.parse(value) : null;
+            return obj;
+        }, {}));
     });
 }

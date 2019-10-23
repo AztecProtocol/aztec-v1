@@ -31,10 +31,11 @@ export default async function init() {
                     __sync: 0,
                 });
                 console.log('--- database idle ---');
-                chrome.storage.local.getBytesInUse(null, (bytes) => {
-                    console.log('getBytesInUse', bytes);
-                });
-                chrome.storage.local.get(null, data => console.info(data));
+                console.log(localStorage);
+                // chrome.storage.local.getBytesInUse(null, (bytes) => {
+                //     console.log('getBytesInUse', bytes);
+                // });
+                // chrome.storage.local.get(null, data => console.info(data));
             },
             {
                 persistent: true,

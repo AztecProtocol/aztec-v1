@@ -48,7 +48,7 @@ class App extends PureComponent {
         const {
             mock,
         } = this.props;
-        ConnectionService.openConnection();
+        await ConnectionService.openConnection(window);
         if (!mock) {
             await configureWeb3Networks();
         }
@@ -90,6 +90,7 @@ class App extends PureComponent {
     async loadInitialStates() {
         const search = new URLSearchParams(window.location.search);
         const actionId = search.get('id');
+        console.log({ search, actionId });
         const openByUser = !actionId;
 
         let route;
@@ -108,6 +109,7 @@ class App extends PureComponent {
                 } = actions[type] || {});
             }
         }
+        console.log({ action });
 
         let currentAccount;
         const {

@@ -8,9 +8,7 @@ export default async ({ data }) => {
     let eip712Data;
     let method;
     const {
-        response: {
-            action,
-        },
+        action,
     } = data;
     const { address } = Web3Service.account;
     switch (action) {
@@ -22,6 +20,7 @@ export default async ({ data }) => {
                 params: [address, eip712Data],
                 from: address,
             });
+
             const publicKey = ethSigUtil.extractPublicKey({
                 data: eip712Data,
                 sig: result,
@@ -40,11 +39,9 @@ export default async ({ data }) => {
             // TODO the wallet contract or any contract will be responsible for this
             const {
                 response: {
-                    response: {
-                        assetAddress,
-                        amount,
-                        proofHash,
-                    },
+                    assetAddress,
+                    amount,
+                    proofHash,
                 },
             } = data;
 
@@ -66,12 +63,10 @@ export default async ({ data }) => {
         case 'metamask.eip712.signNotes': {
             const {
                 response: {
-                    response: {
-                        assetAddress,
-                        noteHashes,
-                        challenge,
-                        sender,
-                    },
+                    assetAddress,
+                    noteHashes,
+                    challenge,
+                    sender,
                 },
             } = data;
             const signatures = (await Promise.all(noteHashes.map(async (noteHash) => {
@@ -100,11 +95,9 @@ export default async ({ data }) => {
         case 'metamask.zkAsset.updateNoteMetadata': {
             const {
                 response: {
-                    response: {
-                        noteHash,
-                        assetAddress,
-                        metadata,
-                    },
+                    noteHash,
+                    assetAddress,
+                    metadata,
                 },
             } = data;
 

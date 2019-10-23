@@ -36,8 +36,8 @@ export default ({ response }) => {
     };
 
     const message = {
-        account: response.response.address,
-        linkedPublicKey: response.response.linkedPublicKey,
+        account: response.address,
+        linkedPublicKey: response.linkedPublicKey,
     };
 
     const data = JSON.stringify({
