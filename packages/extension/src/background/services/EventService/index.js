@@ -232,17 +232,22 @@ class EventService {
         const manager = notesSyncManager(networkId);
         const watcher = notesWatcher(networkId);
 
-        const latestNoteSyncedBlock = async (assetAddress) => {
+        const latestNoteSyncedBlock = async (asset) => {
+            const {
+                registryOwner,
+                blockNumber: assetBlockNumber,
+            } = asset;
             const options = {
                 filterOptions: {
-                    asset: assetAddress,
+                    asset: registryOwner,
                     owner: address,
                 },
             };
             const note = await Note.latest({ networkId }, options);
+            const initialBlock = Math.max(assetBlockNumber, account.blockNumber);
             return {
-                lastSyncedBlock: note ? note.blockNumber : 0, // TODO: replace 0 to => account.blockNumber
-                assetAddress,
+                lastSyncedBlock: note ? note.blockNumber : initialBlock,
+                assetAddress: registryOwner,
             };
         };
 
@@ -255,8 +260,7 @@ class EventService {
         });
         if (!onlyNewAssets.length) return;
 
-        const syncedBlocksPromises = onlyNewAssets
-            .map(({ registryOwner }) => latestNoteSyncedBlock(registryOwner));
+        const syncedBlocksPromises = onlyNewAssets.map(latestNoteSyncedBlock);
         const syncedBlocksArray = await Promise.all(syncedBlocksPromises);
         const syncedBlocks = syncedBlocksArray
             .reduce((acum, info) => {
