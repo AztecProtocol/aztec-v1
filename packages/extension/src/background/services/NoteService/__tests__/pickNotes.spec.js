@@ -102,17 +102,26 @@ describe('pickNotes', () => {
             minSum: 6,
             numberOfNotes: 1,
         })).toEqual([
-            'n:4',
+            {
+                key: 'n:4',
+                value: 10,
+            },
         ]);
 
         expect(pickNotes({
             noteValues,
             minSum: 13,
             numberOfNotes: 2,
-        }).sort()).toEqual([
-            'n:4',
-            'n:6',
-        ].sort());
+        })).toEqual([
+            {
+                key: 'n:6',
+                value: 4,
+            },
+            {
+                key: 'n:4',
+                value: 10,
+            },
+        ]);
     });
 
     it('throw error if there is no note combinations >= min sum', () => {
@@ -135,9 +144,15 @@ describe('pickNotes', () => {
             },
             minSum: 6,
             numberOfNotes: 3,
-        }).sort()).toEqual([
-            'n:0',
-            'n:1',
+        })).toEqual([
+            {
+                key: 'n:1',
+                value: 2,
+            },
+            {
+                key: 'n:0',
+                value: 5,
+            },
         ].sort());
     });
 

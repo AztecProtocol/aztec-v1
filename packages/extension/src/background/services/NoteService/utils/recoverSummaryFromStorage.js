@@ -6,9 +6,8 @@ import {
     fromHexString,
 } from '~utils/crypto';
 import dataKey from '~utils/dataKey';
-import recoverAssetNotesFromStorage from './recoverAssetNotesFromStorage';
 
-export default async function recoverFromStorage(
+export default async function recoverSummaryFromStorage(
     networkId,
     owner,
 ) {
@@ -36,19 +35,8 @@ export default async function recoverFromStorage(
         network: networkId,
     })) || [];
 
-    const assetNotes = {};
-    await Promise.all(priority
-        .map(async (assetId) => {
-            assetNotes[assetId] = await recoverAssetNotesFromStorage(
-                networkId,
-                owner,
-                assetId,
-            );
-        }));
-
     return {
         assetSummary,
-        assetNotes,
         priority,
     };
 }

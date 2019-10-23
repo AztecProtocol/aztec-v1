@@ -34,8 +34,16 @@ export default function pickNotes({
                 count,
             });
         }
-        return Object.values(noteValues)
-            .reduce((accum, noteKeys) => [...accum, ...noteKeys], []);
+        const notes = [];
+        sortedValues.forEach((value) => {
+            noteValues[value].forEach((key) => {
+                notes.push({
+                    key,
+                    value,
+                });
+            });
+        });
+        return notes;
     }
 
     let values = [];
@@ -57,5 +65,11 @@ export default function pickNotes({
         );
     }
 
-    return pickKeysByValues(noteValues, values);
+    const keys = pickKeysByValues(noteValues, values);
+    const notes = keys.map((key, i) => ({
+        key,
+        value: values[i],
+    }));
+
+    return notes;
 }

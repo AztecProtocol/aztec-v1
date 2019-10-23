@@ -1,74 +1,51 @@
 import {
-    warnLog,
-} from '~utils/log';
-import NoteManager from './helpers/NoteManager';
+    argsError,
+} from '~utils/error';
+import {
+    get,
+} from '~utils/storage';
+import Note from '~background/database/models/note';
+import ApiSessionManager from './helpers/ApiSessionManager';
+import pickNotes from './utils/pickNotes';
 
-const manager = new NoteManager();
+const manager = new ApiSessionManager();
 
 export default {
-    init: () => warnLog('NoteService.init() is deprecated. Use NoteService.initWithUser(ownerAddress, linkedPrivateKey, linkedPublicKey) instead.'),
-    initWithUser: async (ownerAddress, linkedPrivateKey, linkedPublicKey, networkId) => manager.init(
+    initWithUser: async (
         ownerAddress,
         linkedPrivateKey,
         linkedPublicKey,
         networkId,
-    ),
-    switchUser: async (ownerAddress, linkedPrivateKey, linkedPublicKey, networkId) => {
-        if (ownerAddress === manager.ownerAddress) return;
-        await manager.init(
-            ownerAddress,
+    ) => manager.init(
+        networkId,
+        {
+            address: ownerAddress,
             linkedPrivateKey,
             linkedPublicKey,
-            networkId,
-        );
-    },
+        },
+    ),
     save: async () => manager.save(),
-    syncAsset: async (
+    addNotes: async (
+        networkId,
         ownerAddress,
-        assetId,
-    ) => manager.syncAsset({
+        notes,
+    ) => manager.addRawNotes({
+        networkId,
         ownerAddress,
-        assetId,
+        notes,
     }),
-    addNoteValue: async (
-        ownerAddress,
-        assetId,
-        value,
-        noteKey,
-    ) => manager.ensureSynced(
-        'addNoteValue',
-        {
-            ownerAddress,
-            assetId,
-            value,
-            noteKey,
-        },
-    ),
-    removeNoteValue: async (
-        ownerAddress,
-        assetId,
-        value,
-        noteKey,
-    ) => manager.ensureSynced(
-        'removeNoteValue',
-        {
-            ownerAddress,
-            assetId,
-            value,
-            noteKey,
-        },
-    ),
     getBalance: async (
+        // TODO - pass networkId
         ownerAddress,
         assetId,
     ) => manager.ensureSynced(
-        'getBalance',
-        {
-            ownerAddress,
-            assetId,
-        },
+        manager.networkId,
+        ownerAddress,
+        assetId,
+        ({ balance }) => balance,
     ),
     pick: async (
+        networkId,
         ownerAddress,
         assetId,
         minSum,
@@ -76,14 +53,48 @@ export default {
             numberOfNotes = 1,
             allowLessNumberOfNotes = true,
         } = {},
-    ) => manager.ensureSynced(
-        'pick',
-        {
-            assetId,
+    ) => {
+        if (numberOfNotes <= 0) {
+            return [];
+        }
+
+        return manager.ensureSynced(
+            networkId,
             ownerAddress,
-            minSum,
-            numberOfNotes,
-            allowLessNumberOfNotes,
-        },
-    ),
+            assetId,
+            async ({
+                balance,
+                noteValues,
+            }) => {
+                if (balance < minSum) {
+                    throw argsError('note.pick.sum', {
+                        messageOptions: {
+                            value: minSum,
+                        },
+                    });
+                }
+
+                const noteKeyData = pickNotes({
+                    noteValues,
+                    minSum,
+                    numberOfNotes,
+                    allowLessNumberOfNotes,
+                });
+
+                const notes = await Promise.all(noteKeyData.map(async ({
+                    key,
+                    value,
+                }) => {
+                    const noteHash = await get(key);
+                    const note = await Note.get({ networkId }, noteHash);
+                    return {
+                        ...note,
+                        value,
+                    };
+                }));
+
+                return notes;
+            },
+        );
+    },
 };
