@@ -2,7 +2,6 @@ import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
-import subscribeToContentScript from '~client/utils/subscribeToContentScript';
 import proofFactory from './assetProofFactory';
 
 const dataProperties = [
@@ -68,14 +67,14 @@ export default class Asset {
         if (!this.subscriptions[type]) return;
 
         if (!this.subscriptions[type].receipt) {
-            this.subscriptions[type].receipt = subscribeToContentScript(
-                {
-                    entity: 'asset',
-                    type,
-                    assetId: this.id,
-                },
-                result => this.notifySubscribers(type, result.response),
-            );
+            // this.subscriptions[type].receipt = subscribeToContentScript(
+            //     {
+            //         entity: 'asset',
+            //         type,
+            //         assetId: this.id,
+            //     },
+            //     result => this.notifySubscribers(type, result.response),
+            // );
         }
 
         this.subscriptions[type].subscribers.add(cb);
