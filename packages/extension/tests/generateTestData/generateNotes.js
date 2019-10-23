@@ -11,7 +11,7 @@ import {
 } from '~utils/note';
 import prettyPrint from '../utils/prettyPrint';
 
-export default async function generateNotes(userAccount, numberOfNotes = 20) {
+export default async function generateNotes(userAccount, numberOfNotes = 100) {
     console.log('Generating notes...');
     const {
         address,

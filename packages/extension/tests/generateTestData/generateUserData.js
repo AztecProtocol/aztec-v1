@@ -40,6 +40,7 @@ const generateAccount = async () => {
     const address = secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
 
     return {
+        keyStore,
         pwDerivedKey,
         password,
         salt,
@@ -62,17 +63,14 @@ export default async function generateUserData(numberOfAccounts = 2) {
     }
 
     const {
+        keyStore,
         password,
-        salt,
-        mnemonic,
         pwDerivedKey,
     } = accounts[0];
 
     const registrationData = {
-        password,
-        salt,
-        address: accounts[0].userAccount.address,
-        seedPhrase: mnemonic,
+        keyStore,
+        pwDerivedKey,
     };
 
     const content = [
@@ -82,6 +80,7 @@ export default async function generateUserData(numberOfAccounts = 2) {
         `export const registrationData = ${prettyPrint(registrationData)};`,
         `const pwDerivedKeyStr = '${JSON.stringify(pwDerivedKey)}';`,
         'export const pwDerivedKey = new Uint8Array(Object.values(JSON.parse(pwDerivedKeyStr)));',
+        `export const password = '${password}';`,
     ].join('\n\n');
 
     const dest = path.resolve(__dirname, '../helpers/testUsers.js');
