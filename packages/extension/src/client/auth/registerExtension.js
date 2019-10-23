@@ -13,5 +13,6 @@ export default async function registerExtension() {
         },
     }) || {};
 
+
     return data;
 }

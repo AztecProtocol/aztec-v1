@@ -1,6 +1,6 @@
-import browser from 'webextension-polyfill';
 import {
     contentSubscribeEvent,
+    clientEvent,
     contentUnsubscribeEvent,
 } from '~config/event';
 import Connection from '../utils/connection';
@@ -28,9 +28,21 @@ const handleContentScriptSubscription = (data, port) => {
 export default function acceptConnection() {
     const connection = new Connection();
 
-    browser.runtime.onConnect.addListener((port) => {
-        connection.registerClient(port);
-        port.onMessage.addListener(handleContentScriptSubscription);
-        port.onDisconnect.addListener(connection.removeClient);
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'aztec-connection') {
+            const channel = new MessageChannel();
+            event.source.postMessage({
+                type: 'aztec-connection',
+                code: '200',
+            }, event.origin, [channel.port2]);
+            const { data, origin } = event;
+            connection.registerClient({
+                data,
+                origin,
+                port: channel.port1,
+            });
+        }
+        // port.onMessage.addListener(handleContentScriptSubscription);
+        // port.onDisconnect.addListener(connection.removeClient);
     });
 }

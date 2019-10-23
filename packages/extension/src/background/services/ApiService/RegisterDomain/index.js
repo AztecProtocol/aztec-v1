@@ -20,7 +20,7 @@ const registerDomain = async (query, connection) => {
             favIconUrl,
             title,
             url,
-        } = senderPort.sender.tab;
+        } = {};
 
         connection.UiActionSubject.next({
             type: 'ui.domain.approve',

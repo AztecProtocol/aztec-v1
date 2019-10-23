@@ -28,39 +28,33 @@ export const updateActionState = async (action) => {
 export const openPopup = ({ timestamp }) => {
     const popupURL = browser.extension.getURL('pages/popup.html');
     const { width, height } = window.screen;
-    browser.windows.create({
-        url: `${popupURL}?id=${timestamp}`,
-        width: 340, // approximate golden ratio
-        top: (height - 550) / 2,
-        left: (width - 340) / 2,
-        height: 550,
-        type: 'popup',
-        focused: true,
-    });
+    const popup = window.open(`${popupURL}?id=${timestamp}`, '_blank', `left=${(width - 340) / 2},height=550,width=340,top=${(height - 550) / 2},status=0,titlebar=0,resizable=0,menubar=0,location=0,toolbar=0`);
+    return popup;
 };
 
 export const addDomainData = ({
-    data, sender, senderId, requestId,
+    data,
+    senderId,
+    requestId,
+    origin,
+    ...rest
 }) => {
-    const {
-        url,
-    } = sender;
     let domain;
-    if (url.match(/^https?:\/\/(127.0.0.1|localhost)(:[0-9+]|\/)/)) {
+    if (origin.match(/^https?:\/\/(127.0.0.1|localhost)(:[0-9+]|\/)/)) {
         domain = 'localhost';
     } else {
         ({
             domain,
-        } = psl.parse(url.replace(/^https?:\/\//, '').split('/')[0]));
+        } = psl.parse(origin.replace(/^https?:\/\//, '').split('/')[0]));
     }
 
-    const extension = !!url.match(/(extension:)+/);
     return {
         domain,
-        extension,
         senderId,
         requestId,
+        origin,
         data,
+        ...rest,
     };
 };
 

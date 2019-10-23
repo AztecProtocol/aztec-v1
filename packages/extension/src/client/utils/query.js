@@ -2,22 +2,8 @@ import {
     clientEvent,
 } from '~config/event';
 import Web3Service from '../services/Web3Service';
-import postToContentScript from './postToContentScript';
 import ApiError from './ApiError';
 
-const handleResponse = (response) => {
-    const { error, ...rest } = response;
-    console.log(response);
-    if (error) {
-        throw new ApiError(response);
-    }
-    const responseKey = Object.keys(response)
-        .find(queryName => !!response[queryName]);
-    if (rest[responseKey].error) {
-        throw new ApiError(rest);
-    }
-    return rest[responseKey];
-};
 
 export default async function query({ type, args }) {
     /* TODO
@@ -34,15 +20,26 @@ export default async function query({ type, args }) {
         address,
     } = Web3Service.account || {};
 
-    return postToContentScript(
+    const response = await window.aztec.query(
         {
             type: clientEvent,
             query: type,
             args: {
                 ...args,
                 currentAddress: address,
+                domain: window.location.origin,
             },
         },
-        handleResponse,
     );
+
+    const { error, ...rest } = response;
+    if (error) {
+        throw new ApiError(response);
+    }
+    const responseKey = Object.keys(response)
+        .find(queryName => !!response[queryName]);
+    if (rest[responseKey].error) {
+        throw new ApiError(rest);
+    }
+    return rest[responseKey];
 }

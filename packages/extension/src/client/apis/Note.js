@@ -65,11 +65,19 @@ export default class Note {
         return fromViewingKey(decryptedViewingKey, owner.address);
     }
 
+    /**
+     *
+     * grantAccess
+     *
+     * - addresses ([address]!)
+     *
+     * @returns (Bool!)
+     */
+
     async grantAccess(addresses) {
         const addressList = typeof addresses === 'string'
             ? [addresses]
             : addresses;
-
 
         const { permission } = await query({
             type: 'grantNoteAccess',
@@ -78,55 +86,6 @@ export default class Note {
                 addresses,
             },
         }) || {};
-
-        // const {
-        //     response,
-        // } = await query(`
-        //     response: grantNoteAccessPermission(noteId: "${this.id}", address: "${addressList.join('')}") {
-        //         permission {
-        //             metadata
-        //             prevMetadata
-        //             asset {
-        //                 address
-        //             }
-        //         }
-        //         error {
-        //             type
-        //             key
-        //             message
-        //             response
-        //         }
-        //     }
-        // `);
-
-        // const {
-        //     metadata,
-        //     prevMetadata,
-        //     asset,
-        // } = permission || {};
-        // let updated = false;
-        // if (metadata
-        //     && metadata !== prevMetadata
-        // ) {
-        //     const {
-        //         address: zkAssetAddress,
-        //     } = asset;
-        //     try {
-        //         await Web3Service
-        //             .useContract('ZkAsset')
-        //             .at(zkAssetAddress)
-        //             .method('updateNoteMetaData')
-        //             .send(
-        //                 this.id,
-        //                 metadata,
-        //             );
-        //     } catch (e) {
-        //         throw new ApiError(e);
-        //     }
-        //     updated = true;
-        // }
-
-        // return updated;
     }
 
     /**

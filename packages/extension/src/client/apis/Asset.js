@@ -31,7 +31,7 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const { asset } = await query({
+        const { response: { asset: { asset } } } = await query({
             type: 'asset',
             args: { id: this.id },
         }) || {};
@@ -45,13 +45,15 @@ export default class Asset {
 
     async balance() {
         const {
-            asset,
+            response: {
+                asset: { asset },
+            },
         } = await query({
             type: 'assetBalance',
             args: { id: this.id },
         }) || {};
 
-
+        console.log('balance, asset', asset);
         return (asset && asset.balance) || 0;
     }
 
