@@ -1,0 +1,47 @@
+{
+  "name": "@aztec/note-access",
+  "version": "0.0.0-semantically-released",
+  "description": "AZTEC note access utilities",
+  "scripts": {
+    "build": "yarn clean && babel --copy-files --out-dir ./lib ./src",
+    "clean": "shx rm -rf ./lib",
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+    "watch": "yarn build --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
+  "keywords": [
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol",
+    "note",
+    "access"
+  ],
+  "author": "AZTEC",
+  "license": "LGPL-3.0",
+  "engines": {
+    "node": ">=8.3"
+  },
+  "main": "./lib",
+  "private": true,
+  "files": [
+    "/lib"
+  ],
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
+  },
+  "homepage": "https://github.com/AztecProtocol/AZTEC/tree/develop/packages/noteAccess#readme",
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "got": "^9.6.0"
+  }
+}
