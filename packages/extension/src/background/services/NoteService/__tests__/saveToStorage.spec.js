@@ -1,9 +1,17 @@
 import {
     userAccount,
 } from '~testHelpers/testUsers';
+import {
+    randomId,
+} from '~utils/random';
 import * as storage from '~utils/storage';
 import dataKey from '~utils/dataKey';
 import saveToStorage from '../utils/saveToStorage';
+import {
+    assetSummary,
+    assetNotes,
+    priority,
+} from './testData';
 
 jest.mock('~utils/storage');
 
@@ -12,180 +20,161 @@ beforeEach(() => {
 });
 
 describe('saveToStorage', () => {
+    const networkId = randomId(10);
     const {
-        address: userAddress,
+        address,
         linkedPublicKey,
     } = userAccount;
+    const owner = {
+        address,
+        linkedPublicKey,
+    };
+
+    const userAssetsDataKey = dataKey('userAssets', {
+        user: owner.address,
+        network: networkId,
+    });
+    const assetPriorityDataKey = dataKey('userAssetPriority', {
+        user: owner.address,
+        network: networkId,
+    });
+    const getAssetNotesDataKey = assetId => dataKey('userAssetNotes', {
+        user: owner.address,
+        asset: assetId,
+        network: networkId,
+    });
 
     const hashPattern = /^0x[0-9a-f]+$/i;
 
-    it('save asset note values to storage', async () => {
-        const assetNoteDataMapping = {
-            assetId0: {
-                balance: 12,
-                noteValues: {
-                    2: ['n:0'],
-                    5: ['n:1', 'n:2'],
-                },
-                syncing: true,
-                lastSynced: 'n:2',
-            },
-            assetId1: {
-                balance: 7,
-                noteValues: {
-                    0: ['n:3', 'n:4'],
-                    2: ['n:5'],
-                    5: ['n:16'],
-                },
-                syncing: false,
-                lastSynced: 'n:16',
-            },
+    const storageSummaryData = {};
+    Object.keys(assetSummary).forEach((assetId) => {
+        const {
+            lastSynced,
+            size,
+        } = assetSummary[assetId];
+        storageSummaryData[assetId] = {
+            balance: expect.stringMatching(hashPattern),
+            size,
+            lastSynced,
         };
-        await saveToStorage(userAddress, linkedPublicKey, assetNoteDataMapping);
+    });
+    const commonStorageData = {
+        [userAssetsDataKey]: storageSummaryData,
+        [assetPriorityDataKey]: priority,
+    };
+
+    it('save asset note values to storage', async () => {
+        await saveToStorage(
+            networkId,
+            owner,
+            {
+                assetSummary,
+                assetNotes,
+                priority,
+            },
+        );
+
+        const expectedAssetNotes = {};
+        Object.keys(assetNotes).forEach((assetId) => {
+            expectedAssetNotes[getAssetNotesDataKey(assetId)] = Object.keys(assetNotes[assetId])
+                .map(() => expect.stringMatching(hashPattern));
+        });
 
         const db = await storage.get();
         expect(db).toEqual({
-            [dataKey('userAssets', { user: userAddress })]: {
-                assetId0: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:2',
-                },
-                assetId1: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:16',
-                },
-            },
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId0' })]: [
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-            ],
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId1' })]: [
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-            ],
+            ...commonStorageData,
+            ...expectedAssetNotes,
         });
     });
 
-    it('merge new asset to previous storage data', async () => {
-        const assetNoteDataMapping = {
-            assetId0: {
-                balance: 12,
-                noteValues: {
-                    2: ['n:0'],
-                    5: ['n:1', 'n:2'],
-                },
-                syncing: true,
-                lastSynced: 'n:2',
+    it('merge summary with previous summary data in storage', async () => {
+        await saveToStorage(
+            networkId,
+            owner,
+            {
+                assetSummary,
+                assetNotes,
+                priority,
+            },
+        );
+
+        const prevStorageSummary = await storage.get(userAssetsDataKey);
+
+        const assetIds = Object.keys(assetSummary);
+        const newAssetSummary = {
+            [assetIds[0]]: {
+                balance: assetSummary[assetIds[0]].balance + 2,
+                size: 1,
+                lastSynced: 'n:20',
+            },
+            newAsset: {
+                balance: 0,
+                size: 10,
+                lastSynced: 'n:190',
             },
         };
-        await saveToStorage(userAddress, linkedPublicKey, assetNoteDataMapping);
 
-        const db = await storage.get();
-        expect(db).toEqual({
-            [dataKey('userAssets', { user: userAddress })]: {
-                assetId0: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:2',
-                },
+        await saveToStorage(
+            networkId,
+            owner,
+            {
+                assetSummary: newAssetSummary,
+                assetNotes,
+                priority,
             },
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId0' })]: [
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-            ],
+        );
+
+        const storageSummary = await storage.get(userAssetsDataKey);
+        expect(storageSummary).toEqual({
+            ...prevStorageSummary,
+            [assetIds[0]]: {
+                ...newAssetSummary[assetIds[0]],
+                balance: expect.stringMatching(hashPattern),
+            },
+            newAsset: {
+                ...newAssetSummary.newAsset,
+                balance: expect.stringMatching(hashPattern),
+            },
         });
 
-        const newAssetNoteDataMapping = {
-            assetId1: {
-                balance: 7,
-                noteValues: {
-                    0: ['n:3', 'n:4'],
-                    2: ['n:5'],
-                    5: ['n:16'],
-                },
-                syncing: false,
-                lastSynced: 'n:16',
-            },
-        };
-        await saveToStorage(userAddress, linkedPublicKey, newAssetNoteDataMapping);
-
-        const db2 = await storage.get();
-        expect(db2).toEqual({
-            [dataKey('userAssets', { user: userAddress })]: {
-                assetId0: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:2',
-                },
-                assetId1: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:16',
-                },
-            },
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId0' })]: [
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-            ],
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId1' })]: [
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-            ],
-        });
+        expect(storageSummary[assetIds[0]].balance)
+            .not.toBe(prevStorageSummary[assetIds[0]].balance);
     });
 
     it('override existing asset in storage', async () => {
-        const assetNoteDataMapping = {
-            assetId0: {
-                balance: 7,
-                noteValues: {
-                    0: ['n:0', 'n:1'],
-                    2: ['n:2'],
-                    5: ['n:3'],
-                },
-                syncing: false,
-                lastSynced: 'n:3',
+        await saveToStorage(
+            networkId,
+            owner,
+            {
+                assetSummary,
+                assetNotes,
+                priority,
+            },
+        );
+
+        const toOverride = priority[0];
+        const prevStorageAssetNotes = await storage.get(getAssetNotesDataKey(toOverride));
+
+        const newAssetNotes = {
+            [toOverride]: {
+                2: ['n:5'],
+                12: ['n:5'],
             },
         };
-        await saveToStorage(userAddress, linkedPublicKey, assetNoteDataMapping);
-
-        const db = await storage.get();
-        expect(db).toEqual({
-            [dataKey('userAssets', { user: userAddress })]: {
-                assetId0: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:3',
-                },
+        await saveToStorage(
+            networkId,
+            owner,
+            {
+                assetSummary,
+                assetNotes: newAssetNotes,
+                priority,
             },
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId0' })]: [
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-                expect.stringMatching(hashPattern),
-            ],
-        });
-
-        const updatedAssetNoteDataMapping = {
-            assetId0: {
-                balance: 2,
-                noteValues: {
-                    2: ['n:5'],
-                },
-                syncing: false,
-                lastSynced: 'n:20',
-            },
-        };
-        await saveToStorage(userAddress, linkedPublicKey, updatedAssetNoteDataMapping);
-
-        const db2 = await storage.get();
-        expect(db2).toEqual({
-            [dataKey('userAssets', { user: userAddress })]: {
-                assetId0: {
-                    balance: expect.stringMatching(hashPattern),
-                    lastSynced: 'n:20',
-                },
-            },
-            [dataKey('userAssetNotes', { user: userAddress, asset: 'assetId0' })]: [
-                expect.stringMatching(hashPattern),
-            ],
-        });
+        );
+        const storageAssetNotes = await storage.get(getAssetNotesDataKey(toOverride));
+        expect(storageAssetNotes).toEqual([
+            expect.stringMatching(hashPattern),
+            expect.stringMatching(hashPattern),
+        ]);
+        expect(storageAssetNotes).not.toEqual(prevStorageAssetNotes);
     });
 });
