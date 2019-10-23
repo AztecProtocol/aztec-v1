@@ -1,9 +1,5 @@
-import {
-    VIEWING_KEY_LENGTH,
-} from '~config/constants';
-import {
-    warnLog,
-} from '~log';
+import { VIEWING_KEY_LENGTH } from '~config/constants';
+import { warnLog } from '~log';
 import recoverFromHexString from '~/crypto/fromHexString';
 import decrypt from './decrypt';
 
@@ -15,7 +11,7 @@ export default function fromHexString(str) {
     }
 
     const encrypted = recoverFromHexString(str);
-    encrypted.decrypt = privateKey => decrypt(privateKey, encrypted);
+    encrypted.decrypt = (privateKey) => decrypt(privateKey, encrypted);
 
     return encrypted;
 }

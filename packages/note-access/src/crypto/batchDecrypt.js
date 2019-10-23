@@ -1,8 +1,6 @@
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
-import {
-    errorLog,
-} from '~/log';
+import { errorLog } from '~/log';
 
 export default function batchDecrypt(privateKey, encryptedDataArr) {
     const privateKeyHash = privateKey.replace(/^0x/, '');
@@ -10,30 +8,17 @@ export default function batchDecrypt(privateKey, encryptedDataArr) {
     try {
         const privateKeyBase64 = Buffer.from(privateKeyHash, 'hex').toString('base64');
         const privateKeyUint8Array = nacl.util.decodeBase64(privateKeyBase64);
-        const recieverEncryptionPrivateKey = nacl
-            .box
-            .keyPair
-            .fromSecretKey(privateKeyUint8Array)
-            .secretKey;
+        const recieverEncryptionPrivateKey = nacl.box.keyPair.fromSecretKey(privateKeyUint8Array).secretKey;
 
         outputArr = encryptedDataArr.map((encrypted) => {
-            const encryptedMessage = 'export' in encrypted
-                ? encrypted.export()
-                : encrypted;
+            const encryptedMessage = 'export' in encrypted ? encrypted.export() : encrypted;
             const nonce = toUint8Array(encryptedMessage.nonce);
             const ciphertext = toUint8Array(encryptedMessage.ciphertext);
             const ephemPublicKey = toUint8Array(encryptedMessage.ephemPublicKey);
 
-            const decryptedMessage = nacl.box.open(
-                ciphertext,
-                nonce,
-                ephemPublicKey,
-                recieverEncryptionPrivateKey,
-            );
+            const decryptedMessage = nacl.box.open(ciphertext, nonce, ephemPublicKey, recieverEncryptionPrivateKey);
 
-            return decryptedMessage
-                ? nacl.util.encodeUTF8(decryptedMessage)
-                : '';
+            return decryptedMessage ? nacl.util.encodeUTF8(decryptedMessage) : '';
         });
     } catch (error) {
         errorLog('Decryption failed.', error);

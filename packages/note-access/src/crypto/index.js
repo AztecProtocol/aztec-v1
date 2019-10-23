@@ -4,10 +4,4 @@ import decryptMessage from './decryptMessage';
 import batchDecrypt from './batchDecrypt';
 import fromHexString from './fromHexString';
 
-export {
-    encryptMessage,
-    batchEncrypt,
-    decryptMessage,
-    batchDecrypt,
-    fromHexString,
-};
+export { encryptMessage, batchEncrypt, decryptMessage, batchDecrypt, fromHexString };

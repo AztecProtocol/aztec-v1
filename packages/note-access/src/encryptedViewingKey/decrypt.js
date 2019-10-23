@@ -1,18 +1,11 @@
-import {
-    warnLog,
-} from '~/log';
-import {
-    decryptMessage,
-} from '~/crypto';
+import { warnLog } from '~/log';
+import { decryptMessage } from '~/crypto';
 import lengthConfig from './lengthConfig';
 
 export default function decrypt(privateKey, encrypted) {
-    const encryptedData = 'export' in encrypted
-        ? encrypted.export()
-        : encrypted;
+    const encryptedData = 'export' in encrypted ? encrypted.export() : encrypted;
 
-    const wrongKey = Object.keys(encryptedData)
-        .find(key => encryptedData[key].length !== (lengthConfig[key] + 2));
+    const wrongKey = Object.keys(encryptedData).find((key) => encryptedData[key].length !== lengthConfig[key] + 2);
     if (wrongKey) {
         warnLog(
             'Wrong encrypted viewing key format.',

@@ -1,8 +1,6 @@
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
-import {
-    errorLog,
-} from '~/log';
+import { errorLog } from '~/log';
 
 export default function decryptMessage(privateKey, encryptedData) {
     if (typeof encryptedData === 'string') {
@@ -14,25 +12,14 @@ export default function decryptMessage(privateKey, encryptedData) {
     try {
         const privateKeyBase64 = Buffer.from(privateKeyHash, 'hex').toString('base64');
         const privateKeyUint8Array = nacl.util.decodeBase64(privateKeyBase64);
-        const recieverEncryptionPrivateKey = nacl
-            .box
-            .keyPair
-            .fromSecretKey(privateKeyUint8Array)
-            .secretKey;
+        const recieverEncryptionPrivateKey = nacl.box.keyPair.fromSecretKey(privateKeyUint8Array).secretKey;
 
-        const encryptedMessage = 'export' in encryptedData
-            ? encryptedData.export()
-            : encryptedData;
+        const encryptedMessage = 'export' in encryptedData ? encryptedData.export() : encryptedData;
         const nonce = toUint8Array(encryptedMessage.nonce);
         const ciphertext = toUint8Array(encryptedMessage.ciphertext);
         const ephemPublicKey = toUint8Array(encryptedMessage.ephemPublicKey);
 
-        const decryptedMessage = nacl.box.open(
-            ciphertext,
-            nonce,
-            ephemPublicKey,
-            recieverEncryptionPrivateKey,
-        );
+        const decryptedMessage = nacl.box.open(ciphertext, nonce, ephemPublicKey, recieverEncryptionPrivateKey);
 
         if (decryptedMessage) {
             output = nacl.util.encodeUTF8(decryptedMessage);
