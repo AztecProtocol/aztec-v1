@@ -5,7 +5,7 @@ import {
 const infuraConfig = ({ id: networkId, networkName }, projectId) => ({
     title: networkName,
     networkId,
-    providerUrl: `https://${networkName}.infura.io/v3/${projectId}`,
+    providerUrl: `wss://${networkName}.infura.io/ws/v3/${projectId}`,
 });
 
 const availableNetworks = () => Object.values(NETWORKS).map(({ id }) => id);
