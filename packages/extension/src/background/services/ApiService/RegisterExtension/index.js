@@ -52,7 +52,7 @@ const registerExtension = async (query, connection) => {
 
     const response = await validateUserPermission({
         ...args,
-        domain: window.location.host,
+        domain: window.location.origin,
     });
     const { userPermission: { account = {} } } = response;
     if (account && account.blockNumber) {
