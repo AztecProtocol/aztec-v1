@@ -2,10 +2,8 @@
 
 // ### External Dependencies
 const { expect } = require('chai');
-const chai = require('chai');
 const dotenv = require('dotenv');
 const path = require('path');
-const truffleAssert = require('truffle-assertions');
 const {
     performance,
 } = require('perf_hooks');
@@ -13,8 +11,9 @@ const {
 const Environment = require('./harness');
 
 const extensionPath = path.resolve(__dirname + '/../client');
+const dotenvFile = path.resolve(__dirname + '/../.env.development');
 
-dotenv.config();
+dotenv.config({ path: dotenvFile });
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -22,10 +21,8 @@ function sleep(ms) {
 
 
 contract.only('SyncBenchmark', (accounts) => {
-    const seedPhrease = 'warm pink purchase relax hollow swarm digital novel avocado pig toss satoshi';
+    const seedPhrease = process.env.RINKEBY_TESTING_ACCOUNT_0_AZTEC_SEED_PHRASE;
     const assetAddress = '0xae5fEB559F4486730333cabFaa407A9e10c0E874';
-    const address = '0x3339C3c842732F4DAaCf12aed335661cf4eab66b';
-    const privateKey = '0xb8a23114e720d45005b608f8741639464a341c32c61920bf341b5cbddae7651d';
     const assetBalance = 10;
 
     let environment;
@@ -35,7 +32,6 @@ contract.only('SyncBenchmark', (accounts) => {
             observeTime: 0,
             network: 'Rinkeby',
         });
-        await environment.metamask.addAccount(privateKey);
     });
 
     after(async () => {
