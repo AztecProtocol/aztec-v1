@@ -18,7 +18,7 @@ const sendTransaction = async (data) => {
     /**
      * TODO: This should be fixed by gas station network
      */
-    web3Service.account.privateKey = '0xB8A23114E720D45005B608F8741639464A341C32C61920BF341B5CBDDAE7651D';
+    web3Service.account.privateKey = process.env.GANACHE_TESTING_ACCOUNT_0;
 
     const receipt = await web3Service
         .useContract(contract, contractAddress)
