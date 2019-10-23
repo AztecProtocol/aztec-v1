@@ -4,47 +4,77 @@ import {
     lock,
 } from '~utils/storage';
 import {
-    encryptMessage,
+    batchEncrypt,
 } from '~utils/crypto';
 import dataKey from '~utils/dataKey';
-import asyncForEach from '~utils/asyncForEach';
-import saveUserAssetNotes from './saveUserAssetNotes';
+import saveAssetNotesToStorage from './saveAssetNotesToStorage';
 
-export default async function saveToStorage(userAddress, linkedPublicKey, assetNoteDataMappinig) {
-    const assetSummary = {};
-    await asyncForEach(Object.keys(assetNoteDataMappinig), async (assetId) => {
+export default async function saveToStorage(
+    networkId,
+    owner,
+    userAssetsData,
+) {
+    const {
+        address: userAddress,
+        linkedPublicKey,
+    } = owner;
+    const {
+        assetSummary,
+        assetNotes,
+        priority,
+    } = userAssetsData;
+
+    const balanceStrings = Object.values(assetSummary)
+        .map(({ balance }) => `${balance}`);
+    const encryptedBalances = batchEncrypt(linkedPublicKey, balanceStrings);
+    const encryptedSummary = {};
+    Object.keys(assetSummary).forEach((assetId, i) => {
         const {
-            balance,
+            size,
             lastSynced,
-        } = assetNoteDataMappinig[assetId];
-        const encryptedBalance = await encryptMessage(linkedPublicKey, `${balance}`);
-        assetSummary[assetId] = {
-            balance: encryptedBalance.toHexString(),
+        } = assetSummary[assetId];
+        encryptedSummary[assetId] = {
+            balance: encryptedBalances[i].toHexString(),
+            size,
             lastSynced,
         };
     });
 
     const userAssetsKey = dataKey('userAssets', {
         user: userAddress,
+        network: networkId,
     });
-
     await lock(userAssetsKey, async () => {
-        const prevAssets = await get(userAssetsKey);
-        const mergedAssets = {
-            ...prevAssets,
-            ...assetSummary,
+        const prevSummary = await get(userAssetsKey);
+        const mergedSummary = {
+            ...prevSummary,
+            ...encryptedSummary,
         };
         await set({
-            [userAssetsKey]: mergedAssets,
+            [userAssetsKey]: mergedSummary,
         });
     });
 
-    const assetNotesPromises = Object.keys(assetNoteDataMappinig)
-        .map(assetId => saveUserAssetNotes(
+    if (priority) {
+        const priorityDataKey = dataKey(
+            'userAssetPriority',
+            {
+                user: userAddress,
+                network: networkId,
+            },
+        );
+        await set({
+            [priorityDataKey]: priority,
+        });
+    }
+
+    const assetNotesPromises = Object.keys(assetNotes)
+        .map(assetId => saveAssetNotesToStorage(
+            networkId,
             userAddress,
             linkedPublicKey,
             assetId,
-            assetNoteDataMappinig[assetId].noteValues,
+            assetNotes[assetId],
         ));
 
     await Promise.all(assetNotesPromises);
