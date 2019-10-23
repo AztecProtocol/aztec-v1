@@ -1,6 +1,4 @@
-import {
-    errorLog,
-} from '~/log';
+import { errorLog } from '~/log';
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
 import toHexString from './toHexString';
@@ -19,12 +17,7 @@ export default function encryptMessage(publicKey, message) {
 
     const msgParamsUInt8Array = nacl.util.decodeUTF8(message);
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    const encryptedMessage = nacl.box(
-        msgParamsUInt8Array,
-        nonce,
-        pubKeyUInt8Array,
-        ephemeralKeyPair.secretKey,
-    );
+    const encryptedMessage = nacl.box(msgParamsUInt8Array, nonce, pubKeyUInt8Array, ephemeralKeyPair.secretKey);
 
     return EncryptedMessage({
         nonce: toHexString(nonce),

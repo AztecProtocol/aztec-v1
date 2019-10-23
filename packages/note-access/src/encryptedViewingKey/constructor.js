@@ -1,12 +1,6 @@
-import {
-    REAL_VIEWING_KEY_LENGTH,
-} from '~config/constants';
-import {
-    warnLog,
-} from '~log';
-import {
-    encryptMessage,
-} from '~/crypto';
+import { REAL_VIEWING_KEY_LENGTH } from '~config/constants';
+import { warnLog } from '~log';
+import { encryptMessage } from '~/crypto';
 import decrypt from './decrypt';
 
 export default function constructor(publicKey, realViewingKey) {
@@ -17,7 +11,7 @@ export default function constructor(publicKey, realViewingKey) {
     }
 
     const encrypted = encryptMessage(publicKey, realVkHash);
-    encrypted.decrypt = privateKey => decrypt(privateKey, encrypted);
+    encrypted.decrypt = (privateKey) => decrypt(privateKey, encrypted);
 
     return encrypted;
 }

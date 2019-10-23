@@ -38,6 +38,6 @@ module.exports = {
         maxEntrypointSize: 400000,
     },
     resolve: {
-        extensions: ['.js'],
+        extensions: ['.js', '.json'],
     },
 };

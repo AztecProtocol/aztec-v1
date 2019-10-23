@@ -1,12 +1,10 @@
-import {
-    warnLog,
-} from '~/log';
+import { warnLog } from '~/log';
 import EncryptedMessage from './EncryptedMessage';
 import lengthConfig from './lengthConfig';
 
 export default function fromHexString(str) {
     const hash = str.replace(/^0x/, '');
-    if (hash.length < (48 + 64)) {
+    if (hash.length < 48 + 64) {
         warnLog('Wrong encrypted string length.', str);
         return null;
     }

@@ -4,5 +4,5 @@
 
 _October x, 2019_
 
-- Placeholder
-- Placeholder
+-   Placeholder
+-   Placeholder

@@ -1,35 +1,22 @@
-import {
-    utils,
-} from 'web3';
+import { utils } from 'web3';
 import config from '~config/metadata';
-import {
-    DYNAMIC_VAR_CONFIG_LENGTH,
-    MIN_BYTES_VAR_LENGTH,
-} from '~config/constants';
+import { DYNAMIC_VAR_CONFIG_LENGTH, MIN_BYTES_VAR_LENGTH } from '~config/constants';
 import _addAccess from './_addAccess';
 import _getAccess from './_getAccess';
 import toString from './toString';
 
 export default function constructor(metadataStr) {
     const metadata = {};
-    let start = metadataStr.startsWith('0x')
-        ? 2
-        : 0;
+    let start = metadataStr.startsWith('0x') ? 2 : 0;
 
-    const lenVars = config.reduce((accum, {
-        startAt,
-    }) => {
+    const lenVars = config.reduce((accum, { startAt }) => {
         if (!startAt) {
             return accum;
         }
         return [...accum, startAt];
     }, []);
 
-    config.forEach(({
-        name,
-        length,
-        startAt,
-    }) => {
+    config.forEach(({ name, length, startAt }) => {
         const isDynamic = !!startAt;
         const isLenVar = lenVars.indexOf(name) >= 0;
 
@@ -45,15 +32,9 @@ export default function constructor(metadataStr) {
             if (isLenVar) {
                 segLen = length;
             } else {
-                segLen = length !== undefined
-                    ? Math.max(length, MIN_BYTES_VAR_LENGTH)
-                    : metadataStr.length - start;
+                segLen = length !== undefined ? Math.max(length, MIN_BYTES_VAR_LENGTH) : metadataStr.length - start;
             }
-            let val = metadataStr
-                .substr(
-                    start,
-                    segLen,
-                );
+            let val = metadataStr.substr(start, segLen);
             if (isLenVar) {
                 val = parseInt(val, 16);
             } else if (length) {
@@ -67,25 +48,17 @@ export default function constructor(metadataStr) {
             start += segLen;
         }
 
-        const isArrayValue = isDynamic && (length !== undefined);
+        const isArrayValue = isDynamic && length !== undefined;
 
-        metadata[name] = isArrayValue
-            ? arr
-            : (arr[0] || '');
+        metadata[name] = isArrayValue ? arr : arr[0] || '';
     });
 
-    const {
-        addresses,
-        viewingKeys,
-    } = metadata;
+    const { addresses, viewingKeys } = metadata;
 
     return {
         ...metadata,
         addAccess: (access) => {
-            const {
-                addresses: newAddresses,
-                viewingKeys: newViewingKeys,
-            } = _addAccess(metadata, access);
+            const { addresses: newAddresses, viewingKeys: newViewingKeys } = _addAccess(metadata, access);
 
             newAddresses.forEach((a, i) => {
                 if (addresses.indexOf(a) >= 0) return;
@@ -94,7 +67,7 @@ export default function constructor(metadataStr) {
                 viewingKeys.push(newViewingKeys[i]);
             });
         },
-        getAccess: address => _getAccess(metadata, address),
+        getAccess: (address) => _getAccess(metadata, address),
         toString: () => toString(metadata),
     };
 }

@@ -1,9 +1,4 @@
-import {
-    METADATA_AZTEC_DATA_LENGTH,
-    DYNAMIC_VAR_CONFIG_LENGTH,
-    ADDRESS_LENGTH,
-    VIEWING_KEY_LENGTH,
-} from './constants';
+import { METADATA_AZTEC_DATA_LENGTH, DYNAMIC_VAR_CONFIG_LENGTH, ADDRESS_LENGTH, VIEWING_KEY_LENGTH } from './constants';
 
 export default [
     {
