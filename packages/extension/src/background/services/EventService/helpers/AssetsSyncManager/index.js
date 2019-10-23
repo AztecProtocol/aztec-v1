@@ -10,7 +10,6 @@ import {
 } from '../../utils/asset';
 import EventSubscription from '../../utils/asset/subscription';
 
-
 class SyncManager {
     constructor() {
         this.config = {

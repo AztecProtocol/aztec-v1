@@ -24,6 +24,7 @@ const sendTransaction = async (data) => {
         .useContract(contract, contractAddress)
         .method(method)
         .sendSigned(...params);
+
     return {
         ...data,
         data: {
@@ -34,6 +35,7 @@ const sendTransaction = async (data) => {
         responseId,
     };
 };
+
 // TODO change this to use the gas station network
 
 export default {

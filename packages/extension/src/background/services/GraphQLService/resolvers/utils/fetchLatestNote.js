@@ -38,7 +38,6 @@ export default async function fetchNoteFromIndexedDB(options) {
         errorLog("'account' cannot be empty");
         return [];
     }
-
     const {
         error,
         note: onChainNote,

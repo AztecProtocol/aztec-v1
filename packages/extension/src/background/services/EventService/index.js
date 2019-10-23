@@ -72,7 +72,7 @@ class EventService {
             errorLog(`Error syncing address: ${address}. Cannot find an account.`);
             return;
         }
-        
+
         this.networks[networkId][address] = account;
 
         const config = this.autosyncConfig.get(networkId) || {};
@@ -350,7 +350,7 @@ class EventService {
             noteHash,
             fromAssets,
             networkId,
-            fromBlock: 0
+            fromBlock: 0,
         });
 
         if (!groupedNotes.isEmpty()) {
