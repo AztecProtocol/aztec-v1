@@ -10,6 +10,9 @@ import {
     randomId,
     randomInt,
 } from '~utils/random';
+import {
+    addAccess,
+} from '~utils/metadata';
 import Asset from '../helpers/Asset';
 import NoteBucketCache from '../helpers/NoteBucketCache';
 import RawNoteManager from '../helpers/RawNoteManager';
@@ -22,6 +25,25 @@ const owner = userAccount;
 let noteBucketCache;
 let rawNoteManager;
 let asset;
+
+const transformNote = ({
+    hash,
+    viewingKey,
+}) => {
+    const blockNumber = randomInt(1000);
+    const metadataStr = addAccess('', {
+        address: userAccount.address,
+        viewingKey,
+    });
+
+    return {
+        noteHash: hash,
+        metadata: metadataStr,
+        assetId,
+        blockNumber,
+        status: 'CREATED',
+    };
+};
 
 beforeEach(() => {
     storage.reset();
@@ -44,7 +66,7 @@ beforeEach(() => {
 });
 
 describe('Asset.startSync', () => {
-    it('restor data and trigger actions to start processing notes', async () => {
+    it('restore data and trigger actions to start processing notes', async () => {
         const restoreSpy = jest.spyOn(asset, 'restore');
         const getRawNotesSpy = jest.spyOn(asset, 'getRawNotes').mockImplementation(() => {});
 
@@ -101,6 +123,7 @@ describe('Asset.decryptNotes', () => {
     const errorLogSpy = jest.spyOn(console, 'error').mockImplementation((error) => {
         errors.push(error);
     });
+
     let warnings = [];
     const warnLogSpy = jest.spyOn(console, 'warn').mockImplementation((warning) => {
         warnings.push(warning);
@@ -119,21 +142,20 @@ describe('Asset.decryptNotes', () => {
         let balance = 0;
         let maxBlockNumber = 0;
         testNotes.forEach((note, i) => {
-            const blockNumber = randomInt(1000);
-            noteGroups[i % totalGroups].push({
-                ...note,
-                assetId,
-                blockNumber,
-            });
+            const noteData = transformNote(note);
+            noteGroups[i % totalGroups].push(noteData);
             balance += note.value;
-            if (blockNumber > maxBlockNumber) {
-                maxBlockNumber = blockNumber;
+            if (noteData.blockNumber > maxBlockNumber) {
+                maxBlockNumber = noteData.blockNumber;
             }
         });
 
-        const promises = noteGroups.map(async group => asset.decryptNotes(group));
-        await Promise.all(promises);
+        await Promise.all(noteGroups.map(
+            async group => asset.decryptNotes(group),
+        ));
 
+        expect(errors).toEqual([]);
+        expect(warnings).toEqual([]);
         expect(asset.balance).toBe(balance);
         expect(asset.lastSynced).toBe(maxBlockNumber);
         expect(noteBucketCache.getSize(assetId)).toBe(testNotes.length);
@@ -145,15 +167,15 @@ describe('Asset.decryptNotes', () => {
         const notes = testNotes.slice(0, totalNotes).map((note, i) => {
             balance += note.value;
             return {
-                ...note,
-                assetId,
+                ...transformNote(note),
                 blockNumber: i + 1,
             };
         });
-        const invalidNote = notes[Math.floor(totalNotes / 2)];
-        invalidNote.viewingKey = `0x${randomId(VIEWING_KEY_LENGTH - 1)}`;
-        balance -= invalidNote.value;
-        expect(invalidNote.value > 0).toBe(true);
+
+        const invalidIdx = Math.floor(totalNotes / 2);
+        notes[invalidIdx].metadata = '';
+        balance -= testNotes[invalidIdx].value;
+        expect(testNotes[invalidIdx].value > 0).toBe(true);
 
         await asset.decryptNotes(notes);
         expect(errors.length).toBe(1);
@@ -165,7 +187,7 @@ describe('Asset.decryptNotes', () => {
     it('will update lastSync even when the note is invalid', async () => {
         const invalidNote = {
             ...testNotes[0],
-            viewingKey: `0x${randomId(VIEWING_KEY_LENGTH - 1)}`,
+            metadata: '',
             blockNumber: 10,
         };
 
@@ -228,6 +250,10 @@ describe('managing asynchronous processes', () => {
             .mockImplementation(() => []);
     });
 
+    afterAll(() => {
+        mockFetchAndRemove.mockReset();
+    });
+
     const testAsynchrounousProcesses = async ({
         notesPerFetch,
         notesPerBatch,
@@ -263,10 +289,12 @@ describe('managing asynchronous processes', () => {
                 return [];
             }
             currentFetch += 1;
-            return testNotes.slice(
-                (currentFetch - 1) * notesPerFetch,
-                currentFetch * notesPerFetch,
-            );
+            return testNotes
+                .slice(
+                    (currentFetch - 1) * notesPerFetch,
+                    currentFetch * notesPerFetch,
+                )
+                .map(transformNote);
         });
 
         const assetSynced = new Promise((resolve) => {
