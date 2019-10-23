@@ -7,10 +7,6 @@
         "16": "./images/icons/icon-16.png",
         "128": "./images/icons/icon-128.png"
     },
-    "background": {
-        "scripts": ["./build/bundle.background.js"],
-        "persistent": true
-    },
     "permissions": ["tabs", "storage", "http://*/*", "https://*/*"],
     "browser_action": {
         "default_title": "",
@@ -24,5 +20,5 @@
             "js": ["./build/bundle.content.js"]
         }
     ],
-    "web_accessible_resources": ["/build/*", "/build/bundle.client.js"]
+    "web_accessible_resources": ["/build/*", "/build/bundle.client.js", "/pages/*"]
 }
