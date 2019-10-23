@@ -4,6 +4,7 @@ import AuthService from '../../AuthService';
 const registerDomain = async (query, connection) => {
     const registeredDomain = await AuthService.getRegisteredDomain(query.domain);
 
+
     if (!registeredDomain) {
         const {
             webClientId,
@@ -21,6 +22,7 @@ const registerDomain = async (query, connection) => {
             title,
             url,
         } = {};
+        console.log(query);
 
         connection.UiActionSubject.next({
             type: 'ui.domain.approve',
@@ -28,6 +30,7 @@ const registerDomain = async (query, connection) => {
             clientId: query.clientId,
             data: {
                 response: {
+                    ...args,
                     domain: {
                         iconSrc: favIconUrl,
                         name: title,
@@ -35,7 +38,6 @@ const registerDomain = async (query, connection) => {
                         url,
                         ...query.data.metadata,
                     },
-                    ...args,
                 },
                 requestId: query.requestId,
             },
