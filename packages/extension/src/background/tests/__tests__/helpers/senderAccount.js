@@ -12,12 +12,13 @@ import {
 export default async function senderAccount(sender) {
     const {
         address,
+        rinkebySeedPhrase,
     } = sender;
 
     const keyStorePayload = {
-        password: '5d4hl6xv5r',
+        password: 'kjaui3i2kjsdfk',
         salt: 'y29qm2',
-        seedPhrase: 'warm pink purchase relax hollow swarm digital novel avocado pig toss satoshi',
+        seedPhrase: rinkebySeedPhrase,
         hdPathString: "m/44'/60'/0'/0",
     };
 

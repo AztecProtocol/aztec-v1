@@ -1,5 +1,5 @@
 import secp256k1 from '@aztec/secp256k1';
-import '../../../../../env';
+// import '../../../../../env';
 
 class AuthService {
     constructor() {
@@ -12,6 +12,7 @@ class AuthService {
         this.accountIndex = accountIndex;
         const privateKey = process.env[`GANACHE_TESTING_ACCOUNT_${this.accountIndex}`];
         const mnemonic = process.env[`GANACHE_TESTING_ACCOUNT_${this.accountIndex}_MNEMONIC`];
+        const rinkebySeedPhrase = process.env[`RINKEBY_TESTING_ACCOUNT_${this.accountIndex}_AZTEC_SEED_PHRASE`];
         const {
             publicKey,
             address,
@@ -22,6 +23,7 @@ class AuthService {
             publicKey,
             privateKey,
             mnemonic,
+            rinkebySeedPhrase,
         };
     }
 

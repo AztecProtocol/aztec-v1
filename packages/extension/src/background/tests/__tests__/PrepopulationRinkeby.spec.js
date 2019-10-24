@@ -1,4 +1,6 @@
 import aztec from 'aztec.js';
+// import dotenv from 'dotenv';
+// import path from 'path';
 import TestAuthService from './helpers/AuthService';
 import {
     set,
@@ -80,7 +82,6 @@ describe('PrepopulationRinkeby', () => {
             account: sender,
             networkId,
         });
-        // const aceAddress = web3Service.contract('ACE').address;
         web3Service.registerContract(ACE, { address: aceAddress });
 
         await Account.add(account, { networkId });
@@ -91,6 +92,7 @@ describe('PrepopulationRinkeby', () => {
                 error,
                 groupedNotes,
             } = await fetchNotes({
+                owner: userAddress,
                 fromBlock: 1,
                 toBlock: 'latest',
                 fromAssets: [zkAssetAddress],

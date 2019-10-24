@@ -1,4 +1,5 @@
 import Dexie from 'dexie';
+import '../env';
 
 const windowCrypto = require('@trust/webcrypto');
 
