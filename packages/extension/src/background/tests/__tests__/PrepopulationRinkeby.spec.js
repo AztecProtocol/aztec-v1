@@ -1,6 +1,4 @@
 import aztec from 'aztec.js';
-// import dotenv from 'dotenv';
-// import path from 'path';
 import TestAuthService from './helpers/AuthService';
 import {
     set,
