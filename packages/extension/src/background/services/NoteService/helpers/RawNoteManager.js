@@ -4,6 +4,7 @@ import {
 import {
     defaultMaxNotes,
     defaultNotesPerBatch,
+    defaultNotesPerSyncBatch,
     defaultSyncInterval,
 } from '../config';
 import fetchNotesFromIndexedDB from '../utils/fetchNotesFromIndexedDB';
@@ -14,11 +15,13 @@ export default class RawNoteManager {
         owner,
         maxNotes = defaultMaxNotes,
         notesPerBatch = defaultNotesPerBatch,
+        notesPerSyncBatch = defaultNotesPerSyncBatch,
         syncInterval = defaultSyncInterval,
     }) {
         this.networkId = networkId;
         this.owner = owner;
         this.notesPerBatch = notesPerBatch;
+        this.notesPerSyncBatch = notesPerSyncBatch;
 
         // TODO - remove from the top of tail notes if numberOfNotes exceeds this.capacity
         this.capacity = maxNotes;
@@ -28,12 +31,20 @@ export default class RawNoteManager {
         this.maxHeadBlockNumber = -1;
         this.minTailBlockNumber = -1;
         this.maxTailBlockNumber = -1;
+        this.prependNotesMapping = {};
         this.headNotesMapping = {};
         this.tailNotesMapping = {}; // added by calling NoteService.addNotes()
         this.assetLastSyncedMapping = {};
 
+
         this.syncInterval = syncInterval;
+        // TODO - syncing for asset's prepend notes should be run with a PriorityQueue
+        this.syncAssetReqMapping = {};
         this.syncFromIndexedDBReq = null;
+
+        this.fetchQueues = {};
+
+        this.locked = false;
 
         this.eventListeners = {
             newNotes: [],
@@ -79,21 +90,58 @@ export default class RawNoteManager {
         listeners.forEach(cb => cb(params));
     }
 
-    async startSync(fromBlockNumber) {
+    pause() {
+        this.locked = true;
+    }
+
+    startSync(fromBlockNumber) {
+        if (this.syncFromIndexedDBReq
+            || !this.requireHeadNotes()
+        ) return;
+
         this.minHeadBlockNumber = fromBlockNumber;
         this.maxHeadBlockNumber = fromBlockNumber;
-        await this.fetchHeadNotes();
+        this.syncFromIndexedDBReq = setTimeout(async () => {
+            await this.startSyncInterval();
+        }, 0);
+    }
+
+    setAssetLastSynced(assetId, lastSynced) {
+        if (lastSynced >= this.minHeadBlockNumber - 1
+            || this.assetLastSyncedMapping[assetId] >= 0
+        ) return;
+
+        this.assetLastSyncedMapping[assetId] = lastSynced;
+
+        if (!this.syncAssetReqMapping[assetId]) {
+            this.syncAssetReqMapping[assetId] = setTimeout(async () => {
+                await this.startSyncAssetInterval(assetId);
+            }, 0);
+        }
     }
 
     async startSyncInterval() {
+        if (this.locked) return;
+
         const notes = await this.fetchHeadNotes();
-        const interval = notes.length === this.notesPerBatch
+        const interval = notes.length === this.notesPerSyncBatch
             ? 0
             : this.syncInterval;
 
         this.syncFromIndexedDBReq = setTimeout(async () => {
             await this.startSyncInterval();
         }, interval);
+    }
+
+    async startSyncAssetInterval(assetId) {
+        if (this.locked) return;
+
+        const notes = await this.fetchAssetNotes(assetId);
+        if (notes.length < this.notesPerSyncBatch) return;
+
+        this.syncAssetReqMapping[assetId] = setTimeout(async () => {
+            await this.startSyncAssetInterval(assetId);
+        }, 0);
     }
 
     requirePrependNotes(assetId) {
@@ -106,66 +154,95 @@ export default class RawNoteManager {
             || (this.maxHeadBlockNumber < this.minTailBlockNumber - 1);
     }
 
-    setAssetLastSynced(assetId, lastSynced) {
-        if (lastSynced >= this.minHeadBlockNumber - 1) return;
-
-        this.assetLastSyncedMapping[assetId] = lastSynced;
-    }
-
     getCurrentSynced(assetId) {
         if (this.requirePrependNotes(assetId)) {
             return this.assetLastSyncedMapping[assetId];
         }
-        if (this.maxTailBlockNumber >= 0) {
+        if (this.maxTailBlockNumber >= 0
+            && !this.requireHeadNotes()
+        ) {
             return this.maxTailBlockNumber;
         }
         return this.maxHeadBlockNumber;
     }
 
-    async fetchAndRemove(assetId, count = this.notesPerBatch) {
-        let notes = [];
-        let headNotes = this.headNotesMapping[assetId] || [];
-        if (!headNotes || headNotes.length < count) {
-            // TODO - await previous fetchMoreForAsset
-            await this.fetchMoreForAsset();
-            headNotes = this.headNotesMapping[assetId] || [];
+    async waitInFetchQueue(assetId) {
+        if (!this.fetchQueues[assetId]) {
+            this.fetchQueues[assetId] = [];
+        }
+        return new Promise((resolve) => {
+            this.fetchQueues[assetId].push(resolve);
+        });
+    }
+
+    flushNextInFetchQueue(assetId, numberOfBatches = 1) {
+        const queue = this.fetchQueues[assetId];
+        if (!queue) return;
+
+        const count = Math.min(numberOfBatches, queue.length);
+        const toFlush = queue.splice(0, count);
+        toFlush.forEach(next => next());
+    }
+
+    flushAssetInFetchQueue(assetId) {
+        const queue = this.fetchQueues[assetId];
+        if (!queue) return;
+
+        this.fetchQueues[assetId] = [];
+        queue.forEach(next => next());
+    }
+
+    flushAllInFetchQueue() {
+        const queues = Object.values(this.fetchQueues);
+        this.fetchQueues = {};
+        queues.forEach((queue) => {
+            queue.forEach(next => next());
+        });
+    }
+
+    async fetchAndRemove(assetId) {
+        if (this.fetchQueues[assetId]
+            && this.fetchQueues[assetId].length
+        ) {
+            await this.waitInFetchQueue(assetId);
         }
 
-        notes = headNotes.splice(0, count);
-        this.numberOfNotes -= notes.length;
+        let notes;
 
-        if (headNotes.length < count) {
-            // run this in parallel to make the next call return faster
-            this.fetchMoreForAsset(assetId);
+        let prependNotes = this.prependNotesMapping[assetId] || [];
+        if (prependNotes.length < this.notesPerBatch
+            && this.requirePrependNotes(assetId)
+        ) {
+            await this.waitInFetchQueue(assetId);
+            prependNotes = this.prependNotesMapping[assetId] || [];
         }
+        notes = prependNotes.splice(0, this.notesPerBatch);
 
-        if (notes.length < count) {
-            const tailNotes = this.tailNotesMapping[assetId];
-            if (tailNotes) {
-                const restNotes = tailNotes.splice(0, count - notes.length);
-                notes = notes.concat(restNotes);
-                this.numberOfNotes -= restNotes.length;
+        // return notes from the same source
+        // even when the number is not enough
+        // so that it won't have to wait in the queue again
+        // which might cause the returned notes' block numbers not in correct order
+        if (!notes.length) {
+            let headNotes = this.headNotesMapping[assetId] || [];
+            if (headNotes.length < this.notesPerBatch
+                && this.requireHeadNotes()
+            ) {
+                await this.waitInFetchQueue(assetId);
+                headNotes = this.headNotesMapping[assetId] || [];
+            }
+            if (headNotes.length > 0) {
+                notes = headNotes.splice(0, this.notesPerBatch);
             }
         }
 
-        return notes;
-    }
-
-    async fetchMoreForAsset(assetId, count) {
-        let notes = [];
-        if (this.requirePrependNotes(assetId)) {
-            notes = await this.fetchAssetNotes(assetId);
+        if (!notes.length) {
+            const tailNotes = this.tailNotesMapping[assetId] || [];
+            if (tailNotes.length > 0) {
+                notes = tailNotes.splice(0, this.notesPerBatch);
+            }
         }
 
-        while (this.requireHeadNotes() && notes.length < count) {
-            const newNotes = await this.fetchHeadNotes(); // eslint-disable-line no-await-in-loop
-            if (!newNotes.length) break;
-
-            const notesForAsset = newNotes.filter(({
-                asset,
-            }) => asset === assetId);
-            notes = notes.concat(notesForAsset);
-        }
+        this.numberOfNotes -= notes.length;
 
         return notes;
     }
@@ -176,15 +253,22 @@ export default class RawNoteManager {
             this.owner.address,
             {
                 assetId,
-                count: this.notesPerBatch,
+                count: this.notesPerSyncBatch,
                 fromBlockNumber: this.assetLastSyncedMapping[assetId],
                 toBlockNumber: this.minHeadBlockNumber,
             },
         );
 
-        this.prependHeads(assetId, notes);
+        const newNotes = this.prependHeads(assetId, notes);
 
-        return notes;
+        if (newNotes.length < this.notesPerSyncBatch) {
+            this.flushAssetInFetchQueue(assetId);
+        } else {
+            const validBatch = Math.floor(newNotes.length / this.notesPerBatch);
+            this.flushNextInFetchQueue(assetId, validBatch);
+        }
+
+        return newNotes;
     }
 
     async fetchHeadNotes() {
@@ -192,49 +276,69 @@ export default class RawNoteManager {
             this.networkId,
             this.owner.address,
             {
-                count: this.notesPerBatch,
+                count: this.notesPerSyncBatch,
                 fromBlockNumber: this.maxHeadBlockNumber,
                 toBlockNumber: this.minTailBlockNumber,
             },
         );
 
-        if (notes.length) {
-            this.appendHeads(notes);
-        } else if (!this.syncFromIndexedDBReq
-            && this.minTailBlockNumber === -1
-        ) {
-            this.syncFromIndexedDBReq = setTimeout(async () => {
-                await this.startSyncInterval();
-            }, this.syncInterval);
+        const newNotes = this.appendHeads(notes);
+
+        if (newNotes.length < this.notesPerSyncBatch) {
+            this.flushAllInFetchQueue();
+        } else {
+            const assetIds = newNotes.reduce((ids, {
+                asset,
+            }) => {
+                ids.add(asset);
+                return ids;
+            }, new Set());
+
+            assetIds.forEach((assetId) => {
+                const headNotes = this.headNotesMapping[assetId];
+                const validBatch = Math.floor(headNotes.length / this.notesPerBatch);
+                if (validBatch) {
+                    this.flushNextInFetchQueue(assetId, validBatch);
+                }
+            });
         }
 
-
-        return notes;
+        return newNotes;
     }
 
     prependHeads(assetId, notes) {
         const lastNote = notes[notes.length - 1];
-        if (!lastNote) return;
+        if (!lastNote) return [];
 
-        this.assetLastSyncedMapping[assetId] = lastNote.blockNumber;
-        this.numberOfNotes += notes.length;
-
-        if (!this.headNotesMapping[assetId]) {
-            this.headNotesMapping[assetId] = [];
+        let newNotes = notes;
+        if (lastNote.blockNumber >= this.minHeadBlockNumber) {
+            const lastIndex = notes.findIndex(({
+                blockNumber,
+            }) => blockNumber >= this.minHeadBlockNumber);
+            newNotes = notes.slice(0, lastIndex);
         }
 
-        this.headNotesMapping[assetId] = this.headNotesMapping[assetId].concat(notes);
+        this.assetLastSyncedMapping[assetId] = newNotes.length < this.notesPerSyncBatch
+            ? this.minHeadBlockNumber - 1
+            : lastNote.blockNumber;
+        this.numberOfNotes += newNotes.length;
+
+        if (!this.prependNotesMapping[assetId]) {
+            this.prependNotesMapping[assetId] = [];
+        }
+
+        this.prependNotesMapping[assetId] = this.prependNotesMapping[assetId].concat(newNotes);
+
+        return newNotes;
     }
 
     appendHeads(notes) {
         const lastNote = notes[notes.length - 1];
-        if (!lastNote) return;
-
-        this.maxHeadBlockNumber = lastNote.blockNumber;
+        if (!lastNote) return [];
 
         let newNotes = notes;
-        if (lastNote.blockNumber >= this.minTailBlockNumber
-            && this.minTailBlockNumber >= 0
+        if (this.minTailBlockNumber >= 0
+            && lastNote.blockNumber >= this.minTailBlockNumber
         ) {
             const lastIndex = notes.findIndex(({
                 blockNumber,
@@ -242,6 +346,10 @@ export default class RawNoteManager {
             newNotes = notes.slice(0, lastIndex);
         }
 
+        this.maxHeadBlockNumber = newNotes.length < this.notesPerBatch
+            && this.minTailBlockNumber !== -1
+            ? this.minTailBlockNumber - 1
+            : lastNote.blockNumber;
         this.numberOfNotes += newNotes.length;
 
         const toNotify = [];
@@ -260,22 +368,24 @@ export default class RawNoteManager {
         toNotify.forEach((assetId) => {
             this.notifyListeners('newNotes', assetId);
         });
+
+        return newNotes;
     }
 
     appendTails(notes) {
         let [firstNote] = notes;
-        if (!firstNote) return;
-
-        if (this.syncFromIndexedDBReq) {
-            clearTimeout(this.syncFromIndexedDBReq);
-        }
+        if (!firstNote) return [];
 
         let newNotes = notes;
         if (firstNote.blockNumber <= this.maxHeadBlockNumber) {
+            if (this.syncFromIndexedDBReq !== null) {
+                clearTimeout(this.syncFromIndexedDBReq);
+            }
+
             const firstIndex = notes.findIndex(({
                 blockNumber,
             }) => blockNumber > this.maxHeadBlockNumber);
-            if (firstIndex < 0) return;
+            if (firstIndex < 0) return [];
 
             firstNote = notes[firstIndex];
             newNotes = notes.slice(firstIndex, notes.length);
@@ -302,5 +412,7 @@ export default class RawNoteManager {
 
         const lastNote = newNotes[newNotes.length - 1];
         this.maxTailBlockNumber = lastNote.blockNumber;
+
+        return newNotes;
     }
 }
