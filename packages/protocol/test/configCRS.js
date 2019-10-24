@@ -32,4 +32,8 @@ devUtils.constants.K_MAX_TEST = 15000;
 devUtils.constants.SIGNATURES_PER_FILE = 1000;
 devUtils.constants.ZERO_VALUE_NOTE_HASH = '0x828d004b7cff80b8fc6915f80d7e239d1d265e83781aee56b74041df0f599694';
 
+module.exports = {
+    CRS: bn128.CRS,
+};
+
 console.log('CRS configured');
