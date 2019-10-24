@@ -17,6 +17,8 @@ screenshots/
 .env
 .env.development
 .env.production
+.env.test
+.env.integration
 *.log
 coverage.json
 lerna-debug.log*
