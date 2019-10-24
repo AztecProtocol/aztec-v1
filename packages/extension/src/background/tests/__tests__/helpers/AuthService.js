@@ -1,5 +1,5 @@
 import secp256k1 from '@aztec/secp256k1';
-// import '../../../../../env';
+
 
 class AuthService {
     constructor() {
