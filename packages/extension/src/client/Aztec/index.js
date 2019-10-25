@@ -75,8 +75,8 @@ class Aztec {
             width: window.innerWidth,
         });
         const elem = document.getElementById('AZTECSDK');
-        elem.height = 550;
-        elem.width = 340;
+        elem.height = 550 + (16 * 2);
+        elem.width = 340 + (16 * 2);
         elem.style.display = 'block';
     };
 

@@ -1,5 +1,21 @@
 @import './variables';
 
+:global(#popup) {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+
+    :global(#app) {
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    :global(#AZTECSDK-POPUP) {
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
 :global(#app) {
     width: 100%;
     height: 100%;
