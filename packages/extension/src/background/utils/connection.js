@@ -86,7 +86,6 @@ class Connection {
                 u.id = 'AZTECSDK-POPUP';
                 u.src = browser.runtime.getURL('./pages/popup.html');
                 u.style.display = 'block';
-                u.style.position = 'fixed';
                 u.width = '100%';
                 u.height = '100%';
                 document.body.appendChild(u);
