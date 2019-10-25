@@ -5,13 +5,15 @@ import PropTypes from 'prop-types';
 import {
     Route,
 } from 'react-router-dom';
+import {
+    addresses,
+} from '../data';
 import initialProps from '../initialProps';
 
 class MockRoute extends PureComponent {
     renderComponent = () => {
         const {
             name,
-            currentAccount,
             action,
             Component,
             goToPage,
@@ -35,6 +37,9 @@ class MockRoute extends PureComponent {
         const handleGoNext = next
             ? () => goToPage(next)
             : null;
+        const currentAccount = {
+            address: addresses[0],
+        };
 
         return (
             <Component
@@ -67,10 +72,6 @@ class MockRoute extends PureComponent {
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    currentAccount: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        linkedPublicKey: PropTypes.string,
-    }).isRequired,
     action: PropTypes.shape({
         id: PropTypes.string.isRequired,
         data: PropTypes.object,
