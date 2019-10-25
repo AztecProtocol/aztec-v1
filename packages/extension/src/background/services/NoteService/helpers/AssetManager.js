@@ -135,14 +135,15 @@ class AssetManager {
     }
 
     handleAssetSynced = async (assetId) => {
-        this.flushCallbacks(assetId);
-
         const asset = this.assetMapping[assetId];
         asset.removeListener('synced', this.handleAssetSynced);
         this.activeAssets.remove(asset);
+        this.flushCallbacks(assetId);
         this.syncNext();
 
-        await asset.save();
+        if (asset.modified) {
+            await asset.save();
+        }
     };
 
     handleNewRawNotes = (assetId) => {
