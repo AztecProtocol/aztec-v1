@@ -27,26 +27,26 @@ export const assets = [
     {
         code: 'dai',
         address: randomAddress(),
-        tokenAddress: randomAddress(),
+        linkedTokenAddress: randomAddress(),
         icon: daiIcon,
         balance: 0.51232,
     },
     {
         code: 'usdc',
         address: randomAddress(),
-        tokenAddress: randomAddress(),
+        linkedTokenAddress: randomAddress(),
         icon: usdcIcon,
         balance: 2832.21,
     },
     {
         code: 'cc',
         address: randomAddress(),
-        tokenAddress: randomAddress(),
+        linkedTokenAddress: randomAddress(),
         balance: 0,
     },
     ...generate(5, () => ({
         address: randomAddress(),
-        tokenAddress: randomAddress(),
+        linkedTokenAddress: randomAddress(),
         balance: 0,
     })),
 ];

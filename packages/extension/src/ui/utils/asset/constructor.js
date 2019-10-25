@@ -7,12 +7,12 @@ import {
 import getCodeByAddress from './getCodeByAddress';
 
 export default async function assetConstructor(address) {
-    const tokenAddress = await getLinkedTokenAddress(address);
+    const linkedTokenAddress = await getLinkedTokenAddress(address);
     const code = getCodeByAddress(address);
 
     return {
         code,
-        tokenAddress,
+        linkedTokenAddress,
         address,
         icon: icon(code),
     };

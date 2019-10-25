@@ -127,7 +127,7 @@ ProfileIcon.propTypes = {
     theme: themeType,
     type: profileType,
     address: PropTypes.string,
-    tokenAddress: PropTypes.string,
+    linkedTokenAddress: PropTypes.string,
     src: PropTypes.string,
     alt: PropTypes.string,
     tooltip: PropTypes.oneOfType([
@@ -141,7 +141,7 @@ ProfileIcon.defaultProps = {
     className: '',
     theme: 'primary',
     address: '',
-    tokenAddress: '',
+    linkedTokenAddress: '',
     type: '',
     src: '',
     alt: '',

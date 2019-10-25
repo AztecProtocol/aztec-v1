@@ -15,7 +15,7 @@ import SummaryLink from '~ui/components/SummaryLink';
 const AssetSummaryLink = ({
     className,
     address,
-    tokenAddress,
+    linkedTokenAddress,
     code,
     balance,
     onClick,
@@ -25,7 +25,7 @@ const AssetSummaryLink = ({
         profile={{
             type: 'asset',
             address,
-            tokenAddress,
+            linkedTokenAddress,
         }}
         onClick={onClick}
         hasButton={!!onClick}
@@ -59,7 +59,7 @@ const AssetSummaryLink = ({
 AssetSummaryLink.propTypes = {
     className: PropTypes.string,
     address: PropTypes.string.isRequired,
-    tokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
     balance: PropTypes.number.isRequired,
     onClick: PropTypes.func,

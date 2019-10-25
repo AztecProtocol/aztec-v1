@@ -38,14 +38,14 @@ const DomainPermissionTransaction = ({
         const maxAvatars = 3;
         assets.slice(0, maxAvatars).forEach(({
             address,
-            tokenAddress,
+            linkedTokenAddress,
             code,
         }) => {
             icons.push({
                 profile: {
                     type: 'asset',
                     address,
-                    tokenAddress,
+                    linkedTokenAddress,
                 },
                 tooltip: i18n.token(code) || formatAddress(address, 12, 6),
             });
@@ -53,7 +53,7 @@ const DomainPermissionTransaction = ({
         if (assets.length > maxAvatars) {
             moreItems = assets.slice(maxAvatars).map(({
                 address,
-                tokenAddress,
+                linkedTokenAddress,
             }, i) => (
                 <ListItem
                     key={+i}
@@ -61,7 +61,7 @@ const DomainPermissionTransaction = ({
                     profile={{
                         type: 'asset',
                         address,
-                        tokenAddress,
+                        linkedTokenAddress,
                     }}
                     content={formatAddress(address, 12, 6)}
                     size="xxs"
@@ -130,7 +130,7 @@ const DomainPermissionTransaction = ({
                             profile={{
                                 type: 'asset',
                                 address: firstAsset.address,
-                                tokenAddress: firstAsset.tokenAddress,
+                                linkedTokenAddress: firstAsset.linkedTokenAddress,
                             }}
                             content={(
                                 <div>

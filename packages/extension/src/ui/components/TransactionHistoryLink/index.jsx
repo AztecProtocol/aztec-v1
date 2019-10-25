@@ -45,7 +45,7 @@ const TransactionHistoryLink = ({
             profile={{
                 type: 'asset',
                 address: asset.address,
-                tokenAddress: asset.tokenAddress,
+                linkedTokenAddress: asset.linkedTokenAddress,
             }}
             onClick={onClick}
         >

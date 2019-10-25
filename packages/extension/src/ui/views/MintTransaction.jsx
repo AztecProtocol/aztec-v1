@@ -64,7 +64,7 @@ const MintTransaction = ({
     const {
         code,
         address: assetAddress,
-        tokenAddress,
+        linkedTokenAddress,
     } = asset;
     const {
         address: userAddress,
@@ -90,7 +90,7 @@ const MintTransaction = ({
                 to={{
                     type: 'asset',
                     address: assetAddress,
-                    tokenAddress,
+                    linkedTokenAddress,
                     alt: code,
                     description: formatAddress(assetAddress, 6, 4),
                 }}

@@ -69,7 +69,7 @@ const WithdrawTransaction = ({
     const {
         code,
         address: assetAddress,
-        tokenAddress,
+        linkedTokenAddress,
     } = asset;
 
     const ticketHeader = (
@@ -88,7 +88,7 @@ const WithdrawTransaction = ({
                     profile: {
                         type: 'asset',
                         address: assetAddress,
-                        tokenAddress,
+                        linkedTokenAddress,
                     },
                     description: formatAddress(assetAddress, 6, 4),
                 }}

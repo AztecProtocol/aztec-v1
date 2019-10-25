@@ -10,7 +10,7 @@ import TransactionHistorySummary from '~ui/components/TransactionHistorySummary'
 
 const Asset = ({
     address,
-    tokenAddress,
+    linkedTokenAddress,
     code,
     balance,
     goBack,
@@ -27,7 +27,7 @@ const Asset = ({
         <Block padding="0 l l">
             <AssetSummary
                 address={address}
-                tokenAddress={tokenAddress}
+                linkedTokenAddress={linkedTokenAddress}
                 code={code}
                 balance={balance}
             />
@@ -41,7 +41,7 @@ const Asset = ({
 
 Asset.propTypes = {
     address: PropTypes.string.isRequired,
-    tokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
     balance: PropTypes.number,
     pastTransactions: PropTypes.arrayOf(PropTypes.shape({
