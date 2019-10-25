@@ -87,13 +87,12 @@ class App extends PureComponent {
     }
 
     async loadInitialStates() {
-        const search = new URLSearchParams(window.location.search);
-        const actionId = search.get('id');
+        const action = await ActionService.last();
+        const actionId = action && action.id;
         const openByUser = !actionId;
         let route;
-        let action;
         if (actionId) {
-            action = await ActionService.get(actionId) || {};
+            // action = await ActionService.get(actionId) || {};
             if (action.requestId) {
                 const {
                     type,
@@ -117,6 +116,8 @@ class App extends PureComponent {
             });
             return;
         }
+
+        if (!action) return;
 
         const {
             data: {

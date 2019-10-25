@@ -29,7 +29,7 @@ class ConnectionManager {
                 this.port.onmessage = this.handlePortResponse;
             }
         });
-        window.opener.postMessage({
+        window.parent.postMessage({
             type: 'aztec-connection',
             requestId: randomId(),
             clientId: this.portId,
