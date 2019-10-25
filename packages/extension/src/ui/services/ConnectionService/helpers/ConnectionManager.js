@@ -2,9 +2,6 @@ import {
     warnLog,
 } from '~utils/log';
 import {
-    clientEvent,
-} from '~config/event';
-import {
     randomId,
 } from '~utils/random';
 import LRU from '~utils/caches/LRU';
@@ -20,7 +17,7 @@ class ConnectionManager {
         this.clientRequestId = '';
     }
 
-    async openConnection(source) {
+    async openConnection() {
         if (this.port) {
             warnLog('Connection has been established.');
             return;
@@ -28,7 +25,7 @@ class ConnectionManager {
         this.portId = randomId();
         window.addEventListener('message', (e) => {
             if (e.data.type === 'aztec-connection') {
-                this.port = e.ports[0];
+                [this.port] = e.ports;
                 this.port.onmessage = this.handlePortResponse;
             }
         });
@@ -77,14 +74,6 @@ class ConnectionManager {
             ? [callback]
             : [];
 
-        console.log('postToBackground', {
-            type,
-            requestId,
-            responseId,
-            clientRequestId,
-            clientId: this.portId,
-            data,
-        });
         this.port.postMessage({
             type,
             requestId,
