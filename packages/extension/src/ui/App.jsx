@@ -26,10 +26,11 @@ class App extends PureComponent {
 
         const {
             locale,
+            mock,
         } = props;
 
         this.state = {
-            loading: true,
+            loading: !mock,
             currentAccount: null,
             action: null,
             nextRoute: '',
@@ -47,10 +48,10 @@ class App extends PureComponent {
         const {
             mock,
         } = this.props;
+        if (mock) return;
+
         await ConnectionService.openConnection(window);
-        if (!mock) {
-            await configureWeb3Networks();
-        }
+        await configureWeb3Networks();
         this.loadInitialStates();
     }
 
@@ -88,36 +89,20 @@ class App extends PureComponent {
 
     async loadInitialStates() {
         const action = await ActionService.last();
-        const actionId = action && action.id;
-        const openByUser = !actionId;
-        let route;
-        if (actionId) {
-            // action = await ActionService.get(actionId) || {};
-            if (action.requestId) {
-                const {
-                    type,
-                    requestId,
-                } = action;
-                ConnectionService.setDefaultClientRequestId(requestId);
-                ({
-                    route,
-                } = actions[type] || {});
-            }
-        }
-
-        const {
-            mock,
-        } = this.props;
-        if (mock) {
-            this.setState({
-                nextRoute: '/',
-                loading: false,
-                action,
-            });
-            return;
-        }
-
         if (!action) return;
+
+        const openByUser = false;
+        let route;
+        if (action.requestId) {
+            const {
+                type,
+                requestId,
+            } = action;
+            ConnectionService.setDefaultClientRequestId(requestId);
+            ({
+                route,
+            } = actions[type] || {});
+        }
 
         const {
             data: {
