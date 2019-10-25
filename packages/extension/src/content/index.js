@@ -6,4 +6,6 @@ const runScript = () => {
     enableApi();
 };
 
-runScript();
+if (window.location.hostname.match(/^(www.)?aztecprotocol.com$/)) {
+    runScript();
+}
