@@ -69,12 +69,27 @@ class Aztec {
         return resp;
     }
 
+    openPopup = () => {
+        console.log({
+            height: window.innerHeight,
+            width: window.innerWidth,
+        });
+        const elem = document.getElementById('AZTECSDK');
+        elem.height = 550;
+        elem.width = 340;
+        elem.style.display = 'block';
+    };
+
     setupStreams = ({ data, ports, ...rest }) => {
         // here we need to enable the subscription to await metamask actions from the extension
         this.MessageSubject = new Subject();
         this.messages$ = this.MessageSubject.asObservable();
         this.port = ports[0];
         this.port.onmessage = ({ data }) => {
+            if (data.data.type === 'UI_REQUEST_POPUP') {
+                this.openPopup();
+                return;
+            }
             this.MessageSubject.next({
                 ...data,
                 data: {

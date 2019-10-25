@@ -7,4 +7,5 @@ export default {
         }
         return actionModel.get({ id: actionId });
     },
+    last: async () => actionModel.last(),
 };

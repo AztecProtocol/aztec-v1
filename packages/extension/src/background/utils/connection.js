@@ -9,6 +9,7 @@ import {
     map,
     filter,
 } from 'rxjs/operators';
+import browser from 'webextension-polyfill';
 import {
     clientEvent,
     actionEvent,
@@ -79,9 +80,28 @@ class Connection {
             mergeMap(action => from(updateActionState(action))),
             map((action) => {
                 const {
-                    timestamp,
+                    requestId,
                 } = action;
-                openPopup({ timestamp });
+                const u = document.createElement('iframe');
+                u.id = 'AZTECSDK-POPUP';
+                u.src = browser.runtime.getURL('./pages/popup.html');
+                u.style.display = 'block';
+                u.style.position = 'fixed';
+                u.width = '100%';
+                u.height = '100%';
+                document.body.appendChild(u);
+                const popupContainer = document.getElementById('popup');
+                popupContainer.innerHTML = '';
+                popupContainer.appendChild(u);
+
+                const clientId = this.requests[requestId].webClientId;
+                const clientPort = this.connections[clientId];
+                clientPort.postMessage({
+                    requestId,
+                    data: {
+                        type: 'UI_REQUEST_POPUP',
+                    },
+                });
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
