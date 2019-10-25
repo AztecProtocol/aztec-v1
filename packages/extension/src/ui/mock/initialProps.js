@@ -86,6 +86,7 @@ export default {
         goNext: dummyFunc,
     },
     noteAccess: {
+        id: notes[0].noteHash,
         note: notes[0],
         accounts: addresses.map(address => ({
             address,
@@ -108,6 +109,7 @@ export default {
     },
     deposit: {
         from: addresses[0],
+        sender: addresses[1],
         assetAddress: assets[0].address,
         transactions: [depositTransactions[0]],
         goNext: dummyFunc,
@@ -122,6 +124,7 @@ export default {
     'deposit.grant': {
         asset: assets[0],
         from: addresses[0],
+        sender: addresses[1],
         transactions: [],
         amount: randomInt(1, 1000),
         goNext: dummyFunc,
