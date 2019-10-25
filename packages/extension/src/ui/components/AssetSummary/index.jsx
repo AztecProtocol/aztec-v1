@@ -16,7 +16,7 @@ import Button from '~ui/components/Button';
 const AssetSummary = ({
     className,
     address,
-    tokenAddress,
+    linkedTokenAddress,
     code,
     balance,
 }) => (
@@ -29,7 +29,7 @@ const AssetSummary = ({
         <ProfileIcon
             type="asset"
             address={address}
-            tokenAddress={tokenAddress}
+            linkedTokenAddress={linkedTokenAddress}
             size="l"
         />
         <Block top="m">
@@ -73,7 +73,7 @@ const AssetSummary = ({
 AssetSummary.propTypes = {
     className: PropTypes.string,
     address: PropTypes.string.isRequired,
-    tokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string.isRequired,
     code: PropTypes.string,
     balance: PropTypes.number.isRequired,
 };

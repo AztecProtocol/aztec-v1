@@ -70,7 +70,7 @@ const SendTransaction = ({
     const {
         code,
         address: assetAddress,
-        tokenAddress,
+        linkedTokenAddress,
     } = asset;
 
     const [firstTransaction, ...rest] = transactions;
@@ -118,7 +118,7 @@ const SendTransaction = ({
                     profile: {
                         type: 'asset',
                         address: assetAddress,
-                        tokenAddress,
+                        linkedTokenAddress,
                     },
                     description: formatAddress(assetAddress, 6, 4),
                 }}

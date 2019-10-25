@@ -66,7 +66,7 @@ const DepositTransaction = ({
     const {
         code,
         address: assetAddress,
-        tokenAddress,
+        linkedTokenAddress,
     } = asset;
 
     const initialData = {
@@ -94,16 +94,16 @@ const DepositTransaction = ({
                     profile: {
                         type: 'token',
                         address: assetAddress,
-                        tokenAddress,
+                        linkedTokenAddress,
                         alt: code,
                     },
-                    description: formatAddress(tokenAddress, 6, 4),
+                    description: formatAddress(linkedTokenAddress, 6, 4),
                 }}
                 to={{
                     profile: {
                         type: 'asset',
                         address: assetAddress,
-                        tokenAddress,
+                        linkedTokenAddress,
                     },
                     description: formatAddress(assetAddress, 6, 4),
                 }}

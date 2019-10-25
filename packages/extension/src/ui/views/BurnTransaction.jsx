@@ -61,7 +61,7 @@ const BurnTransaction = ({
     const {
         code,
         address: assetAddress,
-        tokenAddress,
+        linkedTokenAddress,
     } = asset;
 
     const ticketHeader = (
@@ -84,7 +84,7 @@ const BurnTransaction = ({
                 to={{
                     type: 'asset',
                     address: assetAddress,
-                    tokenAddress,
+                    linkedTokenAddress,
                     alt: code,
                     description: formatAddress(assetAddress, 6, 4),
                 }}
@@ -123,7 +123,7 @@ const BurnTransaction = ({
 BurnTransaction.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,
-        tokenAddress: PropTypes.string.isRequired,
+        linkedTokenAddress: PropTypes.string.isRequired,
         code: PropTypes.string,
     }).isRequired,
     user: PropTypes.shape({

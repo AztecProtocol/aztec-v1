@@ -23,7 +23,7 @@ export const profileType = PropTypes.oneOf([
 const assetProfileShape = PropTypes.shape({
     type: PropTypes.oneOf(['asset', 'token']),
     address: PropTypes.string.isRequired,
-    tokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string.isRequired,
 });
 
 const userProfileShape = PropTypes.shape({
