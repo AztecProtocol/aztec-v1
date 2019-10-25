@@ -1,3 +1,3 @@
-window.opener = {
+window.parent = {
     postMessage: () => {},
 };

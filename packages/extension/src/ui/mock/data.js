@@ -62,12 +62,12 @@ export const domains = [
 
 export const notes = [
     {
-        hash: `0x${randomId()}`,
+        noteHash: `0x${randomId()}`,
         value: randomInt(100),
         asset: assets[0],
     },
     {
-        hash: `0x${randomId()}`,
+        noteHash: `0x${randomId()}`,
         value: randomInt(100),
         asset: assets[1],
     },
