@@ -22,6 +22,7 @@ export default async function deposit({
     transactions,
     publicOwner,
     numberOfOutputNotes,
+    sender,
 }) {
     const notesOwner = await getNoteOwnerAccount(owner);
     if (!notesOwner) {
@@ -77,10 +78,11 @@ export default async function deposit({
     );
     const inputNotes = [];
 
+
     const proof = new JoinSplitProof(
         inputNotes,
         outputNotes,
-        notesOwnerAddress,
+        sender,
         publicValue,
         publicOwner,
     );

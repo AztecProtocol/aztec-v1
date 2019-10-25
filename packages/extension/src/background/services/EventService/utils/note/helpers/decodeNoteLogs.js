@@ -51,16 +51,14 @@ const decodeLog = rawLog => ({
     },
 });
 
-const noteLog = (decodedLog) => {
-    return {
-        owner: decodedLog.owner,
-        noteHash: decodedLog.noteHash,
-        blockNumber: decodedLog.blockNumber,
-        asset: decodedLog.asset,
-        status: decodedLog.status,
-        metadata: decodedLog.metadata,
-    };
-};
+const noteLog = decodedLog => ({
+    owner: decodedLog.owner,
+    noteHash: decodedLog.noteHash,
+    blockNumber: decodedLog.blockNumber,
+    asset: decodedLog.asset,
+    status: decodedLog.status,
+    metadata: decodedLog.metadata,
+});
 
 export default function decodeNoteLogs(eventsTopics, rawLogs) {
     const [
@@ -79,7 +77,11 @@ export default function decodeNoteLogs(eventsTopics, rawLogs) {
         .map(log => noteLog(decodeLog(log).updateNoteMetaData()));
 
     const destroyNotes = (groupedRawLogs[destroyNoteTopic] || [])
-        .map(log => noteLog(decodeLog(log).destroyNote()));
+        .map(log => noteLog(decodeLog(log).destroyNote()))
+        .map((note) => {
+            delete note.metadata;
+            return note;
+        });
 
     const lastBlockNumber = () => [
         createNotes[createNotes.length - 1],

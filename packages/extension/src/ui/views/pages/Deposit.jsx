@@ -26,6 +26,7 @@ const Deposit = ({
     from,
     assetAddress,
     transactions,
+    sender,
 }) => {
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
@@ -36,6 +37,7 @@ const Deposit = ({
             from,
             amount,
             transactions,
+            sender,
         };
     };
 
