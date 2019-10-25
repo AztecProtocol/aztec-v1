@@ -198,7 +198,7 @@ class Web3Service {
     }
 
     triggerMethod = async (type, method, contractAddress, ...args) => {
-        const { 
+        const {
             address,
             privateKey,
         } = this.account;
@@ -221,7 +221,7 @@ class Web3Service {
 
         if (type === 'sendSigned') {
             if (!contractAddress) {
-                errorLog('contractAddress should be passed')
+                errorLog('contractAddress should be passed');
                 return;
             }
             const encodedData = method(...methodArgs).encodeABI();
@@ -229,19 +229,19 @@ class Web3Service {
                 from: address,
                 gas: 6500000,
                 ...methodSetting,
-            })
+            });
             const tx = {
                 to: contractAddress,
                 data: encodedData,
                 gas: estimatedGas,
                 gasPrice: 4000000000, // comment it to set gasPrice automatically
                 ...methodSetting,
-            }
+            };
 
             const signedT = await this.web3.eth.accounts.signTransaction(tx, privateKey);
 
             return new Promise(async (resolve, reject) => {
-                this.web3.eth.sendSignedTransaction(signedT.rawTransaction).on('receipt', ({ transactionHash }) => {                    
+                this.web3.eth.sendSignedTransaction(signedT.rawTransaction).on('receipt', ({ transactionHash }) => {
                     const interval = setInterval(() => {
                         this.web3.eth.getTransactionReceipt(transactionHash, (
                             error,
@@ -298,7 +298,7 @@ class Web3Service {
                 if (!method) {
                     throw new Error(`Method '${methodName}' is not defined in contract '${contractName}'.`);
                 }
-                
+
                 const address = contractAddress || contract.address;
                 return {
                     call: async (...args) => this.triggerMethod('call', method, null, ...args),

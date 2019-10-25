@@ -1,4 +1,5 @@
 import updateBulkNotes from './updateBulkNotes';
+import createBulkNotes from './createBulkNotes';
 
 
 export default async function saveNotes({
@@ -7,7 +8,7 @@ export default async function saveNotes({
     destroyNotes,
 }, networkId) {
     // save it in serial
-    await updateBulkNotes(createNotes, networkId);
+    await createBulkNotes(createNotes, networkId);
     await updateBulkNotes(updateNotes, networkId);
     await updateBulkNotes(destroyNotes, networkId);
 }

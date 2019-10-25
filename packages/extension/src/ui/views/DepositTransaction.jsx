@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    proofs,
+} from '@aztec/dev-utils';
+import {
     assetShape,
 } from '~ui/config/propTypes';
 import {
@@ -59,6 +62,7 @@ const DepositTransaction = ({
     initialStep,
     initialTask,
     autoStart,
+    sender,
     goNext,
     goBack,
     onClose,
@@ -74,8 +78,11 @@ const DepositTransaction = ({
         owner: fromAddress,
         publicOwner: fromAddress,
         transactions,
+        sender,
         amount,
         numberOfOutputNotes,
+        signatures: '0x',
+        proofId: proofs.JOIN_SPLIT_PROOF,
     };
 
     const ticketHeader = (
@@ -142,6 +149,7 @@ DepositTransaction.propTypes = {
     })).isRequired,
     amount: PropTypes.number.isRequired,
     numberOfOutputNotes: PropTypes.number,
+    sender: PropTypes.string.isRequired,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     autoStart: PropTypes.bool,

@@ -11,6 +11,7 @@ import bulkAdd from './bulkAdd';
 
 // update
 import put from './put';
+import update from './update';
 import bulkPut from './bulkPut';
 
 // retrieve
@@ -92,6 +93,7 @@ export default function Model(config) {
         bulkAdd: (items, options) => bulkAdd(name, items, { options, modelConfig }),
         put: (items, options) => put(name, items, { options, modelConfig }),
         bulkPut: (items, options) => bulkPut(name, items, { options, modelConfig }),
+        update: (items, options) => update(name, items, { options, modelConfig }),
 
         // queries
         get: (options, pk) => get(name, options, pk),

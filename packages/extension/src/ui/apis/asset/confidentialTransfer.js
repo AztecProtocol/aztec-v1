@@ -1,19 +1,19 @@
 import ConnectionService from '~ui/services/ConnectionService';
 
-export default async function send({
+export default async function publicApprove({
     assetAddress,
     proof,
-    signatures = '0x',
+    signatures,
 }) {
+    console.log({ signatures });
     const proofData = proof.encodeABI(assetAddress);
-    const response = await ConnectionService.sendTransaction({
-        contract: 'IZkAsset',
-        contractAddress: assetAddress,
-        method: 'confidentialTransfer',
-        data: [
+    const response = await ConnectionService.post({
+        action: 'metamask.zkAsset.confidentialTransfer',
+        data: {
             proofData,
+            assetAddress,
             signatures,
-        ],
+        },
     });
 
     return response;

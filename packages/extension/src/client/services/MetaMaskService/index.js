@@ -116,6 +116,30 @@ export default async ({ data }) => {
                 },
             };
         }
+        case 'metamask.zkAsset.confidentialTransfer': {
+            const {
+                response: {
+                    assetAddress,
+                    proofData,
+                    signatures,
+                },
+            } = data;
+
+            await Web3Service
+                .useContract('ZkAsset')
+                .at(assetAddress)
+                .method('confidentialTransfer')
+                .send(
+                    proofData,
+                    signatures,
+                );
+            return {
+                ...data,
+                response: {
+                    success: true,
+                },
+            };
+        }
         default: {
             break;
         }
