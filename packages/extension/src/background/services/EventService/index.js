@@ -118,7 +118,7 @@ class EventService {
             address,
             networkId,
         });
-        console.log(newAccount);
+        console.log({ newAccount });
 
         if (newAccount) {
             await createAccount(newAccount, networkId);

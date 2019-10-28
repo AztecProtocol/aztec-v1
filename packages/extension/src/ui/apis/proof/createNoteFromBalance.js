@@ -22,7 +22,7 @@ import {
 } from '~ui/config/settings';
 import ConnectionService from '~ui/services/ConnectionService';
 import {
-    getNoteOwnerAccount,
+    getExtensionAccount,
 } from '~ui/apis/account';
 
 export default async function createNoteFromBalance({
@@ -36,7 +36,7 @@ export default async function createNoteFromBalance({
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
 }) {
-    const inputNotesOwner = await getNoteOwnerAccount(sender);
+    const inputNotesOwner = await getExtensionAccount(sender);
     let inputAmount = amount;
 
     const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
@@ -50,7 +50,7 @@ export default async function createNoteFromBalance({
     let outputNotesOwner = inputNotesOwner;
     if (transactions && transactions.length) {
         await asyncForEach(transactions, async ({ to }) => {
-            const account = await getNoteOwnerAccount(to);
+            const account = await getExtensionAccount(to);
             outputNotesOwnerMapping[to] = account;
         });
 
@@ -60,7 +60,7 @@ export default async function createNoteFromBalance({
         }
     } else if (owner) {
         if (owner !== inputNotesOwner.address) {
-            outputNotesOwner = await getNoteOwnerAccount(owner);
+            outputNotesOwner = await getExtensionAccount(owner);
         }
         outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
     }

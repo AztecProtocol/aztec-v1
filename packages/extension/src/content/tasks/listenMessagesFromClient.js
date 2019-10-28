@@ -75,7 +75,6 @@ export default function listenMessagesFromClient() {
     });
     const backgroundSubject = new Subject();
     const background$ = backgroundSubject.asObservable();
-
     backgroundPort.onMessage.addListener((msg, sender) => {
         backgroundSubject.next(msg);
     });

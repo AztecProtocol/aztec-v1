@@ -23,7 +23,7 @@ export default async function demoBurnable({
     } = Web3Service.account;
 
 
-    let zkAssetAddress = ''; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = '0xB9664917C22dF160FF7866e2e3726e75fdB2DDCa'; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
