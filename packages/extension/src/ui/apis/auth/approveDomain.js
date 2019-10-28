@@ -4,6 +4,7 @@ export default async function approveDomain({
     domain,
 }) {
     let success;
+    console.log({ domain });
     try {
         const response = await AuthService.registerDomain(domain);
         success = !!response && !response.error;

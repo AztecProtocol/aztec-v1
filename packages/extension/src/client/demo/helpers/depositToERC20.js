@@ -27,6 +27,6 @@ export default async function depositToERC20({
         .method('approve')
         .send(
             aceAddress,
-            amount,
+            amount * 5000000,
         );
 }

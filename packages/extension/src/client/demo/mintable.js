@@ -20,7 +20,7 @@ export default async function demoMintable({
         address: userAddress,
     } = Web3Service.account;
 
-    let zkAssetAddress = '0xCfb33FF2E975fdd9f9DCc3D00952491ae5368EC7'; // ADD EXISTING ASSET ADDRESS HERE
+    let zkAssetAddress = '0x4579bddE4D9F07059CD0623C7c927BC54d90F86e'; // ADD EXISTING ASSET ADDRESS HERE
     if (!zkAssetAddress) {
         log('Creating new asset...');
         ({

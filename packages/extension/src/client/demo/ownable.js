@@ -94,25 +94,25 @@ export default async function demoOwnable({
     }
 
 
-//     await deposit(asset, [{
-//         amount: depositAmount,
-//         to: userAddress,
-//     }], {
-//         from: userAddress,
-//         sender: userAddress,
-//     });
+    //     await deposit(asset, [{
+    //         amount: depositAmount,
+    //         to: userAddress,
+    //     }], {
+    //         from: userAddress,
+    //         sender: userAddress,
+    //     });
 
 
-//     await logBalance();
+    //     await logBalance();
 
 
-//     const withdrawAmount = randomInt(1, 10);
-//     // const withdrawAmount = 10;
-//     await withdraw(asset, withdrawAmount, {
-//         sender: userAddress,
-//         from: userAddress,
-//         to: userAddress,
-//     });
+    //     const withdrawAmount = randomInt(1, 10);
+    //     // const withdrawAmount = 10;
+    //     await withdraw(asset, withdrawAmount, {
+    //         sender: userAddress,
+    //         from: userAddress,
+    //         to: userAddress,
+    //     });
 
 
     await logBalance();

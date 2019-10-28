@@ -19,14 +19,21 @@ class ConfirmBackup extends PureComponent {
             seedPhrase,
             numberOfPhrases,
         } = props;
-
         this.seedPhraseSize = seedPhrase.split(' ').length;
-
+        const seedPhraseArr = seedPhrase.split(' ');
+        const inputPos = randomInts(numberOfPhrases, 1, this.seedPhraseSize);
+        const inputPhrases = inputPos.map(pos => seedPhraseArr[pos - 1]);
         this.state = {
-            inputPos: randomInts(numberOfPhrases, 1, this.seedPhraseSize),
-            inputPhrases: [],
+            inputPos,
+            inputPhrases,
             errorKey: '',
         };
+
+        // this.state = {
+        //     inputPos: randomInts(numberOfPhrases, 1, this.seedPhraseSize),
+        //     inputPhrases: [],
+        //     errorKey: '',
+        // };
     }
 
     handleSubmit = () => {
