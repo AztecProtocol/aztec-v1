@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const { padLeft, toHex } = require('web3-utils');
 
 const note = require('../../src/note');
-const ProofUtils = require('../../src/proof/utils');
+const ProofUtils = require('../../src/proof/base/epoch0/utils');
 
 const mockLightNote = async (k) => {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);

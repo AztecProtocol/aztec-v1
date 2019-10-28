@@ -5,8 +5,8 @@ const { randomHex } = require('web3-utils');
 const sinon = require('sinon');
 
 const { BurnProof, MintProof, Proof } = require('../../../src/proof');
-const BurnVerifier = require('../../../src/proof/joinSplitFluid/burn/verifier');
-const MintVerifier = require('../../../src/proof/joinSplitFluid/mint/verifier');
+const BurnVerifier = require('../../../src/proof/proofs/BURN/epoch0/burn/verifier');
+const MintVerifier = require('../../../src/proof/proofs/MINT/epoch0/mint/verifier');
 const note = require('../../../src/note');
 
 describe('Join-Split Fluid Proof Verifier', () => {

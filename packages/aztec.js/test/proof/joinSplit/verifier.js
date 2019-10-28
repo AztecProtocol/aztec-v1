@@ -8,9 +8,9 @@ const { padLeft, randomHex } = require('web3-utils');
 
 const { balancedPublicValues, mockNoteSet, randomNoteValue } = require('../../helpers/note');
 const { JoinSplitProof, Proof } = require('../../../src/proof');
-const JoinSplitVerifier = require('../../../src/proof/joinSplit/verifier');
+const JoinSplitVerifier = require('../../../src/proof/proofs/BALANCED/epoch0/joinSplit/verifier');
 const { mockZeroJoinSplitProof } = require('../../helpers/proof');
-const ProofUtils = require('../../../src/proof/utils');
+const ProofUtils = require('../../../src/proof/base/epoch0/utils');
 
 describe('Join-Split Proof Verifier', () => {
     const sender = randomHex(20);
@@ -56,7 +56,6 @@ describe('Join-Split Proof Verifier', () => {
 
             const verifier = new JoinSplitVerifier(proof);
             const result = verifier.verifyProof();
-            // console.log(verifier.errors);
             expect(verifier.isValid).to.equal(true);
             expect(result.pairingGammas).to.equal(undefined);
             expect(result.pairingSigmas).to.equal(undefined);
