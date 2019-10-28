@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 /* eslint-disable prefer-destructuring */
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
@@ -7,7 +8,7 @@ const { randomHex } = require('web3-utils');
 
 const { JoinSplitProof } = require('../../../src/proof');
 const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
-const ProofUtils = require('../../../src/proof/utils');
+const ProofUtils = require('../../../src/proof/base/epoch0/utils');
 const { validateElement, validateScalar } = require('../../helpers/bn128');
 
 const { K_MAX } = constants;
@@ -42,6 +43,7 @@ describe('Join-Split Proof', () => {
             let publicValue = ProofUtils.getPublicValue(kIn, kOut);
             publicValue = bn128.groupModulus.add(new BN(publicValue)).umod(bn128.groupModulus);
             const proof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+
             expect(proof.data.length).to.equal(5);
             expect(proof.challengeHex.length).to.equal(66);
             validateScalar(proof.challengeHex);
