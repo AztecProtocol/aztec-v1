@@ -6,7 +6,8 @@ const truffleAssert = require('truffle-assertions');
 // ### Internal Dependencies
 /* eslint-disable-next-line object-curly-newline */
 const { BurnProof, JoinSplitProof, MintProof, note } = require('aztec.js');
-const { constants, proofs } = require('@aztec/dev-utils');
+const { CRS } = require('@aztec/bn128');
+const { proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 
 const { BURN_PROOF, JOIN_SPLIT_PROOF, MINT_PROOF } = proofs;
@@ -69,7 +70,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             joinSplitFluidValidator = await JoinSplitFluid.new();
             joinSplitValidator = await JoinSplit.new();
 
-            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setCommonReferenceString(CRS);
             await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
@@ -136,7 +137,7 @@ contract('ACE Mint and Burn Functionality', (accounts) => {
             joinSplitFluidValidator = await JoinSplitFluid.new();
             joinSplitValidator = await JoinSplit.new();
 
-            await ace.setCommonReferenceString(constants.CRS);
+            await ace.setCommonReferenceString(CRS);
             await ace.setProof(MINT_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(BURN_PROOF, joinSplitFluidValidator.address);
             await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address);
