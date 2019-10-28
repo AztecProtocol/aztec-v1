@@ -24,8 +24,8 @@ export default async function demoOwnable({
         address: userAddress,
     } = Web3Service.account;
 
-    // let zkAssetAddress = '0xae5fEB559F4486730333cabFaa407A9e10c0E874'; // ADD EXISTING ASSET ADDRESS HERE
-    let zkAssetAddress = '';
+    let zkAssetAddress = '0xae5fEB559F4486730333cabFaa407A9e10c0E874'; // RINKBEY asset
+    // let zkAssetAddress = '0x5DA442ED40215f6fBA37A731D54056674e4e67Ca';
     if (!zkAssetAddress) {
         log('Creating new asset...');
         const {
@@ -94,39 +94,39 @@ export default async function demoOwnable({
     }
 
 
-    await deposit(asset, [{
-        amount: depositAmount,
-        to: userAddress,
+//     await deposit(asset, [{
+//         amount: depositAmount,
+//         to: userAddress,
+//     }], {
+//         from: userAddress,
+//         sender: userAddress,
+//     });
+
+
+//     await logBalance();
+
+
+//     const withdrawAmount = randomInt(1, 10);
+//     // const withdrawAmount = 10;
+//     await withdraw(asset, withdrawAmount, {
+//         sender: userAddress,
+//         from: userAddress,
+//         to: userAddress,
+//     });
+
+
+    await logBalance();
+
+    const to = prompt('enter sender address');
+    const sendAmount = parseInt(prompt('enter amount'));
+    await send(asset, [{
+        amount: sendAmount,
+        to,
     }], {
         from: userAddress,
         sender: userAddress,
+
     });
-
-
-    await logBalance();
-
-
-    // const withdrawAmount = randomInt(1, 10);
-    const withdrawAmount = 1;
-    await withdraw(asset, withdrawAmount, {
-        sender: userAddress,
-        from: userAddress,
-        to: userAddress,
-    });
-
-
-    await logBalance();
-
-
-    // const sendAmount = randomInt(1, 10);
-    // await send(asset, [{
-    //     amount: sendAmount,
-    //     to: userAddress,
-    // }], {
-    //     from: userAddress,
-    //     sender: userAddress,
-
-    // });
 
 
     await logBalance();

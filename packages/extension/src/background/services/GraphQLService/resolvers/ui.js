@@ -1,4 +1,5 @@
 import AuthService from '~background/services/AuthService';
+import EventService from '~background/services/EventService';
 import {
     ensureKeyvault,
     ensureAccount,
@@ -50,10 +51,7 @@ const uiResolvers = {
                 address: id,
             });
         },
-        account: async (_, { address }) => ({
-            id: address,
-            address,
-        }),
+        account: async (_, { address }, ctx) => EventService.fetchAztecAccount({ address, networkId: ctx.networkId }),
 
         note: async (_, args) => {
             const {
