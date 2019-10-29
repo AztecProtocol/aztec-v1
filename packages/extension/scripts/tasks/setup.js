@@ -3,6 +3,7 @@ import {
 } from 'terminal-kit';
 import chalk from 'chalk';
 import ganacheInstance from '../instances/ganacheInstance';
+import gsnRelayerInstance from '../instances/gsnRelayerInstance';
 import {
     log,
     successLog,
@@ -14,6 +15,7 @@ import pipeTasks, {
 import stopProcesses from '../utils/stopProcesses';
 import deployContracts from './deployContracts';
 import copy from './copy';
+import waitUntilGSNRealyerUp from './waitUntilGSNRealyerUp';
 
 export default function setup({
     onStart,
@@ -101,12 +103,27 @@ export default function setup({
         log('');
     };
 
+    const doCloseGSNRelayer = makeCloseChildProcessCallback('gsnRelayer');
+
     runningProcesses.ganache = ganacheInstance({
         onClose: makeCloseChildProcessCallback('ganache'),
         onError: handleError,
     }).next(async () => {
+        // runningProcesses.gsnRelayer = await gsnRelayerInstance({
+        //     onClose: (code) => {
+        //         if (code === 0) return;
+        //         doCloseGSNRelayer();
+        //     },
+        //     onError: handleError,
+        // });
+        // return runningProcesses.gsnRelayer;
+        
+    }).next(() => {
+        log(`Should be next pipeTasks`);
+
         pipeTasks(
             [
+                // waitUntilGSNRealyerUp,
                 deployContracts,
                 logTask('Successfully deployed contracts to ganache.'),
                 copy,
