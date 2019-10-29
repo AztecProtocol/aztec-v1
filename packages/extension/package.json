@@ -31,6 +31,7 @@
         "dexie": "^2.0.4",
         "dotenv": "^8.0.0",
         "dotenv-webpack": "^1.7.0",
+        "eth-crypto": "^1.5.0",
         "eth-sig-util": "^2.2.0",
         "global": "^4.4.0",
         "graphiql": "^0.13.2",

@@ -139,6 +139,7 @@ class App extends PureComponent {
                     : 'welcome';
             } else if (!onChainLinkedPublicKey && validSession) {
                 route = 'register.address';
+                currentAccount.linkedPublicKey = localLinkedPublicKey;
             } else if (onChainLinkedPublicKey) {
                 route = 'account.restore';
             }

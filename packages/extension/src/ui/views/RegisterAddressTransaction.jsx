@@ -86,6 +86,7 @@ const RegisterAddressTransaction = ({
     address,
     initialStep,
     initialTask,
+    linkedPublicKey,
     autoStart,
     goNext,
     goBack,
@@ -119,6 +120,7 @@ const RegisterAddressTransaction = ({
 
     const initialData = {
         seedPhrase,
+        linkedPublicKey,
         password,
         address,
     };

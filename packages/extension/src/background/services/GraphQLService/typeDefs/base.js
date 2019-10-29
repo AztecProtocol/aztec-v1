@@ -28,6 +28,7 @@ export default gql`
         id: ID!
         address: String!
         linkedPublicKey: String
+        spendingPublicKey: String
     }
     type User {
         id: ID!

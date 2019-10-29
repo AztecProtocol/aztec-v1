@@ -9,7 +9,7 @@ import getAssetBalance from './utils/getAssetBalance';
 export default {
     BigInt: new BigInt('bigInt'),
     User: {
-        spendingPublicKey: async () => getUserSpendingPublicKey(),
+        // spendingPublicKey: async () => getUserSpendingPublicKey(),
     },
     Note: {
         asset: async ({ asset }) => (typeof asset === 'string' && assetModel.get({ id: asset })) || asset,
