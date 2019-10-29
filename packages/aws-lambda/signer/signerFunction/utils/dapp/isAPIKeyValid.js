@@ -6,4 +6,3 @@ module.exports = (host, apiKey) => {
     log('Not implemented isAPIKeyValid')
     return true;
 };
-
