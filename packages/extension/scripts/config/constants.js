@@ -1,0 +1,1 @@
+export const DEFAULT_GSN_RELAYER_PORT = 8090;
