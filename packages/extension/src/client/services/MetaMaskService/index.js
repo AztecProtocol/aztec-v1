@@ -1,4 +1,5 @@
 import ethSigUtil from 'eth-sig-util';
+import EthCrypto from 'eth-crypto';
 import { utils } from 'web3';
 import Web3Service from '../Web3Service';
 import registerExtension from './registerExtension';
@@ -25,12 +26,15 @@ export default async ({ data }) => {
                 data: eip712Data,
                 sig: result,
             });
+            const compressedPublicKey = EthCrypto.publicKey.compress(
+                publicKey.slice(2),
+            );
 
             return {
                 ...data,
                 response: {
                     signature: result,
-                    publicKey: utils.keccak256(publicKey),
+                    publicKey: `0x${compressedPublicKey}`,
                 },
             };
         }

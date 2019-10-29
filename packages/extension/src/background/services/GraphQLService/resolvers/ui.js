@@ -1,6 +1,9 @@
 import AuthService from '~background/services/AuthService';
 import EventService from '~background/services/EventService';
 import {
+    get,
+} from '~utils/storage';
+import {
     ensureKeyvault,
     ensureAccount,
     ensureDomainPermission,
@@ -45,13 +48,14 @@ const uiResolvers = {
         user: async (_, { id }) => userModel.get({
             id,
         }),
-        asset: async (_, { id }) => {
-            console.log('fetching', id);
-            return assetModel.get({
-                address: id,
-            });
+        asset: async (_, { id }) => assetModel.get({
+            address: id,
+        }),
+        account: async (_, { address }, ctx, info) => {
+            const networkId = await get('networkId');
+            return EventService.fetchAztecAccount({ address, networkId });
         },
-        account: async (_, { address }, ctx) => EventService.fetchAztecAccount({ address, networkId: ctx.networkId }),
+
 
         note: async (_, args) => {
             const {

@@ -13,7 +13,7 @@ const uiTypes = gql`
         action: Action
     }
     type UserAccountApiResponse {
-        account: User
+        account: Account
         error: Error
     }
     extend type Query {
@@ -25,7 +25,7 @@ const uiTypes = gql`
         ): Asset 
         account( 
             address: String!
-        ): Account
+        ): UserAccountApiResponse 
         note(
             id: ID!
         ): Note

@@ -144,7 +144,7 @@ export default async function createNoteFromBalance({
             outputValues.push(...values);
             const newNotes = await createNotes(
                 values,
-                inputNotesOwner.spendingPublicKey,
+                notesOwner.spendingPublicKey,
                 notesOwner.address,
                 notesOwner.linkedPublicKey,
             );
@@ -159,7 +159,7 @@ export default async function createNoteFromBalance({
 
         const newNotes = await createNotes(
             values,
-            inputNotesOwner.spendingPublicKey,
+            outputNotesOwner.spendingPublicKey,
             outputNotesOwner.address,
             outputNotesOwner.linkedPublicKey,
         );

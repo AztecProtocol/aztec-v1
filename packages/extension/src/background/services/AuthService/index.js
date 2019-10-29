@@ -18,6 +18,9 @@ const AuthService = {
     getKeyStore: async () => get('keyStore') || null,
     getSession: async () => {
         const session = await get('session');
+        if (!session) {
+            return null;
+        }
         const {
             pwDerivedKey,
         } = session || {};

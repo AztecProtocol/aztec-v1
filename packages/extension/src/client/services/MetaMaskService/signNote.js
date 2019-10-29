@@ -15,7 +15,6 @@ export default ({
     challenge,
     assetAddress,
 }) => {
-    console.log(assetAddress);
     const domain = signer.generateZKAssetDomainParams(assetAddress);
     const schema = eip712.JOIN_SPLIT_SIGNATURE;
     const message = {
@@ -24,7 +23,6 @@ export default ({
         challenge,
         sender,
     };
-    console.log(message);
     const data = JSON.stringify({
         ...schema,
         message,

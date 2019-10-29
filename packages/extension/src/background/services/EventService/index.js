@@ -101,7 +101,6 @@ class EventService {
         address,
         networkId,
     }) => {
-        console.log('Trying to fetch account', { address, networkId });
         const account = await Account.get({ networkId }, address);
 
         if (account) {
@@ -118,7 +117,6 @@ class EventService {
             address,
             networkId,
         });
-        console.log({ newAccount });
 
         if (newAccount) {
             await createAccount(newAccount, networkId);
@@ -126,7 +124,7 @@ class EventService {
 
             return {
                 error: null,
-                account: latestAccount,
+                account: latestAccount || newAccount,
             };
         }
 
