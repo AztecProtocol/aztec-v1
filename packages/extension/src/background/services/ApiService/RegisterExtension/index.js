@@ -23,7 +23,18 @@ const registerExtensionUi = async (query, connection) => {
                 requestId,
             },
         });
+
         const response = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+        const {
+            data: registeredData,
+        } = response.data || {};
+        if (registeredData && registeredData.linkedPublicKey) {
+            // call validateUserPermission again to start EventService and NoteService
+            await validateUserPermission({
+                ...args,
+                domain: window.location.origin,
+            });
+        }
 
         return {
             ...query,
