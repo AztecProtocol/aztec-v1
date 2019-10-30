@@ -393,8 +393,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     */
     function logInputNotes(bytes memory inputNotes) internal {
         for (uint i = 0; i < inputNotes.getLength(); i += 1) {
-            (address noteOwner, bytes32 noteHash, bytes memory metadata) = inputNotes.get(i).extractNote();
-            emit DestroyNote(noteOwner, noteHash, metadata);
+            (address noteOwner, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
+            emit DestroyNote(noteOwner, noteHash);
         }
     }
 
