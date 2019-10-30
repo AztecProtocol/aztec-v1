@@ -12,7 +12,6 @@ export default async function syncUserInfo(args, ctx) {
     const {
         currentAddress: userAddress,
     } = args;
-
     const {
         keyStore,
         session: {
@@ -29,6 +28,7 @@ export default async function syncUserInfo(args, ctx) {
         address: userAddress,
         networkId,
     });
+
     const {
         linkedPublicKey: prevLinkedPublicKey,
     } = account || {};
@@ -41,11 +41,9 @@ export default async function syncUserInfo(args, ctx) {
         });
     }
 
-    // if (linkedPublicKey !== prevLinkedPublicKey) {
-    //     // TODO
-    //     // we need to show different UI saying the account is registered, please restore from seed phrase
-    //     throw permissionError('account.duplicated');
-    // }
+    if (linkedPublicKey !== prevLinkedPublicKey) {
+        throw permissionError('account.duplicated');
+    }
 
     await AuthService.registerAddress(account);
 
@@ -57,7 +55,6 @@ export default async function syncUserInfo(args, ctx) {
             address: user.address,
             networkId,
         });
-
         EventService.startAutoSync({
             networkId,
         });
