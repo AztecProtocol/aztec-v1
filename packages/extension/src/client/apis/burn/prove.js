@@ -5,7 +5,7 @@ import {
     valueOf,
 } from '~utils/note';
 import asyncMap from '~utils/asyncMap';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
 import query from '~client/utils/query';

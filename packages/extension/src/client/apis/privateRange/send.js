@@ -1,5 +1,5 @@
 import devUtils from '@aztec/dev-utils';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 
 const { PRIVATE_RANGE_PROOF } = devUtils.proofs;
 

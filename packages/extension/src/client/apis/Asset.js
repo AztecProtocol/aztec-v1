@@ -1,4 +1,4 @@
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';

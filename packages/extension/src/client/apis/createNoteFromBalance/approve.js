@@ -1,5 +1,5 @@
 import asyncForEach from '~utils/asyncForEach';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 
 export default async function approveCreateNoteFromBalance({

@@ -1,7 +1,7 @@
 import ethSigUtil from 'eth-sig-util';
 import EthCrypto from 'eth-crypto';
 import { utils } from 'web3';
-import Web3Service from '../Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import registerExtension from './registerExtension';
 import signNote from './signNote';
 

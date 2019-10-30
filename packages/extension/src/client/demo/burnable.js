@@ -5,7 +5,7 @@ import {
 import {
     randomInt,
 } from '~utils/random';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
 import depositToERC20 from './helpers/depositToERC20';
 import sleep from './utils/sleep';

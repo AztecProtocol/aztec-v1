@@ -5,7 +5,7 @@ import {
     addAccess,
 } from '~utils/metadata';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 
 const {

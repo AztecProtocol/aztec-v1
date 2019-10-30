@@ -1,4 +1,4 @@
-import Web3Service from '../Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 
 const domainParams = [
     {

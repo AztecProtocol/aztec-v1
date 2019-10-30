@@ -5,8 +5,8 @@ import {
 import {
     randomInt,
 } from '~utils/random';
+import Web3Service from '~/client/services/Web3Service';
 import createNewAsset from './helpers/createNewAsset';
-import Web3Service from '../services/Web3Service';
 import sleep from './utils/sleep';
 import withdraw from './tasks/withdraw';
 

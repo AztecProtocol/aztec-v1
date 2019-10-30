@@ -2,7 +2,7 @@ import devUtils from '@aztec/dev-utils';
 import {
     log,
 } from '~utils/log';
-import Web3Service from '~client/services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import ZkAssetOwnable from '../../../../build/protocol/ZkAssetOwnable';
 import ZkAssetMintable from '../../../../build/protocol/ZkAssetMintable';
 import ZkAssetBurnable from '../../../../build/protocol/ZkAssetBurnable';
