@@ -1,7 +1,7 @@
 import {
     clientEvent,
 } from '~config/event';
-import Web3Service from '../services/Web3Service';
+import Web3Service from '~/client/services/Web3Service';
 import ApiError from './ApiError';
 
 
