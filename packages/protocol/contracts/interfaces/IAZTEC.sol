@@ -42,8 +42,4 @@ contract IAZTEC {
     // proofEpoch = 1 | proofCategory = 4 | proofId = 1
     // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
     uint24 public constant DIVIDEND_PROOF = 66561;
-
-    // Hash of a dummy AZTEC note with k = 0 and a = 1
-    // This changes with the CRS
-    bytes32 public constant ZERO_VALUE_NOTE_HASH = 0x828d004b7cff80b8fc6915f80d7e239d1d265e83781aee56b74041df0f599694;
 }
