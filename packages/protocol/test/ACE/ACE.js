@@ -5,7 +5,7 @@ const bn128 = require('@aztec/bn128');
 const { constants, proofs } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
-const { padLeft, randomHex } = require('web3-utils');
+const { padLeft } = require('web3-utils');
 const truffleAssert = require('truffle-assertions');
 
 const { customMetaData } = require('../helpers/ERC1724');
@@ -185,20 +185,6 @@ contract('ACE', (accounts) => {
 
                 const { receipt } = await ace.validateProof(PUBLIC_RANGE_PROOF, sender, publicRangeData);
                 expect(receipt.status).to.equal(true);
-            });
-
-            it('should update the ZERO_VALUE_NOTE_HASH constant', async () => {
-                const currentNoteHash = await ace.ZERO_VALUE_NOTE_HASH.call();
-                expect(currentNoteHash).to.equal(constants.ZERO_VALUE_NOTE_HASH);
-
-                const newZeroNoteHash = randomHex(32);
-                const { receipt } = await ace.setZeroValueNoteHash(newZeroNoteHash);
-                const updatedNoteHash = await ace.ZERO_VALUE_NOTE_HASH.call();
-                expect(updatedNoteHash).to.equal(newZeroNoteHash);
-
-                const updateZeroNoteHashEvent = receipt.logs.find((l) => l.event === 'SetZeroValueNoteHash');
-                const emittedZeroNoteHash = updateZeroNoteHashEvent.args.zeroValueNoteHash;
-                expect(emittedZeroNoteHash).to.equal(newZeroNoteHash);
             });
         });
 

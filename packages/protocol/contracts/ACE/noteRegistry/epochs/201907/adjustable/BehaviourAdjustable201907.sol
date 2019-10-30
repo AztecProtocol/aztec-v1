@@ -15,9 +15,6 @@ import "../Behaviour201907.sol";
 contract BehaviourAdjustable201907 is Behaviour201907 {
     constructor () Behaviour201907() public {}
 
-    event OldTotalNoteHash(bytes32 oldtotalnotehash);
-    event ConfidentialTotalMinted(bytes32 confidentialtotalminted);
-
     function burn(bytes calldata _proofOutputs) external onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not burnable");
         // Dealing with notes representing totals
