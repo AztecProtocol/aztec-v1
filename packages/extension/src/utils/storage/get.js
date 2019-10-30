@@ -1,13 +1,27 @@
-export default function get(keys) {
-    if (typeof keys === 'string') {
-        const value = localStorage.getItem(keys);
-        return value ? JSON.parse(value) : null;
+const parseValue = (val) => {
+    let obj;
+    try {
+        obj = JSON.parse(val);
+    } catch (e) {
+        obj = null;
     }
-    return new Promise((resolve) => {
-        resolve(keys.reduce((obj, str) => {
-            const value = localStorage.getItem(str);
-            obj[str] = value ? JSON.parse(value) : null;
-            return obj;
-        }, {}));
+
+    return obj;
+};
+
+export default function get(keys) {
+    const isSingleRequest = typeof keys === 'string';
+    const keyArr = isSingleRequest
+        ? [keys]
+        : keys;
+
+    const values = {};
+    keyArr.forEach((key) => {
+        const val = localStorage.getItem(key);
+        values[key] = parseValue(val);
     });
+
+    return isSingleRequest
+        ? values[keys]
+        : values;
 }

@@ -1,9 +1,11 @@
+import ConnectionService from '~ui/services/ConnectionService';
+
 export default function closeWindow(delay = 0) {
     if (!delay) {
-        window.close();
+        ConnectionService.close();
         return;
     }
     setTimeout(() => {
-        window.close();
+        ConnectionService.close();
     }, delay);
 }

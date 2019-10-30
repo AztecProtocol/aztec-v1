@@ -1,4 +1,7 @@
 import {
+    uiReadyEvent,
+} from '~/config/event';
+import {
     warnLog,
 } from '~utils/log';
 import {
@@ -22,13 +25,20 @@ class ConnectionManager {
             warnLog('Connection has been established.');
             return;
         }
+
+        window.parent.postMessage({
+            type: uiReadyEvent,
+        }, '*');
+
         this.portId = randomId();
+
         window.addEventListener('message', (e) => {
             if (e.data.type === 'aztec-connection') {
                 [this.port] = e.ports;
                 this.port.onmessage = this.handlePortResponse;
             }
         });
+
         window.parent.postMessage({
             type: 'aztec-connection',
             requestId: randomId(),

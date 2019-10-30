@@ -9,15 +9,18 @@ import {
     map,
     filter,
 } from 'rxjs/operators';
-import browser from 'webextension-polyfill';
 import {
     clientEvent,
     actionEvent,
     sendTransactionEvent,
+    uiReadyEvent,
+    uiOpenEvent,
+    uiCloseEvent,
 } from '~config/event';
+import urls from '~config/urls';
+import Iframe from '~/utils/Iframe';
 import {
     updateActionState,
-    openPopup,
     addDomainData,
 } from './connectionUtils';
 
@@ -27,7 +30,6 @@ import ApiService from '../services/ApiService';
 import ClientActionService from '../services/ClientActionService';
 import TransactionSendingService from '../services/TransactionSendingService';
 import GraphQLService from '../services/GraphQLService';
-
 
 class Connection {
     constructor() {
@@ -78,27 +80,32 @@ class Connection {
 
         this.ui$.pipe(
             mergeMap(action => from(updateActionState(action))),
-            map((action) => {
+            map(async (action) => {
                 const {
                     requestId,
                 } = action;
-                const u = document.createElement('iframe');
-                u.id = 'AZTECSDK-POPUP';
-                u.src = browser.runtime.getURL('./pages/popup.html');
-                u.style.display = 'block';
-                u.width = '100%';
-                u.height = '100%';
-                document.body.appendChild(u);
-                const popupContainer = document.getElementById('popup');
-                popupContainer.innerHTML = '';
-                popupContainer.appendChild(u);
+
+                const containerId = 'popup';
+                const popupContainer = document.getElementById(containerId);
+                popupContainer.innerHTML = ''; // clear previous popup
+
+                const uiFrame = new Iframe({
+                    id: 'AZTECSDK-POPUP',
+                    src: urls.ui,
+                    width: '100%',
+                    height: '100%',
+                    onReadyEventName: uiReadyEvent,
+                    containerId,
+                });
+                await uiFrame.init();
+                uiFrame.open();
 
                 const clientId = this.requests[requestId].webClientId;
                 const clientPort = this.connections[clientId];
                 clientPort.postMessage({
                     requestId,
                     data: {
-                        type: 'UI_REQUEST_POPUP',
+                        type: uiOpenEvent,
                     },
                 });
             }), // we can extend this to automatically close the window after a timeout
@@ -121,6 +128,22 @@ class Connection {
             mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
             tap((data) => {
                 this.UiResponseSubject.next(data);
+            }),
+        ).subscribe();
+
+        this.message$.pipe(
+            filter(({ data }) => data.type === uiCloseEvent),
+            tap((data) => {
+                const {
+                    requestId,
+                    webClientId,
+                } = data;
+                this.connections[webClientId].postMessage({
+                    requestId,
+                    data: {
+                        type: uiCloseEvent,
+                    },
+                });
             }),
         ).subscribe();
 
@@ -200,7 +223,6 @@ class Connection {
             this.requests[requestId].webClientId = senderId;
         }
 
-
         return {
             data,
             requestId,
@@ -214,7 +236,6 @@ class Connection {
     registerClient = ({
         port,
         data,
-        origin,
     }) => {
         this.connections[data.clientId] = port;
         this.connections[data.clientId].onmessage = this.onMessage;
@@ -222,7 +243,6 @@ class Connection {
 
     onMessage = ({
         origin,
-        source,
         data,
     }) => {
         this.MessageSubject.next({

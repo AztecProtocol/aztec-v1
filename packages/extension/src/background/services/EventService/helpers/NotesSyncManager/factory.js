@@ -1,4 +1,4 @@
-import NotesSyncManager from '.';
+import NotesSyncManager from './index';
 
 
 class NotesSyncManagerFactory {

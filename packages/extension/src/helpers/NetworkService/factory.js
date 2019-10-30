@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import browser from 'webextension-polyfill';
 import Web3Service from '~/utils/Web3Service';
 import {
     get,
@@ -7,7 +6,6 @@ import {
 import {
     errorLog,
 } from '~utils/log';
-
 
 
 // The goals of the web3 service
@@ -22,14 +20,6 @@ import {
 // into this config.
 
 class NetworkSwitcher {
-    constructor() {
-        browser.storage.onChanged.addListener((changes, namespace) => {
-            if (namespace === 'local' && changes.networkId) {
-                this.networkId = changes.networkId.newValue;
-            }
-        });
-    }
-
     setNetworkConfig({
         networkId,
         currentAddress,

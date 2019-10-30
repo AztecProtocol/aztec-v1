@@ -1,4 +1,4 @@
-import NotesWatcher from '.';
+import NotesWatcher from './index';
 
 
 class NotesWatcherFactory {

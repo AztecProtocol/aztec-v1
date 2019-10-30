@@ -15,19 +15,25 @@ class Web3Service {
     }
 
     async init({
-        provider = window.web3.currentProvider,
+        provider,
         account,
     } = {}) {
-        if (!provider) {
+        let web3;
+        const web3Provider = provider || window.ethereum;
+        if (web3Provider) {
+            web3 = new Web3(web3Provider);
+        } else if (window.web3) {
+            ({ web3 } = window);
+        } else {
             errorLog('Provider cannot be empty.');
-            return;
+            return null;
         }
 
         if (typeof provider.enable === 'function') {
             await provider.enable();
         }
 
-        this.web3 = new Web3(provider);
+        this.web3 = web3;
         this.eth = this.web3.eth;
 
         if (account) {
@@ -40,6 +46,8 @@ class Web3Service {
                 };
             }
         }
+
+        return web3Provider;
     }
 
     registerContract(
@@ -171,7 +179,7 @@ class Web3Service {
                 .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas: 6500000,
+                    gas,
                 })
                 .once('transactionHash', (receipt) => {
                     const interval = setInterval(() => {
@@ -222,8 +230,9 @@ class Web3Service {
         if (type === 'sendSigned') {
             if (!contractAddress) {
                 errorLog('contractAddress should be passed');
-                return;
+                return null;
             }
+
             const encodedData = method(...methodArgs).encodeABI();
             const estimatedGas = await method(...methodArgs).estimateGas({
                 from: address,
@@ -320,11 +329,17 @@ class Web3Service {
                     all: async () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,
                     }),
-                    subscribe: (options = { filter: {}, fromBlock: 1 }, callback) => contract.events[eventName]({
+                    subscribe: (
+                        options = { filter: {}, fromBlock: 1 },
+                        callback,
+                    ) => contract.events[eventName]({
                         filter: options.filter,
                         fromBlock: options.fromBlock,
                     }, callback),
-                    subscribeAll: (options = { filter: {}, fromBlock: 1 }, callback) => contract.events.allEvents({
+                    subscribeAll: (
+                        options = { filter: {}, fromBlock: 1 },
+                        callback,
+                    ) => contract.events.allEvents({
                         filter: options.filter,
                         fromBlock: options.fromBlock,
                     }, callback),

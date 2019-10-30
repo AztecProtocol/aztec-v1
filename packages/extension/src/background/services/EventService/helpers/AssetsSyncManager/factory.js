@@ -1,4 +1,4 @@
-import AssetsSyncManager from '.';
+import AssetsSyncManager from './index';
 
 
 class AssetsSyncManagerFactory {

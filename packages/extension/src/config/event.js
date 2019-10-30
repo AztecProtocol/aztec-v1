@@ -8,3 +8,8 @@ export const sendTransactionEvent = 'aztec-extension-send-transaction';
 export const actionEvent = 'aztec-extension-client-action';
 export const uiQueryEvent = 'UI_QUERY_REQUEST';
 export const uiResponseEvent = 'UI_RESPONSE';
+
+export const backgroundReadyEvent = 'aztec-sdk-background-ready';
+export const uiReadyEvent = 'aztec-sdk-ui-ready';
+export const uiOpenEvent = 'aztec-sdk-ui-open';
+export const uiCloseEvent = 'aztec-sdk-ui-close';
