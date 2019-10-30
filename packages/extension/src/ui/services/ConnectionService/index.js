@@ -3,6 +3,7 @@ import {
     sendTransactionEvent,
     uiQueryEvent,
     uiResponseEvent,
+    uiCloseEvent,
 } from '~config/event';
 import AuthService from '~background/services/AuthService';
 import ConnectionManager from './helpers/ConnectionManager';
@@ -11,6 +12,10 @@ const manager = new ConnectionManager();
 
 export default {
     openConnection: source => manager.openConnection(source),
+    close: () => manager.postToBackground({
+        type: uiCloseEvent,
+        clientRequestId: manager.clientRequestId,
+    }),
     setDefaultClientRequestId: id => manager.setDefaultClientRequestId(id),
     post: async ({
         clientRequestId = '',

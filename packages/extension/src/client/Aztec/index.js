@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import {
     mergeMap,
     filter,
@@ -14,46 +13,47 @@ import {
     randomId,
 } from '~utils/random';
 import filterStream from '~utils/filterStream';
-import AZTECAccountRegistry from '../../../build/contracts/AZTECAccountRegistry';
-import ZkAsset from '../../../build/protocol/ZkAsset';
-import ACE from '../../../build/protocol/ACE';
 import {
     AZTECAccountRegistryConfig,
     ACEConfig,
-    IZkAssetConfig,
 } from '~/config/contracts';
-
-
-import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
-import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import {
     actionEvent,
+    uiOpenEvent,
+    uiCloseEvent,
 } from '~config/event';
+import Web3Service from '~/client/services/Web3Service';
+/* eslint-disable import/no-unresolved */
+import ZkAsset from '../../../build/protocol/ZkAsset';
+import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 /* eslint-enable */
 import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
 import { ensureExtensionInstalled, ensureDomainRegistered } from '../auth';
-import Web3Service from '../services/Web3Service';
 import MetaMaskService from '../services/MetaMaskService';
-
+import backgroundFrame from './backgroundFrame';
 
 class Aztec {
     constructor() {
         this.enabled = false;
+        this.frame = null;
+        this.clientId = randomId();
+        this.bindAccountDetectors();
+    }
+
+    bindAccountDetectors() {
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', async () => {
                 if (!this.enabled) return;
-                // Time to reload your interface with accounts[0]!
                 await this.enable();
             });
 
-            window.ethereum.on('networkChanged', async (networkId) => {
+            window.ethereum.on('networkChanged', async () => {
                 if (!this.enabled) return;
                 await this.enable();
             });
         }
-        this.frame = document.getElementById('AZTECSDK').contentWindow;
-        this.clientId = randomId();
+        // TODO - other providers
     }
 
     query = async (data) => {
@@ -69,25 +69,18 @@ class Aztec {
         return resp;
     }
 
-    openPopup = () => {
-        console.log({
-            height: window.innerHeight,
-            width: window.innerWidth,
-        });
-        const elem = document.getElementById('AZTECSDK');
-        elem.height = 550 + (16 * 2);
-        elem.width = 340 + (16 * 2);
-        elem.style.display = 'block';
-    };
-
-    setupStreams = ({ data, ports, ...rest }) => {
+    setupStreams = ({ ports }) => {
         // here we need to enable the subscription to await metamask actions from the extension
         this.MessageSubject = new Subject();
         this.messages$ = this.MessageSubject.asObservable();
-        this.port = ports[0];
+        [this.port] = ports;
         this.port.onmessage = ({ data }) => {
-            if (data.data.type === 'UI_REQUEST_POPUP') {
-                this.openPopup();
+            if (data.data.type === uiOpenEvent) {
+                backgroundFrame.open();
+                return;
+            }
+            if (data.data.type === uiCloseEvent) {
+                backgroundFrame.close();
                 return;
             }
             this.MessageSubject.next({
@@ -117,11 +110,12 @@ class Aztec {
     }
 
     enable = async ({
-        // networkId,
         contractAddresses = {},
     } = {}) => {
+        this.frame = await backgroundFrame.init();
+
         // ensure there is an open channel / port we can communicate on
-        this.frame.postMessage({
+        this.frame.contentWindow.postMessage({
             type: 'aztec-connection',
             requestId: randomId(),
             clientId: this.clientId,
@@ -135,15 +129,15 @@ class Aztec {
                 take(1),
             ).toPromise();
 
-        // we have an open channel / port so queries will run
-
         if (!this.contractAddresses) {
             this.contractAddresses = contractAddresses;
         }
-        await Web3Service.init();
 
-        const networkId = window.ethereum.networkVersion;
-        // console.log(`enabled with networkId: ${networkId}`);
+        const web3Provider = await Web3Service.init({
+            provider: window.ethereum,
+        });
+
+        const networkId = web3Provider.networkVersion;
         const {
             config: accountRegistryContract,
             networks: accountRegistryNetworks,
@@ -155,25 +149,21 @@ class Aztec {
             address: accountRegistryAddress,
         });
 
-
         const {
             error: registerExtensionError,
         } = await ensureExtensionInstalled({
             contractAddresses,
         });
-        //  SEND to background script and store contract addresses for network
-
         if (registerExtensionError) {
             throw new Error(registerExtensionError);
         }
-        console.log('___after register');
 
         const {
             error: ensureDomainRegisteredError,
         } = await ensureDomainRegistered();
-        console.log('___after domain');
-
-        this.enabled = true;
+        if (ensureDomainRegisteredError) {
+            throw new Error(ensureDomainRegisteredError);
+        }
 
         const {
             config: aceContract,
@@ -193,6 +183,7 @@ class Aztec {
 
         this.asset = assetFactory;
         this.note = noteFactory;
+        this.enabled = true;
     };
 }
 

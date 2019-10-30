@@ -1,9 +1,7 @@
 import {
     fromViewingKey,
 } from '~utils/note';
-import Web3Service from '~client/services/Web3Service';
 import query from '~client/utils/query';
-import ApiError from '~client/utils/ApiError';
 import proofFactory from './noteProofFactory';
 
 const dataProperties = [
