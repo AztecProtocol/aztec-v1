@@ -183,6 +183,7 @@ class Aztec {
 
         this.asset = assetFactory;
         this.note = noteFactory;
+        this.Web3Service = Web3Service;
         this.enabled = true;
     };
 }

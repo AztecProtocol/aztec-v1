@@ -4,6 +4,7 @@ node_modules/*
 /client/*
 /test/*
 /migrations/*
+/demo/*
 
 # ignored file types
 **/*.json
