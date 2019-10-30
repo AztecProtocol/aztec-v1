@@ -1,24 +1,28 @@
+import Web3Service from '~/client/services/Web3Service';
 import query from '~client/utils/query';
 
 export default async function proveDeposit({
+    assetAddress,
     transactions,
     from,
     sender,
-    assetAddress,
     numberOfOutputNotes,
 }) {
+    const {
+        address,
+    } = Web3Service.account;
+
     const data = await query({
         type: 'constructProof',
         args: {
             proofType: 'DEPOSIT_PROOF',
-            transactions,
-            from,
             assetAddress,
-            sender,
+            transactions,
+            from: from || address,
+            sender: sender || address,
             numberOfOutputNotes,
         },
     }) || {};
-
 
     return data;
 }

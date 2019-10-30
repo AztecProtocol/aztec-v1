@@ -73,18 +73,12 @@ async function deposit() {
   }
 
   const account = window.aztec.Web3Service.account;
-  await asset.deposit(
-    [
-      {
-        amount: value,
-        to: account.address,
-      },
-    ],
+  await asset.deposit([
     {
-      from: account.address,
-      sender: account.address,
+      amount: value,
+      to: account.address,
     },
-  );
+  ]);
 
   refreshAssetBalances();
   depositInput.value = '';
