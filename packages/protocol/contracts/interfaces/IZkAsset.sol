@@ -17,7 +17,7 @@ contract IZkAsset {
     );
     event CreateNoteRegistry(uint256 noteRegistryId);
     event CreateNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
-    event DestroyNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
+    event DestroyNote(address indexed owner, bytes32 indexed noteHash);
     event ConvertTokens(address indexed owner, uint256 value);
     event RedeemTokens(address indexed owner, uint256 value);
     event UpdateNoteMetaData(address indexed owner, bytes32 indexed noteHash, bytes metadata);
