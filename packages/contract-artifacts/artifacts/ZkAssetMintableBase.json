@@ -17,20 +17,6 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "ZERO_VALUE_NOTE_HASH",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bytes32"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
             "name": "PUBLIC_RANGE_PROOF",
             "outputs": [
                 {
@@ -520,11 +506,6 @@
                     "indexed": true,
                     "name": "noteHash",
                     "type": "bytes32"
-                },
-                {
-                    "indexed": false,
-                    "name": "metadata",
-                    "type": "bytes"
                 }
             ],
             "name": "DestroyNote",
