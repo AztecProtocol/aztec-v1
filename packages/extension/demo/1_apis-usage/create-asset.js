@@ -90,7 +90,6 @@ async function createAsset() {
 
   await setProofInAce('JOIN_SPLIT_PROOF');
   await setProofInAce('MINT_PROOF');
-  await setProofInAce('BURN_PROOF');
 
   addAssetStatus('Deploying ZkAsset...');
   const scalingFactor = document.getElementById('new-asset-scaling-factor').value;
@@ -106,17 +105,6 @@ async function createAsset() {
   );
   const zkAssetAddress = deployedZkAsset.address;
   addAssetStatus(`✓ ZkAsset deployed - ${zkAssetAddress}`, true);
-
-  addAssetStatus('Setting proof in ZkAsset...');
-  await window.aztec.Web3Service
-    .useContract('ZkAssetOwnable')
-    .at(zkAssetAddress)
-    .method('setProofs')
-    .send(
-      1,
-      17,
-    );
-  addAssetStatus('✓ Set proof in ZkAsset', true);
 
   if (value) {
     const account = window.aztec.Web3Service.account;
