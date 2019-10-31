@@ -58,9 +58,14 @@ class AssetManager {
         this.activeAssets = new PriorityQueue();
         this.pendingAssets = new PriorityQueue();
         this.priority = [];
+
+        this.locked = true;
     }
 
     async clear() {
+        this.locked = true;
+        this.rawNoteManager.lock();
+        this.rawNoteManager.removeListener('newNotes', this.handleNewRawNotes);
         await this.saveAll();
     }
 
@@ -97,10 +102,6 @@ class AssetManager {
                 .filter(id => this.assetMapping[id]);
         }
 
-        if (assetIds.length) {
-            this.syncNext();
-        }
-
         const maxLastSynced = Object.values(assetSummary)
             .reduce((max, { lastSynced }) => {
                 if (lastSynced > max) return lastSynced;
@@ -108,9 +109,14 @@ class AssetManager {
             }, -1);
         this.rawNoteManager.addListener('newNotes', this.handleNewRawNotes);
         this.rawNoteManager.startSync(maxLastSynced);
+
+        this.locked = false;
+        this.syncNext();
     }
 
     syncNext() {
+        if (this.locked) return;
+
         while (this.activeAssets.size < this.maxActiveAssets) {
             let nextAsset = this.pendingAssets.removeTop();
             if (!nextAsset) {
@@ -221,7 +227,7 @@ class AssetManager {
             if (this.priority.indexOf(assetId) < 0) {
                 const asset = this.assetMapping[assetId];
                 if (this.activeAssets.has(asset)) {
-                    asset.pause();
+                    asset.lock();
                     this.activeAssets.remove(asset);
                     this.pendingAssets.addToTop(asset);
                 }

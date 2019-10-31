@@ -135,13 +135,17 @@ describe('AssetManager.init', () => {
         expect(assetManager.assetMapping).toEqual({});
         expect(assetManager.activeAssets.size).toBe(0);
         expect(assetManager.pendingAssets.size).toBe(0);
-        expect(syncNextSpy).toHaveBeenCalledTimes(0);
         expect(rawNoteStartSyncSpy).toHaveBeenCalledTimes(1);
         expect(rawNoteStartSyncSpy).toHaveBeenCalledWith(-1);
+        expect(syncNextSpy).toHaveBeenCalledTimes(1);
     });
 });
 
 describe('AssetManager.syncNext', () => {
+    beforeEach(() => {
+        assetManager.locked = false;
+    });
+
     it('activate assets in the order of priority', () => {
         assetManager.maxActiveAssets = 2;
         assetManager.priority = ['a1', 'a2', 'a0'];
@@ -198,7 +202,7 @@ describe('AssetManager.syncNext', () => {
         expect(orderedActiveAssetIds()).toEqual(['a0', 'a2']);
     });
 
-    it('bind handleAssetSynced to each asset in it and remove from asset when they are synced', async () => {
+    it('bind handleAssetSynced to each asset in it and unbind when the asset is synced', async () => {
         const assets = generateMockAssets(['a0']);
         assetManager.maxActiveAssets = 1;
         assetManager.assetMapping = assets;
@@ -211,6 +215,7 @@ describe('AssetManager.syncNext', () => {
         expect(saveSpy).toHaveBeenCalledTimes(0);
         expect(assetManager.activeAssets.size).toBe(1);
 
+        assets.a0.modified = true;
         assets.a0.synced = true;
         await assets.a0.notifyListeners('synced', 'a0');
         expect(handleAssetSyncedSpy).toHaveBeenCalledTimes(1);

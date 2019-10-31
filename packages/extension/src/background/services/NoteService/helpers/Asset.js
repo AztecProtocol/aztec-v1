@@ -49,7 +49,7 @@ export default class Asset {
         this.balance = balance;
         this.lastSynced = lastSynced;
 
-        this.locked = false;
+        this.locked = true;
         this.modified = false;
         this.synced = false;
 
@@ -130,10 +130,6 @@ export default class Asset {
             resolve(action());
         }
         this.locked = false;
-    }
-
-    pause() {
-        this.lock();
     }
 
     async startSync() {
@@ -290,7 +286,9 @@ export default class Asset {
     }
 
     async save() {
-        if (this.activeProcesses.size > 0) {
+        if (this.activeProcesses.size > 0
+            || this.actionQueue.length > 0
+        ) {
             warnLog(
                 'Avoid calling "save" on Asset when there are still processes running.',
                 `Asset id: ${this.id}`,

@@ -90,7 +90,7 @@ export default class RawNoteManager {
         listeners.forEach(cb => cb(params));
     }
 
-    pause() {
+    lock() {
         this.locked = true;
     }
 
