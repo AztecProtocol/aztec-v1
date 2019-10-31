@@ -28,7 +28,6 @@ describe('Dividend Proof', () => {
         const za = 100;
         const zb = 5;
         const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
-
         expect(proof.data.length).to.equal(3);
         expect(proof.challengeHex.length).to.equal(66);
         expect(proof.data[0].length).to.equal(6);

@@ -157,6 +157,7 @@ contract MultiSigWallet {
     /// @param newOwner Address of new owner.
     function replaceOwner(address owner, address newOwner)
         public
+        notNull(newOwner)
         onlyWallet
         ownerExists(owner)
         ownerDoesNotExist(newOwner)
