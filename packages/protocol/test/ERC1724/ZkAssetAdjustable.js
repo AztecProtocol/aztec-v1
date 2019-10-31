@@ -67,8 +67,6 @@ contract('ZkAssetAdjustable', (accounts) => {
         beforeEach(async () => {
             ace = await ACE.at(ACE.address);
             erc20 = await ERC20Mintable.new({ from: accounts[0] });
-
-            erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
         });
 
@@ -76,7 +74,6 @@ contract('ZkAssetAdjustable', (accounts) => {
             const zkAssetAdjustable = await ZkAssetAdjustable.new(ace.address, erc20.address, scalingFactor, 0, [], {
                 from: accounts[0],
             });
-
             const sender = accounts[0];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getDefaultMintNotes();
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
@@ -136,6 +133,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             const mintValue = 50;
             const mintNotes = [20, 30];
             const { zeroMintCounterNote, newMintCounterNote, mintedNotes } = await getCustomMintNotes(mintValue, mintNotes);
+
             const proof = new MintProof(zeroMintCounterNote, newMintCounterNote, mintedNotes, sender);
             const data = proof.encodeABI();
             await zkAssetAdjustable.confidentialMint(MINT_PROOF, data, { from: accounts[0] });
@@ -143,6 +141,7 @@ contract('ZkAssetAdjustable', (accounts) => {
             const [burnSender] = accounts;
             const newBurnCounterNote = await note.create(aztecAccount.publicKey, mintValue);
             const zeroBurnCounterNote = await note.createZeroValueNote();
+
             const burnProof = new BurnProof(zeroBurnCounterNote, newBurnCounterNote, mintedNotes, burnSender);
             const burnData = burnProof.encodeABI(zkAssetAdjustable.address);
 
