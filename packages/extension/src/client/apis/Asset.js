@@ -52,7 +52,6 @@ export default class Asset {
             args: { id: this.id },
         }) || {};
 
-        console.log('balance, asset', asset);
         return (asset && asset.balance) || 0;
     }
 
@@ -164,16 +163,14 @@ export default class Asset {
         },
     );
 
-    withdraw = async (amount, {
+    withdraw = async (transactions, {
         sender = '',
-        to,
         numberOfInputNotes,
     } = {}) => proofFactory(
         'withdraw',
         {
             assetAddress: this.address,
-            amount,
-            to,
+            transactions,
             sender,
             numberOfInputNotes,
         },

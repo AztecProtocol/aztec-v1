@@ -109,6 +109,11 @@ export const depositTransactions = generate(3, i => ({
     to: addresses[i + 1],
 }));
 
+export const withdrawTransactions = generate(3, i => ({
+    amount: randomInt(1, 100),
+    to: addresses[i + 1],
+}));
+
 export const sendTransactions = generate(3, () => ({
     amount: randomInt(1, 100),
     to: addresses[randomInt(1, addresses.length - 1)],

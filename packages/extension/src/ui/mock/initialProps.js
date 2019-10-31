@@ -10,6 +10,7 @@ import {
     notes,
     pastTransactions,
     depositTransactions,
+    withdrawTransactions,
     sendTransactions,
     generate,
     randomAddress,
@@ -132,8 +133,7 @@ export default {
     withdraw: {
         asset: assets[0],
         sender: addresses[0],
-        to: addresses[0],
-        amount: randomInt(1, 1000),
+        transactions: withdrawTransactions,
         goNext: dummyFunc,
     },
     send: {

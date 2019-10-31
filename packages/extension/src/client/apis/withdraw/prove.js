@@ -1,23 +1,24 @@
+import Web3Service from '~/client/services/Web3Service';
 import query from '~client/utils/query';
 
 export default async function proveWithdraw({
-    amount,
-    from,
-    sender,
     assetAddress,
+    transactions,
+    sender,
     numberOfInputNotes,
-    numberOfOutputNotes,
 }) {
+    const {
+        address,
+    } = Web3Service.account;
+
     const data = await query({
         type: 'constructProof',
         args: {
             proofType: 'WITHDRAW_PROOF',
-            from,
-            amount,
             assetAddress,
-            sender,
+            transactions,
+            sender: sender || address,
             numberOfInputNotes,
-            numberOfOutputNotes,
         },
     }) || {};
 

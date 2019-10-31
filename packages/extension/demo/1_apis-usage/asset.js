@@ -86,8 +86,14 @@ async function deposit() {
 
 async function withdraw() {
   const withdrawInput = document.getElementById('withdraw-value');
+  const numberOfInputNotes = parseInt(document.getElementById('withdraw-input-number').value, 10);
   const value = parseInt(withdrawInput.value);
   if (!value) {
+    withdrawStatus.log('× Number of input notes must be larger than 0');
+    return;
+  }
+  if (!numberOfInputNotes) {
+    withdrawStatus.log('× Number of input notes must be larger than 0');
     return;
   }
 
@@ -95,18 +101,21 @@ async function withdraw() {
 
   const balance = await asset.balance();
   if (balance < value) {
-    withdrawStatus.log(`Asset balance (${balance}) is not enough to make a withdraw of ${value}.`);
+    withdrawStatus.log(`× Asset balance (${balance}) is not enough to make a withdraw of ${value}.`);
     return;
   }
 
   const account = window.aztec.Web3Service.account;
-  await asset.withdraw(
-    value,
+  const transactions = [
     {
-      numberOfInputNotes: 1,
+      amount: value,
       to: account.address,
-      from: account.address,
-      sender: account.address,
+    },
+  ];
+  await asset.withdraw(
+    transactions,
+    {
+        numberOfInputNotes,
     },
   );
 
@@ -174,12 +183,19 @@ document.getElementById('app').innerHTML = `
       <br/>
       <div>
         <div>Withdraw:</div>
+        <label>Amount</label>
         <input
           id="withdraw-value"
           type="number"
           size="10"
-          placeholder="amount"
-        />
+        /><br/>
+        <label>Number of input notes</label>
+        <input
+          id="withdraw-input-number"
+          type="number"
+          size="2"
+          value="1"
+        /><br/>
         <button onclick="withdraw()">Submit</button><br/>
         <br/>
         <div id="withdraw-status"></div>

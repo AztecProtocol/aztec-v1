@@ -3,15 +3,13 @@ import createNoteFromBalance from './createNoteFromBalance';
 export default function withdraw({
     assetAddress,
     sender,
-    to,
-    amount,
+    transactions,
     numberOfInputNotes,
 }) {
     return createNoteFromBalance({
         assetAddress,
         sender,
-        publicOwner: to,
-        amount,
+        transactions,
         numberOfInputNotes,
         numberOfOutputNotes: 0,
     });
