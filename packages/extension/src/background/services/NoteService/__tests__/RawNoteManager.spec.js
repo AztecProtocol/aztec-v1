@@ -574,6 +574,21 @@ describe('RawNoteManager.prependHeads', () => {
         expect(newNotes).toEqual(notes);
     });
 
+    it('set minHeadBlockNumber - 1 for an asset if it has no prepend notes', () => {
+        rawNoteManager.notesPerSyncBatch = 5;
+        rawNoteManager.minHeadBlockNumber = 10;
+
+        expect(rawNoteManager.assetLastSyncedMapping[defaultAssetId]).toBe(undefined);
+        expect(rawNoteManager.numberOfNotes).toBe(0);
+
+        const newNotes = rawNoteManager.prependHeads(defaultAssetId, []);
+
+        expect(rawNoteManager.assetLastSyncedMapping[defaultAssetId]).toBe(9);
+        expect(rawNoteManager.numberOfNotes).toBe(0);
+        expect(rawNoteManager.prependNotesMapping[defaultAssetId]).toEqual(undefined);
+        expect(newNotes).toEqual([]);
+    });
+
     it('will not add notes that should be in head notes', () => {
         const notes = generateNewNotes([0, 3, 7, 11, 13]);
         rawNoteManager.notesPerSyncBatch = 5;
