@@ -24,6 +24,9 @@ export default async function signNotes({
     });
 
     return {
-        signatures: signatures.reduce((accum, sig) => accum + sig.slice(2), '0x'),
+        signatures: signatures.reduce((accum, sig) => {
+            const fullSig = sig.padEnd(194, '0');
+            return `${accum}${fullSig.slice(2)}`;
+        }, '0x'),
     };
 }
