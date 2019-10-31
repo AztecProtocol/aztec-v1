@@ -18,6 +18,7 @@ import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
 import Transaction from '~ui/views/handlers/Transaction';
 import Connection from '~ui/components/Connection';
+import ListItem from '~ui/components/ListItem';
 
 const steps = [
     {
@@ -56,8 +57,7 @@ const steps = [
 const WithdrawTransaction = ({
     asset,
     sender,
-    to,
-    amount,
+    transactions,
     numberOfInputNotes,
     initialStep,
     initialTask,
@@ -71,12 +71,34 @@ const WithdrawTransaction = ({
         address: assetAddress,
         linkedTokenAddress,
     } = asset;
+    const totalAmount = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const [firstTransaction, ...rest] = transactions;
+    const moreItems = rest.map(({
+        amount,
+        to,
+    }, i) => (
+        <ListItem
+            key={+i}
+            profile={{
+                type: 'user',
+                address: to,
+            }}
+            content={formatAddress(to, 6, 4)}
+            size="xxs"
+            footnote={(
+                <Text
+                    text={`+${formatValue(asset.code, amount)}`}
+                    color="green"
+                />
+            )}
+        />
+    ));
 
     const ticketHeader = (
         <div>
             <Block bottom="s">
                 <Text
-                    text={formatValue(code, amount)}
+                    text={formatValue(code, totalAmount)}
                     size="m"
                     color="primary"
                     weight="semibold"
@@ -95,9 +117,22 @@ const WithdrawTransaction = ({
                 to={{
                     profile: {
                         type: 'user',
-                        address: to,
+                        address: firstTransaction.to,
                     },
-                    description: formatAddress(to, 6, 4),
+                    tooltip: (
+                        <ListItem
+                            content={formatAddress(firstTransaction.to, 6, 4)}
+                            size="xxs"
+                            footnote={(
+                                <Text
+                                    text={`+${formatValue(asset.code, firstTransaction.amount)}`}
+                                    color="green"
+                                />
+                            )}
+                        />
+                    ),
+                    description: formatAddress(firstTransaction.to, 6, 4),
+                    moreItems,
                 }}
                 size="s"
                 actionIconName="double_arrow"
@@ -108,8 +143,7 @@ const WithdrawTransaction = ({
     const initialData = {
         assetAddress: asset.address,
         sender,
-        to,
-        amount,
+        transactions,
         numberOfInputNotes,
     };
 
@@ -136,8 +170,10 @@ const WithdrawTransaction = ({
 WithdrawTransaction.propTypes = {
     asset: assetShape.isRequired,
     sender: PropTypes.string.isRequired,
-    to: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
+    transactions: PropTypes.arrayOf(PropTypes.shape({
+        amount: PropTypes.number.isRequired,
+        to: PropTypes.string.isRequired,
+    })).isRequired,
     numberOfInputNotes: PropTypes.number,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,

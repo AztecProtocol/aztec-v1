@@ -14,7 +14,7 @@ const Steps = [
 const Withdraw = ({
     assetAddress,
     sender,
-    amount,
+    transactions,
     numberOfInputNotes,
 }) => {
     const fetchInitialData = async () => {
@@ -24,7 +24,7 @@ const Withdraw = ({
             asset,
             sender,
             to: sender,
-            amount,
+            transactions,
             numberOfInputNotes,
         };
     };
@@ -41,7 +41,10 @@ const Withdraw = ({
 Withdraw.propTypes = {
     assetAddress: PropTypes.string.isRequired,
     sender: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
+    transactions: PropTypes.arrayOf(PropTypes.shape({
+        amount: PropTypes.number.isRequired,
+        to: PropTypes.string.isRequired,
+    })).isRequired,
     numberOfInputNotes: PropTypes.number,
 };
 
