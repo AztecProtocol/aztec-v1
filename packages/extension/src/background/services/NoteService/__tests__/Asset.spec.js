@@ -2,9 +2,6 @@ import {
     userAccount,
 } from '~testHelpers/testUsers';
 import testNotes from '~testHelpers/testNotes';
-import {
-    VIEWING_KEY_LENGTH,
-} from '~config/constants';
 import * as storage from '~utils/storage';
 import {
     randomId,
@@ -87,11 +84,10 @@ describe('Asset.startSync', () => {
         expect(restoreSpy).toHaveBeenCalledTimes(0);
     });
 
-    it('processes will be pending if paused/locked', () => {
+    it('processes will be pending if startSync is not triggered', () => {
         const getRawNotesSpy = jest.spyOn(asset, 'getRawNotes');
         const decryptNotesSpy = jest.spyOn(asset, 'decryptNotes');
 
-        asset.pause();
         asset.addProcess(async () => asset.getRawNotes());
 
         expect(getRawNotesSpy).toHaveBeenCalledTimes(0);
@@ -103,7 +99,7 @@ describe('Asset.startSync', () => {
     it('continue with previous pending process if there is any', async () => {
         const addProcessSpy = jest.spyOn(asset, 'addProcess');
         const mockProcess = jest.fn();
-        asset.pause();
+        asset.lock();
         asset.addProcess(mockProcess);
         addProcessSpy.mockClear();
 
@@ -134,6 +130,8 @@ describe('Asset.decryptNotes', () => {
         warnings = [];
         errorLogSpy.mockClear();
         warnLogSpy.mockClear();
+
+        asset.unlock();
     });
 
     it('can run multiple decryptNotes asynchronously', async () => {
