@@ -308,10 +308,11 @@ export default class RawNoteManager {
 
     prependHeads(assetId, notes) {
         const lastNote = notes[notes.length - 1];
-        if (!lastNote) return [];
 
         let newNotes = notes;
-        if (lastNote.blockNumber >= this.minHeadBlockNumber) {
+        if (lastNote
+            && lastNote.blockNumber >= this.minHeadBlockNumber
+        ) {
             const lastIndex = notes.findIndex(({
                 blockNumber,
             }) => blockNumber >= this.minHeadBlockNumber);
@@ -323,11 +324,12 @@ export default class RawNoteManager {
             : lastNote.blockNumber;
         this.numberOfNotes += newNotes.length;
 
-        if (!this.prependNotesMapping[assetId]) {
-            this.prependNotesMapping[assetId] = [];
+        if (newNotes.length) {
+            if (!this.prependNotesMapping[assetId]) {
+                this.prependNotesMapping[assetId] = [];
+            }
+            this.prependNotesMapping[assetId] = this.prependNotesMapping[assetId].concat(newNotes);
         }
-
-        this.prependNotesMapping[assetId] = this.prependNotesMapping[assetId].concat(newNotes);
 
         return newNotes;
     }
