@@ -78,11 +78,6 @@
                     "indexed": true,
                     "name": "noteHash",
                     "type": "bytes32"
-                },
-                {
-                    "indexed": false,
-                    "name": "metadata",
-                    "type": "bytes"
                 }
             ],
             "name": "DestroyNote",
