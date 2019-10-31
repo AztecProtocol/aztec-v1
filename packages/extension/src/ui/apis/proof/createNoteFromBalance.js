@@ -50,6 +50,7 @@ export default async function createNoteFromBalance({
     let outputNotesOwner = inputNotesOwner;
     if (transactions && transactions.length) {
         await asyncForEach(transactions, async ({ to }) => {
+            if (outputNotesOwnerMapping[to]) return;
             const account = await getExtensionAccount(to);
             outputNotesOwnerMapping[to] = account;
         });
@@ -136,11 +137,13 @@ export default async function createNoteFromBalance({
             to,
             numberOfOutputNotes: count,
         }) => {
-            const notesOwner = outputNotesOwnerMapping[to];
+            if (!count && !numberOfOutputNotes) return;
+
             const values = randomSumArray(
                 transactionAmount,
                 count || numberOfOutputNotes,
             );
+            const notesOwner = outputNotesOwnerMapping[to];
             outputValues.push(...values);
             const newNotes = await createNotes(
                 values,
@@ -152,7 +155,7 @@ export default async function createNoteFromBalance({
         });
     } else if (numberOfOutputNotes > 0) {
         const values = randomSumArray(
-            inputAmount,
+            amount,
             numberOfOutputNotes,
         );
         outputValues.push(...values);
@@ -183,6 +186,7 @@ export default async function createNoteFromBalance({
     );
 
     return {
+        inputNotes,
         proof,
     };
 }

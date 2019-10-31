@@ -1,12 +1,13 @@
 import ConnectionService from '~ui/services/ConnectionService';
 
 export default async function signNotes({
+    inputNotes,
     sender,
     assetAddress,
     proof,
     requestId,
 }) {
-    const noteHashes = proof.notes.map(({ noteHash }) => noteHash);
+    const noteHashes = inputNotes.map(({ noteHash }) => noteHash);
     const challenge = proof.challengeHex;
 
     const {
