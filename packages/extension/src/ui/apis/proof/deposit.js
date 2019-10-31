@@ -32,7 +32,6 @@ export default async function deposit({
     }
 
     const {
-        address: notesOwnerAddress,
         spendingPublicKey,
     } = notesOwner;
 
@@ -77,8 +76,6 @@ export default async function deposit({
         outputNoteValues,
     );
     const inputNotes = [];
-
-
     const proof = new JoinSplitProof(
         inputNotes,
         outputNotes,
