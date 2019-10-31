@@ -32,9 +32,9 @@ const BackupKeys = ({
                 borderRadius="m"
             >
                 <Text size="xs">
-                    {seedPhrase.split(' ').map(phrase => (
+                    {seedPhrase.split(' ').map((phrase, i) => (
                         <Block
-                            key={phrase}
+                            key={`${+i}_${phrase}`}
                             padding="xxs 0"
                         >
                             {phrase}

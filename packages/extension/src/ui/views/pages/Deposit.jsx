@@ -53,6 +53,7 @@ const Deposit = ({
 
 Deposit.propTypes = {
     from: PropTypes.string.isRequired,
+    sender: PropTypes.string.isRequired,
     assetAddress: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
