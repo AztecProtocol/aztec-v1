@@ -9,6 +9,7 @@ module.exports = {
     entry: {
         aztec: './src/index.js',
         background: './src/background',
+        'background-ui': './src/ui/background.jsx',
         ui: './src/ui',
     },
     resolve: {
@@ -23,11 +24,6 @@ module.exports = {
     },
     module: {
         rules: [
-            // {
-            //     test: /\.js/, // assuming the files are named .js.flow
-            //     enforce: 'pre',
-            //     use: ['remove-flow-types-loader'],
-            // },
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,

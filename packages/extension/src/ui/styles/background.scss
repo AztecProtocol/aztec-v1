@@ -1,12 +1,29 @@
 @import './variables';
 
 :global(#app) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
+  backdrop-filter: blur(16px) grayscale(70%);
 }
 
-:global(.text-code) {
-  font-family: $code-font-family;
+:global(#popup) {
+  width: $popup-width;
+  height: $popup-height;
+
+  :global(#AZTECSDK-POPUP) {
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media all and (max-width: $popup-width) {
+  :global(#popup) {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 @font-face {

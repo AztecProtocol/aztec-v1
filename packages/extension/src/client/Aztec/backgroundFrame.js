@@ -8,12 +8,12 @@ export default new Iframe({
     id: 'AZTECSDK',
     src: urls.background,
     onReadyEventName: backgroundReadyEvent,
-    width: 340 + (16 * 2),
-    height: 550 + (16 * 2),
+    width: '100vw',
+    height: '100vh',
     style: {
         position: 'fixed',
-        right: '32px',
-        bottom: '32px',
+        top: 0,
+        left: 0,
         zIndex: '99999',
     },
 });
