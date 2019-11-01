@@ -36,7 +36,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         "NoteSignature(",
             "bytes32 noteHash,",
             "address spender,",
-            "bool[] spenderApprovals",
+            "bool spenderApproval",
         ")"
     ));
     
