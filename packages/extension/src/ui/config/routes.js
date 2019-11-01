@@ -4,7 +4,8 @@ import Welcome from '~ui/views/Welcome';
 import Register from '~ui/views/pages/Register';
 import BackupKeys from '~ui/views/BackupKeys';
 import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
-import CreatePassword from '~ui/views/CreatePassword'; import DomainPermission from '~ui/views/pages/DomainPermission';
+import CreatePassword from '~ui/views/CreatePassword';
+import DomainPermission from '~ui/views/pages/DomainPermission';
 import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
 import Account from '~ui/views/pages/Account';
 import Assets from '~ui/views/Assets';
@@ -25,7 +26,6 @@ import WithdrawTransaction from '~ui/views/WithdrawTransaction';
 import Send from '~ui/views/pages/Send';
 import SendConfirm from '~ui/views/SendConfirm';
 import SendTransaction from '~ui/views/SendTransaction';
-
 import Icons from '~ui/views/playground/Icons';
 
 /*

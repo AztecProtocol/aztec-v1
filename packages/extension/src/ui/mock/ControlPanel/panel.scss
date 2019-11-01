@@ -15,7 +15,12 @@ $panel-width: 320px;
     overflow: auto;
 }
 
-.extension-window {
-    width: $popup-width;
-    height: $popup-height;
+.browser-window {
+  background-image: url('https://cdn.dribbble.com/users/1875714/screenshots/6770456/dribbble_shot.png');
+  background-size: cover;
+  background-position: center;
+}
+
+:global(#background-app) {
+  border-radius: 0 0 6px 6px;
 }

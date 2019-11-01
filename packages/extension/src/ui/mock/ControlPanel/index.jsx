@@ -18,18 +18,18 @@ const ControlPanel = ({
         <Block
             className={styles['section-extension']}
             background="grey-darker"
+            padding="xxl"
             stretch
         >
-            <FlexBox
-                align="center"
-                valign="center"
-                expand
-                stretch
+            <BrowserWindow
+                className={styles['browser-window']}
             >
-                <BrowserWindow className={styles['extension-window']}>
-                    {children}
-                </BrowserWindow>
-            </FlexBox>
+                <div id="background-app">
+                    <div id="popup">
+                        {children}
+                    </div>
+                </div>
+            </BrowserWindow>
         </Block>
         <Block
             className={styles['section-panel']}

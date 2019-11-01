@@ -51,6 +51,19 @@ export const assets = [
     })),
 ];
 
+export const sites = [
+    {
+        title: 'Aztec Protocol',
+        url: 'https://www.aztecprotocol.com',
+        icons: [
+            {
+                href: '/icons/icon-144x144.png?v=d70c0dfad3304ef3eca84c656c8c63ab',
+                sizes: '144x144',
+            },
+        ],
+    },
+];
+
 export const domains = [
     {
         name: 'Compound Finance',
