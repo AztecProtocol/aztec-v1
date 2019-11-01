@@ -27,6 +27,7 @@ import Web3Service from '~/client/services/Web3Service';
 import ZkAsset from '../../../build/protocol/ZkAsset';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 /* eslint-enable */
+import getSiteData from '../utils/getSiteData';
 import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
 import { ensureExtensionInstalled, ensureDomainRegistered } from '../auth';
@@ -62,16 +63,7 @@ class Aztec {
             clientId: this.clientId,
             requestId,
             domain: window.location.origin,
-            site: {
-                title: 'Aztec Protocol',
-                url: 'https://www.aztecprotocol.com',
-                icons: [
-                    {
-                        href: '/icons/icon-144x144.png?v=d70c0dfad3304ef3eca84c656c8c63ab',
-                        sizes: '144x144',
-                    },
-                ],
-            },
+            site: getSiteData(),
             sender: 'WEB_CLIENT',
         });
         return filterStream('CLIENT_RESPONSE', requestId, this.MessageSubject.asObservable());
