@@ -3,7 +3,18 @@ import PropTypes from 'prop-types';
 export const themeType = PropTypes.oneOf([
     'primary',
     'white',
+    'light',
+    'dark',
 ]);
+
+export const siteShape = PropTypes.shape({
+    title: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    icons: PropTypes.arrayOf(PropTypes.shape({
+        href: PropTypes.string.isRequired,
+        sizes: PropTypes.string,
+    })),
+});
 
 export const assetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,

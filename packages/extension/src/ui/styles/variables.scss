@@ -1,5 +1,6 @@
 @import './guacamole-vars';
 
+$popup-page-spacing: map-get($spacing-map, 's');
 $popup-width: 340px;
 $popup-height: 550px;
 

@@ -9,6 +9,7 @@ export default Model({
             'data',
             'requestId',
             'clientId',
+            'site',
         ],
     },
 });

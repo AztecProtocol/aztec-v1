@@ -13,11 +13,13 @@ export const updateActionState = async (action) => {
     const {
         data: {
             response,
+            site,
         },
     } = action;
     const newAction = {
         ...action,
         data: response,
+        site,
         timestamp,
     };
     await actionModel.set(newAction);
