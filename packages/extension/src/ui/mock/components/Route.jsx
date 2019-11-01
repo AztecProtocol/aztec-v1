@@ -5,8 +5,11 @@ import PropTypes from 'prop-types';
 import {
     Route,
 } from 'react-router-dom';
+import Popup from '~/ui/components/Popup';
+import routes from '../../config/routes';
 import {
     addresses,
+    sites,
 } from '../data';
 import initialProps from '../initialProps';
 
@@ -41,10 +44,21 @@ class MockRoute extends PureComponent {
             address: addresses[0],
         };
 
-        return (
+        let config = routes;
+        const subNames = name.split('.');
+        subNames.forEach((subName) => {
+            if (config.routes) {
+                config = config.routes;
+            }
+            config = config[subName];
+        });
+
+        const isView = Component === config.View;
+        const contentNode = (
             <Component
                 clientRequestId="client-request-id"
                 actionId={actionId}
+                site={sites[0]}
                 currentAccount={currentAccount}
                 goBack={handleGoBack}
                 goNext={handleGoNext}
@@ -53,6 +67,16 @@ class MockRoute extends PureComponent {
                 {...data}
             />
         );
+
+        if (isView) {
+            return (
+                <Popup site={sites[0]}>
+                    {contentNode}
+                </Popup>
+            );
+        }
+
+        return contentNode;
     };
 
     render() {

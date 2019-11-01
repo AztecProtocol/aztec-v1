@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 import App from '../App';
 import ControlPanel from './ControlPanel';
+import '../styles/background.scss';
 import './window';
 
 ReactDOM.render(
@@ -13,5 +14,5 @@ ReactDOM.render(
             <App mock />
         </ControlPanel>
     </Router>,
-    document.getElementById('app'),
+    document.getElementById('mock-app'),
 );
