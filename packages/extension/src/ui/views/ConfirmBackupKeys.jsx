@@ -9,7 +9,7 @@ import {
     randomInts,
 } from '~utils/random';
 import i18n from '~ui/helpers/i18n';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 
 class ConfirmBackup extends PureComponent {
     constructor(props) {
@@ -90,7 +90,7 @@ class ConfirmBackup extends PureComponent {
         });
 
         return (
-            <Popup
+            <PopupContent
                 theme="white"
                 title={i18n.t('register.backup.confirm.title')}
                 description={i18n.t('register.backup.confirm.description', descriptionOptions)}
@@ -123,7 +123,7 @@ class ConfirmBackup extends PureComponent {
                         </Block>
                     )}
                 </div>
-            </Popup>
+            </PopupContent>
         );
     }
 }

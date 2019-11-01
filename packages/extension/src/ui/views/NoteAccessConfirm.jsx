@@ -14,7 +14,7 @@ import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
@@ -37,7 +37,7 @@ const NoteAccessConfirm = ({
     const invalidAccounts = accounts.some(({ linkedPublicKey }) => !linkedPublicKey);
 
     return (
-        <Popup
+        <PopupContent
             theme="white"
             title={i18n.t('note.access.grant.title')}
             leftIconName={goBack ? 'chevron_left' : 'close'}
@@ -117,7 +117,7 @@ const NoteAccessConfirm = ({
                     />
                 </Block>
             </FlexBox>
-        </Popup>
+        </PopupContent>
     );
 };
 

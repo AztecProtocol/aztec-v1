@@ -7,7 +7,7 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Logo from '~ui/components/Logo';
 
 class Loading extends PureComponent {
@@ -37,7 +37,7 @@ class Loading extends PureComponent {
         } = this.props;
 
         return (
-            <Popup>
+            <PopupContent>
                 <FlexBox
                     direction="column"
                     valign="center"
@@ -59,7 +59,7 @@ class Loading extends PureComponent {
                         </Block>
                     )}
                 </FlexBox>
-            </Popup>
+            </PopupContent>
         );
     }
 }

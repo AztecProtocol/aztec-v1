@@ -11,14 +11,14 @@ import i18n from '~ui/helpers/i18n';
 import {
     startUrl,
 } from '~ui/config/settings';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Logo from '~ui/components/Logo';
 import Button from '~ui/components/Button';
 
 const Welcome = ({
     goToPage,
 }) => (
-    <Popup theme="primary">
+    <PopupContent theme="primary">
         <FlexBox
             direction="column"
             align="space-between"
@@ -72,7 +72,7 @@ const Welcome = ({
                 </Block>
             </div>
         </FlexBox>
-    </Popup>
+    </PopupContent>
 );
 
 Welcome.propTypes = {

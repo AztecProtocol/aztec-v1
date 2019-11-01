@@ -4,11 +4,11 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Logo from '~ui/components/Logo';
 
 const Home = () => (
-    <Popup>
+    <PopupContent>
         <FlexBox
             direction="column"
             valign="center"
@@ -26,7 +26,7 @@ const Home = () => (
                 />
             </Block>
         </FlexBox>
-    </Popup>
+    </PopupContent>
 );
 
 export default Home;

@@ -6,7 +6,7 @@ import {
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Connection from '~ui/components/Connection';
 
 const RestoreFailed = ({
@@ -15,7 +15,7 @@ const RestoreFailed = ({
     isLinked,
     goNext,
 }) => (
-    <Popup
+    <PopupContent
         theme="white"
         title={i18n.t('account.restore.failed.title')}
         description={i18n.t(`account.restore.failed${isLinked ? '.linked' : ''}.description`)}
@@ -55,7 +55,7 @@ const RestoreFailed = ({
                 {seedPhrase}
             </Text>
         </Block>
-    </Popup>
+    </PopupContent>
 );
 
 RestoreFailed.propTypes = {

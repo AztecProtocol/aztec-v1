@@ -4,7 +4,7 @@ import {
     Block,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import AssetSummary from '~ui/components/AssetSummary';
 import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
 
@@ -18,7 +18,7 @@ const Asset = ({
     pastTransactions,
     isLoadingTransactions,
 }) => (
-    <Popup
+    <PopupContent
         theme="primary"
         title={i18n.t('account.assets.title')}
         leftIconName={goBack ? 'chevron_left' : 'close'}
@@ -36,7 +36,7 @@ const Asset = ({
             transactions={pastTransactions}
             isLoading={isLoadingTransactions}
         />
-    </Popup>
+    </PopupContent>
 );
 
 Asset.propTypes = {

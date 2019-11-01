@@ -12,7 +12,7 @@ import {
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListItem from '~ui/components/ListItem';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
@@ -72,7 +72,7 @@ const DomainPermissionTransaction = ({
 
     const title = i18n.t('domain.permission.title');
     return (
-        <Popup
+        <PopupContent
             theme="white"
             title={(
                 <div>
@@ -167,7 +167,7 @@ const DomainPermissionTransaction = ({
                     />
                 </Block>
             </FlexBox>
-        </Popup>
+        </PopupContent>
     );
 };
 

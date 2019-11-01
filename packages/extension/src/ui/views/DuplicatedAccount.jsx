@@ -7,14 +7,14 @@ import {
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import formatAddress from '~ui/utils/formatAddress';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Connection from '~ui/components/Connection';
 
 const DuplicatedAccount = ({
     address,
     goNext,
 }) => (
-    <Popup
+    <PopupContent
         theme="white"
         title={i18n.t('account.duplicated.title')}
         description={i18n.t('account.duplicated.description')}
@@ -49,7 +49,7 @@ const DuplicatedAccount = ({
             actionIconName="warning"
             actionIconColor="red"
         />
-    </Popup>
+    </PopupContent>
 );
 
 DuplicatedAccount.propTypes = {

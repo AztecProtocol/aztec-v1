@@ -8,7 +8,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import PasswordMeter from '~ui/components/PasswordMeter';
 
 const inputIconMapping = {
@@ -45,7 +45,7 @@ const CreatePassword = ({
     }
 
     return (
-        <Popup
+        <PopupContent
             theme="white"
             title={title || i18n.t('register.create.password.title')}
             description={description || i18n.t('register.create.password.description')}
@@ -92,7 +92,7 @@ const CreatePassword = ({
                     </Block>
                 )}
             </Block>
-        </Popup>
+        </PopupContent>
     );
 };
 

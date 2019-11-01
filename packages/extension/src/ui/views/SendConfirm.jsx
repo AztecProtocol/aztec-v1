@@ -14,7 +14,7 @@ import formatAddress from '~ui/utils/formatAddress';
 import {
     formatValue,
 } from '~ui/utils/asset';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
@@ -30,7 +30,7 @@ const SendConfirm = ({
     goBack,
     onClose,
 }) => (
-    <Popup
+    <PopupContent
         theme="white"
         title={i18n.t('send.transaction')}
         leftIconName={goBack ? 'chevron_left' : 'close'}
@@ -128,7 +128,7 @@ const SendConfirm = ({
                 />
             </Block>
         </FlexBox>
-    </Popup>
+    </PopupContent>
 );
 
 SendConfirm.propTypes = {
