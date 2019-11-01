@@ -36,7 +36,6 @@ import backgroundFrame from './backgroundFrame';
 class Aztec {
     constructor() {
         this.enabled = false;
-        this.frame = null;
         this.clientId = randomId();
         this.bindAccountDetectors();
     }
@@ -76,7 +75,11 @@ class Aztec {
         this.port.onmessage = ({ data }) => {
             console.log({ data });
             if (data.data.type === uiOpenEvent) {
-                backgroundFrame.open();
+                // TODO - add resize listener and update the size of iframe
+                backgroundFrame.open({
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                });
                 return;
             }
             if (data.data.type === uiCloseEvent) {
@@ -112,10 +115,10 @@ class Aztec {
     enable = async ({
         contractAddresses = {},
     } = {}) => {
-        this.frame = await backgroundFrame.init();
+        const frame = await backgroundFrame.init();
 
         // ensure there is an open channel / port we can communicate on
-        this.frame.contentWindow.postMessage({
+        frame.contentWindow.postMessage({
             type: 'aztec-connection',
             requestId: randomId(),
             clientId: this.clientId,
