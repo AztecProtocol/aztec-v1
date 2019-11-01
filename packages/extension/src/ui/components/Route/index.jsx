@@ -16,6 +16,7 @@ class CustomRoute extends PureComponent {
         } = this.props;
         const {
             id: actionId,
+            site,
             data,
         } = action || {};
 
@@ -23,6 +24,7 @@ class CustomRoute extends PureComponent {
             <Component
                 {...data}
                 actionId={actionId}
+                site={site}
                 currentAccount={currentAccount}
                 goToPage={goToPage}
             />
@@ -51,6 +53,14 @@ CustomRoute.propTypes = {
     }).isRequired,
     action: PropTypes.shape({
         id: PropTypes.string.isRequired,
+        site: PropTypes.shape({
+            title: PropTypes.string.isRequired,
+            url: PropTypes.string.isRequired,
+            icons: PropTypes.arrayOf(PropTypes.shape({
+                href: PropTypes.string.isRequired,
+                size: PropTypes.string,
+            })).isRequired,
+        }).isRequired,
         data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,

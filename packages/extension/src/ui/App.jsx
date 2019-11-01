@@ -13,6 +13,7 @@ import apis from '~uiModules/apis';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
+import ThemeContext from '~ui/views/handlers/ThemeContext';
 import Loading from '~ui/views/Loading';
 import routes from '~ui/config/routes';
 import actions from '~ui/config/actions';
@@ -238,10 +239,16 @@ class App extends PureComponent {
             return <Loading />;
         }
 
+        const theme = {
+            name: 'light',
+        };
+
         return (
-            <Switch>
-                {this.renderRoutes(routes)}
-            </Switch>
+            <ThemeContext.Provider value={theme}>
+                <Switch>
+                    {this.renderRoutes(routes)}
+                </Switch>
+            </ThemeContext.Provider>
         );
     }
 }

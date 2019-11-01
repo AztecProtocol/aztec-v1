@@ -10,16 +10,12 @@ import {
     Text,
     Icon,
 } from '@aztec/guacamole-ui';
-import {
-    themeType,
-} from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import Button from '~ui/components/Button';
 import Header from '../Header';
-import styles from './popup.scss';
 
-const Popup = ({
-    theme,
+const PopupContent = ({
+    className,
     title,
     description,
     leftIconName,
@@ -53,7 +49,7 @@ const Popup = ({
 
     return (
         <Block
-            className={styles[`popup-${theme}`]}
+            className={className}
             align="center"
         >
             <FlexBox
@@ -167,8 +163,8 @@ const Popup = ({
     );
 };
 
-Popup.propTypes = {
-    theme: themeType,
+PopupContent.propTypes = {
+    className: PropTypes.string,
     title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     description: PropTypes.string,
     leftIconName: PropTypes.string,
@@ -196,8 +192,8 @@ Popup.propTypes = {
     }),
 };
 
-Popup.defaultProps = {
-    theme: 'primary',
+PopupContent.defaultProps = {
+    className: '',
     title: '',
     description: '',
     leftIconName: '',
@@ -216,4 +212,4 @@ Popup.defaultProps = {
     error: null,
 };
 
-export default Popup;
+export default PopupContent;

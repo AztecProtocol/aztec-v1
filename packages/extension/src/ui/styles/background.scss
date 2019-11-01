@@ -10,16 +10,11 @@
 }
 
 :global(#popup) {
-  width: $popup-width;
-  height: $popup-height;
-
-  :global(#AZTECSDK-POPUP) {
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+  width: $popup-width + $popup-page-spacing * 2;
+  height: $popup-height + $popup-page-spacing * 2;
 }
 
-@media all and (max-width: $popup-width) {
+@media all and (max-width: $popup-width + $popup-page-spacing * 2 - 1) {
   :global(#popup) {
     width: 100%;
     height: 100%;

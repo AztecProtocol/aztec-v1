@@ -62,6 +62,16 @@ class Aztec {
             clientId: this.clientId,
             requestId,
             domain: window.location.origin,
+            site: {
+                title: 'Aztec Protocol',
+                url: 'https://www.aztecprotocol.com',
+                icons: [
+                    {
+                        href: '/icons/icon-144x144.png?v=d70c0dfad3304ef3eca84c656c8c63ab',
+                        sizes: '144x144',
+                    },
+                ],
+            },
             sender: 'WEB_CLIENT',
         });
         return filterStream('CLIENT_RESPONSE', requestId, this.MessageSubject.asObservable());
