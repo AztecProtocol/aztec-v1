@@ -7,7 +7,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import AssetSummaryLink from '~ui/components/AssetSummaryLink';
 import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
 import InplacePopup from '~ui/components/InplacePopup';
@@ -22,7 +22,7 @@ const Assets = ({
     onClickAsset,
     onClickTransaction,
 }) => (
-    <Popup
+    <PopupContent
         theme="primary"
         title={i18n.t('account.assets.title')}
         leftIconName={goBack ? 'chevron_left' : 'close'}
@@ -63,7 +63,7 @@ const Assets = ({
                 onClickTransaction={onClickTransaction}
             />
         </FlexBox>
-    </Popup>
+    </PopupContent>
 );
 
 Assets.propTypes = {

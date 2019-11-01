@@ -13,7 +13,7 @@ import {
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import formatAddress from '~ui/utils/formatAddress';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import ProfileIcon from '~ui/components/ProfileIcon';
 
 const validateSeedPhrase = (seedPhrase) => {
@@ -57,7 +57,7 @@ const RestoreFromSeedPhrase = ({
     };
 
     return (
-        <Popup
+        <PopupContent
             theme="white"
             title={i18n.t('account.restore.title')}
             description={i18n.t(isLinked
@@ -109,7 +109,7 @@ const RestoreFromSeedPhrase = ({
                     }}
                 />
             </Block>
-        </Popup>
+        </PopupContent>
     );
 };
 

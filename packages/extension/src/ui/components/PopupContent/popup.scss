@@ -1,0 +1,18 @@
+@import '../../styles/variables';
+
+%popup {
+    width: 100%;
+    height: 100%;
+}
+
+.popup-primary {
+    @extend %popup;
+    background: $bg-gradient;
+    color: map-get($color-map, 'white');
+}
+
+.popup-white {
+    @extend %popup;
+    background: map-get($color-map, 'white');
+    color: $default-text-color;
+}

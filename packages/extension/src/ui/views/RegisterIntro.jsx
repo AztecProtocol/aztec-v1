@@ -6,7 +6,7 @@ import {
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 
 const Intro = ({
     goNext,
@@ -34,7 +34,7 @@ const Intro = ({
     }
 
     return (
-        <Popup
+        <PopupContent
             theme="white"
             title={i18n.t('register.intro.title')}
             leftIconName={goBack ? 'chevron_left' : 'close'}
@@ -47,7 +47,7 @@ const Intro = ({
             }}
         >
             {descriptionNodes}
-        </Popup>
+        </PopupContent>
     );
 };
 

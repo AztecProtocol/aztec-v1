@@ -15,7 +15,7 @@ import {
 } from '~ui/config/settings';
 import i18n from '~ui/helpers/i18n';
 import returnAndClose from '~uiModules/helpers/returnAndClose';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ProgressList from '~ui/components/ProgressList';
 import Button from '~ui/components/Button';
@@ -279,7 +279,7 @@ class Transaction extends PureComponent {
             : ticketHeader;
 
         return (
-            <Popup
+            <PopupContent
                 theme="white"
                 title={title}
                 description={description || i18n.t('transaction.description')}
@@ -302,7 +302,7 @@ class Transaction extends PureComponent {
                 >
                     {this.renderSteps()}
                 </Ticket>
-            </Popup>
+            </PopupContent>
         );
     }
 }

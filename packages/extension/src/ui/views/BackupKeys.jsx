@@ -5,7 +5,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import ClickToCopy from '~ui/components/ClickToCopy';
 
 const BackupKeys = ({
@@ -14,7 +14,7 @@ const BackupKeys = ({
     goBack,
     onClose,
 }) => (
-    <Popup
+    <PopupContent
         theme="white"
         title={i18n.t('register.backup.title')}
         description={i18n.t('register.backup.description')}
@@ -43,7 +43,7 @@ const BackupKeys = ({
                 </Text>
             </Block>
         </ClickToCopy>
-    </Popup>
+    </PopupContent>
 );
 
 BackupKeys.propTypes = {

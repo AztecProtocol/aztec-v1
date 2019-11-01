@@ -10,7 +10,7 @@ import {
 import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
 import formatAddress from '~ui/utils/formatAddress';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import ProfileIcon from '~ui/components/ProfileIcon';
 
 const inputIconMapping = {
@@ -144,7 +144,7 @@ class LoginTransaction extends PureComponent {
         } = currentAccount;
 
         return (
-            <Popup
+            <PopupContent
                 theme="white"
                 title={i18n.t('account.login.title')}
                 description={i18n.t('account.login.description')}
@@ -188,7 +188,7 @@ class LoginTransaction extends PureComponent {
                         onChange={this.handleChangePassword}
                     />
                 </Block>
-            </Popup>
+            </PopupContent>
         );
     }
 }

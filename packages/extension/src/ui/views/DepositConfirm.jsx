@@ -11,7 +11,7 @@ import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
-import Popup from '~ui/components/Popup';
+import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
@@ -27,7 +27,7 @@ const DepositConfirm = ({
     goBack,
     onClose,
 }) => (
-    <Popup
+    <PopupContent
         theme="white"
         title={i18n.t('deposit.transaction')}
         leftIconName={goBack ? 'chevron_left' : 'close'}
@@ -127,7 +127,7 @@ const DepositConfirm = ({
                 />
             </Block>
         </FlexBox>
-    </Popup>
+    </PopupContent>
 );
 
 DepositConfirm.propTypes = {
