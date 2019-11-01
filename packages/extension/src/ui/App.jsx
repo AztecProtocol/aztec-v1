@@ -144,7 +144,6 @@ class App extends PureComponent {
                 route = 'account.restore';
             }
         }
-
         if (!this.isCurrentPage(route)) {
             this.setState(
                 {

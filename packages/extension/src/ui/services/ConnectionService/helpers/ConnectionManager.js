@@ -23,7 +23,7 @@ class ConnectionManager {
     async openConnection() {
         if (this.port) {
             warnLog('Connection has been established.');
-            return;
+            return null;
         }
 
         window.parent.postMessage({
@@ -32,11 +32,15 @@ class ConnectionManager {
 
         this.portId = randomId();
 
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'aztec-connection') {
-                [this.port] = e.ports;
-                this.port.onmessage = this.handlePortResponse;
-            }
+        const promise = new Promise((resolve) => {
+            window.addEventListener('message', (e) => {
+                if (e.data.type === 'aztec-connection') {
+                    [this.port] = e.ports;
+                    this.port.onmessage = this.handlePortResponse;
+                    resolve();
+                    window.removeEventListener('message');
+                }
+            });
         });
 
         window.parent.postMessage({
@@ -45,6 +49,7 @@ class ConnectionManager {
             clientId: this.portId,
             sender: 'UI_CLIENT',
         });
+        return promise;
     }
 
     setDefaultClientRequestId(clientRequestId) {
@@ -84,6 +89,7 @@ class ConnectionManager {
             ? [callback]
             : [];
 
+        console.log(this.port);
         this.port.postMessage({
             type,
             requestId,

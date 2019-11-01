@@ -78,7 +78,6 @@ export default function constructor(metadataStr) {
         addresses,
         viewingKeys,
     } = metadata;
-    console.log(metadata);
 
     return {
         ...metadata,
