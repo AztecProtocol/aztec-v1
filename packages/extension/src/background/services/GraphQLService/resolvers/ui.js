@@ -60,6 +60,7 @@ const uiResolvers = {
         note: async (_, args) => {
             const {
                 note: noteResponse,
+                error,
             } = await ConnectionService.query({
                 query: 'note',
                 data: {
