@@ -1,3 +1,5 @@
+import getAbsoluteIconUrl from './getAbsoluteIconUrl';
+
 const getIconTags = (tagName) => {
     const iconTags = [];
     const tags = document.head.getElementsByTagName(tagName);
@@ -11,7 +13,10 @@ const getIconTags = (tagName) => {
 };
 
 export default function getSiteData() {
-    const url = window.location.host;
+    const {
+        host,
+        hostname,
+    } = window.location;
     const titleTag = document.head.getElementsByTagName('title');
 
     const iconTags = [
@@ -25,18 +30,16 @@ export default function getSiteData() {
         if (!href.match(/\.[jpg|png|svg]/i)) return;
 
         const sizes = tag.getAttribute('sizes');
-        const fullHref = href.startsWith('http')
-            ? href
-            : `${url}${href}`;
+        const iconHref = getAbsoluteIconUrl(href, window.location);
         icons.push({
-            href: fullHref,
+            href: iconHref,
             sizes,
         });
     });
 
     return {
-        title: titleTag.length ? titleTag[0].text : url,
-        url,
+        title: titleTag.length ? titleTag[0].text : hostname,
+        url: host,
         icons,
     };
 }
