@@ -97,4 +97,20 @@ export default class Iframe {
         this.frame.height = 0;
         this.frame.width = 0;
     }
+
+    updateStyle({
+        width,
+        height,
+        ...style
+    }) {
+        if (width !== undefined) {
+            this.frame.width = width;
+        }
+        if (height !== undefined) {
+            this.frame.height = height;
+        }
+        Object.keys(style).forEach((attr) => {
+            this.frame.style[attr] = style[attr];
+        });
+    }
 }
