@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sign a data with trusted private key, so cliend can send it to the GSN later
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 15
+    Environment:
+      Variables:
+        STAGE: dev
+        SIGNER_ADDRESS: "0x01234"
+        SIGNER_PRIVATE_KEY: "0x012345678"
+        WEB3_PROVIDER_URL: "https://localhost:8545"
+
+Resources:
+  SignDataFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ./signerFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs10.x
+      FunctionName: SignData
+      Role: arn:aws:iam::278380418400:role/NAME-OF-YOUR-ROLE
+      Events:
+        SignData:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /gsn/sign-data
+            Method: post
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  SignDataApi:
+    Description: "API Gateway endpoint URL for dev stage for SignData function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/gsn/sign-data/"
+  SignDataFunction:
+    Description: "SignData Lambda Function ARN"
+    Value: !GetAtt SignDataFunction.Arn
+  # HelloWorldFunctionIamRole:
+  #   Description: "Implicit IAM Role created for Hello World function"
+  #   Value: !GetAtt HelloWorldFunctionRole.Arn

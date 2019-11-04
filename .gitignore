@@ -42,3 +42,8 @@ packages/extension/src/background/contracts/AZTECAccountRegistry.json
 packages/extension/src/background/contracts/IZkAsset.json
 packages/extension/src/background/contracts/ACE.json
 packages/extension/src/test/harness
+packages/aws-lambda/signer/.aws/
+packages/aws-lambda/signer/.aws-sam/
+packages/aws-lambda/signer/template.yaml
+packages/aws-lambda/signer/packaged_dev.yaml
+packages/aws-lambda/signer/packaged_prod.yaml
