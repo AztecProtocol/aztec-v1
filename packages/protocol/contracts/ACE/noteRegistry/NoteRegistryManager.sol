@@ -363,12 +363,14 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         NoteRegistry memory registry = registries[msg.sender];
         require(address(registry.behaviour) != address(0x0), "note registry does not exist");
         bytes32 proofHash = keccak256(_proofOutput);
+        bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+
         require(
             validateProofByHash(_proof, proofHash, _proofSender) == true,
             "ACE has not validated a matching proof"
         );
         // clear record of valid proof - stops re-entrancy attacks and saves some gas
-        validatedProofs[proofHash] = false;
+        validatedProofs[validatedProofHash] = false;
 
         (
             address publicOwner,
