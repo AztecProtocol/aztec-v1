@@ -4,7 +4,33 @@ import {
 } from '~/config/event';
 import Iframe from '~/utils/Iframe';
 
-export default new Iframe({
+class BackgroundFrame extends Iframe {
+    adjustFrameSize = () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        this.updateStyle({
+            width,
+            height,
+        });
+    };
+
+    open() {
+        window.addEventListener('resize', this.adjustFrameSize, true);
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        super.open({
+            width,
+            height,
+        });
+    }
+
+    close() {
+        window.removeEventListener('resize', this.adjustFrameSize, true);
+        super.close();
+    }
+}
+
+export default new BackgroundFrame({
     id: 'AZTECSDK',
     src: urls.background,
     onReadyEventName: backgroundReadyEvent,

@@ -77,11 +77,7 @@ class Aztec {
         this.port.onmessage = ({ data }) => {
             console.log({ data });
             if (data.data.type === uiOpenEvent) {
-                // TODO - add resize listener and update the size of iframe
-                backgroundFrame.open({
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                });
+                backgroundFrame.open();
                 return;
             }
             if (data.data.type === uiCloseEvent) {
