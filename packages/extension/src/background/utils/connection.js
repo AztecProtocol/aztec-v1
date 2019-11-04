@@ -116,8 +116,6 @@ class Connection {
                 await uiFrame.init();
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';
-                uiContainer.width = '100%';
-                uiContainer.height = '100%';
                 uiFrame.open();
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();

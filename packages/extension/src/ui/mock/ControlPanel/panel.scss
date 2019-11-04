@@ -21,6 +21,10 @@ $panel-width: 320px;
   background-position: center;
 }
 
-:global(#background-app) {
-  border-radius: 0 0 6px 6px;
+:global(#aztec-popup-placeholder) {
+  display: none !important;
+}
+
+:global(#aztec-popup-ui) {
+  display: block !important;
 }
