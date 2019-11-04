@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import { KeyStore } from '~utils/keyvault';
 import i18n from '~ui/helpers/i18n';
 import returnAndClose from '~ui/helpers/returnAndClose';
-import {
-    siteShape,
-} from '~/ui/config/propTypes';
-import Popup from '~ui/components/Popup';
 import CombinedViews from '~ui/views/handlers/CombinedViews';
 import Intro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
@@ -65,31 +61,27 @@ const handleOnStep = (step) => {
 
 const Register = ({
     actionId,
-    site,
     currentAccount,
     initialStep,
     initialData,
     goToPage,
 }) => (
-    <Popup site={site}>
-        <CombinedViews
-            Steps={Steps}
-            initialStep={initialStep}
-            initialData={{
-                ...initialData,
-                address: currentAccount.address,
-            }}
-            onGoBack={handleGoBack}
-            onGoNext={handleGoNext}
-            onStep={handleOnStep}
-            onExit={actionId ? returnAndClose : () => goToPage('account')}
-        />
-    </Popup>
+    <CombinedViews
+        Steps={Steps}
+        initialStep={initialStep}
+        initialData={{
+            ...initialData,
+            address: currentAccount.address,
+        }}
+        onGoBack={handleGoBack}
+        onGoNext={handleGoNext}
+        onStep={handleOnStep}
+        onExit={actionId ? returnAndClose : () => goToPage('account')}
+    />
 );
 
 Register.propTypes = {
     actionId: PropTypes.string,
-    site: siteShape.isRequired,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,

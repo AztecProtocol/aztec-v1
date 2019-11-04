@@ -5,6 +5,10 @@ import PropTypes from 'prop-types';
 import {
     Route,
 } from 'react-router-dom';
+import {
+    siteShape,
+} from '~/ui/config/propTypes';
+import Popup from '~ui/components/Popup';
 
 class CustomRoute extends PureComponent {
     renderComponent = () => {
@@ -21,13 +25,14 @@ class CustomRoute extends PureComponent {
         } = action || {};
 
         return (
-            <Component
-                {...data}
-                actionId={actionId}
-                site={site}
-                currentAccount={currentAccount}
-                goToPage={goToPage}
-            />
+            <Popup site={site}>
+                <Component
+                    {...data}
+                    actionId={actionId}
+                    currentAccount={currentAccount}
+                    goToPage={goToPage}
+                />
+            </Popup>
         );
     };
 
@@ -53,14 +58,7 @@ CustomRoute.propTypes = {
     }).isRequired,
     action: PropTypes.shape({
         id: PropTypes.string.isRequired,
-        site: PropTypes.shape({
-            title: PropTypes.string.isRequired,
-            url: PropTypes.string.isRequired,
-            icons: PropTypes.arrayOf(PropTypes.shape({
-                href: PropTypes.string.isRequired,
-                size: PropTypes.string,
-            })).isRequired,
-        }).isRequired,
+        site: siteShape.isRequired,
         data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,

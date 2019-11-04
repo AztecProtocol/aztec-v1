@@ -6,7 +6,6 @@ import {
     Route,
 } from 'react-router-dom';
 import Popup from '~/ui/components/Popup';
-import routes from '../../config/routes';
 import {
     addresses,
     sites,
@@ -44,16 +43,6 @@ class MockRoute extends PureComponent {
             address: addresses[0],
         };
 
-        let config = routes;
-        const subNames = name.split('.');
-        subNames.forEach((subName) => {
-            if (config.routes) {
-                config = config.routes;
-            }
-            config = config[subName];
-        });
-
-        const isView = Component === config.View;
         const contentNode = (
             <Component
                 clientRequestId="client-request-id"
@@ -68,15 +57,11 @@ class MockRoute extends PureComponent {
             />
         );
 
-        if (isView) {
-            return (
-                <Popup site={sites[0]}>
-                    {contentNode}
-                </Popup>
-            );
-        }
-
-        return contentNode;
+        return (
+            <Popup site={sites[0]}>
+                {contentNode}
+            </Popup>
+        );
     };
 
     render() {

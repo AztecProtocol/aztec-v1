@@ -4,6 +4,7 @@ import {
     FlexBox,
     Block,
 } from '@aztec/guacamole-ui';
+import UiPlaceholder from '~/ui/views/UiPlaceholder';
 import BrowserWindow from './BrowserWindow';
 import Panel from './Panel';
 import styles from './panel.scss';
@@ -25,9 +26,11 @@ const ControlPanel = ({
                 className={styles['browser-window']}
             >
                 <div id="background-app">
-                    <div id="popup">
-                        {children}
-                    </div>
+                    <UiPlaceholder>
+                        <div id="app">
+                            {children}
+                        </div>
+                    </UiPlaceholder>
                 </div>
             </BrowserWindow>
         </Block>
