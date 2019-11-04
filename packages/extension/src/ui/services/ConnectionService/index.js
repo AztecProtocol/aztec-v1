@@ -12,9 +12,14 @@ const manager = new ConnectionManager();
 
 export default {
     openConnection: source => manager.openConnection(source),
-    close: () => manager.postToBackground({
+    close: ({
+        abort = false,
+    } = {}) => manager.postToBackground({
         type: uiCloseEvent,
         clientRequestId: manager.clientRequestId,
+        data: {
+            abort,
+        },
     }),
     setDefaultClientRequestId: id => manager.setDefaultClientRequestId(id),
     post: async ({

@@ -1,11 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
     FlexBox,
     Block,
     Text,
     Icon,
     Image,
+    Clickable,
 } from '@aztec/guacamole-ui';
+import ConnectionService from '~/ui/services/ConnectionService';
 import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     siteShape,
@@ -15,6 +18,7 @@ import styles from './popup.scss';
 
 const Header = ({
     site,
+    disableClose,
 }) => {
     const {
         title,
@@ -67,19 +71,32 @@ const Header = ({
                     </div>
                 </Block>
             </FlexBox>
-            <div className="flex-fixed">
-                <Icon
-                    name="close"
-                    size="xl"
-                    color="label"
-                />
-            </div>
+            {!disableClose && (
+                <div className="flex-fixed">
+                    <Clickable
+                        onClick={() => ConnectionService.close({
+                            abort: true,
+                        })}
+                    >
+                        <Icon
+                            name="close"
+                            size="xl"
+                            color="label"
+                        />
+                    </Clickable>
+                </div>
+            )}
         </FlexBox>
     );
 };
 
 Header.propTypes = {
     site: siteShape.isRequired,
+    disableClose: PropTypes.bool,
+};
+
+Header.defaultProps = {
+    disableClose: false,
 };
 
 export default Header;
