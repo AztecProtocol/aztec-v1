@@ -57,7 +57,7 @@ export const sites = [
         url: 'https://www.aztecprotocol.com',
         icons: [
             {
-                href: '/icons/icon-144x144.png?v=d70c0dfad3304ef3eca84c656c8c63ab',
+                href: 'https://www.aztecprotocol.com/icons/icon-144x144.png?v=d70c0dfad3304ef3eca84c656c8c63ab',
                 sizes: '144x144',
             },
         ],

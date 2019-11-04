@@ -6,6 +6,7 @@ import {
     Icon,
     Image,
 } from '@aztec/guacamole-ui';
+import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     siteShape,
 } from '~/ui/config/propTypes';
@@ -21,6 +22,7 @@ const Header = ({
         icons,
     } = site;
     const icon = findOptimalIcon(icons, { width: 80, height: 80 });
+    const domain = getDomainFromUrl(url);
 
     return (
         <FlexBox
@@ -39,7 +41,7 @@ const Header = ({
                         <Image
                             className={styles['site-icon']}
                             ratio="square"
-                            backgroundUrl={`${url}${icon.href}`}
+                            backgroundUrl={icon.href}
                             borderRadius="s"
                         />
                     </Block>
@@ -57,7 +59,7 @@ const Header = ({
                     />
                     <div>
                         <Text
-                            text={url}
+                            text={domain}
                             size="xxs"
                             color="primary-lighter"
                             showEllipsis

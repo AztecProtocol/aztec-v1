@@ -1,9 +1,9 @@
 import browser from 'webextension-polyfill';
-import psl from 'psl';
 import gql from 'graphql-tag';
 import insertVariablesToGql from '~utils/insertVariablesToGql';
 import actionModel from '~database/models/action';
 import GraphQLService from '../services/GraphQLService';
+import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     errorToActionMap,
 } from '~config/action';
@@ -40,25 +40,14 @@ export const addDomainData = ({
     requestId,
     origin,
     ...rest
-}) => {
-    let domain;
-    if (origin.match(/^https?:\/\/(127.0.0.1|localhost)(:[0-9+]|\/)/)) {
-        domain = 'localhost';
-    } else {
-        ({
-            domain,
-        } = psl.parse(origin.replace(/^https?:\/\//, '').split('/')[0]));
-    }
-
-    return {
-        domain,
-        senderId,
-        requestId,
-        origin,
-        data,
-        ...rest,
-    };
-};
+}) => ({
+    domain: getDomainFromUrl(origin),
+    senderId,
+    requestId,
+    origin,
+    data,
+    ...rest,
+});
 
 export const handleQuery = async ({
     domain,
