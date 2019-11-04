@@ -1,3 +1,6 @@
+import {
+    get,
+} from '~/utils/storage';
 import Web3Service from '~helpers/NetworkService';
 
 const sendTransaction = async (data) => {
@@ -13,7 +16,10 @@ const sendTransaction = async (data) => {
         },
     } = data;
 
-    const web3Service = await Web3Service();
+    const networkId = await get('networkId');
+    const web3Service = await Web3Service({
+        networkId,
+    });
 
     /**
      * TODO: This should be fixed by gas station network
