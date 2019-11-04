@@ -12,6 +12,9 @@ export default {
         },
         timeout: 'The request timed out because the user did not respond to the notification.',
     },
+    user: {
+        denied: 'User denied transactions.',
+    },
     account: {
         not: {
             register: 'Account %{account} is not registered.',

@@ -3,7 +3,7 @@
     <title>AZTEC SDK demo page</title>
     <link rel="shortcut icon" href="./icons/icon-48x48.png">
   </head>
-  <body style="width: 100%; height: 100%; background-image: url('https://cdn.dribbble.com/users/1407879/screenshots/5923205/exchangeapp-2.png'); background-size: cover;">
+  <body>
     <div id="sdk-status">
       Loading AZTEC SDK...
     </div>
@@ -11,10 +11,20 @@
     <script type="module" src="http://localhost:5555/sdk/aztec.js"></script>
     <script>
       async function initAztecSdk() {
-        await window.aztec.enable();
+        const statusElem = document.getElementById('sdk-status');
+        try {
+          await window.aztec.enable();
+        } catch (error) {
+          console.error(error);
+          statusElem.innerHTML = `
+            <div>
+              Failed to load AZTEC SDK.
+            </div>
+          `;
+          return;
+        }
 
         const account = window.aztec.Web3Service.account;
-        const statusElem = document.getElementById('sdk-status');
         statusElem.innerHTML = `
           <div>
             AZTEC SDK loaded and enabled!<br/>

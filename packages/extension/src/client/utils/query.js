@@ -20,7 +20,7 @@ export default async function query({ type, args }) {
         address,
     } = Web3Service.account || {};
 
-    const response = await window.aztec.query(
+    const result = await window.aztec.query(
         {
             type: clientEvent,
             query: type,
@@ -32,14 +32,21 @@ export default async function query({ type, args }) {
         },
     );
 
+    const {
+        data: {
+            response,
+        },
+    } = result;
     const { error, ...rest } = response;
     if (error) {
         throw new ApiError(response);
     }
+
     const responseKey = Object.keys(response)
         .find(queryName => !!response[queryName]);
     if (rest[responseKey].error) {
         throw new ApiError(rest);
     }
+
     return rest[responseKey];
 }

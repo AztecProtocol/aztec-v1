@@ -20,12 +20,13 @@ import {
 import urls from '~config/urls';
 import Iframe from '~/utils/Iframe';
 import {
+    permissionError,
+} from '~/utils/error';
+import {
     updateActionState,
     addDomainData,
 } from './connectionUtils';
-
 import graphQueryMap from '../../ui/queries';
-
 import ApiService from '../services/ApiService';
 import ClientActionService from '../services/ClientActionService';
 import TransactionSendingService from '../services/TransactionSendingService';
@@ -88,18 +89,22 @@ class Connection {
                 const loadingElem = document.getElementById('aztec-popup-placeholder');
                 loadingElem.style.display = 'block';
 
-                const clientId = this.requests[requestId].webClientId;
-                const clientPort = this.connections[clientId];
-                clientPort.postMessage({
+                const containerId = 'aztec-popup-ui';
+                const uiContainer = document.getElementById(containerId);
+                uiContainer.style.display = 'none';
+                uiContainer.innerHTML = ''; // clear previous ui
+
+                const {
+                    webClientId,
+                } = this.requests[requestId];
+                this.ClientResponseSubject.next({
                     requestId,
+                    webClientId,
                     data: {
                         type: uiOpenEvent,
                     },
                 });
 
-                const containerId = 'aztec-popup-ui';
-                const popupContainer = document.getElementById(containerId);
-                popupContainer.innerHTML = ''; // clear previous ui
                 const uiFrame = new Iframe({
                     id: 'AZTECSDK-POPUP',
                     src: urls.ui,
@@ -110,9 +115,9 @@ class Connection {
                 });
                 await uiFrame.init();
                 loadingElem.style.display = 'none';
-                popupContainer.style.display = 'block';
-                popupContainer.width = '100%';
-                popupContainer.height = '100%';
+                uiContainer.style.display = 'block';
+                uiContainer.width = '100%';
+                uiContainer.height = '100%';
                 uiFrame.open();
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
@@ -144,13 +149,26 @@ class Connection {
                     requestId,
                     webClientId,
                 } = data;
-                this.connections[webClientId].postMessage({
+                const response = data.data.data;
+                this.ClientResponseSubject.next({
                     requestId,
+                    webClientId,
                     data: {
                         type: uiCloseEvent,
-                        response: data.data.data,
+                        response,
                     },
                 });
+
+                if (response.abort) {
+                    this.ClientResponseSubject.next({
+                        requestId,
+                        webClientId,
+                        data: {
+                            type: 'CLIENT_RESPONSE',
+                            response: permissionError('user.denied'),
+                        },
+                    });
+                }
             }),
         ).subscribe();
 
