@@ -92,7 +92,6 @@ class App extends PureComponent {
         const action = await ActionService.last();
         if (!action) return;
 
-        const openByUser = false;
         let route;
         if (action.requestId) {
             const {
@@ -122,27 +121,25 @@ class App extends PureComponent {
             } = await apis.account.getExtensionAccount(currentAccount.address) || {};
             currentAccount.linkedPublicKey = onChainLinkedPublicKey;
             const {
+                address: localAddress,
                 linkedPublicKey: localLinkedPublicKey,
                 validSession,
             } = await apis.account.getLocalAccount() || {};
-            const loggedIn = !openByUser
-                ? false
-                : await apis.auth.isLoggedIn();
-            if (loggedIn) {
-                route = 'account';
-            } else if (localLinkedPublicKey
-                && localLinkedPublicKey === onChainLinkedPublicKey
+
+            if (onChainLinkedPublicKey) {
+                if (localAddress === currentAddress
+                    && localLinkedPublicKey === onChainLinkedPublicKey
+                ) {
+                    route = 'account.login';
+                } else {
+                    route = 'account.restore';
+                }
+            } else if (validSession
+                && localLinkedPublicKey
+                && localAddress !== currentAddress
             ) {
-                route = 'account.login';
-            } else if (openByUser) {
-                route = onChainLinkedPublicKey
-                    ? 'account.restore'
-                    : 'welcome';
-            } else if (!onChainLinkedPublicKey && validSession) {
                 route = 'register.address';
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
-            } else if (onChainLinkedPublicKey) {
-                route = 'account.restore';
             }
         }
         if (!this.isCurrentPage(route)) {
