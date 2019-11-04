@@ -2,6 +2,7 @@ import React, {
     useContext,
 } from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import {
     FlexBox,
     Block,
@@ -14,6 +15,7 @@ import Header from './Header';
 import styles from './popup.scss';
 
 const Popup = ({
+    className,
     site,
     children,
 }) => {
@@ -21,7 +23,7 @@ const Popup = ({
 
     return (
         <Block
-            className={styles[`popup-${theme.name}`]}
+            className={classnames(className, styles[`popup-${theme.name}`])}
             align="center"
         >
             <FlexBox
@@ -29,17 +31,25 @@ const Popup = ({
                 nowrap
                 stretch
             >
+                {!!site && (
+                    <Block
+                        className={`flex-fixed ${styles.header}`}
+                        padding="l xl"
+                    >
+                        <Header
+                            theme={theme.name}
+                            site={site}
+                        />
+                    </Block>
+                )}
                 <Block
-                    className={`flex-fixed ${styles.header}`}
-                    padding="l xl"
-                >
-                    <Header
-                        theme={theme.name}
-                        site={site}
-                    />
-                </Block>
-                <Block
-                    className={`flex-free-expand ${styles.content}`}
+                    className={classnames(
+                        'flex-free-expand',
+                        styles.content,
+                        {
+                            [styles['no-header']]: !site,
+                        },
+                    )}
                     stretch
                 >
                     {children}
@@ -50,11 +60,14 @@ const Popup = ({
 };
 
 Popup.propTypes = {
-    site: siteShape.isRequired,
+    className: PropTypes.string,
+    site: siteShape,
     children: PropTypes.node,
 };
 
 Popup.defaultProps = {
+    className: '',
+    site: null,
     children: null,
 };
 

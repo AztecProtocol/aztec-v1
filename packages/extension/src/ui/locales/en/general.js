@@ -25,4 +25,5 @@ export default {
     },
     to: 'to',
     next: 'Next',
+    poweredBy: 'Powered by',
 };

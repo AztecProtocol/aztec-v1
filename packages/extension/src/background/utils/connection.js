@@ -85,20 +85,8 @@ class Connection {
                     requestId,
                 } = action;
 
-                const containerId = 'popup';
-                const popupContainer = document.getElementById(containerId);
-                popupContainer.innerHTML = ''; // clear previous popup
-
-                const uiFrame = new Iframe({
-                    id: 'AZTECSDK-POPUP',
-                    src: urls.ui,
-                    width: '100%',
-                    height: '100%',
-                    onReadyEventName: uiReadyEvent,
-                    containerId,
-                });
-                await uiFrame.init();
-                uiFrame.open();
+                const loadingElem = document.getElementById('aztec-popup-placeholder');
+                loadingElem.style.display = 'block';
 
                 const clientId = this.requests[requestId].webClientId;
                 const clientPort = this.connections[clientId];
@@ -108,6 +96,24 @@ class Connection {
                         type: uiOpenEvent,
                     },
                 });
+
+                const containerId = 'aztec-popup-ui';
+                const popupContainer = document.getElementById(containerId);
+                popupContainer.innerHTML = ''; // clear previous ui
+                const uiFrame = new Iframe({
+                    id: 'AZTECSDK-POPUP',
+                    src: urls.ui,
+                    width: '100%',
+                    height: '100%',
+                    onReadyEventName: uiReadyEvent,
+                    containerId,
+                });
+                await uiFrame.init();
+                loadingElem.style.display = 'none';
+                popupContainer.style.display = 'block';
+                popupContainer.width = '100%';
+                popupContainer.height = '100%';
+                uiFrame.open();
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
@@ -142,6 +148,7 @@ class Connection {
                     requestId,
                     data: {
                         type: uiCloseEvent,
+                        response: data.data.data,
                     },
                 });
             }),

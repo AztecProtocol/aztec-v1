@@ -11,6 +11,7 @@ import {
     themeType,
 } from '~ui/config/propTypes';
 import aztecGlyph from '~ui/images/logo.svg';
+import aztecWhiteGlyph from '~ui/images/logo-white.svg';
 import styles from './svg.scss';
 
 const AztecSvg = ({
@@ -29,7 +30,7 @@ const AztecSvg = ({
             )}
         >
             <SVG
-                glyph={aztecGlyph}
+                glyph={theme === 'light' ? aztecWhiteGlyph : aztecGlyph}
                 width={diameter}
                 height={diameter}
             />
@@ -45,7 +46,7 @@ AztecSvg.propTypes = {
 
 AztecSvg.defaultProps = {
     className: '',
-    theme: 'white',
+    theme: 'light',
     size: 'm',
 };
 
