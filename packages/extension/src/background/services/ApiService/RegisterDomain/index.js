@@ -22,7 +22,6 @@ const registerDomain = async (query, connection) => {
             title,
             url,
         } = {};
-        console.log(query);
 
         connection.UiActionSubject.next({
             type: 'ui.domain.approve',

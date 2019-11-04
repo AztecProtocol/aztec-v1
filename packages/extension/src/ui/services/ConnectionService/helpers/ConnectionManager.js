@@ -92,7 +92,6 @@ class ConnectionManager {
             ? [callback]
             : [];
 
-        console.log(this.port);
         this.port.postMessage({
             type,
             requestId,

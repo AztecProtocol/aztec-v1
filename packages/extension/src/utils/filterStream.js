@@ -1,7 +1,6 @@
 import {
     filter,
     take,
-    tap,
 } from 'rxjs/operators';
 
 const filterStream = (type, requestId, stream$) => stream$.pipe(
