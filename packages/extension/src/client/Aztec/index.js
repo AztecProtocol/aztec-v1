@@ -81,7 +81,6 @@ class Aztec {
         this.messages$ = this.MessageSubject.asObservable();
         [this.port] = ports;
         this.port.onmessage = ({ data }) => {
-            console.log({ data });
             if (data.data.type === uiOpenEvent) {
                 backgroundFrame.open();
                 return;
