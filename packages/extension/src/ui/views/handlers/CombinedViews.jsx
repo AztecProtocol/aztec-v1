@@ -2,8 +2,36 @@ import React, {
     PureComponent,
 } from 'react';
 import PropTypes from 'prop-types';
+import posed, { PoseGroup } from 'react-pose';
 import returnAndClose from '~uiModules/helpers/returnAndClose';
 import Loading from '~ui/views/Loading';
+
+const StepContent = posed.div({
+    enter: {
+        x: 0,
+        opacity: 1,
+        transition: {
+            x: { type: 'spring', stiffness: 100, damping: 50 },
+            default: { duration: 330 },
+        },
+    },
+    left: {
+        x: '-50%',
+        opacity: 0,
+        transition: {
+            x: { type: 'spring', stiffness: 100, damping: 50 },
+            default: { duration: 330 },
+        },
+    },
+    right: {
+        x: '50%',
+        opacity: 0,
+        transition: {
+            x: { type: 'spring', stiffness: 100, damping: 50 },
+            default: { duration: 330 },
+        },
+    },
+});
 
 class CombinedViews extends PureComponent {
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -64,6 +92,7 @@ class CombinedViews extends PureComponent {
             data: null,
             history: null,
             loading: false,
+            direction: 1,
             prevProps: {
                 retry: -1,
             },
@@ -101,6 +130,7 @@ class CombinedViews extends PureComponent {
 
         this.goToStep({
             step: backToStep,
+            direction: -1,
             data: {
                 ...historyData,
                 ...childState,
@@ -160,6 +190,7 @@ class CombinedViews extends PureComponent {
 
         this.goToStep({
             step: nextStep,
+            direction: 1,
             data,
             history,
         });
@@ -221,6 +252,7 @@ class CombinedViews extends PureComponent {
             step,
             data,
             loading,
+            direction,
         } = this.state;
 
         if (loading) {
@@ -234,11 +266,18 @@ class CombinedViews extends PureComponent {
         }
 
         return (
-            <Step
-                {...data}
-                goBack={step > 0 ? this.handleGoBack : null}
-                goNext={this.handleGoNext}
-            />
+            <PoseGroup 
+                preEnterPose={direction > 0 ? 'right' : 'left'}
+                exitPose={direction > 0 ? 'left' : 'right'}
+            >
+                <StepContent key={step}>
+                    <Step
+                        {...data}
+                        goBack={step > 0 ? this.handleGoBack : null}
+                        goNext={this.handleGoNext}
+                    />
+                </StepContent>
+            </PoseGroup>
         );
     }
 }
