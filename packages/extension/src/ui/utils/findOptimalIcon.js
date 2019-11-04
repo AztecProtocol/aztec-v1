@@ -12,7 +12,7 @@ export default function findOptimalIcon(icons, dimension) {
         height,
     } = dimension;
 
-    let optimalIcon;
+    let optimalIcon = icons[0];
     let minDiff = Infinity;
     icons.forEach((icon) => {
         const {
