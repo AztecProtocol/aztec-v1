@@ -8,7 +8,6 @@ const registerExtensionUi = async (query, connection) => {
         requestId,
         data: {
             args,
-            site,
         },
     } = query;
 
@@ -17,7 +16,6 @@ const registerExtensionUi = async (query, connection) => {
             type: 'ui.register.extension',
             requestId,
             data: {
-                site,
                 response: {
                     ...account,
                     ...args,

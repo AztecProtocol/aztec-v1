@@ -13,9 +13,11 @@ export const updateActionState = async (action) => {
     const {
         data: {
             response,
-            site,
         },
     } = action;
+    const {
+        site,
+    } = response || {};
     const newAction = {
         ...action,
         data: response,

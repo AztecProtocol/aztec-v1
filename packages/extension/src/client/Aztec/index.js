@@ -58,12 +58,18 @@ class Aztec {
 
     query = async (data) => {
         const requestId = randomId();
+        const {
+            args = {},
+        } = data || {};
         this.port.postMessage({
             ...data,
+            args: {
+                ...args,
+                site: getSiteData(),
+            },
             clientId: this.clientId,
             requestId,
             domain: window.location.origin,
-            site: getSiteData(),
             sender: 'WEB_CLIENT',
         });
         return filterStream('CLIENT_RESPONSE', requestId, this.MessageSubject.asObservable());
