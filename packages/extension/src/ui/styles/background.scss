@@ -7,15 +7,34 @@
   width: 100%;
   height: 100%;
   backdrop-filter: blur(16px) grayscale(70%);
+  background-color: map-get($color-map, 'grey-lighter');
 }
 
-:global(#popup) {
+:global(#aztec-popup) {
+  position: relative;
   width: $popup-width + $popup-page-spacing * 2;
   height: $popup-height + $popup-page-spacing * 2;
 }
 
+:global(#aztec-popup-ui) {
+  display: none;
+}
+
+:global(#aztec-popup-ui),
+:global(#aztec-popup-placeholder) {
+  width: 100%;
+  height: 100%;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0 - map-get($spacing-map, 'm');
+  left: 0;
+  transform: translateY(100%);
+}
+
 @media all and (max-width: $popup-width + $popup-page-spacing * 2 - 1) {
-  :global(#popup) {
+  :global(#aztec-popup) {
     width: 100%;
     height: 100%;
   }

@@ -54,6 +54,10 @@ $radius: map-get($rounded-corner-map, 'm');
 
 .content {
   border-radius: 0 0 $radius $radius;
+
+  &.no-header {
+    border-radius: $radius;
+  }
 }
 
 $close-icon-size: map-get($avatar-sizes-map, 'xl');
