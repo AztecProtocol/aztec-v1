@@ -30,7 +30,7 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const { response: { asset: { asset } } } = await query({
+        const { asset } = await query({
             type: 'asset',
             args: { id: this.id },
         }) || {};
@@ -43,11 +43,7 @@ export default class Asset {
     };
 
     async balance() {
-        const {
-            response: {
-                asset: { asset },
-            },
-        } = await query({
+        const { asset } = await query({
             type: 'assetBalance',
             args: { id: this.id },
         }) || {};
