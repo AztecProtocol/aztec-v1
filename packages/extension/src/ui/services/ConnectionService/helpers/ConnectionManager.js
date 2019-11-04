@@ -33,14 +33,16 @@ class ConnectionManager {
         this.portId = randomId();
 
         const promise = new Promise((resolve) => {
-            window.addEventListener('message', (e) => {
+            const handleReceiveMessage = (e) => {
                 if (e.data.type === 'aztec-connection') {
                     [this.port] = e.ports;
                     this.port.onmessage = this.handlePortResponse;
+                    window.removeEventListener('message', handleReceiveMessage);
                     resolve();
-                    window.removeEventListener('message');
                 }
-            });
+            };
+
+            window.addEventListener('message', handleReceiveMessage);
         });
 
         window.parent.postMessage({
@@ -49,6 +51,7 @@ class ConnectionManager {
             clientId: this.portId,
             sender: 'UI_CLIENT',
         });
+
         return promise;
     }
 
