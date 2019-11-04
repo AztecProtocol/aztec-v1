@@ -59,6 +59,7 @@
         "react-apollo": "^2.5.8",
         "react-dev-utils": "^9.0.3",
         "react-dom": "^16.8.6",
+        "react-pose": "^4.0.9",
         "react-router-dom": "^5.0.1",
         "remove-flow-types-loader": "^1.1.0",
         "rxjs": "^6.5.2",
