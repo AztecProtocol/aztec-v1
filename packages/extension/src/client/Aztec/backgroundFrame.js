@@ -5,6 +5,11 @@ import {
 import Iframe from '~/utils/Iframe';
 
 class BackgroundFrame extends Iframe {
+    constructor(...args) {
+        super(...args);
+        this.defaultStyle = window.document.body.style;
+    }
+
     adjustFrameSize = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -18,6 +23,8 @@ class BackgroundFrame extends Iframe {
         window.addEventListener('resize', this.adjustFrameSize, true);
         const width = window.innerWidth;
         const height = window.innerHeight;
+        window.document.body.style.backgroundAttatchement = 'fixed';
+        window.document.body.style.overflow = 'hidden';
         super.open({
             width,
             height,
@@ -26,6 +33,7 @@ class BackgroundFrame extends Iframe {
 
     close() {
         window.removeEventListener('resize', this.adjustFrameSize, true);
+        window.document.body.style = this.defaultStyle;
         super.close();
     }
 }
