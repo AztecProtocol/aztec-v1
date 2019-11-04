@@ -266,9 +266,13 @@ class CombinedViews extends PureComponent {
         }
 
         return (
-            <PoseGroup 
+            <PoseGroup
                 preEnterPose={direction > 0 ? 'right' : 'left'}
                 exitPose={direction > 0 ? 'left' : 'right'}
+                style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                }}
             >
                 <StepContent key={step}>
                     <Step
