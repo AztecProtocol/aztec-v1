@@ -10,7 +10,8 @@ export default async function getSession() {
         lastActive,
     } = session || {};
 
-    const valid = !!session
+    const valid = !!address
+        && !!session
         && !isDaysAgo(createdAt, 21)
         && !isDaysAgo(lastActive, 7);
 
