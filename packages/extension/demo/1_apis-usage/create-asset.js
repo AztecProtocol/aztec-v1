@@ -42,15 +42,15 @@ async function createAsset() {
 
   const ERC20Mintable = await fetchContract('ERC20Mintable');
   addAssetStatus('Deploying ERC20Mintable...');
-  const deployedERC20 = await window.aztec.Web3Service.deploy(ERC20Mintable);
+  const deployedERC20 = await window.aztec.web3.deploy(ERC20Mintable);
   const erc20Address = deployedERC20.address;
   addAssetStatus(`✓ ERC20 deployed - ${erc20Address}`, true);
 
   addAssetStatus('Deploying ZkAsset...');
   const scalingFactor = document.getElementById('new-asset-scaling-factor').value;
-  const aceAddress = window.aztec.Web3Service.contract('ACE').address;
+  const aceAddress = window.aztec.web3.getAddress('ACE');
   const ZkAssetOwnable = await fetchContract('ZkAssetOwnable');
-  const deployedZkAsset = await window.aztec.Web3Service.deploy(
+  const deployedZkAsset = await window.aztec.web3.deploy(
     ZkAssetOwnable,
     [
       aceAddress,
@@ -62,9 +62,9 @@ async function createAsset() {
   addAssetStatus(`✓ ZkAsset deployed - ${zkAssetAddress}`, true);
 
   if (value) {
-    const account = window.aztec.Web3Service.account;
+    const account = window.aztec.web3.account();
     addAssetStatus(`Minting ERC20 with amount = ${value}...`);
-    await window.aztec.Web3Service
+    await window.aztec.web3
       .useContract('ERC20')
       .at(erc20Address)
       .method('mint')
@@ -75,7 +75,7 @@ async function createAsset() {
     addAssetStatus(`✓ ERC20 balance = ${value}`, true);
 
     addAssetStatus(`Appoving ACE to spend ${value} from ERC20...`);
-    await window.aztec.Web3Service
+    await window.aztec.web3
       .useContract('ERC20')
       .at(erc20Address)
       .method('approve')

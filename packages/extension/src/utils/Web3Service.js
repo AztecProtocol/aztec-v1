@@ -122,6 +122,13 @@ class Web3Service {
         return this.contracts[contractName];
     }
 
+    getAddress(contractName) {
+        const {
+            address,
+        } = this.contract(contractName) || {};
+        return address;
+    }
+
     deployed(contractName, contractAddress = '') {
         let contract;
         if (!contractAddress) {
