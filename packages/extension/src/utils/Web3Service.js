@@ -277,13 +277,13 @@ class Web3Service {
         }
 
         return new Promise(async (resolve, reject) => {
-            const methodCall = method(...methodArgs)[type]({
+            const methodSend = method(...methodArgs)[type]({
                 from: address,
                 ...methodSetting,
                 gas: 6500000,
             });
 
-            methodCall.once('transactionHash', (receipt) => {
+            methodSend.once('transactionHash', (receipt) => {
                 const interval = setInterval(() => {
                     this.web3.eth.getTransactionReceipt(receipt, (
                         error,
@@ -298,6 +298,10 @@ class Web3Service {
                         }
                     });
                 }, 1000);
+            });
+
+            methodSend.on('error', (error) => {
+                reject(error);
             });
         });
     };
