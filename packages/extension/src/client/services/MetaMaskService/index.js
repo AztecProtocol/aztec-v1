@@ -1,21 +1,20 @@
 import ethSigUtil from 'eth-sig-util';
 import EthCrypto from 'eth-crypto';
-import { utils } from 'web3';
 import Web3Service from '~/client/services/Web3Service';
 import registerExtension from './registerExtension';
 import signNote from './signNote';
 
-export default async ({ data }) => {
-    let eip712Data;
-    let method;
+const handleAction = async (data) => {
+    let response = {};
     const {
         action,
     } = data;
     const { address } = Web3Service.account;
+
     switch (action) {
         case 'metamask.register.extension': {
-            eip712Data = registerExtension(data);
-            method = 'eth_signTypedData_v3';
+            const eip712Data = registerExtension(data);
+            const method = 'eth_signTypedData_v3';
             const { result } = await Web3Service.sendAsync({
                 method,
                 params: [address, eip712Data],
@@ -30,13 +29,11 @@ export default async ({ data }) => {
                 publicKey.slice(2),
             );
 
-            return {
-                ...data,
-                response: {
-                    signature: result,
-                    publicKey: `0x${compressedPublicKey}`,
-                },
+            response = {
+                signature: result,
+                publicKey: `0x${compressedPublicKey}`,
             };
+            break;
         }
         case 'metamask.ace.publicApprove': {
             // we only need to do this if the proof sender is the user
@@ -57,12 +54,7 @@ export default async ({ data }) => {
                     proofHash,
                     amount,
                 );
-            return {
-                ...data,
-                response: {
-                    success: true,
-                },
-            };
+            break;
         }
         case 'metamask.eip712.signNotes': {
             const {
@@ -80,7 +72,7 @@ export default async ({ data }) => {
                     challenge,
                     sender,
                 });
-                method = 'eth_signTypedData_v3';
+                const method = 'eth_signTypedData_v3';
                 return Web3Service.sendAsync({
                     method,
                     params: [address, noteSchema],
@@ -88,14 +80,11 @@ export default async ({ data }) => {
                 });
             }))).map(({ result }) => result);
 
-            return {
-                ...data,
-                response: {
-                    signatures,
-                },
+            response = {
+                signatures,
             };
+            break;
         }
-
         case 'metamask.zkAsset.updateNoteMetadata': {
             const {
                 response: {
@@ -104,7 +93,6 @@ export default async ({ data }) => {
                     metadata,
                 },
             } = data;
-
             await Web3Service
                 .useContract('ZkAsset')
                 .at(assetAddress)
@@ -113,12 +101,7 @@ export default async ({ data }) => {
                     noteHash,
                     metadata,
                 );
-            return {
-                ...data,
-                response: {
-                    success: true,
-                },
-            };
+            break;
         }
         case 'metamask.zkAsset.confidentialTransfer': {
             const {
@@ -128,7 +111,6 @@ export default async ({ data }) => {
                     signatures,
                 },
             } = data;
-
             await Web3Service
                 .useContract('ZkAsset')
                 .at(assetAddress)
@@ -137,15 +119,31 @@ export default async ({ data }) => {
                     proofData,
                     signatures,
                 );
-            return {
-                ...data,
-                response: {
-                    success: true,
-                },
-            };
-        }
-        default: {
             break;
         }
+        default:
     }
+
+    return response;
 };
+
+export default async function MetaMaskService({ data }) {
+    try {
+        const response = await handleAction(data);
+        return {
+            ...data,
+            response: {
+                ...response,
+                success: true,
+            },
+        };
+    } catch (error) {
+        return {
+            ...data,
+            response: {
+                success: false,
+                error,
+            },
+        };
+    }
+}
