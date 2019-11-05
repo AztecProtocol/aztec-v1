@@ -147,7 +147,7 @@ export default class Asset {
     deposit = async (transactions, {
         from = '',
         sender = '',
-        numberOfOutputNotes = 2,
+        numberOfOutputNotes,
     } = {}) => proofFactory(
         'deposit',
         {
