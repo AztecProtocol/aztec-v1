@@ -189,7 +189,21 @@ class Aztec {
 
         this.asset = assetFactory;
         this.note = noteFactory;
-        this.Web3Service = Web3Service;
+
+        const availableWeb3Apis = [
+            'useContract',
+            'getAddress',
+            'deploy',
+        ];
+        this.web3 = {
+            account: () => ({
+                ...Web3Service.account,
+            }),
+        };
+        availableWeb3Apis.forEach((name) => {
+            this.web3[name] = (...args) => Web3Service[name](...args);
+        });
+
         this.enabled = true;
     };
 }

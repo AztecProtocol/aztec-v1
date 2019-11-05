@@ -78,7 +78,7 @@ async function deposit() {
     return;
   }
 
-  const account = window.aztec.Web3Service.account;
+  const account = window.aztec.web3.account();
   await asset.deposit([
     {
       amount: value,
@@ -111,7 +111,7 @@ async function withdraw() {
     return;
   }
 
-  const account = window.aztec.Web3Service.account;
+  const account = window.aztec.web3.account();
   const transactions = [
     {
       amount: value,
@@ -146,7 +146,7 @@ async function send() {
     return;
   }
 
-  const account = window.aztec.Web3Service.account;
+  const account = window.aztec.web3.account();
   await asset.send(
     [
       {
