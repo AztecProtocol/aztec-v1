@@ -10,6 +10,9 @@ import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~config/constants';
 import {
+    get,
+} from '~/utils/storage';
+import {
     createAccount,
     fetchAccount,
 } from './utils/account';
@@ -369,13 +372,23 @@ class EventService {
 
     fetchAsset = async ({
         address,
-        networkId,
+        networkId = null,
     }) => {
-        const asset = await Asset.get({ networkId }, { registryOwner: address });
+        const currentNetworkId = networkId !== null
+            ? networkId
+            : await get('networkId');
+        const asset = await Asset.get(
+            { networkId: currentNetworkId },
+            { registryOwner: address },
+        );
         if (asset) {
             return {
                 error: null,
-                asset,
+                asset: {
+                    ...asset,
+                    id: address,
+                    address,
+                },
             };
         }
 
@@ -384,7 +397,7 @@ class EventService {
             assets,
         } = await fetchAssets({
             assetAddress: address,
-            networkId,
+            networkId: currentNetworkId,
         });
 
         return {

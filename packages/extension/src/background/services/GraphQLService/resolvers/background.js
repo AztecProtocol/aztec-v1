@@ -10,7 +10,6 @@ import getAccounts from './utils/getAccounts';
 import EventService from '~background/services/EventService';
 import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
-import syncAssetInfo from './utils/syncAssetInfo';
 import syncNoteInfo from './utils/syncNoteInfo';
 import base from './base';
 
@@ -21,8 +20,8 @@ const backgroundResolvers = {
                 id: (args.id || args.currentAddress),
             }),
         })),
-        asset: ensureDomainPermission(async (_, args) => ({
-            asset: await syncAssetInfo(args),
+        asset: ensureDomainPermission(async (_, args) => EventService.fetchAsset({
+            address: args.id || args.address,
         })),
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
@@ -33,7 +32,10 @@ const backgroundResolvers = {
         pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
         })),
-        account: ensureDomainPermission(async (_, args, ctx) => EventService.fetchAztecAccount({ address: args.currentAddress, networkId: ctx.networkId })),
+        account: ensureDomainPermission(async (_, args, ctx) => EventService.fetchAztecAccount({
+            address: args.currentAddress,
+            networkId: ctx.networkId,
+        })),
         accounts: ensureDomainPermission(async (_, args, ctx) => ({
             accounts: await getAccounts(args, ctx),
         })),
