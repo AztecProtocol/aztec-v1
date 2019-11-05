@@ -4,37 +4,15 @@ import {
     get,
 } from '~utils/storage';
 import {
-    ensureKeyvault,
     ensureAccount,
-    ensureDomainPermission,
 } from '../decorators';
-import assetModel from '~database/models/asset';
 import userModel from '~database/models/user';
 import mergeResolvers from './utils/mergeResolvers';
 import ConnectionService from '~ui/services/ConnectionService';
-import filterStream from '~utils/filterStream';
-import { randomId } from '~utils/random';
 import Web3Service from '~helpers/NetworkService';
 import base from './base';
-import syncNoteInfo from './utils/syncNoteInfo';
 
 const uiResolvers = {
-    // Asset: {
-    // TODO use RXJS connection
-    // balance: async (_, args, ctx, info) => {
-    //     // const requestId = randomId();
-    //     // ClientConnection.backgroundPort.postMessage({
-    //     //     requestId,
-    //     //     type: 'UI_QUERY_REQUEST',
-    //     //     domain: window.location.orgin,
-    //     //     data: {
-    //     //         ...info,
-    //     //     },
-    //     // });
-    //     // const response = await filterStream('UI_QUERY_RESPONSE', requestId, ClientConnection.background$);
-    //     // return response.balance;
-    // },
-    // },
     Account: {
         linkedPublicKey: async ({ address }) => {
             const web3Service = await Web3Service();
@@ -48,19 +26,19 @@ const uiResolvers = {
         user: async (_, { id }) => userModel.get({
             id,
         }),
-        asset: async (_, { id }) => assetModel.get({
-            address: id,
-        }),
-        account: async (_, { address }, ctx, info) => {
+        asset: async (_, { id }) => {
+            const {
+                asset,
+            } = await EventService.fetchAsset({ address: id });
+            return asset;
+        },
+        account: async (_, { address }) => {
             const networkId = await get('networkId');
             return EventService.fetchAztecAccount({ address, networkId });
         },
-
-
         note: async (_, args) => {
             const {
                 note: noteResponse,
-                error,
             } = await ConnectionService.query({
                 query: 'note',
                 data: {
