@@ -8,7 +8,7 @@ pragma solidity >=0.5.0 <0.6.0;
  **/
 interface JoinSplitInterface {
     /* solhint-disable-next-line var-name-mixedcase */
-    
+
     function validateJoinSplit(
         bytes calldata, 
         address, 

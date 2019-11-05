@@ -37,8 +37,8 @@ contract JoinSplit {
             // there's only one function that ever gets called: validateJoinSplit()
             // We still assume calldata is offset by 4 bytes so that we can represent this contract
             // through a compatible ABI
-            validateJoinSplit()
 
+            validateJoinSplit()
             // if we get to here, the proof is valid. We now 'fall through' the assembly block
             // and into JoinSplitABI.validateJoinSplit()
             // reset the free memory pointer because we're touching Solidity code again
@@ -87,10 +87,8 @@ contract JoinSplit {
                 hashCommitments(notes, n)
                 let b := add(0x320, mul(n, 0x80))
 
-                // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
-                // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
-                //  which adds some minor alterations
 
+                let x := 1
                 // Iterate over every note and calculate the blinding factor B_i = \gamma_i^{kBar}h^{aBar}\sigma_i^{-c}.
                 // We use the AZTEC protocol pairing optimization to reduce the number of pairing comparisons to 1,
                 //  which adds some minor alterations
@@ -122,7 +120,7 @@ contract JoinSplit {
                     let c := challenge
 
                     // We don't transmit kBar_{n-1} in the proof to save space, instead we derive it from the
-                    // homomorphic sum condition: \sum_{i=0}^{m-1}\bar{k}_i = \sum_{i=m}^{n-1}\bar{k}_i + k_{public}c, 
+                    // homomorphic sum condition: \sum_{i=0}^{m-1}\bar{k}_i = \sum_{i=m}^{n-1}\bar{k}_i + k_{public}c,
                     // We can recover \bar{k}_{n-1}.
                     // If m=n then \bar{k}_{n-1} = \sum_{i=0}^{n-1}\bar{k}_i + k_{public}
                     // else \bar{k}_{n-1} = \sum_{i=0}^{m-1}\bar{k}_i - \sum_{i=m}^{n-1}\bar{k}_i - k_{public}
@@ -141,6 +139,7 @@ contract JoinSplit {
                     // Check this commitment is well formed...
                     validateCommitment(noteIndex, k, a)
 
+                    x := mulmod(x, mload(0x00), gen_order)
                     // If i > m then this is an output note.
                     // Set k = kx_j, a = ax_j, c = cx_j, where j = i - (m+1)
                     switch gt(add(i, 0x01), m)
@@ -148,20 +147,17 @@ contract JoinSplit {
 
                         // before we update k, update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
                         kn := addmod(kn, sub(gen_order, k), gen_order)
-                        let x := mload(0x00)
+
                         k := mulmod(k, x, gen_order)
                         a := mulmod(a, x, gen_order)
                         c := mulmod(challenge, x, gen_order)
-
-                        // calculate x_{j+1}
-                        mstore(0x00, keccak256(0x00, 0x20))
                     }
                     case 0 {
 
                         // nothing to do here except update kn = \sum_{i=0}^{m-1}k_i - \sum_{i=m}^{n-1}k_i
                         kn := addmod(kn, k, gen_order)
                     }
-                
+
                     // Calculate the G1 element \gamma_i^{k}h^{a}\sigma_i^{-c} = B_i
                     // Memory map:
                     // 0x20: \gamma_iX
@@ -237,7 +233,7 @@ contract JoinSplit {
                     }
 
                     // throw transaction if any calls to precompiled contracts failed
-                    if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20) }
+                    if iszero(result) { mstore(0x00, 400) revert(0x00, 0x20)}
                     b := add(b, 0x40) // increase B pointer by 2 words
                 }
 
@@ -378,13 +374,13 @@ contract JoinSplit {
              **/
             function hashCommitments(notes, n) {
                 for { let i := 0 } lt(i, n) { i := add(i, 0x01) } {
-                let index := add(add(notes, mul(i, 0xc0)), 0x60)
-                calldatacopy(add(0x320, mul(i, 0x80)), index, 0x80)
+                    let index := add(add(notes, mul(i, 0xc0)), 0x60)
+                    calldatacopy(add(0x320, mul(i, 0x80)), index, 0x80)
                 }
                 mstore(0x00, keccak256(0x320, mul(n, 0x80)))
             }
+
         }
-    
         // if we've reached here, we've validated the join-split transaction and haven't thrown an error.
         // Encode the output according to the ACE standard and exit.
         JoinSplitABIEncoder.encodeAndExit();
