@@ -38,6 +38,7 @@ const steps = [
                 run: apis.ace.publicApprove,
             },
         ],
+
     },
     {
         titleKey: 'transaction.step.send',

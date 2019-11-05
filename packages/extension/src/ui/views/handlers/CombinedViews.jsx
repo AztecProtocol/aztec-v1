@@ -32,6 +32,14 @@ const StepContent = posed.div({
         },
     },
 });
+const FooterContent = posed.div({
+    enter: {
+        opacity: 1,
+    },
+    exit: {
+        opacity: 0,
+    },
+});
 
 class CombinedViews extends PureComponent {
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -266,22 +274,24 @@ class CombinedViews extends PureComponent {
         }
 
         return (
-            <PoseGroup
-                preEnterPose={direction > 0 ? 'right' : 'left'}
-                exitPose={direction > 0 ? 'left' : 'right'}
-                style={{
-                    position: 'relative',
-                    overflow: 'hidden',
-                }}
-            >
-                <StepContent key={step}>
-                    <Step
-                        {...data}
-                        goBack={step > 0 ? this.handleGoBack : null}
-                        goNext={this.handleGoNext}
-                    />
-                </StepContent>
-            </PoseGroup>
+            <div>
+                <PoseGroup
+                    preEnterPose={direction > 0 ? 'right' : 'left'}
+                    exitPose={direction > 0 ? 'left' : 'right'}
+                    style={{
+                        position: 'relative',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <StepContent key={step}>
+                        <Step
+                            {...data}
+                            goBack={step > 0 ? this.handleGoBack : null}
+                            goNext={this.handleGoNext}
+                        />
+                    </StepContent>
+                </PoseGroup>
+            </div>
         );
     }
 }

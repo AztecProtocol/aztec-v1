@@ -9,7 +9,9 @@ export default {
         },
     },
     create: {
-        keys: 'Create Keys',
+        title: 'Create Keys',
+        submitText: 'Create',
+        cancelText: 'Cancel',
         password: {
             _: 'Create Password',
             title: 'Create password',
@@ -18,9 +20,16 @@ export default {
         },
         account: 'Create Account',
     },
+    password: {
+        title: 'Create password',
+        submitText: 'Encrypt',
+        cancelText: 'Cancel',
+    },
     backup: {
         title: 'Backup your seed phrase',
         description: '',
+        submitText: 'Download',
+        cancelText: 'Cancel',
         confirm: {
             _: 'I have backed up my seed phrase',
             title: 'A quick check to make sure you backed up',

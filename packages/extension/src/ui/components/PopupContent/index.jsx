@@ -8,160 +8,75 @@ import {
     Block,
     TextButton,
     Text,
-    Icon,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import Button from '~ui/components/Button';
-import Header from '../Header';
 
 const PopupContent = ({
     className,
-    title,
-    description,
-    leftIconName,
-    onClickLeftIcon,
-    disableOnClickLeftIcon,
-    rightIconName,
-    onClickRightIcon,
-    submitButtonText,
     successMessage,
-    onSubmit,
-    submitButton,
     footerLink,
     children,
-    loading,
     success,
     error,
-}) => {
-    const hasHeader = !!(title || onClickLeftIcon || onClickRightIcon);
-    const headerNode = hasHeader
-        ? (
-            <Header
-                title={title}
-                leftIconName={leftIconName}
-                onClickLeftIcon={onClickLeftIcon}
-                disableOnClickLeftIcon={disableOnClickLeftIcon}
-                rightIconName={rightIconName}
-                onClickRightIcon={onClickRightIcon}
-            />
-        )
-        : null;
-
-    return (
-        <Block
-            className={className}
+}) => (
+    <Block
+        className={className}
+    >
+        <FlexBox
+            direction="column"
+            nowrap
             align="center"
+            stretch
+            expand
         >
-            <FlexBox
-                direction="column"
-                nowrap
-                stretch
+            <Block
+                className="flex-free-expand"
+                padding="m"
             >
-                {!!headerNode && (
-                    <Block
-                        className="flex-fixed"
-                        padding="xl xl 0"
-                    >
-                        {headerNode}
-                    </Block>
-                )}
+                {children}
+            </Block>
+            {!!(error || success) && (
                 <Block
-                    className="flex-free-expand"
-                    padding="xl"
-                    stretch
+                    className="flex-fixed"
                 >
-                    <FlexBox
-                        direction="column"
-                        nowrap
-                        stretch
-                    >
-                        {!!description && (
-                            <Block
-                                className="flex-fixed"
-                                bottom="l"
-                            >
-                                <Block
-                                    padding="0 xl"
-                                >
-                                    <Text
-                                        text={description}
-                                        size="xs"
-                                        color="label"
-                                    />
-                                </Block>
-                            </Block>
-                        )}
-                        <Block
-                            className="flex-free-expand"
-                            stretch
-                        >
-                            {children}
-                        </Block>
-                        {!!(onSubmit || submitButton || error) && (
-                            <Block
-                                className="flex-fixed"
-                                top="l"
-                            >
-                                {error && (
-                                    <Block bottom={error.fetal ? 's' : 'm'}>
-                                        <Text
-                                            text={error.message
+                    {error && (
+                        <Block bottom={error.fetal ? 's' : 'm'}>
+                            <Text
+                                text={error.message
                                                 || i18n.t(error.key, error.response)}
-                                            color="red"
-                                            size="xxs"
-                                        />
-                                    </Block>
-                                )}
-                                {success && successMessage && (
-                                    <Block bottom="s">
-                                        <Text
-                                            text={successMessage}
-                                            color="primary"
-                                            size="xs"
-                                            weight="semibold"
-                                        />
-                                    </Block>
-                                )}
-                                {submitButton}
-                                {!submitButton
-                                    && onSubmit
-                                    && (!error || !error.fetal)
-                                    && (!success || !successMessage)
-                                    && (
-                                        <Button
-                                            onClick={onSubmit}
-                                            loading={loading}
-                                        >
-                                            {!success && submitButtonText}
-                                            {success && (
-                                                <Icon
-                                                    name="done"
-                                                    size="m"
-                                                />
-                                            )}
-                                        </Button>
-                                    )}
-                            </Block>
-                        )}
-                        {!!footerLink && (
-                            <Block
-                                className="flex-fixed"
-                                top={onSubmit ? 'm' : 'l'}
-                            >
-                                <TextButton
-                                    {...footerLink}
-                                    Link={Link}
-                                    color="label"
-                                    size="xxs"
-                                />
-                            </Block>
-                        )}
-                    </FlexBox>
+                                color="red"
+                                size="xxs"
+                            />
+                        </Block>
+                    )}
+                    {success && successMessage && (
+                        <Block bottom="s">
+                            <Text
+                                text={successMessage}
+                                color="primary"
+                                size="xs"
+                                weight="semibold"
+                            />
+                        </Block>
+                    )}
                 </Block>
-            </FlexBox>
-        </Block>
-    );
-};
+            )}
+            {!!footerLink && (
+                <Block
+                    className="flex-fixed"
+                    padding="m"
+                >
+                    <TextButton
+                        {...footerLink}
+                        Link={Link}
+                        color="label"
+                        size="xxs"
+                    />
+                </Block>
+            )}
+        </FlexBox>
+    </Block>
+);
 
 PopupContent.propTypes = {
     className: PropTypes.string,
@@ -182,7 +97,6 @@ PopupContent.propTypes = {
         onClick: PropTypes.func,
     }),
     children: PropTypes.node,
-    loading: PropTypes.bool,
     success: PropTypes.bool,
     error: PropTypes.shape({
         key: PropTypes.string,
@@ -207,7 +121,6 @@ PopupContent.defaultProps = {
     submitButton: null,
     footerLink: null,
     children: null,
-    loading: false,
     success: false,
     error: null,
 };

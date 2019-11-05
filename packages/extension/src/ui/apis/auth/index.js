@@ -2,6 +2,7 @@ import isLoggedIn from './isLoggedIn';
 import getCurrentUser from './getCurrentUser';
 import createPwDerivedKey from './createPwDerivedKey';
 import createKeyStore from './createKeyStore';
+import createSeedPhrase from './createSeedPhrase';
 import registerExtension from './registerExtension';
 import linkAccountToMetaMask from './linkAccountToMetaMask';
 import sendRegisterAddress from './sendRegisterAddress';
@@ -19,6 +20,7 @@ export {
     createKeyStore,
     registerExtension,
     linkAccountToMetaMask,
+    createSeedPhrase,
     sendRegisterAddress,
     registerAddress,
     restoreAccount,
