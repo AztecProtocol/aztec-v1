@@ -59,8 +59,14 @@ async function initAsset() {
 
 async function deposit() {
   const depositInput = document.getElementById('deposit-value');
+  const numberOfOutputNotes = parseInt(document.getElementById('deposit-output-number').value, 10);
   const value = parseInt(depositInput.value);
   if (!value) {
+    depositStatus.log('× Deposit value must be larger than 0');
+    return;
+  }
+  if (!numberOfOutputNotes) {
+    depositStatus.log('× Number of output notes must be more than 0');
     return;
   }
 
@@ -89,11 +95,11 @@ async function withdraw() {
   const numberOfInputNotes = parseInt(document.getElementById('withdraw-input-number').value, 10);
   const value = parseInt(withdrawInput.value);
   if (!value) {
-    withdrawStatus.log('× Number of input notes must be larger than 0');
+    withdrawStatus.log('× Withdraw value must be larger than 0');
     return;
   }
   if (!numberOfInputNotes) {
-    withdrawStatus.log('× Number of input notes must be larger than 0');
+    withdrawStatus.log('× Number of input notes must be more than 0');
     return;
   }
 
@@ -170,12 +176,19 @@ document.getElementById('app').innerHTML = `
     <div id="asset-apis" style="display: none;">
       <div>
         <div>Deposit:</div>
+        <label>Amount</label>
         <input
           id="deposit-value"
           type="number"
           size="10"
-          placeholder="amount"
-        />
+        /><br/>
+        <label>Number of output notes</label>
+        <input
+          id="deposit-output-number"
+          type="number"
+          size="2"
+          value="2"
+        /><br/>
         <button onclick="deposit()">Submit</button><br/>
         <br/>
         <div id="deposit-status"></div>
