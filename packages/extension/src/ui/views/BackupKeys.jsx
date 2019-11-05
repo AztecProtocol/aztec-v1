@@ -10,52 +10,36 @@ import ClickToCopy from '~ui/components/ClickToCopy';
 
 const BackupKeys = ({
     seedPhrase,
-    goNext,
-    goBack,
-    onClose,
 }) => (
     <PopupContent
         theme="white"
-        title={i18n.t('register.backup.title')}
-        description={i18n.t('register.backup.description')}
-        leftIconName={goBack ? 'chevron_left' : 'close'}
-        onClickLeftIcon={goBack || onClose}
-        submitButtonText={i18n.t('register.backup.confirm')}
-        onSubmit={goNext}
     >
-        <ClickToCopy
-            text={seedPhrase}
+        <Block
+            padding="l"
+            background="primary-lightest"
+            borderRadius="m"
+            className="flex-free-expand"
         >
-            <Block
-                padding="l"
-                background="primary-lightest"
-                borderRadius="m"
-            >
-                <Text size="xs">
-                    {seedPhrase.split(' ').map((phrase, i) => (
-                        <Block
-                            key={`${+i}_${phrase}`}
-                            padding="xxs 0"
-                        >
-                            {phrase}
-                        </Block>
-                    ))}
-                </Text>
-            </Block>
-        </ClickToCopy>
+            <Text size="xs">
+                {seedPhrase.split(' ').map((phrase, i) => (
+                    <Block
+                        key={`${+i}_${phrase}`}
+                        padding="xxs 0"
+                    >
+                        {phrase}
+                    </Block>
+                ))}
+            </Text>
+        </Block>
     </PopupContent>
 );
 
 BackupKeys.propTypes = {
-    seedPhrase: PropTypes.string.isRequired,
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
+    seedPhrase: PropTypes.string,
 };
 
 BackupKeys.defaultProps = {
-    goBack: null,
-    onClose: null,
+    seedPhrase: '',
 };
 
 export default BackupKeys;

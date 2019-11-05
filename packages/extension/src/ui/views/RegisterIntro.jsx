@@ -8,11 +8,7 @@ import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import PopupContent from '~ui/components/PopupContent';
 
-const Intro = ({
-    goNext,
-    goBack,
-    onClose,
-}) => {
+const Intro = () => {
     const descriptionNodes = [];
     for (let i = 0; i < 10; i += 1) {
         const textKey = `register.intro.description.para${i}`;
@@ -26,8 +22,8 @@ const Intro = ({
                 <Text
                     text={i18n.t(textKey)}
                     size="xs"
-                    color="label"
-                    weight={i === 1 ? 'semibold' : 'normal'}
+                    color="default"
+                    weight={i === 1 ? 'semibold' : 'light'}
                 />
             </Block>
         ));
@@ -36,11 +32,6 @@ const Intro = ({
     return (
         <PopupContent
             theme="white"
-            title={i18n.t('register.intro.title')}
-            leftIconName={goBack ? 'chevron_left' : 'close'}
-            onClickLeftIcon={goBack || onClose}
-            submitButtonText={i18n.t('register.create.keys')}
-            onSubmit={goNext}
             footerLink={{
                 text: i18n.t('account.restore.fromSeedPhrase'),
                 href: router.u('account.restore'),
@@ -51,15 +42,8 @@ const Intro = ({
     );
 };
 
-Intro.propTypes = {
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
-};
+Intro.propTypes = {};
 
-Intro.defaultProps = {
-    goBack: null,
-    onClose: null,
-};
+Intro.defaultProps = {};
 
 export default Intro;

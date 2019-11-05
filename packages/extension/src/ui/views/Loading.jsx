@@ -43,6 +43,7 @@ class Loading extends PureComponent {
                     valign="center"
                     align="center"
                     stretch
+                    expand
                 >
                     <Block bottom={message ? 'l' : ''}>
                         <Logo
