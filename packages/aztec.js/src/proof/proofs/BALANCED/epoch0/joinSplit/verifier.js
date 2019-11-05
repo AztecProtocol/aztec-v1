@@ -1,5 +1,6 @@
 const bn128 = require('@aztec/bn128');
 const { constants, errors } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 
 const Keccak = require('../../../../../keccak');
 const Verifier = require('../../../../base/epoch0/verifier');
@@ -57,16 +58,16 @@ class JoinSplitVerifier65793 extends Verifier {
 
         let pairingGammas;
         let pairingSigmas;
-        let reducer = bn128.zeroBnRed;
+        const reducer = rollingHash.redKeccak();
         this.data.forEach((item, i) => {
             let { kBar, aBar } = item;
             let c = this.challenge;
             if (i >= this.proof.m) {
                 // the reducer is the "x" in the white paper
-                reducer = rollingHash.redKeccak();
-                kBar = kBar.redMul(reducer);
-                aBar = aBar.redMul(reducer);
-                c = this.challenge.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                kBar = kBar.redMul(x);
+                aBar = aBar.redMul(x);
+                c = this.challenge.redMul(x);
             }
             const gamma = item.gamma.mul(c);
             const sigma = item.sigma.mul(c).neg();
