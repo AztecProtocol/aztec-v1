@@ -34,48 +34,6 @@ function addAssetStatus(status, keepInLog = false) {
   }
 }
 
-const proofEpoch = 1;
-const proofId = 1;
-const proofCategoryMapping = {
-  JOIN_SPLIT_PROOF: 1,
-  MINT_PROOF: 2,
-  BURN_PROOF: 3,
-};
-const proofIdMapping = {
-  JOIN_SPLIT_PROOF: '65793',
-  MINT_PROOF: '66049',
-  BURN_PROOF: '66305',
-};
-
-async function setProofInAce(proofName) {
-  addAssetStatus(`Checking ${proofName} in ACE...'`);
-  const category = proofCategoryMapping[proofName];
-  const existingProof = await window.aztec.Web3Service
-    .useContract('ACE')
-    .method('validators')
-    .call(
-      proofEpoch,
-      category,
-      proofId,
-    );
-
-  if (!existingProof) {
-      addAssetStatus(`Setting ${proofName} in ACE...'`);
-      const proof = proofIdMapping[proofName];
-      const proofContract = window.aztec.Web3Service
-        .registerContract(proofContractMapping[proofName]);
-
-      await window.aztec.Web3Service
-        .useContract('ACE')
-        .method('setProof')
-        .send(
-          proof,
-          proofContract.address,
-        );
-      addAssetStatus(`✓ Set ${proofName} in ACE'`, true);
-  }
-}
-
 async function createAsset() {
   const value = document.getElementById('new-asset-value').value || 0;
 
@@ -87,9 +45,6 @@ async function createAsset() {
   const deployedERC20 = await window.aztec.Web3Service.deploy(ERC20Mintable);
   const erc20Address = deployedERC20.address;
   addAssetStatus(`✓ ERC20 deployed - ${erc20Address}`, true);
-
-  await setProofInAce('JOIN_SPLIT_PROOF');
-  await setProofInAce('MINT_PROOF');
 
   addAssetStatus('Deploying ZkAsset...');
   const scalingFactor = document.getElementById('new-asset-scaling-factor').value;
