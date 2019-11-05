@@ -53,8 +53,8 @@ async function initAsset() {
     withdrawStatus = makeStatusGenerator('withdraw-status');
     sendStatus = makeStatusGenerator('send-status');
     refreshAssetBalances();
-    apisElem.style.display = 'block';
   }
+  apisElem.style.display = 'block';
 }
 
 async function deposit() {

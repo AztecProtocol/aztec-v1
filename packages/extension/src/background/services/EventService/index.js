@@ -377,32 +377,41 @@ class EventService {
         const currentNetworkId = networkId !== null
             ? networkId
             : await get('networkId');
-        const asset = await Asset.get(
+        let error = null;
+        let asset = await Asset.get(
             { networkId: currentNetworkId },
             { registryOwner: address },
         );
-        if (asset) {
-            return {
-                error: null,
-                asset: {
-                    ...asset,
-                    id: address,
-                    address,
-                },
-            };
+        if (!asset) {
+            const {
+                error: fetchError,
+                assets,
+            } = await fetchAssets({
+                assetAddress: address,
+                networkId: currentNetworkId,
+            });
+            if (fetchError) {
+                error = fetchError;
+            } else {
+                asset = assets ? assets[assets.length - 1] : null;
+            }
         }
-
-        const {
-            error,
-            assets,
-        } = await fetchAssets({
-            assetAddress: address,
-            networkId: currentNetworkId,
-        });
+        if (asset
+            && asset.registryOwner !== address
+        ) {
+            // TODO - find out why an asset is returned when the given address is not in indexedDB
+            asset = null;
+        }
 
         return {
             error,
-            asset: assets ? assets[assets.length - 1] : null,
+            asset: asset
+                ? {
+                    ...asset,
+                    id: address,
+                    address,
+                }
+                : null,
         };
     };
 }
