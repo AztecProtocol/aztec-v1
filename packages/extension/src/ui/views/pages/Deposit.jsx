@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+    emptyIntValue,
+} from '~/ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
 import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositTransaction from '~ui/views/DepositTransaction';
@@ -24,9 +27,10 @@ const handleOnStep = (step) => {
 
 const Deposit = ({
     from,
+    sender,
     assetAddress,
     transactions,
-    sender,
+    numberOfOutputNotes,
 }) => {
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
@@ -35,9 +39,10 @@ const Deposit = ({
         return {
             asset,
             from,
+            sender,
             amount,
             transactions,
-            sender,
+            numberOfOutputNotes,
         };
     };
 
@@ -59,6 +64,11 @@ Deposit.propTypes = {
         amount: PropTypes.number.isRequired,
         to: PropTypes.string.isRequired,
     })).isRequired,
+    numberOfOutputNotes: PropTypes.number,
+};
+
+Deposit.defaultProps = {
+    numberOfOutputNotes: emptyIntValue,
 };
 
 export default Deposit;
