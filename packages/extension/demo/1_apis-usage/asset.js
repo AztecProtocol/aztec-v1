@@ -2,6 +2,7 @@
 
 const zkAssetAddress = document.body.getAttribute('asset');
 let asset;
+let allowanceStatus;
 let depositStatus;
 let withdrawStatus;
 let sendStatus;
@@ -10,6 +11,7 @@ const makeStatusGenerator = (id) => {
   let statusLogs = [];
   const elem = document.getElementById(id);
   const log = (status, keepInLog = false) => {
+    elem.style.color = 'inherit';
     elem.innerHTML = `
       ${statusLogs.map(status => `${status}<br/>`).join('')}
       ${status}<br/>
@@ -18,12 +20,17 @@ const makeStatusGenerator = (id) => {
       statusLogs.push(status);
     }
   };
+  const error = (status, keepInLog) => {
+    log(status, keepInLog);
+    elem.style.color = 'red';
+  };
   const clear = () => {
     statusLogs = [];
     elem.innerHTML = '';
   };
   return {
     log,
+    error,
     clear,
   };
 };
@@ -33,14 +40,30 @@ async function refreshBalance() {
   document.getElementById('asset-balance').innerHTML = `${balance}`;
 }
 
+async function refreshAllowance() {
+  const account = window.aztec.web3.account();
+  const erc20Address = asset.linkedTokenAddress;
+  const aceAddress = window.aztec.web3.getAddress('ACE');
+  const allowance = await window.aztec.web3
+    .useContract('ERC20')
+    .at(erc20Address)
+    .method('allowance')
+    .call(
+        account.address,
+        aceAddress,
+    );
+  document.getElementById('erc20-allowance').innerHTML = `${allowance}`;
+}
+
 async function refreshERC20Balance() {
   const balance = await asset.balanceOfLinkedToken();
   document.getElementById('erc20-balance').innerHTML = `${balance}`;
 }
 
-function refreshAssetBalances() {
+async function refreshAssetBalances() {
   refreshBalance();
   refreshERC20Balance();
+  refreshAllowance();
 }
 
 async function initAsset() {
@@ -49,12 +72,38 @@ async function initAsset() {
   if (!asset.isValid()) {
     apisElem.innerHTML = 'This asset is not valid.';
   } else {
+    allowanceStatus = makeStatusGenerator('allowance-status');
     depositStatus = makeStatusGenerator('deposit-status');
     withdrawStatus = makeStatusGenerator('withdraw-status');
     sendStatus = makeStatusGenerator('send-status');
     refreshAssetBalances();
   }
   apisElem.style.display = 'block';
+}
+
+async function approveAllowance() {
+  const allowanceInput = document.getElementById('erc20-allowance-value');
+  const value = parseInt(allowanceInput.value);
+  if (!value) {
+    allowanceStatus.log('× Allowance value must be larger than 0');
+    return;
+  }
+
+  allowanceStatus.clear();
+
+  const aceAddress = window.aztec.web3.getAddress('ACE');
+  const erc20Address = asset.linkedTokenAddress;
+  await window.aztec.web3
+    .useContract('ERC20')
+    .at(erc20Address)
+    .method('approve')
+    .send(
+      aceAddress,
+      value,
+    );
+
+  await refreshAllowance();
+  allowanceInput.value = '';
 }
 
 async function deposit() {
@@ -79,7 +128,7 @@ async function deposit() {
   }
 
   const account = window.aztec.web3.account();
-  await asset.deposit(
+  const response = await asset.deposit(
     [
       {
         amount: value,
@@ -90,6 +139,7 @@ async function deposit() {
       numberOfOutputNotes,
     },
   );
+  console.log('api deposit response', response);
 
   refreshAssetBalances();
   depositInput.value = '';
@@ -123,15 +173,22 @@ async function withdraw() {
       to: account.address,
     },
   ];
-  await asset.withdraw(
-    transactions,
-    {
-        numberOfInputNotes,
-    },
-  );
 
-  refreshAssetBalances();
-  withdrawInput.value = '';
+  try {
+    const response = await asset.withdraw(
+      transactions,
+      {
+          numberOfInputNotes,
+      },
+    );
+
+    console.log('withdraw api', response);
+    refreshAssetBalances();
+    withdrawInput.value = '';
+  } catch (error) {
+    console.error(error);
+    withdrawStatus.error(error.message);
+  }
 }
 
 async function send() {
@@ -174,11 +231,30 @@ document.getElementById('app').innerHTML = `
   <div>
     <div>
       Asset: <strong>${zkAssetAddress}</strong><br/>
-      ERC20 balance: <span id="erc20-balance">...</span><br/>
       Balance: <span id="asset-balance">...</span><br/>
     </div>
     <br/>
+    <div>
+      Linked ERC20: <strong>${zkAssetAddress}</strong><br/>
+      Balance: <span id="erc20-balance">...</span><br/>
+      Allowance: <span id="erc20-allowance">...</span><br/>
+    </div>
+    <br/>
+    <br/>
     <div id="asset-apis" style="display: none;">
+      <div>
+        <div>Approve ERC20 allowance:</div>
+        <label>Amount</label>
+        <input
+          id="erc20-allowance-value"
+          type="number"
+          size="10"
+        /><br/>
+        <button onclick="approveAllowance()">Submit</button><br/>
+        <br/>
+        <div id="allowance-status"></div>
+      </div>
+      <br/>
       <div>
         <div>Deposit:</div>
         <label>Amount</label>
