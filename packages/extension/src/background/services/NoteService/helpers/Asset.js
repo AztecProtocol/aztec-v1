@@ -19,6 +19,7 @@ import {
 import {
     isDestroyed,
 } from '~utils/noteStatus';
+import noteModel from '~/background/database/models/note';
 import {
     defaultMaxProcesses,
     defaultNotesPerDecryptionBatch,
@@ -231,7 +232,6 @@ export default class Asset {
         await Promise.all(rawNotes.map(async (note) => {
             const {
                 noteHash,
-                metadata: metadataStr,
                 blockNumber,
                 status,
             } = note;
@@ -241,6 +241,18 @@ export default class Asset {
 
             if (destroyed && !key) {
                 return;
+            }
+
+            let {
+                metadata: metadataStr,
+            } = note;
+            if (!metadataStr) {
+                ({
+                    metadata: metadataStr,
+                } = await noteModel.get(
+                    { networkId: this.networkId },
+                    noteHash,
+                ));
             }
 
             let value;
@@ -293,6 +305,7 @@ export default class Asset {
                 'Avoid calling "save" on Asset when there are still processes running.',
                 `Asset id: ${this.id}`,
             );
+            return;
         }
 
         const {
