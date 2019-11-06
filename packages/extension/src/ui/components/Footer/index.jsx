@@ -12,6 +12,7 @@ const Footer = ({
     onNext,
     onPrevious,
     nextText,
+    loading,
 }) => (
     <FlexBox
         align="center"
@@ -28,6 +29,7 @@ const Footer = ({
             className={styles['next-button']}
             text={nextText}
             onClick={onNext}
+            loading={loading}
         />
     </FlexBox>
 );
@@ -37,6 +39,11 @@ Footer.propTypes = {
     nextText: PropTypes.string.isRequired,
     cancelText: PropTypes.string.isRequired,
     onPrevious: PropTypes.func.isRequired,
+    loading: PropTypes.bool,
+};
+
+Footer.defaultProps = {
+    loading: false,
 };
 
 export default Footer;

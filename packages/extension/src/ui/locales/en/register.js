@@ -38,40 +38,27 @@ export default {
             recovery: 'Recovery Phrase',
             filename: 'AZTEC_Recovery_Kit.pdf',
         },
-        confirm: {
-            _: 'I have backed up my seed phrase',
-            title: 'A quick check to make sure you backed up',
-            description: 'Enter the %{pos0}, %{pos1} and %{pos2} words from your seed phrase below.',
-            wrong: {
-                phrases: 'Some of the phrases are wrong. Please try again.',
-            },
-        },
-        complete: 'Backup complete',
+        // confirm: {
+        //     _: 'I have backed up my seed phrase',
+        //     title: 'A quick check to make sure you backed up',
+        //     description: 'Enter the %{pos0}, %{pos1} and %{pos2} words from your seed phrase below.',
+        //     wrong: {
+        //         phrases: 'Some of the phrases are wrong. Please try again.',
+        //     },
+        // },
+        // complete: 'Backup complete',
     },
-    linkAccountToMetaMask: {
+    linkAccount: {
         title: 'Link Ethereum Account',
+        blurb: 'In order to use AZTEC, you need to link  an EIP712 compatible wallet to your privacy keys with a signature.',
         submitText: 'Link Account',
         cancelText: 'Cancel',
     },
-    extension: {
-        description: 'Last step! Link your address with your extension account.',
-        step: {
-            create: 'Create key vault',
-            register: 'Register Account',
-            completed: 'Account Created!',
-        },
-    },
-    address: {
-        _: 'Register Address',
-        title: 'Register Ethereum Address with AZTEC',
-        description: 'The Ethereum address you are currently using has not been configured to use AZTEC.',
-        step: {
-            validate: 'Validate account',
-            recover: 'Recover account',
-            link: 'Link Account to MetaMask',
-            authorise: 'Authorise Address',
-        },
-        complete: 'Address successfully linked to your account!',
+    confirm: {
+        title: 'Send Transaction',
+        blurb: 'AZTEC relays transactions through the Gas Station Network so you don\'t have to pay gas fees. Click send to send the transaction.',
+        submitText: 'Send',
+        cancelText: 'Cancel',
     },
     link: {
         account: 'Link Account',
