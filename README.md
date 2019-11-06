@@ -63,7 +63,7 @@ AZTEC is maintained as a monorepo with multiple sub packages. Please find a comp
 
 ## Usage :hammer_and_pick:
 
-To fiddle with the Cryptography Engine and create your own AZTEC notes:
+To create AZTEC notes and construct zero-knowledge proofs:
 
 ```bash
 $ yarn add aztec.js
@@ -77,7 +77,7 @@ $ yarn add @aztec/contract-addresses
 $ yarn add @aztec/dev-utils
 ```
 
-To see a demo, head to this [tutorial](https://medium.com/aztec-protocol/how-to-code-your-own-confidential-token-on-ethereum-4a8c045c8651).
+To see a demo, head to this [tutorial](https://github.com/AztecProtocol/aztec-ganache-starter-kit).
 
 For more information, check out our [documentation](https://aztecprotocol.github.io/AZTEC/).
 
@@ -86,15 +86,15 @@ For more information, check out our [documentation](https://aztecprotocol.github
 ### Requirements
 
 -   node >=8.3
--   yarn 1.15.2
+-   yarn >=1.15.2
 -   solidity >=0.5.0 <0.6.0
 
 ### Pre Requisites
 
-Make sure you are using Yarn 1.15.2. To install using brew:
+Make sure you are using Yarn >= 1.15.2. To install using brew:
 
 ```bash
-brew install yarn@1.15.2
+brew install yarn
 ```
 
 Then install dependencies:
