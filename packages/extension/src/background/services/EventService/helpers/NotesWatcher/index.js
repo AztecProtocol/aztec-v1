@@ -222,7 +222,7 @@ class Watcher {
                     ...createNotes,
                     ...destroyNotes,
                     ...updateNotes,
-                ],
+                ].filter(({ owner }) => owner === address),
             );
             this.saveQueue.push({
                 name: 'Save Notes',
