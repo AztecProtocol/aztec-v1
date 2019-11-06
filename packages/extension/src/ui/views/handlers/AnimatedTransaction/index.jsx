@@ -16,7 +16,6 @@ import {
 } from '~ui/config/settings';
 import i18n from '~ui/helpers/i18n';
 import returnAndClose from '~uiModules/helpers/returnAndClose';
-import PopupContent from '~ui/components/PopupContent';
 import AnimatedContent from './AnimatedContent';
 import asyncForEach from '~utils/asyncForEach';
 import Footer from '~ui/components/Footer';
