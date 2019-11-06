@@ -90,7 +90,7 @@ class Transaction extends PureComponent {
             loading: false,
             currentTask: initialTask,
             data: initialData,
-            direction: 1,
+            direction: '1',
             done: false,
             error: null,
             prevProps: {
@@ -193,7 +193,7 @@ class Transaction extends PureComponent {
         this.goToStep({
             step: nextStep,
             direction: '1',
-            data: newData,
+            data: { ...data, ...newData },
             history,
         });
     }
@@ -294,6 +294,15 @@ class Transaction extends PureComponent {
         };
     }
 
+    updateParentState = (state) => {
+        this.setState({
+            data: {
+                ...this.state.data,
+                ...state,
+            },
+        });
+    }
+
     runTasks = async (tasks) => {
         const {
             runTask,
@@ -355,7 +364,7 @@ class Transaction extends PureComponent {
         }
     };
 
-    renderSteps() {
+    renderHeader() {
         const {
             steps,
         } = this.props;
@@ -365,11 +374,12 @@ class Transaction extends PureComponent {
 
         return (
             <Block padding="m s">
-                <Text
-                    text={i18n.t(steps[step].titleKey)}
-                    size="m"
-                    weight="semibold"
-                />
+                <Block padding="xs 0">
+                    <Text
+                        text={i18n.t(steps[step].titleKey)}
+                        size="m"
+                    />
+                </Block>
                 <FlexBox
                     expand
                     direction="row"
@@ -379,9 +389,9 @@ class Transaction extends PureComponent {
                         steps.map(
                             (s, i) => (
                                 <Block
-                                    background={i <= step ? 'primary' : 'primary-lightest'}
+                                    background={i <= step ? 'primary' : 'primary-lighter'}
                                     borderRadius="s"
-                                    padding="xxs l"
+                                    padding="xxs m"
                                     key={i}
                                     style={{
                                         margin: `${spacingMap.xs}`,
@@ -417,7 +427,7 @@ class Transaction extends PureComponent {
     }
 
     renderContent({ content: Component }) {
-        return <Component {...this.state.data} />;
+        return <Component {...this.state.data} updateParentState={this.updateParentState} />;
     }
 
     render() {
@@ -445,7 +455,7 @@ class Transaction extends PureComponent {
                     direction={direction}
                     animationKey={step}
                 >
-                    {this.renderSteps(steps[step])}
+                    {this.renderHeader(steps[step])}
                 </AnimatedContent>
 
                 <AnimatedContent

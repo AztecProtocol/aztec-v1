@@ -10,10 +10,9 @@ import Popup from '~ui/components/Popup';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction/index';
 import Intro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
-// import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
 import CreatePassword from '~ui/views/CreatePassword';
 import apis from '~uiModules/apis';
-// import RegisterAddressTransaction from '~ui/views/RegisterAddressTransaction';
+import RegisterAddressTransaction from '~ui/views/RegisterAddressTransaction';
 
 const Steps = [
     {
@@ -35,7 +34,7 @@ const Steps = [
             {
                 type: 'auth',
                 name: 'create',
-                run: apis.auth.backupKeys,
+                run: apis.auth.backupSeedPhrase,
             },
         ],
         content: BackupKeys,
@@ -43,19 +42,44 @@ const Steps = [
         cancelText: 'register.backup.cancelText',
     },
     {
-        titleKey: 'register.password',
+        titleKey: 'register.password.title',
         tasks: [
             {
                 type: 'auth',
                 name: 'create',
-                run: apis.auth.createKeyStore,
+                run: apis.auth.createPwDerivedKey,
             },
         ],
         content: CreatePassword,
         submitText: 'register.password.submitText',
         cancelText: 'register.password.cancelText',
     },
-    // RegisterAddressTransaction,
+    {
+        titleKey: 'register.linkAccountToMetaMask.title',
+        tasks: [
+            {
+                type: 'auth',
+                name: 'create',
+                run: apis.auth.linkAccountToMetaMask,
+            },
+        ],
+        content: RegisterAddressTransaction,
+        submitText: 'register.linkAccountToMetaMask.submitText',
+        cancelText: 'register.linkAccountToMetaMask.cancelText',
+    },
+    {
+        titleKey: 'register.sendRegisterAccount.title',
+        tasks: [
+            {
+                type: 'auth',
+                name: 'create',
+                run: apis.auth.linkAccountToMetaMask,
+            },
+        ],
+        content: RegisterAddressTransaction,
+        submitText: 'register.linkAccountToMetaMask.submitText',
+        cancelText: 'register.linkAccountToMetaMask.cancelText',
+    },
 ];
 
 const handleGoBack = (step) => {
@@ -98,6 +122,11 @@ const handleOnStep = (step) => {
 
     return newProps;
 };
+
+const isNewExtensionAccount = !!(seedPhrase && password);
+const steps = isNewExtensionAccount
+    ? stepsForNewAccount
+    : stepsForExistingAccount;
 
 const Register = ({
     actionId,
