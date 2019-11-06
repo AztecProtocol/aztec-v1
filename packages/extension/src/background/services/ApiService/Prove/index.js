@@ -43,14 +43,13 @@ const proofUi = (query, connection) => async () => {
     });
 
     const resp = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+    const {
+        data,
+    } = resp.data || {};
     return {
         ...query,
         response: {
-            prove: {
-                prove: {
-                    ...resp.data,
-                },
-            },
+            prove: data,
         },
     };
     // we now know the UI has completed
