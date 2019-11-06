@@ -5,12 +5,13 @@ export default async function transfer({
     sender,
     transactions,
     numberOfInputNotes,
+    numberOfOutputNotes,
 }) {
     return createNoteFromBalance({
         assetAddress,
         sender,
         transactions,
         numberOfInputNotes,
-        numberOfOutputNotes: 0,
+        numberOfOutputNotes,
     });
 }

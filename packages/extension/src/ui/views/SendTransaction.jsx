@@ -60,6 +60,7 @@ const SendTransaction = ({
     transactions,
     amount: totalAmount,
     numberOfInputNotes,
+    numberOfOutputNotes,
     initialStep,
     initialTask,
     autoStart,
@@ -100,6 +101,7 @@ const SendTransaction = ({
         sender,
         transactions,
         numberOfInputNotes,
+        numberOfOutputNotes,
     };
 
     const ticketHeader = (
@@ -177,6 +179,7 @@ SendTransaction.propTypes = {
     })).isRequired,
     amount: PropTypes.number.isRequired,
     numberOfInputNotes: PropTypes.number,
+    numberOfOutputNotes: PropTypes.number,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     autoStart: PropTypes.bool,
@@ -187,6 +190,7 @@ SendTransaction.propTypes = {
 
 SendTransaction.defaultProps = {
     numberOfInputNotes: emptyIntValue,
+    numberOfOutputNotes: emptyIntValue,
     initialStep: -1,
     initialTask: 0,
     autoStart: false,
