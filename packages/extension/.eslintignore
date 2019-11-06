@@ -1,9 +1,9 @@
 # ignored directories
 node_modules/*
 /contracts/*
-/client/*
 /test/*
 /migrations/*
+/build/*
 /demo/*
 
 # ignored file types

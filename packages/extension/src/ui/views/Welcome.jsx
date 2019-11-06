@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -48,7 +47,7 @@ const Welcome = ({
                             if (window.location === startUrl) {
                                 goToPage('register');
                             } else {
-                                browser.tabs.create({ url: startUrl });
+                                window.open(startUrl, 'AZTEC_REGISTER');
                             }
                         }}
                         outlined

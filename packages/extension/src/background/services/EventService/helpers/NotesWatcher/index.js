@@ -50,8 +50,6 @@ class Watcher {
                 lastSyncedBlock,
             });
 
-            log(`Performed task: ${name}`);
-
             callback();
         }, 1);
     }
