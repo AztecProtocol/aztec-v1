@@ -167,7 +167,6 @@ class Transaction extends PureComponent {
 
         const nextStep = step + stepOffset;
         const history = [...prevHistory];
-        console.log(steps[step]);
         history[nextStep] = data;
 
         const newData = await this.runTasks(steps[step].tasks);
