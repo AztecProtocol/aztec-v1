@@ -739,6 +739,21 @@ describe('RawNoteManager.appendTails', () => {
         expect(rawNoteManager.tailNotesMapping[defaultAssetId]).toEqual(notes.slice(1));
     });
 
+    it('will stop syncing from indexedDB if min tail note is just right after head notes', () => {
+        const notes = generateNewNotes([3, 5, 7]);
+        rawNoteManager.maxHeadBlockNumber = 2;
+        rawNoteManager.syncFromIndexedDBReq = 123;
+
+        expect(clearTimeout).toHaveBeenCalledTimes(0);
+
+        rawNoteManager.appendTails(notes);
+
+        expect(clearTimeout).toHaveBeenCalledTimes(1);
+        expect(clearTimeout).toHaveBeenCalledWith(123);
+        expect(rawNoteManager.numberOfNotes).toBe(3);
+        expect(rawNoteManager.tailNotesMapping[defaultAssetId]).toEqual(notes);
+    });
+
     it('will not stop syncing from indexedDB if min block number is larger than max head note', () => {
         const notes = generateNewNotes([7, 9]);
         rawNoteManager.maxHeadBlockNumber = 4;
