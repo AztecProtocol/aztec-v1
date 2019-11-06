@@ -148,29 +148,43 @@ export default class Asset {
         from = '',
         sender = '',
         numberOfOutputNotes,
-    } = {}) => proofFactory(
-        'deposit',
-        {
-            assetAddress: this.address,
-            transactions,
-            from,
-            sender,
-            numberOfOutputNotes,
-        },
-    );
+    } = {}) => {
+        const {
+            address,
+        } = Web3Service.account;
+
+        return query({
+            type: 'constructProof',
+            args: {
+                proofType: 'DEPOSIT_PROOF',
+                assetAddress: this.address,
+                transactions,
+                from: from || address,
+                sender: sender || address,
+                numberOfOutputNotes,
+            },
+        });
+    };
 
     withdraw = async (transactions, {
         sender = '',
         numberOfInputNotes,
-    } = {}) => proofFactory(
-        'withdraw',
-        {
-            assetAddress: this.address,
-            transactions,
-            sender,
-            numberOfInputNotes,
-        },
-    );
+    } = {}) => {
+        const {
+            address,
+        } = Web3Service.account;
+
+        return query({
+            type: 'constructProof',
+            args: {
+                proofType: 'WITHDRAW_PROOF',
+                assetAddress: this.address,
+                transactions,
+                sender: sender || address,
+                numberOfInputNotes,
+            },
+        });
+    };
 
     /**
      *
@@ -190,16 +204,17 @@ export default class Asset {
         sender = '',
         numberOfInputNotes,
         numberOfOutputNotes,
-    } = {}) => proofFactory(
-        'send',
-        {
+    } = {}) => query({
+        type: 'constructProof',
+        args: {
+            proofType: 'TRANSFER_PROOF',
             assetAddress: this.address,
             transactions,
             sender,
             numberOfInputNotes,
             numberOfOutputNotes,
         },
-    );
+    });
 
     /**
      *
