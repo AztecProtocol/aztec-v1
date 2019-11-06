@@ -272,6 +272,7 @@ export default class RawNoteManager {
     }
 
     async fetchHeadNotes() {
+        // TODO - might be some notes that have the same block number with previous max block number
         const notes = await fetchNotesFromIndexedDB(
             this.networkId,
             this.owner.address,
@@ -336,10 +337,10 @@ export default class RawNoteManager {
 
     appendHeads(notes) {
         const lastNote = notes[notes.length - 1];
-        if (!lastNote) return [];
 
         let newNotes = notes;
-        if (this.minTailBlockNumber >= 0
+        if (lastNote
+            && this.minTailBlockNumber >= 0
             && lastNote.blockNumber >= this.minTailBlockNumber
         ) {
             const lastIndex = notes.findIndex(({
@@ -348,10 +349,12 @@ export default class RawNoteManager {
             newNotes = notes.slice(0, lastIndex);
         }
 
-        this.maxHeadBlockNumber = newNotes.length < this.notesPerBatch
-            && this.minTailBlockNumber !== -1
-            ? this.minTailBlockNumber - 1
-            : lastNote.blockNumber;
+        if (lastNote || this.minTailBlockNumber >= 0) {
+            this.maxHeadBlockNumber = newNotes.length < this.notesPerBatch
+                && this.minTailBlockNumber !== -1
+                ? this.minTailBlockNumber - 1
+                : (lastNote && lastNote.blockNumber);
+        }
         this.numberOfNotes += newNotes.length;
 
         const toNotify = [];
@@ -379,7 +382,7 @@ export default class RawNoteManager {
         if (!firstNote) return [];
 
         let newNotes = notes;
-        if (firstNote.blockNumber <= this.maxHeadBlockNumber) {
+        if (firstNote.blockNumber <= this.maxHeadBlockNumber + 1) {
             if (this.syncFromIndexedDBReq !== null) {
                 clearTimeout(this.syncFromIndexedDBReq);
             }
@@ -397,8 +400,11 @@ export default class RawNoteManager {
             this.minTailBlockNumber = firstNote.blockNumber;
         }
 
+        const lastNote = newNotes[newNotes.length - 1];
+        this.maxTailBlockNumber = lastNote.blockNumber;
         this.numberOfNotes += newNotes.length;
 
+        const toNotify = [];
         newNotes.forEach((note) => {
             const {
                 asset,
@@ -407,13 +413,14 @@ export default class RawNoteManager {
                 || !this.tailNotesMapping[asset].length
             ) {
                 this.tailNotesMapping[asset] = [];
-                this.notifyListeners('newNotes', asset);
+                toNotify.push(asset);
             }
             this.tailNotesMapping[asset].push(note);
         });
 
-        const lastNote = newNotes[newNotes.length - 1];
-        this.maxTailBlockNumber = lastNote.blockNumber;
+        toNotify.forEach((assetId) => {
+            this.notifyListeners('newNotes', assetId);
+        });
 
         return newNotes;
     }
