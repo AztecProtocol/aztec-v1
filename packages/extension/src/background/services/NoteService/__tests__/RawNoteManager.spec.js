@@ -673,8 +673,20 @@ describe('RawNoteManager.appendHeads', () => {
 
         rawNoteManager.appendHeads([]);
 
+        expect(rawNoteManager.numberOfNotes).toBe(1);
+        expect(rawNoteManager.maxHeadBlockNumber).toBe(10);
+    });
+
+    it('will set maxHeadBlockNumber to 1 less than minTailBlockNumber if there should be no more notes', () => {
         rawNoteManager.numberOfNotes = 1;
         rawNoteManager.maxHeadBlockNumber = 10;
+        rawNoteManager.minTailBlockNumber = 20;
+
+        rawNoteManager.appendHeads([]);
+
+        expect(rawNoteManager.numberOfNotes).toBe(1);
+        expect(rawNoteManager.maxHeadBlockNumber).toBe(19);
+        expect(rawNoteManager.minTailBlockNumber).toBe(20);
     });
 
     it('return new notes that have been added to head notes', () => {
