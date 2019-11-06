@@ -90,7 +90,8 @@ contract('MultiSigWalletWithTimeLock', (accounts) => {
                 from: accounts[0],
             });
             const txData = '0x';
-            const tx = await multiSig.submitTransaction(nonOwner, 0, txData, { from: owners[0] });
+            // destination has to be a contract
+            const tx = await multiSig.submitTransaction(multiSig.address, 0, txData, { from: owners[0] });
             const txLog = tx.logs[0];
             txId = new BN(txLog.args.transactionId);
         });
