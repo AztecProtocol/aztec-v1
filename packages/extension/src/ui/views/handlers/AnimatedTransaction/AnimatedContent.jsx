@@ -29,14 +29,14 @@ const PoseAnimation = posed.div({
     },
     fadeIn: {
         opacity: 1,
-        default: { duration: 330, delay: 300 },
+        default: { duration: 330, delay: 330 },
     },
     hide: {
         opacity: 0,
     },
     fadeOut: {
         opacity: 0,
-        default: { duration: 330, delay: 300 },
+        default: { duration: 330, delay: 330 },
     },
 });
 

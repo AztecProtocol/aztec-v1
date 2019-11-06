@@ -30,6 +30,14 @@ export default {
         description: '',
         submitText: 'Download',
         cancelText: 'Cancel',
+        pdf: {
+            title: 'AZTEC Recovery Kit',
+            blurb: 'This kit is used to recover your AZTEC account and unlock your private assets. We recomend you print it out, and store it offline in a safe place',
+            warning: 'WARNING if you loose this document you will not be able to recover you account and will loose access to your assets.',
+            account: 'Ethereum Account',
+            recovery: 'Recovery Phrase',
+            filename: 'AZTEC_Recovery_Kit.pdf',
+        },
         confirm: {
             _: 'I have backed up my seed phrase',
             title: 'A quick check to make sure you backed up',
@@ -39,6 +47,11 @@ export default {
             },
         },
         complete: 'Backup complete',
+    },
+    linkAccountToMetaMask: {
+        title: 'Link Ethereum Account',
+        submitText: 'Link Account',
+        cancelText: 'Cancel',
     },
     extension: {
         description: 'Last step! Link your address with your extension account.',

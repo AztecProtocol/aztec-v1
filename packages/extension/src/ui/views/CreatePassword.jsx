@@ -32,6 +32,7 @@ const CreatePassword = ({
     goNext,
     goBack,
     onClose,
+    updateParentState,
 }) => {
     const [password, updatePassword] = useState('');
     const [visible, updateVisible] = useState(false);
@@ -72,6 +73,7 @@ const CreatePassword = ({
                     onClickIcon={() => updateVisible(!visible)}
                     onChange={(p) => {
                         updatePassword(p);
+                        updateParentState({ password: p });
                         setError('');
                     }}
                 />
@@ -107,6 +109,7 @@ CreatePassword.propTypes = {
     goNext: PropTypes.func.isRequired,
     goBack: PropTypes.func,
     onClose: PropTypes.func,
+    updateParentState: PropTypes.func.isRequired,
 };
 
 CreatePassword.defaultProps = {
