@@ -142,8 +142,14 @@ class AssetManager {
 
     handleAssetSynced = async (assetId) => {
         const asset = this.assetMapping[assetId];
-        asset.removeListener('synced', this.handleAssetSynced);
+        if (this.pendingAssets.has(asset)) {
+            this.pendingAssets.remove(asset);
+            asset.startSync();
+            return;
+        }
+
         this.activeAssets.remove(asset);
+        asset.removeListener('synced', this.handleAssetSynced);
         this.flushCallbacks(assetId);
         this.syncNext();
 
@@ -156,9 +162,7 @@ class AssetManager {
         this.ensureAsset(assetId);
         const asset = this.assetMapping[assetId];
 
-        if (this.activeAssets.has(asset)
-            || this.pendingAssets.has(asset)
-        ) {
+        if (this.pendingAssets.has(asset)) {
             return;
         }
 
