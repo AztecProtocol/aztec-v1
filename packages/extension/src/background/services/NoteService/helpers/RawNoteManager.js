@@ -121,7 +121,7 @@ export default class RawNoteManager {
     }
 
     async startSyncInterval() {
-        if (this.locked) return;
+        if (this.locked || !this.requireHeadNotes()) return;
 
         const notes = await this.fetchHeadNotes();
         const interval = notes.length === this.notesPerSyncBatch
