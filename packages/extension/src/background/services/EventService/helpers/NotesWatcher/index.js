@@ -1,4 +1,5 @@
 import async from 'async';
+import NoteService from '~/background/services/NoteService';
 import {
     subscription as NoteSubscription,
     saveNotes,
@@ -6,7 +7,6 @@ import {
 import {
     warnLog,
     errorLog,
-    log,
 } from '~utils/log';
 
 const WATCHER_STATUS = {
@@ -36,7 +36,6 @@ class Watcher {
         this.paused = false;
         this.saveQueue = async.queue(async (task, callback) => {
             const {
-                name,
                 address,
                 groupedNotes,
             } = task;
@@ -213,6 +212,20 @@ class Watcher {
             if (groupedNotes.isEmpty()) {
                 return;
             }
+            const {
+                createNotes,
+                destroyNotes,
+                updateNotes,
+            } = groupedNotes;
+            NoteService.addNotes(
+                networkId,
+                address,
+                [
+                    ...createNotes,
+                    ...destroyNotes,
+                    ...updateNotes,
+                ],
+            );
             this.saveQueue.push({
                 name: 'Save Notes',
                 groupedNotes,
