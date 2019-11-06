@@ -6,8 +6,12 @@ const PoseAnimation = posed.div({
     enter: {
         x: 0,
         opacity: 1,
+        scale: 1,
+        y: 0,
         transition: {
             x: { type: 'spring', stiffness: 100, damping: 50 },
+            y: { type: 'spring', stiffness: 100, damping: 50 },
+            scale: { type: 'spring', stiffness: 100, damping: 50 },
             default: { duration: 330 },
         },
     },
@@ -34,6 +38,17 @@ const PoseAnimation = posed.div({
     hide: {
         opacity: 0,
     },
+    fromBottom: {
+        y: '-100%',
+        scale: 0.4,
+        opacity: 0,
+        transition: {
+            y: { type: 'spring', stiffness: 100, damping: 50 },
+            scale: { type: 'spring', stiffness: 100, damping: 50 },
+            default: { duration: 330, delay: 1000 },
+        },
+
+    },
     fadeOut: {
         opacity: 0,
         default: { duration: 330, delay: 330 },
@@ -53,6 +68,14 @@ const animationMap = {
         style: {
             overflow: 'hidden',
             width: '100%',
+        },
+    },
+    popup: {
+        exitPose: {
+            1: 'fromBottom',
+        },
+        preEnterPose: {
+            1: 'fromBottom',
         },
     },
     header: {

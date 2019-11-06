@@ -29,7 +29,6 @@ const CreatePassword = ({
     description,
     submitButtonText,
     footerLink,
-    goNext,
     goBack,
     onClose,
     updateParentState,
@@ -56,8 +55,6 @@ const CreatePassword = ({
             onSubmit={() => {
                 if (!password) {
                     setError(i18n.t('account.password.error.empty'));
-                } else {
-                    goNext({ password });
                 }
             }}
             footerLink={footerLink}
@@ -106,7 +103,6 @@ CreatePassword.propTypes = {
         text: PropTypes.string.isRequired,
         href: PropTypes.string.isRequired,
     }),
-    goNext: PropTypes.func.isRequired,
     goBack: PropTypes.func,
     onClose: PropTypes.func,
     updateParentState: PropTypes.func.isRequired,
