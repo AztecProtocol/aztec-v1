@@ -151,21 +151,6 @@ class Transaction extends PureComponent {
             ...prevData,
         };
 
-        if (step === steps.length - 1) {
-            const {
-                onExit,
-                autoClose,
-                closeDelay,
-            } = this.props;
-
-            if (onExit) {
-                onExit(data);
-            } else if (autoClose) {
-                returnAndClose(data, closeDelay);
-            }
-            return;
-        }
-
         let stepOffset = 1;
         if (onGoNext) {
             let newProps = null;
@@ -182,6 +167,7 @@ class Transaction extends PureComponent {
 
         const nextStep = step + stepOffset;
         const history = [...prevHistory];
+        console.log(steps[step]);
         history[nextStep] = data;
 
         const newData = await this.runTasks(steps[step].tasks);
@@ -220,6 +206,7 @@ class Transaction extends PureComponent {
         let newData = data;
         const {
             onStep,
+            steps,
         } = this.props;
         if (onStep) {
             const newProps = onStep(step, data);
@@ -227,6 +214,20 @@ class Transaction extends PureComponent {
                 ...newData,
                 ...newProps,
             };
+        }
+        if (step === steps.length) {
+            const {
+                onExit,
+                autoClose,
+                closeDelay,
+            } = this.props;
+
+            if (onExit) {
+                onExit(data);
+            } else if (autoClose) {
+                returnAndClose(data, closeDelay);
+            }
+            return;
         }
 
         this.setState({

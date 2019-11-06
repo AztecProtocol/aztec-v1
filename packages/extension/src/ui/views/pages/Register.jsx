@@ -68,6 +68,10 @@ const newAccountSteps = [
                 type: 'sign',
                 run: apis.auth.linkAccountToMetaMask,
             },
+            {
+                name: 'register_extension',
+                run: apis.auth.registerExtension,
+            },
         ],
         content: LinkAccount,
         submitText: 'register.linkAccount.submitText',
@@ -179,10 +183,11 @@ const Register = ({
     goBack,
     onClose,
 }) => {
-    const steps = (currentAccount && !currentAccount.linkedPublicKey) ? newAccountSteps
+    const hasAccount = (currentAccount && !currentAccount.linkedPublicKey);
+    const steps = hasAccount ? newAccountSteps
         : exisitingAccountSteps;
     return (
-        <Popup site={site}>
+        <Popup>
             <AnimatedTransaction
                 steps={steps}
                 initialStep={initialStep}

@@ -6,6 +6,13 @@ export default async function sendRegisterAddress({
     spendingPublicKey,
     signature,
 }) {
+    console.log({
+        address,
+        linkedPublicKey,
+        spendingPublicKey,
+        signature,
+
+    });
     const {
         txReceipt,
     } = await ConnectionService.sendTransaction({
@@ -18,6 +25,7 @@ export default async function sendRegisterAddress({
             signature,
         ],
     }) || {};
+    console.log({ txReceipt });
     const {
         blockNumber,
     } = txReceipt || {};
