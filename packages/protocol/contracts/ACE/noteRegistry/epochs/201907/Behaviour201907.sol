@@ -58,7 +58,7 @@ contract Behaviour201907 is NoteRegistryBehaviour {
     }
 
     Registry public registry;
-    bytes32 public constant ZERO_VALUE_NOTE_HASH = 0x828d004b7cff80b8fc6915f80d7e239d1d265e83781aee56b74041df0f599694;
+    bytes32 public constant ZERO_VALUE_NOTE_HASH = 0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c;
     constructor () NoteRegistryBehaviour() public {}
 
     function initialise(
