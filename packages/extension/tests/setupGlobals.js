@@ -4,7 +4,6 @@ import '../env';
 const windowCrypto = require('@trust/webcrypto');
 
 global.crypto = windowCrypto;
-global.chrome = require('sinon-chrome');
 
 // IndexedDB
 Dexie.dependencies.indexedDB = require('fake-indexeddb'); // eslint-disable-line global-require

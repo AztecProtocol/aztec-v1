@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill';
 import gql from 'graphql-tag';
 import insertVariablesToGql from '~utils/insertVariablesToGql';
 import actionModel from '~database/models/action';
@@ -26,14 +25,6 @@ export const updateActionState = async (action) => {
     };
     await actionModel.set(newAction);
     return newAction;
-};
-
-
-export const openPopup = ({ timestamp }) => {
-    const popupURL = browser.extension.getURL('pages/popup.html');
-    const { width, height } = window.screen;
-    const popup = window.open(`${popupURL}?id=${timestamp}`, '_blank', `left=${(width - 340) / 2},height=550,width=340,top=${(height - 550) / 2},status=0,titlebar=0,resizable=0,menubar=0,location=0,toolbar=0`);
-    return popup;
 };
 
 export const addDomainData = ({
