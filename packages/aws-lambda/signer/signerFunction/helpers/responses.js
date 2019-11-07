@@ -1,9 +1,18 @@
+const baseResponse = {
+    isBase64Encoded: false,
+    'headers': {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+    },
+};
+
 const successResponse = ({
-    code = 200,
+    statusCode = 200,
     data = {},
 }) => {
     return {
-        code,
+        ...baseResponse,
+        statusCode,
         body: JSON.stringify({
             data,
         }),
@@ -11,11 +20,12 @@ const successResponse = ({
 };
 
 const badResponse = ({
-    code = 400,
+    statusCode = 400,
     message = 'Bad request',
 }) => {
     return {
-        code,
+        ...baseResponse,
+        statusCode,
         body: JSON.stringify({
             error: {
                 message,
