@@ -10,7 +10,8 @@ export const AZTECAccountRegistryConfig = {
     },
     config: AZTECAccountRegistryContract,
     networks: {
-        4: '0x91aFc8fA9278615843a08B26Ce97586c5057e717',
+        // 4: '0x91aFc8fA9278615843a08B26Ce97586c5057e717',
+        4: '0x32167c8263cf521a19a4d2dbb9a87a1d79977a18',
     },
 };
 
