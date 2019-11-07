@@ -23,7 +23,6 @@ import {
     IZkAssetConfig,
 } from '~/config/contracts';
 
-
 import ZkAssetMintable from '../../../build/protocol/ZkAssetMintable';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import {
