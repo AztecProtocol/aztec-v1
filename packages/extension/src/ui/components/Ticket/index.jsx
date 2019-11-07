@@ -1,4 +1,7 @@
 import React from 'react';
+import {
+    FlexBox,
+} from '@aztec/guacamole-ui';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import styles from './ticket.scss';
@@ -37,17 +40,27 @@ const Ticket = ({
                 {edgeNodes}
             </div>
             <div className={styles.content}>
-                {!!header && (
-                    <div className={styles.header}>
-                        {header}
-                    </div>
-                )}
-                {children}
-                {!!footer && (
-                    <div className={styles.footer}>
-                        {footer}
-                    </div>
-                )}
+
+                <FlexBox
+                    align="center"
+                    direction="column"
+                    className="flex-free-expand"
+                    expand
+                    stretch
+                    nowrap
+                >
+                    {!!header && (
+                        <div className={styles.header}>
+                            {header}
+                        </div>
+                    )}
+                    {children}
+                    {!!footer && (
+                        <div className={styles.footer}>
+                            {footer}
+                        </div>
+                    )}
+                </FlexBox>
             </div>
         </div>
     );

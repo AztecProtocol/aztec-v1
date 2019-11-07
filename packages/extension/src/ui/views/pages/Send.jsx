@@ -1,16 +1,57 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+    proofs,
+} from '@aztec/dev-utils';
+import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import CombinedViews from '~ui/views/handlers/CombinedViews';
+import returnAndClose from '~ui/helpers/returnAndClose';
 import SendConfirm from '~ui/views/SendConfirm';
-import SendTransaction from '~ui/views/SendTransaction';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import SendSign from '~ui/views/SendSign';
+import SendSend from '~ui/views/SendSend';
+import apis from '~uiModules/apis';
 
-const Steps = [
-    SendConfirm,
-    SendTransaction,
+const steps = [
+    {
+        titleKey: 'send.confirm.title',
+        submitText: 'send.confirm.submitText',
+        cancelText: 'send.confirm.cancelText',
+        content: SendConfirm,
+        tasks: [
+            {
+                name: 'proof',
+                run: apis.proof.transfer,
+            },
+        ],
+    },
+    {
+        titleKey: 'send.notes.title',
+        submitText: 'send.notes.submitText',
+        cancelText: 'send.notes.cancelText',
+        content: SendSign,
+        tasks: [
+            {
+                type: 'sign',
+                name: 'approve',
+                run: apis.note.signNotes,
+            },
+        ],
+    },
+    {
+        titleKey: 'send.send.title',
+        submitText: 'send.send.submitText',
+        cancelText: 'send.send.cancelText',
+        content: SendSend,
+        tasks: [
+            {
+                name: 'send',
+                run: apis.asset.confidentialTransfer,
+            },
+        ],
+    },
 ];
 
 const handleOnStep = (step) => {
@@ -30,6 +71,7 @@ const Send = ({
     sender,
     transactions,
     numberOfInputNotes,
+    numberOfOutputNotes,
 }) => {
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
@@ -38,17 +80,27 @@ const Send = ({
         return {
             asset,
             sender,
-            amount,
+            totalAmount: amount,
             transactions,
             numberOfInputNotes,
         };
     };
     return (
-        <CombinedViews
-            Steps={Steps}
+        <AnimatedTransaction
+            steps={steps}
             fetchInitialData={fetchInitialData}
+            initialData={
+                {
+                    assetAddress,
+                    transactions,
+                    sender,
+                    numberOfOutputNotes,
+                    numberOfInputNotes,
+                    proofId: proofs.JOIN_SPLIT_PROOF,
+                }
+            }
+            onExit={returnAndClose}
             onStep={handleOnStep}
-            autoClose
         />
     );
 };

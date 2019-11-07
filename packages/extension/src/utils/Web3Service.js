@@ -7,8 +7,7 @@ import {
 
 class Web3Service {
     constructor() {
-        this.web3 = null;
-        this.contracts = {};
+        this.web3 = null; this.contracts = {};
         this.abis = {};
         this.account = null;
         this.eth = {};
@@ -186,7 +185,7 @@ class Web3Service {
                 .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas,
+                    gas: parseInt(gas * 1.1),
                 })
                 .once('transactionHash', (receipt) => {
                     const interval = setInterval(() => {
