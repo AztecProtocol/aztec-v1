@@ -39,89 +39,90 @@ const SendConfirm = ({
     >
         <FlexBox
             direction="column"
-            align="space-between"
+            align="center"
+            valign="center"
+            className="flex-free-expand"
+            expand
             stretch
             nowrap
         >
-            <div>
-                <Ticket height={2}>
-                    <Offset margin="xs 0">
-                        <ListRow
-                            title={i18n.t('asset.send.from')}
-                            content={(
+            <Ticket height={2}>
+                <Offset margin="xs 0">
+                    <ListRow
+                        title={i18n.t('asset.send.from')}
+                        content={(
+                            <ListItem
+                                profile={{
+                                    type: 'user',
+                                    address: sender,
+                                }}
+                                content={formatAddress(sender, 10, 6)}
+                                textSize="inherit"
+                                size="xxs"
+                            />
+                        )}
+                    />
+                    <ListRow
+                        title={i18n.t('asset')}
+                        content={(
+                            <ListItem
+                                profile={{
+                                    ...asset,
+                                    type: 'asset',
+                                }}
+                                content={formatAddress(asset.address, 10, 6)}
+                                size="xxs"
+                                textSize="inherit"
+                            />
+                        )}
+                    />
+                    <ListRow
+                        title={i18n.t('asset.amount.total')}
+                        content={formatValue(asset.code, totalAmount)}
+                    />
+                </Offset>
+            </Ticket>
+            <Block padding="0 xl">
+                <Block top="xl">
+                    <Separator
+                        theme="white"
+                        title={i18n.t('to')}
+                    />
+                    <Block padding="m 0">
+                        <InplacePopup
+                            theme="white"
+                            items={transactions}
+                            renderItem={({
+                                amount,
+                                to,
+                            }) => (
                                 <ListItem
+                                    className="text-code"
                                     profile={{
                                         type: 'user',
-                                        address: sender,
+                                        address: to,
                                     }}
-                                    content={formatAddress(sender, 10, 6)}
-                                    textSize="inherit"
+                                    content={formatAddress(to, 12, 6)}
                                     size="xxs"
+                                    color="label"
+                                    footnote={(
+                                        <Text
+                                            text={`+${formatValue(asset.code, amount)}`}
+                                            color="green"
+                                        />
+                                    )}
                                 />
                             )}
+                            itemMargin="xs 0"
+                            margin="xs m"
+                            numberOfVisibleItems={2}
                         />
-                        <ListRow
-                            title={i18n.t('asset')}
-                            content={(
-                                <ListItem
-                                    profile={{
-                                        ...asset,
-                                        type: 'asset',
-                                    }}
-                                    content={formatAddress(asset.address, 10, 6)}
-                                    size="xxs"
-                                    textSize="inherit"
-                                />
-                            )}
-                        />
-                        <ListRow
-                            title={i18n.t('asset.amount.total')}
-                            content={formatValue(asset.code, totalAmount)}
-                        />
-                    </Offset>
-                </Ticket>
-                <Block padding="0 xl">
-                    <Block top="xl">
-                        <Separator
-                            theme="white"
-                            title={i18n.t('to')}
-                        />
-                        <Block padding="m 0">
-                            <InplacePopup
-                                theme="white"
-                                items={transactions}
-                                renderItem={({
-                                    amount,
-                                    to,
-                                }) => (
-                                    <ListItem
-                                        className="text-code"
-                                        profile={{
-                                            type: 'user',
-                                            address: to,
-                                        }}
-                                        content={formatAddress(to, 12, 6)}
-                                        size="xxs"
-                                        color="label"
-                                        footnote={(
-                                            <Text
-                                                text={`+${formatValue(asset.code, amount)}`}
-                                                color="green"
-                                            />
-                                        )}
-                                    />
-                                )}
-                                itemMargin="xs 0"
-                                margin="xs m"
-                                numberOfVisibleItems={2}
-                            />
-                        </Block>
                     </Block>
                 </Block>
-            </div>
+            </Block>
             <Block padding="0 xl">
                 <Text
-                    text={i18n.t('note.access.grant.explain')}
+                    text={i18n.t('send.confirm.explain')}
                     size="xxs"
                     color="label"
                 />
