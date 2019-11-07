@@ -23,6 +23,8 @@ export default {
     },
     restore: {
         _: 'Restore account',
+        submitText: 'Restore',
+        cancelText: 'Cancel',
         fromSeedPhrase: 'Restore from seed phrase',
         title: 'Recover from seed phrase',
         description: 'Please enter the seed phrase you were given when registered with the following address:',

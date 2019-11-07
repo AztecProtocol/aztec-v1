@@ -87,7 +87,6 @@ class App extends PureComponent {
             });
         }
     }
-
     async loadInitialStates() {
         const action = await ActionService.last();
         if (!action) return;

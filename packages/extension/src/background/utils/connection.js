@@ -51,6 +51,15 @@ class Connection {
 
         this.ClientActionSubject = new Subject();
         this.clientAction$ = this.ClientActionSubject.asObservable();
+        this.containerId = 'aztec-popup-ui';
+        this.uiFrame = new Iframe({
+            id: 'AZTECSDK-POPUP',
+            src: urls.ui,
+            width: '100%',
+            height: '100%',
+            onReadyEventName: uiReadyEvent,
+            containerId: this.containerId,
+        });
 
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
@@ -89,8 +98,7 @@ class Connection {
                 const loadingElem = document.getElementById('aztec-popup-placeholder');
                 loadingElem.style.display = 'block';
 
-                const containerId = 'aztec-popup-ui';
-                const uiContainer = document.getElementById(containerId);
+                const uiContainer = document.getElementById(this.containerId);
                 uiContainer.style.display = 'none';
                 uiContainer.innerHTML = ''; // clear previous ui
 
@@ -105,18 +113,11 @@ class Connection {
                     },
                 });
 
-                const uiFrame = new Iframe({
-                    id: 'AZTECSDK-POPUP',
-                    src: urls.ui,
-                    width: '100%',
-                    height: '100%',
-                    onReadyEventName: uiReadyEvent,
-                    containerId,
-                });
-                await uiFrame.init();
+                await this.uiFrame.init();
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';
-                uiFrame.open();
+                this.uiFrame.open();
+                this.openUi();
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
@@ -148,6 +149,7 @@ class Connection {
                     webClientId,
                 } = data;
                 const response = data.data.data;
+                this.closeUi();
                 this.ClientResponseSubject.next({
                     requestId,
                     webClientId,
@@ -275,6 +277,16 @@ class Connection {
             origin: data.domain || origin,
             sender: data.sender,
         });
+    }
+
+    closeUi = () => {
+        const event = new CustomEvent('closeAztec');
+        window.dispatchEvent(event);
+    }
+
+    openUi = () => {
+        const event = new CustomEvent('openAztec');
+        window.dispatchEvent(event);
     }
 
     removeClient = (client) => {

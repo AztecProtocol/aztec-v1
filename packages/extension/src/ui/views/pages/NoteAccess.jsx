@@ -6,26 +6,30 @@ import {
 import {
     getExtensionAccount,
 } from 'ui/apis/account';
-import CombinedViews from '~ui/views/handlers/CombinedViews';
+import returnAndClose from '~ui/helpers/returnAndClose';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import apis from '~uiModules/apis';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
-import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
 
-const Steps = [
-    NoteAccessConfirm,
-    NoteAccessTransaction,
+const steps = [
+    {
+        titleKey: 'note.access.grant.title',
+        submitText: 'note.access.grant.submitText',
+        cancelText: 'note.access.grant.cancelText',
+        content: NoteAccessConfirm,
+        tasks: [
+            {
+                name: 'encrypt',
+                run: apis.note.grantNoteAccess,
+            },
+            {
+                name: 'send',
+                run: apis.asset.updateNoteMetadata,
+            },
+        ],
+    },
+
 ];
-
-const handleGoNext = (step) => {
-    const newProps = {};
-    switch (step) {
-        case 0:
-            newProps.autoStart = true;
-            break;
-        default:
-    }
-
-    return newProps;
-};
 
 const NoteAccess = ({
     id,
@@ -42,10 +46,17 @@ const NoteAccess = ({
     };
 
     return (
-        <CombinedViews
-            Steps={Steps}
+
+        <AnimatedTransaction
+            steps={steps}
             fetchInitialData={fetchInitialData}
-            onGoNext={handleGoNext}
+            initialData={
+                {
+                    id,
+                    addresses,
+                }
+            }
+            onExit={returnAndClose}
         />
     );
 };

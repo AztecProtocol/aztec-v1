@@ -1,5 +1,6 @@
 import React, {
     useState,
+    useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -34,39 +35,18 @@ const validateSeedPhrase = (seedPhrase) => {
 const RestoreFromSeedPhrase = ({
     address,
     isLinked,
-    submitButtonText,
-    goNext,
-    goBack,
-    onClose,
+    updateParentState,
 }) => {
     const [seedPhrase, updateSeedPhrase] = useState('');
     const [error, updateError] = useState(null);
 
-    const handleSubmit = () => {
-        const errorKey = validateSeedPhrase(seedPhrase);
-        if (errorKey) {
-            updateError({
-                key: errorKey,
-                message: i18n.t(errorKey),
-            });
-        } else {
-            goNext({
-                seedPhrase,
-            });
-        }
-    };
+    useEffect(() => {
+        updateParentState({ seedPhrase });
+    }, [seedPhrase]);
 
     return (
         <PopupContent
             theme="white"
-            title={i18n.t('account.restore.title')}
-            description={i18n.t(isLinked
-                ? 'account.restore.description'
-                : 'account.restore.link.description')}
-            leftIconName={goBack ? 'chevron_left' : 'close'}
-            onClickLeftIcon={goBack || onClose}
-            submitButtonText={submitButtonText || i18n.t('account.restore.confirm')}
-            onSubmit={handleSubmit}
             footerLink={isLinked
                 ? null
                 : {
@@ -115,18 +95,13 @@ const RestoreFromSeedPhrase = ({
 
 RestoreFromSeedPhrase.propTypes = {
     address: PropTypes.string.isRequired,
+    updateParentState: PropTypes.func.isRequired,
     isLinked: PropTypes.bool,
-    submitButtonText: PropTypes.string,
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
 };
 
 RestoreFromSeedPhrase.defaultProps = {
     isLinked: false,
     submitButtonText: '',
-    goBack: null,
-    onClose: null,
 };
 
 export default RestoreFromSeedPhrase;

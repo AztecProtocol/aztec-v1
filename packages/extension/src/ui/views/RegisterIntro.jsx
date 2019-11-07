@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Block,
+    FlexBox,
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
@@ -17,12 +18,13 @@ const Intro = () => {
         descriptionNodes.push((
             <Block
                 key={`para${i}`}
-                padding="l 0"
+                padding="l s"
             >
                 <Text
                     text={i18n.t(textKey)}
-                    size="xs"
+                    size="s"
                     color="default"
+                    align="left"
                     weight={i === 1 ? 'semibold' : 'light'}
                 />
             </Block>

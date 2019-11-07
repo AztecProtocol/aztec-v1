@@ -21,6 +21,7 @@ const PopupContent = ({
 }) => (
     <Block
         className={className}
+        padding="0 xl"
     >
         <FlexBox
             direction="column"
@@ -31,7 +32,7 @@ const PopupContent = ({
         >
             <Block
                 className="flex-free-expand"
-                padding="m"
+                padding="0"
             >
                 {children}
             </Block>

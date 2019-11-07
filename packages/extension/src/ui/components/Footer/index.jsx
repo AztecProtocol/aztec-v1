@@ -10,10 +10,12 @@ import styles from './footer.scss';
 const Footer = ({
     cancelText,
     onNext,
+    isNextExit,
     onPrevious,
     nextText,
     loading,
 }) => (
+
     <FlexBox
         align="center"
         direction="row"
@@ -28,15 +30,17 @@ const Footer = ({
         <Button
             className={styles['next-button']}
             text={nextText}
-            onClick={onNext}
+            onClick={() => {
+                onNext();
+            }}
             loading={loading}
         />
     </FlexBox>
 );
-
 Footer.propTypes = {
     onNext: PropTypes.func.isRequired,
     nextText: PropTypes.string.isRequired,
+    isNextExit: PropTypes.bool.isRequired,
     cancelText: PropTypes.string.isRequired,
     onPrevious: PropTypes.func.isRequired,
     loading: PropTypes.bool,

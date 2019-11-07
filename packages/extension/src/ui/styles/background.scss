@@ -6,24 +6,57 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  backdrop-filter: blur(16px);
-  background-color: map-get($color-map, 'grey-lighter');
+}
+:global(#aztec-popup-container) {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-attachment: fixed;
+  overflow: hidden;
 }
 
-:global(#aztec-popup) {
+:global(.aztec-overlay) {
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-attachment: fixed;
+  overflow: hidden;
+  background-color: $overlay-color;
+}
+:global(.aztec-popup) {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100; 
+  transition: all ease 0.5s;
+  transform: translateY(100%) scale(0.7);
+  opacity: 0;
+  width: $popup-width + $popup-page-spacing * 2;
+  height: $popup-height + $popup-page-spacing * 2;
+}
+:global(.aztec-popup.shown) {
+  transform: translateY(0%) scale(1);
+  opacity: 1;
+}
+
+:global(#aztec-popup-ui) {
   width: $popup-width + $popup-page-spacing * 2;
   height: $popup-height + $popup-page-spacing * 2;
 }
 
-:global(#aztec-popup-ui) {
-  display: none;
-}
-
 :global(#aztec-popup-ui),
 :global(#aztec-popup-placeholder) {
-  width: 100%;
-  height: 100%;
+  width: $popup-width + $popup-page-spacing * 2;
+  height: $popup-height + $popup-page-spacing * 2;
 }
 
 @media all and (max-width: $popup-width + $popup-page-spacing * 2 - 1) {

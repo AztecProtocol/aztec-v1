@@ -16,7 +16,7 @@ const BackupKeys = ({
     >
         <Block
             padding="l"
-            background="primary-lightest"
+            background="white-lighter"
             borderRadius="m"
             className="flex-free-expand"
         >

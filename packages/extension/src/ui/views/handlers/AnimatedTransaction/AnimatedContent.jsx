@@ -51,7 +51,7 @@ const PoseAnimation = posed.div({
     },
     fadeOut: {
         opacity: 0,
-        default: { duration: 330, delay: 330 },
+        default: { duration: 330 },
     },
 });
 
@@ -76,6 +76,33 @@ const animationMap = {
         },
         preEnterPose: {
             1: 'fromBottom',
+        },
+        style: {
+
+        },
+    },
+    'popup-content': {
+        exitPose: {
+            1: 'fadeOut',
+            '-1': 'fadeOut',
+        },
+        preEnterPose: {
+            1: 'hide',
+            '-1': 'hide',
+        },
+        style: {
+
+        },
+    },
+    overlay: {
+        exitPose: {
+            1: 'fadeOut',
+        },
+        preEnterPose: {
+            1: 'hide',
+        },
+        style: {
+
         },
     },
     header: {
