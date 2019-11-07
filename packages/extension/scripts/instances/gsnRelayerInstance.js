@@ -56,9 +56,9 @@ export default async function gsnRelayerInstance({
             exitOnError();
         }
     };
-    const runRelayerCMD = `npx oz-gsn run-relayer -q -n "${providerUrl}" --relayUrl "${relayUrl}" -f "${from}" --workdir "${workdir}"`;
-    log(`runRelayerCMD: ${runRelayerCMD}`);
-    
+
+    const runRelayerCMD = `npx oz-gsn run-relayer --detach --quiet --relayUrl "${relayUrl}" --ethereumNodeURL "${providerUrl}" -f "${from}" --workdir "${workdir}"`;
+
     const process = instance(
         runRelayerCMD,
         {
