@@ -46,6 +46,7 @@ const initialize = () => {
 exports.lambdaHandler = async (event) => {
     if (event.httpMethod !== 'POST') return null;
     initialize();
+
     const origin = getOrigin(event);
     const {
         apiKey,
@@ -61,7 +62,7 @@ exports.lambdaHandler = async (event) => {
     }
 
     if (!isValidData(data)) {
-        return BAD_400('"data" parameter is not valid. It should be started from "0x"');
+        return BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to');
     }
 
     if (!isAPIKeyValid({
