@@ -1,5 +1,6 @@
 import React, {
     useState,
+    useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -39,6 +40,10 @@ const CreatePassword = ({
     const [inputRef, setInputRef] = useState(null);
     const [didMount, doMount] = useState(false);
 
+    useEffect(() => {
+        updateParentState({ password });
+    }, [password]);
+
     if (inputRef && !didMount) {
         inputRef.focus();
         doMount(true);
@@ -60,6 +65,15 @@ const CreatePassword = ({
             footerLink={footerLink}
         >
             <Block align="left">
+                <Block padding="s s xl s" align="center">
+                    <Text
+                        text={i18n.t('register.create.password.description')}
+                        size="xs"
+                        weight="light"
+                        textAlign="center"
+
+                    />
+                </Block>
                 <TextInput
                     setInputRef={setInputRef}
                     theme="inline"
@@ -70,12 +84,11 @@ const CreatePassword = ({
                     onClickIcon={() => updateVisible(!visible)}
                     onChange={(p) => {
                         updatePassword(p);
-                        updateParentState({ password: p });
                         setError('');
                     }}
                 />
                 {password !== '' && (
-                    <Block top="l" bottom="s">
+                    <Block padding="m xxs">
                         <PasswordMeter
                             password={password}
                         />

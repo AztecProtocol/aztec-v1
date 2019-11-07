@@ -93,9 +93,11 @@ export default class Iframe {
     }
 
     close() {
-        this.frame.style.display = 'none';
-        this.frame.height = 0;
-        this.frame.width = 0;
+        setTimeout(() => {
+            this.frame.style.display = 'none';
+            this.frame.height = 0;
+            this.frame.width = 0;
+        }, 500);
     }
 
     updateStyle({

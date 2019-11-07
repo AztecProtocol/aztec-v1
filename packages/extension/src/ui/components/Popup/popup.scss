@@ -11,7 +11,7 @@
     $header-bg: get-darken-color($bg, 10%);
   }
   .header {
-    background: $header-bg;
+    background: map-get($color-map, 'white');
   }
   .content {
     background: $bg;

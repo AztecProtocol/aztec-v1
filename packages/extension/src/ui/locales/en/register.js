@@ -3,9 +3,8 @@ export default {
     intro: {
         title: 'Create your privacy keys',
         description: {
-            para0: 'AZTEC creates a set of privacy keys that are used to keep your assets private. These are stored in encrypted form inside the extension.',
-            para1: 'We never have access to your keys. Your privacy keys do not control the spending of assets / tokens.',
-            para2: 'These keys are used to decrypt your balance and construct the Zero-Knowledge proofs needed to interact with AZTEC assets, while keeping your balance private.',
+            para0: 'AZTEC will now help you create a set of privacy keys that are used to keep your assets private. These are stored in encrypted form.',
+            para1: 'We never have access to your keys and your privacy keys do not control the spending of your tokens.',
         },
     },
     create: {
@@ -15,7 +14,7 @@ export default {
         password: {
             _: 'Create Password',
             title: 'Create password',
-            description: 'Donec ut maximus sapien. You will need this password to login.',
+            description: 'This password is used to encrypt your keys, and should be secure. You will need this password to login.',
             placeholder: 'Enter your password',
         },
         account: 'Create Account',
@@ -51,12 +50,14 @@ export default {
     linkAccount: {
         title: 'Link Ethereum Account',
         blurb: 'In order to use AZTEC, you need to link  an EIP712 compatible wallet to your privacy keys with a signature.',
+        important: 'IMPORTANT! Check the signature contains the above values.',
         submitText: 'Link Account',
         cancelText: 'Cancel',
     },
     confirm: {
         title: 'Send Transaction',
-        blurb: 'AZTEC relays transactions through the Gas Station Network so you don\'t have to pay gas fees. Click send to send the transaction.',
+        blurb: 'AZTEC relays transactions through the Gas Station Network so you don\'t have to pay gas fees.',
+        explain: 'If you are happy to link your account press send.',
         submitText: 'Send',
         cancelText: 'Cancel',
     },

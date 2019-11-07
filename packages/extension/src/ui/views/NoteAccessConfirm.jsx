@@ -39,16 +39,14 @@ const NoteAccessConfirm = ({
     return (
         <PopupContent
             theme="white"
-            title={i18n.t('note.access.grant.title')}
-            leftIconName={goBack ? 'chevron_left' : 'close'}
-            onClickLeftIcon={goBack || onClose}
-            submitButtonText={i18n.t('note.access.grant')}
             error={invalidAccounts ? { key: 'note.access.invalidAccounts' } : undefined}
-            onSubmit={invalidAccounts ? undefined : goNext}
         >
             <FlexBox
                 direction="column"
-                align="space-between"
+                align="center"
+                valign="center"
+                className="flex-free-expand"
+                expand
                 stretch
                 nowrap
             >
@@ -131,14 +129,7 @@ NoteAccessConfirm.propTypes = {
         address: PropTypes.string,
         linkedPublicKey: PropTypes.string,
     })).isRequired,
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
 };
 
-NoteAccessConfirm.defaultProps = {
-    goBack: null,
-    onClose: null,
-};
 
 export default NoteAccessConfirm;

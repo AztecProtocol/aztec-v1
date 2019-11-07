@@ -375,11 +375,12 @@ class Transaction extends PureComponent {
         } = this.state;
 
         return (
-            <Block padding="m s">
-                <Block padding="xs 0">
+            <Block padding="s s l s">
+                <Block padding="xxs s xs s">
                     <Text
                         text={i18n.t(steps[step].titleKey)}
-                        size="m"
+                        size="l"
+                        weight="semibold"
                     />
                 </Block>
                 <FlexBox
@@ -390,9 +391,9 @@ class Transaction extends PureComponent {
                     {steps.length > 1 && steps.map(
                         (s, i) => (
                             <Block
-                                background={i <= step ? 'primary' : 'primary-lighter'}
+                                background={i <= step ? 'primary' : 'primary-lightest'}
                                 borderRadius="s"
-                                padding="xxs m"
+                                padding="xxs l"
                                 key={i}
                                 style={{
                                     margin: `${spacingMap.xs}`,
@@ -422,6 +423,7 @@ class Transaction extends PureComponent {
                 nextText={i18n.t(steps[step].submitText)}
                 loading={loading}
                 onNext={this.handleGoNext}
+                isNextExit={step === steps.length}
                 onPrevious={this.handleGoBack}
             />
         );

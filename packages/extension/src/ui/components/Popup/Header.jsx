@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {
+    useContext,
+} from 'react';
 import PropTypes from 'prop-types';
 import {
     FlexBox,
@@ -74,9 +76,11 @@ const Header = ({
             {!disableClose && (
                 <div className="flex-fixed">
                     <Clickable
-                        onClick={() => ConnectionService.close({
-                            abort: true,
-                        })}
+                        onClick={() => {
+                            ConnectionService.close({
+                                abort: true,
+                            });
+                        }}
                     >
                         <Icon
                             name="close"

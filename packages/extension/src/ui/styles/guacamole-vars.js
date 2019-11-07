@@ -265,8 +265,8 @@ export const fontSizeMap = {
   xxs: '12px',
   xs: '14px',
   s: '16px',
-  m: '20px',
-  l: '24px',
+  m: '18px',
+  l: '22px',
   xl: '32px',
   xxl: '48px',
 };

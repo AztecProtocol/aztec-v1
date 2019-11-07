@@ -24,12 +24,11 @@ export default class Note {
 
     async refresh() {
         const {
-            response,
+            note,
         } = await query({
             type: 'note',
             args: { id: this.id },
         }) || {};
-        const { note: { note } } = response;
 
         if (note) {
             dataProperties.forEach((key) => {

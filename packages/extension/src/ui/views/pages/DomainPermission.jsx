@@ -91,6 +91,7 @@ class DomainPermission extends PureComponent {
                 steps={steps}
                 initialStep={0}
                 onExit={returnAndClose}
+                loading={loading}
                 initialData={{
                     address,
                     domain,

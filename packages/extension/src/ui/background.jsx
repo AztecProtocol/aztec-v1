@@ -11,6 +11,7 @@ i18n.setLocale(locale);
 i18n.register(phrases);
 
 ReactDOM.render(
+
     <UiPlaceholder />,
     document.getElementById('background-app'),
 );

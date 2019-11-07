@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
 import i18n from '~ui/helpers/i18n';
 import returnAndClose from '~ui/helpers/returnAndClose';
-import CombinedViews from '~ui/views/handlers/CombinedViews';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import RestoreFromSeedPhrase from '~ui/views/RestoreFromSeedPhrase';
 import CreatePassword from '~ui/views/CreatePassword';
 import Loading from '~ui/views/Loading';
@@ -20,29 +20,34 @@ const Steps = [
     RegisterAddressTransaction,
 ];
 
-const handleOnStep = (step, prevData) => {
-    let newProps = {};
-    switch (step) {
-        case 0:
-            newProps = {
-                submitButtonText: i18n.t('next'),
-            };
-            break;
-        case 1:
-            newProps = {
-                description: i18n.t('account.restore.password.description'),
-                submitButtonText: i18n.t('account.restore.confirm'),
-            };
-            break;
-        case 2: {
-            const {
-                address,
-                seedPhrase,
-                password,
-            } = prevData;
-            newProps = {
-                message: i18n.t('account.restore.processing'),
-                onStart: async () => {
+const steps = [
+    {
+        titleKey: 'account.restore.title',
+        tasks: [
+        ],
+        content: RestoreFromSeedPhrase,
+        submitText: 'account.restore.submitText',
+        cancelText: 'account.restore.cancelText',
+    },
+    {
+        titleKey: 'register.password.title',
+        tasks: [
+            {
+                name: 'restore',
+                run: async (
+
+                    {
+                        address,
+                        seedPhrase,
+                        password,
+                    },
+                ) => {
+                    console.log({
+                        address,
+                        seedPhrase,
+                        password,
+
+                    });
                     const {
                         duplicated,
                     } = await apis.account.checkDuplicates({
@@ -50,6 +55,7 @@ const handleOnStep = (step, prevData) => {
                         seedPhrase,
                         password,
                     });
+                    console.log({ duplicated });
                     let linkedPublicKey;
                     if (!duplicated) {
                         ({
@@ -59,22 +65,32 @@ const handleOnStep = (step, prevData) => {
                             seedPhrase,
                             password,
                         }));
+                        console.log({ linkedPublicKey });
                     }
                     return {
                         duplicated,
                         linkedPublicKey,
                     };
                 },
-            };
+            },
+        ],
+        content: CreatePassword,
+        submitText: 'register.password.submitText',
+        cancelText: 'register.password.cancelText',
+    },
+];
+
+const handleOnStep = (step, prevData) => {
+    const newProps = {};
+    switch (step) {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2: {
             break;
         }
         case 4:
-            newProps = {
-                title: i18n.t('account.restore'),
-                description: i18n.t('account.restore.processing.description'),
-                successMessage: i18n.t('account.restore.complete'),
-                autoStart: true,
-            };
             break;
         default:
     }
@@ -84,43 +100,8 @@ const handleOnStep = (step, prevData) => {
 const Restore = ({
     actionId,
     currentAccount,
-    goToPage,
 }) => {
-    const [retry, updateRetry] = useState(0);
-
-    const handleGoNext = (currentStep, data) => {
-        const newProps = {};
-        switch (currentStep) {
-            case 2: {
-                const {
-                    duplicated,
-                    linkedPublicKey,
-                } = data;
-                if (linkedPublicKey) {
-                    if (actionId) {
-                        returnAndClose(data);
-                    } else {
-                        goToPage('account');
-                    }
-                    return {
-                        redirect: true,
-                    };
-                }
-                if (!duplicated) {
-                    newProps.stepOffset = 2;
-                }
-                break;
-            }
-            case 3:
-                updateRetry(retry + 1);
-                return {
-                    redirect: true,
-                };
-            default:
-        }
-
-        return newProps;
-    };
+    console.log({ currentAccount });
 
     const initialData = {
         address: currentAccount.address,
@@ -128,13 +109,12 @@ const Restore = ({
     };
 
     return (
-        <CombinedViews
-            Steps={Steps}
+
+        <AnimatedTransaction
+            steps={steps}
             initialData={initialData}
+            onExit={returnAndClose}
             onStep={handleOnStep}
-            onGoNext={handleGoNext}
-            onExit={actionId ? returnAndClose : () => goToPage('account')}
-            retry={retry}
         />
     );
 };
@@ -145,7 +125,6 @@ Restore.propTypes = {
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string,
     }).isRequired,
-    goToPage: PropTypes.func.isRequired,
 };
 
 Restore.defaultProps = {
