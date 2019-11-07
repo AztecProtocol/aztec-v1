@@ -17,8 +17,7 @@ import {
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
-import ListItem from '~ui/components/ListItem';
-import Separator from '~ui/components/Separator';
+import ListItem from '~ui/components/ListItem'; import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
 
 const SendConfirm = ({

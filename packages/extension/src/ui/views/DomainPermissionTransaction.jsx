@@ -4,8 +4,6 @@ import {
     FlexBox,
     Block,
     Text,
-    Row,
-    Col,
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
@@ -13,32 +11,22 @@ import {
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
-import Ticket from '~ui/components/Ticket';
 import ListItem from '~ui/components/ListItem';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
 
 const DomainPermissionTransaction = ({
-    domain,
     assets,
     loading,
-    success,
-    error, goNext, goBack,
-    onClose,
+    error,
 }) => {
-    const {
-        name: domainName,
-        domain: domainUrl,
-        iconSrc,
-    } = domain;
     const [firstAsset] = assets;
     const icons = [];
     let moreItems;
     if (assets.length > 1) {
         const maxAvatars = 3;
         assets.slice(0, maxAvatars).forEach(({
-            address,
-            linkedTokenAddress,
+            address, linkedTokenAddress,
             code,
         }) => {
             icons.push({
@@ -70,95 +58,54 @@ const DomainPermissionTransaction = ({
         }
     }
 
-    const title = i18n.t('domain.permission.title');
     return (
         <PopupContent
             theme="white"
-            title={(
-                <div>
-                    <Text weight="medium" text={domainName} />
-                    <Text text={title} />
-                </div>
-            )}
-            leftIconName={goBack ? 'chevron_left' : 'close'}
-            onClickLeftIcon={goBack || onClose}
-            submitButtonText={i18n.t('domain.permission.grant')}
-            onSubmit={goNext}
             loading={loading}
-            success={success}
             error={error}
         >
             <FlexBox
+                align="center"
+                valign="center"
+                className="flex-free-expand"
                 direction="column"
-                align="space-between"
                 stretch
                 nowrap
+                expand
             >
-                <Ticket height={4}>
+                {assets.length === 1 && (
                     <ListItem
                         profile={{
-                            type: 'domain',
-                            src: iconSrc,
-                            alt: domainName,
+                            type: 'asset',
+                            address: firstAsset.address,
+                            linkedTokenAddress: firstAsset.linkedTokenAddress,
                         }}
                         content={(
-                            <Row>
-                                <Col column={6}>
-                                    <Text
-                                        size="m"
-                                        text={domainName}
-                                        weight="semibold"
-                                        showEllipsis
-                                    />
-                                    <Text
-                                        text={domainUrl}
-                                        color="label"
-                                        size="xxs"
-                                    />
-                                </Col>
-                            </Row>
+                            <div>
+                                <Text
+                                    size="s"
+                                    text={i18n.token(firstAsset.code)}
+                                    weight="semibold"
+                                    showEllipsis
+                                />
+                                <Text
+                                    className="text-code"
+                                    text={formatAddress(firstAsset.address, 12, 6)}
+                                    color="label"
+                                    size="xxs"
+                                />
+                            </div>
                         )}
                     />
-                    <Block padding={firstAsset ? 'l 0' : 'xl 0 0'}>
-                        <Text
-                            text={i18n.t('domain.permission.requesting', assets.length)}
-                            size={firstAsset ? 'xs' : 's'}
-                        />
-                    </Block>
-                    {assets.length === 1 && (
-                        <ListItem
-                            profile={{
-                                type: 'asset',
-                                address: firstAsset.address,
-                                linkedTokenAddress: firstAsset.linkedTokenAddress,
-                            }}
-                            content={(
-                                <div>
-                                    <Text
-                                        size="s"
-                                        text={i18n.token(firstAsset.code)}
-                                        weight="semibold"
-                                        showEllipsis
-                                    />
-                                    <Text
-                                        className="text-code"
-                                        text={formatAddress(firstAsset.address, 12, 6)}
-                                        color="label"
-                                        size="xxs"
-                                    />
-                                </div>
-                            )}
-                        />
-                    )}
-                    {assets.length > 1 && (
-                        <ProfileIconGroup
-                            theme="white"
-                            size="s"
-                            icons={icons}
-                            moreItems={moreItems}
-                        />
-                    )}
-                </Ticket>
+                )}
+                {assets.length > 1 && (
+                    <ProfileIconGroup
+                        theme="white"
+                        size="s"
+                        icons={icons}
+                        moreItems={moreItems}
+                    />
+                )}
                 <Block padding={`${firstAsset ? 'l' : 'xl'} xl 0`}>
                     <Text
                         text={i18n.t('domain.permission.explain')}
@@ -172,32 +119,20 @@ const DomainPermissionTransaction = ({
 };
 
 DomainPermissionTransaction.propTypes = {
-    domain: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        domain: PropTypes.string.isRequired,
-        iconSrc: PropTypes.string,
-    }).isRequired,
     assets: PropTypes.arrayOf(assetShape),
     loading: PropTypes.bool,
-    success: PropTypes.bool,
     error: PropTypes.shape({
         key: PropTypes.string,
         message: PropTypes.string,
         response: PropTypes.object,
         fetal: PropTypes.bool,
     }),
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
 };
 
 DomainPermissionTransaction.defaultProps = {
     assets: [],
     loading: false,
-    success: false,
     error: null,
-    goBack: null,
-    onClose: null,
 };
 
 export default DomainPermissionTransaction;

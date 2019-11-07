@@ -15,8 +15,7 @@ import {
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
-import apis from '~uiModules/apis';
-import Transaction from '~ui/views/handlers/Transaction';
+import apis from '~uiModules/apis'; import Transaction from '~ui/views/handlers/Transaction';
 import Connection from '~ui/components/Connection';
 
 const steps = [

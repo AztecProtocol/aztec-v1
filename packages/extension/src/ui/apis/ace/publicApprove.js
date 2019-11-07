@@ -5,6 +5,12 @@ export default async function publicApprove({
     proof,
     assetAddress,
 }) {
+    console.log({
+
+        amount,
+        proof,
+        assetAddress,
+    });
     const response = await ConnectionService.post({
         action: 'metamask.ace.publicApprove',
         data: {

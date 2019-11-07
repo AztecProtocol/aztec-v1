@@ -1,23 +1,64 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+    proofs,
+} from '@aztec/dev-utils';
+import {
     emptyIntValue,
 } from '~/ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
 import DepositConfirm from '~ui/views/DepositConfirm';
-import DepositTransaction from '~ui/views/DepositTransaction';
-import CombinedViews from '~ui/views/handlers/CombinedViews';
+import returnAndClose from '~ui/helpers/returnAndClose';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import DepositApprove from '~ui/views/DepositApprove';
+import DepositSend from '~ui/views/DepositSend';
+import apis from '~uiModules/apis';
 
-const Steps = [
-    DepositConfirm,
-    DepositTransaction,
+
+const steps = [
+    {
+        titleKey: 'deposit.confirm.title',
+        tasks: [
+            {
+                name: 'proof',
+                run: apis.proof.deposit,
+            },
+        ],
+        content: DepositConfirm,
+        submitText: 'deposit.confirm.submitText',
+        cancelText: 'deposit.confirm.cancelText',
+    },
+    {
+        titleKey: 'deposit.approve.title',
+        tasks: [
+            {
+                type: 'sign',
+                name: 'approve',
+                run: apis.ace.publicApprove,
+            },
+        ],
+        content: DepositApprove,
+        submitText: 'deposit.approve.submitText',
+        cancelText: 'deposit.approve.cancelText',
+    },
+    {
+        titleKey: 'deposit.send.title',
+        tasks: [
+            {
+                name: 'send',
+                run: apis.asset.confidentialTransfer,
+            },
+        ],
+        content: DepositSend,
+        submitText: 'deposit.send.submitText',
+        cancelText: 'deposit.send.cancelText',
+    },
 ];
 
 const handleOnStep = (step) => {
     const newProps = {};
     switch (step) {
         case 1:
-            newProps.autoStart = true;
             break;
         default:
     }
@@ -47,11 +88,23 @@ const Deposit = ({
     };
 
     return (
-        <CombinedViews
-            Steps={Steps}
+        <AnimatedTransaction
+            steps={steps}
             fetchInitialData={fetchInitialData}
+            initialData={
+                {
+                    assetAddress,
+                    owner: from,
+                    publicOwner: from,
+                    transactions,
+                    sender,
+                    numberOfOutputNotes,
+                    signatures: '0x',
+                    proofId: proofs.JOIN_SPLIT_PROOF,
+                }
+            }
+            onExit={returnAndClose}
             onStep={handleOnStep}
-            autoClose
         />
     );
 };
