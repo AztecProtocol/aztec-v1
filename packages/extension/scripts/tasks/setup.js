@@ -109,24 +109,21 @@ export default function setup({
         onClose: makeCloseChildProcessCallback('ganache'),
         onError: handleError,
     }).next(async () => {
-        // runningProcesses.gsnRelayer = await gsnRelayerInstance({
-        //     onClose: (code) => {
-        //         if (code === 0) return;
-        //         doCloseGSNRelayer();
-        //     },
-        //     onError: handleError,
-        // });
-        // return runningProcesses.gsnRelayer;
-        
+        runningProcesses.gsnRelayer = await gsnRelayerInstance({
+            onClose: (code) => {
+                if (code === 0) return;
+                doCloseGSNRelayer();
+            },
+            onError: handleError,
+        });
+        return runningProcesses.gsnRelayer;
     }).next(() => {
-        log(`Should be next pipeTasks`);
-
         pipeTasks(
             [
-                // waitUntilGSNRealyerUp,
                 deployContracts,
                 logTask('Successfully deployed contracts to ganache.'),
                 copy,
+                waitUntilGSNRealyerUp,
             ],
             {
                 onError: handleBuildError,
