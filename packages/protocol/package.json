@@ -7,7 +7,13 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "openzeppelin-solidity": "2.3.0"
+    "@openzeppelin/contracts-ethereum-package": "^2.3.0",
+    "@openzeppelin/gsn-helpers": "^0.2.1",
+    "@openzeppelin/gsn-provider": "^0.1.9",
+    "@openzeppelin/network": "^0.2.10",
+    "@openzeppelin/upgrades": "^2.5.3",
+    "axios": "^0.19.0",
+    "openzeppelin-solidity": "^2.4.0"
   },
   "devDependencies": {
     "@0x/sol-coverage": "^3.0.0",
@@ -72,6 +78,7 @@
     "profile": "scripts/profile.sh",
     "test": "scripts/test.sh",
     "test:sol": "scripts/test.sh",
-    "trace": "scripts/trace.sh"
+    "trace": "scripts/trace.sh",
+    "test:gsn": "scripts/testGSN.sh"
   }
 }

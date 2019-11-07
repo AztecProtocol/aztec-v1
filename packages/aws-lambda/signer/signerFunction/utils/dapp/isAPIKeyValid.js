@@ -1,5 +1,8 @@
+const {
+    log,
+} = require('../../utils/log');
 
 module.exports = (host, apiKey) => {
-    console.log('Not implemented isAPIKeyValid')
+    log('Not implemented isAPIKeyValid')
     return true;
 };
