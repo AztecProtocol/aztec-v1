@@ -105,8 +105,10 @@ if [ "$SOLC_NIGHTLY" = true ]; then
   wget -q https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-nightly.js -O /tmp/soljson.js && find . -name soljson.js -exec cp /tmp/soljson.js {} \;
 fi
 
-./node_modules/.bin/truffle version
-./node_modules/.bin/truffle test "$@"
+./node_modules/.bin/truffle migrate --reset --network test $@
+# ./node_modules/.bin/truffle deploy --reset --network test $@
+
+env PROVIDER_URL=$ganache_url RELAYER_URL=$relayer_url ./node_modules/.bin/mocha ./test/ERC1724/ZkAssetGSN.js --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings $@
 
 if [ "$MODE" = "coverage" ]; then
   ./node_modules/.bin/istanbul report html lcov
