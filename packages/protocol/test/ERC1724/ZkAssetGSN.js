@@ -89,7 +89,7 @@ describe('ZkAsset with GSN', () => {
 
         const accountRegistryTemplate = new web3.eth.Contract(AZTECAccountRegistryGSN.abi, null, { data: AZTECAccountRegistryGSN.bytecode });
         accountRegistry = await accountRegistryTemplate
-            .deploy({ arguments: [ace.options.address, trustedAddress] })
+            .deploy({ arguments: [trustedAddress] })
             .send({ from: owner, gas: 6e6 });
 
         accountRegistry.setProvider(gsnProvider);
