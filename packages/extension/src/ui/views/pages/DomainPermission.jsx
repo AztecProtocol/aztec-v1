@@ -1,9 +1,9 @@
 import React, {
     PureComponent,
-} from 'react';
-import PropTypes from 'prop-types';
-import returnAndClose from '~uiModules/helpers/returnAndClose';
+} from 'react'; import PropTypes from 'prop-types';
 import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
+import returnAndClose from '~ui/helpers/returnAndClose';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import Loading from '~ui/views/Loading';
 import {
     getDomainAssets,
@@ -12,6 +12,22 @@ import {
     getCurrentUser,
     approveDomain,
 } from '~ui/apis/auth';
+
+const steps = [
+    {
+        titleKey: 'domain.permission.title',
+        tasks: [
+            {
+                type: 'auth',
+                name: 'create',
+                run: approveDomain,
+            },
+        ],
+        content: DomainPermissionTransaction,
+        submitText: 'domain.permission.submitText',
+        cancelText: 'domain.permission.cancelText',
+    },
+];
 
 class DomainPermission extends PureComponent {
     constructor(props) {
@@ -35,40 +51,6 @@ class DomainPermission extends PureComponent {
         }, this.approveDomain);
     };
 
-    async approveDomain() {
-        const {
-            address,
-        } = this.state;
-        const {
-            domain,
-        } = this.props;
-
-        const {
-            success,
-        } = await approveDomain(
-            {
-                address,
-                domain: domain.domain,
-            },
-        );
-
-        if (!success) {
-            this.setState({
-                error: {
-                    key: 'domain.permission.grant.error',
-                },
-                loading: false,
-            });
-        } else {
-            this.setState(
-                {
-                    loading: false,
-                    success: true,
-                },
-                returnAndClose,
-            );
-        }
-    }
 
     async fetchDataForPage() {
         const {
@@ -105,24 +87,27 @@ class DomainPermission extends PureComponent {
         } = this.state;
 
         return (
-            <DomainPermissionTransaction
-                address={address}
-                domain={domain}
-                assets={assets}
-                loading={loading}
-                success={success}
-                error={error}
-                goNext={this.handleSubmit}
+            <AnimatedTransaction
+                steps={steps}
+                initialStep={0}
+                onExit={returnAndClose}
+                initialData={{
+                    address,
+                    domain,
+                    assets,
+                    loading,
+                    success,
+                    error,
+                }}
             />
+
         );
     }
 }
 
 DomainPermission.propTypes = {
     domain: PropTypes.shape({
-        name: PropTypes.string.isRequired,
         domain: PropTypes.string.isRequired,
-        iconSrc: PropTypes.string,
     }).isRequired,
 };
 

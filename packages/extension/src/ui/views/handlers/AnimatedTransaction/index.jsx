@@ -19,6 +19,7 @@ import returnAndClose from '~uiModules/helpers/returnAndClose';
 import AnimatedContent from './AnimatedContent';
 import asyncForEach from '~utils/asyncForEach';
 import Footer from '~ui/components/Footer';
+import Loading from '~ui/views/Loading';
 import {
     spacingMap,
 } from '~ui/styles/guacamole-vars';
@@ -68,6 +69,7 @@ class Transaction extends PureComponent {
                 ? [data]
                 : history.slice(0, initialStep + 1),
             loading: requireInitialFetch,
+            pendingInitialFetch: requireInitialFetch,
             prevProps: {
                 retry,
             },
@@ -252,6 +254,7 @@ class Transaction extends PureComponent {
             data,
             history: [data],
             loading: false,
+            pendingInitialFetch: false,
         });
     }
 
@@ -384,20 +387,19 @@ class Transaction extends PureComponent {
                     direction="row"
                     align="center"
                 >
-                    {
-                        steps.map(
-                            (s, i) => (
-                                <Block
-                                    background={i <= step ? 'primary' : 'primary-lighter'}
-                                    borderRadius="s"
-                                    padding="xxs m"
-                                    key={i}
-                                    style={{
-                                        margin: `${spacingMap.xs}`,
-                                    }}
-                                />
-                            ),
-                        )
+                    {steps.length > 1 && steps.map(
+                        (s, i) => (
+                            <Block
+                                background={i <= step ? 'primary' : 'primary-lighter'}
+                                borderRadius="s"
+                                padding="xxs m"
+                                key={i}
+                                style={{
+                                    margin: `${spacingMap.xs}`,
+                                }}
+                            />
+                        ),
+                    )
                     }
                 </FlexBox>
             </Block>
@@ -437,9 +439,13 @@ class Transaction extends PureComponent {
         const {
             error,
             loading,
+            pendingInitialFetch,
             step,
             direction,
         } = this.state;
+        if (pendingInitialFetch) {
+            return <Loading />;
+        }
 
         return (
             <FlexBox
@@ -459,7 +465,7 @@ class Transaction extends PureComponent {
 
                 <AnimatedContent
                     animationType="content"
-                    direction={direction}
+                    direction={direction.toString()}
                     className="flex-free-expand"
                     animationKey={step}
                 >

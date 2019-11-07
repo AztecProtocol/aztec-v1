@@ -14,9 +14,7 @@ $radius: map-get($rounded-corner-map, 'm');
 }
 
 .next-button {
-  background: $bg-gradient !important;
   border-radius: 0px 0px $radius 0px !important;
-  color: map-get($color-map, 'white') !important;
   height: 100% !important;
   flex: 1;
   &:hover {

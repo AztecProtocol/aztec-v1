@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     FlexBox,
-    Button,
 } from '@aztec/guacamole-ui';
+import Button from '~ui/components/Button';
 import styles from './footer.scss';
 
 

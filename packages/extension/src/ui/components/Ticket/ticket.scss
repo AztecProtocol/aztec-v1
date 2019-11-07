@@ -2,7 +2,7 @@
 
 $dot-radius: map-get($spacing-map, 'm');
 $edge-height: $dot-radius * 3;
-$ticket-background: map-get($color-map, 'white');
+$ticket-background: map-get($color-map, 'white-lighter');
 $ticket-radius: map-get($rounded-corner-map, 's');
 $ticket-spacing-h: map-get($spacing-map, 'xl');
 $ticket-spacing-v: map-get($spacing-map, 'xl');
@@ -32,13 +32,13 @@ $ticket-shadow-color: rgba(0, 0, 0, 0.2);
   &:before {
     top: 0;
     border-radius: $ticket-radius $ticket-radius 0 0;
-    box-shadow: 0px -1px 2px -1px $ticket-shadow-color;
+    // box-shadow: 0px -1px 2px -1px $ticket-shadow-color;
   }
 
   &:after {
     bottom: 0;
     border-radius: 0 0 $ticket-radius $ticket-radius;
-    box-shadow: 0px 3px 3px -2px $ticket-shadow-color;
+    // box-shadow: 0px 3px 3px -2px $ticket-shadow-color;
   }
 }
 
@@ -94,7 +94,7 @@ $ticket-shadow-color: rgba(0, 0, 0, 0.2);
   height: $dot-radius * 2;
   border-radius: $dot-radius;
   background: transparent;
-  box-shadow: 0 0 0 $dot-radius $ticket-background, 0 1px 3px $ticket-shadow-color inset;
+  box-shadow: 0 0 0 $dot-radius $ticket-background;
 }
 
 .spot-left {

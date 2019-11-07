@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import {
     FlexBox,
     Block,
-    Offset,
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
@@ -23,105 +22,98 @@ const DepositConfirm = ({
     from: fromAddress,
     transactions,
     amount: totalAmount,
-    goNext,
-    goBack,
-    onClose,
 }) => (
     <PopupContent
         theme="white"
-        title={i18n.t('deposit.transaction')}
-        leftIconName={goBack ? 'chevron_left' : 'close'}
-        onClickLeftIcon={goBack || onClose}
-        submitButtonText={i18n.t('deposit')}
-        onSubmit={goNext}
     >
         <FlexBox
             direction="column"
-            align="space-between"
+            align="center"
+            valign="center"
+            className="flex-free-expand"
+            expand
             stretch
             nowrap
         >
-            <div>
-                <Ticket height={2}>
-                    <Offset margin="xs 0">
-                        <ListRow
-                            title={i18n.t('deposit.from')}
-                            content={(
+            <Ticket height={3}>
+                <Block padding="0 s">
+                    <ListRow
+                        title={i18n.t('deposit.from')}
+                        content={(
+                            <ListItem
+                                className="text-code"
+                                profile={{
+                                    type: 'user',
+                                    address: fromAddress,
+                                }}
+                                content={formatAddress(fromAddress, 10, 6)}
+                                textSize="inherit"
+                                size="xxs"
+                            />
+                        )}
+                    />
+                    <ListRow
+                        title={i18n.t('asset')}
+                        content={(
+                            <ListItem
+                                className="text-code"
+                                profile={{
+                                    ...asset,
+                                    type: 'asset',
+                                }}
+                                content={formatAddress(asset.address, 10, 6)}
+                                textSize="inherit"
+                                size="xxs"
+                            />
+                        )}
+                    />
+                    <ListRow
+                        title={i18n.t('deposit.amount.total')}
+                        content={formatValue(asset.code, totalAmount)}
+                    />
+                </Block>
+            </Ticket>
+            <Block padding="0 xl">
+                <Block top="xl">
+                    <Separator
+                        theme="white"
+                        title={i18n.t('to')}
+                    />
+                    <Block padding="m 0">
+                        <InplacePopup
+                            theme="white"
+                            items={transactions}
+                            renderItem={({
+                                amount,
+                                to,
+                            }) => (
                                 <ListItem
                                     className="text-code"
                                     profile={{
                                         type: 'user',
-                                        address: fromAddress,
+                                        address: to,
                                     }}
-                                    content={formatAddress(fromAddress, 10, 6)}
-                                    textSize="inherit"
+                                    content={formatAddress(to, 12, 6)}
                                     size="xxs"
+                                    color="label"
+                                    footnote={(
+                                        <Text
+                                            text={`+${formatValue(asset.code, amount)}`}
+                                            color="green"
+                                        />
+                                    )}
                                 />
                             )}
+                            itemMargin="xs 0"
+                            margin="xs m"
+                            numberOfVisibleItems={2}
                         />
-                        <ListRow
-                            title={i18n.t('asset')}
-                            content={(
-                                <ListItem
-                                    className="text-code"
-                                    profile={{
-                                        ...asset,
-                                        type: 'asset',
-                                    }}
-                                    content={formatAddress(asset.address, 10, 6)}
-                                    textSize="inherit"
-                                    size="xxs"
-                                />
-                            )}
-                        />
-                        <ListRow
-                            title={i18n.t('deposit.amount.total')}
-                            content={formatValue(asset.code, totalAmount)}
-                        />
-                    </Offset>
-                </Ticket>
-                <Block padding="0 xl">
-                    <Block top="xl">
-                        <Separator
-                            theme="white"
-                            title={i18n.t('to')}
-                        />
-                        <Block padding="m 0">
-                            <InplacePopup
-                                theme="white"
-                                items={transactions}
-                                renderItem={({
-                                    amount,
-                                    to,
-                                }) => (
-                                    <ListItem
-                                        className="text-code"
-                                        profile={{
-                                            type: 'user',
-                                            address: to,
-                                        }}
-                                        content={formatAddress(to, 12, 6)}
-                                        size="xxs"
-                                        color="label"
-                                        footnote={(
-                                            <Text
-                                                text={`+${formatValue(asset.code, amount)}`}
-                                                color="green"
-                                            />
-                                        )}
-                                    />
-                                )}
-                                itemMargin="xs 0"
-                                margin="xs m"
-                                numberOfVisibleItems={2}
-                            />
-                        </Block>
                     </Block>
                 </Block>
-            </div>
+            </Block>
             <Block padding="0 xl">
                 <Text
-                    text={i18n.t('note.access.grant.explain')}
+                    text={i18n.t('deposit.confirm.explain')}
                     size="xxs"
                     color="label"
                 />
@@ -141,14 +133,7 @@ DepositConfirm.propTypes = {
         to: PropTypes.string.isRequired,
     })).isRequired,
     amount: PropTypes.number.isRequired,
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
 };
 
-DepositConfirm.defaultProps = {
-    goBack: null,
-    onClose: null,
-};
 
 export default DepositConfirm;

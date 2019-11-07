@@ -1,6 +1,6 @@
 export default {
     permission: {
-        title: ' is requesting access to your private assets',
+        title: 'This page is requesting access to your private assets',
         requesting: {
             _: 'is requesting access to your assets:',
             0: 'is requesting access to your assets.',
@@ -10,8 +10,9 @@ export default {
 and construct proofs using your AZTEC notes.
 The page will not be able to spend your assets without your approval via MetaMask.`,
         grant: {
-            _: 'Grant Access',
             error: 'Cannot grant access to domain. Please try again later.',
         },
+        submitText: 'Grant Access',
+        cancelText: 'Cancel',
     },
 };
