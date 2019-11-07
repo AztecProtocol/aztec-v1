@@ -6,26 +6,17 @@ export default async function sendRegisterAddress({
     spendingPublicKey,
     signature,
 }) {
-    console.log({
-        address,
-        linkedPublicKey,
-        spendingPublicKey,
-        signature,
-
-    });
     const {
         txReceipt,
-    } = await ConnectionService.sendTransaction({
-        contract: 'AZTECAccountRegistry',
-        method: 'registerAZTECExtension',
-        data: [
+    } = await ConnectionService.post({
+        action: 'metamask.aztec.registerAZTECExtension',
+        data: {
             address,
             linkedPublicKey,
             spendingPublicKey,
             signature,
-        ],
+        },
     }) || {};
-    console.log({ txReceipt });
     const {
         blockNumber,
     } = txReceipt || {};
