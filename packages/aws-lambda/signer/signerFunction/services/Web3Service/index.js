@@ -2,6 +2,12 @@ const Web3 = require('web3');
 const {
     errorLog,
 } = require('../../utils/log');
+const fixSignature = require('./helpers/fixSignature');
+
+const {
+    toBN,
+    soliditySha3,
+} = Web3.utils;
 
 class Web3Service {
     constructor() {
@@ -30,9 +36,34 @@ class Web3Service {
         account = this.account,
     ) {
         const {
+            relayerAddress,
+            from,
+            encodedFunctionCall,
+            txFee,
+            gasPrice,
+            gas,
+            nonce,
+            relayHubAddress,
+            to,
+        } = data;
+
+        const {
             privateKey,
         } = account;
-        return this.web3.eth.accounts.sign(data, privateKey);
+
+        const solSha3 = soliditySha3(
+            relayerAddress,
+            from,
+            encodedFunctionCall,
+            toBN(txFee),
+            toBN(gasPrice),
+            toBN(gas),
+            toBN(nonce),
+            relayHubAddress,
+            to,
+        )
+
+        return this.web3.eth.accounts.sign(solSha3, privateKey);
     }
 }
 
