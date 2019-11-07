@@ -66,15 +66,15 @@
     yargs "^10.0.3"
 
 "@0x/sol-coverage@^3.0.0":
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/@0x/sol-coverage/-/sol-coverage-3.0.10.tgz#32bfa49e47a14dc105230f70d6e51dc3057482c9"
-  integrity sha512-iqgGTv3ykQ4Tt6VP+EpxisHInCWqG/UvWc0+VLybXSLgxKiMAPsneuWkUoypGp9TlvLJAPe6fNMlpzR+jPg5YQ==
+  version "3.0.12"
+  resolved "https://registry.yarnpkg.com/@0x/sol-coverage/-/sol-coverage-3.0.12.tgz#4ca602495f7bcc4f045854850cd7f20fdf64e984"
+  integrity sha512-V4Iq8LU8HWNctVCt+gMHKcZ0moiawpna7bd3SWQuiQIig0iNpXBBCQl9SEIwpboTcv4Xhzo4cZuCGsWwKAQSpw==
   dependencies:
-    "@0x/sol-tracing-utils" "^6.0.17"
-    "@0x/subproviders" "^5.0.2"
-    "@0x/typescript-typings" "^4.2.4"
+    "@0x/sol-tracing-utils" "^6.0.19"
+    "@0x/subproviders" "^5.0.4"
+    "@0x/typescript-typings" "^4.3.0"
     "@types/minimatch" "^3.0.3"
-    ethereum-types "^2.1.4"
+    ethereum-types "^2.1.6"
     lodash "^4.17.11"
     minimatch "^3.0.4"
     web3-provider-engine "14.0.6"
