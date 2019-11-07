@@ -11,9 +11,7 @@ const {
     JoinSplitProof,
     ProofUtils,
 } = require('aztec.js');
-
 const secp256k1 = require('@aztec/secp256k1');
-const bn128 = require('@aztec/bn128');
 
 const ACE = require('../../build/contracts/ACE');
 const ERC20Mintable = require('../../build/contracts/ERC20Mintable');
@@ -21,8 +19,8 @@ const ZkAsset = require('../../build/contracts/ZkAsset');
 const AZTECAccountRegistryGSN = require('../../build/contracts/AZTECAccountRegistryGSN');
 
 const helpers = require('../helpers/ERC1724');
-const migrate = require('../../web3-migrations');
 const contractAddress = require('../helpers/contractAddress');
+
 const aztecAccount = secp256k1.generateAccount();
 
 describe('ZkAsset with GSN', () => {
@@ -147,7 +145,7 @@ describe('ZkAsset with GSN', () => {
         });
 
         it('should send confidentialTransfer() tx via the GSN', async () => {
-            // const initialRecipientFunds = await balance(web3, { recipient: zkAsset.options.address });
+            const initialRecipientFunds = await balance(web3, { recipient: zkAsset.options.address });
             const depositInputNotes = [];
             const notesValues = [20, 10];
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, notesValues);
@@ -174,11 +172,8 @@ describe('ZkAsset with GSN', () => {
             expect(receipt.status).to.equal(true);
 
             // const postTxRecipientFunds = await balance(web3, { recipient: accountRegistry.options.address });
-            // expect(postTxRecipientFunds).to.be.below(initialRecipientFunds);
+            // expect(parseInt(postTxRecipientFunds, 10)).to.be.below(parseInt(initialRecipientFunds, 10));
         });
-
-        // it('should accept all transactions sent', async () => {});
-        // it('should reject a transaction if recipient funds have been exhausted', async () => {});
     });
 
     // describe('Failure states', async () => {
