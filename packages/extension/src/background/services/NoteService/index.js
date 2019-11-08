@@ -7,6 +7,7 @@ import {
 import Note from '~background/database/models/note';
 import ApiSessionManager from './helpers/ApiSessionManager';
 import pickNotes from './utils/pickNotes';
+import pickNotesInRange from './utils/pickNotesInRange';
 
 const manager = new ApiSessionManager();
 
@@ -77,6 +78,54 @@ export default {
                 const noteKeyData = pickNotes({
                     noteValues,
                     minSum,
+                    numberOfNotes,
+                    allowLessNumberOfNotes,
+                });
+
+                const notes = await Promise.all(noteKeyData.map(async ({
+                    key,
+                    value,
+                }) => {
+                    const noteHash = await get(key);
+                    const note = await Note.get({ networkId }, noteHash);
+                    return {
+                        ...note,
+                        value,
+                    };
+                }));
+
+                return notes;
+            },
+        );
+    },
+    fetch: async (
+        networkId,
+        ownerAddress,
+        assetId,
+        {
+            equalTo,
+            greaterThan,
+            lessThan,
+            numberOfNotes = 1,
+            allowLessNumberOfNotes = true,
+        } = {},
+    ) => {
+        if (numberOfNotes <= 0) {
+            return [];
+        }
+
+        return manager.ensureSynced(
+            networkId,
+            ownerAddress,
+            assetId,
+            async ({
+                noteValues,
+            }) => {
+                const noteKeyData = pickNotesInRange({
+                    noteValues,
+                    equalTo,
+                    greaterThan,
+                    lessThan,
                     numberOfNotes,
                     allowLessNumberOfNotes,
                 });

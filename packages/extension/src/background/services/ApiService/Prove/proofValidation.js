@@ -1,19 +1,20 @@
-import { Validator, validate } from 'jsonschema';
+import { Validator } from 'jsonschema';
 import sendProofSchema from './sendProofSchema';
 import depositProofSchema from './depositProofSchema';
 import withdrawProofSchema from './withdrawProofSchema';
-
+import {
+    schema as fetchNotesFromBalanceSchema,
+} from './fetchNotesFromBalance';
 
 const v = new Validator();
-
 
 const proofSchemaMap = {
     DEPOSIT_PROOF: depositProofSchema,
     WITHDRAW_PROOF: withdrawProofSchema,
     TRANSFER_PROOF: sendProofSchema,
     MINT_PROOF: sendProofSchema,
+    FETCH_NOTES_FROM_BALANCE: fetchNotesFromBalanceSchema,
 };
-
 
 export default (proofType, data) => {
     if (!proofType || !proofSchemaMap[proofType]) {

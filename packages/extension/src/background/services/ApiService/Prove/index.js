@@ -1,19 +1,9 @@
 import filterStream from '~utils/filterStream';
-
 import proofValidation from './proofValidation';
+import fetchNotesFromBalance from './fetchNotesFromBalance';
 
-
-const validateProof = async (query) => {
+const validateProof = (proofType, data) => {
     // we need to validate the resultant note owners
-    const {
-        data: {
-            args: {
-                proofType,
-                ...data
-            },
-        },
-    } = query;
-
     const validatedProofInputs = proofValidation(proofType, data);
     if (!(validatedProofInputs instanceof Error)) {
         return data;
@@ -21,7 +11,7 @@ const validateProof = async (query) => {
     throw new Error(validatedProofInputs);
 };
 
-const proofUi = (query, connection) => async () => {
+const proofUi = async (query, connection) => {
     const {
         data: {
             args: {
@@ -55,9 +45,32 @@ const proofUi = (query, connection) => async () => {
     // we now know the UI has completed
 };
 
-
-const triggerProofUi = async (query, connection) => validateProof(query, connection)
-    .then(proofUi(query, connection));
-
+const triggerProofUi = async (query, connection) => {
+    const {
+        data: {
+            args: {
+                proofType,
+                ...data
+            },
+        },
+    } = query;
+    try {
+        validateProof(proofType, data);
+    } catch (error) {
+        return error;
+    }
+    if (proofType === 'FETCH_NOTES_FROM_BALANCE') {
+        const response = await fetchNotesFromBalance({
+            ...data,
+            assetId: data.assetAddress,
+            domain: window.location.origin,
+        });
+        return {
+            ...query,
+            response,
+        };
+    }
+    return proofUi(query, connection);
+};
 
 export default triggerProofUi;

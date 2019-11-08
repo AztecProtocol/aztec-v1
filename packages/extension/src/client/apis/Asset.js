@@ -311,20 +311,49 @@ export default class Asset {
         );
     };
 
-    createNoteFromBalance = async (amount, {
-        sender = '',
-        userAccess = [],
-        numberOfInputNotes = 0,
-        numberOfOutputNotes = 1,
-    } = {}) => proofFactory(
-        'createNoteFromBalance',
-        {
-            assetAddress: this.address,
-            amount,
-            sender,
-            userAccess,
-            numberOfInputNotes,
-            numberOfOutputNotes,
-        },
-    );
+    // createNoteFromBalance = async (amount, {
+    //     userAccess = [],
+    //     numberOfInputNotes,
+    // } = {}) => {
+    //     const {
+    //         address,
+    //     } = Web3Service.account;
+    //
+    //     return query({
+    //         type: 'constructProof',
+    //         args: {
+    //             proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
+    //             assetAddress: this.address,
+    //             amount,
+    //             owner: address,
+    //             userAccess,
+    //             numberOfInputNotes,
+    //             numberOfOutputNotes: 1,
+    //         },
+    //     });
+    // };
+
+    fetchNotesFromBalance = async ({
+        greaterThan,
+        lessThan,
+        equalTo,
+        numberOfNotes = 1,
+    } = {}) => {
+        const {
+            address,
+        } = Web3Service.account;
+
+        return query({
+            type: 'constructProof', // TODO - define another query type
+            args: {
+                proofType: 'FETCH_NOTES_FROM_BALANCE',
+                assetAddress: this.address,
+                owner: address,
+                greaterThan,
+                lessThan,
+                equalTo,
+                numberOfNotes,
+            },
+        });
+    };
 }

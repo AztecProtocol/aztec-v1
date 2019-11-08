@@ -6,6 +6,7 @@ let allowanceStatus;
 let depositStatus;
 let withdrawStatus;
 let sendStatus;
+let fetchStatus;
 
 const makeStatusGenerator = (id) => {
   let statusLogs = [];
@@ -76,6 +77,7 @@ async function initAsset() {
     depositStatus = makeStatusGenerator('deposit-status');
     withdrawStatus = makeStatusGenerator('withdraw-status');
     sendStatus = makeStatusGenerator('send-status');
+    fetchStatus = makeStatusGenerator('fetch-status');
     refreshAssetBalances();
   }
   apisElem.style.display = 'block';
@@ -227,6 +229,53 @@ async function send() {
   valueInput.value = '';
 }
 
+async function fetchNotesFromBalance() {
+  fetchStatus.clear();
+
+  let equalTo = document.getElementById('fetch-eq-value').value;
+  equalTo = equalTo === ''
+    ? undefined
+    : parseInt(equalTo);
+  let greaterThan = document.getElementById('fetch-gt-value').value;
+  greaterThan = greaterThan === ''
+    ? undefined
+    : parseInt(greaterThan);
+  let lessThan = document.getElementById('fetch-lt-value').value;
+  lessThan = lessThan === ''
+    ? undefined
+    : parseInt(lessThan);
+  if (equalTo === undefined && greaterThan === undefined && lessThan === undefined) {
+    fetchStatus.log('× You must define at least one of the following parameters: equalTo/greaterThan/lessThan');
+    return;
+  }
+
+  const numberOfNotes = parseInt(document.getElementById('fetch-count-value').value);
+  if (numberOfNotes <= 0) {
+    fetchStatus.log('× Number of notes must be larger than 0');
+    return;
+  }
+
+  fetchStatus.clear();
+
+  const notes = await asset.fetchNotesFromBalance({
+    equalTo,
+    lessThan,
+    greaterThan,
+    numberOfNotes,
+  });
+  if (!notes.length) {
+    fetchStatus.log('Cannot find any notes that meet the requirements.');
+  } else {
+    fetchStatus.log(`Found ${notes.length} note${notes.length === 1 ? '' : 's'}:`, true);
+    notes.forEach(({
+      noteHash,
+      value,
+    }) => {
+      fetchStatus.log(`${value} - ${noteHash}`, true);
+    });
+  }
+}
+
 document.getElementById('app').innerHTML = `
   <div>
     <div>
@@ -313,6 +362,39 @@ document.getElementById('app').innerHTML = `
         <br/>
         <div id="send-status"></div>
       </div>
+    </div>
+    <div>
+      <div>Fetch note from balance:</div>
+      <label>Equal to</label>
+      <input
+        id="fetch-eq-value"
+        type="number"
+        size="10"
+      /><br/>
+      <label>Greater than</label>
+      <input
+        id="fetch-gt-value"
+        type="number"
+        size="10"
+        value="0"
+      /><br/>
+      <label>Less than</label>
+      <input
+        id="fetch-lt-value"
+        type="number"
+        size="10"
+        value="100"
+      /><br/>
+      <label>Number of notes</label>
+      <input
+        id="fetch-count-value"
+        type="number"
+        size="10"
+        value="1"
+      /><br/>
+      <button onclick="fetchNotesFromBalance()">Submit</button><br/>
+      <br/>
+      <div id="fetch-status"></div>
     </div>
   </div>
 `;
