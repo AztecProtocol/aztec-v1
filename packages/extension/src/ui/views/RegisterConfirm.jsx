@@ -4,8 +4,10 @@ import {
     Block,
     FlexBox,
     Text,
+    SVG,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import sendGlyph from '~ui/images/send.svg';
 import ListItem from '~ui/components/ListItem';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
@@ -15,12 +17,22 @@ const RegisterConfirm = ({ address, linkedPublicKey }) => (
         theme="white"
     >
         <FlexBox direction="column" align="space-between" className="flex-free-expand">
-            <Block padding="l s">
+            <Block padding="m 0">
                 <Text
                     text={i18n.t('register.confirm.blurb')}
+                    size="s"
+                    weight="light"
                 />
             </Block>
-            <Block padding="m" background="white-lighter" borderRadius="s">
+
+            <Block padding="m 0 l 0">
+                <SVG
+                    glyph={sendGlyph}
+                    width={70}
+                    height={70}
+                />
+            </Block>
+            <Block padding="xs" background="white-lighter" borderRadius="s">
                 <Block padding="s" align="center">
                     <ListItem
                         profile={{
@@ -42,10 +54,10 @@ const RegisterConfirm = ({ address, linkedPublicKey }) => (
                     />
                 </Block>
             </Block>
-            <Block padding="l s">
+            <Block padding="m s">
                 <Text
                     text={i18n.t('register.confirm.explain')}
-                    color="label"
+                    size="s"
                 />
             </Block>
         </FlexBox>
