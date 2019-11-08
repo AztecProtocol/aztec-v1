@@ -4,8 +4,10 @@ import {
     FlexBox,
     Block,
     Text,
+    SVG,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import approveGlyph from '~ui/images/approve.svg';
 import PopupContent from '~ui/components/PopupContent';
 
 const DepositApprove = ({
@@ -18,27 +20,39 @@ const DepositApprove = ({
         <FlexBox
             direction="column"
             align="center"
-            valign="center"
             className="flex-free-expand"
             expand
             stretch
             nowrap
         >
-            <Block padding="m xl">
+            <Block padding="0 s l s">
                 <Text
-                    text={i18n.t('deposit.approve.amount', {
-                        totalAmount,
-                        assetName: asset.name || 'ERC20',
-                    })}
+                    text={i18n.t('deposit.approve.amount')}
                     size="xl"
-                    weight="semibold"
+                    weight="light"
+                />
+                <Text
+                    text={totalAmount}
+                    size="xl"
+                    weight="bold"
+                />
+                <Text
+                    text={asset.name || ' ERC20 Tokens'}
+                    size="xl"
+                    weight="light"
                 />
             </Block>
-            <Block padding="m xl">
+            <Block padding="l 0 l 0">
+                <SVG
+                    glyph={approveGlyph}
+                    width={80}
+                    height={80}
+                />
+            </Block>
+            <Block padding="l m">
                 <Text
                     text={i18n.t('deposit.approve.explain')}
-                    size="xxs"
-                    color="label"
+                    size="s"
                 />
             </Block>
         </FlexBox>

@@ -46,8 +46,9 @@ const DepositConfirm = ({
                                     type: 'user',
                                     address: fromAddress,
                                 }}
-                                content={formatAddress(fromAddress, 10, 6)}
-                                textSize="inherit"
+                                content={<Text text={formatAddress(fromAddress, 10, 3)} size="xs" />}
+                                textSize="xs"
+                                color="black"
                                 size="xxs"
                             />
                         )}
@@ -61,7 +62,8 @@ const DepositConfirm = ({
                                     ...asset,
                                     type: 'asset',
                                 }}
-                                content={formatAddress(asset.address, 10, 6)}
+                                content={<Text text={formatAddress(asset.address, 10, 3)} size="xs" color="secondary" />}
+                                color="black"
                                 textSize="inherit"
                                 size="xxs"
                             />
@@ -69,7 +71,7 @@ const DepositConfirm = ({
                     />
                     <ListRow
                         title={i18n.t('deposit.amount.total')}
-                        content={formatValue(asset.code, totalAmount)}
+                        content={<Text text={formatValue(asset.code, totalAmount)} color="green" size="m" />}
                     />
                 </Block>
             </Ticket>
@@ -93,7 +95,7 @@ const DepositConfirm = ({
                                         type: 'user',
                                         address: to,
                                     }}
-                                    content={formatAddress(to, 12, 6)}
+                                    content={formatAddress(to, 12, 4)}
                                     size="xxs"
                                     color="label"
                                     footnote={(
@@ -111,11 +113,10 @@ const DepositConfirm = ({
                     </Block>
                 </Block>
             </Block>
-            <Block padding="0 xl">
+            <Block padding="m xl">
                 <Text
                     text={i18n.t('deposit.confirm.explain')}
-                    size="xxs"
-                    color="label"
+                    size="s"
                 />
             </Block>
         </FlexBox>

@@ -29,7 +29,7 @@ const contractsForNetwork = (networkId) => {
 
 const configureWeb3Networks = async () => {
     const providerUrlGanache = await get('__providerUrl');
-    const infuraProjectId = await get('__infuraProjectId');
+    const infuraProjectId = '09c4eed231c840d5ace14ba5389a1a7c';
 
     const infuraNetworksConfigs = [
         NETWORKS.RINKEBY,

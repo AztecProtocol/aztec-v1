@@ -27,7 +27,7 @@ export default {
         cancelText: 'Cancel',
         fromSeedPhrase: 'Restore from seed phrase',
         title: 'Recover from seed phrase',
-        description: 'Please enter the seed phrase you were given when registered with the following address:',
+        description: 'Please enter the seed phrase you used to register with the following address:',
         link: {
             description: 'The following address will be linked to your account after recovery.',
         },

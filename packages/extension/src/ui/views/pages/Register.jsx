@@ -5,8 +5,7 @@ import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction/index';
 import Intro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
-import CreatePassword from '~ui/views/CreatePassword';
-import LinkAccount from '~ui/views/LinkAccount';
+import CreatePassword from '~ui/views/CreatePassword'; import LinkAccount from '~ui/views/LinkAccount';
 import ConfirmRegister from '~ui/views/RegisterConfirm';
 import apis from '~uiModules/apis';
 
@@ -67,17 +66,6 @@ const newAccountSteps = [
                 name: 'register_extension',
                 run: apis.auth.registerExtension,
             },
-        ],
-        content: LinkAccount,
-        submitText: 'register.linkAccount.submitText',
-        cancelText: 'register.linkAccount.cancelText',
-    },
-    {
-        titleKey: 'register.confirm.title',
-        content: ConfirmRegister,
-        submitText: 'register.confirm.submitText',
-        cancelText: 'register.confirm.cancelText',
-        tasks: [
             {
                 name: 'authorise',
                 run: apis.auth.sendRegisterAddress,
@@ -87,7 +75,26 @@ const newAccountSteps = [
                 run: apis.auth.registerAddress,
             },
         ],
+        content: LinkAccount,
+        submitText: 'register.linkAccount.submitText',
+        cancelText: 'register.linkAccount.cancelText',
     },
+    // {
+    //     titleKey: 'register.confirm.title',
+    //     content: ConfirmRegister,
+    //     submitText: 'register.confirm.submitText',
+    //     cancelText: 'register.confirm.cancelText',
+    //     tasks: [
+    //         {
+    //             name: 'authorise',
+    //             run: apis.auth.sendRegisterAddress,
+    //         },
+    //         {
+    //             name: 'register_address',
+    //             run: apis.auth.registerAddress,
+    //         },
+    //     ],
+    // },
 ];
 
 const exisitingAccountSteps = [
@@ -105,17 +112,6 @@ const exisitingAccountSteps = [
                 type: 'sign',
                 run: apis.auth.linkAccountToMetaMask,
             },
-        ],
-        content: LinkAccount,
-        submitText: 'register.linkAccount.submitText',
-        cancelText: 'register.linkAccount.cancelText',
-    },
-    {
-        titleKey: 'register.confirm.title',
-        content: ConfirmRegister,
-        submitText: 'register.confirm.submitText',
-        cancelText: 'register.confirm.cancelText',
-        tasks: [
             {
                 name: 'authorise',
                 run: apis.auth.sendRegisterAddress,
@@ -125,7 +121,26 @@ const exisitingAccountSteps = [
                 run: apis.auth.registerAddress,
             },
         ],
+        content: LinkAccount,
+        submitText: 'register.linkAccount.submitText',
+        cancelText: 'register.linkAccount.cancelText',
     },
+    // {
+    //     titleKey: 'register.confirm.title',
+    //     content: ConfirmRegister,
+    //     submitText: 'register.confirm.submitText',
+    //     cancelText: 'register.confirm.cancelText',
+    //     tasks: [
+    //         {
+    //             name: 'authorise',
+    //             run: apis.auth.sendRegisterAddress,
+    //         },
+    //         {
+    //             name: 'register_address',
+    //             run: apis.auth.registerAddress,
+    //         },
+    //     ],
+    // },
 ];
 
 const handleGoBack = (step) => {
@@ -182,7 +197,7 @@ const Register = ({
             initialStep={initialStep}
             initialData={{
                 ...initialData,
-                address: currentAccount.address,
+                ...currentAccount,
             }}
             onGoBack={handleGoBack}
             onExit={returnAndClose}

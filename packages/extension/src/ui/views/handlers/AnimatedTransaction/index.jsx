@@ -380,7 +380,7 @@ class Transaction extends PureComponent {
                     <Text
                         text={i18n.t(steps[step].titleKey)}
                         size="l"
-                        weight="semibold"
+                        weight="normal"
                     />
                 </Block>
                 <FlexBox

@@ -101,8 +101,6 @@ const Restore = ({
     actionId,
     currentAccount,
 }) => {
-    console.log({ currentAccount });
-
     const initialData = {
         address: currentAccount.address,
         isLinked: !!currentAccount.linkedPublicKey,

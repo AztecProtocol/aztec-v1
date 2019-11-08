@@ -68,7 +68,7 @@ const CreatePassword = ({
                 <Block padding="s s xl s" align="center">
                     <Text
                         text={i18n.t('register.create.password.description')}
-                        size="xs"
+                        size="s"
                         weight="light"
                         textAlign="center"
 

@@ -2,7 +2,7 @@ export default {
 
     confirm: {
         title: 'Withdraw',
-        amount: 'Withdraw %{totalAmount} %{assetName}',
+        amount: 'Withdraw ',
         submitText: 'Create Proof',
         explain: 'Check the above details are correct before proceeding.',
         cancelText: 'Cancel',
@@ -11,6 +11,7 @@ export default {
         title: 'Approve Note Spending',
         submitText: 'Sign',
         cancelText: 'Cancel',
+        blurb: 'To spend AZTEC notes a signature is required. The note total may be greater than the required amount, the difference will be credited to your balance.',
         explain: 'IMPORTANT! Check the signature contains the note values shown.',
     },
     send: {

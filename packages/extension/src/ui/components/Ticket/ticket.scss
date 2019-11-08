@@ -2,10 +2,10 @@
 
 $dot-radius: map-get($spacing-map, 'm');
 $edge-height: $dot-radius * 3;
-$ticket-background: map-get($color-map, 'white');
+$ticket-background: #eff1f6;
 $ticket-radius: map-get($rounded-corner-map, 's');
-$ticket-spacing-h: map-get($spacing-map, 'xl');
-$ticket-spacing-v: map-get($spacing-map, 'xl');
+$ticket-spacing-h: map-get($spacing-map, 'l');
+$ticket-spacing-v: map-get($spacing-map, 'l');
 $border-color: rgb(242, 242, 242);
 $ticket-shadow-color: rgba(0, 0, 0, 0.2);
 
@@ -94,7 +94,7 @@ $ticket-shadow-color: rgba(0, 0, 0, 0.2);
   height: $dot-radius * 2;
   border-radius: $dot-radius;
   background: transparent;
-  box-shadow: 0 0 0 $dot-radius $ticket-background;
+  box-shadow: 0 0 0 6px $ticket-background;
 }
 
 .spot-left {

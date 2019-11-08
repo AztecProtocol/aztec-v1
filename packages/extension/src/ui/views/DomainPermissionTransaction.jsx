@@ -67,50 +67,57 @@ const DomainPermissionTransaction = ({
             <FlexBox
                 align="center"
                 valign="center"
-                className="flex-free-expand"
                 direction="column"
                 stretch
                 nowrap
                 expand
             >
-                {assets.length === 1 && (
-                    <ListItem
-                        profile={{
-                            type: 'asset',
-                            address: firstAsset.address,
-                            linkedTokenAddress: firstAsset.linkedTokenAddress,
-                        }}
-                        content={(
-                            <div>
-                                <Text
-                                    size="s"
-                                    text={i18n.token(firstAsset.code)}
-                                    weight="semibold"
-                                    showEllipsis
-                                />
-                                <Text
-                                    className="text-code"
-                                    text={formatAddress(firstAsset.address, 12, 6)}
-                                    color="label"
-                                    size="xxs"
-                                />
-                            </div>
-                        )}
-                    />
-                )}
-                {assets.length > 1 && (
-                    <ProfileIconGroup
-                        theme="white"
-                        size="s"
-                        icons={icons}
-                        moreItems={moreItems}
-                    />
-                )}
-                <Block padding={`${firstAsset ? 'l' : 'xl'} xl 0`}>
+                <Block padding="0 l xl l">
                     <Text
                         text={i18n.t('domain.permission.explain')}
-                        size="xxs"
-                        color="label"
+                        size="s"
+                        weight="light"
+                    />
+                </Block>
+                <Block padding="l">
+                    {assets.length === 1 && (
+                        <ListItem
+                            profile={{
+                                type: 'asset',
+                                address: firstAsset.address,
+                                linkedTokenAddress: firstAsset.linkedTokenAddress,
+                            }}
+                            content={(
+                                <div>
+                                    <Text
+                                        size="s"
+                                        text={i18n.token(firstAsset.code)}
+                                        weight="semibold"
+                                        showEllipsis
+                                    />
+                                    <Text
+                                        className="text-code"
+                                        text={formatAddress(firstAsset.address, 12, 6)}
+                                        color="label"
+                                        size="xxs"
+                                    />
+                                </div>
+                            )}
+                        />
+                    )}
+                    {assets.length > 1 && (
+                        <ProfileIconGroup
+                            theme="white"
+                            size="s"
+                            icons={icons}
+                            moreItems={moreItems}
+                        />
+                    )}
+                </Block>
+                <Block padding="xl l l l">
+                    <Text
+                        text={i18n.t('domain.permission.footer')}
+                        size="s"
                     />
                 </Block>
             </FlexBox>

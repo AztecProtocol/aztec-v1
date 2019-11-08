@@ -10,8 +10,8 @@ import makeAsset from '~uiModules/utils/asset';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import SendConfirm from '~ui/views/SendConfirm';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import SendSign from '~ui/views/SendSign';
-import SendSend from '~ui/views/SendSend';
+import SendSign from '~ui/views/WithdrawSign';
+import SendSend from '~ui/views/DepositSend';
 import apis from '~uiModules/apis';
 
 const steps = [
@@ -75,12 +75,12 @@ const Send = ({
 }) => {
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
-        const amount = transactions.reduce((sum, t) => sum + t.amount, 0);
+        const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
 
         return {
             asset,
             sender,
-            totalAmount: amount,
+            totalAmount,
             transactions,
             numberOfInputNotes,
         };
