@@ -26,7 +26,6 @@ export const schema = {
         },
         required: [
             'owner',
-            'numberOfNotes',
         ],
     },
 };

@@ -87,7 +87,7 @@ async function approveAllowance() {
   const allowanceInput = document.getElementById('erc20-allowance-value');
   const value = parseInt(allowanceInput.value);
   if (!value) {
-    allowanceStatus.log('× Allowance value must be larger than 0');
+    allowanceStatus.error('× Allowance value must be larger than 0');
     return;
   }
 
@@ -113,11 +113,11 @@ async function deposit() {
   const numberOfOutputNotes = parseInt(document.getElementById('deposit-output-number').value, 10);
   const value = parseInt(depositInput.value);
   if (!value) {
-    depositStatus.log('× Deposit value must be larger than 0');
+    depositStatus.error('× Deposit value must be larger than 0');
     return;
   }
   if (!numberOfOutputNotes) {
-    depositStatus.log('× Number of output notes must be more than 0');
+    depositStatus.error('× Number of output notes must be more than 0');
     return;
   }
 
@@ -125,7 +125,7 @@ async function deposit() {
 
   const erc20Balance = await asset.balanceOfLinkedToken();
   if (erc20Balance < value) {
-    depositStatus.log(`ERC20 balance (${erc20Balance}) is not enough to make a deposit of ${value}.`);
+    depositStatus.error(`ERC20 balance (${erc20Balance}) is not enough to make a deposit of ${value}.`);
     return;
   }
 
@@ -141,7 +141,6 @@ async function deposit() {
       numberOfOutputNotes,
     },
   );
-  console.log('api deposit response', response);
 
   refreshAssetBalances();
   depositInput.value = '';
@@ -152,11 +151,11 @@ async function withdraw() {
   const numberOfInputNotes = parseInt(document.getElementById('withdraw-input-number').value, 10);
   const value = parseInt(withdrawInput.value);
   if (!value) {
-    withdrawStatus.log('× Withdraw value must be larger than 0');
+    withdrawStatus.error('× Withdraw value must be larger than 0');
     return;
   }
   if (!numberOfInputNotes) {
-    withdrawStatus.log('× Number of input notes must be more than 0');
+    withdrawStatus.error('× Number of input notes must be more than 0');
     return;
   }
 
@@ -164,7 +163,7 @@ async function withdraw() {
 
   const balance = await asset.balance();
   if (balance < value) {
-    withdrawStatus.log(`× Asset balance (${balance}) is not enough to make a withdraw of ${value}.`);
+    withdrawStatus.error(`× Asset balance (${balance}) is not enough to make a withdraw of ${value}.`);
     return;
   }
 
@@ -184,11 +183,9 @@ async function withdraw() {
       },
     );
 
-    console.log('withdraw api', response);
     refreshAssetBalances();
     withdrawInput.value = '';
   } catch (error) {
-    console.error(error);
     withdrawStatus.error(error.message);
   }
 }
@@ -206,7 +203,7 @@ async function send() {
 
   const balance = await asset.balance();
   if (balance < value) {
-    sendStatus.log(`Asset balance (${balance}) is not enough.`);
+    sendStatus.error(`Asset balance (${balance}) is not enough.`);
     return;
   }
 
@@ -232,30 +229,22 @@ async function send() {
 async function fetchNotesFromBalance() {
   fetchStatus.clear();
 
-  let equalTo = document.getElementById('fetch-eq-value').value;
+  let equalTo = document.getElementById('fetch-eq-value').value.trim();
   equalTo = equalTo === ''
     ? undefined
     : parseInt(equalTo);
-  let greaterThan = document.getElementById('fetch-gt-value').value;
+  let greaterThan = document.getElementById('fetch-gt-value').value.trim();
   greaterThan = greaterThan === ''
     ? undefined
     : parseInt(greaterThan);
-  let lessThan = document.getElementById('fetch-lt-value').value;
+  let lessThan = document.getElementById('fetch-lt-value').value.trim();
   lessThan = lessThan === ''
     ? undefined
     : parseInt(lessThan);
-  if (equalTo === undefined && greaterThan === undefined && lessThan === undefined) {
-    fetchStatus.log('× You must define at least one of the following parameters: equalTo/greaterThan/lessThan');
-    return;
-  }
-
-  const numberOfNotes = parseInt(document.getElementById('fetch-count-value').value);
-  if (numberOfNotes <= 0) {
-    fetchStatus.log('× Number of notes must be larger than 0');
-    return;
-  }
-
-  fetchStatus.clear();
+  let numberOfNotes = document.getElementById('fetch-count-value').value.trim();
+  numberOfNotes = numberOfNotes === ''
+    ? undefined
+    : parseInt(numberOfNotes);
 
   const notes = await asset.fetchNotesFromBalance({
     equalTo,
