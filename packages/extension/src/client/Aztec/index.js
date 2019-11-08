@@ -18,7 +18,6 @@ import {
     AZTECAccountRegistryGSNConfig,
     ACEConfig,
 } from '~/config/contracts';
-
 import {
     actionEvent,
     uiOpenEvent,
