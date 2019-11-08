@@ -56,7 +56,7 @@ export default {
     },
     confirm: {
         title: 'Send Transaction',
-        blurb: 'AZTEC relays transactions through the Gas Station Network so you don\'t have to pay gas fees.',
+        blurb: 'AZTEC relays transactions through the Gas Station Network so you don\'t have to pay gas.',
         explain: 'If you are happy to link your account press send.',
         submitText: 'Send',
         cancelText: 'Cancel',
