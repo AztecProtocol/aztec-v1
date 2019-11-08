@@ -15,6 +15,8 @@ export const MIN_BYTES_VAR_LENGTH = 64;
 
 export const START_EVENTS_SYNCING_BLOCK = 0;
 
+export const INFURA_API_KEY = '09c4eed231c840d5ace14ba5389a1a7c';
+
 export const NOTE_STATUS = {
     CREATED: 'CREATED',
     DESTROYED: 'DESTROYED',
@@ -45,3 +47,24 @@ export const NETWORKS = {
         networkName: 'kovan',
     },
 };
+
+export const INFURA_NETWORKS = [1, 3, 4, 5, 42];
+
+export const NETWORKS_NAMES = (networkId) => {
+    switch (parseInt(networkId, 10)) {
+        case 1:
+            return 'mainnet';
+        case 3:
+            return 'ropsten';
+        case 4:
+            return 'rinkeby';
+        case 5:
+            return 'goerli';
+        case 42:
+            return 'goerli';
+      
+        // TODO: check compiled contracts wether it is exectly ganache
+        default:
+            return 'ganache';
+    }
+}
