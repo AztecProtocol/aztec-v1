@@ -14,11 +14,13 @@ export default {
     openConnection: source => manager.openConnection(source),
     close: ({
         abort = false,
+        error = null,
     } = {}) => manager.postToBackground({
         type: uiCloseEvent,
         clientRequestId: manager.clientRequestId,
         data: {
             abort,
+            error,
         },
     }),
     setDefaultClientRequestId: id => manager.setDefaultClientRequestId(id),

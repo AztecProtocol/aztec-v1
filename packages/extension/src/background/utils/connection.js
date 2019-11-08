@@ -159,13 +159,19 @@ class Connection {
                     },
                 });
 
-                if (response.abort) {
+                const {
+                    abort,
+                    error,
+                } = response;
+                if (abort) {
                     this.ClientResponseSubject.next({
                         requestId,
                         webClientId,
                         data: {
                             type: 'CLIENT_RESPONSE',
-                            response: permissionError('user.denied'),
+                            response: error
+                                ? { error }
+                                : permissionError('user.denied'),
                         },
                     });
                 }

@@ -172,6 +172,19 @@ class Transaction extends PureComponent {
         history[nextStep] = data;
 
         const newData = await this.runTasks(steps[step].tasks);
+        const {
+            error,
+        } = newData;
+        if (error) {
+            this.setState({
+                loading: false,
+                error: typeof error === 'string'
+                    ? { message: error }
+                    : error,
+            });
+            return;
+        }
+
         this.setState({
             loading: false,
         });
@@ -314,6 +327,8 @@ class Transaction extends PureComponent {
         } = this.state;
 
         await asyncForEach(tasks, async (task) => {
+            if (data.error) return;
+
             let response;
             const {
                 run,
@@ -329,18 +344,6 @@ class Transaction extends PureComponent {
                 };
             }
 
-            const {
-                error,
-            } = response || {};
-
-            if (error) {
-                this.setState({
-                    loading: false,
-                    error: typeof error === 'string'
-                        ? { message: error }
-                        : error,
-                });
-            }
             data = {
                 ...data,
                 ...response,
@@ -415,13 +418,15 @@ class Transaction extends PureComponent {
         const {
             step,
             loading,
+            error,
         } = this.state;
-        return (
 
+        return (
             <Footer
                 cancelText={i18n.t(steps[step].cancelText)}
                 nextText={i18n.t(steps[step].submitText)}
                 loading={loading}
+                error={error}
                 onNext={this.handleGoNext}
                 isNextExit={step === steps.length}
                 onPrevious={this.handleGoBack}
@@ -435,12 +440,9 @@ class Transaction extends PureComponent {
 
     render() {
         const {
-            tasks,
             steps,
         } = this.props;
         const {
-            error,
-            loading,
             pendingInitialFetch,
             step,
             direction,
@@ -464,7 +466,6 @@ class Transaction extends PureComponent {
                 >
                     {this.renderHeader(steps[step])}
                 </AnimatedContent>
-
                 <AnimatedContent
                     animationType="content"
                     direction={direction.toString()}
