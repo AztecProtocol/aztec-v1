@@ -1,4 +1,5 @@
 import Web3Service from '~/client/services/Web3Service';
+import GSNService from '~/client/services/GSNService';
 import query from '~client/utils/query';
 
 export default async function proveDeposit({
@@ -12,6 +13,13 @@ export default async function proveDeposit({
         address,
     } = Web3Service.account;
 
+    const {
+        useGSN,
+        proxyContractAddress,
+    } = GSNService.getGSNConfig();;
+
+    const senderValue = useGSN ? proxyContractAddress : sender || address;
+    
     const data = await query({
         type: 'constructProof',
         args: {
@@ -19,8 +27,9 @@ export default async function proveDeposit({
             assetAddress,
             transactions,
             from: from || address,
-            sender: sender || address,
+            sender: senderValue,
             numberOfOutputNotes,
+            useGSN,
         },
     }) || {};
 
