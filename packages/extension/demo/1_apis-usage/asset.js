@@ -130,20 +130,23 @@ async function deposit() {
   }
 
   const account = window.aztec.web3.account();
-  const response = await asset.deposit(
-    [
+  try {
+    await asset.deposit(
+      [
+        {
+          amount: value,
+          to: account.address,
+        },
+      ],
       {
-        amount: value,
-        to: account.address,
+        numberOfOutputNotes,
       },
-    ],
-    {
-      numberOfOutputNotes,
-    },
-  );
-
-  refreshAssetBalances();
-  depositInput.value = '';
+    );
+    refreshAssetBalances();
+    depositInput.value = '';
+  } catch (error) {
+    depositStatus.error(error.message);
+  }
 }
 
 async function withdraw() {
@@ -266,12 +269,19 @@ async function fetchNotesFromBalance() {
     ? undefined
     : parseInt(numberOfNotes);
 
-  const notes = await asset.fetchNotesFromBalance({
-    equalTo,
-    lessThan,
-    greaterThan,
-    numberOfNotes,
-  });
+  let notes;
+  try {
+    notes = await asset.fetchNotesFromBalance({
+      equalTo,
+      lessThan,
+      greaterThan,
+      numberOfNotes,
+    });
+  } catch (error) {
+    fetchStatus.error(error.message);
+    return;
+  }
+
   if (!notes.length) {
     fetchStatus.log('Cannot find any notes that meet the requirements.');
   } else {
