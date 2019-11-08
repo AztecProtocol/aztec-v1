@@ -11,6 +11,14 @@ export default function pickNotesInRange({
     allowLessNumberOfNotes,
 }) {
     if (typeof equalTo === 'number') {
+        if (greaterThan !== undefined
+            && equalTo <= greaterThan
+        ) return [];
+
+        if (lessThan !== undefined
+            && equalTo >= lessThan
+        ) return [];
+
         return pickNoteWithValue({
             noteValues,
             value: equalTo,
