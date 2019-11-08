@@ -186,7 +186,7 @@ class Web3Service {
                 .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas,
+                    gas: parseInt(gas * 1.1, 10),
                 })
                 .once('transactionHash', (receipt) => {
                     const interval = setInterval(() => {
@@ -216,7 +216,7 @@ class Web3Service {
         const {
             address,
             privateKey,
-        } = this.account;
+        } = this.account || {};
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
             && !Array.isArray(args[args.length - 1])
@@ -277,13 +277,15 @@ class Web3Service {
         }
 
         return new Promise(async (resolve, reject) => {
-            const methodSend = method(...methodArgs)[type]({
+            const options = {
                 from: address,
                 ...methodSetting,
                 gas: 6500000,
-            });
-
+            };
+            const methodSend = method(...methodArgs).send(options);
             methodSend.once('transactionHash', (receipt) => {
+                log(`receipt: ${JSON.stringify(receipt)}`);
+
                 const interval = setInterval(() => {
                     this.web3.eth.getTransactionReceipt(receipt, (
                         error,
