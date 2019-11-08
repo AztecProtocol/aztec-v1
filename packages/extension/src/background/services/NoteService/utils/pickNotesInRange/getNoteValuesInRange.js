@@ -6,10 +6,10 @@ export default function getNoteValuesInRange({
     const validNoteValues = {};
     Object.keys(noteValues).forEach((value) => {
         const intValue = +value;
-        if (greaterThan !== undefined
+        if (typeof greaterThan === 'number'
             && intValue <= greaterThan
         ) return;
-        if (lessThan !== undefined
+        if (typeof lessThan === 'number'
             && intValue >= lessThan
         ) return;
         validNoteValues[value] = noteValues[value];
