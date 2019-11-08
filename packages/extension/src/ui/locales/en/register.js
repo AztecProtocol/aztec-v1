@@ -20,12 +20,12 @@ export default {
         account: 'Create Account',
     },
     password: {
-        title: 'Create password',
+        title: 'Create Password',
         submitText: 'Encrypt',
         cancelText: 'Cancel',
     },
     backup: {
-        title: 'Backup your seed phrase',
+        title: 'Backup Seed Phrase',
         description: '',
         submitText: 'Download',
         cancelText: 'Cancel',

@@ -1,4 +1,4 @@
-import JsPDF from 'jspdf';
+import * as JsPDF from 'jspdf';
 import i18n from '~ui/helpers/i18n';
 
 const backup = async ({
