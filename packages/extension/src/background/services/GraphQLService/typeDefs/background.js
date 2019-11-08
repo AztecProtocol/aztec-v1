@@ -75,6 +75,17 @@ const backgroundTypes = gql`
             currentAddress: String!
             domain: String!
         ): NotesApiResponse
+        fetchNotesFromBalance(
+            assetId: ID!
+            equalTo: Int,
+            greaterThan: Int,
+            lessThan: Int,
+            owner: String
+            numberOfNotes: Int
+            allowLessNumberOfNotes: Boolean
+            currentAddress: String!
+            domain: String!
+        ): NotesApiResponse
         userPermission(
             currentAddress: String!
             domain: String!

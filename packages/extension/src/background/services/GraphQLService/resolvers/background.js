@@ -8,6 +8,7 @@ import mergeResolvers from './utils/mergeResolvers';
 import syncUserInfo from './utils/syncUserInfo';
 import getAccounts from './utils/getAccounts';
 import EventService from '~background/services/EventService';
+import NoteService from '~background/services/NoteService';
 import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncNoteInfo from './utils/syncNoteInfo';
@@ -31,6 +32,20 @@ const backgroundResolvers = {
         })),
         pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
+        })),
+        fetchNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
+            notes: await NoteService.fetch(
+                ctx.networkId,
+                args.owner,
+                args.assetId,
+                {
+                    equalTo: args.equalTo,
+                    greaterThan: args.greaterThan,
+                    lessThan: args.lessThan,
+                    numberOfNotes: args.numberOfNotes,
+                    allowLessNumberOfNotes: args.allowLessNumberOfNotes,
+                },
+            ),
         })),
         account: ensureDomainPermission(async (_, args, ctx) => EventService.fetchAztecAccount({
             address: args.currentAddress,
