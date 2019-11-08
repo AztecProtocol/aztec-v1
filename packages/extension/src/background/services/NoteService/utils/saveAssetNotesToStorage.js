@@ -19,14 +19,15 @@ export default async function saveAssetNotesToStorage(
         network: networkId,
     });
 
-    const encryptedAssetNotes = await Promise.all(Object.keys(noteValues)
-        .map((value) => {
-            const data = [
-                value,
-                ...noteValues[value],
-            ];
-            return encryptMessage(linkedPublicKey, data.join(''));
-        }));
+    const encryptedAssetNotes = [];
+    Object.keys(noteValues).forEach((value) => {
+        if (!noteValues[value].length) return;
+        const data = [
+            value,
+            ...noteValues[value],
+        ];
+        encryptedAssetNotes.push(encryptMessage(linkedPublicKey, data.join('')));
+    });
     const assetNotes = encryptedAssetNotes.map(encrypted => encrypted.toHexString());
 
     await set({
