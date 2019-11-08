@@ -78,27 +78,21 @@ const Send = ({
         const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
 
         return {
+            assetAddress,
             asset,
             sender,
-            totalAmount,
             transactions,
             numberOfInputNotes,
+            numberOfOutputNotes,
+            totalAmount,
+            amount: totalAmount,
+            proofId: proofs.JOIN_SPLIT_PROOF,
         };
     };
     return (
         <AnimatedTransaction
             steps={steps}
             fetchInitialData={fetchInitialData}
-            initialData={
-                {
-                    assetAddress,
-                    transactions,
-                    sender,
-                    numberOfOutputNotes,
-                    numberOfInputNotes,
-                    proofId: proofs.JOIN_SPLIT_PROOF,
-                }
-            }
             onExit={returnAndClose}
             onStep={handleOnStep}
         />
@@ -113,10 +107,12 @@ Send.propTypes = {
         to: PropTypes.string.isRequired,
     })).isRequired,
     numberOfInputNotes: PropTypes.number,
+    numberOfOutputNotes: PropTypes.number,
 };
 
 Send.defaultProps = {
     numberOfInputNotes: emptyIntValue,
+    numberOfOutputNotes: emptyIntValue,
 };
 
 export default Send;
