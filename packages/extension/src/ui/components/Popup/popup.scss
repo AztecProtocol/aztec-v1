@@ -36,8 +36,13 @@
   color: map-get($color-map, 'white');
 }
 
-.header, .content {
+.content {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.header {
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
 }

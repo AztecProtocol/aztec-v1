@@ -24,7 +24,7 @@ const SendConfirm = ({
     asset,
     sender,
     transactions,
-    amount: totalAmount,
+    totalAmount,
     goNext,
     goBack,
     onClose,
@@ -46,6 +46,23 @@ const SendConfirm = ({
             stretch
             nowrap
         >
+            <Block padding="0 m xl m">
+                <Text
+                    text={i18n.t('send.confirm.amount')}
+                    size="xl"
+                    weight="light"
+                />
+                <Text
+                    text={totalAmount}
+                    size="xl"
+                    weight="bold"
+                />
+                <Text
+                    text={asset.name || ' ZkNotes'}
+                    size="xl"
+                    weight="light"
+                />
+            </Block>
             <Ticket height={2}>
                 <Offset margin="xs 0">
                     <ListRow
@@ -57,8 +74,9 @@ const SendConfirm = ({
                                     address: sender,
                                 }}
                                 content={formatAddress(sender, 10, 6)}
+                                color="black"
                                 textSize="inherit"
-                                size="xxs"
+                                size="xs"
                             />
                         )}
                     />
@@ -71,14 +89,15 @@ const SendConfirm = ({
                                     type: 'asset',
                                 }}
                                 content={formatAddress(asset.address, 10, 6)}
-                                size="xxs"
+                                color="black"
+                                size="xs"
                                 textSize="inherit"
                             />
                         )}
                     />
                     <ListRow
-                        title={i18n.t('asset.amount.total')}
-                        content={formatValue(asset.code, totalAmount)}
+                        title={i18n.t('deposit.amount.total')}
+                        content={<Text text={formatValue(asset.code, totalAmount)} color="primary" size="m" />}
                     />
                 </Offset>
             </Ticket>
@@ -123,8 +142,7 @@ const SendConfirm = ({
             <Block padding="0 xl">
                 <Text
                     text={i18n.t('send.confirm.explain')}
-                    size="xxs"
-                    color="label"
+                    size="s"
                 />
             </Block>
         </FlexBox>
@@ -138,15 +156,8 @@ SendConfirm.propTypes = {
         amount: PropTypes.number.isRequired,
         to: PropTypes.string.isRequired,
     })).isRequired,
-    amount: PropTypes.number.isRequired,
-    goNext: PropTypes.func.isRequired,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
+    totalAmount: PropTypes.number.isRequired,
 };
 
-SendConfirm.defaultProps = {
-    goBack: null,
-    onClose: null,
-};
 
 export default SendConfirm;

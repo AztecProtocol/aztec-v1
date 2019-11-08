@@ -6,10 +6,10 @@ export default {
         explain: 'Check the above details are correct before proceeding.',
     },
     approve: {
-        title: 'Approve Token Spending',
+        title: 'Approve Spend',
         cancelText: 'Cancel',
         submitText: 'Approve',
-        amount: 'Deposit %{totalAmount} %{assetName}',
+        amount: 'Deposit ',
         explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
     },
     send: {
@@ -17,6 +17,7 @@ export default {
         cancelText: 'Cancel',
         submitText: 'Send',
         explain: 'AZTEC sends transactions through the Gas Station Network so you don\'t pay gas.',
+        footer: 'This window will close automatically once the transaction is confirmed.',
     },
     transaction: {
         _: 'Deposit Transaction',

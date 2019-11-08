@@ -38,12 +38,19 @@ const WithdrawConfirm = ({
         >
             <Block padding="m xl">
                 <Text
-                    text={i18n.t('withdraw.confirm.amount', {
-                        totalAmount: firstTransaction.amount,
-                        assetName: name || 'ERC20',
-                    })}
+                    text={i18n.t('withdraw.confirm.amount')}
                     size="xl"
-                    weight="semibold"
+                    weight="light"
+                />
+                <Text
+                    text={firstTransaction.amount}
+                    size="xl"
+                    weight="bold"
+                />
+                <Text
+                    text={name || ' ERC20 Tokens'}
+                    size="xl"
+                    weight="light"
                 />
             </Block>
             <Ticket height={2}>
@@ -83,8 +90,7 @@ const WithdrawConfirm = ({
             <Block padding="m xl">
                 <Text
                     text={i18n.t('withdraw.confirm.explain')}
-                    size="xxs"
-                    color="label"
+                    size="s"
                 />
             </Block>
         </FlexBox>

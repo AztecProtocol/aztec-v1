@@ -56,6 +56,11 @@ const RestoreFromSeedPhrase = ({
             error={error}
         >
             <Block
+                padding="l"
+            >
+                <Text text={i18n.t('account.restore.description')} size="s" />
+            </Block>
+            <Block
                 top="l"
                 bottom="l"
             >
@@ -70,7 +75,6 @@ const RestoreFromSeedPhrase = ({
                     <Text
                         className="text-code"
                         text={formatAddress(address, 16, 10)}
-                        color="label"
                         size="xxs"
                     />
                 </Block>

@@ -8,7 +8,7 @@ import {
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
 import WithdrawConfirm from '~ui/views/WithdrawConfirm';
-import WithdrawSend from '~ui/views/WithdrawSend';
+import WithdrawSend from '~ui/views/DepositSend';
 import WithdrawSign from '~ui/views/WithdrawSign';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';

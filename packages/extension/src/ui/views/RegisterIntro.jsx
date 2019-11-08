@@ -22,10 +22,10 @@ const Intro = () => {
             >
                 <Text
                     text={i18n.t(textKey)}
-                    size="s"
+                    size="m"
                     color="default"
                     align="left"
-                    weight={i === 1 ? 'semibold' : 'light'}
+                    weight={i === 1 ? 'normal' : 'light'}
                 />
             </Block>
         ));

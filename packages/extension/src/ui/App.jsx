@@ -87,6 +87,7 @@ class App extends PureComponent {
             });
         }
     }
+
     async loadInitialStates() {
         const action = await ActionService.last();
         if (!action) return;
@@ -137,7 +138,7 @@ class App extends PureComponent {
                 && localLinkedPublicKey
                 && localAddress !== currentAddress
             ) {
-                route = 'register.address';
+                route = 'register';
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
             }
         }
@@ -238,6 +239,7 @@ class App extends PureComponent {
         const theme = {
             name: 'light',
         };
+
 
         return (
             <ThemeContext.Provider value={theme}>

@@ -4,6 +4,7 @@ export default {
         cancelText: 'Cancel',
         submitText: 'Create Proof',
         explain: 'Check the above details are correct before proceeding.',
+        amount: 'Send ',
     },
     notes: {
         title: 'Approve Note Spending',

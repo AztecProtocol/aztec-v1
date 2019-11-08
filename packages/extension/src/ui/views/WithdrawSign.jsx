@@ -4,6 +4,7 @@ import {
     FlexBox,
     Block,
     Text,
+    SVG,
 } from '@aztec/guacamole-ui';
 import Ticket from '~ui/components/Ticket';
 import ListItem from '~ui/components/ListItem';
@@ -12,6 +13,7 @@ import {
     formatValue,
 } from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
+import signGlyph from '~ui/images/sign.svg';
 import PopupContent from '~ui/components/PopupContent';
 
 const WithdrawConfirm = ({
@@ -31,26 +33,29 @@ const WithdrawConfirm = ({
             stretch
             nowrap
         >
-            <Block padding="m xl">
+            <Block padding="m 0 xl 0">
                 <Text
-                    text={i18n.t('withdraw.confirm.amount', {
-                        totalAmount: firstTransaction.amount,
-                        assetName: name || 'ERC20',
-                    })}
-                    size="xl"
-                    weight="semibold"
+                    text={i18n.t('withdraw.notes.blurb')}
+                    size="s"
+                    weight="light"
                 />
             </Block>
             <Ticket height={proof.inputNotes.length}>
 
                 {proof.inputNotes.map(({ noteHash, k }) => (
                     <ListItem
-                        content={formatAddress(noteHash, 24, 4)}
+                        content={(
+                            <Text
+                                text={formatAddress(noteHash, 24, 4)}
+                                size="xxs"
+                            />
+                        )}
                         size="xxs"
                         footnote={(
                             <Text
                                 text={`(${k.words[0]})`}
                                 color="green"
+                                size="xxs"
                             />
                         )}
                     />
@@ -60,8 +65,7 @@ const WithdrawConfirm = ({
             <Block padding="m xl">
                 <Text
                     text={i18n.t('withdraw.notes.explain')}
-                    size="xs"
-                    color="red"
+                    size="s"
                 />
             </Block>
         </FlexBox>
