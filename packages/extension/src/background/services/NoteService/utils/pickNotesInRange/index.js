@@ -1,4 +1,3 @@
-import pickNoteWithValue from './pickNoteWithValue';
 import getNoteValuesInRange from './getNoteValuesInRange';
 import pickNotesFromNoteValues from './pickNotesFromNoteValues';
 
@@ -10,28 +9,21 @@ export default function pickNotesInRange({
     numberOfNotes,
     allowLessNumberOfNotes,
 }) {
+    let validNoteValues;
     if (typeof equalTo === 'number') {
-        if (typeof greaterThan === 'number'
-            && equalTo <= greaterThan
-        ) return [];
-
-        if (typeof lessThan === 'number'
-            && equalTo >= lessThan
-        ) return [];
-
-        return pickNoteWithValue({
+        if (!noteValues[equalTo]) {
+            return [];
+        }
+        validNoteValues = {
+            [equalTo]: noteValues[equalTo],
+        };
+    } else {
+        validNoteValues = getNoteValuesInRange({
             noteValues,
-            value: equalTo,
-            numberOfNotes,
-            allowLessNumberOfNotes,
+            greaterThan,
+            lessThan,
         });
     }
-
-    const validNoteValues = getNoteValuesInRange({
-        noteValues,
-        greaterThan,
-        lessThan,
-    });
 
     return pickNotesFromNoteValues({
         noteValues: validNoteValues,

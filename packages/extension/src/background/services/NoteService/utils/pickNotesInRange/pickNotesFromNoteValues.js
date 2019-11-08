@@ -1,12 +1,17 @@
 import {
     randomInts,
 } from '~/utils/random';
+import packAllNotes from './packAllNotes';
 
 export default function pickNotesFromNoteValues({
     noteValues,
     numberOfNotes,
     allowLessNumberOfNotes,
 }) {
+    if (typeof numberOfNotes !== 'number') {
+        return packAllNotes(noteValues);
+    }
+
     let accumCount = 0;
     const weights = Object.keys(noteValues)
         .map((value) => {
@@ -23,6 +28,10 @@ export default function pickNotesFromNoteValues({
         || (accumCount < numberOfNotes && !allowLessNumberOfNotes)
     ) {
         return [];
+    }
+
+    if (accumCount <= numberOfNotes) {
+        return packAllNotes(noteValues);
     }
 
     const noteKeyData = [];

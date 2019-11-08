@@ -337,7 +337,7 @@ export default class Asset {
         greaterThan,
         lessThan,
         equalTo,
-        numberOfNotes = 1,
+        numberOfNotes,
     } = {}) => {
         const {
             address,

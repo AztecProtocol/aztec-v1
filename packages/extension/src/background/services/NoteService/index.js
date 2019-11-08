@@ -106,11 +106,18 @@ export default {
             equalTo,
             greaterThan,
             lessThan,
-            numberOfNotes = 1,
+            numberOfNotes,
             allowLessNumberOfNotes = true,
         } = {},
     ) => {
-        if (numberOfNotes <= 0) {
+        if (typeof numberOfNotes === 'number'
+            && numberOfNotes <= 0) {
+            return [];
+        }
+        if (typeof equalTo === 'number'
+            && ((typeof greaterThan === 'number' && equalTo <= greaterThan)
+                || (typeof lessThan === 'number' && equalTo >= lessThan))
+        ) {
             return [];
         }
 
