@@ -45,8 +45,8 @@ const CreatePassword = ({
     }, [password]);
 
     if (inputRef && !didMount) {
-        inputRef.focus();
-        doMount(true);
+        // inputRef.focus();
+        // doMount(true);
     }
 
     return (

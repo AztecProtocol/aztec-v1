@@ -8,7 +8,6 @@ export default async function linkAccountToMetaMask(account) {
         action: 'metamask.register.extension',
         data: account,
     }) || {};
-    console.log(account);
 
     return {
         ...data,

@@ -42,12 +42,6 @@ const steps = [
                         password,
                     },
                 ) => {
-                    console.log({
-                        address,
-                        seedPhrase,
-                        password,
-
-                    });
                     const {
                         duplicated,
                     } = await apis.account.checkDuplicates({
@@ -55,7 +49,6 @@ const steps = [
                         seedPhrase,
                         password,
                     });
-                    console.log({ duplicated });
                     let linkedPublicKey;
                     if (!duplicated) {
                         ({
@@ -65,7 +58,6 @@ const steps = [
                             seedPhrase,
                             password,
                         }));
-                        console.log({ linkedPublicKey });
                     }
                     return {
                         duplicated,

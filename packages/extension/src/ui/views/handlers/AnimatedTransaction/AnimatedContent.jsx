@@ -10,8 +10,6 @@ const PoseAnimation = posed.div({
         y: 0,
         transition: {
             x: { type: 'spring', stiffness: 100, damping: 50 },
-            y: { type: 'spring', stiffness: 100, damping: 50 },
-            scale: { type: 'spring', stiffness: 100, damping: 50 },
             default: { duration: 330 },
         },
     },
