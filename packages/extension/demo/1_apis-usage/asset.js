@@ -176,7 +176,7 @@ async function withdraw() {
   ];
 
   try {
-    const response = await asset.withdraw(
+    await asset.withdraw(
       transactions,
       {
           numberOfInputNotes,
@@ -192,10 +192,23 @@ async function withdraw() {
 
 async function send() {
   const addressInput = document.getElementById('send-address');
+  let numberOfInputNotes = document.getElementById('send-input-number').value.trim();
+  numberOfInputNotes = numberOfInputNotes === ''
+    ? undefined
+    : parseInt(numberOfInputNotes);
+  let numberOfOutputNotes = document.getElementById('send-output-number').value.trim();
+  numberOfOutputNotes = numberOfOutputNotes === ''
+    ? undefined
+    : parseInt(numberOfOutputNotes);
   const valueInput = document.getElementById('send-value');
-  const address = addressInput.value;
-  const value = parseInt(valueInput.value);
-  if (!address || !value) {
+  const address = addressInput.value.trim();
+  const value = parseInt(valueInput.value.trim());
+  if (!address) {
+    sendStatus.error('Please enter an address');
+    return;
+  }
+  if (value <= 0) {
+    sendStatus.error('Value must be larger than 0');
     return;
   }
 
@@ -208,22 +221,29 @@ async function send() {
   }
 
   const account = window.aztec.web3.account();
-  await asset.send(
-    [
-      {
-        to: address,
-        amount: value,
-      },
-    ],
-    {
-      from: account.address,
-      sender: account.address,
-    },
-  );
 
-  refreshAssetBalances();
-  addressInput.value = '';
-  valueInput.value = '';
+  try {
+    await asset.send(
+      [
+        {
+          to: address,
+          amount: value,
+        },
+      ],
+      {
+        from: account.address,
+        sender: account.address,
+        numberOfInputNotes,
+        numberOfOutputNotes,
+      },
+    );
+
+    refreshAssetBalances();
+    addressInput.value = '';
+    valueInput.value = '';
+  } catch (error) {
+    sendStatus.error(error.message);
+  }
 }
 
 async function fetchNotesFromBalance() {
@@ -326,7 +346,7 @@ document.getElementById('app').innerHTML = `
           id="withdraw-input-number"
           type="number"
           size="2"
-          value="1"
+          value="2"
         /><br/>
         <button onclick="withdraw()">Submit</button><br/>
         <br/>
@@ -347,11 +367,26 @@ document.getElementById('app').innerHTML = `
           type="number"
           size="10"
         /><br/>
+        <label>Number of input notes</label>
+        <input
+          id="send-input-number"
+          type="number"
+          size="2"
+          value="2"
+        /><br/>
+        <label>Number of output notes</label>
+        <input
+          id="send-output-number"
+          type="number"
+          size="2"
+          value="2"
+        /><br/>
         <button onclick="send()">Submit</button><br/>
         <br/>
         <div id="send-status"></div>
       </div>
     </div>
+    <br/>
     <div>
       <div>Fetch note from balance:</div>
       <label>Equal to</label>
