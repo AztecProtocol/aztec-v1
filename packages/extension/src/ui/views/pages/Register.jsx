@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { KeyStore } from '~utils/keyvault';
+import i18n from '~/ui/helpers/i18n';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction/index';
 import Intro from '~ui/views/RegisterIntro';
@@ -51,6 +52,14 @@ const newAccountSteps = [
             },
         ],
         content: CreatePassword,
+        validate: ({ password }) => {
+            if (!password || !password.trim()) {
+                return {
+                    message: i18n.t('account.password.error.empty'),
+                };
+            }
+            return null;
+        },
         submitText: 'register.password.submitText',
         cancelText: 'register.password.cancelText',
     },
@@ -165,9 +174,7 @@ const handleOnStep = (step) => {
     return newProps;
 };
 
-
 const Register = ({
-    actionId,
     currentAccount,
     initialStep,
     initialData,
@@ -192,7 +199,6 @@ const Register = ({
 };
 
 Register.propTypes = {
-    actionId: PropTypes.string,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string,
@@ -202,7 +208,6 @@ Register.propTypes = {
 };
 
 Register.defaultProps = {
-    actionId: '',
     initialStep: 0,
     initialData: {},
 };
