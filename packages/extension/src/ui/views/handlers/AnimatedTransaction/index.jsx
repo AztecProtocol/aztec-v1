@@ -8,7 +8,6 @@ import {
     FlexBox,
 } from '@aztec/guacamole-ui';
 import {
-    warnLog,
     errorLog,
 } from '~utils/log';
 import {
@@ -92,8 +91,8 @@ class Transaction extends PureComponent {
             currentTask: initialTask,
             data: initialData,
             direction: '1',
-            done: false,
             error: null,
+            validationError: null,
             prevProps: {
                 retry: -1,
             },
@@ -146,12 +145,29 @@ class Transaction extends PureComponent {
         } = this.props;
         const {
             step,
+            data: stateData,
             history: prevHistory,
         } = this.state;
         const prevData = prevHistory[step];
         let data = {
             ...prevData,
         };
+
+        const {
+            tasks,
+            validate,
+        } = steps[step];
+
+        const validationError = validate
+            ? await validate(stateData)
+            : null;
+        if (validationError) {
+            this.setState({
+                loading: false,
+                validationError,
+            });
+            return;
+        }
 
         let stepOffset = 1;
         if (onGoNext) {
@@ -171,7 +187,7 @@ class Transaction extends PureComponent {
         const history = [...prevHistory];
         history[nextStep] = data;
 
-        const newData = await this.runTasks(steps[step].tasks);
+        const newData = await this.runTasks(tasks);
         const {
             error,
         } = newData;
@@ -309,12 +325,20 @@ class Transaction extends PureComponent {
         };
     }
 
-    updateParentState = (state) => {
+    updateParentState = (childState) => {
+        const {
+            data: prevData,
+        } = this.state;
+        const {
+            error: validationError,
+            ...childData
+        } = childState;
         this.setState({
             data: {
-                ...this.state.data,
-                ...state,
+                ...prevData,
+                ...childData,
             },
+            validationError,
         });
     }
 
@@ -394,10 +418,10 @@ class Transaction extends PureComponent {
                     {steps.length > 1 && steps.map(
                         (s, i) => (
                             <Block
+                                key={+i}
                                 background={i <= step ? 'primary' : 'primary-lightest'}
                                 borderRadius="s"
                                 padding="xxs l"
-                                key={i}
                                 style={{
                                     margin: `${spacingMap.xs}`,
                                 }}
@@ -409,7 +433,6 @@ class Transaction extends PureComponent {
             </Block>
         );
     }
-
 
     renderFooter = () => {
         const {
@@ -435,7 +458,18 @@ class Transaction extends PureComponent {
     }
 
     renderContent({ content: Component }) {
-        return <Component {...this.state.data} updateParentState={this.updateParentState} />;
+        const {
+            data,
+            validationError,
+        } = this.state;
+
+        return (
+            <Component
+                {...data}
+                error={validationError}
+                updateParentState={this.updateParentState}
+            />
+        );
     }
 
     render() {
@@ -498,6 +532,9 @@ Transaction.propTypes = {
             loadingMessage: PropTypes.string,
             run: PropTypes.func,
         })),
+        validate: PropTypes.func,
+        cancelText: PropTypes.string,
+        submitText: PropTypes.string,
     })).isRequired,
     successMessage: PropTypes.string,
     initialStep: PropTypes.number,

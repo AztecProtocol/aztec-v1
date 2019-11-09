@@ -1,6 +1,5 @@
 import React, {
     useState,
-    useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -28,21 +27,13 @@ const inputIconMapping = {
 const CreatePassword = ({
     title,
     description,
-    submitButtonText,
-    footerLink,
-    goBack,
-    onClose,
+    password,
     updateParentState,
+    error,
 }) => {
-    const [password, updatePassword] = useState('');
     const [visible, updateVisible] = useState(false);
-    const [error, setError] = useState('');
     const [inputRef, setInputRef] = useState(null);
     const [didMount, doMount] = useState(false);
-
-    useEffect(() => {
-        updateParentState({ password });
-    }, [password]);
 
     if (inputRef && !didMount) {
         inputRef.focus();
@@ -54,15 +45,6 @@ const CreatePassword = ({
             theme="white"
             title={title || i18n.t('register.create.password.title')}
             description={description || i18n.t('register.create.password.description')}
-            leftIconName={goBack ? 'chevron_left' : 'close'}
-            onClickLeftIcon={goBack || onClose}
-            submitButtonText={submitButtonText || i18n.t('next')}
-            onSubmit={() => {
-                if (!password) {
-                    setError(i18n.t('account.password.error.empty'));
-                }
-            }}
-            footerLink={footerLink}
         >
             <Block align="left">
                 <Block padding="s s xl s" align="center">
@@ -83,8 +65,10 @@ const CreatePassword = ({
                     icon={inputIconMapping[visible ? 'hide' : 'show']}
                     onClickIcon={() => updateVisible(!visible)}
                     onChange={(p) => {
-                        updatePassword(p);
-                        setError('');
+                        updateParentState({
+                            password: p,
+                            error: null,
+                        });
                     }}
                 />
                 {password !== '' && (
@@ -97,7 +81,8 @@ const CreatePassword = ({
                 {!!error && (
                     <Block top="s">
                         <Text
-                            text={error}
+                            text={error.message
+                              || i18n.t(error.key, error.response)}
                             color="red"
                             size="xxs"
                         />
@@ -111,23 +96,21 @@ const CreatePassword = ({
 CreatePassword.propTypes = {
     title: PropTypes.string,
     description: PropTypes.string,
-    submitButtonText: PropTypes.string,
-    footerLink: PropTypes.shape({
-        text: PropTypes.string.isRequired,
-        href: PropTypes.string.isRequired,
-    }),
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
+    password: PropTypes.string,
     updateParentState: PropTypes.func.isRequired,
+    error: PropTypes.shape({
+        key: PropTypes.string,
+        message: PropTypes.string,
+        response: PropTypes.object,
+        fetal: PropTypes.bool,
+    }),
 };
 
 CreatePassword.defaultProps = {
     title: '',
     description: '',
-    submitButtonText: '',
-    footerLink: null,
-    goBack: null,
-    onClose: null,
+    password: '',
+    error: null,
 };
 
 export default CreatePassword;
