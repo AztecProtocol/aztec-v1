@@ -2,11 +2,10 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const Dotenv = require('dotenv-webpack');
-const BrotliPlugin = require('brotli-webpack-plugin');
 
 module.exports = {
-    mode: 'development',
-    devtool: '',
+    mode: 'production',
+    devtool: 'source-map',
     entry: {
         aztec: './src/index.js',
         background: './src/background',
@@ -110,15 +109,5 @@ module.exports = {
         new Dotenv({
             path: './.env.development',
         }),
-        // new BrotliPlugin({
-        //     asset: '[path].br[query]',
-        //     test: /\.(js|css|html|svg)$/,
-        //     threshold: 10240,
-        //     minRatio: 0.8,
-        // }),
     ],
-    watchOptions: {
-        aggregateTimeout: 300,
-        poll: 1000,
-    },
 };
