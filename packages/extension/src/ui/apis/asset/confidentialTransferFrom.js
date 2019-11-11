@@ -1,16 +1,19 @@
 import ConnectionService from '~ui/services/ConnectionService';
+import {
+    AZTECAccountRegistryGSNConfig,
+} from '~/config/contracts';
 
 export default async function send({
     assetAddress,
     proof,
     proofId,
 }) {
-    const proofData = proof.encodeABI('0xcF217475D84997E9c0EbA3052E1F818916fE3eEC');
+    const proofData = proof.encodeABI(assetAddress);
     const response = await ConnectionService.sendTransaction({
-        contract: 'IZkAsset',
-        contractAddress: assetAddress,
+        contract: AZTECAccountRegistryGSNConfig.name,
         method: 'confidentialTransferFrom',
         data: [
+            assetAddress,
             proofId,
             proofData,
         ],

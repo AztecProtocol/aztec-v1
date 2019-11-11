@@ -46,7 +46,7 @@ const steps = [
         tasks: [
             {
                 name: 'send',
-                run: apis.asset.confidentialTransfer,
+                run: apis.asset.confidentialTransferFrom,
             },
         ],
         content: DepositSend,

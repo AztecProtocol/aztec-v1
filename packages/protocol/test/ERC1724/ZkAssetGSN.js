@@ -24,7 +24,7 @@ const contractAddress = require('../helpers/contractAddress');
 const aztecAccount = secp256k1.generateAccount();
 
 describe('ZkAsset with GSN', () => {
-    const SIGNING_PROVIDER = 'https://wcb4cz8x39.execute-api.us-east-1.amazonaws.com';
+    const SIGNING_PROVIDER = 'https://bv9t4hwozi.execute-api.us-east-1.amazonaws.com';
     const WEB3_PROVIDER_URL = 'http://127.0.0.1:8545';
     const web3 = new Web3(WEB3_PROVIDER_URL);
     const trustedAddress = '0x6794d16143e537a51d6745D3ae6bc99502b4331C';
@@ -85,11 +85,12 @@ describe('ZkAsset with GSN', () => {
             useGNS: true,
         });
 
-        ace = new web3.eth.Contract(ACE.abi, contractAddress(ACE, networkId));
+        const aceAddress = contractAddress(ACE, networkId);
+        ace = new web3.eth.Contract(ACE.abi, aceAddress);
 
         const accountRegistryTemplate = new web3.eth.Contract(AZTECAccountRegistryGSN.abi, null, { data: AZTECAccountRegistryGSN.bytecode });
         accountRegistry = await accountRegistryTemplate
-            .deploy({ arguments: [trustedAddress] })
+            .deploy({ arguments: [aceAddress, trustedAddress] })
             .send({ from: owner, gas: 6e6 });
 
         accountRegistry.setProvider(gsnProvider);
@@ -101,11 +102,17 @@ describe('ZkAsset with GSN', () => {
             .deploy()
             .send({ from: owner, gas: 6e6 });
 
-        await erc20.methods.mint(sender, amount)
+        // await erc20.methods.mint(sender, amount)
+        //     .send({ from: owner, gas: 6e6 });
+
+        // await erc20.methods.approve(ace.options.address, amount)
+        //     .send({ from: sender, gas: 6e6 });
+
+        await erc20.methods.mint(accountRegistry.options.address, amount)
             .send({ from: owner, gas: 6e6 });
 
-        await erc20.methods.approve(ace.options.address, amount)
-            .send({ from: sender, gas: 6e6 });
+        await accountRegistry.methods.approve(erc20.options.address, ace.options.address, amount)
+            .send({ from: sender, gas: 6e6, useGSN: false });
 
         const zkAssetTemplate = new web3.eth.Contract(ZkAsset.abi, null, { data: ZkAsset.bytecode });
         zkAsset = await zkAssetTemplate
@@ -145,7 +152,7 @@ describe('ZkAsset with GSN', () => {
         });
 
         it('should send confidentialTransfer() tx via the GSN', async () => {
-            const initialRecipientFunds = await balance(web3, { recipient: zkAsset.options.address });
+            // const initialRecipientFunds = await balance(web3, { recipient: zkAsset.options.address });
             const depositInputNotes = [];
             const notesValues = [20, 10];
             const depositOutputNotes = await helpers.getNotesForAccount(aztecAccount, notesValues);
@@ -154,17 +161,16 @@ describe('ZkAsset with GSN', () => {
                 notesValues,
             );
             const publicOwner = sender;
+            const registryAddress = accountRegistry.options.address;
 
-            const depositProof = new JoinSplitProof(depositInputNotes, depositOutputNotes, accountRegistry.options.address, publicValue, publicOwner);
+            const depositProof = new JoinSplitProof(depositInputNotes, depositOutputNotes, registryAddress, publicValue, publicOwner);
             const depositData = depositProof.encodeABI(zkAsset.options.address);
-            const signatures = depositProof.constructSignatures(zkAsset.options.address, []);
-
-            // await ace.methods.publicApprove(zkAsset.options.address, depositProof.hash, 30).send({ from: sender });
+            // const signatures = depositProof.constructSignatures(zkAsset.options.address, []);
 
             const receiptApprove = await ace.methods.publicApprove(zkAsset.options.address, depositProof.hash, 30).send({ from: sender });
             expect(receiptApprove.status).to.equal(true);
 
-            const receipt = await accountRegistry.methods.confidentialTransfer(zkAsset.options.address, depositData, signatures).send({
+            const receipt = await accountRegistry.methods.confidentialTransferFrom(zkAsset.options.address, depositData).send({
                 from: sender,
                 gas: 8e6,
                 approveFunction,
