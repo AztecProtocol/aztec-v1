@@ -22,7 +22,9 @@ contract AZTECAccountRegistryGSN is LibEIP712, AZTECAccountRegistry, GSNRecipien
         GSNBouncerSignature.initialize(_trustedAddress);
     }
 
-    function confidentialTransfer(address _registryOwner, bytes memory _proofData, bytes memory _signatures) public {
-        IZkAsset(_registryOwner).confidentialTransfer(_proofData, _signatures);
+    function confidentialTransferFrom(address _registryOwner, uint24 _proof, bytes memory _proofOutput) public {
+        IZkAsset(_registryOwner).confidentialTransferFrom(_proof, _proofOutput);
     }
+
 }
+

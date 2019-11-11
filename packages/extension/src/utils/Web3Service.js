@@ -8,6 +8,7 @@ import {
 class Web3Service {
     constructor() {
         this.web3 = null;
+        this.gsnConfig = null,
         this.contracts = {};
         this.abis = {};
         this.account = null;
@@ -17,6 +18,7 @@ class Web3Service {
     async init({
         provider,
         account,
+        gsnConfig,
     } = {}) {
         let web3;
         const web3Provider = provider || window.ethereum;
@@ -35,6 +37,7 @@ class Web3Service {
 
         this.web3 = web3;
         this.eth = this.web3.eth;
+        this.gsnConfig = gsnConfig;
 
         if (account) {
             this.account = account;
@@ -129,14 +132,14 @@ class Web3Service {
         return address;
     }
 
-    deployed(contractName, contractAddress = '') {
+    deployed(contractName, contractAddress = '', useGSN = false) {
         let contract;
-        if (!contractAddress) {
+        if (!contractAddress && !useGSN) {
             contract = this.contracts[contractName];
         } else if (this.abis[contractName]) {
             contract = new this.web3.eth.Contract(
                 this.abis[contractName],
-                contractAddress,
+                contractAddress || (this.contracts[contractName] || {}).address,
             );
             const {
                 _address: address,
@@ -145,6 +148,12 @@ class Web3Service {
         }
         if (!contract) {
             log(`'${contractName}' is not registered as a contract.`);
+        }
+        if (useGSN && !this.gsnConfig) {
+            log('Cannot use gsn as "this.gsnConfig" was not set');
+        }
+        if (useGSN && contract) {
+            contract.setProvider(this.gsnConfig.gsnProvider);
         }
         return contract;
     }
@@ -276,9 +285,14 @@ class Web3Service {
             });
         }
 
+        let fromAddress = address;
+        if (type === 'sendWithGSN') {
+            fromAddress = this.gsnConfig.signingInfo.address;
+        }
+
         return new Promise(async (resolve, reject) => {
             const options = {
-                from: address,
+                from: fromAddress,
                 ...methodSetting,
                 gas: 6500000,
             };
@@ -310,8 +324,8 @@ class Web3Service {
 
     useContract(contractName, contractAddress = null) {
         return {
-            method: (methodName) => {
-                const contract = this.deployed(contractName, contractAddress);
+            method: (methodName, useGSN = false) => {
+                const contract = this.deployed(contractName, contractAddress, useGSN);
                 if (!contract) {
                     throw new Error(`Cannot call method '${methodName}' of undefined.`);
                 }
@@ -324,7 +338,7 @@ class Web3Service {
                 const address = contractAddress || contract.address;
                 return {
                     call: async (...args) => this.triggerMethod('call', method, null, ...args),
-                    send: async (...args) => this.triggerMethod('send', method, null, ...args),
+                    send: async (...args) => this.triggerMethod(useGSN ? 'sendWithGSN' : 'send', method, null, ...args),
                     sendSigned: async (...args) => this.triggerMethod('sendSigned', method, address, ...args),
                 };
             },

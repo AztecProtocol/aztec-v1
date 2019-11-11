@@ -15,7 +15,6 @@ import {
 import filterStream from '~utils/filterStream';
 import {
     AZTECAccountRegistryConfig,
-    AZTECAccountRegistryGSNConfig,
     ACEConfig,
 } from '~/config/contracts';
 import {
@@ -24,9 +23,6 @@ import {
     uiCloseEvent,
 } from '~config/event';
 import Web3Service from '~/client/services/Web3Service';
-import GSNService, {
-    Web3ServiceGSN,
-} from '~/client/services/GSNService';
 /* eslint-disable import/no-unresolved */
 import ZkAsset from '../../../build/protocol/ZkAsset';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
@@ -34,10 +30,9 @@ import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import getSiteData from '../utils/getSiteData';
 import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
+import MetaMaskService from '../services/MetaMaskService';
 import { ensureExtensionInstalled, ensureDomainRegistered } from '../auth';
 import backgroundFrame from './backgroundFrame';
-import Provider from '~/config/provider';
-import detectActionHandler from '~/client/helpers/detectActionHandler';
 
 
 class Aztec {
@@ -106,7 +101,7 @@ class Aztec {
 
         this.messages$.pipe(
             filter(({ data: { type } }) => type === actionEvent),
-            mergeMap(data => from(detectActionHandler(data))),
+            mergeMap(data => from(MetaMaskService(data))),
             tap(data => this.port.postMessage({
                 type: 'ACTION_RESPONSE',
                 requestId: data.requestId,
@@ -151,16 +146,6 @@ class Aztec {
         const networkId = web3Provider.networkVersion;
 
         const {
-            providerUrl,
-        } = Provider.getProvider(networkId);
-        console.log(`providerUrl: ${providerUrl} networkId: ${networkId}`)
-        
-        await GSNService.init({
-            apiKey: '12345',
-            providerUrl,
-        });
-
-        const {
             config: accountRegistryContract,
             networks: accountRegistryNetworks,
         } = AZTECAccountRegistryConfig;
@@ -169,16 +154,6 @@ class Aztec {
 
         Web3Service.registerContract(accountRegistryContract, {
             address: accountRegistryAddress,
-        });
-
-        const {
-            config: accountRegistryGSNContract,
-            networks: accountRegistryGSNNetworks,
-        } = AZTECAccountRegistryGSNConfig;
-        const accountRegistryGSNAddress = this.contractAddresses.aztecAccountRegistryGSN
-            || accountRegistryGSNNetworks[networkId];
-        Web3ServiceGSN.registerContract(accountRegistryGSNContract, {
-            address: accountRegistryGSNAddress,
         });
 
         const {
