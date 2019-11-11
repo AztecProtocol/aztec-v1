@@ -1,4 +1,3 @@
-
 const Web3 = require('web3');
 const axios = require('axios');
 const { getRelayHub, isRelayHubDeployed, fundRecipient, balance } = require('@openzeppelin/gsn-helpers');
@@ -71,7 +70,7 @@ describe('ZkAsset with GSN', () => {
         }
 
         console.log(response.data);
-        
+
         return response.data.data.dataSignature;
     };
 
@@ -102,11 +101,11 @@ describe('ZkAsset with GSN', () => {
             .deploy()
             .send({ from: owner, gas: 6e6 });
 
-        // await erc20.methods.mint(sender, amount)
-        //     .send({ from: owner, gas: 6e6 });
+        await erc20.methods.mint(sender, amount)
+            .send({ from: owner, gas: 6e6 });
 
-        // await erc20.methods.approve(ace.options.address, amount)
-        //     .send({ from: sender, gas: 6e6 });
+        await erc20.methods.approve(ace.options.address, amount)
+            .send({ from: sender, gas: 6e6 });
 
         await erc20.methods.mint(accountRegistry.options.address, amount)
             .send({ from: owner, gas: 6e6 });
@@ -164,10 +163,11 @@ describe('ZkAsset with GSN', () => {
             const registryAddress = accountRegistry.options.address;
 
             const depositProof = new JoinSplitProof(depositInputNotes, depositOutputNotes, registryAddress, publicValue, publicOwner);
+            console.log(`zkAsset.options.address`, zkAsset.options.address);
             const depositData = depositProof.encodeABI(zkAsset.options.address);
             // const signatures = depositProof.constructSignatures(zkAsset.options.address, []);
 
-            const receiptApprove = await ace.methods.publicApprove(zkAsset.options.address, depositProof.hash, 30).send({ from: sender });
+            const receiptApprove = await ace.methods.publicApprove(zkAsset.options.address, depositProof.hash, 100).send({ from: sender, useGSN: false  });
             expect(receiptApprove.status).to.equal(true);
 
             const receipt = await accountRegistry.methods.confidentialTransferFrom(zkAsset.options.address, depositData).send({

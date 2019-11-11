@@ -2,6 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBouncerSignature.sol";
+import "@aztec/protocol/contracts/libs/NoteUtils.sol";
 
 
 import "../interfaces/IZkAsset.sol";
@@ -21,6 +22,7 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
 
     IACEModule.IACE ace;
 
+    using NoteUtils for bytes;
     constructor(
         address _ace,
         address _trustedAddress
@@ -31,8 +33,8 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
     }
 
     function confidentialTransferFrom(address _registryOwner, bytes memory _proofData) public {
-        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
-        IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs);
+        (bytes memory proofOutputs) = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
+        IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
     }
 
     function approve(address _erc20, address spender, uint256 value) public {
