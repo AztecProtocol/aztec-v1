@@ -1,6 +1,7 @@
 import filterStream from '~utils/filterStream';
-import AuthService from '~background/services/AuthService';
 import validateUserPermission from '../utils/validateUserPermision';
+import setNetworkConfig from '../utils/setNetworkConfig';
+
 
 const registerExtensionUi = async (query, connection) => {
     const {
@@ -55,8 +56,7 @@ const registerExtension = async (query, connection) => {
         currentAddress,
     } = args;
 
-    // We set the network id here so everything runs correctly
-    await AuthService.setNetworkConfig({
+    await setNetworkConfig({
         networkId,
         currentAddress,
     });
