@@ -3,6 +3,7 @@ import {
 } from '~/utils/storage';
 import Web3Service from '~helpers/NetworkService';
 
+
 const sendTransaction = async (data) => {
     const {
         data: {
@@ -11,7 +12,6 @@ const sendTransaction = async (data) => {
                 contract,
                 method,
                 params,
-                contractAddress,
             },
         },
     } = data;
@@ -21,25 +21,25 @@ const sendTransaction = async (data) => {
         networkId,
     });
 
-    /**
-     * TODO: This should be fixed by gas station network
-     */
-    web3Service.account.privateKey = process.env.GANACHE_TESTING_ACCOUNT_0;
-
-    const receipt = await web3Service
-        .useContract(contract, contractAddress)
-        .method(method)
-        .sendSigned(...params);
-
-    return {
-        ...data,
-        data: {
-            response: {
-                txReceipt: receipt,
+    try {
+        const receipt = await web3Service
+            .useContract(contract)
+            .method(method, true)
+            .send(...params);
+        return {
+            ...data,
+            data: {
+                response: {
+                    txReceipt: receipt,
+                },
             },
-        },
-        responseId,
-    };
+            responseId,
+        };
+    } catch (e) {
+        console.error('GSN service error: ', e);
+    }
+
+    return null;
 };
 
 // TODO change this to use the gas station network

@@ -5,6 +5,9 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBounc
 
 
 import "../interfaces/IZkAsset.sol";
+import "../interfaces/IACE.sol" as IACEModule;
+import "../interfaces/IERC20.sol";
+import "../interfaces/IAZTEC.sol";
 import "../libs/LibEIP712.sol";
 import "./AZTECAccountRegistry.sol";
 
@@ -14,16 +17,26 @@ import "./AZTECAccountRegistry.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 
-contract AZTECAccountRegistryGSN is LibEIP712, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
+contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
+
+    IACEModule.IACE ace;
 
     constructor(
+        address _ace,
         address _trustedAddress
     ) public {
         GSNRecipient.initialize();
         GSNBouncerSignature.initialize(_trustedAddress);
+        ace = IACEModule.IACE(_ace);
     }
 
-    function confidentialTransfer(address _registryOwner, bytes memory _proofData, bytes memory _signatures) public {
-        IZkAsset(_registryOwner).confidentialTransfer(_proofData, _signatures);
+    function confidentialTransferFrom(address _registryOwner, bytes memory _proofData) public {
+        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
+        IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs);
+    }
+
+    function approve(address _erc20, address spender, uint256 value) public {
+        IERC20(_erc20).approve(spender, value);
     }
 }
+
