@@ -1,4 +1,5 @@
 import React, {
+    useEffect,
     useState,
 } from 'react';
 import PropTypes from 'prop-types';
@@ -35,10 +36,12 @@ const CreatePassword = ({
     const [inputRef, setInputRef] = useState(null);
     const [didMount, doMount] = useState(false);
 
-    if (inputRef && !didMount) {
-        inputRef.focus();
-        doMount(true);
-    }
+    useEffect(() => {
+        if (inputRef && !didMount) {
+            inputRef.focus();
+            doMount(true);
+        }
+    });
 
     return (
         <PopupContent
