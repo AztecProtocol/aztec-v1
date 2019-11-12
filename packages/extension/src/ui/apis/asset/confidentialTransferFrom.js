@@ -6,7 +6,7 @@ import {
 export default async function send({
     assetAddress,
     proof,
-    proofId,
+    // proofId,
 }) {
     const proofData = proof.encodeABI(assetAddress);
     const response = await ConnectionService.sendTransaction({
@@ -14,7 +14,6 @@ export default async function send({
         method: 'confidentialTransferFrom',
         data: [
             assetAddress,
-            // proofId,
             proofData,
         ],
     });
