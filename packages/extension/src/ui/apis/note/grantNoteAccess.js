@@ -1,4 +1,3 @@
-
 import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~config/constants';

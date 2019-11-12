@@ -71,6 +71,7 @@ const WithdrawConfirm = ({
         </FlexBox>
     </PopupContent>
 );
+
 WithdrawConfirm.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,

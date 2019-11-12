@@ -45,7 +45,6 @@ const NoteAccess = ({
     };
 
     return (
-
         <AnimatedTransaction
             steps={steps}
             fetchInitialData={fetchInitialData}

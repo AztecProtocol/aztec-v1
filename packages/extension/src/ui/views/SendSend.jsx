@@ -115,6 +115,7 @@ const SendSend = ({
         </PopupContent>
     );
 };
+
 SendSend.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,

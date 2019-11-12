@@ -136,5 +136,4 @@ DepositConfirm.propTypes = {
     amount: PropTypes.number.isRequired,
 };
 
-
 export default DepositConfirm;

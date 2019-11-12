@@ -14,7 +14,6 @@ import PopupContent from '~ui/components/PopupContent';
 import ListItem from '~ui/components/ListItem';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
-
 const DomainPermissionTransaction = ({
     assets,
     loading,

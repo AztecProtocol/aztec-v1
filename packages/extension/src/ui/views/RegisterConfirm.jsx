@@ -24,7 +24,6 @@ const RegisterConfirm = ({ address, linkedPublicKey }) => (
                     weight="light"
                 />
             </Block>
-
             <Block padding="m 0 l 0">
                 <SVG
                     glyph={sendGlyph}
@@ -61,7 +60,6 @@ const RegisterConfirm = ({ address, linkedPublicKey }) => (
                 />
             </Block>
         </FlexBox>
-
     </PopupContent>
 );
 
@@ -69,6 +67,5 @@ RegisterConfirm.propTypes = {
     address: PropTypes.string.isRequired,
     linkedPublicKey: PropTypes.string.isRequired,
 };
-
 
 export default RegisterConfirm;

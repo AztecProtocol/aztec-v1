@@ -43,7 +43,6 @@ const UiPlaceholder = ({
         updateSetListener(true);
     }
 
-
     return (
         <div id="aztec-popup-container">
             <PoseGroup>
@@ -77,12 +76,9 @@ const UiPlaceholder = ({
                     )}
                 </ThemeContext.Consumer>
             </div>
-
-
         </div>
     );
 };
-
 
 UiPlaceholder.propTypes = {
     children: PropTypes.node,

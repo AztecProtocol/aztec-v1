@@ -67,6 +67,7 @@ const SendSign = ({
         </FlexBox>
     </PopupContent>
 );
+
 SendSign.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,
