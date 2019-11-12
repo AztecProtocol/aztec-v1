@@ -8,6 +8,7 @@ Globals:
     Timeout: 15
     Environment:
       Variables:
+        API_KEY_REQUIRED: False
         SIGNER_ADDRESS: "0x4544..."
         SIGNER_PRIVATE_KEY: "0x346..."
         WEB3_PROVIDER_URL: "https://rinkeby.infu..."
