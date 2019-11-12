@@ -46,9 +46,15 @@ const ACCESS_DENIED_401 = (message = 'Access Denied') => badResponse({
     message,
 });
 
+const ACCESS_DENIED_404 = (message = 'Not Found') => badResponse({
+    statusCode: 404,
+    message,
+});
+
 
 module.exports = {
     OK_200,
     BAD_400,
     ACCESS_DENIED_401,
+    ACCESS_DENIED_404,
 };

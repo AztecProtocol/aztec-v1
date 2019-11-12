@@ -9,6 +9,7 @@ const {
     OK_200,
     BAD_400,
     ACCESS_DENIED_401,
+    ACCESS_DENIED_404,
 } = require('./helpers/responses');
 const {
     getOrigin,
@@ -18,6 +19,7 @@ const {
     isValidData,
 } = require('./utils/data');
 const web3Service = require('./services/Web3Service');
+const isTrue = require('./helpers/isTrue');
 
 const initialize = () => {
     const providerURL = process.env.WEB3_PROVIDER_URL;
@@ -44,7 +46,9 @@ const initialize = () => {
  * 
  */
 exports.lambdaHandler = async (event) => {
-    if (event.httpMethod !== 'POST') return null;
+    if (event.httpMethod !== 'POST') {
+        return ACCESS_DENIED_404();
+    }
     initialize();
 
     const origin = getOrigin(event);
@@ -65,11 +69,11 @@ exports.lambdaHandler = async (event) => {
         return BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to');
     }
 
-    const isValid = await isAPIKeyValid({
+    const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
+    if (isApiKeyRequired && !await isAPIKeyValid({
         apiKey,
         origin,
-    });
-    if (!isValid) {
+    })) {
         return ACCESS_DENIED_401();
     }
 
