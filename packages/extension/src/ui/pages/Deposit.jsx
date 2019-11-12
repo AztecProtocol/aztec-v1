@@ -14,7 +14,6 @@ import DepositApprove from '~ui/views/DepositApprove';
 import DepositSend from '~ui/views/DepositSend';
 import apis from '~uiModules/apis';
 
-
 const steps = [
     {
         titleKey: 'deposit.confirm.title',

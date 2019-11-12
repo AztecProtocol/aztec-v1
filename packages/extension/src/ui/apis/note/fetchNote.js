@@ -6,15 +6,15 @@ import {
 export default async function fetchNote(noteHash) {
     const currentUser = await getCurrentUser();
 
-    const { note,  } = await apollo.query(`
+    const { note } = await apollo.query(`
         note(id: "${noteHash}", currentAddress: "${currentUser.address}") {
                 value
                 status
-                noteHash 
+                noteHash
                 metadata
                 asset {
                     address
-                    linkedTokenAddress 
+                    linkedTokenAddress
                 }
                 owner {
                     address
@@ -22,5 +22,6 @@ export default async function fetchNote(noteHash) {
                 decryptedViewingKey
         }
     `) || {};
+
     return note;
 }

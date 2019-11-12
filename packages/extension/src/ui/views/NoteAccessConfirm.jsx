@@ -131,5 +131,4 @@ NoteAccessConfirm.propTypes = {
     })).isRequired,
 };
 
-
 export default NoteAccessConfirm;

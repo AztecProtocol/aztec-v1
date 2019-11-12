@@ -7,10 +7,7 @@ import {
 } from '@aztec/guacamole-ui';
 import styles from './popup.scss';
 
-console.log({ styles });
-
 const AnimatedButton = posed.div({
-
     exit: {
         opacity: 0,
     },

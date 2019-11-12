@@ -159,5 +159,4 @@ SendConfirm.propTypes = {
     totalAmount: PropTypes.number.isRequired,
 };
 
-
 export default SendConfirm;
