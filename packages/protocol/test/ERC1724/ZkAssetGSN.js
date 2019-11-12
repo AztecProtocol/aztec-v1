@@ -107,11 +107,11 @@ describe('ZkAsset with GSN', () => {
         await erc20.methods.approve(ace.options.address, amount)
             .send({ from: sender, gas: 6e6 });
 
-        await erc20.methods.mint(accountRegistry.options.address, amount)
-            .send({ from: owner, gas: 6e6 });
+        // await erc20.methods.mint(accountRegistry.options.address, amount)
+        //     .send({ from: owner, gas: 6e6 });
 
-        await accountRegistry.methods.approve(erc20.options.address, ace.options.address, amount)
-            .send({ from: sender, gas: 6e6, useGSN: false });
+        // await accountRegistry.methods.approve(erc20.options.address, ace.options.address, amount)
+        //     .send({ from: sender, gas: 6e6, useGSN: false });
 
         const zkAssetTemplate = new web3.eth.Contract(ZkAsset.abi, null, { data: ZkAsset.bytecode });
         zkAsset = await zkAssetTemplate
@@ -163,11 +163,9 @@ describe('ZkAsset with GSN', () => {
             const registryAddress = accountRegistry.options.address;
 
             const depositProof = new JoinSplitProof(depositInputNotes, depositOutputNotes, registryAddress, publicValue, publicOwner);
-            console.log(`zkAsset.options.address`, zkAsset.options.address);
             const depositData = depositProof.encodeABI(zkAsset.options.address);
-            // const signatures = depositProof.constructSignatures(zkAsset.options.address, []);
 
-            const receiptApprove = await ace.methods.publicApprove(zkAsset.options.address, depositProof.hash, 100).send({ from: sender, useGSN: false  });
+            const receiptApprove = await ace.methods.publicApprove(zkAsset.options.address, depositProof.hash, 30).send({ from: sender  });
             expect(receiptApprove.status).to.equal(true);
 
             const receipt = await accountRegistry.methods.confidentialTransferFrom(zkAsset.options.address, depositData).send({
