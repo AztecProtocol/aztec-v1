@@ -13,95 +13,90 @@ import {
 import {
     closeWindowDelay,
 } from '~ui/config/settings';
+import closeWindow from '~/ui/utils/closeWindow';
 import i18n from '~ui/helpers/i18n';
 import returnAndClose from '~uiModules/helpers/returnAndClose';
-import AnimatedContent from './AnimatedContent';
-import asyncForEach from '~utils/asyncForEach';
 import Footer from '~ui/components/Footer';
 import Loading from '~ui/views/Loading';
-import {
-    spacingMap,
-} from '~ui/styles/guacamole-vars';
+import AnimatedContent from './AnimatedContent';
 
-class Transaction extends PureComponent {
-    static getDerivedStateFromProps(nextProps, prevState) {
-        const {
-            prevProps: {
-                retry: prevRetry,
-            },
-        } = prevState;
-        const {
-            retry,
-        } = nextProps;
-        if (retry === prevRetry) {
-            return null;
-        }
-
-        const {
-            initialStep,
-            initialData,
-            fetchInitialData,
-            onStep,
-        } = nextProps;
-        const {
-            history,
-        } = prevState;
-
-        const requireInitialFetch = !history && !!fetchInitialData;
-
-        const data = history
-            ? history[initialStep]
-            : initialData;
-
-        let extraData;
-        if (onStep && !requireInitialFetch) {
-            extraData = onStep(initialStep, data);
-        }
-
-        return {
-            step: initialStep,
-            data: {
-                ...data,
-                ...extraData,
-            },
-            history: !history
-                ? [data]
-                : history.slice(0, initialStep + 1),
-            loading: requireInitialFetch,
-            pendingInitialFetch: requireInitialFetch,
-            prevProps: {
-                retry,
-            },
-        };
-    }
-
+class AnimatedTransaction extends PureComponent {
     constructor(props) {
         super(props);
         const {
             initialStep,
             initialTask,
             initialData,
+            fetchInitialData,
         } = props;
+
+        const history = [];
+        if (initialData) {
+            history[initialStep] = initialData;
+        }
 
         this.state = {
             step: initialStep,
-            data: null,
-            history: null,
-            loading: false,
             currentTask: initialTask,
             data: initialData,
-            direction: '1',
+            history,
+            pendingInitialFetch: !!fetchInitialData,
+            loading: false,
+            direction: 1,
             error: null,
             validationError: null,
-            prevProps: {
-                retry: -1,
-            },
         };
     }
 
     componentDidMount() {
         this.fetchInitialData();
     }
+
+    handleSubmit = async () => {
+        const {
+            loading,
+        } = this.state;
+        if (loading) {
+            return;
+        }
+
+        const {
+            steps,
+            onSubmit,
+        } = this.props;
+        const {
+            step,
+            data,
+        } = this.state;
+        const {
+            onSubmit: onSubmitStep,
+        } = steps[step];
+        if (onSubmitStep) {
+            const validationError = await onSubmitStep(data);
+            if (validationError) {
+                this.setState({
+                    loading: false,
+                    validationError,
+                });
+                return;
+            }
+        }
+        if (onSubmit) {
+            const error = await onSubmit(data);
+            if (error) {
+                this.setState({
+                    loading: false,
+                    error,
+                });
+                return;
+            }
+        }
+
+        this.setState(
+            { loading: true },
+            this.runTask,
+        );
+    };
 
     handleGoBack = () => {
         const {
@@ -119,211 +114,19 @@ class Transaction extends PureComponent {
             ({
                 stepOffset = 1,
                 ...modifiedData
-            } = onGoBack(step, {
-                ...prevData,
-            }));
+            } = onGoBack(step, prevData));
+
+            if (modifiedData.redirect) return;
         }
 
         const backToStep = step - stepOffset;
         const historyData = history[backToStep];
 
-        this.goToStep({
-            step: backToStep,
-            direction: '-1',
-            data: {
-                ...historyData,
-                ...modifiedData,
-            },
-            history: history.slice(0, backToStep + 1),
+        this.goToStep(backToStep, {
+            ...historyData,
+            ...modifiedData,
         });
     };
-
-    runAsyncTasks = async () => {
-        const {
-            steps,
-            onGoNext,
-        } = this.props;
-        const {
-            step,
-            data: stateData,
-            history: prevHistory,
-        } = this.state;
-        const prevData = prevHistory[step];
-        let data = {
-            ...prevData,
-        };
-
-        const {
-            tasks,
-            validate,
-        } = steps[step];
-
-        const validationError = validate
-            ? await validate(stateData)
-            : null;
-        if (validationError) {
-            this.setState({
-                loading: false,
-                validationError,
-            });
-            return;
-        }
-
-        let stepOffset = 1;
-        if (onGoNext) {
-            let newProps = null;
-            ({
-                stepOffset = 1,
-                ...newProps
-            } = onGoNext(step, data));
-
-            data = {
-                ...data,
-                ...newProps,
-            };
-        }
-
-        const nextStep = step + stepOffset;
-        const history = [...prevHistory];
-        history[nextStep] = data;
-
-        const newData = await this.runTasks(tasks);
-        const {
-            error,
-        } = newData;
-        if (error) {
-            this.setState({
-                loading: false,
-                error: typeof error === 'string'
-                    ? { message: error }
-                    : error,
-            });
-            return;
-        }
-
-        this.setState({
-            loading: false,
-        });
-
-        this.goToStep({
-            step: nextStep,
-            direction: '1',
-            data: { ...data, ...newData },
-            history,
-        });
-    }
-
-    handleGoNext = () => {
-        const {
-            loading,
-        } = this.state;
-        if (loading) {
-            return;
-        }
-        this.setState({ loading: true }, this.runAsyncTasks);
-    };
-
-    goToStep(state) {
-        const {
-            step,
-            data,
-        } = state;
-        const {
-            redirect,
-        } = data;
-        if (redirect) return;
-
-        let newData = data;
-        const {
-            onStep,
-            steps,
-        } = this.props;
-        if (onStep) {
-            const newProps = onStep(step, data);
-            newData = {
-                ...newData,
-                ...newProps,
-            };
-        }
-        if (step === steps.length) {
-            const {
-                onExit,
-                autoClose,
-                closeDelay,
-            } = this.props;
-
-            if (onExit) {
-                onExit(data);
-            } else if (autoClose) {
-                returnAndClose(data, closeDelay);
-            }
-            return;
-        }
-
-        this.setState({
-            ...state,
-            data: newData,
-        });
-    }
-
-    async fetchInitialData() {
-        const {
-            fetchInitialData,
-            initialData,
-        } = this.props;
-        if (!fetchInitialData) return;
-
-        const newData = await fetchInitialData();
-        const data = {
-            ...initialData,
-            ...newData,
-        };
-        this.goToStep({
-            step: 0,
-            data,
-            history: [data],
-            loading: false,
-            pendingInitialFetch: false,
-        });
-    }
-
-    getTask() {
-        const {
-            steps,
-        } = this.props;
-        const {
-            step,
-            currentTask,
-        } = this.state;
-        const {
-            tasks = [],
-        } = steps[step] || {};
-
-        return tasks[currentTask];
-    }
-
-    getNextTask({ step, currentTask } = this.state) {
-        const {
-            steps,
-        } = this.props;
-        const {
-            tasks = [],
-        } = steps[step] || {};
-        const task = tasks[currentTask + 1];
-
-        if (!task && step < steps.length) {
-            return this.getNextTask({
-                step: step + 1,
-                currentTask: -1,
-            });
-        }
-
-        return {
-            task,
-            nextStep: step,
-            nextTask: currentTask + 1,
-        };
-    }
 
     updateParentState = (childState) => {
         const {
@@ -342,56 +145,187 @@ class Transaction extends PureComponent {
         });
     }
 
-    runTasks = async (tasks) => {
+    async fetchInitialData() {
         const {
-            runTask,
+            fetchInitialData,
+            initialData,
         } = this.props;
-        let {
-            data,
-        } = this.state;
+        if (!fetchInitialData) return;
 
-        await asyncForEach(tasks, async (task) => {
-            if (data.error) return;
+        const newData = await fetchInitialData();
 
-            let response;
-            const {
-                run,
-            } = task;
-            try {
-                response = run
-                    ? await run(data)
-                    : await runTask(task, data);
-            } catch (error) {
-                errorLog(error);
-                response = {
-                    error,
-                };
-            }
-
-            data = {
-                ...data,
-                ...response,
-            };
-        });
-
-        return data;
-    };
-
-    handleTransactionComplete = () => {
         const {
-            goNext,
-            autoClose,
+            step,
+            history: prevHistory,
+        } = this.state;
+        const data = {
+            ...initialData,
+            ...newData,
+        };
+        const history = [...prevHistory];
+        history[step] = data;
+
+        this.setState({
+            data,
+            history,
+            pendingInitialFetch: false,
+        });
+    }
+
+    handleClose(accumData) {
+        const {
+            onExit,
             closeDelay,
         } = this.props;
-        const {
-            data,
-        } = this.state;
-        if (goNext) {
-            goNext(data);
-        } else if (autoClose) {
-            returnAndClose(data, closeDelay);
+        if (onExit) {
+            onExit(accumData);
+        } else {
+            returnAndClose(accumData, closeDelay);
         }
-    };
+    }
+
+    async handleGoNext(accumData) {
+        const {
+            onGoNext,
+        } = this.props;
+        const {
+            step,
+        } = this.state;
+
+        let stepOffset = 1;
+        let data = accumData;
+        let modifiedData;
+        if (onGoNext) {
+            ({
+                stepOffset = 1,
+                ...modifiedData
+            } = onGoNext(step, data));
+
+            if (modifiedData.redirect) return;
+            data = {
+                ...data,
+                ...modifiedData,
+            };
+        }
+
+        const nextStep = step + stepOffset;
+
+        this.goToStep(nextStep, accumData);
+    }
+
+    async runTask() {
+        const {
+            steps,
+            runTask,
+        } = this.props;
+        const {
+            step,
+            currentTask: prevTask,
+            data: prevData,
+        } = this.state;
+        const {
+            tasks = [],
+        } = steps[step] || {};
+        const currentTask = prevTask + 1;
+        const task = tasks[currentTask];
+        let data = prevData;
+
+        if (!task) {
+            this.handleGoNext(data);
+            return;
+        }
+
+        const {
+            run,
+        } = task;
+        let response;
+        try {
+            response = run
+                ? await run(data)
+                : await runTask(task, data);
+        } catch (error) {
+            errorLog(error);
+            response = {
+                error,
+            };
+        }
+
+        const {
+            error,
+        } = response || {};
+        if (error) {
+            this.setState({
+                loading: false,
+                error: typeof error === 'string'
+                    ? { message: error }
+                    : error,
+            });
+            return;
+        }
+
+        data = {
+            ...data,
+            ...response,
+        };
+
+        if (currentTask === tasks.length - 1) {
+            this.handleGoNext(data);
+            return;
+        }
+
+        this.setState(
+            {
+                currentTask,
+                data,
+            },
+            this.runTask,
+        );
+    }
+
+    goToStep(step, accumData) {
+        const {
+            step: prevStep,
+            history: prevHistory,
+        } = this.state;
+        const {
+            onGoStep,
+            steps,
+        } = this.props;
+
+        if (step < 0) {
+            closeWindow(0, true);
+            return;
+        }
+        if (step === steps.length) {
+            this.handleClose(accumData);
+            return;
+        }
+
+        let data = accumData;
+        if (onGoStep) {
+            const newProps = onGoStep(step, data);
+            data = {
+                ...data,
+                ...newProps,
+            };
+            const {
+                redirect,
+            } = newProps;
+            if (redirect) return;
+        }
+
+        const history = [...prevHistory];
+        history[step] = accumData;
+
+        this.setState({
+            step,
+            currentTask: -1,
+            data,
+            history,
+            loading: false,
+            direction: step > prevStep ? 1 : -1,
+        });
+    }
 
     renderHeader() {
         const {
@@ -400,36 +334,51 @@ class Transaction extends PureComponent {
         const {
             step,
         } = this.state;
+        const {
+            title,
+            titleKey,
+        } = steps[step];
+        const titleText = title
+            || (titleKey && i18n.t(titleKey));
+
+        if (!titleText && steps.length <= 1) {
+            return null;
+        }
 
         return (
-            <Block padding="s s l s">
-                <Block padding="xxs s xs s">
-                    <Text
-                        text={i18n.t(steps[step].titleKey)}
-                        size="l"
-                        weight="normal"
-                    />
-                </Block>
-                <FlexBox
-                    expand
-                    direction="row"
-                    align="center"
-                >
-                    {steps.length > 1 && steps.map(
-                        (s, i) => (
-                            <Block
-                                key={+i}
-                                background={i <= step ? 'primary' : 'primary-lightest'}
-                                borderRadius="s"
-                                padding="xxs l"
-                                style={{
-                                    margin: `${spacingMap.xs}`,
-                                }}
-                            />
-                        ),
-                    )
-                    }
-                </FlexBox>
+            <Block padding="s">
+                {!!titleText && (
+                    <Block padding="xs s">
+                        <Text
+                            text={titleText}
+                            size="l"
+                            weight="normal"
+                        />
+                    </Block>
+                )}
+                {steps.length > 1 && (
+                    <Block padding="xs s">
+                        <FlexBox
+                            expand
+                            direction="row"
+                            align="center"
+                        >
+                            {steps.map((s, i) => (
+                                <Block
+                                    key={+i}
+                                    padding="xs"
+                                    inline
+                                >
+                                    <Block
+                                        background={i <= step ? 'primary' : 'primary-lightest'}
+                                        borderRadius="s"
+                                        padding="xxs l"
+                                    />
+                                </Block>
+                            ))}
+                        </FlexBox>
+                    </Block>
+                )}
             </Block>
         );
     }
@@ -440,6 +389,7 @@ class Transaction extends PureComponent {
         } = this.props;
         const {
             step,
+            currentTask,
             loading,
             error,
         } = this.state;
@@ -448,31 +398,43 @@ class Transaction extends PureComponent {
             cancelTextKey,
             submitText,
             submitTextKey,
+            tasks = [],
         } = steps[step];
+        const {
+            type: taskType,
+        } = tasks[currentTask] || {};
 
         return (
             <Footer
+                taskType={taskType}
                 cancelText={cancelText
                     || (cancelTextKey && i18n.t(cancelTextKey))
                     || (step === 0 && i18n.t('cancel'))
-                    || ''}
+                    || i18n.t('go.back')}
                 nextText={submitText
                     || (submitTextKey && i18n.t(submitTextKey))
-                    || ''}
+                    || i18n.t('next')}
+                onPrevious={this.handleGoBack}
+                onNext={this.handleSubmit}
+                disableOnNext={step === steps.length}
                 loading={loading}
                 error={error}
-                onNext={this.handleGoNext}
-                isNextExit={step === steps.length}
-                onPrevious={this.handleGoBack}
             />
         );
     }
 
-    renderContent({ content: Component }) {
+    renderContent() {
         const {
+            steps,
+        } = this.props;
+        const {
+            step,
             data,
             validationError,
         } = this.state;
+        const {
+            content: Component,
+        } = steps[step];
 
         return (
             <Component
@@ -485,13 +447,11 @@ class Transaction extends PureComponent {
 
     render() {
         const {
-            steps,
-        } = this.props;
-        const {
             pendingInitialFetch,
             step,
             direction,
         } = this.state;
+
         if (pendingInitialFetch) {
             return <Loading />;
         }
@@ -504,25 +464,25 @@ class Transaction extends PureComponent {
                 nowrap
             >
                 <AnimatedContent
+                    className="flex-fixed"
                     animationType="header"
-                    className="flex-fixed"
-                    direction={direction}
+                    direction={`${direction}`}
                     animationKey={step}
                 >
-                    {this.renderHeader(steps[step])}
+                    {this.renderHeader()}
                 </AnimatedContent>
                 <AnimatedContent
-                    animationType="content"
-                    direction={direction.toString()}
                     className="flex-free-expand"
+                    animationType="content"
+                    direction={`${direction}`}
                     animationKey={step}
                 >
-                    {this.renderContent(steps[step])}
+                    {this.renderContent()}
                 </AnimatedContent>
                 <AnimatedContent
-                    animationType="footer"
-                    direction={direction}
                     className="flex-fixed"
+                    animationType="footer"
+                    direction={`${direction}`}
                     animationKey={step}
                 >
                     {this.renderFooter()}
@@ -532,49 +492,51 @@ class Transaction extends PureComponent {
     }
 }
 
-Transaction.propTypes = {
-    content: PropTypes.node,
+AnimatedTransaction.propTypes = {
     steps: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string,
         titleKey: PropTypes.string,
         tasks: PropTypes.arrayOf(PropTypes.shape({
             name: PropTypes.string,
             type: PropTypes.string,
-            loadingMessage: PropTypes.string,
             run: PropTypes.func,
         })),
-        validate: PropTypes.func,
+        content: PropTypes.func,
+        onSubmit: PropTypes.func,
         cancelText: PropTypes.string,
         cancelTextKey: PropTypes.string,
         submitText: PropTypes.string,
         submitTextKey: PropTypes.string,
     })).isRequired,
-    successMessage: PropTypes.string,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+    fetchInitialData: PropTypes.func,
     runTask: PropTypes.func,
+    onSubmit: PropTypes.func,
+    onGoStep: PropTypes.func,
+    onGoBack: PropTypes.func,
+    onGoNext: PropTypes.func,
     goNext: PropTypes.func,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
+    onExit: PropTypes.func,
     autoStart: PropTypes.bool,
-    autoClose: PropTypes.bool,
     closeDelay: PropTypes.number,
 };
 
-Transaction.defaultProps = {
-    content: null,
-    successMessage: '',
+AnimatedTransaction.defaultProps = {
     initialStep: 0,
-    initialTask: 0,
+    initialTask: -1,
     initialData: {},
+    fetchInitialData: null,
     runTask: null,
+    onSubmit: null,
+    onGoStep: null,
+    onGoBack: null,
+    onGoNext: null,
     goNext: null,
-    goBack: null,
-    onClose: null,
+    onExit: null,
     autoStart: false,
-    autoClose: false,
     closeDelay: closeWindowDelay,
 };
 
-export default Transaction;
+export default AnimatedTransaction;

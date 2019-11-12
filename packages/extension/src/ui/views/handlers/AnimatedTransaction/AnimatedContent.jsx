@@ -75,9 +75,7 @@ const animationMap = {
         preEnterPose: {
             1: 'fromBottom',
         },
-        style: {
-
-        },
+        style: {},
     },
     'popup-content': {
         exitPose: {
@@ -129,7 +127,6 @@ const animationMap = {
             width: '100%',
         },
     },
-
 };
 
 
@@ -141,16 +138,17 @@ const AnimatedContent = ({
     className,
 }) => (
     <PoseGroup
+        className={className}
         preEnterPose={animationMap[animationType].preEnterPose[direction]}
         exitPose={animationMap[animationType].exitPose[direction]}
         style={animationMap[animationType].style}
-        className={className}
     >
         <PoseAnimation key={animationKey}>
             {children}
         </PoseAnimation>
     </PoseGroup>
 );
+
 AnimatedContent.propTypes = {
     children: PropTypes.node,
     className: PropTypes.string.isRequired,
@@ -160,6 +158,7 @@ AnimatedContent.propTypes = {
 };
 
 AnimatedContent.defaultProps = {
+    children: null,
     direction: '1',
 };
 
