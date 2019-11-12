@@ -85,7 +85,6 @@ class Transaction extends PureComponent {
 
         this.state = {
             step: initialStep,
-            data: null,
             history: null,
             loading: false,
             currentTask: initialTask,
