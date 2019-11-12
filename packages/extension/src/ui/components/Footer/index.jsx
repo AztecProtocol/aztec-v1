@@ -7,7 +7,7 @@ import {
     TextButton,
 } from '@aztec/guacamole-ui';
 import i18n from '~/ui/helpers/i18n';
-import ConnectionService from '~/ui/services/ConnectionService';
+import ConnectionService from '~uiModules/services/ConnectionService';
 import Button from '~ui/components/Button';
 import styles from './footer.scss';
 

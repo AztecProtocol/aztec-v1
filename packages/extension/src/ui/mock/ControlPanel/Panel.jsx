@@ -5,7 +5,7 @@ import {
     TextButton,
     Text,
 } from '@aztec/guacamole-ui';
-import routes from '../../config/routes';
+import routes from '~uiModules/config/routes';
 
 const formatName = (name) => {
     if (name === '_') {

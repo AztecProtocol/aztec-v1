@@ -36,16 +36,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100; 
+  z-index: 100;
   transition: all ease 0.5s;
   transform: translateY(100%) scale(0.7);
   opacity: 0;
   width: $popup-width + $popup-page-spacing * 2;
   height: $popup-height + $popup-page-spacing * 2;
-}
-:global(.aztec-popup.shown) {
-  transform: translateY(0%) scale(1);
-  opacity: 1;
+
+  &:global(.shown) {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
+  }
 }
 
 :global(#aztec-popup-ui) {
@@ -65,4 +66,3 @@
     height: 100%;
   }
 }
-
