@@ -12,7 +12,6 @@ and construct proofs using your AZTEC notes.`,
         grant: {
             error: 'Cannot grant access to domain. Please try again later.',
         },
-        submitText: 'Grant Access',
-        cancelText: 'Cancel',
+        submit: 'Grant Access',
     },
 };

@@ -17,8 +17,7 @@ import apis from '~uiModules/apis';
 const steps = [
     {
         titleKey: 'withdraw.confirm.title',
-        submitText: 'withdraw.confirm.submitText',
-        cancelText: 'withdraw.confirm.cancelText',
+        submitTextKey: 'withdraw.confirm.submit',
         content: WithdrawConfirm,
         tasks: [
             {
@@ -29,8 +28,7 @@ const steps = [
     },
     {
         titleKey: 'withdraw.notes.title',
-        submitText: 'withdraw.notes.submitText',
-        cancelText: 'withdraw.notes.cancelText',
+        submitTextKey: 'withdraw.notes.submit',
         content: WithdrawSign,
         tasks: [
             {
@@ -42,8 +40,7 @@ const steps = [
     },
     {
         titleKey: 'withdraw.send.title',
-        submitText: 'withdraw.send.submitText',
-        cancelText: 'withdraw.send.cancelText',
+        submitTextKey: 'withdraw.send.submit',
         content: WithdrawSend,
         tasks: [
             {

@@ -24,8 +24,7 @@ const steps = [
             },
         ],
         content: DomainPermissionTransaction,
-        submitText: 'domain.permission.submitText',
-        cancelText: 'domain.permission.cancelText',
+        submitTextKey: 'domain.permission.submit',
     },
 ];
 

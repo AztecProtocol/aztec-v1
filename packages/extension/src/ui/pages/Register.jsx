@@ -21,8 +21,7 @@ const newAccountSteps = [
             },
         ],
         content: Intro,
-        submitText: 'register.create.submitText',
-        cancelText: 'register.create.cancelText',
+        submitTextKey: 'register.create.submit',
     },
     {
         titleKey: 'register.backup.title',
@@ -34,8 +33,7 @@ const newAccountSteps = [
             },
         ],
         content: BackupKeys,
-        submitText: 'register.backup.submitText',
-        cancelText: 'register.backup.cancelText',
+        submitTextKey: 'register.backup.submit',
     },
     {
         titleKey: 'register.password.title',
@@ -60,8 +58,7 @@ const newAccountSteps = [
             }
             return null;
         },
-        submitText: 'register.password.submitText',
-        cancelText: 'register.password.cancelText',
+        submitTextKey: 'register.password.submit',
     },
     {
         titleKey: 'register.linkAccount.title',
@@ -77,14 +74,12 @@ const newAccountSteps = [
             },
         ],
         content: LinkAccount,
-        submitText: 'register.linkAccount.submitText',
-        cancelText: 'register.linkAccount.cancelText',
+        submitTextKey: 'register.linkAccount.submit',
     },
     {
         titleKey: 'register.confirm.title',
         content: ConfirmRegister,
-        submitText: 'register.confirm.submitText',
-        cancelText: 'register.confirm.cancelText',
+        submitTextKey: 'register.confirm.submit',
         tasks: [
             {
                 name: 'authorise',
@@ -99,7 +94,6 @@ const newAccountSteps = [
 ];
 
 const exisitingAccountSteps = [
-
     {
         titleKey: 'register.linkAccount.title',
         tasks: [
@@ -115,14 +109,12 @@ const exisitingAccountSteps = [
             },
         ],
         content: LinkAccount,
-        submitText: 'register.linkAccount.submitText',
-        cancelText: 'register.linkAccount.cancelText',
+        submitTextKey: 'register.linkAccount.submit',
     },
     {
         titleKey: 'register.confirm.title',
         content: ConfirmRegister,
-        submitText: 'register.confirm.submitText',
-        cancelText: 'register.confirm.cancelText',
+        submitTextKey: 'register.confirm.submit',
         tasks: [
             {
                 name: 'authorise',

@@ -443,11 +443,22 @@ class Transaction extends PureComponent {
             loading,
             error,
         } = this.state;
+        const {
+            cancelText,
+            cancelTextKey,
+            submitText,
+            submitTextKey,
+        } = steps[step];
 
         return (
             <Footer
-                cancelText={i18n.t(steps[step].cancelText)}
-                nextText={i18n.t(steps[step].submitText)}
+                cancelText={cancelText
+                    || (cancelTextKey && i18n.t(cancelTextKey))
+                    || (step === 0 && i18n.t('cancel'))
+                    || ''}
+                nextText={submitText
+                    || (submitTextKey && i18n.t(submitTextKey))
+                    || ''}
                 loading={loading}
                 error={error}
                 onNext={this.handleGoNext}
@@ -514,7 +525,7 @@ class Transaction extends PureComponent {
                     className="flex-fixed"
                     animationKey={step}
                 >
-                    {this.renderFooter(steps[step])}
+                    {this.renderFooter()}
                 </AnimatedContent>
             </FlexBox>
         );
@@ -534,7 +545,9 @@ Transaction.propTypes = {
         })),
         validate: PropTypes.func,
         cancelText: PropTypes.string,
+        cancelTextKey: PropTypes.string,
         submitText: PropTypes.string,
+        submitTextKey: PropTypes.string,
     })).isRequired,
     successMessage: PropTypes.string,
     initialStep: PropTypes.number,

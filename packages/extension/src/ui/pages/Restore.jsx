@@ -26,8 +26,7 @@ const steps = [
         tasks: [
         ],
         content: RestoreFromSeedPhrase,
-        submitText: 'account.restore.submitText',
-        cancelText: 'account.restore.cancelText',
+        submitTextKey: 'account.restore.submit',
     },
     {
         titleKey: 'register.password.title',
@@ -67,8 +66,7 @@ const steps = [
             },
         ],
         content: CreatePassword,
-        submitText: 'register.password.submitText',
-        cancelText: 'register.password.cancelText',
+        submitTextKey: 'register.password.submit',
     },
 ];
 
