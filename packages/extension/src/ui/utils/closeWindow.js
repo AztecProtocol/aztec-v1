@@ -1,4 +1,4 @@
-import ConnectionService from '~ui/services/ConnectionService';
+import ConnectionService from '~uiModules/services/ConnectionService';
 
 export default function closeWindow(delay = 0, abort = false) {
     if (!delay) {

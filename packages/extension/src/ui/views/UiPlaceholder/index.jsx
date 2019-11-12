@@ -20,11 +20,14 @@ const Overlay = posed.div({
     },
 });
 
-const UiPlaceholder = ({ children }) => {
-    const [visible, toggle] = useState(false);
-    const [renderOverlay, updateOverlay] = useState(false);
-    const [setListener, updateSetListener] = useState(false);
-    const [renderPopup, updatePopup] = useState(false);
+const UiPlaceholder = ({
+    children,
+    initialVisibility,
+}) => {
+    const [visible, toggle] = useState(initialVisibility);
+    const [renderOverlay, updateOverlay] = useState(initialVisibility);
+    const [setListener, updateSetListener] = useState(initialVisibility);
+    const [renderPopup, updatePopup] = useState(initialVisibility);
 
     if (!setListener) {
         window.addEventListener('openAztec', () => {
@@ -45,11 +48,18 @@ const UiPlaceholder = ({ children }) => {
         <div id="aztec-popup-container">
             <PoseGroup>
                 {renderOverlay && visible && (
-                    <Overlay className="aztec-overlay" key="overlay" />
+                    <Overlay
+                        key="overlay"
+                        className="aztec-overlay"
+                    />
                 )}
-
             </PoseGroup>
-            <div className={renderPopup && visible ? 'aztec-popup shown' : 'aztec-popup'} key="content">
+            <div
+                key="content"
+                className={renderPopup && visible
+                    ? 'aztec-popup shown'
+                    : 'aztec-popup'}
+            >
                 <div id="aztec-popup-ui">
                     {children}
                 </div>
@@ -76,10 +86,12 @@ const UiPlaceholder = ({ children }) => {
 
 UiPlaceholder.propTypes = {
     children: PropTypes.node,
+    initialVisibility: PropTypes.bool,
 };
 
 UiPlaceholder.defaultProps = {
     children: null,
+    initialVisibility: false,
 };
 
 export default UiPlaceholder;

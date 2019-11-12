@@ -15,7 +15,7 @@ import router from '~ui/helpers/router';
 import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
 import ThemeContext from '~ui/views/handlers/ThemeContext';
 import Loading from '~ui/views/Loading';
-import routes from '~ui/config/routes';
+import routes from '~uiModules/config/routes';
 import actions from '~ui/config/actions';
 import './styles/guacamole.css';
 import './styles/_reset.scss';

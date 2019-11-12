@@ -26,7 +26,7 @@ const ControlPanel = ({
                 className={styles['browser-window']}
             >
                 <div id="background-app">
-                    <UiPlaceholder>
+                    <UiPlaceholder initialVisibility>
                         <div id="app">
                             {children}
                         </div>
