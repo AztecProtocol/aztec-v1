@@ -1,6 +1,4 @@
-import React, {
-    useContext,
-} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
     FlexBox,
@@ -10,7 +8,7 @@ import {
     Image,
     Clickable,
 } from '@aztec/guacamole-ui';
-import ConnectionService from '~/ui/services/ConnectionService';
+import closeWindow from '~/ui/utils/closeWindow';
 import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     siteShape,
@@ -76,11 +74,7 @@ const Header = ({
             {!disableClose && (
                 <div className="flex-fixed">
                     <Clickable
-                        onClick={() => {
-                            ConnectionService.close({
-                                abort: true,
-                            });
-                        }}
+                        onClick={() => closeWindow(0, true)}
                     >
                         <Icon
                             name="close"
