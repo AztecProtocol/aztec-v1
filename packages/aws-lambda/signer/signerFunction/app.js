@@ -65,10 +65,11 @@ exports.lambdaHandler = async (event) => {
         return BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to');
     }
 
-    if (!isAPIKeyValid({
+    const isValid = await isAPIKeyValid({
         apiKey,
         origin,
-    })) {
+    });
+    if (!isValid) {
         return ACCESS_DENIED_401();
     }
 
