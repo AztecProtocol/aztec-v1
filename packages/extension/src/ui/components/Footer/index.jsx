@@ -13,9 +13,11 @@ import styles from './footer.scss';
 
 const Footer = ({
     cancelText,
-    onNext,
-    onPrevious,
     nextText,
+    onPrevious,
+    onNext,
+    disableOnPrevious,
+    disableOnNext,
     loading,
     error,
 }) => {
@@ -47,33 +49,43 @@ const Footer = ({
 
     return (
         <FlexBox
+            className={styles.footer}
             align="center"
             direction="row"
             valing="center"
-            className={styles.footer}
+            nowrap
         >
-            <Button
-                className={styles['cancel-button']}
-                text={cancelText}
-                onClick={onPrevious}
-            />
-            <Button
-                className={styles['next-button']}
-                text={nextText}
-                onClick={() => {
-                    onNext();
-                }}
-                loading={loading}
-            />
+            {!!onPrevious && (
+                <Button
+                    className={styles.button}
+                    theme="white"
+                    text={cancelText || i18n.t('cancel')}
+                    onClick={onPrevious}
+                    disabled={loading || disableOnPrevious}
+                    expand
+                />
+            )}
+            {!!onNext && (
+                <Button
+                    className={styles.button}
+                    text={nextText || i18n.t('next')}
+                    onClick={onNext}
+                    loading={loading}
+                    disabled={disableOnNext}
+                    expand
+                />
+            )}
         </FlexBox>
     );
 };
 
 Footer.propTypes = {
-    onNext: PropTypes.func.isRequired,
-    nextText: PropTypes.string.isRequired,
     cancelText: PropTypes.string.isRequired,
-    onPrevious: PropTypes.func.isRequired,
+    nextText: PropTypes.string.isRequired,
+    onPrevious: PropTypes.func,
+    onNext: PropTypes.func,
+    disableOnPrevious: PropTypes.bool,
+    disableOnNext: PropTypes.bool,
     loading: PropTypes.bool,
     error: PropTypes.shape({
         key: PropTypes.string,
@@ -84,6 +96,10 @@ Footer.propTypes = {
 };
 
 Footer.defaultProps = {
+    onPrevious: null,
+    onNext: null,
+    disableOnPrevious: false,
+    disableOnNext: false,
     loading: false,
     error: null,
 };

@@ -9,6 +9,7 @@ export default {
     },
     copied: 'Copied!',
     close: 'Close',
+    cancel: 'Cancel',
     and: {
         more: {
             count: {
@@ -25,5 +26,8 @@ export default {
     },
     to: 'to',
     next: 'Next',
+    go: {
+        back: 'Go Back',
+    },
     poweredBy: 'Powered by',
 };

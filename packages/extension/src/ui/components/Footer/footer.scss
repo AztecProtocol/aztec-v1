@@ -1,28 +1,9 @@
-@import '../../styles/variables';
-@import '../../styles/functions';
-$radius: map-get($rounded-corner-map, 'm');
-
-.cancel-button {
-  background: white !important;
-  border-radius: 0px 0px 0px $radius !important;
-  color: $default-text-color !important;
-  flex: 1;
-  height: 100% !important;
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
-.next-button {
-  border-radius: 0px 0px $radius 0px !important;
-  height: 100% !important;
-  flex: 1;
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
 .footer {
-    width: 100%;
-    height: 50px;
+  width: 100%;
+}
+
+.button {
+  flex: 1;
+  height: 48px !important;
+  border-radius: 0 !important;
 }

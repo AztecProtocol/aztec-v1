@@ -25,8 +25,7 @@ const steps = [
             },
         ],
         content: DepositConfirm,
-        submitText: 'deposit.confirm.submitText',
-        cancelText: 'deposit.confirm.cancelText',
+        submitTextKey: 'deposit.confirm.submit',
     },
     {
         titleKey: 'deposit.approve.title',
@@ -38,8 +37,7 @@ const steps = [
             },
         ],
         content: DepositApprove,
-        submitText: 'deposit.approve.submitText',
-        cancelText: 'deposit.approve.cancelText',
+        submitTextKey: 'deposit.approve.submit',
     },
     {
         titleKey: 'deposit.send.title',
@@ -50,8 +48,7 @@ const steps = [
             },
         ],
         content: DepositSend,
-        submitText: 'deposit.send.submitText',
-        cancelText: 'deposit.send.cancelText',
+        submitTextKey: 'deposit.send.submit',
     },
 ];
 

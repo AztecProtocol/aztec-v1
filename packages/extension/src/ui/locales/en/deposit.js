@@ -1,21 +1,18 @@
 export default {
     confirm: {
         title: 'Deposit',
-        cancelText: 'Cancel',
-        submitText: 'Create Proof',
+        submit: 'Create Proof',
         explain: 'Check the above details are correct before proceeding.',
     },
     approve: {
         title: 'Approve Spend',
-        cancelText: 'Cancel',
-        submitText: 'Approve',
+        submit: 'Approve',
         amount: 'Deposit ',
         explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
     },
     send: {
         title: 'Send Transaction',
-        cancelText: 'Cancel',
-        submitText: 'Send',
+        submit: 'Send',
         explain: 'AZTEC sends transactions through the Gas Station Network so you don\'t pay gas.',
         footer: 'This window will close automatically once the transaction is confirmed.',
     },

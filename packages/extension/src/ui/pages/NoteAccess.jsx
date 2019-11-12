@@ -14,8 +14,7 @@ import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 const steps = [
     {
         titleKey: 'note.access.grant.title',
-        submitText: 'note.access.grant.submitText',
-        cancelText: 'note.access.grant.cancelText',
+        submitTextKey: 'note.access.grant.submit',
         content: NoteAccessConfirm,
         tasks: [
             {

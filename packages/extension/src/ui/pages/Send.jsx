@@ -17,8 +17,7 @@ import apis from '~uiModules/apis';
 const steps = [
     {
         titleKey: 'send.confirm.title',
-        submitText: 'send.confirm.submitText',
-        cancelText: 'send.confirm.cancelText',
+        submitTextKey: 'send.confirm.submit',
         content: SendConfirm,
         tasks: [
             {
@@ -29,8 +28,7 @@ const steps = [
     },
     {
         titleKey: 'send.notes.title',
-        submitText: 'send.notes.submitText',
-        cancelText: 'send.notes.cancelText',
+        submitTextKey: 'send.notes.submit',
         content: SendSign,
         tasks: [
             {
@@ -42,8 +40,7 @@ const steps = [
     },
     {
         titleKey: 'send.send.title',
-        submitText: 'send.send.submitText',
-        cancelText: 'send.send.cancelText',
+        submitTextKey: 'send.send.submit',
         content: SendSend,
         tasks: [
             {
