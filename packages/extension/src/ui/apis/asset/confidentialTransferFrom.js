@@ -14,7 +14,7 @@ export default async function send({
         method: 'confidentialTransferFrom',
         data: [
             assetAddress,
-            proofId,
+            // proofId,
             proofData,
         ],
     });

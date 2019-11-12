@@ -2,9 +2,9 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBouncerSignature.sol";
-import "@aztec/protocol/contracts/libs/NoteUtils.sol";
 
 
+import "../libs/NoteUtils.sol";
 import "../interfaces/IZkAsset.sol";
 import "../interfaces/IACE.sol" as IACEModule;
 import "../interfaces/IERC20.sol";

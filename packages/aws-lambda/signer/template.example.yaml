@@ -8,10 +8,14 @@ Globals:
     Timeout: 15
     Environment:
       Variables:
-        STAGE: dev
-        SIGNER_ADDRESS: "0x01234"
-        SIGNER_PRIVATE_KEY: "0x012345678"
-        WEB3_PROVIDER_URL: "https://localhost:8545"
+        SIGNER_ADDRESS: "0x4544..."
+        SIGNER_PRIVATE_KEY: "0x346..."
+        WEB3_PROVIDER_URL: "https://rinkeby.infu..."
+  Api:
+    Cors:
+      AllowMethods: '''OPTIONS,POST'''
+      AllowHeaders: '''Content-Type'''
+      AllowOrigin: '''*'''
 
 Resources:
   SignDataFunction:
@@ -20,13 +24,13 @@ Resources:
       CodeUri: ./signerFunction
       Handler: app.lambdaHandler
       Runtime: nodejs10.x
-      FunctionName: SignData
-      Role: arn:aws:iam::278380418400:role/NAME-OF-YOUR-ROLE
+      FunctionName: sign-data
+      Role: arn:aws:iam::HERE-SOME-ID:role/HERE-YOUR-ROLE
       Events:
         SignData:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /gsn/sign-data
+            Path: /sign-data
             Method: post
 
 Outputs:
@@ -34,8 +38,8 @@ Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   SignDataApi:
-    Description: "API Gateway endpoint URL for dev stage for SignData function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev/gsn/sign-data/"
+    Description: "API Gateway endpoint URL for SignData function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/sign-data/s"
   SignDataFunction:
     Description: "SignData Lambda Function ARN"
     Value: !GetAtt SignDataFunction.Arn
