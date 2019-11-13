@@ -10,8 +10,15 @@ export default async function login({
             password,
         });
     } catch (e) {
-        return false;
+        return {
+            isLoggedIn: false,
+            error: {
+                key: 'account.login.failed',
+            },
+        };
     }
 
-    return true;
+    return {
+        isLoggedIn: true,
+    };
 }
