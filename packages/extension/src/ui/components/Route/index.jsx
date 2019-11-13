@@ -1,6 +1,4 @@
-import React, {
-    PureComponent,
-} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Route,
@@ -10,45 +8,35 @@ import {
 } from '~/ui/config/propTypes';
 import Popup from '~ui/components/Popup';
 
-class CustomRoute extends PureComponent {
-    renderComponent = () => {
-        const {
-            currentAccount,
-            action,
-            Component,
-            goToPage,
-        } = this.props;
-        const {
-            id: actionId,
-            site,
-            data,
-        } = action || {};
+const CustomRoute = ({
+    path,
+    currentAccount,
+    action,
+    Component,
+    goToPage,
+}) => {
+    const {
+        id: actionId,
+        site,
+        data,
+    } = action || {};
 
-        return (
-            <Popup site={site}>
-                <Component
-                    {...data}
-                    actionId={actionId}
-                    currentAccount={currentAccount}
-                    goToPage={goToPage}
-                />
-            </Popup>
-        );
-    };
-
-    render() {
-        const {
-            path,
-        } = this.props;
-
-        return (
-            <Route
-                path={path}
-                component={this.renderComponent}
-            />
-        );
-    }
-}
+    return (
+        <Route
+            path={path}
+            component={() => (
+                <Popup site={site}>
+                    <Component
+                        {...data}
+                        actionId={actionId}
+                        currentAccount={currentAccount}
+                        goToPage={goToPage}
+                    />
+                </Popup>
+            )}
+        />
+    );
+};
 
 CustomRoute.propTypes = {
     path: PropTypes.string.isRequired,

@@ -93,23 +93,37 @@ const steps = [
 
 const Register = ({
     initialStep,
-    initialData,
-}) => (
-    <AnimatedTransaction
-        steps={steps}
-        initialStep={initialStep}
-        initialData={initialData}
-    />
-);
+    address,
+    linkedPublicKey,
+    seedPhrase,
+}) => {
+    const initialData = {
+        address,
+        linkedPublicKey,
+        seedPhrase,
+    };
+
+    return (
+        <AnimatedTransaction
+            steps={steps}
+            initialStep={initialStep}
+            initialData={initialData}
+        />
+    );
+};
 
 Register.propTypes = {
     initialStep: PropTypes.number,
-    initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+    address: PropTypes.string,
+    linkedPublicKey: PropTypes.string,
+    seedPhrase: PropTypes.string,
 };
 
 Register.defaultProps = {
     initialStep: 0,
-    initialData: {},
+    address: '',
+    linkedPublicKey: '',
+    seedPhrase: '',
 };
 
 export default Register;
