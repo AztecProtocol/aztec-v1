@@ -13,8 +13,6 @@ import RestoreFailed from '~/ui/views/RestoreFailed';
 import DuplicatedAccount from '~/ui/views/DuplicatedAccount';
 import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
-import NoteAccessConfirm from '~/ui/views/NoteAccessConfirm';
-import NoteAccessTransaction from '~/ui/views/NoteAccessTransaction';
 import Deposit from '~/ui/pages/Deposit';
 import Withdraw from '~/ui/pages/Withdraw';
 import Send from '~/ui/pages/Send';
@@ -134,20 +132,6 @@ export default {
             },
         },
     },
-    noteAccess: {
-        path: 'note-access',
-        Component: NoteAccess,
-        routes: {
-            confirm: {
-                path: 'confirm',
-                View: NoteAccessConfirm,
-            },
-            grant: {
-                path: 'grant',
-                View: NoteAccessTransaction,
-            },
-        },
-    },
     send: {
         path: 'send',
         Component: Send,
@@ -163,6 +147,10 @@ export default {
                 initialStep: 2,
             },
         },
+    },
+    noteAccess: {
+        path: 'note-access',
+        Component: NoteAccess,
     },
     playground: {
         path: 'playground',
