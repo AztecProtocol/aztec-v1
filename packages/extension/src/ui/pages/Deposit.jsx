@@ -12,7 +12,7 @@ import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositApprove from '~ui/views/DepositApprove';
-import DepositSend from '~ui/views/DepositSend';
+import TransactionSend from '~ui/views/TransactionSend';
 
 const steps = [
     {
@@ -46,7 +46,10 @@ const steps = [
                 run: apis.asset.confidentialTransfer,
             },
         ],
-        content: DepositSend,
+        content: TransactionSend,
+        contentProps: {
+            descriptionKey: 'deposit.send.explain',
+        },
         submitTextKey: 'deposit.send.submit',
     },
 ];

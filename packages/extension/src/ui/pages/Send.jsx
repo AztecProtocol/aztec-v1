@@ -11,7 +11,7 @@ import returnAndClose from '~ui/helpers/returnAndClose';
 import SendConfirm from '~ui/views/SendConfirm';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import SendSign from '~ui/views/WithdrawSign';
-import SendSend from '~ui/views/DepositSend';
+import TransactionSend from '~ui/views/TransactionSend';
 import apis from '~uiModules/apis';
 
 const steps = [
@@ -41,7 +41,10 @@ const steps = [
     {
         titleKey: 'send.send.title',
         submitTextKey: 'send.send.submit',
-        content: SendSend,
+        content: TransactionSend,
+        contentProps: {
+            descriptionKey: 'send.send.explain',
+        },
         tasks: [
             {
                 name: 'send',

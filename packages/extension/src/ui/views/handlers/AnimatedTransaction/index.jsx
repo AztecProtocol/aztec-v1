@@ -434,10 +434,12 @@ class AnimatedTransaction extends PureComponent {
         } = this.state;
         const {
             content: Component,
+            contentProps,
         } = steps[step];
 
         return (
             <Component
+                {...contentProps}
                 {...data}
                 error={validationError}
                 updateParentState={this.updateParentState}
@@ -502,6 +504,7 @@ AnimatedTransaction.propTypes = {
             run: PropTypes.func,
         })),
         content: PropTypes.func,
+        contentProps: PropTypes.object,
         onSubmit: PropTypes.func,
         cancelText: PropTypes.string,
         cancelTextKey: PropTypes.string,

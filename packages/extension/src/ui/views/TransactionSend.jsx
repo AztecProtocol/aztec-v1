@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
     FlexBox,
     Block,
@@ -9,7 +10,12 @@ import i18n from '~ui/helpers/i18n';
 import sendGlyph from '~ui/images/send.svg';
 import PopupContent from '~ui/components/PopupContent';
 
-const DepositSend = () => (
+const TransactionSend = ({
+    description,
+    descriptionKey,
+    footnote,
+    footnoteKey,
+}) => (
     <PopupContent
         theme="white"
     >
@@ -24,7 +30,7 @@ const DepositSend = () => (
         >
             <Block padding="0 l l l">
                 <Text
-                    text={i18n.t('deposit.send.explain')}
+                    text={description || i18n.t(descriptionKey)}
                     size="s"
                     weight="light"
                 />
@@ -38,7 +44,7 @@ const DepositSend = () => (
             </Block>
             <Block padding="0 l">
                 <Text
-                    text={i18n.t('deposit.send.footer')}
+                    text={footnote || i18n.t(footnoteKey)}
                     size="s"
                 />
             </Block>
@@ -46,4 +52,18 @@ const DepositSend = () => (
     </PopupContent>
 );
 
-export default DepositSend;
+TransactionSend.propTypes = {
+    description: PropTypes.string,
+    descriptionKey: PropTypes.string,
+    footnote: PropTypes.string,
+    footnoteKey: PropTypes.string,
+};
+
+TransactionSend.defaultProps = {
+    description: '',
+    descriptionKey: 'transaction.send.explain',
+    footnote: '',
+    footnoteKey: 'transaction.send.footnote',
+};
+
+export default TransactionSend;

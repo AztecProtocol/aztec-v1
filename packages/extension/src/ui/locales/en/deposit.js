@@ -14,7 +14,6 @@ export default {
         title: 'Send Transaction',
         submit: 'Send',
         explain: 'AZTEC sends transactions through the Gas Station Network so you don\'t pay gas.',
-        footer: 'This window will close automatically once the transaction is confirmed.',
     },
     transaction: {
         _: 'Deposit Transaction',
