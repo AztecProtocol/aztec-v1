@@ -1,18 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    proofs,
-} from '@aztec/dev-utils';
-import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
+import apis from '~uiModules/apis';
 import WithdrawConfirm from '~ui/views/WithdrawConfirm';
 import WithdrawSign from '~ui/views/WithdrawSign';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import TransactionSend from '~ui/views/TransactionSend';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import apis from '~uiModules/apis';
 
 const steps = [
     {
@@ -55,56 +51,52 @@ const steps = [
 ];
 
 const Withdraw = ({
+    initialStep,
     assetAddress,
     sender,
     transactions,
+    proof,
     numberOfInputNotes,
-    numberOfOutputNotes,
-    currentAccount,
 }) => {
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
 
         return {
+            assetAddress,
             asset,
             sender,
-            to: sender,
             transactions,
+            proof,
             numberOfInputNotes,
         };
     };
 
-
     return (
         <AnimatedTransaction
+            initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
-            initialData={
-                {
-                    assetAddress,
-                    publicOwner: currentAccount.address,
-                    transactions,
-                    sender,
-                    numberOfOutputNotes,
-                    proofId: proofs.JOIN_SPLIT_PROOF,
-                }
-            }
-            onExit={returnAndClose}
         />
     );
 };
 
 Withdraw.propTypes = {
+    initialStep: PropTypes.number,
     assetAddress: PropTypes.string.isRequired,
     sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
         to: PropTypes.string.isRequired,
     })).isRequired,
+    proof: PropTypes.shape({
+        inputNotes: PropTypes.array.isRequired,
+    }),
     numberOfInputNotes: PropTypes.number,
 };
 
 Withdraw.defaultProps = {
+    initialStep: 0,
+    proof: null,
     numberOfInputNotes: emptyIntValue,
 };
 

@@ -4,21 +4,14 @@ import {
     FlexBox,
     Block,
     Text,
-    SVG,
 } from '@aztec/guacamole-ui';
 import Ticket from '~ui/components/Ticket';
 import ListItem from '~ui/components/ListItem';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
-import signGlyph from '~ui/images/sign.svg';
 import PopupContent from '~ui/components/PopupContent';
 
-const WithdrawConfirm = ({
-    asset,
-    transactions: [firstTransaction],
+const WithdrawSign = ({
     proof,
 }) => (
     <PopupContent
@@ -41,9 +34,9 @@ const WithdrawConfirm = ({
                 />
             </Block>
             <Ticket height={proof.inputNotes.length}>
-
                 {proof.inputNotes.map(({ noteHash, k }) => (
                     <ListItem
+                        key={noteHash}
                         content={(
                             <Text
                                 text={formatAddress(noteHash, 24, 4)}
@@ -59,7 +52,6 @@ const WithdrawConfirm = ({
                             />
                         )}
                     />
-
                 ))}
             </Ticket>
             <Block padding="m xl">
@@ -72,7 +64,7 @@ const WithdrawConfirm = ({
     </PopupContent>
 );
 
-WithdrawConfirm.propTypes = {
+WithdrawSign.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,
         code: PropTypes.string,
@@ -80,12 +72,6 @@ WithdrawConfirm.propTypes = {
     proof: PropTypes.shape({
         inputNotes: PropTypes.array.isRequired,
     }).isRequired,
-    transactions: PropTypes.arrayOf(
-        PropTypes.shape({
-            to: PropTypes.string.isRequired,
-            amount: PropTypes.number.isRequired,
-        }),
-    ).isRequired,
 };
 
-export default WithdrawConfirm;
+export default WithdrawSign;

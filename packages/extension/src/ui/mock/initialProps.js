@@ -1,4 +1,5 @@
 import {
+    randomId,
     randomInt,
 } from '~utils/random';
 import i18n from '~ui/helpers/i18n';
@@ -112,10 +113,19 @@ export default {
     },
     'deposit.send': {},
     withdraw: {
-        asset: assets[0],
+        assetAddress: assets[0].address,
         sender: addresses[0],
         transactions: withdrawTransactions,
-        goNext: dummyFunc,
+    },
+    'withdraw.approve': {
+        proof: {
+            inputNotes: generate(3, () => ({
+                noteHash: `0x${randomId()}`,
+                k: {
+                    words: [randomInt(100)],
+                },
+            })),
+        },
     },
     send: {
         assetAddress: assets[0].address,
