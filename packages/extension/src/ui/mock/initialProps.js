@@ -111,13 +111,12 @@ export default {
         asset: assets[0],
         amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
     },
-    'deposit.send': {},
     withdraw: {
         assetAddress: assets[0].address,
         sender: addresses[0],
         transactions: withdrawTransactions,
     },
-    'withdraw.approve': {
+    'withdraw.sign': {
         proof: {
             inputNotes: generate(3, () => ({
                 noteHash: `0x${randomId()}`,
@@ -131,21 +130,16 @@ export default {
         assetAddress: assets[0].address,
         sender: addresses[0],
         transactions: sendTransactions.slice(0, 1),
-        goNext: dummyFunc,
     },
-    'send.confirm': {
-        asset: assets[0],
-        sender: addresses[0],
-        transactions: sendTransactions,
-        amount: sendTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        goNext: dummyFunc,
-    },
-    'send.grant': {
-        asset: assets[0],
-        sender: addresses[0],
-        transactions: sendTransactions,
-        amount: sendTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        goNext: dummyFunc,
+    'send.sign': {
+        proof: {
+            inputNotes: generate(3, () => ({
+                noteHash: `0x${randomId()}`,
+                k: {
+                    words: [randomInt(100)],
+                },
+            })),
+        },
     },
     mint: {
         asset: assets[0],

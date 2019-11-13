@@ -1,18 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    proofs,
-} from '@aztec/dev-utils';
-import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import returnAndClose from '~ui/helpers/returnAndClose';
-import SendConfirm from '~ui/views/SendConfirm';
+import apis from '~uiModules/apis';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import SendConfirm from '~ui/views/SendConfirm';
 import SignNotes from '~ui/views/SignNotes';
 import TransactionSend from '~ui/views/TransactionSend';
-import apis from '~uiModules/apis';
 
 const steps = [
     {
@@ -54,22 +50,12 @@ const steps = [
     },
 ];
 
-const handleOnStep = (step) => {
-    const newProps = {};
-    switch (step) {
-        case 1:
-            newProps.autoStart = true;
-            break;
-        default:
-    }
-
-    return newProps;
-};
-
 const Send = ({
+    initialStep,
     assetAddress,
     sender,
     transactions,
+    proof,
     numberOfInputNotes,
     numberOfOutputNotes,
 }) => {
@@ -82,35 +68,40 @@ const Send = ({
             asset,
             sender,
             transactions,
+            proof,
             numberOfInputNotes,
             numberOfOutputNotes,
             totalAmount,
-            amount: totalAmount,
-            proofId: proofs.JOIN_SPLIT_PROOF,
         };
     };
+
     return (
         <AnimatedTransaction
+            initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
-            onExit={returnAndClose}
-            onStep={handleOnStep}
         />
     );
 };
 
 Send.propTypes = {
+    initialStep: PropTypes.number,
     assetAddress: PropTypes.string.isRequired,
     sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
         to: PropTypes.string.isRequired,
     })).isRequired,
+    proof: PropTypes.shape({
+        inputNotes: PropTypes.array.isRequired,
+    }),
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
 };
 
 Send.defaultProps = {
+    initialStep: 0,
+    proof: null,
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
 };

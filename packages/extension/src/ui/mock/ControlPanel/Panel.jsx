@@ -20,10 +20,9 @@ const renderRouteNodes = (config, pathPrefix) => Object.keys(config).map((name) 
         path: subPath,
         routes: childRoutes,
         Component,
-        View,
     } = config[name];
     const path = `${pathPrefix || ''}/${subPath || ''}`;
-    const canRender = !!(Component || View);
+    const canRender = !!Component;
 
     let childRouteNodes;
     if (childRoutes) {

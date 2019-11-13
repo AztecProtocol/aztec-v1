@@ -17,7 +17,8 @@ import {
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
-import ListItem from '~ui/components/ListItem'; import Separator from '~ui/components/Separator';
+import ListItem from '~ui/components/ListItem';
+import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
 
 const SendConfirm = ({
@@ -25,17 +26,10 @@ const SendConfirm = ({
     sender,
     transactions,
     totalAmount,
-    goNext,
-    goBack,
-    onClose,
 }) => (
     <PopupContent
         theme="white"
         title={i18n.t('send.transaction')}
-        leftIconName={goBack ? 'chevron_left' : 'close'}
-        onClickLeftIcon={goBack || onClose}
-        submitButtonText={i18n.t('send')}
-        onSubmit={goNext}
     >
         <FlexBox
             direction="column"
@@ -48,17 +42,19 @@ const SendConfirm = ({
         >
             <Block padding="0 m xl m">
                 <Text
-                    text={i18n.t('send.confirm.amount')}
+                    text={i18n.t('send.confirm.sendAmount')}
                     size="xl"
                     weight="light"
                 />
+                <Block padding="0 s" inline>
+                    <Text
+                        text={totalAmount}
+                        size="xl"
+                        weight="bold"
+                    />
+                </Block>
                 <Text
-                    text={totalAmount}
-                    size="xl"
-                    weight="bold"
-                />
-                <Text
-                    text={asset.name || ' ZkNotes'}
+                    text={asset.name || i18n.t('asset.zkNotes')}
                     size="xl"
                     weight="light"
                 />

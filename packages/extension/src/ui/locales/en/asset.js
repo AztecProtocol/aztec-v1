@@ -19,4 +19,8 @@ export default {
             1: 'ERC20 Token',
         },
     },
+    zkNotes: {
+        _: 'zkNotes',
+        1: 'zkNote',
+    },
 };

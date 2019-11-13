@@ -3,13 +3,11 @@ export default {
         title: 'Send',
         submit: 'Create Proof',
         explain: 'Check the above details are correct before proceeding.',
-        amount: 'Send ',
+        sendAmount: 'Send',
     },
     notes: {
         title: 'Approve Note Spending',
         submit: 'Sign',
-        amount: 'Send %{totalAmount} %{assetName}',
-        explain: 'IMPORTANT! Check the signature contains the note values shown.',
     },
     send: {
         title: 'Send',
