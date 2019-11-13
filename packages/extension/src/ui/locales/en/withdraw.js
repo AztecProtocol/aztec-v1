@@ -7,8 +7,6 @@ export default {
     notes: {
         title: 'Approve Note Spending',
         submit: 'Sign',
-        blurb: 'To spend AZTEC notes a signature is required. The note total may be greater than the required amount, the difference will be credited to your balance.',
-        explain: 'IMPORTANT! Check the signature contains the note values shown.',
     },
     send: {
         title: 'Send Transaction',

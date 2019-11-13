@@ -10,4 +10,8 @@ export default {
         },
         invalidAccounts: 'Error: All accounts must have registered the AZTEC extension',
     },
+    sign: {
+        description: 'To spend AZTEC notes a signature is required. The note total may be greater than the required amount, the difference will be credited to your balance.',
+        footnote: 'IMPORTANT! Check the signature contains the note values shown.',
+    },
 };

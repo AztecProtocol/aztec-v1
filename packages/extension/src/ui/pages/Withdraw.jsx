@@ -6,7 +6,7 @@ import {
 import makeAsset from '~uiModules/utils/asset';
 import apis from '~uiModules/apis';
 import WithdrawConfirm from '~ui/views/WithdrawConfirm';
-import WithdrawSign from '~ui/views/WithdrawSign';
+import SignNotes from '~ui/views/SignNotes';
 import TransactionSend from '~ui/views/TransactionSend';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 
@@ -25,7 +25,7 @@ const steps = [
     {
         titleKey: 'withdraw.notes.title',
         submitTextKey: 'withdraw.notes.submit',
-        content: WithdrawSign,
+        content: SignNotes,
         tasks: [
             {
                 type: 'sign',
