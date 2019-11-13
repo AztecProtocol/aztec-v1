@@ -13,6 +13,7 @@ module.exports = {
         extensions: ['mjs', '.js', '.jsx', '.json'],
         alias: {
             '~uiModules': path.resolve(__dirname, './src/ui/mock'),
+            '~testHelpers': path.resolve(__dirname, './tests/helpers'),
         },
     },
     output: {
