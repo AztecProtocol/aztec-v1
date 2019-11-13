@@ -8,6 +8,9 @@ import {
     TextInput,
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    errorShape,
+} from '~/ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import PopupContent from '~ui/components/PopupContent';
 import PasswordMeter from '~ui/components/PasswordMeter';
@@ -92,12 +95,7 @@ CreatePassword.propTypes = {
     description: PropTypes.string,
     password: PropTypes.string,
     updateParentState: PropTypes.func.isRequired,
-    error: PropTypes.shape({
-        key: PropTypes.string,
-        message: PropTypes.string,
-        response: PropTypes.object,
-        fetal: PropTypes.bool,
-    }),
+    error: errorShape,
 };
 
 CreatePassword.defaultProps = {
