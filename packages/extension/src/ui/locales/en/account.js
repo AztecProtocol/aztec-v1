@@ -8,8 +8,12 @@ export default {
     login: {
         _: 'Login',
         title: 'Login with password',
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non dictum mauris.',
-        placeholder: '',
+        description: '',
+        password: {
+            placeholder: '',
+        },
+        submit: 'Login',
+        failed: 'Cannot login to your account. Incorrect password.',
     },
     address: {
         _: 'Address',

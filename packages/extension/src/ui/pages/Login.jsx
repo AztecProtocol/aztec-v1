@@ -1,12 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import returnAndClose from '~ui/helpers/returnAndClose';
+import apis from '~uiModules/apis';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import LoginTransaction from '~ui/views/LoginTransaction';
+import LoginWithPassword from '~ui/views/LoginWithPassword';
 
 const steps = [
     {
-        content: LoginTransaction,
+        titleKey: 'account.login.title',
+        content: LoginWithPassword,
+        tasks: [
+            {
+                name: 'login',
+                run: apis.auth.login,
+            },
+        ],
+        submitTextKey: 'account.login.submit',
+        onSubmit: ({ password }) => {
+            if (!password || !password.trim()) {
+                return {
+                    error: {
+                        key: 'account.password.error.empty',
+                    },
+                };
+            }
+            return null;
+        },
     },
 ];
 
@@ -16,9 +34,8 @@ const Login = ({
     <AnimatedTransaction
         steps={steps}
         initialData={{
-            currentAccount,
+            address: currentAccount.address,
         }}
-        onExit={returnAndClose}
     />
 );
 
