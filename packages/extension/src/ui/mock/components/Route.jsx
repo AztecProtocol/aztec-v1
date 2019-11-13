@@ -1,6 +1,4 @@
-import React, {
-    PureComponent,
-} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Route,
@@ -23,68 +21,49 @@ const getConfigByName = (nameArr, routeConfig = routes) => {
     return config;
 };
 
-class MockRoute extends PureComponent {
-    renderComponent = () => {
-        const {
-            name,
-            action,
-            Component,
-        } = this.props;
-        const {
-            id: actionId,
-            data,
-        } = action || {};
-        let childProps = initialProps[name];
-        if (typeof childProps === 'function') {
-            childProps = childProps();
-        }
-        const {
-            currentAccount,
-            ...props
-        } = childProps || {};
-
-        const {
-            initialStep,
-        } = getConfigByName(name.split('.')) || {};
-
-        const initialData = {
-            ...data,
-            ...props,
-        };
-
-        const contentNode = (
-            <Component
-                clientRequestId="client-request-id"
-                actionId={actionId}
-                site={sites[0]}
-                currentAccount={currentAccount || {
-                    address: addresses[0],
-                }}
-                initialStep={initialStep}
-                initialData={initialData}
-            />
-        );
-
-        return (
-            <Popup site={sites[0]}>
-                {contentNode}
-            </Popup>
-        );
-    };
-
-    render() {
-        const {
-            path,
-        } = this.props;
-
-        return (
-            <Route
-                path={path}
-                component={this.renderComponent}
-            />
-        );
+const MockRoute = ({
+    path,
+    name,
+    action,
+    Component,
+}) => {
+    const {
+        id: actionId,
+        data,
+    } = action || {};
+    let childProps = initialProps[name];
+    if (typeof childProps === 'function') {
+        childProps = childProps();
     }
-}
+    const {
+        currentAccount,
+        ...props
+    } = childProps || {};
+
+    const {
+        initialStep,
+    } = getConfigByName(name.split('.')) || {};
+
+    return (
+        <Route
+            path={path}
+            component={() => (
+                <Popup site={sites[0]}>
+                    <Component
+                        {...data}
+                        {...props}
+                        actionId={actionId}
+                        site={sites[0]}
+                        currentAccount={currentAccount || {
+                            address: addresses[0],
+                        }}
+                        initialStep={initialStep}
+                    />
+                </Popup>
+            )}
+        />
+    );
+};
 
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
