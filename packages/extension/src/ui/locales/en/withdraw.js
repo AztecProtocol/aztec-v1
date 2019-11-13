@@ -1,8 +1,6 @@
 export default {
-
     confirm: {
         title: 'Withdraw',
-        amount: 'Withdraw ',
         submit: 'Create Proof',
         explain: 'Check the above details are correct before proceeding.',
     },

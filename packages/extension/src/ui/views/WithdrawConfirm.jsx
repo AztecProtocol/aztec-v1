@@ -9,6 +9,9 @@ import i18n from '~ui/helpers/i18n';
 import {
     formatValue,
 } from '~ui/utils/asset';
+import {
+    assetShape,
+} from '~/ui/config/propTypes';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import Connection from '~ui/components/Connection';
@@ -38,17 +41,19 @@ const WithdrawConfirm = ({
         >
             <Block padding="m xl">
                 <Text
-                    text={i18n.t('withdraw.confirm.amount')}
+                    text={i18n.t('withdraw.confirm.title')}
                     size="xl"
                     weight="light"
                 />
+                <Block padding="0 s" inline>
+                    <Text
+                        text={firstTransaction.amount}
+                        size="xl"
+                        weight="bold"
+                    />
+                </Block>
                 <Text
-                    text={firstTransaction.amount}
-                    size="xl"
-                    weight="bold"
-                />
-                <Text
-                    text={name || ' ERC20 Tokens'}
+                    text={name || i18n.t('asset.erc20.token')}
                     size="xl"
                     weight="light"
                 />
@@ -98,11 +103,7 @@ const WithdrawConfirm = ({
 );
 
 WithdrawConfirm.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-        linkedTokenAddress: PropTypes.string.isRequired,
-    }).isRequired,
+    asset: assetShape.isRequired,
     transactions: PropTypes.arrayOf(
         PropTypes.shape({
             to: PropTypes.string.isRequired,
