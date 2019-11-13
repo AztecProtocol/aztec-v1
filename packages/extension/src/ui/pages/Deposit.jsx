@@ -7,12 +7,12 @@ import {
     emptyIntValue,
 } from '~/ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import DepositConfirm from '~ui/views/DepositConfirm';
+import apis from '~uiModules/apis';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositApprove from '~ui/views/DepositApprove';
 import DepositSend from '~ui/views/DepositSend';
-import apis from '~uiModules/apis';
 
 const steps = [
     {
@@ -63,6 +63,7 @@ const handleOnStep = (step) => {
 };
 
 const Deposit = ({
+    initialStep,
     from,
     sender,
     assetAddress,
@@ -85,6 +86,7 @@ const Deposit = ({
 
     return (
         <AnimatedTransaction
+            initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
             initialData={
@@ -106,6 +108,7 @@ const Deposit = ({
 };
 
 Deposit.propTypes = {
+    initialStep: PropTypes.number,
     from: PropTypes.string.isRequired,
     sender: PropTypes.string.isRequired,
     assetAddress: PropTypes.string.isRequired,
@@ -117,6 +120,7 @@ Deposit.propTypes = {
 };
 
 Deposit.defaultProps = {
+    initialStep: 0,
     numberOfOutputNotes: emptyIntValue,
 };
 

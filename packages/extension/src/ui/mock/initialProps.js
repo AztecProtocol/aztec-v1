@@ -105,23 +105,12 @@ export default {
         sender: addresses[1],
         assetAddress: assets[0].address,
         transactions: [depositTransactions[0]],
-        goNext: dummyFunc,
     },
-    'deposit.confirm': {
+    'deposit.approve': {
         asset: assets[0],
-        from: addresses[0],
-        transactions: depositTransactions,
         amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        goNext: dummyFunc,
     },
-    'deposit.grant': {
-        asset: assets[0],
-        from: addresses[0],
-        sender: addresses[1],
-        transactions: [],
-        amount: randomInt(1, 1000),
-        goNext: dummyFunc,
-    },
+    'deposit.send': {},
     withdraw: {
         asset: assets[0],
         sender: addresses[0],

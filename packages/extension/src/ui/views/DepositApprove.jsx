@@ -6,6 +6,9 @@ import {
     Text,
     SVG,
 } from '@aztec/guacamole-ui';
+import {
+    assetShape,
+} from '~/ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import approveGlyph from '~ui/images/approve.svg';
 import PopupContent from '~ui/components/PopupContent';
@@ -60,10 +63,7 @@ const DepositApprove = ({
 );
 
 DepositApprove.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-    }).isRequired,
+    asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
 };
 

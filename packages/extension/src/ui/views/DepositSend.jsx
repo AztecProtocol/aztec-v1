@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
     FlexBox,
     Block,
@@ -7,22 +6,10 @@ import {
     SVG,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
-import formatAddress from '~ui/utils/formatAddress';
-import Connection from '~ui/components/Connection';
 import sendGlyph from '~ui/images/send.svg';
 import PopupContent from '~ui/components/PopupContent';
 
-const DepositSend = ({
-    asset: {
-        code,
-        address: assetAddress,
-        linkedTokenAddress,
-    },
-    amount: totalAmount,
-}) => (
+const DepositSend = () => (
     <PopupContent
         theme="white"
     >
@@ -42,7 +29,6 @@ const DepositSend = ({
                     weight="light"
                 />
             </Block>
-
             <Block padding="xl 0 xl 0">
                 <SVG
                     glyph={sendGlyph}
@@ -56,17 +42,8 @@ const DepositSend = ({
                     size="s"
                 />
             </Block>
-
         </FlexBox>
     </PopupContent>
 );
-
-DepositSend.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-    }).isRequired,
-    amount: PropTypes.number.isRequired,
-};
 
 export default DepositSend;
