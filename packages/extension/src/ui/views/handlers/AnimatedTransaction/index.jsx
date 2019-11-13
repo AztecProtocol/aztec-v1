@@ -44,7 +44,7 @@ class AnimatedTransaction extends PureComponent {
             loading: false,
             direction: 1,
             error: null,
-            validationError: null,
+            childError: null,
         };
     }
 
@@ -60,41 +60,9 @@ class AnimatedTransaction extends PureComponent {
             return;
         }
 
-        const {
-            steps,
-            onSubmit,
-        } = this.props;
-        const {
-            step,
-            data,
-        } = this.state;
-        const {
-            onSubmit: onSubmitStep,
-        } = steps[step];
-        if (onSubmitStep) {
-            const validationError = await onSubmitStep(data);
-            if (validationError) {
-                this.setState({
-                    loading: false,
-                    validationError,
-                });
-                return;
-            }
-        }
-        if (onSubmit) {
-            const error = await onSubmit(data);
-            if (error) {
-                this.setState({
-                    loading: false,
-                    error,
-                });
-                return;
-            }
-        }
-
         this.setState(
             { loading: true },
-            this.runTask,
+            this.validateSubmitData,
         );
     };
 
@@ -131,9 +99,12 @@ class AnimatedTransaction extends PureComponent {
     updateParentState = (childState) => {
         const {
             data: prevData,
+            error,
         } = this.state;
+        if (error) return;
+
         const {
-            error: validationError,
+            error: childError,
             ...childData
         } = childState;
         this.setState({
@@ -141,7 +112,23 @@ class AnimatedTransaction extends PureComponent {
                 ...prevData,
                 ...childData,
             },
-            validationError,
+            childError,
+        });
+    }
+
+    handleClearError = () => {
+        this.setState({
+            currentTask: -1,
+            error: null,
+        });
+    };
+
+    handleError(error) {
+        this.setState({
+            loading: false,
+            error: typeof error === 'string'
+                ? { message: error }
+                : error,
         });
     }
 
@@ -172,6 +159,56 @@ class AnimatedTransaction extends PureComponent {
         });
     }
 
+    async validateSubmitData() {
+        const {
+            steps,
+            onSubmit,
+        } = this.props;
+        const {
+            step,
+            data: prevData,
+        } = this.state;
+        const {
+            onSubmit: stepOnSubmit,
+        } = steps[step];
+
+        let data = prevData;
+        if (stepOnSubmit) {
+            const {
+                error: childError,
+                ...extraData
+            } = await stepOnSubmit(data) || {};
+            if (childError) {
+                this.setState({
+                    loading: false,
+                    childError,
+                });
+                return;
+            }
+            data = {
+                ...data,
+                ...extraData,
+            };
+        }
+
+        if (onSubmit) {
+            const {
+                error,
+                ...extraData
+            } = await onSubmit(data) || {};
+            if (error) {
+                this.handleError(error);
+                return;
+            }
+            data = {
+                ...data,
+                ...extraData,
+            };
+        }
+
+        this.runTask(data);
+    }
+
     handleClose(accumData) {
         const {
             onExit,
@@ -186,34 +223,59 @@ class AnimatedTransaction extends PureComponent {
 
     async handleGoNext(accumData) {
         const {
+            steps,
             onGoNext,
         } = this.props;
         const {
             step,
         } = this.state;
+        const {
+            onGoNext: stepOnGoNext,
+        } = steps[step];
 
         let stepOffset = 1;
         let data = accumData;
-        let modifiedData;
-        if (onGoNext) {
-            ({
-                stepOffset = 1,
-                ...modifiedData
-            } = onGoNext(step, data));
+        let error;
+        const shouldContinue = [stepOnGoNext, onGoNext]
+            .filter(fn => fn)
+            .every((fn) => {
+                const {
+                    stepOffset: offset,
+                    error: stepError,
+                    redirect,
+                    ...modifiedData
+                } = fn(data, step) || {};
 
-            if (modifiedData.redirect) return;
-            data = {
-                ...data,
-                ...modifiedData,
-            };
+                if (stepError || redirect) {
+                    error = stepError;
+                    return false;
+                }
+
+                if (offset !== undefined) {
+                    stepOffset = offset;
+                }
+
+                data = {
+                    ...data,
+                    ...modifiedData,
+                };
+
+                return true;
+            });
+
+        if (error) {
+            this.handleError(error);
+            return;
         }
+
+        if (!shouldContinue) return;
 
         const nextStep = step + stepOffset;
 
         this.goToStep(nextStep, accumData);
     }
 
-    async runTask() {
+    async runTask(accumData) {
         const {
             steps,
             runTask,
@@ -221,14 +283,13 @@ class AnimatedTransaction extends PureComponent {
         const {
             step,
             currentTask: prevTask,
-            data: prevData,
         } = this.state;
         const {
             tasks = [],
         } = steps[step] || {};
         const currentTask = prevTask + 1;
         const task = tasks[currentTask];
-        let data = prevData;
+        let data = accumData;
 
         if (!task) {
             this.handleGoNext(data);
@@ -254,12 +315,7 @@ class AnimatedTransaction extends PureComponent {
             error,
         } = response || {};
         if (error) {
-            this.setState({
-                loading: false,
-                error: typeof error === 'string'
-                    ? { message: error }
-                    : error,
-            });
+            this.handleError(error);
             return;
         }
 
@@ -416,6 +472,7 @@ class AnimatedTransaction extends PureComponent {
                     || i18n.t('next')}
                 onPrevious={this.handleGoBack}
                 onNext={this.handleSubmit}
+                onRetry={this.handleClearError}
                 disableOnNext={step === steps.length}
                 loading={loading}
                 error={error}
@@ -430,7 +487,7 @@ class AnimatedTransaction extends PureComponent {
         const {
             step,
             data,
-            validationError,
+            childError,
         } = this.state;
         const {
             content: Component,
@@ -441,7 +498,7 @@ class AnimatedTransaction extends PureComponent {
             <Component
                 {...contentProps}
                 {...data}
-                error={validationError}
+                error={childError}
                 updateParentState={this.updateParentState}
             />
         );
@@ -506,6 +563,7 @@ AnimatedTransaction.propTypes = {
         content: PropTypes.func,
         contentProps: PropTypes.object,
         onSubmit: PropTypes.func,
+        onGoNext: PropTypes.func,
         cancelText: PropTypes.string,
         cancelTextKey: PropTypes.string,
         submitText: PropTypes.string,

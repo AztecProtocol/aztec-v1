@@ -14,14 +14,16 @@ import styles from './footer.scss';
 const Footer = ({
     cancelText,
     nextText,
-    onPrevious,
-    onNext,
     disableOnPrevious,
     disableOnNext,
     loading,
     error,
+    onPrevious,
+    onNext,
+    onRetry,
 }) => {
     if (error) {
+        const isFetal = error.fetal;
         return (
             <Block padding="m" align="center">
                 <Text
@@ -33,14 +35,16 @@ const Footer = ({
                 <Block top="m">
                     <TextButton
                         theme="underline"
-                        text={i18n.t('close')}
+                        text={i18n.t(isFetal ? 'close' : 'retry')}
                         size="m"
-                        onClick={() => {
-                            ConnectionService.close({
-                                abort: true,
-                                error,
-                            });
-                        }}
+                        onClick={!isFetal
+                            ? onRetry
+                            : () => {
+                                ConnectionService.close({
+                                    abort: true,
+                                    error,
+                                });
+                            }}
                     />
                 </Block>
             </Block>
@@ -82,8 +86,6 @@ const Footer = ({
 Footer.propTypes = {
     cancelText: PropTypes.string.isRequired,
     nextText: PropTypes.string.isRequired,
-    onPrevious: PropTypes.func,
-    onNext: PropTypes.func,
     disableOnPrevious: PropTypes.bool,
     disableOnNext: PropTypes.bool,
     loading: PropTypes.bool,
@@ -93,15 +95,19 @@ Footer.propTypes = {
         response: PropTypes.object,
         fetal: PropTypes.bool,
     }),
+    onPrevious: PropTypes.func,
+    onNext: PropTypes.func,
+    onRetry: PropTypes.func,
 };
 
 Footer.defaultProps = {
-    onPrevious: null,
-    onNext: null,
     disableOnPrevious: false,
     disableOnNext: false,
     loading: false,
     error: null,
+    onPrevious: null,
+    onNext: null,
+    onRetry: null,
 };
 
 export default Footer;
