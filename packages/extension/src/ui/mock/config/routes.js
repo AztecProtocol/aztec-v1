@@ -63,7 +63,7 @@ export default {
             },
             address: {
                 path: 'address',
-                Component: Register,
+                Component: RegisterAddress,
             },
             domain: {
                 path: 'domain',

@@ -1,5 +1,6 @@
 import Home from '~/ui/views/Home';
 import Register from '~/ui/pages/Register';
+import RegisterAddress from '~/ui/pages/RegisterAddress';
 import DomainPermission from '~/ui/pages/DomainPermission';
 import Account from '~/ui/pages/Account';
 import Restore from '~/ui/pages/Restore';
@@ -19,7 +20,7 @@ export default {
         routes: {
             address: {
                 path: 'address',
-                Component: Register,
+                Component: RegisterAddress,
             },
             domain: {
                 path: 'domain',

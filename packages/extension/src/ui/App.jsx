@@ -138,7 +138,7 @@ class App extends PureComponent {
                 && localLinkedPublicKey
                 && localAddress !== currentAddress
             ) {
-                route = 'register';
+                route = 'register.address';
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
             }
         }
