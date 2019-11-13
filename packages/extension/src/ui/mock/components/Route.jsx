@@ -17,8 +17,25 @@ const getConfigByName = (nameArr, routeConfig = routes) => {
     if (childNames && childNames.length) {
         return getConfigByName(childNames, config.routes);
     }
-
     return config;
+};
+
+const getInitialDataByName = (nameArr) => {
+    let accumName = '';
+    return nameArr.reduce((data, name) => {
+        accumName = `${accumName}${name}`;
+        let newData = initialProps[accumName];
+        if (typeof newData === 'function') {
+            newData = newData();
+        }
+        accumName = `${accumName}.`;
+        return newData
+            ? {
+                ...data,
+                ...newData,
+            }
+            : data;
+    }, {});
 };
 
 const MockRoute = ({
@@ -31,18 +48,15 @@ const MockRoute = ({
         id: actionId,
         data,
     } = action || {};
-    let childProps = initialProps[name];
-    if (typeof childProps === 'function') {
-        childProps = childProps();
-    }
+    const nameArr = name.split('.');
+    const {
+        initialStep,
+    } = getConfigByName(nameArr) || {};
+    const initialData = getInitialDataByName(nameArr);
     const {
         currentAccount,
         ...props
-    } = childProps || {};
-
-    const {
-        initialStep,
-    } = getConfigByName(name.split('.')) || {};
+    } = initialData;
 
     return (
         <Route
