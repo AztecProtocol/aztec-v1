@@ -9,7 +9,6 @@ import Account from '~/ui/pages/Account';
 import Assets from '~/ui/views/Assets';
 import Asset from '~/ui/views/Asset';
 import Restore from '~/ui/pages/Restore';
-import RestoreFailed from '~/ui/views/RestoreFailed';
 import DuplicatedAccount from '~/ui/views/DuplicatedAccount';
 import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
@@ -74,11 +73,8 @@ export default {
                 routes: {
                     password: {
                         path: 'set-new-password',
-                        View: CreatePassword,
-                    },
-                    failed: {
-                        path: 'error',
-                        View: RestoreFailed,
+                        Component: Restore,
+                        initialStep: 1,
                     },
                 },
             },

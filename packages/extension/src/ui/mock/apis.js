@@ -40,11 +40,9 @@ export default mergeApis(realApis, {
         createKeyStore: () => ({
             linkedPublicKey: 'linked_public_key',
         }),
+        generateLinkedPublicKey: realApis.auth.generateLinkedPublicKey,
     },
     account: {
-        checkDuplicates: () => ({
-            duplicated: true,
-        }),
         getExtensionAccount: address => ({
             address,
             linkedPublicKey: 'linked_public_key',

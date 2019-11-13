@@ -48,6 +48,7 @@ const CreatePassword = ({
             theme="white"
             title={title || i18n.t('register.create.password.title')}
             description={description || i18n.t('register.create.password.description')}
+            error={error}
         >
             <Block align="left">
                 <Block padding="s s xl s" align="center">
@@ -78,16 +79,6 @@ const CreatePassword = ({
                     <Block padding="m xxs">
                         <PasswordMeter
                             password={password}
-                        />
-                    </Block>
-                )}
-                {!!error && (
-                    <Block top="s">
-                        <Text
-                            text={error.message
-                              || i18n.t(error.key, error.response)}
-                            color="red"
-                            size="xxs"
                         />
                     </Block>
                 )}
