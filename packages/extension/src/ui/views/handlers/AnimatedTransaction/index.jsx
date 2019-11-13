@@ -517,9 +517,7 @@ AnimatedTransaction.propTypes = {
     onGoStep: PropTypes.func,
     onGoBack: PropTypes.func,
     onGoNext: PropTypes.func,
-    goNext: PropTypes.func,
     onExit: PropTypes.func,
-    autoStart: PropTypes.bool,
     closeDelay: PropTypes.number,
 };
 
@@ -533,9 +531,7 @@ AnimatedTransaction.defaultProps = {
     onGoStep: null,
     onGoBack: null,
     onGoNext: null,
-    goNext: null,
     onExit: null,
-    autoStart: false,
     closeDelay: closeWindowDelay,
 };
 

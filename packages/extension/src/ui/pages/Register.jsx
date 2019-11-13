@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { KeyStore } from '~utils/keyvault';
 import i18n from '~/ui/helpers/i18n';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction/index';
-import Intro from '~ui/views/RegisterIntro';
+import RegisterIntro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
-import CreatePassword from '~ui/views/CreatePassword'; import LinkAccount from '~ui/views/LinkAccount';
-import ConfirmRegister from '~ui/views/RegisterConfirm';
+import CreatePassword from '~ui/views/CreatePassword';
+import LinkAccount from '~ui/views/LinkAccount';
+import RegisterConfirm from '~ui/views/RegisterConfirm';
 import apis from '~uiModules/apis';
 
 const newAccountSteps = [
@@ -20,7 +19,7 @@ const newAccountSteps = [
                 run: apis.auth.createSeedPhrase,
             },
         ],
-        content: Intro,
+        content: RegisterIntro,
         submitTextKey: 'register.create.submit',
     },
     {
@@ -50,7 +49,7 @@ const newAccountSteps = [
             },
         ],
         content: CreatePassword,
-        validate: ({ password }) => {
+        onSubmit: ({ password }) => {
             if (!password || !password.trim()) {
                 return {
                     message: i18n.t('account.password.error.empty'),
@@ -78,7 +77,7 @@ const newAccountSteps = [
     },
     {
         titleKey: 'register.confirm.title',
-        content: ConfirmRegister,
+        content: RegisterConfirm,
         submitTextKey: 'register.confirm.submit',
         tasks: [
             {
@@ -113,7 +112,7 @@ const exisitingAccountSteps = [
     },
     {
         titleKey: 'register.confirm.title',
-        content: ConfirmRegister,
+        content: RegisterConfirm,
         submitTextKey: 'register.confirm.submit',
         tasks: [
             {
@@ -128,52 +127,15 @@ const exisitingAccountSteps = [
     },
 ];
 
-const handleGoBack = (step) => {
-    const newProps = {};
-    switch (step) {
-        case 3: {
-            newProps.stepOffset = 2;
-            break;
-        }
-        default:
-    }
-
-    return newProps;
-};
-
-const handleGoNext = (step) => {
-    const newProps = {};
-    switch (step) {
-        case 0:
-            newProps.seedPhrase = KeyStore.generateRandomSeed(Date.now().toString());
-            break;
-        default:
-    }
-
-    return newProps;
-};
-
-const handleOnStep = (step) => {
-    let newProps = {};
-    switch (step) {
-        case 4:
-            newProps = {
-            };
-            break;
-        default:
-    }
-
-    return newProps;
-};
-
 const Register = ({
     currentAccount,
     initialStep,
     initialData,
 }) => {
-    const hasAccount = (currentAccount && !currentAccount.linkedPublicKey);
-    const steps = hasAccount ? newAccountSteps
+    const steps = !currentAccount.linkedPublicKey
+        ? newAccountSteps
         : exisitingAccountSteps;
+
     return (
         <AnimatedTransaction
             steps={steps}
@@ -182,10 +144,6 @@ const Register = ({
                 ...initialData,
                 ...currentAccount,
             }}
-            onGoBack={handleGoBack}
-            onExit={returnAndClose}
-            onGoNext={handleGoNext}
-            onStep={handleOnStep}
         />
     );
 };

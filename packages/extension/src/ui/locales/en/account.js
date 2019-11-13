@@ -11,6 +11,9 @@ export default {
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris non dictum mauris.',
         placeholder: '',
     },
+    address: {
+        _: 'Address',
+    },
     password: {
         weak: 'Weak',
         fair: 'Fair',
@@ -20,6 +23,9 @@ export default {
             empty: 'Please enter your password.',
             incorrect: 'Incorrect password.',
         },
+    },
+    linkedPublicKey: {
+        _: 'Linked public key',
     },
     restore: {
         _: 'Restore account',

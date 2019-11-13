@@ -4,9 +4,7 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
 import PopupContent from '~ui/components/PopupContent';
-import ClickToCopy from '~ui/components/ClickToCopy';
 
 const BackupKeys = ({
     seedPhrase,
@@ -35,11 +33,7 @@ const BackupKeys = ({
 );
 
 BackupKeys.propTypes = {
-    seedPhrase: PropTypes.string,
-};
-
-BackupKeys.defaultProps = {
-    seedPhrase: '',
+    seedPhrase: PropTypes.string.isRequired,
 };
 
 export default BackupKeys;

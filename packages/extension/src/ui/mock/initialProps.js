@@ -4,6 +4,7 @@ import {
 import i18n from '~ui/helpers/i18n';
 import {
     seedPhrase,
+    linkedPublicKey,
     addresses,
     assets,
     domains,
@@ -18,33 +19,23 @@ import {
 
 const dummyFunc = () => {};
 
+const address = addresses[0];
+
 export default {
     register: {
-        address: addresses[0],
-        next: 'register.backup',
+        address,
     },
     'register.backup': {
         seedPhrase,
-        prev: 'register',
-        next: 'register.confirm',
+    },
+    'register.password': {},
+    'register.link': {
+        address,
+        linkedPublicKey,
     },
     'register.confirm': {
-        seedPhrase,
-        prev: 'register.backup',
-        next: 'register.password',
-    },
-    'register.password': {
-        prev: 'register.confirm',
-        next: 'register.account',
-    },
-    'register.account': {
-        initialStep: 4,
-        initialData: {
-            seedPhrase,
-            password: 'password01',
-        },
-        prev: 'register.password',
-        goNext: dummyFunc,
+        address,
+        linkedPublicKey,
     },
     'register.address': {
         goNext: dummyFunc,
@@ -89,22 +80,22 @@ export default {
     noteAccess: {
         id: notes[0].noteHash,
         note: notes[0],
-        accounts: addresses.map(address => ({
-            address,
+        accounts: addresses.map(a => ({
+            address: a,
         })),
         goNext: dummyFunc,
     },
     'noteAccess.confirm': {
         note: notes[0],
-        accounts: addresses.map(address => ({
-            address,
+        accounts: addresses.map(a => ({
+            address: a,
         })),
         goNext: dummyFunc,
     },
     'noteAccess.grant': {
         note: notes[0],
-        accounts: addresses.map(address => ({
-            address,
+        accounts: addresses.map(a => ({
+            address: a,
         })),
         goNext: dummyFunc,
     },

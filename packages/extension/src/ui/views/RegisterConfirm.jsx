@@ -12,11 +12,18 @@ import ListItem from '~ui/components/ListItem';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 
-const RegisterConfirm = ({ address, linkedPublicKey }) => (
+const RegisterConfirm = ({
+    address,
+    linkedPublicKey,
+}) => (
     <PopupContent
         theme="white"
     >
-        <FlexBox direction="column" align="space-between" className="flex-free-expand">
+        <FlexBox
+            className="flex-free-expand"
+            direction="column"
+            align="space-between"
+        >
             <Block padding="m 0">
                 <Text
                     text={i18n.t('register.confirm.blurb')}
@@ -31,25 +38,41 @@ const RegisterConfirm = ({ address, linkedPublicKey }) => (
                     height={70}
                 />
             </Block>
-            <Block padding="xs" background="white-lighter" borderRadius="s">
-                <Block padding="s" align="center">
+            <Block
+                padding="xs"
+                background="white-lighter"
+                borderRadius="s"
+            >
+                <Block padding="s">
                     <ListItem
                         profile={{
                             type: 'user',
                             address,
                         }}
-                        content={formatAddress(address, 16, 8)}
+                        content={`${i18n.t('account.address')}:`}
                         size="xs"
+                        weight="light"
+                        footnote={(
+                            <Text
+                                text={`${formatAddress(address, 12, 4)}`}
+                                size="xs"
+                                color="label"
+                            />
+                        )}
                     />
                 </Block>
-                <Block padding="s" align="center">
+                <Block padding="s">
                     <ListItem
-                        profile={{
-                            type: 'asset',
-                            address,
-                        }}
-                        content={formatAddress(linkedPublicKey, 16, 8)}
+                        content={`${i18n.t('account.linkedPublicKey')}:`}
                         size="xs"
+                        weight="light"
+                        footnote={(
+                            <Text
+                                text={`${formatAddress(linkedPublicKey, 12, 4)}`}
+                                size="xs"
+                                color="label"
+                            />
+                        )}
                     />
                 </Block>
             </Block>
