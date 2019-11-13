@@ -60,7 +60,7 @@ const Footer = ({
                     className={styles.button}
                     theme="white"
                     text={cancelText || i18n.t('cancel')}
-                    onClick={onPrevious}
+                    onSubmit={onPrevious}
                     disabled={loading || disableOnPrevious}
                     expand
                 />
@@ -69,7 +69,7 @@ const Footer = ({
                 <Button
                     className={styles.button}
                     text={nextText || i18n.t('next')}
-                    onClick={onNext}
+                    onSubmit={onNext}
                     loading={loading}
                     disabled={disableOnNext}
                     expand
