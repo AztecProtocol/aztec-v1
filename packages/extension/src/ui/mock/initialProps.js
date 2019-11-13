@@ -38,7 +38,10 @@ export default {
         linkedPublicKey,
     },
     'register.address': {
-        goNext: dummyFunc,
+        currentAccount: {
+            address,
+            linkedPublicKey,
+        },
     },
     'register.domain': {
         domain: domains[0],
