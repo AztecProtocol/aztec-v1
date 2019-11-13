@@ -18,8 +18,6 @@ import NoteAccessTransaction from '~/ui/views/NoteAccessTransaction';
 import Deposit from '~/ui/pages/Deposit';
 import Withdraw from '~/ui/pages/Withdraw';
 import Send from '~/ui/pages/Send';
-import SendConfirm from '~/ui/views/SendConfirm';
-import SendTransaction from '~/ui/views/SendTransaction';
 import Icons from '~/ui/views/playground/Icons';
 
 export default {
@@ -124,8 +122,8 @@ export default {
         path: 'withdraw',
         Component: Withdraw,
         routes: {
-            approve: {
-                path: 'approve',
+            sign: {
+                path: 'sign',
                 Component: Withdraw,
                 initialStep: 1,
             },
@@ -154,13 +152,15 @@ export default {
         path: 'send',
         Component: Send,
         routes: {
-            confirm: {
-                path: 'confirm',
-                View: SendConfirm,
+            sign: {
+                path: 'sign',
+                Component: Send,
+                initialStep: 1,
             },
-            grant: {
-                path: 'grant',
-                View: SendTransaction,
+            send: {
+                path: 'send',
+                Component: Send,
+                initialStep: 2,
             },
         },
     },
