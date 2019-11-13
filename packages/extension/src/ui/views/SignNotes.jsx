@@ -8,15 +8,10 @@ import {
 import Ticket from '~ui/components/Ticket';
 import ListItem from '~ui/components/ListItem';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 
-const SendSign = ({
-    asset,
-    totalAmount,
+const SignNotes = ({
     proof,
 }) => (
     <PopupContent
@@ -31,57 +26,48 @@ const SendSign = ({
             stretch
             nowrap
         >
-            <Block padding="m xl">
+            <Block padding="m 0 xl 0">
                 <Text
-                    text={i18n.t('send.notes.amount', {
-                        totalAmount,
-                        assetName: asset.name || 'ERC20',
-                    })}
-                    size="xl"
-                    weight="semibold"
+                    text={i18n.t('note.sign.description')}
+                    size="s"
+                    weight="light"
                 />
             </Block>
             <Ticket height={proof.inputNotes.length}>
-
                 {proof.inputNotes.map(({ noteHash, k }) => (
                     <ListItem
-                        content={formatAddress(noteHash, 24, 4)}
+                        key={noteHash}
+                        content={(
+                            <Text
+                                text={formatAddress(noteHash, 24, 4)}
+                                size="xxs"
+                            />
+                        )}
                         size="xxs"
                         footnote={(
                             <Text
                                 text={`(${k.words[0]})`}
                                 color="green"
+                                size="xxs"
                             />
                         )}
                     />
-
                 ))}
             </Ticket>
             <Block padding="m xl">
                 <Text
-                    text={i18n.t('send.notes.explain')}
-                    size="xs"
-                    color="red"
+                    text={i18n.t('note.sign.footnote')}
+                    size="s"
                 />
             </Block>
         </FlexBox>
     </PopupContent>
 );
 
-SendSign.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        code: PropTypes.string,
-    }).isRequired,
+SignNotes.propTypes = {
     proof: PropTypes.shape({
         inputNotes: PropTypes.array.isRequired,
     }).isRequired,
-    transactions: PropTypes.arrayOf(
-        PropTypes.shape({
-            to: PropTypes.string.isRequired,
-            amount: PropTypes.number.isRequired,
-        }),
-    ).isRequired,
 };
 
-export default SendSign;
+export default SignNotes;

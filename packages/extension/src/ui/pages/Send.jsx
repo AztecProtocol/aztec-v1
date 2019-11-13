@@ -10,7 +10,7 @@ import makeAsset from '~uiModules/utils/asset';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import SendConfirm from '~ui/views/SendConfirm';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import SendSign from '~ui/views/WithdrawSign';
+import SignNotes from '~ui/views/SignNotes';
 import TransactionSend from '~ui/views/TransactionSend';
 import apis from '~uiModules/apis';
 
@@ -29,7 +29,7 @@ const steps = [
     {
         titleKey: 'send.notes.title',
         submitTextKey: 'send.notes.submit',
-        content: SendSign,
+        content: SignNotes,
         tasks: [
             {
                 type: 'sign',
