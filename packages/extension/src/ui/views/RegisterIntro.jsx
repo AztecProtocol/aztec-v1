@@ -1,15 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
     Block,
-    FlexBox,
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
 import PopupContent from '~ui/components/PopupContent';
 
-const Intro = () => {
+const RegisterIntro = () => {
     const descriptionNodes = [];
     for (let i = 0; i < 10; i += 1) {
         const textKey = `register.intro.description.para${i}`;
@@ -44,8 +42,4 @@ const Intro = () => {
     );
 };
 
-Intro.propTypes = {};
-
-Intro.defaultProps = {};
-
-export default Intro;
+export default RegisterIntro;
