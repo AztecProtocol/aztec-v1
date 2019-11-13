@@ -1,11 +1,5 @@
-import {
-    METADATA_AZTEC_DATA_LENGTH,
-} from '~config/constants';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
-import metaData, {
-    addAccess,
-    toString,
-} from '~utils/metadata';
+import metaData from '~utils/metadata';
 
 export default async function grantNoteAccess({
     note: {

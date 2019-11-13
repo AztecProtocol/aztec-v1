@@ -24,9 +24,6 @@ import InplacePopup from '~ui/components/InplacePopup';
 const NoteAccessConfirm = ({
     note,
     accounts,
-    goNext,
-    goBack,
-    onClose,
 }) => {
     const {
         noteHash,
