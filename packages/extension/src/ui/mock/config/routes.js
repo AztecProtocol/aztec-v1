@@ -1,43 +1,37 @@
-import Home from '~ui/views/Home';
-import Loading from '~ui/views/Loading';
-import Welcome from '~ui/views/Welcome';
-import Register from '~ui/pages/Register';
-import BackupKeys from '~ui/views/BackupKeys';
-import ConfirmBackupKeys from '~ui/views/ConfirmBackupKeys';
-import CreatePassword from '~ui/views/CreatePassword';
-import DomainPermission from '~ui/pages/DomainPermission';
-import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
-import Account from '~ui/pages/Account';
-import Assets from '~ui/views/Assets';
-import Asset from '~ui/views/Asset';
-import Restore from '~ui/pages/Restore';
-import RestoreFailed from '~ui/views/RestoreFailed';
-import DuplicatedAccount from '~ui/views/DuplicatedAccount';
-import Login from '~ui/pages/Login';
-import NoteAccess from '~ui/pages/NoteAccess';
-import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
-import NoteAccessTransaction from '~ui/views/NoteAccessTransaction';
-import Deposit from '~ui/pages/Deposit';
-import DepositConfirm from '~ui/views/DepositConfirm';
-import DepositTransaction from '~ui/views/DepositTransaction';
-import Withdraw from '~ui/pages/Withdraw';
-import WithdrawTransaction from '~ui/views/WithdrawTransaction';
-import Send from '~ui/pages/Send';
-import SendConfirm from '~ui/views/SendConfirm';
-import SendTransaction from '~ui/views/SendTransaction';
-import Icons from '~ui/views/playground/Icons';
+import Home from '~/ui/views/Home';
+import Loading from '~/ui/views/Loading';
+import Welcome from '~/ui/views/Welcome';
+import Register from '~/ui/pages/Register';
+import RegisterAddress from '~/ui/pages/RegisterAddress';
+import CreatePassword from '~/ui/views/CreatePassword';
+import DomainPermission from '~/ui/pages/DomainPermission';
+import Account from '~/ui/pages/Account';
+import Assets from '~/ui/views/Assets';
+import Asset from '~/ui/views/Asset';
+import Restore from '~/ui/pages/Restore';
+import RestoreFailed from '~/ui/views/RestoreFailed';
+import DuplicatedAccount from '~/ui/views/DuplicatedAccount';
+import Login from '~/ui/pages/Login';
+import NoteAccess from '~/ui/pages/NoteAccess';
+import NoteAccessConfirm from '~/ui/views/NoteAccessConfirm';
+import NoteAccessTransaction from '~/ui/views/NoteAccessTransaction';
+import Deposit from '~/ui/pages/Deposit';
+import DepositConfirm from '~/ui/views/DepositConfirm';
+import DepositTransaction from '~/ui/views/DepositTransaction';
+import Withdraw from '~/ui/pages/Withdraw';
+import WithdrawTransaction from '~/ui/views/WithdrawTransaction';
+import Send from '~/ui/pages/Send';
+import SendConfirm from '~/ui/views/SendConfirm';
+import SendTransaction from '~/ui/views/SendTransaction';
+import Icons from '~/ui/views/playground/Icons';
 
-/*
- * Component can be rendered from background script and by clicking extension icon
- * while View can only be access directly from devServer
- */
 export default {
     _: {
         Component: Home,
     },
     loading: {
         path: 'loading',
-        View: Loading,
+        Component: Loading,
     },
     welcome: {
         path: 'welcome',
@@ -49,19 +43,23 @@ export default {
         routes: {
             backup: {
                 path: 'backup',
-                View: BackupKeys,
-            },
-            confirm: {
-                path: 'confirm',
-                View: ConfirmBackupKeys,
+                Component: Register,
+                initialStep: 1,
             },
             password: {
                 path: 'password',
-                View: CreatePassword,
+                Component: Register,
+                initialStep: 2,
             },
-            account: {
-                path: 'account',
-                View: Register,
+            link: {
+                path: 'link-account',
+                Component: Register,
+                initialStep: 3,
+            },
+            confirm: {
+                path: 'confirm',
+                Component: Register,
+                initialStep: 4,
             },
             address: {
                 path: 'address',
@@ -70,7 +68,6 @@ export default {
             domain: {
                 path: 'domain',
                 Component: DomainPermission,
-                View: DomainPermissionTransaction,
             },
         },
     },
@@ -165,11 +162,11 @@ export default {
                 routes: {
                     assets: {
                         path: 'assets',
-                        View: Icons,
+                        Component: Icons,
                     },
                     users: {
                         path: 'users',
-                        View: Icons,
+                        Component: Icons,
                     },
                 },
             },

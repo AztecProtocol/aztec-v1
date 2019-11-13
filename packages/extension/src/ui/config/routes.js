@@ -9,10 +9,6 @@ import Deposit from '~/ui/pages/Deposit';
 import Withdraw from '~/ui/pages/Withdraw';
 import Send from '~/ui/pages/Send';
 
-/*
- * Component can be rendered from background script and by clicking extension icon
- * while View can only be access directly from devServer
- */
 export default {
     _: {
         Component: Home,
@@ -21,10 +17,6 @@ export default {
         path: 'register',
         Component: Register,
         routes: {
-            account: {
-                path: 'account',
-                View: Register,
-            },
             address: {
                 path: 'address',
                 Component: Register,
