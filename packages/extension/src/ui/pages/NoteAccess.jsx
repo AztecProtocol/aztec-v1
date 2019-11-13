@@ -1,14 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    fetchNote,
-} from 'ui/apis/note';
-import {
-    getExtensionAccount,
-} from 'ui/apis/account';
-import returnAndClose from '~ui/helpers/returnAndClose';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import apis from '~uiModules/apis';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
 
 const steps = [
@@ -27,18 +20,20 @@ const steps = [
             },
         ],
     },
-
 ];
 
 const NoteAccess = ({
+    initialStep,
     id,
     addresses,
 }) => {
     const fetchInitialData = async () => {
-        const note = await fetchNote(id);
-        const accounts = await Promise.all(addresses.map(getExtensionAccount));
+        const note = await apis.note.fetchNote(id);
+        const accounts = await Promise.all(addresses.map(apis.account.getExtensionAccount));
 
         return {
+            id,
+            addresses,
             note,
             accounts,
         };
@@ -46,22 +41,21 @@ const NoteAccess = ({
 
     return (
         <AnimatedTransaction
+            initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
-            initialData={
-                {
-                    id,
-                    addresses,
-                }
-            }
-            onExit={returnAndClose}
         />
     );
 };
 
 NoteAccess.propTypes = {
+    initialStep: PropTypes.number,
     id: PropTypes.string.isRequired,
     addresses: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
+
+NoteAccess.defaultProps = {
+    initialStep: 0,
 };
 
 export default NoteAccess;

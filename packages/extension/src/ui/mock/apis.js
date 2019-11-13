@@ -45,7 +45,8 @@ export default mergeApis(realApis, {
         checkDuplicates: () => ({
             duplicated: true,
         }),
-        getExtensionAccount: () => ({
+        getExtensionAccount: address => ({
+            address,
             linkedPublicKey: 'linked_public_key',
         }),
     },
@@ -62,5 +63,12 @@ export default mergeApis(realApis, {
                 ? transactions
                 : transactions.slice(0, count);
         },
+    },
+    note: {
+        fetchNote: noteHash => ({
+            noteHash,
+            value: randomInt(100),
+            asset: assets[0],
+        }),
     },
 });

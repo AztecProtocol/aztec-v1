@@ -79,28 +79,6 @@ export default {
         address: addresses[0],
         goNext: dummyFunc,
     },
-    noteAccess: {
-        id: notes[0].noteHash,
-        note: notes[0],
-        accounts: addresses.map(a => ({
-            address: a,
-        })),
-        goNext: dummyFunc,
-    },
-    'noteAccess.confirm': {
-        note: notes[0],
-        accounts: addresses.map(a => ({
-            address: a,
-        })),
-        goNext: dummyFunc,
-    },
-    'noteAccess.grant': {
-        note: notes[0],
-        accounts: addresses.map(a => ({
-            address: a,
-        })),
-        goNext: dummyFunc,
-    },
     deposit: {
         from: addresses[0],
         sender: addresses[1],
@@ -140,6 +118,10 @@ export default {
                 },
             })),
         },
+    },
+    noteAccess: {
+        id: notes[0].noteHash,
+        addresses,
     },
     mint: {
         asset: assets[0],

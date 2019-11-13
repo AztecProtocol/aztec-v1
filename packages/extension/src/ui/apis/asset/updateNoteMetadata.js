@@ -4,7 +4,6 @@ export default async function publicApprove({
     noteHash,
     metadata,
     assetAddress,
-    ...rest
 }) {
     const response = await ConnectionService.post({
         action: 'metamask.zkAsset.updateNoteMetadata',
