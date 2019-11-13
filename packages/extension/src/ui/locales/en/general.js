@@ -29,5 +29,6 @@ export default {
     go: {
         back: 'Go Back',
     },
+    retry: 'Retry',
     poweredBy: 'Powered by',
 };

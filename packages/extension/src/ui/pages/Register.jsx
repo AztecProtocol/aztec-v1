@@ -51,7 +51,9 @@ const steps = [
         onSubmit: ({ password }) => {
             if (!password || !password.trim()) {
                 return {
-                    key: 'account.password.error.empty',
+                    error: {
+                        key: 'account.password.error.empty',
+                    },
                 };
             }
             return null;
