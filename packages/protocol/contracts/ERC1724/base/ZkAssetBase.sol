@@ -50,7 +50,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     ));
 
     ACE public ace;
-    IERC20 public linkedToken;
+    IERC20Mintable public linkedToken;
 
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
     mapping(bytes32 => uint256) public metaDataTimeLog;
@@ -71,7 +71,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             bytes32(uint256(address(this)))
         ));
         ace = ACE(_aceAddress);
-        linkedToken = IERC20(_linkedTokenAddress);
+        linkedToken = IERC20Mintable(_linkedTokenAddress);
         ace.createNoteRegistry(
             _linkedTokenAddress,
             _scalingFactor,

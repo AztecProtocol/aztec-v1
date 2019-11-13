@@ -6,6 +6,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../../interfaces/IAZTEC.sol";
 import "../../libs/VersioningUtils.sol";
+import "../../interfaces/IERC20Mintable.sol";
 import "./interfaces/NoteRegistryBehaviour.sol";
 import "./interfaces/NoteRegistryFactory.sol";
 import "./proxies/AdminUpgradeabilityProxy.sol";
@@ -54,7 +55,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     struct NoteRegistry {
         NoteRegistryBehaviour behaviour;
-        IERC20 linkedToken;
+        IERC20Mintable linkedToken;
         uint24 latestFactory;
         uint256 totalSupply;
         uint256 totalSupplemented;
@@ -261,7 +262,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
         registries[msg.sender] = NoteRegistry({
             behaviour: NoteRegistryBehaviour(proxy),
-            linkedToken: IERC20(_linkedTokenAddress),
+            linkedToken: IERC20Mintable(_linkedTokenAddress),
             latestFactory: _factoryId,
             totalSupply: 0,
             totalSupplemented: 0
