@@ -8,9 +8,9 @@ import {
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
 import WithdrawConfirm from '~ui/views/WithdrawConfirm';
-import WithdrawSend from '~ui/views/DepositSend';
 import WithdrawSign from '~ui/views/WithdrawSign';
 import returnAndClose from '~ui/helpers/returnAndClose';
+import TransactionSend from '~ui/views/TransactionSend';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import apis from '~uiModules/apis';
 
@@ -41,7 +41,10 @@ const steps = [
     {
         titleKey: 'withdraw.send.title',
         submitTextKey: 'withdraw.send.submit',
-        content: WithdrawSend,
+        content: TransactionSend,
+        contentProps: {
+            descriptionKey: 'withdraw.send.explain',
+        },
         tasks: [
             {
                 name: 'send',
