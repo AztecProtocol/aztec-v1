@@ -1,4 +1,7 @@
 import {
+    userAccount,
+} from '~testHelpers/testUsers';
+import {
     randomId,
     randomInt,
 } from '~utils/random';
@@ -17,6 +20,20 @@ export const generate = (count, generator) => {
 export const randomAddress = () => `0x${randomId(40)}`;
 
 export const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle';
+
+export const password = 'password01';
+
+const {
+    linkedPublicKey,
+    linkedPrivateKey,
+    spendingPublicKey,
+} = userAccount;
+
+export {
+    linkedPublicKey,
+    linkedPrivateKey,
+    spendingPublicKey,
+};
 
 export const addresses = [
     '0x3339C3c842732F4DAaCf12aed335661cf4eab66b',
