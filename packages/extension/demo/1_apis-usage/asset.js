@@ -78,6 +78,7 @@ async function initAsset() {
     withdrawStatus = makeStatusGenerator('withdraw-status');
     sendStatus = makeStatusGenerator('send-status');
     fetchStatus = makeStatusGenerator('fetch-status');
+    document.getElementById('linked-erc20-address').innerHTML = asset.linkedTokenAddress;
     refreshAssetBalances();
   }
   apisElem.style.display = 'block';
@@ -303,7 +304,7 @@ document.getElementById('app').innerHTML = `
     </div>
     <br/>
     <div>
-      Linked ERC20: <strong>${zkAssetAddress}</strong><br/>
+      Linked ERC20: <strong id="linked-erc20-address"></strong><br/>
       Balance: <span id="erc20-balance">...</span><br/>
       Allowance: <span id="erc20-allowance">...</span><br/>
     </div>
