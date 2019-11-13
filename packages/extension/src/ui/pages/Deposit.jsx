@@ -1,9 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    proofs,
-} from '@aztec/dev-utils';
-import {
     emptyIntValue,
 } from '~/ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
@@ -100,8 +97,6 @@ const Deposit = ({
                     transactions,
                     sender,
                     numberOfOutputNotes,
-                    signatures: '0x',
-                    proofId: proofs.JOIN_SPLIT_PROOF,
                 }
             }
             onExit={returnAndClose}
