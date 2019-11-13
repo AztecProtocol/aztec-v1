@@ -86,6 +86,7 @@ export default async function deposit({
 
     return {
         proof,
+        signatures: '0x',
         notes: outputNotes,
         notesOwner,
     };
