@@ -6,11 +6,22 @@ import {
     Route,
 } from 'react-router-dom';
 import Popup from '~/ui/components/Popup';
+import routes from '../config/routes';
 import {
     addresses,
     sites,
 } from '../data';
 import initialProps from '../initialProps';
+
+const getConfigByName = (nameArr, routeConfig = routes) => {
+    const [name, ...childNames] = nameArr;
+    const config = routeConfig[name];
+    if (childNames && childNames.length) {
+        return getConfigByName(childNames, config.routes);
+    }
+
+    return config;
+};
 
 class MockRoute extends PureComponent {
     renderComponent = () => {
@@ -18,7 +29,6 @@ class MockRoute extends PureComponent {
             name,
             action,
             Component,
-            goToPage,
         } = this.props;
         const {
             id: actionId,
@@ -29,18 +39,17 @@ class MockRoute extends PureComponent {
             childProps = childProps();
         }
         const {
-            prev,
-            next,
+            currentAccount,
             ...props
         } = childProps || {};
-        const handleGoBack = prev
-            ? () => goToPage(prev)
-            : null;
-        const handleGoNext = next
-            ? () => goToPage(next)
-            : null;
-        const currentAccount = {
-            address: addresses[0],
+
+        const {
+            initialStep,
+        } = getConfigByName(name.split('.')) || {};
+
+        const initialData = {
+            ...data,
+            ...props,
         };
 
         const contentNode = (
@@ -48,12 +57,11 @@ class MockRoute extends PureComponent {
                 clientRequestId="client-request-id"
                 actionId={actionId}
                 site={sites[0]}
-                currentAccount={currentAccount}
-                goBack={handleGoBack}
-                goNext={handleGoNext}
-                goToPage={goToPage}
-                {...props}
-                {...data}
+                currentAccount={currentAccount || {
+                    address: addresses[0],
+                }}
+                initialStep={initialStep}
+                initialData={initialData}
             />
         );
 
@@ -86,7 +94,6 @@ MockRoute.propTypes = {
         data: PropTypes.object,
     }),
     Component: PropTypes.func.isRequired,
-    goToPage: PropTypes.func.isRequired,
 };
 
 MockRoute.defaultProps = {

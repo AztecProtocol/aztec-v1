@@ -168,14 +168,10 @@ class App extends PureComponent {
             currentAccount,
             action,
         } = this.state;
-        const {
-            mock,
-        } = this.props;
 
         Object.keys(config).forEach((subName) => {
             const {
                 Component,
-                View,
                 path: subPath,
                 routes: childRoutes,
             } = config[subName];
@@ -195,9 +191,7 @@ class App extends PureComponent {
                 routeNodes.push(...childRouteNodes);
             }
 
-            if (Component
-                || (View && process.env.NODE_ENV === 'development')
-            ) {
+            if (Component) {
                 const routeNode = (
                     <Route
                         key={path}
@@ -206,10 +200,7 @@ class App extends PureComponent {
                         currentAccount={currentAccount}
                         action={action}
                         goToPage={this.goToPage}
-                        Component={mock
-                            ? View || Component
-                            : Component || View
-                        }
+                        Component={Component}
                     />
                 );
                 if (name === '_') {
@@ -239,7 +230,6 @@ class App extends PureComponent {
         const theme = {
             name: 'light',
         };
-
 
         return (
             <ThemeContext.Provider value={theme}>
