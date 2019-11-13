@@ -1,17 +1,8 @@
-import React, {
-    PureComponent,
-} from 'react'; import PropTypes from 'prop-types';
-import DomainPermissionTransaction from '~ui/views/DomainPermissionTransaction';
-import returnAndClose from '~ui/helpers/returnAndClose';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import Loading from '~ui/views/Loading';
-import {
-    getDomainAssets,
-} from '~ui/apis/asset';
-import {
-    getCurrentUser,
-    approveDomain,
-} from '~ui/apis/auth';
+import React from 'react';
+import PropTypes from 'prop-types';
+import DomainPermissionTransaction from '~/ui/views/DomainPermissionTransaction';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import apis from '~uiModules/apis';
 
 const steps = [
     {
@@ -20,7 +11,7 @@ const steps = [
             {
                 type: 'auth',
                 name: 'create',
-                run: approveDomain,
+                run: apis.auth.approveDomain,
             },
         ],
         content: DomainPermissionTransaction,
@@ -28,82 +19,29 @@ const steps = [
     },
 ];
 
-class DomainPermission extends PureComponent {
-    constructor(props) {
-        super(props);
-        this.state = {
-            address: '',
-            assets: [],
-            loading: false,
-            success: false,
-            error: null,
+const DomainPermission = ({
+    domain,
+}) => {
+    const fetchInitialData = async () => {
+        const {
+            address,
+        } = await apis.auth.getCurrentUser() || {};
+        const assets = await apis.asset.getDomainAssets(domain.domain);
+
+        return {
+            domain,
+            address,
+            assets,
         };
-    }
-
-    componentDidMount() {
-        this.fetchDataForPage();
-    }
-
-    handleSubmit = () => {
-        this.setState({
-            loading: true,
-        }, this.approveDomain);
     };
 
-
-    async fetchDataForPage() {
-        const {
-            address,
-        } = await getCurrentUser() || {};
-        const {
-            domain,
-        } = this.props;
-        const assets = await getDomainAssets(domain.domain);
-
-        this.setState({
-            address,
-            assets,
-        });
-    }
-
-    render() {
-        const {
-            address,
-        } = this.state;
-
-        if (!address) {
-            return <Loading />;
-        }
-
-        const {
-            domain,
-        } = this.props;
-        const {
-            assets,
-            loading,
-            success,
-            error,
-        } = this.state;
-
-        return (
-            <AnimatedTransaction
-                steps={steps}
-                initialStep={0}
-                onExit={returnAndClose}
-                loading={loading}
-                initialData={{
-                    address,
-                    domain,
-                    assets,
-                    loading,
-                    success,
-                    error,
-                }}
-            />
-
-        );
-    }
-}
+    return (
+        <AnimatedTransaction
+            steps={steps}
+            fetchInitialData={fetchInitialData}
+        />
+    );
+};
 
 DomainPermission.propTypes = {
     domain: PropTypes.shape({

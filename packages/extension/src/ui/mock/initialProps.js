@@ -45,8 +45,6 @@ export default {
     },
     'register.domain': {
         domain: domains[0],
-        assets: assets.slice(0, 10),
-        goNext: dummyFunc,
     },
     'account.restore': {
         goNext: dummyFunc,

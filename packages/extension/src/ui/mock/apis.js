@@ -51,6 +51,7 @@ export default mergeApis(realApis, {
     },
     asset: {
         getAssets: async () => assets,
+        getDomainAssets: async () => assets,
         getPastTransactions: async (assetCode = '', count = 2) => {
             const transactions = !assetCode
                 ? pastTransactions
