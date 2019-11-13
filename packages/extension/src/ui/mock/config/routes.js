@@ -3,13 +3,11 @@ import Loading from '~/ui/views/Loading';
 import Welcome from '~/ui/views/Welcome';
 import Register from '~/ui/pages/Register';
 import RegisterAddress from '~/ui/pages/RegisterAddress';
-import CreatePassword from '~/ui/views/CreatePassword';
 import DomainPermission from '~/ui/pages/DomainPermission';
 import Account from '~/ui/pages/Account';
 import Assets from '~/ui/views/Assets';
 import Asset from '~/ui/views/Asset';
 import Restore from '~/ui/pages/Restore';
-import DuplicatedAccount from '~/ui/views/DuplicatedAccount';
 import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
 import Deposit from '~/ui/pages/Deposit';
@@ -77,10 +75,6 @@ export default {
                         initialStep: 1,
                     },
                 },
-            },
-            duplicated: {
-                path: 'duplicated',
-                View: DuplicatedAccount,
             },
             login: {
                 path: 'login',
