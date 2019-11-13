@@ -16,8 +16,6 @@ import NoteAccess from '~/ui/pages/NoteAccess';
 import NoteAccessConfirm from '~/ui/views/NoteAccessConfirm';
 import NoteAccessTransaction from '~/ui/views/NoteAccessTransaction';
 import Deposit from '~/ui/pages/Deposit';
-import DepositConfirm from '~/ui/views/DepositConfirm';
-import DepositTransaction from '~/ui/views/DepositTransaction';
 import Withdraw from '~/ui/pages/Withdraw';
 import WithdrawTransaction from '~/ui/views/WithdrawTransaction';
 import Send from '~/ui/pages/Send';
@@ -111,13 +109,15 @@ export default {
         path: 'deposit',
         Component: Deposit,
         routes: {
-            confirm: {
-                path: 'confirm',
-                View: DepositConfirm,
+            approve: {
+                path: 'approve',
+                Component: Deposit,
+                initialStep: 1,
             },
-            grant: {
-                path: 'grant',
-                View: DepositTransaction,
+            send: {
+                path: 'send',
+                Component: Deposit,
+                initialStep: 2,
             },
         },
     },
