@@ -8,51 +8,30 @@ import {
     TextInput,
     Text,
 } from '@aztec/guacamole-ui';
-import {
-    validateMnemonic,
-} from '~utils/keyvault';
 import i18n from '~ui/helpers/i18n';
-import router from '~ui/helpers/router';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import ProfileIcon from '~ui/components/ProfileIcon';
 
-const validateSeedPhrase = (seedPhrase) => {
-    const phrases = seedPhrase
-        .split(' ')
-        .filter(p => p);
-
-    let errorKey;
-    if (!phrases.length) {
-        errorKey = 'account.restore.error.seedPhrase.empty';
-    } else if (!validateMnemonic(seedPhrase)) {
-        errorKey = 'account.restore.error.seedPhrase';
-    }
-
-    return errorKey;
-};
-
 const RestoreFromSeedPhrase = ({
     address,
-    isLinked,
+    seedPhrase,
     updateParentState,
+    error,
 }) => {
-    const [seedPhrase, updateSeedPhrase] = useState('');
-    const [error, updateError] = useState(null);
+    const [inputRef, setInputRef] = useState(null);
+    const [didMount, doMount] = useState(false);
 
     useEffect(() => {
-        updateParentState({ seedPhrase });
-    }, [seedPhrase]);
+        if (inputRef && !didMount) {
+            inputRef.focus();
+            doMount(true);
+        }
+    });
 
     return (
         <PopupContent
             theme="white"
-            footerLink={isLinked
-                ? null
-                : {
-                    text: i18n.t('account.create'),
-                    href: router.u('register'),
-                }}
             error={error}
         >
             <Block
@@ -81,15 +60,16 @@ const RestoreFromSeedPhrase = ({
             </Block>
             <Block align="left">
                 <TextInput
+                    setInputRef={setInputRef}
                     type="textarea"
                     rows={3}
                     value={seedPhrase}
                     placeholder={i18n.t('account.restore.input.seedPhrase.placeholder')}
                     onChange={(val) => {
-                        if (error) {
-                            updateError(null);
-                        }
-                        updateSeedPhrase(val);
+                        updateParentState({
+                            seedPhrase: val,
+                            error: null,
+                        });
                     }}
                 />
             </Block>
@@ -99,13 +79,19 @@ const RestoreFromSeedPhrase = ({
 
 RestoreFromSeedPhrase.propTypes = {
     address: PropTypes.string.isRequired,
+    seedPhrase: PropTypes.string,
     updateParentState: PropTypes.func.isRequired,
-    isLinked: PropTypes.bool,
+    error: PropTypes.shape({
+        key: PropTypes.string,
+        message: PropTypes.string,
+        response: PropTypes.object,
+        fetal: PropTypes.bool,
+    }),
 };
 
 RestoreFromSeedPhrase.defaultProps = {
-    isLinked: false,
-    submitButtonText: '',
+    seedPhrase: '',
+    error: null,
 };
 
 export default RestoreFromSeedPhrase;

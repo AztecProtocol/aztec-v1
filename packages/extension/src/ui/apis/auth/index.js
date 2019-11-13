@@ -4,6 +4,7 @@ import createPwDerivedKey from './createPwDerivedKey';
 import createKeyStore from './createKeyStore';
 import createSeedPhrase from './createSeedPhrase';
 import backupSeedPhrase from './backupSeedPhrase';
+import generateLinkedPublicKey from './generateLinkedPublicKey';
 import registerExtension from './registerExtension';
 import linkAccountToMetaMask from './linkAccountToMetaMask';
 import sendRegisterAddress from './sendRegisterAddress';
@@ -23,6 +24,7 @@ export {
     linkAccountToMetaMask,
     createSeedPhrase,
     backupSeedPhrase,
+    generateLinkedPublicKey,
     sendRegisterAddress,
     registerAddress,
     restoreAccount,

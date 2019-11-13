@@ -58,9 +58,7 @@ export default {
         failed: {
             title: 'Failed to recover account',
             description: 'We cannot restore your account with the seed phrase you provided. Please use a correct one or create a new account.',
-            linked: {
-                description: 'We cannot restore your account with the seed phrase you provided. Please use the seed phrase you were given when registered with the address.',
-            },
+            seedPhrase: 'We cannot restore your account with the seed phrase you provided. Please use the seed phrase you were given when registered with the address.',
             retry: 'Restore with another seed phrase',
         },
         error: {

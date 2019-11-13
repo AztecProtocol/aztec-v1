@@ -48,18 +48,10 @@ export default {
         domain: domains[0],
     },
     'account.restore': {
-        goNext: dummyFunc,
-    },
-    'account.restore.password': () => ({
-        description: i18n.t('account.restore.password.description'),
-        submitButtonText: i18n.t('account.restore.confirm'),
-        goNext: dummyFunc,
-    }),
-    'account.restore.failed': {
-        address: addresses[0],
-        seedPhrase,
-        isLinked: true,
-        goNext: dummyFunc,
+        currentAccount: {
+            address,
+            linkedPublicKey,
+        },
     },
     'account.login': {
         goNext: dummyFunc,

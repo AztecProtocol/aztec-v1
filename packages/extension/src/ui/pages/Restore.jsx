@@ -1,122 +1,110 @@
-import React, {
-    useState,
-} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
-import i18n from '~ui/helpers/i18n';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import RestoreFromSeedPhrase from '~ui/views/RestoreFromSeedPhrase';
 import CreatePassword from '~ui/views/CreatePassword';
-import Loading from '~ui/views/Loading';
-import RestoreFailed from '~ui/views/RestoreFailed';
-import RegisterAddressTransaction from '~ui/views/RegisterAddressTransaction';
-
-const Steps = [
-    RestoreFromSeedPhrase,
-    CreatePassword,
-    Loading,
-    RestoreFailed,
-    RegisterAddressTransaction,
-];
 
 const steps = [
     {
         titleKey: 'account.restore.title',
-        tasks: [
-        ],
         content: RestoreFromSeedPhrase,
         submitTextKey: 'account.restore.submit',
+        onSubmit: ({ seedPhrase }) => {
+            const phrases = seedPhrase
+                .replace(/\s{1,}/g, ' ')
+                .trim()
+                .split(' ')
+                .filter(p => p);
+
+            let errorKey;
+            if (!phrases.length) {
+                errorKey = 'account.restore.error.seedPhrase.empty';
+            } else if (phrases.length !== 12) {
+                errorKey = 'account.restore.error.seedPhrase';
+            }
+
+            return !errorKey
+                ? {
+                    seedPhrase: phrases.join(' '),
+                }
+                : {
+                    error: {
+                        key: errorKey,
+                    },
+                };
+        },
+        tasks: [
+            {
+                name: 'generate',
+                run: apis.auth.generateLinkedPublicKey,
+            },
+        ],
+        onGoNext: ({
+            currentAccount,
+            linkedPublicKey,
+        }) => {
+            if (linkedPublicKey !== currentAccount.linkedPublicKey) {
+                return {
+                    error: {
+                        key: 'account.restore.failed.seedPhrase',
+                    },
+                };
+            }
+            return null;
+        },
     },
     {
         titleKey: 'register.password.title',
         tasks: [
             {
                 name: 'restore',
-                run: async (
-
-                    {
-                        address,
-                        seedPhrase,
-                        password,
-                    },
-                ) => {
-                    const {
-                        duplicated,
-                    } = await apis.account.checkDuplicates({
-                        address,
-                        seedPhrase,
-                        password,
-                    });
-                    let linkedPublicKey;
-                    if (!duplicated) {
-                        ({
-                            linkedPublicKey,
-                        } = await apis.auth.restoreAccount({
-                            address,
-                            seedPhrase,
-                            password,
-                        }));
-                    }
-                    return {
-                        duplicated,
-                        linkedPublicKey,
-                    };
-                },
+                run: apis.auth.restoreAccount,
             },
         ],
         content: CreatePassword,
         submitTextKey: 'register.password.submit',
+        onSubmit: ({ password }) => {
+            if (!password || !password.trim()) {
+                return {
+                    error: {
+                        key: 'account.password.error.empty',
+                    },
+                };
+            }
+            return null;
+        },
     },
 ];
 
-const handleOnStep = (step, prevData) => {
-    const newProps = {};
-    switch (step) {
-        case 0:
-            break;
-        case 1:
-            break;
-        case 2: {
-            break;
-        }
-        case 4:
-            break;
-        default:
-    }
-    return newProps;
-};
-
 const Restore = ({
-    actionId,
+    initialStep,
     currentAccount,
-}) => {
-    const initialData = {
-        address: currentAccount.address,
-        isLinked: !!currentAccount.linkedPublicKey,
-    };
-
-    return (
-
-        <AnimatedTransaction
-            steps={steps}
-            initialData={initialData}
-            onExit={returnAndClose}
-            onStep={handleOnStep}
-        />
-    );
-};
+    seedPhrase,
+}) => (
+    <AnimatedTransaction
+        initialStep={initialStep}
+        steps={steps}
+        initialData={{
+            currentAccount,
+            seedPhrase,
+            address: currentAccount.address,
+        }}
+    />
+);
 
 Restore.propTypes = {
-    actionId: PropTypes.string,
+    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string,
     }).isRequired,
+    seedPhrase: PropTypes.string,
 };
 
 Restore.defaultProps = {
-    actionId: '',
+    initialStep: 0,
+    seedPhrase: '',
 };
 
 export default Restore;
