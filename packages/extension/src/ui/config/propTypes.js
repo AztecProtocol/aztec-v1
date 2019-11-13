@@ -54,3 +54,10 @@ export const profileShape = PropTypes.oneOfType([
     userProfileShape,
     generalProfileShape,
 ]);
+
+export const errorShape = PropTypes.shape({
+    key: PropTypes.string,
+    message: PropTypes.string,
+    response: PropTypes.object,
+    fetal: PropTypes.bool,
+});

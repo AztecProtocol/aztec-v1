@@ -6,6 +6,9 @@ import {
     Text,
     TextButton,
 } from '@aztec/guacamole-ui';
+import {
+    errorShape,
+} from '~/ui/config/propTypes';
 import i18n from '~/ui/helpers/i18n';
 import ConnectionService from '~uiModules/services/ConnectionService';
 import Button from '~ui/components/Button';
@@ -89,12 +92,7 @@ Footer.propTypes = {
     disableOnPrevious: PropTypes.bool,
     disableOnNext: PropTypes.bool,
     loading: PropTypes.bool,
-    error: PropTypes.shape({
-        key: PropTypes.string,
-        message: PropTypes.string,
-        response: PropTypes.object,
-        fetal: PropTypes.bool,
-    }),
+    error: errorShape,
     onPrevious: PropTypes.func,
     onNext: PropTypes.func,
     onRetry: PropTypes.func,

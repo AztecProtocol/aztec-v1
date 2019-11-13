@@ -8,6 +8,9 @@ import {
     TextInput,
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    errorShape,
+} from '~/ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
@@ -81,12 +84,7 @@ RestoreFromSeedPhrase.propTypes = {
     address: PropTypes.string.isRequired,
     seedPhrase: PropTypes.string,
     updateParentState: PropTypes.func.isRequired,
-    error: PropTypes.shape({
-        key: PropTypes.string,
-        message: PropTypes.string,
-        response: PropTypes.object,
-        fetal: PropTypes.bool,
-    }),
+    error: errorShape,
 };
 
 RestoreFromSeedPhrase.defaultProps = {

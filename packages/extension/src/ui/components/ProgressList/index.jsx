@@ -6,6 +6,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import {
+    errorShape,
+} from '~/ui/config/propTypes';
 import ProgressStatus from './ProgressStatus';
 import styles from './progress.scss';
 
@@ -72,10 +75,7 @@ ProgressList.propTypes = {
         titleKey: PropTypes.string,
     })).isRequired,
     currentStep: PropTypes.number.isRequired,
-    error: PropTypes.shape({
-        key: PropTypes.string,
-        message: PropTypes.string,
-    }),
+    error: errorShape,
     loading: PropTypes.bool,
 };
 

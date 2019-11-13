@@ -9,6 +9,9 @@ import {
     TextButton,
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    errorShape,
+} from '~/ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 
 const PopupContent = ({
@@ -99,12 +102,7 @@ PopupContent.propTypes = {
     }),
     children: PropTypes.node,
     success: PropTypes.bool,
-    error: PropTypes.shape({
-        key: PropTypes.string,
-        message: PropTypes.string,
-        response: PropTypes.object,
-        fetal: PropTypes.bool,
-    }),
+    error: errorShape,
 };
 
 PopupContent.defaultProps = {

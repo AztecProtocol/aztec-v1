@@ -13,6 +13,7 @@ import {
 } from '~/utils/random';
 import {
     assetShape,
+    errorShape,
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
@@ -144,12 +145,7 @@ const DomainPermissionTransaction = ({
 DomainPermissionTransaction.propTypes = {
     assets: PropTypes.arrayOf(assetShape),
     loading: PropTypes.bool,
-    error: PropTypes.shape({
-        key: PropTypes.string,
-        message: PropTypes.string,
-        response: PropTypes.object,
-        fetal: PropTypes.bool,
-    }),
+    error: errorShape,
     visibleAssets: PropTypes.number,
 };
 
