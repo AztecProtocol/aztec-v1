@@ -14,6 +14,8 @@ import {
 } from '~utils/random';
 import filterStream from '~utils/filterStream';
 import {
+    connectionRequestEvent,
+    connectionApprovedEvent,
     actionEvent,
     uiOpenEvent,
     uiCloseEvent,
@@ -137,9 +139,17 @@ class Aztec {
         } = Web3Service;
 
         const frame = await backgroundFrame.init();
+
+        const backgroundResponse = fromEvent(window, 'message')
+            .pipe(
+                filter(({ data }) => data.type === connectionApprovedEvent),
+                tap(this.setupStreams),
+                take(1),
+            ).toPromise();
+
         // ensure there is an open channel / port we can communicate on
         frame.contentWindow.postMessage({
-            type: 'aztec-connection',
+            type: connectionRequestEvent,
             requestId: randomId(),
             clientId: this.clientId,
             sender: 'WEB_CLIENT',
@@ -157,12 +167,7 @@ class Aztec {
                     contractsConfigs,
                 } = {},
             },
-        } = await fromEvent(window, 'message')
-            .pipe(
-                filter(({ data }) => data.type === 'aztec-connection'),
-                tap(this.setupStreams),
-                take(1),
-            ).toPromise();
+        } = await backgroundResponse;
 
         const {
             error: registerExtensionError,
