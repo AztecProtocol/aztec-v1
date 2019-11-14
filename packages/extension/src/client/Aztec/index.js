@@ -14,15 +14,12 @@ import {
 } from '~utils/random';
 import filterStream from '~utils/filterStream';
 import {
-    AZTECAccountRegistryConfig,
-    ACEConfig,
-} from '~/config/contracts';
-import {
     actionEvent,
     uiOpenEvent,
     uiCloseEvent,
 } from '~config/event';
 import Web3Service from '~/client/services/Web3Service';
+import ApiError from '~client/utils/ApiError';
 /* eslint-disable import/no-unresolved */
 import ZkAsset from '../../../build/protocol/ZkAsset';
 import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
@@ -30,9 +27,17 @@ import ERC20Mintable from '../../../build/protocol/ERC20Mintable';
 import getSiteData from '../utils/getSiteData';
 import assetFactory from '../apis/assetFactory';
 import noteFactory from '../apis/noteFactory';
-import { ensureExtensionInstalled, ensureDomainRegistered } from '../auth';
+import {
+    ensureExtensionInstalled,
+    ensureDomainRegistered,
+} from '../auth';
 import MetaMaskService from '../services/MetaMaskService';
 import backgroundFrame from './backgroundFrame';
+
+const clientContracts = [
+    'ACE',
+    'AZTECAccountRegistry',
+];
 
 class Aztec {
     constructor() {
@@ -116,50 +121,52 @@ class Aztec {
     }
 
     enable = async ({
-        contractAddresses = {},
+        providerUrl = 'ws://localhost:8545',
+        contractAddresses = {
+            ACE: '',
+            AZTECAccountRegistry: '',
+        },
     } = {}) => {
-        const frame = await backgroundFrame.init();
+        await Web3Service.init({
+            provider: window.ethereum,
+        });
 
+        const {
+            networkId,
+            account,
+        } = Web3Service;
+
+        const frame = await backgroundFrame.init();
         // ensure there is an open channel / port we can communicate on
         frame.contentWindow.postMessage({
             type: 'aztec-connection',
             requestId: randomId(),
             clientId: this.clientId,
             sender: 'WEB_CLIENT',
+            data: {
+                providerUrl,
+                contractAddresses,
+                networkId,
+                currentAddress: account.address,
+            },
         }, '*');
 
-        await fromEvent(window, 'message')
+        const {
+            data: {
+                response: {
+                    contractsConfigs,
+                } = {},
+            },
+        } = await fromEvent(window, 'message')
             .pipe(
                 filter(({ data }) => data.type === 'aztec-connection'),
                 tap(this.setupStreams),
                 take(1),
             ).toPromise();
 
-        if (!this.contractAddresses) {
-            this.contractAddresses = contractAddresses;
-        }
-
-        const web3Provider = await Web3Service.init({
-            provider: window.ethereum,
-        });
-
-        const networkId = web3Provider.networkVersion;
-        const {
-            config: accountRegistryContract,
-            networks: accountRegistryNetworks,
-        } = AZTECAccountRegistryConfig;
-        const accountRegistryAddress = this.contractAddresses.aztecAccountRegistry
-            || accountRegistryNetworks[networkId];
-
-        Web3Service.registerContract(accountRegistryContract, {
-            address: accountRegistryAddress,
-        });
-
         const {
             error: registerExtensionError,
-        } = await ensureExtensionInstalled({
-            contractAddresses,
-        });
+        } = await ensureExtensionInstalled();
         if (registerExtensionError) {
             throw new Error(registerExtensionError);
         }
@@ -171,15 +178,25 @@ class Aztec {
             throw new Error(ensureDomainRegisteredError);
         }
 
-        const {
-            config: aceContract,
-            networks: ACENetworks,
-        } = ACEConfig;
-        const aceAddress = this.contractAddresses.ace || ACENetworks[networkId];
-
-        Web3Service.registerContract(aceContract, {
-            address: aceAddress,
-        });
+        contractsConfigs
+            .filter(({ config }) => clientContracts.indexOf(config.contractName) >= 0)
+            .forEach(({
+                config,
+                address,
+            }) => {
+                if (!address) {
+                    throw new ApiError('input.contract.address.empty', {
+                        messageOptions: {
+                            contractName: config.contractName,
+                        },
+                        networkId,
+                        contractName: config.contractName,
+                    });
+                }
+                Web3Service.registerContract(config, {
+                    address,
+                });
+            });
         Web3Service.registerInterface(ERC20Mintable, {
             name: 'ERC20',
         });

@@ -30,6 +30,11 @@ export default {
         },
     },
     input: {
+        contract: {
+            address: {
+                empty: 'Please provide an address for contract "%{contractName}"',
+            },
+        },
         address: {
             not: {
                 valid: 'Input address not valid.',

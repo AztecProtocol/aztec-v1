@@ -1,5 +1,4 @@
 import filterStream from '~utils/filterStream';
-import AuthService from '~background/services/AuthService';
 import validateUserPermission from '../utils/validateUserPermision';
 
 const registerExtensionUi = async (query, connection) => {
@@ -50,22 +49,14 @@ const registerExtension = async (query, connection) => {
     const {
         data: { args },
     } = query;
+
     const {
-        networkId,
-        currentAddress,
-    } = args;
-
-    // We set the network id here so everything runs correctly
-    await AuthService.setNetworkConfig({
-        networkId,
-        currentAddress,
-    });
-
-    const response = await validateUserPermission({
+        userPermission: { account = {} },
+    } = await validateUserPermission({
         ...args,
         domain: window.location.origin,
-    });
-    const { userPermission: { account = {} } } = response;
+    }) || {};
+
     if (account && account.blockNumber) {
         return {
             ...query,
@@ -83,6 +74,5 @@ const registerExtension = async (query, connection) => {
 
     return registerExtensionUi(queryWithAccount, connection);
 };
-
 
 export default registerExtension;
