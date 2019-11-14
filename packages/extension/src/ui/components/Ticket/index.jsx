@@ -22,6 +22,7 @@ const Ticket = ({
     children,
     header,
     footer,
+    align,
     height,
 }) => {
     const edgeNodes = [];
@@ -40,11 +41,10 @@ const Ticket = ({
                 {edgeNodes}
             </div>
             <div className={styles.content}>
-
                 <FlexBox
-                    align="center"
                     direction="column"
-                    className="flex-free-expand"
+                    align="center"
+                    valign={align}
                     expand
                     stretch
                     nowrap
@@ -71,6 +71,11 @@ Ticket.propTypes = {
     children: PropTypes.node,
     header: PropTypes.node,
     footer: PropTypes.node,
+    align: PropTypes.oneOf([
+        'center',
+        'flex-start',
+        'flex-end',
+    ]),
     height: PropTypes.number,
 };
 
@@ -79,6 +84,7 @@ Ticket.defaultProps = {
     children: null,
     header: null,
     footer: null,
+    align: 'flex-start',
     height: 3,
 };
 

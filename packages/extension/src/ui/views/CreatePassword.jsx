@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import {
     Block,
     TextInput,
-    Text,
 } from '@aztec/guacamole-ui';
 import {
     errorShape,
@@ -29,8 +28,6 @@ const inputIconMapping = {
 };
 
 const CreatePassword = ({
-    title,
-    description,
     password,
     updateParentState,
     error,
@@ -48,21 +45,10 @@ const CreatePassword = ({
 
     return (
         <PopupContent
-            theme="white"
-            title={title || i18n.t('register.create.password.title')}
-            description={description || i18n.t('register.create.password.description')}
+            descriptionKey="register.create.password.description"
             error={error}
         >
             <Block align="left">
-                <Block padding="s s xl s" align="center">
-                    <Text
-                        text={i18n.t('register.create.password.description')}
-                        size="s"
-                        weight="light"
-                        textAlign="center"
-
-                    />
-                </Block>
                 <TextInput
                     setInputRef={setInputRef}
                     theme="inline"
@@ -91,16 +77,12 @@ const CreatePassword = ({
 };
 
 CreatePassword.propTypes = {
-    title: PropTypes.string,
-    description: PropTypes.string,
     password: PropTypes.string,
     updateParentState: PropTypes.func.isRequired,
     error: errorShape,
 };
 
 CreatePassword.defaultProps = {
-    title: '',
-    description: '',
     password: '',
     error: null,
 };

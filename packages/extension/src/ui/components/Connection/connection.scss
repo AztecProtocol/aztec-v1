@@ -1,5 +1,9 @@
 @import '../../styles/variables';
 
+.wrapper {
+  width: 100%;
+}
+
 $dot-dot-dot-spacing: (map-get($icon-size-map, 'xs') * 2)
   + (map-get($spacing-map, 'xs') * 6);
 

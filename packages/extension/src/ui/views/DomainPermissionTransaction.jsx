@@ -23,7 +23,6 @@ import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
 const DomainPermissionTransaction = ({
     assets: realAssets,
-    loading,
     error,
     visibleAssets,
 }) => {
@@ -77,81 +76,78 @@ const DomainPermissionTransaction = ({
 
     return (
         <PopupContent
-            theme="white"
-            loading={loading}
             error={error}
         >
-            <FlexBox
-                align="center"
-                valign="center"
-                direction="column"
-                stretch
-                nowrap
-                expand
-            >
-                <Block padding="0 l xl l">
-                    <Text
-                        text={i18n.t('domain.permission.explain')}
-                        size="s"
-                        weight="light"
-                    />
-                </Block>
-                <Block padding="l">
-                    {assets.length === 1 && (
-                        <ListItem
-                            profile={{
-                                type: 'asset',
-                                address: firstAsset.address,
-                                linkedTokenAddress: firstAsset.linkedTokenAddress,
-                            }}
-                            content={(
-                                <div>
-                                    <Text
-                                        size="s"
-                                        text={i18n.token(firstAsset.code)}
-                                        weight="semibold"
-                                        showEllipsis
-                                    />
-                                    <Text
-                                        className="text-code"
-                                        text={formatAddress(firstAsset.address, 12, 6)}
-                                        color="label"
-                                        size="xxs"
-                                    />
-                                </div>
-                            )}
-                        />
-                    )}
-                    {assets.length > 1 && (
-                        <ProfileIconGroup
-                            theme="white"
+            <Block padding="0 l">
+                <FlexBox
+                    direction="column"
+                    align="center"
+                    valign="center"
+                    stretch
+                    nowrap
+                >
+                    <Block padding="l 0">
+                        <Text
+                            text={i18n.t('domain.permission.explain')}
                             size="s"
-                            icons={icons}
-                            moreItems={moreItems}
+                            weight="light"
                         />
-                    )}
-                </Block>
-                <Block padding="xl l l l">
-                    <Text
-                        text={i18n.t('domain.permission.footer')}
-                        size="s"
-                    />
-                </Block>
-            </FlexBox>
+                    </Block>
+                    <Block padding="l 0">
+                        {assets.length === 1 && (
+                            <ListItem
+                                profile={{
+                                    type: 'asset',
+                                    address: firstAsset.address,
+                                    linkedTokenAddress: firstAsset.linkedTokenAddress,
+                                }}
+                                content={(
+                                    <div>
+                                        <Text
+                                            size="s"
+                                            text={i18n.token(firstAsset.code)}
+                                            weight="semibold"
+                                            showEllipsis
+                                        />
+                                        <Text
+                                            className="text-code"
+                                            text={formatAddress(firstAsset.address, 12, 6)}
+                                            color="label"
+                                            size="xxs"
+                                        />
+                                    </div>
+                                )}
+                            />
+                        )}
+                        {assets.length > 1 && (
+                            <ProfileIconGroup
+                                theme="white"
+                                size="s"
+                                icons={icons}
+                                moreItems={moreItems}
+                            />
+                        )}
+                    </Block>
+                    <Block padding="l 0">
+                        <Text
+                            text={i18n.t('domain.permission.footer')}
+                            size="s"
+                        />
+                    </Block>
+                </FlexBox>
+            </Block>
         </PopupContent>
     );
 };
 
 DomainPermissionTransaction.propTypes = {
     assets: PropTypes.arrayOf(assetShape),
-    loading: PropTypes.bool,
     error: errorShape,
     visibleAssets: PropTypes.number,
 };
 
 DomainPermissionTransaction.defaultProps = {
     assets: [],
-    loading: false,
     error: null,
     visibleAssets: 3,
 };

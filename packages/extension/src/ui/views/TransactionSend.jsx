@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
     Text,
     SVG,
@@ -17,38 +16,22 @@ const TransactionSend = ({
     footnoteKey,
 }) => (
     <PopupContent
-        theme="white"
+        description={description}
+        descriptionKey={descriptionKey}
     >
-        <FlexBox
-            direction="column"
-            align="center"
-            valign="center"
-            className="flex-free-expand"
-            expand
-            stretch
-            nowrap
-        >
-            <Block padding="0 l l l">
-                <Text
-                    text={description || i18n.t(descriptionKey)}
-                    size="s"
-                    weight="light"
-                />
-            </Block>
-            <Block padding="xl 0 xl 0">
-                <SVG
-                    glyph={sendGlyph}
-                    width={100}
-                    height={100}
-                />
-            </Block>
-            <Block padding="0 l">
-                <Text
-                    text={footnote || i18n.t(footnoteKey)}
-                    size="s"
-                />
-            </Block>
-        </FlexBox>
+        <Block padding="xl 0">
+            <SVG
+                glyph={sendGlyph}
+                width={100}
+                height={100}
+            />
+        </Block>
+        <Block padding="l">
+            <Text
+                text={footnote || i18n.t(footnoteKey)}
+                size="s"
+            />
+        </Block>
     </PopupContent>
 );
 

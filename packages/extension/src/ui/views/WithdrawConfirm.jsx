@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -28,18 +27,8 @@ const WithdrawConfirm = ({
     transactions: [firstTransaction],
 }) => (
     <PopupContent
-        theme="white"
-    >
-        <FlexBox
-            direction="column"
-            align="center"
-            valign="center"
-            className="flex-free-expand"
-            expand
-            stretch
-            nowrap
-        >
-            <Block padding="m xl">
+        title={(
+            <div>
                 <Text
                     text={i18n.t('withdraw.confirm.title')}
                     size="xl"
@@ -57,48 +46,49 @@ const WithdrawConfirm = ({
                     size="xl"
                     weight="light"
                 />
-            </Block>
-            <Ticket height={2}>
-                <Connection
-                    theme="white"
-                    from={{
-                        profile: {
-                            type: 'asset',
-                            address: assetAddress,
-                            linkedTokenAddress,
-                        },
-                        description: formatAddress(assetAddress, 6, 4),
-                    }}
-                    to={{
-                        profile: {
-                            type: 'user',
-                            address: firstTransaction.to,
-                        },
-                        tooltip: (
-                            <ListItem
-                                content={formatAddress(firstTransaction.to, 6, 4)}
-                                size="xxs"
-                                footnote={(
-                                    <Text
-                                        text={`+${formatValue(code, firstTransaction.amount)}`}
-                                        color="green"
-                                    />
-                                )}
-                            />
-                        ),
-                        description: formatAddress(firstTransaction.to, 6, 4),
-                    }}
-                    size="s"
-                    actionIconName="double_arrow"
-                />
-            </Ticket>
-            <Block padding="m xl">
-                <Text
-                    text={i18n.t('withdraw.confirm.explain')}
-                    size="s"
-                />
-            </Block>
-        </FlexBox>
+            </div>
+        )}
+    >
+        <Ticket height={2}>
+            <Connection
+                theme="white"
+                from={{
+                    profile: {
+                        type: 'asset',
+                        address: assetAddress,
+                        linkedTokenAddress,
+                    },
+                    description: formatAddress(assetAddress, 6, 4),
+                }}
+                to={{
+                    profile: {
+                        type: 'user',
+                        address: firstTransaction.to,
+                    },
+                    tooltip: (
+                        <ListItem
+                            content={formatAddress(firstTransaction.to, 6, 4)}
+                            size="xxs"
+                            footnote={(
+                                <Text
+                                    text={`+${formatValue(code, firstTransaction.amount)}`}
+                                    color="green"
+                                />
+                            )}
+                        />
+                    ),
+                    description: formatAddress(firstTransaction.to, 6, 4),
+                }}
+                size="s"
+                actionIconName="double_arrow"
+            />
+        </Ticket>
+        <Block padding="l">
+            <Text
+                text={i18n.t('withdraw.confirm.explain')}
+                size="xs"
+            />
+        </Block>
     </PopupContent>
 );
 

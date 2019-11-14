@@ -88,7 +88,7 @@ export default {
     },
     'withdraw.sign': {
         proof: {
-            inputNotes: generate(3, () => ({
+            inputNotes: generate(5, () => ({
                 noteHash: `0x${randomId()}`,
                 k: {
                     words: [randomInt(100)],

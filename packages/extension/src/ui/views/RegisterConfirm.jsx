@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Block,
-    FlexBox,
     Text,
     SVG,
 } from '@aztec/guacamole-ui';
@@ -17,51 +16,34 @@ const RegisterConfirm = ({
     linkedPublicKey,
 }) => (
     <PopupContent
-        theme="white"
+        descriptionKey="register.confirm.blurb"
     >
-        <FlexBox
-            className="flex-free-expand"
-            direction="column"
-            align="space-between"
-        >
-            <Block padding="m 0">
-                <Text
-                    text={i18n.t('register.confirm.blurb')}
-                    size="s"
-                    weight="light"
-                />
-            </Block>
-            <Block padding="m 0 l 0">
-                <SVG
-                    glyph={sendGlyph}
-                    width={70}
-                    height={70}
-                />
-            </Block>
-            <Block
-                padding="xs"
-                background="white-lighter"
-                borderRadius="s"
-            >
-                <Block padding="s">
+        <Block padding="s 0">
+            <SVG
+                glyph={sendGlyph}
+                width={70}
+                height={70}
+            />
+        </Block>
+        <Block padding="s 0">
+            <Block padding="xs 0">
+                <Block
+                    padding="l"
+                    borderRadius="s"
+                    background="white-lighter"
+                >
                     <ListItem
-                        profile={{
-                            type: 'user',
-                            address,
-                        }}
                         content={`${i18n.t('account.address')}:`}
                         size="xs"
                         weight="light"
                         footnote={(
                             <Text
-                                text={`${formatAddress(address, 12, 4)}`}
+                                text={`${formatAddress(address, 18, 4)}`}
                                 size="xs"
                                 color="label"
                             />
                         )}
                     />
-                </Block>
-                <Block padding="s">
                     <ListItem
                         content={`${i18n.t('account.linkedPublicKey')}:`}
                         size="xs"
@@ -76,13 +58,13 @@ const RegisterConfirm = ({
                     />
                 </Block>
             </Block>
-            <Block padding="m s">
+            <Block padding="xs m">
                 <Text
                     text={i18n.t('register.confirm.explain')}
                     size="s"
                 />
             </Block>
-        </FlexBox>
+        </Block>
     </PopupContent>
 );
 

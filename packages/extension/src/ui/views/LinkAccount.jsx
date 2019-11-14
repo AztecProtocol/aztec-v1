@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import {
     Block,
     Text,
-    FlexBox,
     SVG,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
@@ -17,11 +16,8 @@ const LinkAccount = ({
     address,
 }) => (
     <PopupContent
-        theme="white"
+        descriptionKey="register.linkAccount.blurb"
     >
-        <Block padding="m 0 l 0">
-            <Text text={i18n.t('register.linkAccount.blurb')} size="s" weight="light" />
-        </Block>
         <Block padding="s 0">
             <SVG
                 glyph={linkGlyph}
@@ -29,9 +25,13 @@ const LinkAccount = ({
                 height={70}
             />
         </Block>
-        <Block padding="m 0 m 0">
-            <Block padding="l" borderRadius="s" background="white-lighter">
-                <FlexBox direction="column" align="center" valign="flex-start">
+        <Block padding="s 0">
+            <Block padding="xs 0">
+                <Block
+                    padding="l"
+                    borderRadius="s"
+                    background="white-lighter"
+                >
                     <ListItem
                         content={`${i18n.t('account.address')}:`}
                         size="xs"
@@ -56,9 +56,9 @@ const LinkAccount = ({
                             />
                         )}
                     />
-                </FlexBox>
+                </Block>
             </Block>
-            <Block padding="l m">
+            <Block padding="xs m">
                 <Text
                     text={i18n.t('register.linkAccount.important')}
                     color="red"
