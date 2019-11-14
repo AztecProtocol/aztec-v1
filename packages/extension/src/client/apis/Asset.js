@@ -3,6 +3,7 @@ import query from '~client/utils/query';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
 import proofFactory from './assetProofFactory';
+import getGsnConfig from '~client/config/getGsnConfig';
 
 const dataProperties = [
     'address',
@@ -152,6 +153,7 @@ export default class Asset {
         const {
             address,
         } = Web3Service.account;
+        const gsnConfig = await getGsnConfig();
 
         return query({
             type: 'constructProof',
@@ -162,6 +164,7 @@ export default class Asset {
                 from: from || address,
                 sender: sender || address,
                 numberOfOutputNotes,
+                gsnConfig,
             },
         });
     };
@@ -173,6 +176,7 @@ export default class Asset {
         const {
             address,
         } = Web3Service.account;
+        const gsnConfig = await getGsnConfig();
 
         return query({
             type: 'constructProof',
@@ -182,6 +186,7 @@ export default class Asset {
                 transactions,
                 sender: sender || address,
                 numberOfInputNotes,
+                gsnConfig,
             },
         });
     };

@@ -5,6 +5,7 @@ export default function withdraw({
     sender,
     transactions,
     numberOfInputNotes,
+    gsnConfig,
 }) {
     return createNoteFromBalance({
         assetAddress,
@@ -12,5 +13,6 @@ export default function withdraw({
         transactions,
         numberOfInputNotes,
         numberOfOutputNotes: 0,
+        gsnConfig,
     });
 }

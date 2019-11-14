@@ -13,8 +13,11 @@ import WithdrawSign from '~ui/views/WithdrawSign';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import apis from '~uiModules/apis';
+import {
+    gsnConfigShape,
+} from '~ui/config/propTypes';
 
-const steps = [
+const metamaskSteps = [
     {
         titleKey: 'withdraw.confirm.title',
         submitText: 'withdraw.confirm.submitText',
@@ -54,6 +57,46 @@ const steps = [
     },
 ];
 
+const gsnSteps = [
+    {
+        titleKey: 'withdraw.confirm.title',
+        submitText: 'withdraw.confirm.submitText',
+        cancelText: 'withdraw.confirm.cancelText',
+        content: WithdrawConfirm,
+        tasks: [
+            {
+                name: 'proof',
+                run: apis.proof.withdraw,
+            },
+        ],
+    },
+    {
+        titleKey: 'withdraw.notes.title',
+        submitText: 'withdraw.notes.submitText',
+        cancelText: 'withdraw.notes.cancelText',
+        content: WithdrawSign,
+        tasks: [
+            {
+                type: 'sign',
+                name: 'approve',
+                run: apis.note.signNotes,
+            },
+        ],
+    },
+    {
+        titleKey: 'withdraw.send.title',
+        submitText: 'withdraw.send.submitText',
+        cancelText: 'withdraw.send.cancelText',
+        content: WithdrawSend,
+        tasks: [
+            {
+                name: 'send',
+                run: apis.asset.confidentialTransferFrom,
+            },
+        ],
+    },
+];
+
 const Withdraw = ({
     assetAddress,
     sender,
@@ -61,7 +104,13 @@ const Withdraw = ({
     numberOfInputNotes,
     numberOfOutputNotes,
     currentAccount,
+    gsnConfig,
 }) => {
+    const {
+        isGSNAvailable,
+    } = gsnConfig;
+    const steps = isGSNAvailable ? gsnSteps : metamaskSteps;
+
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
 
@@ -71,6 +120,7 @@ const Withdraw = ({
             to: sender,
             transactions,
             numberOfInputNotes,
+            gsnConfig,
         };
     };
 
@@ -87,6 +137,7 @@ const Withdraw = ({
                     sender,
                     numberOfOutputNotes,
                     proofId: proofs.JOIN_SPLIT_PROOF,
+                    gsnConfig,
                 }
             }
             onExit={returnAndClose}
@@ -102,6 +153,7 @@ Withdraw.propTypes = {
         to: PropTypes.string.isRequired,
     })).isRequired,
     numberOfInputNotes: PropTypes.number,
+    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Withdraw.defaultProps = {

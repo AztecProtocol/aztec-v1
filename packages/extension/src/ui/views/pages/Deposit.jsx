@@ -13,9 +13,51 @@ import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import DepositApprove from '~ui/views/DepositApprove';
 import DepositSend from '~ui/views/DepositSend';
 import apis from '~uiModules/apis';
+import {
+    gsnConfigShape,
+} from '~ui/config/propTypes';
 
+const metamaskSteps = [
+    {
+        titleKey: 'deposit.confirm.title',
+        tasks: [
+            {
+                name: 'proof',
+                run: apis.proof.deposit,
+            },
+        ],
+        content: DepositConfirm,
+        submitText: 'deposit.confirm.submitText',
+        cancelText: 'deposit.confirm.cancelText',
+    },
+    {
+        titleKey: 'deposit.approve.title',
+        tasks: [
+            {
+                type: 'sign',
+                name: 'approve',
+                run: apis.ace.publicApprove,
+            },
+        ],
+        content: DepositApprove,
+        submitText: 'deposit.approve.submitText',
+        cancelText: 'deposit.approve.cancelText',
+    },
+    {
+        titleKey: 'deposit.send.title',
+        tasks: [
+            {
+                name: 'send',
+                run: apis.asset.confidentialTransfer,
+            },
+        ],
+        content: DepositSend,
+        submitText: 'deposit.send.submitText',
+        cancelText: 'deposit.send.cancelText',
+    },
+];
 
-const steps = [
+const gsnSteps = [
     {
         titleKey: 'deposit.confirm.title',
         tasks: [
@@ -72,7 +114,15 @@ const Deposit = ({
     assetAddress,
     transactions,
     numberOfOutputNotes,
+    gsnConfig,
 }) => {
+    const {
+        isGSNAvailable,
+        proxyContract,
+    } = gsnConfig;
+    const steps = isGSNAvailable ? gsnSteps : metamaskSteps;
+    const actualSender = isGSNAvailable ? proxyContract : sender;
+
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const amount = transactions.reduce((sum, t) => sum + t.amount, 0);
@@ -80,7 +130,7 @@ const Deposit = ({
         return {
             asset,
             from,
-            sender,
+            sender: actualSender,
             amount,
             transactions,
             numberOfOutputNotes,
@@ -97,7 +147,7 @@ const Deposit = ({
                     owner: from,
                     publicOwner: from,
                     transactions,
-                    sender,
+                    sender: actualSender,
                     numberOfOutputNotes,
                     signatures: '0x',
                     proofId: proofs.JOIN_SPLIT_PROOF,
@@ -118,6 +168,7 @@ Deposit.propTypes = {
         to: PropTypes.string.isRequired,
     })).isRequired,
     numberOfOutputNotes: PropTypes.number,
+    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Deposit.defaultProps = {

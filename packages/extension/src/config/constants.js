@@ -1,3 +1,5 @@
+import ACE from '../../build/contracts/ACE.json';
+
 // exluding 0x
 export const ADDRESS_LENGTH = 40;
 
@@ -22,8 +24,11 @@ export const NOTE_STATUS = {
     DESTROYED: 'DESTROYED',
 };
 
+export const GANACHE_NETWORK_ID = Object.keys(ACE.networks).pop();
+
 export const NETWORKS = {
     GANACHE: {
+        id: GANACHE_NETWORK_ID,
         networkName: 'ganache',
     },
     MAIN: {
@@ -62,9 +67,9 @@ export const NETWORKS_NAMES = (networkId) => {
             return 'goerli';
         case 42:
             return 'goerli';
-      
-        // TODO: check compiled contracts wether it is exectly ganache
-        default:
+        case GANACHE_NETWORK_ID:
             return 'ganache';
+        default:
+            return null;
     }
-}
+};

@@ -53,6 +53,10 @@ class Web3Service {
         return web3Provider;
     }
 
+    async networkId() {
+        return this.web3.eth.net.getId();
+    }
+
     registerContract(
         config,
         {
@@ -294,7 +298,7 @@ class Web3Service {
             const options = {
                 from: fromAddress,
                 ...methodSetting,
-                gas: 6500000,
+                // gas: 6500000,
             };
             const methodSend = method(...methodArgs).send(options);
             methodSend.once('transactionHash', (receipt) => {
