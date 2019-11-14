@@ -2,7 +2,6 @@ export default {
     create: {
         _: 'Create new account',
         title: 'AZTEC',
-        description: 'Welcome to acest ante ipsum primis. Let\'s get you started.',
         already: 'Already have an account?',
     },
     login: {

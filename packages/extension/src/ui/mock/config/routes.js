@@ -1,6 +1,5 @@
 import Home from '~/ui/views/Home';
 import Loading from '~/ui/views/Loading';
-import Welcome from '~/ui/views/Welcome';
 import Register from '~/ui/pages/Register';
 import RegisterAddress from '~/ui/pages/RegisterAddress';
 import DomainPermission from '~/ui/pages/DomainPermission';
@@ -22,10 +21,6 @@ export default {
     loading: {
         path: 'loading',
         Component: Loading,
-    },
-    welcome: {
-        path: 'welcome',
-        Component: Welcome,
     },
     register: {
         path: 'register',
