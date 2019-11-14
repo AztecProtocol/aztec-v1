@@ -8,6 +8,7 @@ import {
     randomId,
 } from '~utils/random';
 import LRU from '~utils/caches/LRU';
+import NetworkService from '~/helpers/NetworkService/factory';
 
 class ConnectionManager {
     constructor({
@@ -35,6 +36,11 @@ class ConnectionManager {
         const promise = new Promise((resolve) => {
             const handleReceiveMessage = (e) => {
                 if (e.data.type === 'aztec-connection') {
+                    const {
+                        response,
+                    } = e.data;
+                    NetworkService.setConfigs([response]);
+
                     [this.port] = e.ports;
                     this.port.onmessage = this.handlePortResponse;
                     window.removeEventListener('message', handleReceiveMessage);

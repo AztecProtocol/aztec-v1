@@ -7,10 +7,12 @@ import {
 
 class Web3Service {
     constructor() {
-        this.web3 = null; this.contracts = {};
+        this.web3 = null;
+        this.eth = null;
+        this.contracts = {};
         this.abis = {};
         this.account = null;
-        this.eth = {};
+        this.networkId = 0;
     }
 
     async init({
@@ -25,7 +27,7 @@ class Web3Service {
             ({ web3 } = window);
         } else {
             errorLog('Provider cannot be empty.');
-            return null;
+            return;
         }
 
         if (typeof provider.enable === 'function') {
@@ -33,7 +35,7 @@ class Web3Service {
         }
 
         this.web3 = web3;
-        this.eth = this.web3.eth;
+        this.eth = web3.eth;
 
         if (account) {
             this.account = account;
@@ -46,7 +48,9 @@ class Web3Service {
             }
         }
 
-        return web3Provider;
+        this.networkId = web3Provider
+            ? web3Provider.networkVersion
+            : 0;
     }
 
     registerContract(
@@ -185,7 +189,7 @@ class Web3Service {
                 .deploy(deployOptions)
                 .send({
                     from: address,
-                    gas: parseInt(gas * 1.1),
+                    gas: parseInt(gas * 1.1, 10),
                 })
                 .once('transactionHash', (receipt) => {
                     const interval = setInterval(() => {

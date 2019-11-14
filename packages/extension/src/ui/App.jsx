@@ -19,7 +19,6 @@ import routes from '~uiModules/config/routes';
 import actions from '~ui/config/actions';
 import './styles/guacamole.css';
 import './styles/_reset.scss';
-import configureWeb3Networks from '~utils/configureWeb3Networks';
 
 class App extends PureComponent {
     constructor(props) {
@@ -51,9 +50,8 @@ class App extends PureComponent {
         } = this.props;
         if (mock) return;
 
-        await ConnectionService.openConnection(window);
-        await configureWeb3Networks();
-        this.loadInitialStates();
+        await ConnectionService.openConnection();
+        await this.loadInitialStates();
     }
 
     componentDidUpdate() {

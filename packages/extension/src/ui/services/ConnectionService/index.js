@@ -11,7 +11,7 @@ import ConnectionManager from './helpers/ConnectionManager';
 const manager = new ConnectionManager();
 
 export default {
-    openConnection: source => manager.openConnection(source),
+    openConnection: () => manager.openConnection(),
     close: ({
         abort = false,
         error = null,
