@@ -35,6 +35,7 @@ export default async function createNoteFromBalance({
     // userAccess,
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
+    gsnConfig,
 }) {
     const inputNotesOwner = await getExtensionAccount(sender);
     let inputAmount = amount;
@@ -177,10 +178,16 @@ export default async function createNoteFromBalance({
         inputValues,
         outputValues,
     );
+    const {
+        isGSNAvailable,
+        proxyContract,
+    } = gsnConfig;
+    const actualSender = isGSNAvailable ? proxyContract : inputNotesOwner.address;
+
     const proof = new JoinSplitProof(
         inputNotes,
         outputNotes,
-        inputNotesOwner.address,
+        actualSender,
         publicValue,
         publicOwner || inputNotesOwner.address,
     );

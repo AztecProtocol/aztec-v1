@@ -6,11 +6,11 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBounc
 
 import "../libs/NoteUtils.sol";
 import "../interfaces/IZkAsset.sol";
-import "../interfaces/IACE.sol" as IACEModule;
 import "../interfaces/IERC20.sol";
 import "../interfaces/IAZTEC.sol";
 import "../libs/LibEIP712.sol";
 import "./AZTECAccountRegistry.sol";
+import "../ACE/ACE.sol" as ACEModule;
 
 /**
  * @title AZTECAccountRegistryGSN implementation
@@ -20,7 +20,7 @@ import "./AZTECAccountRegistry.sol";
 
 contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
-    IACEModule.IACE ace;
+    ACEModule.IACE ace;
 
     using NoteUtils for bytes;
     constructor(
@@ -29,7 +29,7 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
     ) public {
         GSNRecipient.initialize();
         GSNBouncerSignature.initialize(_trustedAddress);
-        ace = IACEModule.IACE(_ace);
+        ace = ACEModule.IACE(_ace);
     }
 
     function confidentialTransferFrom(address _registryOwner, bytes memory _proofData) public {
@@ -37,8 +37,12 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
         IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
     }
 
-    function approve(address _erc20, address spender, uint256 value) public {
-        IERC20(_erc20).approve(spender, value);
+    function confidentialTransfer(address _registryOwner, bytes memory _proofData, bytes memory _signatures) public {
+        IZkAsset(_registryOwner).confidentialTransfer(_proofData, _signatures);
+    }
+
+    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
+        ace.publicApprove(_registryOwner, _proofHash, _value);
     }
 }
 

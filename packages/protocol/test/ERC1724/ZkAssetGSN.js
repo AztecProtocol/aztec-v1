@@ -107,12 +107,6 @@ describe('ZkAsset with GSN', () => {
         await erc20.methods.approve(ace.options.address, amount)
             .send({ from: sender, gas: 6e6 });
 
-        // await erc20.methods.mint(accountRegistry.options.address, amount)
-        //     .send({ from: owner, gas: 6e6 });
-
-        // await accountRegistry.methods.approve(erc20.options.address, ace.options.address, amount)
-        //     .send({ from: sender, gas: 6e6, useGSN: false });
-
         const zkAssetTemplate = new web3.eth.Contract(ZkAsset.abi, null, { data: ZkAsset.bytecode });
         zkAsset = await zkAssetTemplate
             .deploy({ arguments: [ace.options.address, erc20.options.address, scalingFactor] })

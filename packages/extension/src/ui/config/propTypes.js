@@ -54,3 +54,8 @@ export const profileShape = PropTypes.oneOfType([
     userProfileShape,
     generalProfileShape,
 ]);
+
+export const gsnConfigShape = PropTypes.shape({
+    isGSNAvailable: PropTypes.bool,
+    proxyContract: PropTypes.string,
+});
