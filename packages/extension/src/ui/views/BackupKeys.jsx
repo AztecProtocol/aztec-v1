@@ -9,9 +9,7 @@ import PopupContent from '~ui/components/PopupContent';
 const BackupKeys = ({
     seedPhrase,
 }) => (
-    <PopupContent
-        theme="white"
-    >
+    <PopupContent>
         <Block
             padding="l"
             background="white-lighter"

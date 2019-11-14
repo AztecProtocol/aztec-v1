@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -23,20 +22,13 @@ const DepositConfirm = ({
     transactions,
     amount: totalAmount,
 }) => (
-    <PopupContent
-        theme="white"
-    >
-        <FlexBox
-            direction="column"
-            align="center"
-            valign="center"
-            className="flex-free-expand"
-            expand
-            stretch
-            nowrap
-        >
-            <Ticket height={3}>
-                <Block padding="0 s">
+    <PopupContent>
+        <Block padding="m 0">
+            <Ticket
+                align="center"
+                height={3}
+            >
+                <Block align="left">
                     <ListRow
                         title={i18n.t('deposit.from')}
                         content={(
@@ -46,10 +38,9 @@ const DepositConfirm = ({
                                     type: 'user',
                                     address: fromAddress,
                                 }}
-                                content={<Text text={formatAddress(fromAddress, 10, 3)} size="xs" />}
-                                textSize="xs"
-                                color="black"
+                                content={<Text text={formatAddress(fromAddress, 10, 4)} size="xs" />}
                                 size="xxs"
+                                textSize="xs"
                             />
                         )}
                     />
@@ -62,64 +53,63 @@ const DepositConfirm = ({
                                     ...asset,
                                     type: 'asset',
                                 }}
-                                content={<Text text={formatAddress(asset.address, 10, 3)} size="xs" color="secondary" />}
-                                color="black"
-                                textSize="inherit"
+                                content={<Text text={formatAddress(asset.address, 10, 4)} size="xs" color="secondary" />}
                                 size="xxs"
+                                textSize="xs"
                             />
                         )}
                     />
                     <ListRow
                         title={i18n.t('deposit.amount.total')}
-                        content={<Text text={formatValue(asset.code, totalAmount)} color="green" size="m" />}
+                        content={formatValue(asset.code, totalAmount)}
+                        size="xs"
+                        contentSize="s"
+                        color="green"
                     />
                 </Block>
             </Ticket>
-            <Block padding="0 xl">
-                <Block top="xl">
-                    <Separator
-                        theme="white"
-                        title={i18n.t('to')}
-                    />
-                    <Block padding="m 0">
-                        <InplacePopup
-                            theme="white"
-                            items={transactions}
-                            renderItem={({
-                                amount,
-                                to,
-                            }) => (
-                                <ListItem
-                                    className="text-code"
-                                    profile={{
-                                        type: 'user',
-                                        address: to,
-                                    }}
-                                    content={formatAddress(to, 12, 4)}
-                                    size="xxs"
-                                    color="label"
-                                    footnote={(
-                                        <Text
-                                            text={`+${formatValue(asset.code, amount)}`}
-                                            color="green"
-                                        />
-                                    )}
+        </Block>
+        <Block padding="m xl">
+            <Separator
+                theme="white"
+                title={i18n.t('to')}
+            />
+            <Block padding="m 0">
+                <InplacePopup
+                    theme="white"
+                    items={transactions}
+                    renderItem={({
+                        amount,
+                        to,
+                    }) => (
+                        <ListItem
+                            className="text-code"
+                            profile={{
+                                type: 'user',
+                                address: to,
+                            }}
+                            content={formatAddress(to, 12, 4)}
+                            size="xxs"
+                            footnote={(
+                                <Text
+                                    text={`+${formatValue(asset.code, amount)}`}
+                                    color="green"
                                 />
                             )}
-                            itemMargin="xs 0"
-                            margin="xs m"
-                            numberOfVisibleItems={2}
                         />
-                    </Block>
-                </Block>
-            </Block>
-            <Block padding="m xl">
-                <Text
-                    text={i18n.t('deposit.confirm.explain')}
-                    size="s"
+                    )}
+                    itemMargin="xs 0"
+                    margin="xs m"
+                    numberOfVisibleItems={2}
                 />
             </Block>
-        </FlexBox>
+            <Block padding="m 0">
+                <Text
+                    text={i18n.t('deposit.confirm.explain')}
+                    size="xs"
+                />
+            </Block>
+        </Block>
     </PopupContent>
 );
 

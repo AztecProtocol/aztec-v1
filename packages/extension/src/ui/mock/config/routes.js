@@ -54,6 +54,13 @@ export default {
             address: {
                 path: 'address',
                 Component: RegisterAddress,
+                routes: {
+                    confirm: {
+                        path: 'confirm',
+                        Component: RegisterAddress,
+                        initialStep: 1,
+                    },
+                },
             },
             domain: {
                 path: 'domain',

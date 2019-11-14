@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
-    Offset,
     Text,
 } from '@aztec/guacamole-ui';
 import {
@@ -35,83 +33,74 @@ const NoteAccessConfirm = ({
 
     return (
         <PopupContent
-            theme="white"
             error={invalidAccounts ? { key: 'note.access.invalidAccounts' } : undefined}
         >
-            <FlexBox
-                direction="column"
-                align="center"
-                valign="center"
-                className="flex-free-expand"
-                expand
-                stretch
-                nowrap
-            >
-                <div>
-                    <Ticket height={2}>
-                        <Offset top="xs">
-                            <ListRow
-                                title={i18n.t('asset')}
-                                content={(
-                                    <ListItem
-                                        profile={{
-                                            ...asset,
-                                            type: 'asset',
-                                        }}
-                                        content={formatAddress(asset.address, 10, 6)}
-                                        size="xxs"
-                                        textSize="inherit"
-                                    />
-                                )}
-                            />
-                            <ListRow
-                                title={i18n.t('note.hash')}
-                                content={formatAddress(noteHash, 10, 6)}
-                            />
-                            <ListRow
-                                title={i18n.t('note.value')}
-                                content={formatValue(asset.code, value)}
-                            />
-                        </Offset>
-                    </Ticket>
-                    <Block padding="0 xl">
-                        <Block top="xl">
-                            <Separator
-                                theme="white"
-                                title={i18n.t('to')}
-                            />
-                            <Block padding="m 0">
-                                <InplacePopup
-                                    theme="white"
-                                    items={accounts}
-                                    renderItem={({ address, linkedPublicKey }) => (
-                                        <ListItem
-                                            className="text-code"
-                                            profile={{
-                                                type: 'user',
-                                                address,
-                                            }}
-                                            content={formatAddress(address, 18, 8)}
-                                            size="xxs"
-                                            color={linkedPublicKey ? 'label' : 'red'}
-                                        />
-                                    )}
-                                    itemMargin="xs 0"
-                                    margin="xs m"
-                                    numberOfVisibleItems={2}
+            <Block padding="m 0">
+                <Ticket
+                    height={2}
+                    align="center"
+                >
+                    <Block align="left">
+                        <ListRow
+                            title={i18n.t('asset')}
+                            content={(
+                                <ListItem
+                                    profile={{
+                                        ...asset,
+                                        type: 'asset',
+                                    }}
+                                    content={formatAddress(asset.address, 16, 6)}
+                                    size="xxs"
+                                    textSize="xs"
                                 />
-                            </Block>
-                        </Block>
+                            )}
+                        />
+                        <ListRow
+                            title={i18n.t('note.hash')}
+                            content={formatAddress(noteHash, 16, 6)}
+                        />
+                        <ListRow
+                            title={i18n.t('note.value')}
+                            content={formatValue(asset.code, value)}
+                            color="primary"
+                        />
                     </Block>
-                </div>
-                <Block padding="0 xl">
+                </Ticket>
+            </Block>
+            <Block padding="m xl">
+                <Separator
+                    theme="white"
+                    title={i18n.t('to')}
+                />
+                <Block padding="m 0">
+                    <InplacePopup
+                        theme="white"
+                        items={accounts}
+                        renderItem={({ address, linkedPublicKey }) => (
+                            <ListItem
+                                className="text-code"
+                                profile={{
+                                    type: 'user',
+                                    address,
+                                }}
+                                content={formatAddress(address, 18, 8)}
+                                size="xxs"
+                                color={linkedPublicKey ? 'default' : 'red'}
+                            />
+                        )}
+                        itemMargin="xs 0"
+                        margin="xs m"
+                        numberOfVisibleItems={2}
+                    />
+                </Block>
+                <Block padding="m 0">
                     <Text
                         text={i18n.t('note.access.grant.explain')}
-                        size="xxs"
+                        size="xs"
                         color="label"
                     />
                 </Block>
-            </FlexBox>
+            </Block>
         </PopupContent>
     );
 };

@@ -31,7 +31,6 @@ const RegisterIntro = () => {
 
     return (
         <PopupContent
-            theme="white"
             footerLink={{
                 text: i18n.t('account.restore.fromSeedPhrase'),
                 href: router.u('account.restore'),

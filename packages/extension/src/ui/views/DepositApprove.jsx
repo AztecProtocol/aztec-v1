@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
     Text,
     SVG,
@@ -18,17 +17,8 @@ const DepositApprove = ({
     amount: totalAmount,
 }) => (
     <PopupContent
-        theme="white"
-    >
-        <FlexBox
-            direction="column"
-            align="center"
-            className="flex-free-expand"
-            expand
-            stretch
-            nowrap
-        >
-            <Block padding="0 s l s">
+        title={(
+            <div>
                 <Text
                     text={i18n.t('deposit.approve.amount')}
                     size="xl"
@@ -44,21 +34,22 @@ const DepositApprove = ({
                     size="xl"
                     weight="light"
                 />
-            </Block>
-            <Block padding="l 0 l 0">
-                <SVG
-                    glyph={approveGlyph}
-                    width={80}
-                    height={80}
-                />
-            </Block>
-            <Block padding="l m">
-                <Text
-                    text={i18n.t('deposit.approve.explain')}
-                    size="s"
-                />
-            </Block>
-        </FlexBox>
+            </div>
+        )}
+    >
+        <Block padding="l 0">
+            <SVG
+                glyph={approveGlyph}
+                width={80}
+                height={80}
+            />
+        </Block>
+        <Block padding="l">
+            <Text
+                text={i18n.t('deposit.approve.explain')}
+                size="s"
+            />
+        </Block>
     </PopupContent>
 );
 

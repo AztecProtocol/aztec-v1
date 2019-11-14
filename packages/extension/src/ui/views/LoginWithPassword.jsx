@@ -48,56 +48,45 @@ const LoginWithPassword = ({
 
     return (
         <PopupContent
-            theme="white"
+            descriptionKey="account.login.description"
             error={error}
         >
-            <Block align="left">
-                <Block padding="s s xl s" align="center">
-                    <Text
-                        text={i18n.t('account.login.description')}
-                        size="s"
-                        weight="light"
-                        textAlign="center"
-
-                    />
-                </Block>
-                <Block
-                    top="l"
-                    bottom="l"
-                    align="center"
-                >
-                    <ProfileIcon
-                        type="user"
-                        address={address}
-                    />
-                    <Block
-                        top="m"
-                        bottom="m"
-                    >
-                        <Text
-                            className="text-code"
-                            text={formatAddress(address, 16, 10)}
-                            color="label"
-                            size="xxs"
-                        />
-                    </Block>
-                </Block>
-                <TextInput
-                    setInputRef={setInputRef}
-                    theme="inline"
-                    type={visible ? 'text' : 'password'}
-                    placeholder={i18n.t('account.login.password.placeholder')}
-                    value={password}
-                    icon={inputIconMapping[visible ? 'hide' : 'show']}
-                    onClickIcon={() => updateVisible(!visible)}
-                    onChange={(val) => {
-                        updateParentState({
-                            password: val,
-                            error: null,
-                        });
-                    }}
+            <Block
+                top="l"
+                bottom="l"
+                align="center"
+            >
+                <ProfileIcon
+                    type="user"
+                    address={address}
                 />
+                <Block
+                    top="m"
+                    bottom="m"
+                >
+                    <Text
+                        className="text-code"
+                        text={formatAddress(address, 24, 6)}
+                        color="label"
+                        size="xxs"
+                    />
+                </Block>
             </Block>
+            <TextInput
+                setInputRef={setInputRef}
+                theme="inline"
+                type={visible ? 'text' : 'password'}
+                placeholder={i18n.t('account.login.password.placeholder')}
+                value={password}
+                icon={inputIconMapping[visible ? 'hide' : 'show']}
+                onClickIcon={() => updateVisible(!visible)}
+                onChange={(val) => {
+                    updateParentState({
+                        password: val,
+                        error: null,
+                    });
+                }}
+            />
         </PopupContent>
     );
 };

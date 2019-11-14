@@ -7,8 +7,8 @@ export default {
     },
     login: {
         _: 'Login',
-        title: 'Login with password',
-        description: '',
+        title: 'Login',
+        description: 'Your session has expired. Please login with your password:',
         password: {
             placeholder: '',
         },

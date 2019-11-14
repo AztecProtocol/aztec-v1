@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import {
     Link,
 } from 'react-router-dom';
 import {
-    FlexBox,
     Block,
     TextButton,
     Text,
@@ -13,114 +13,127 @@ import {
     errorShape,
 } from '~/ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
+import styles from './content.scss';
+
+const spacingH = 'xl';
 
 const PopupContent = ({
     className,
-    successMessage,
-    footerLink,
+    title,
+    titleKey,
+    description,
+    descriptionKey,
     children,
-    success,
+    footerLink,
     error,
-}) => (
-    <Block
-        className={className}
-        padding="0 xl"
-    >
-        <FlexBox
-            direction="column"
-            nowrap
-            align="center"
-            stretch
-            expand
+}) => {
+    const titleText = title
+        || (titleKey && i18n.t(titleKey))
+        || '';
+    const descriptionText = description
+        || (descriptionKey && i18n.t(descriptionKey))
+        || '';
+
+    return (
+        <div
+            className={classnames(
+                className,
+                styles.wrapper,
+                {
+                    [styles.singleFooter]: !!error ^ !!footerLink, // eslint-disable-line no-bitwise
+                    [styles.doubleFooter]: error && footerLink,
+                },
+            )}
         >
-            <Block
-                className="flex-free-expand"
-                padding="0"
-            >
-                {children}
-            </Block>
-            {!!(error || success) && (
+            <Block className={styles.content}>
+                {!!(titleText || descriptionText) && (
+                    <Block
+                        padding={`s ${spacingH}`}
+                        align="center"
+                    >
+                        {!!titleText && (
+                            <Block padding="xxs 0">
+                                <Text
+                                    text={titleText}
+                                    size="m"
+                                    weight="light"
+                                />
+                            </Block>
+                        )}
+                        {!!descriptionText && (
+                            <Block padding="s 0">
+                                <Text
+                                    text={descriptionText}
+                                    size="s"
+                                    weight="light"
+                                />
+                            </Block>
+                        )}
+                    </Block>
+                )}
                 <Block
-                    className="flex-fixed"
+                    padding={`0 ${spacingH}`}
                 >
-                    {error && (
-                        <Block bottom={error.fetal ? 's' : 'm'}>
+                    {children}
+                </Block>
+            </Block>
+            {!!(error || footerLink) && (
+                <div className={styles.footer}>
+                    {!!error && (
+                        <Block
+                            className="flex-fixed"
+                            padding={`s ${spacingH}`}
+                        >
                             <Text
                                 text={error.message
-                                                || i18n.t(error.key, error.response)}
+                                    || i18n.t(error.key, error.response)}
                                 color="red"
                                 size="xxs"
                             />
                         </Block>
                     )}
-                    {success && successMessage && (
-                        <Block bottom="s">
-                            <Text
-                                text={successMessage}
-                                color="primary"
-                                size="xs"
-                                weight="semibold"
+                    {!!footerLink && (
+                        <Block
+                            className="flex-fixed"
+                            padding={`s ${spacingH}`}
+                        >
+                            <TextButton
+                                {...footerLink}
+                                Link={Link}
+                                color="label"
+                                size="xxs"
                             />
                         </Block>
                     )}
-                </Block>
+                </div>
             )}
-            {!!footerLink && (
-                <Block
-                    className="flex-fixed"
-                    padding="m"
-                >
-                    <TextButton
-                        {...footerLink}
-                        Link={Link}
-                        color="label"
-                        size="xxs"
-                    />
-                </Block>
-            )}
-        </FlexBox>
-    </Block>
-);
+        </div>
+    );
+};
 
 PopupContent.propTypes = {
     className: PropTypes.string,
     title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-    description: PropTypes.string,
-    leftIconName: PropTypes.string,
-    onClickLeftIcon: PropTypes.func,
-    disableOnClickLeftIcon: PropTypes.bool,
-    rightIconName: PropTypes.string,
-    onClickRightIcon: PropTypes.func,
-    submitButtonText: PropTypes.string,
-    successMessage: PropTypes.string,
-    onSubmit: PropTypes.func,
-    submitButton: PropTypes.node,
+    titleKey: PropTypes.string,
+    description: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+    descriptionKey: PropTypes.string,
     footerLink: PropTypes.shape({
         text: PropTypes.string.isRequired,
         href: PropTypes.string,
         onClick: PropTypes.func,
     }),
     children: PropTypes.node,
-    success: PropTypes.bool,
     error: errorShape,
 };
 
 PopupContent.defaultProps = {
     className: '',
     title: '',
+    titleKey: '',
     description: '',
-    leftIconName: '',
-    onClickLeftIcon: null,
-    disableOnClickLeftIcon: false,
-    rightIconName: '',
-    onClickRightIcon: null,
-    submitButtonText: '',
-    successMessage: '',
-    onSubmit: null,
-    submitButton: null,
+    descriptionKey: '',
     footerLink: null,
     children: null,
-    success: false,
     error: null,
 };
 

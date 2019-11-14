@@ -34,25 +34,18 @@ const RestoreFromSeedPhrase = ({
 
     return (
         <PopupContent
-            theme="white"
+            descriptionKey="account.restore.description"
             error={error}
         >
             <Block
-                padding="l"
-            >
-                <Text text={i18n.t('account.restore.description')} size="s" />
-            </Block>
-            <Block
-                top="l"
-                bottom="l"
+                padding="l 0"
             >
                 <ProfileIcon
                     type="user"
                     address={address}
                 />
                 <Block
-                    top="m"
-                    bottom="m"
+                    padding="m 0"
                 >
                     <Text
                         className="text-code"

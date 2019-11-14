@@ -13,16 +13,11 @@ const Asset = ({
     linkedTokenAddress,
     code,
     balance,
-    goBack,
-    onClose,
     pastTransactions,
     isLoadingTransactions,
 }) => (
     <PopupContent
-        theme="primary"
         title={i18n.t('account.assets.title')}
-        leftIconName={goBack ? 'chevron_left' : 'close'}
-        onClickLeftIcon={goBack || onClose}
     >
         <Block padding="0 l l">
             <AssetSummary
@@ -54,8 +49,6 @@ Asset.propTypes = {
         timestamp: PropTypes.number.isRequired,
     })),
     isLoadingTransactions: PropTypes.bool,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
 };
 
 Asset.defaultProps = {
@@ -63,8 +56,6 @@ Asset.defaultProps = {
     balance: null,
     pastTransactions: [],
     isLoadingTransactions: false,
-    goBack: null,
-    onClose: null,
 };
 
 export default Asset;

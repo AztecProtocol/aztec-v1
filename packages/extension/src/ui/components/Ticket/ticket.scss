@@ -32,13 +32,11 @@ $ticket-shadow-color: rgba(0, 0, 0, 0.2);
   &:before {
     top: 0;
     border-radius: $ticket-radius $ticket-radius 0 0;
-    // box-shadow: 0px -1px 2px -1px $ticket-shadow-color;
   }
 
   &:after {
     bottom: 0;
     border-radius: 0 0 $ticket-radius $ticket-radius;
-    // box-shadow: 0px 3px 3px -2px $ticket-shadow-color;
   }
 }
 

@@ -9,6 +9,9 @@ import {
 const ListRow = ({
     title,
     content,
+    size,
+    contentSize,
+    color,
 }) => (
     <Block padding="xs 0">
         <FlexBox
@@ -18,15 +21,15 @@ const ListRow = ({
             <Text
                 className="flex-fixed"
                 text={`${title}:`}
-                size="xs"
+                size={size}
             />
             <Block
                 className="flex-free-expand"
                 left="s"
             >
                 <Text
-                    size="xs"
-                    color="grey"
+                    size={contentSize || size}
+                    color={color}
                 >
                     {content}
                 </Text>
@@ -41,6 +44,15 @@ ListRow.propTypes = {
         PropTypes.string,
         PropTypes.element,
     ]).isRequired,
+    size: PropTypes.string,
+    contentSize: PropTypes.string,
+    color: PropTypes.string,
+};
+
+ListRow.defaultProps = {
+    size: 'xs',
+    contentSize: '',
+    color: 'default',
 };
 
 export default ListRow;

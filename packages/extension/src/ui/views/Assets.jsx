@@ -17,16 +17,11 @@ const Assets = ({
     pastTransactions,
     isLoadingAssets,
     isLoadingTransactions,
-    goBack,
-    onClose,
     onClickAsset,
     onClickTransaction,
 }) => (
     <PopupContent
-        theme="primary"
         title={i18n.t('account.assets.title')}
-        leftIconName={goBack ? 'chevron_left' : 'close'}
-        onClickLeftIcon={goBack || onClose}
     >
         <FlexBox
             direction="column"
@@ -82,8 +77,6 @@ Assets.propTypes = {
     })),
     isLoadingAssets: PropTypes.bool,
     isLoadingTransactions: PropTypes.bool,
-    goBack: PropTypes.func,
-    onClose: PropTypes.func,
     onClickAsset: PropTypes.func,
     onClickTransaction: PropTypes.func,
 };
@@ -93,8 +86,6 @@ Assets.defaultProps = {
     pastTransactions: [],
     isLoadingAssets: false,
     isLoadingTransactions: false,
-    goBack: null,
-    onClose: null,
     onClickAsset: null,
     onClickTransaction: null,
 };

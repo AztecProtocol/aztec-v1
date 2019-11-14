@@ -51,6 +51,7 @@ const Connection = ({
         <div
             className={classnames(
                 className,
+                styles.wrapper,
                 styles[`size-${size}`],
             )}
         >
