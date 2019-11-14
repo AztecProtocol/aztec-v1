@@ -1,4 +1,6 @@
 import {
+    connectionRequestEvent,
+    connectionApprovedEvent,
     backgroundReadyEvent,
 } from '~/config/event';
 import urls from '~/config/urls';
@@ -18,7 +20,7 @@ export default function acceptConnection() {
     let response;
 
     window.addEventListener('message', async (event) => {
-        if (event.data.type === 'aztec-connection') {
+        if (event.data.type === connectionRequestEvent) {
             const {
                 data: clientData,
             } = event.data;
@@ -35,7 +37,7 @@ export default function acceptConnection() {
             } = event;
 
             event.source.postMessage({
-                type: 'aztec-connection',
+                type: connectionApprovedEvent,
                 code: '200',
                 response,
             }, '*', [channel.port2]);

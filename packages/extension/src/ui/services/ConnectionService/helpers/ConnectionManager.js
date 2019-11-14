@@ -1,4 +1,6 @@
 import {
+    connectionRequestEvent,
+    connectionApprovedEvent,
     uiReadyEvent,
 } from '~/config/event';
 import {
@@ -35,7 +37,7 @@ class ConnectionManager {
 
         const promise = new Promise((resolve) => {
             const handleReceiveMessage = (e) => {
-                if (e.data.type === 'aztec-connection') {
+                if (e.data.type === connectionApprovedEvent) {
                     const {
                         response,
                     } = e.data;
@@ -52,7 +54,7 @@ class ConnectionManager {
         });
 
         window.parent.postMessage({
-            type: 'aztec-connection',
+            type: connectionRequestEvent,
             requestId: randomId(),
             clientId: this.portId,
             sender: 'UI_CLIENT',
