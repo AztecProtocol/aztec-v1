@@ -6,7 +6,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import initEventListeners from '~/utils/initEventListeners';
+import EventListeners from '~/utils/EventListeners';
 import {
     PriorityQueue,
 } from '~utils/dataStructures';
@@ -61,7 +61,7 @@ export default class Asset {
         this.actionQueue = [];
         this.notesPerDecryptionBatch = notesPerDecryptionBatch;
 
-        initEventListeners(this, ['synced']);
+        this.eventListeners = new EventListeners(['synced']);
     }
 
     ensureUnlocked(action) {
@@ -119,7 +119,7 @@ export default class Asset {
         ) {
             this.lastSynced = this.rawNoteManager.getCurrentSynced(this.id);
             this.synced = true;
-            this.notifyListeners('synced', this.id);
+            this.eventListeners.notify('synced', this.id);
         } else {
             this.runNextProcess();
         }

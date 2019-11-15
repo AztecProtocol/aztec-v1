@@ -33,7 +33,7 @@ class AssetManager {
         this.assetMapping = {};
 
         this.callbackCache = new CallbackCache(maxCallbacks);
-        this.callbackCache.addListener(
+        this.callbackCache.eventListeners.add(
             'priority',
             this.handleCallbackPriorityChanged,
         );
@@ -65,7 +65,7 @@ class AssetManager {
     async clear() {
         this.locked = true;
         this.rawNoteManager.lock();
-        this.rawNoteManager.removeListener('newNotes', this.handleNewRawNotes);
+        this.rawNoteManager.eventListeners.remove('newNotes', this.handleNewRawNotes);
         await this.saveAll();
     }
 
@@ -107,7 +107,7 @@ class AssetManager {
                 if (lastSynced > max) return lastSynced;
                 return max;
             }, -1);
-        this.rawNoteManager.addListener('newNotes', this.handleNewRawNotes);
+        this.rawNoteManager.eventListeners.add('newNotes', this.handleNewRawNotes);
         this.rawNoteManager.startSync(maxLastSynced);
 
         this.locked = false;
@@ -135,7 +135,7 @@ class AssetManager {
             if (!nextAsset) return;
 
             this.activeAssets.addToBottom(nextAsset);
-            nextAsset.addListener('synced', this.handleAssetSynced);
+            nextAsset.eventListeners.add('synced', this.handleAssetSynced);
             nextAsset.startSync();
         }
     }
@@ -149,8 +149,8 @@ class AssetManager {
         }
 
         this.activeAssets.remove(asset);
-        asset.removeListener('synced', this.handleAssetSynced);
         this.flushCallbacks(assetId);
+        asset.eventListeners.remove('synced', this.handleAssetSynced);
         this.syncNext();
 
         if (asset.modified) {

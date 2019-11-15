@@ -11,13 +11,13 @@ export default class EventListeners {
         });
     }
 
-    addListener = (eventName, cb) => {
+    add = (eventName, cb) => {
         if (!this.eventListeners[eventName]) {
             const events = Object.keys(this.eventListeners)
                 .map(name => `'${name}'`)
                 .join(', ');
             warnLog(
-                `Cannot call RawNoteManager.addListener('${eventName}').`,
+                `Cannot call EventListeners.add('${eventName}').`,
                 `Available events: [${events}].`,
             );
             return;
@@ -26,13 +26,13 @@ export default class EventListeners {
         this.eventListeners[eventName].push(cb);
     };
 
-    removeListener = (eventName, cb) => {
+    remove = (eventName, cb) => {
         if (!this.eventListeners[eventName]) {
             const events = Object.keys(this.eventListeners)
                 .map(name => `'${name}'`)
                 .join(', ');
             warnLog(
-                `Cannot call RawNoteManager.removeListener('${eventName}').`,
+                `Cannot call EventListeners.remove('${eventName}').`,
                 `Available events: [${events}].`,
             );
             return;
@@ -45,8 +45,11 @@ export default class EventListeners {
         }
     };
 
-    notifyListeners = (eventName, params) => {
+    notify = (eventName, params) => {
         const listeners = this.eventListeners[eventName];
         listeners.forEach(cb => cb(params));
     };
+
+    isListening = (eventName, cb) => this.eventListeners[eventName]
+        .some(callback => callback === cb);
 }

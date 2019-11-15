@@ -1,7 +1,7 @@
 import {
     PriorityQueue,
 } from '~utils/dataStructures';
-import initEventListeners from '~/utils/initEventListeners';
+import EventListeners from '~/utils/EventListeners';
 
 const defaultCapacity = 2 ** 10;
 
@@ -11,7 +11,7 @@ export default class CacheManager {
         this.cache = {};
         this.capacity = capacity;
 
-        initEventListeners(this, ['priority']);
+        this.eventListeners = new EventListeners(['priority']);
     }
 
     isFull() {
@@ -24,7 +24,7 @@ export default class CacheManager {
 
         const newPriority = this.priorityQueue.increasePriority(key);
         if (newPriority !== prevPriority) {
-            this.notifyListeners('priority', this.priorityQueue);
+            this.eventListeners.notify('priority', this.priorityQueue);
         }
     }
 
@@ -35,7 +35,7 @@ export default class CacheManager {
         if (prevTop === key) return;
 
         this.priorityQueue.moveToTop(key);
-        this.notifyListeners('priority', this.priorityQueue);
+        this.eventListeners.notify('priority', this.priorityQueue);
     }
 
     add(key, value) {
@@ -49,7 +49,7 @@ export default class CacheManager {
                 delete this.cache[toDelete];
             }
             this.priorityQueue.addToTop(key);
-            this.notifyListeners('priority', this.priorityQueue);
+            this.eventListeners.notify('priority', this.priorityQueue);
         }
         this.cache[key] = value;
     }
@@ -76,7 +76,7 @@ export default class CacheManager {
         if (data !== undefined) {
             delete this.cache[key];
             this.priorityQueue.remove(key);
-            this.notifyListeners('priority', this.priorityQueue);
+            this.eventListeners.notify('priority', this.priorityQueue);
         }
 
         return data;
