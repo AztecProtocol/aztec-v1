@@ -22,7 +22,10 @@ class ClientWeb3Service extends Web3Service {
         // TODO - other providers
     }
 
-    bindProfileChange(cb) {
+    bindProfileChange(cb, allowMultiple = false) {
+        if (!allowMultiple) {
+            this.eventListeners.removeAll('profile');
+        }
         if (!this.eventListeners.isListening('profile', cb)) {
             this.eventListeners.add('profile', cb);
         }
