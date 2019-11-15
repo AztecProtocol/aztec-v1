@@ -41,6 +41,12 @@ export default class EventListeners {
         }
     };
 
+    removeAll = (eventName) => {
+        if (!this.validateEventName(eventName, 'removeAll')) return;
+
+        this.eventListeners[eventName] = [];
+    };
+
     notify = (eventName, params) => {
         const listeners = this.eventListeners[eventName];
         listeners.forEach(cb => cb(params));
