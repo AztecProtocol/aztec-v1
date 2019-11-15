@@ -1,3 +1,6 @@
+import {
+    uiReturnEvent,
+} from '~/config/event';
 import filterStream from '~utils/filterStream';
 import validateUserPermission from '../utils/validateUserPermision';
 
@@ -23,7 +26,11 @@ const registerExtensionUi = async (query, connection) => {
             },
         });
 
-        const response = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+        const response = await filterStream(
+            uiReturnEvent,
+            query.requestId,
+            connection.MessageSubject.asObservable(),
+        );
         const {
             data: registeredData,
         } = response.data || {};

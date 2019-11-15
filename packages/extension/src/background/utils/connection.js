@@ -10,12 +10,14 @@ import {
     filter,
 } from 'rxjs/operators';
 import {
-    clientEvent,
-    actionEvent,
+    clientRequestEvent,
+    clientResponseEvent,
+    actionRequestEvent,
     sendTransactionEvent,
     uiReadyEvent,
     uiOpenEvent,
     uiCloseEvent,
+    sendQueryEvent,
 } from '~config/event';
 import urls from '~config/urls';
 import Iframe from '~/utils/Iframe';
@@ -125,7 +127,7 @@ class Connection {
         // we need to setup a stream that relays messages to the client and back to the UI
         this.message$.pipe(
             // we filter the stream here
-            filter(({ data }) => data.type === actionEvent),
+            filter(({ data }) => data.type === actionRequestEvent),
             mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())
                 .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
             tap((data) => {
@@ -168,7 +170,7 @@ class Connection {
                         requestId,
                         webClientId,
                         data: {
-                            type: 'CLIENT_RESPONSE',
+                            type: clientResponseEvent,
                             response: error
                                 ? { error }
                                 : permissionError('user.denied'),
@@ -179,7 +181,7 @@ class Connection {
         ).subscribe();
 
         this.message$.pipe(
-            filter(({ data }) => data.type === 'UI_QUERY_REQUEST'),
+            filter(({ data }) => data.type === sendQueryEvent),
             mergeMap((data) => {
                 const {
                     data: {
@@ -208,24 +210,21 @@ class Connection {
                 this.connections[uiClientId].postMessage({
                     requestId,
                     data: {
-                        type: 'UI_QUERY_RESPONSE',
-                        response: {
-                            ...response,
-                        },
+                        response,
                     },
                 });
             }),
         ).subscribe();
 
         this.api$ = this.message$.pipe(
-            filter(({ data }) => data.type === clientEvent),
+            filter(({ data }) => data.type === clientRequestEvent),
             mergeMap(data => from(ApiService.clientApi(data, this))),
             tap((data) => {
                 this.ClientResponseSubject.next({
                     ...data,
                     data: {
                         response: data.response,
-                        type: 'CLIENT_RESPONSE',
+                        type: clientResponseEvent,
                     },
                 });
             }),

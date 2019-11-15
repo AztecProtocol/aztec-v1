@@ -16,8 +16,10 @@ import filterStream from '~utils/filterStream';
 import {
     connectionRequestEvent,
     connectionApprovedEvent,
-    clientEvent,
-    actionEvent,
+    clientRequestEvent,
+    clientResponseEvent,
+    actionRequestEvent,
+    actionResponseEvent,
     uiOpenEvent,
     uiCloseEvent,
 } from '~config/event';
@@ -103,10 +105,10 @@ class ConnectionService {
         };
 
         this.messages$.pipe(
-            filter(({ data: { type } }) => type === actionEvent),
+            filter(({ data: { type } }) => type === actionRequestEvent),
             mergeMap(data => from(MetaMaskService(data))),
             tap(data => this.port.postMessage({
-                type: 'ACTION_RESPONSE',
+                type: actionResponseEvent,
                 requestId: data.requestId,
                 domain: window.location.origin,
                 clientId: this.clientId,
@@ -135,7 +137,7 @@ class ConnectionService {
             sender: 'WEB_CLIENT',
         });
 
-        return filterStream('CLIENT_RESPONSE', requestId, this.MessageSubject.asObservable());
+        return filterStream(clientResponseEvent, requestId, this.MessageSubject.asObservable());
     }
 
     async query(queryName, args = {}) {
@@ -148,7 +150,7 @@ class ConnectionService {
                 response,
             },
         } = await this.postToBackground({
-            type: clientEvent,
+            type: clientRequestEvent,
             query: queryName,
             args: {
                 ...args,

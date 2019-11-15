@@ -1,3 +1,6 @@
+import {
+    uiReturnEvent,
+} from '~/config/event';
 import filterStream from '~utils/filterStream';
 import AuthService from '../../AuthService';
 
@@ -41,7 +44,11 @@ const registerDomain = async (query, connection) => {
                 requestId: query.requestId,
             },
         });
-        const reply = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+        const reply = await filterStream(
+            uiReturnEvent,
+            query.requestId,
+            connection.MessageSubject.asObservable(),
+        );
         return {
             domain: reply,
         };

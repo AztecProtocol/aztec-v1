@@ -1,8 +1,8 @@
 import {
-    actionEvent,
+    actionRequestEvent,
     sendTransactionEvent,
-    uiQueryEvent,
-    uiResponseEvent,
+    sendQueryEvent,
+    uiReturnEvent,
     uiCloseEvent,
 } from '~config/event';
 import AuthService from '~background/services/AuthService';
@@ -29,7 +29,7 @@ export default {
         action,
         data = {},
     }) => manager.postToBackground({
-        type: actionEvent,
+        type: actionRequestEvent,
         clientRequestId: clientRequestId || manager.clientRequestId,
         data: {
             action,
@@ -56,7 +56,7 @@ export default {
     }) => {
         const currentUser = await AuthService.getCurrentUser();
         return manager.postToBackground({
-            type: uiQueryEvent,
+            type: sendQueryEvent,
             data: {
                 query,
                 args: {
@@ -68,7 +68,7 @@ export default {
         });
     },
     returnToClient: data => manager.postToBackground({
-        type: uiResponseEvent,
+        type: uiReturnEvent,
         clientRequestId: manager.clientRequestId,
         data,
     }),

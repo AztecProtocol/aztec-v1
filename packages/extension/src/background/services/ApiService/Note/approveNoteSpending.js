@@ -1,3 +1,6 @@
+import {
+    uiReturnEvent,
+} from '~/config/event';
 import filterStream from '~utils/filterStream';
 
 const triggerApproveNoteSpending = async (query, connection) => {
@@ -18,7 +21,12 @@ const triggerApproveNoteSpending = async (query, connection) => {
         },
     });
 
-    const resp = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+    const resp = await filterStream(
+        uiReturnEvent,
+        query.requestId,
+        connection.MessageSubject.asObservable(),
+    );
+
     return {
         ...query,
         response: {

@@ -1,3 +1,6 @@
+import {
+    uiReturnEvent,
+} from '~/config/event';
 import filterStream from '~utils/filterStream';
 import proofValidation from './proofValidation';
 import fetchNotesFromBalance from './fetchNotesFromBalance';
@@ -32,7 +35,11 @@ const proofUi = async (query, connection) => {
         },
     });
 
-    const resp = await filterStream('UI_RESPONSE', query.requestId, connection.MessageSubject.asObservable());
+    const resp = await filterStream(
+        uiReturnEvent,
+        query.requestId,
+        connection.MessageSubject.asObservable(),
+    );
     const {
         data,
     } = resp.data || {};
