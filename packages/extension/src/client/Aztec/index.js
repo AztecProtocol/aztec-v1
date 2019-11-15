@@ -46,10 +46,11 @@ class Aztec {
         });
     };
 
-    disable() {
+    async disable() {
         this.web3 = null;
         this.asset = {};
         this.note = {};
+        await ConnectionService.disconnect();
     }
 
     refreshSession = async () => {

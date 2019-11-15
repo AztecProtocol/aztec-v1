@@ -12,6 +12,7 @@ import {
 import {
     clientRequestEvent,
     clientResponseEvent,
+    clientDisconnectEvent,
     actionRequestEvent,
     sendTransactionEvent,
     uiReadyEvent,
@@ -66,6 +67,7 @@ class Connection {
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
             tap(({ webClientId, ...rest }) => {
+                if (!this.connections[webClientId]) return;
                 this.connections[webClientId].postMessage({
                     ...rest,
                 });
@@ -80,6 +82,7 @@ class Connection {
         // respond to  the UI
         this.uiResponse$.pipe(
             tap(({ uiClientId, ...rest }) => {
+                if (!this.connections[uiClientId]) return;
                 this.connections[uiClientId].postMessage({
                     ...rest,
                 });
@@ -207,6 +210,7 @@ class Connection {
                 requestId,
                 response,
             }) => {
+                if (!this.connections[uiClientId]) return;
                 this.connections[uiClientId].postMessage({
                     requestId,
                     data: {
@@ -231,6 +235,35 @@ class Connection {
         );
 
         this.api$.subscribe();
+
+        this.message$.pipe(
+            filter(({ data }) => data.type === clientDisconnectEvent),
+            tap((data) => {
+                const clientData = data.data;
+                this.ClientResponseSubject.next({
+                    ...data,
+                    data: {
+                        type: clientResponseEvent,
+                    },
+                });
+
+                this.closeUi();
+
+                const {
+                    requestId,
+                    webClientId,
+                } = data;
+                this.ClientResponseSubject.next({
+                    requestId,
+                    webClientId,
+                    data: {
+                        type: uiCloseEvent,
+                    },
+                });
+
+                this.removeClient(clientData);
+            }),
+        ).subscribe();
 
         this.connections = {};
         this.requests = {};
@@ -295,7 +328,11 @@ class Connection {
     }
 
     removeClient = (client) => {
-        delete this.connections[client.name];
+        const {
+            clientId,
+        } = client;
+
+        delete this.connections[clientId];
         Object.keys(this.requests).forEach((reqId) => {
             const {
                 [reqId]: {
@@ -303,7 +340,7 @@ class Connection {
                     webClientId,
                 } = {},
             } = this.requests;
-            if (uiClientId === client.name || webClientId === client.name) {
+            if (uiClientId === clientId || webClientId === clientId) {
                 delete this.requests[reqId];
             }
         });
