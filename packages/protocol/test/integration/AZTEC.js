@@ -12,6 +12,7 @@ const {
 } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
 const {
+    constants: { ERC20_SCALING_FACTOR },
     proofs: { BURN_PROOF, DIVIDEND_PROOF, JOIN_SPLIT_PROOF, SWAP_PROOF, MINT_PROOF, PRIVATE_RANGE_PROOF, PUBLIC_RANGE_PROOF },
 } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -92,12 +93,12 @@ contract('AZTEC integration', (accounts) => {
             expect(swapValidatorAddress).to.equal(swapValidator.address);
         });
 
-        it('should have set zkAsset linkedToken', async () => {
-            const linkedTokenAddress = await zkAsset.linkedToken();
-            expect(linkedTokenAddress).to.equal(erc20.address);
-        });
+        // it('should set zkAsset linkedToken', async () => {
+        //     const linkedTokenAddress = await zkAsset.linkedToken();
+        //     expect(linkedTokenAddress).to.equal(erc20.address);
+        // });
 
-        it('should have set zkAsset owner', async () => {
+        it('should set zkAsset owner', async () => {
             const zkAssetOwner = await zkAsset.owner();
             expect(zkAssetOwner).to.equal(accounts[0]);
         });
