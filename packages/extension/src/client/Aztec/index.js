@@ -10,22 +10,35 @@ class Aztec {
         this.note = {};
     }
 
-    enable = async ({
-        provider = null,
-        providerUrl = '',
-        contractAddresses = {
-            ACE: '',
-            AZTECAccountRegistry: '',
-        },
-    } = {}) => {
+    enable = async (
+        {
+            provider = null,
+            providerUrl = '',
+            contractAddresses = {
+                ACE: '',
+                AZTECAccountRegistry: '',
+            },
+            autoRefreshOnProfileChange = true,
+        } = {},
+        callback = null,
+    ) => {
         await Web3Service.init({
             provider,
             providerUrl,
         });
 
-        Web3Service.bindProfileChange(this.refreshSession);
-
         return new Promise(async (resolve) => {
+            if (autoRefreshOnProfileChange) {
+                Web3Service.bindProfileChange(async () => this.refreshSession(
+                    {
+                        provider,
+                        providerUrl,
+                        contractAddresses,
+                    },
+                    resolve,
+                ));
+            }
+
             const {
                 contractsConfigs,
             } = await ConnectionService.openConnection({
@@ -42,6 +55,18 @@ class Aztec {
                 this[name] = apis[name];
             });
 
+            if (autoRefreshOnProfileChange) {
+                Web3Service.bindProfileChange(async () => this.refreshSession({
+                    provider,
+                    providerUrl,
+                    contractAddresses,
+                }));
+            }
+
+            if (callback) {
+                callback();
+            }
+
             resolve();
         });
     };
@@ -53,9 +78,9 @@ class Aztec {
         await ConnectionService.disconnect();
     }
 
-    refreshSession = async () => {
+    refreshSession = async (config, cb) => {
         await this.disable();
-        await this.enable();
+        await this.enable(config, cb);
     }
 }
 
