@@ -15,10 +15,21 @@ class Web3Service {
         this.networkId = 0;
     }
 
+    reset() {
+        this.web3 = null;
+        this.eth = null;
+        this.contracts = {};
+        this.abis = {};
+        this.account = null;
+        this.networkId = 0;
+    }
+
     async init({
         provider,
         account,
     } = {}) {
+        this.reset();
+
         let web3;
         const web3Provider = provider || window.ethereum;
         if (web3Provider) {
