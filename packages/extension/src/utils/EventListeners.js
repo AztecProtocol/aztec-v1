@@ -11,32 +11,28 @@ export default class EventListeners {
         });
     }
 
-    add = (eventName, cb) => {
+    validateEventName(eventName, api) {
         if (!this.eventListeners[eventName]) {
-            const events = Object.keys(this.eventListeners)
+            const events = this.eventNames
                 .map(name => `'${name}'`)
                 .join(', ');
             warnLog(
-                `Cannot call EventListeners.add('${eventName}').`,
+                `Cannot call EventListeners.${api}('${eventName}').`,
                 `Available events: [${events}].`,
             );
-            return;
+            return false;
         }
+        return true;
+    }
+
+    add = (eventName, cb) => {
+        if (!this.validateEventName(eventName, 'add')) return;
 
         this.eventListeners[eventName].push(cb);
     };
 
     remove = (eventName, cb) => {
-        if (!this.eventListeners[eventName]) {
-            const events = Object.keys(this.eventListeners)
-                .map(name => `'${name}'`)
-                .join(', ');
-            warnLog(
-                `Cannot call EventListeners.remove('${eventName}').`,
-                `Available events: [${events}].`,
-            );
-            return;
-        }
+        if (!this.validateEventName(eventName, 'remove')) return;
 
         const toRemove = this.eventListeners[eventName]
             .findIndex(listener => listener === cb);
