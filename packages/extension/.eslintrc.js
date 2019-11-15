@@ -49,5 +49,8 @@ module.exports = {
             ignoreTemplateLiterals: true,
             ignoreRegExpLiterals: true,
         }],
+        'import/no-unresolved': ['error', {
+            ignore: ['^~contracts/'],
+        }],
     },
 };
