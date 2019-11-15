@@ -1,17 +1,14 @@
-export const clientEvent = 'aztec-browser-api';
-export const clientSubscribeEvent = 'aztec-browser-subscribe';
-export const clientUnsubscribeEvent = 'aztec-browser-unsubscribe';
-export const contentEvent = 'aztec-extension-api';
-export const contentSubscribeEvent = 'aztec-extension-subscribe';
-export const contentUnsubscribeEvent = 'aztec-extension-unsubscribe';
-export const sendTransactionEvent = 'aztec-extension-send-transaction';
-export const actionEvent = 'aztec-extension-client-action';
-export const uiQueryEvent = 'UI_QUERY_REQUEST';
-export const uiResponseEvent = 'UI_RESPONSE';
-
 export const connectionRequestEvent = 'aztec-connection';
 export const connectionApprovedEvent = 'aztec-connection-approved';
 export const backgroundReadyEvent = 'aztec-sdk-background-ready';
 export const uiReadyEvent = 'aztec-sdk-ui-ready';
 export const uiOpenEvent = 'aztec-sdk-ui-open';
 export const uiCloseEvent = 'aztec-sdk-ui-close';
+export const uiReturnEvent = 'aztec-sdk-ui-return-data';
+export const clientRequestEvent = 'aztec-sdk-api-request';
+export const clientResponseEvent = 'aztec-sdk-api-response';
+export const clientDisconnectEvent = 'aztec-sdk-client-disconnect';
+export const actionRequestEvent = 'aztec-sdk-client-action-request';
+export const actionResponseEvent = 'aztec-sdk-client-action-response';
+export const sendQueryEvent = 'aztec-sdk-send-query';
+export const sendTransactionEvent = 'aztec-sdk-send-transaction';

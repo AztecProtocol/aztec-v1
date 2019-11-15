@@ -1,6 +1,7 @@
 import filterStream from '~utils/filterStream';
 import {
-    actionEvent,
+    actionRequestEvent,
+    actionResponseEvent,
 } from '~config/event';
 
 const triggerClientAction = (query, connection) => async () => {
@@ -13,7 +14,7 @@ const triggerClientAction = (query, connection) => async () => {
     } = query;
     connection.ClientActionSubject.next({
         ...rest,
-        type: actionEvent,
+        type: actionRequestEvent,
         requestId,
         data: {
             action: data.action,
@@ -23,7 +24,7 @@ const triggerClientAction = (query, connection) => async () => {
             requestId,
         },
     });
-    return filterStream('ACTION_RESPONSE', requestId, connection.message$);
+    return filterStream(actionResponseEvent, requestId, connection.message$);
 };
 
 export default {
