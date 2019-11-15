@@ -28,10 +28,6 @@ export default class ApiSessionManager {
     ) {
         this.networkId = networkId;
         this.owner = owner;
-        console.warn('init Asset', {
-            networkId,
-            owner,
-        });
         this.assetManager = new AssetManager({
             networkId,
             owner,
@@ -42,7 +38,6 @@ export default class ApiSessionManager {
             maxProcesses: defaultMaxProcesses,
             notesPerBatch: defaultNotesPerBatch,
         });
-        console.log(this.assetManager);
     }
 
     isSameSession(networkId, ownerAddress, logWarning = false) {
