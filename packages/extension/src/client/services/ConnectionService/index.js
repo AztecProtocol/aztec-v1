@@ -60,7 +60,7 @@ class ConnectionService {
             requestId: randomId(),
             clientId: this.clientId,
             sender: 'WEB_CLIENT',
-            data: {
+            clientProfile: {
                 providerUrl,
                 contractAddresses,
                 networkId,

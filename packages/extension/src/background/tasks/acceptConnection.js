@@ -22,11 +22,11 @@ export default function acceptConnection() {
     window.addEventListener('message', async (event) => {
         if (event.data.type === connectionRequestEvent) {
             const {
-                data: clientData,
+                clientProfile,
             } = event.data;
 
-            if (clientData && clientData.networkId) {
-                response = await setupClientConfig(clientData);
+            if (clientProfile && clientProfile.networkId) {
+                response = await setupClientConfig(clientProfile);
             } else if (event.origin !== uiSourceOrigin) {
                 return;
             }
