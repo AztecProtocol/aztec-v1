@@ -18,6 +18,7 @@ import {
     connectionApprovedEvent,
     clientRequestEvent,
     clientResponseEvent,
+    clientDisconnectEvent,
     actionRequestEvent,
     actionResponseEvent,
     uiOpenEvent,
@@ -79,6 +80,15 @@ class ConnectionService {
         return {
             contractsConfigs,
         };
+    }
+
+    async disconnect() {
+        if (!this.port) return;
+
+        await this.postToBackground({
+            type: clientDisconnectEvent,
+        });
+        this.port = null;
     }
 
     setupStreams = ({ ports }) => {
