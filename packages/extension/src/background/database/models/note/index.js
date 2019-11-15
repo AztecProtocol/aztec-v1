@@ -17,9 +17,9 @@ export default Model({
         // 'status',
         // 'blockNumber',
     ],
-    // autoFields: {
-    //     assetOwner: {
-    //         childFields: ['asset', 'owner'],
-    //     },
-    // },
+    autoFields: {
+        assetOwner: {
+            childFields: ['asset', 'owner'],
+        },
+    },
 });
