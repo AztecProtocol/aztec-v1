@@ -1,7 +1,11 @@
-const getDappHash = require('./getDappHash');
+const monitorTx = require('./monitorTx');
 const isAPIKeyValid = require('./isAPIKeyValid');
+const balance = require('./balance');
+const getDappInfo = require('./getDappInfo');
 
 module.exports = {
-    getDappHash,
+    balance,
+    monitorTx,
     isAPIKeyValid,
+    getDappInfo,
 }

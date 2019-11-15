@@ -1,6 +1,8 @@
 import axios from 'axios';
+import {
+    SIGNING_PROVIDER,
+} from '~config/constants';
 
-const SIGNING_PROVIDER = 'https://bv9t4hwozi.execute-api.us-east-1.amazonaws.com';
 
 export default async ({
     from,
@@ -16,6 +18,7 @@ export default async ({
     const data = {
         from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress,
     };
+    console.warn('TODO: approveGSNFunction handle dev / prod url');
 
     const response = await axios.post(`${SIGNING_PROVIDER}/Stage/sign-data`, {
         data,

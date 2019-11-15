@@ -2,24 +2,20 @@ const {
     signData,
 } = require('./utils/signer');
 const {
-    isAPIKeyValid,
-    // getDappHash,
-} = require('./utils/dapp');
-const {
     OK_200,
-    BAD_400,
-    ACCESS_DENIED_401,
-    ACCESS_DENIED_404,
+    ACCESS_NOT_FOUND_404,
 } = require('./helpers/responses');
+const validationErrors = require('./helpers/validationErrors');
 const {
     getOrigin,
     getParameters,
 } = require('./utils/event');
-const {
-    isValidData,
-} = require('./utils/data');
 const web3Service = require('./services/Web3Service');
-const isTrue = require('./helpers/isTrue');
+const {
+    monitorTx,
+    getDappInfo,
+} = require('./utils/dapp')
+
 
 const initialize = () => {
     const providerURL = process.env.WEB3_PROVIDER_URL;
@@ -47,44 +43,45 @@ const initialize = () => {
  */
 exports.lambdaHandler = async (event) => {
     if (event.httpMethod !== 'POST') {
-        return ACCESS_DENIED_404();
+        return ACCESS_NOT_FOUND_404();
     }
     initialize();
 
-    const origin = getOrigin(event);
     const {
         apiKey,
         data,
     } = getParameters(event) || {};
+    const origin = getOrigin(event);
 
-    if (!apiKey) {
-        return BAD_400('"ApiKey" parameter is requeired');
-    }
-
-    if (!data) {
-        return BAD_400('"data" parameter is requeired');
-    }
-
-    if (!isValidData(data)) {
-        return BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to');
-    }
-
-    const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
-    if (isApiKeyRequired && !await isAPIKeyValid({
+    const validationError = validationErrors({
         apiKey,
         origin,
-    })) {
-        return ACCESS_DENIED_401();
+        data,
+    });
+    if (validationError) {
+        return validationError;
     }
 
     const {
         messageHash: dataHash,
-        signature: dataSignature,
+        signature,
     } = signData(data);
+    const {
+        dappId,
+    } = await getDappInfo(apiKey);
+    const {
+        from,
+    } = data;
+
+    await monitorTx({
+        dappId,
+        signature,
+        from,
+    });
 
     return OK_200({
         data,
         dataHash,
-        dataSignature,
+        dataSignature: signature,
     });
 };
