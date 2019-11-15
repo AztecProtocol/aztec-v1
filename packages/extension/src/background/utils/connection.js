@@ -179,6 +179,7 @@ class Connection {
                                 : permissionError('user.denied'),
                         },
                     });
+                    this.removeRequest(data);
                 }
             }),
         ).subscribe();
@@ -231,6 +232,7 @@ class Connection {
                         type: clientResponseEvent,
                     },
                 });
+                this.removeRequest(data);
             }),
         );
 
@@ -327,7 +329,14 @@ class Connection {
         window.dispatchEvent(event);
     }
 
-    removeClient = (client) => {
+    removeRequest(client) {
+        const {
+            requestId,
+        } = client;
+        delete this.requests[requestId];
+    }
+
+    removeClient(client) {
         const {
             clientId,
         } = client;
