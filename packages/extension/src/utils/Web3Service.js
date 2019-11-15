@@ -44,10 +44,18 @@ class Web3Service {
         }
 
         let web3;
+        let networkId;
         if (web3Provider) {
             web3 = new Web3(web3Provider);
+            networkId = await web3.eth.net.getId();
         } else if (window.web3) {
             ({ web3 } = window);
+            networkId = await new Promise((resolve) => {
+                window.web3.version.getNetwork((_, id) => {
+                    networkId = id;
+                    resolve();
+                });
+            });
         } else {
             errorLog('Provider cannot be empty.');
             return;
@@ -61,6 +69,7 @@ class Web3Service {
 
         this.web3 = web3;
         this.eth = web3.eth;
+        this.networkId = networkId || 0;
 
         if (account) {
             this.account = account;
@@ -72,10 +81,6 @@ class Web3Service {
                 };
             }
         }
-
-        this.networkId = web3Provider
-            ? web3Provider.networkVersion
-            : 0;
     }
 
     registerContract(
