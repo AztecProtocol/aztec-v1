@@ -6,6 +6,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
+import initEventListeners from '~/utils/initEventListeners';
 import {
     PriorityQueue,
 } from '~utils/dataStructures';
@@ -60,48 +61,7 @@ export default class Asset {
         this.actionQueue = [];
         this.notesPerDecryptionBatch = notesPerDecryptionBatch;
 
-        this.eventListeners = {
-            synced: [],
-        };
-    }
-
-    addListener(eventName, cb) {
-        if (!this.eventListeners[eventName]) {
-            const events = Object.keys(this.eventListeners)
-                .map(name => `'${name}'`)
-                .join(', ');
-            warnLog(
-                `Cannot call Asset.addListener('${eventName}').`,
-                `Available events: [${events}].`,
-            );
-            return;
-        }
-
-        this.eventListeners[eventName].push(cb);
-    }
-
-    removeListener(eventName, cb) {
-        if (!this.eventListeners[eventName]) {
-            const events = Object.keys(this.eventListeners)
-                .map(name => `'${name}'`)
-                .join(', ');
-            warnLog(
-                `Cannot call Asset.removeListener('${eventName}').`,
-                `Available events: [${events}].`,
-            );
-            return;
-        }
-
-        const toRemove = this.eventListeners[eventName]
-            .findIndex(listener => listener === cb);
-        if (toRemove >= 0) {
-            this.eventListeners[eventName].splice(toRemove, 1);
-        }
-    }
-
-    notifyListeners(eventName, ...params) {
-        const listeners = this.eventListeners[eventName];
-        listeners.forEach(cb => cb(...params));
+        initEventListeners(this, ['synced']);
     }
 
     ensureUnlocked(action) {
@@ -264,7 +224,7 @@ export default class Asset {
                 const realViewingKey = fromHexString(viewingKey).decrypt(linkedPrivateKey);
                 value = valueFromViewingKey(realViewingKey);
             } catch (error) {
-                errorLog(error);
+                errorLog(noteHash, error);
                 this.ensureUnlocked(() => {
                     if (blockNumber > this.lastSynced) {
                         this.lastSynced = blockNumber;
