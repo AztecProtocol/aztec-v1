@@ -10,6 +10,7 @@ import {
 import {
     addAccess,
 } from '~utils/metadata';
+import noteModel from '~/background/database/models/note';
 import Asset from '../helpers/Asset';
 import NoteBucketCache from '../helpers/NoteBucketCache';
 import RawNoteManager from '../helpers/RawNoteManager';
@@ -115,6 +116,9 @@ describe('Asset.startSync', () => {
 });
 
 describe('Asset.decryptNotes', () => {
+    const noteModelSpy = jest.spyOn(noteModel, 'get')
+        .mockImplementation(() => ({}));
+
     let errors = [];
     const errorLogSpy = jest.spyOn(console, 'error').mockImplementation((error) => {
         errors.push(error);
@@ -132,6 +136,10 @@ describe('Asset.decryptNotes', () => {
         warnLogSpy.mockClear();
 
         asset.unlock();
+    });
+
+    afterAll(() => {
+        noteModelSpy.mockReset();
     });
 
     it('can run multiple decryptNotes asynchronously', async () => {
