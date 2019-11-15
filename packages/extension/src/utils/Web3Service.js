@@ -25,13 +25,25 @@ class Web3Service {
     }
 
     async init({
-        provider,
+        provider = null,
+        providerUrl = '',
         account,
     } = {}) {
         this.reset();
 
+        let web3Provider = provider;
+        if (!web3Provider && providerUrl) {
+            if (providerUrl.match(/^wss?:\/\//)) {
+                web3Provider = new Web3.providers.WebsocketProvider(providerUrl);
+            } else {
+                web3Provider = new Web3.providers.HttpProvider(providerUrl);
+            }
+        }
+        if (!web3Provider) {
+            web3Provider = window.ethereum;
+        }
+
         let web3;
-        const web3Provider = provider || window.ethereum;
         if (web3Provider) {
             web3 = new Web3(web3Provider);
         } else if (window.web3) {
@@ -41,8 +53,10 @@ class Web3Service {
             return;
         }
 
-        if (typeof provider.enable === 'function') {
-            await provider.enable();
+        if (web3Provider
+            && typeof web3Provider.enable === 'function'
+        ) {
+            await web3Provider.enable();
         }
 
         this.web3 = web3;
