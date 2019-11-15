@@ -1,9 +1,7 @@
 import {
-    warnLog,
-} from '~utils/log';
-import {
     PriorityQueue,
 } from '~utils/dataStructures';
+import initEventListeners from '~/utils/initEventListeners';
 
 const defaultCapacity = 2 ** 10;
 
@@ -13,48 +11,7 @@ export default class CacheManager {
         this.cache = {};
         this.capacity = capacity;
 
-        this.eventListeners = {
-            priority: [],
-        };
-    }
-
-    addListener(eventName, cb) {
-        if (!this.eventListeners[eventName]) {
-            const events = Object.keys(this.eventListeners)
-                .map(name => `'${name}'`)
-                .join(', ');
-            warnLog(
-                `Cannot call CacheManager.addListener('${eventName}').`,
-                `Available events: [${events}].`,
-            );
-            return;
-        }
-
-        this.eventListeners[eventName].push(cb);
-    }
-
-    removeListener(eventName, cb) {
-        if (!this.eventListeners[eventName]) {
-            const events = Object.keys(this.eventListeners)
-                .map(name => `'${name}'`)
-                .join(', ');
-            warnLog(
-                `Cannot call CacheManager.removeListener('${eventName}').`,
-                `Available events: [${events}].`,
-            );
-            return;
-        }
-
-        const toRemove = this.eventListeners[eventName]
-            .findIndex(listener => listener === cb);
-        if (toRemove >= 0) {
-            this.eventListeners[eventName].splice(toRemove, 1);
-        }
-    }
-
-    notifyListeners(eventName, params) {
-        const listeners = this.eventListeners[eventName];
-        listeners.forEach(cb => cb(params));
+        initEventListeners(this, ['priority']);
     }
 
     isFull() {
