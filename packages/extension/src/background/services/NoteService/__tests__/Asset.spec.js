@@ -304,7 +304,7 @@ describe('managing asynchronous processes', () => {
         });
 
         const assetSynced = new Promise((resolve) => {
-            asset.addListener('synced', resolve);
+            asset.eventListeners.add('synced', resolve);
         });
 
         asset.startSync();

@@ -217,13 +217,13 @@ describe('AssetManager.syncNext', () => {
 
         assets.a0.modified = true;
         assets.a0.synced = true;
-        await assets.a0.notifyListeners('synced', 'a0');
+        await assets.a0.eventListeners.notify('synced', 'a0');
         expect(handleAssetSyncedSpy).toHaveBeenCalledTimes(1);
         expect(saveSpy).toHaveBeenCalledTimes(1);
         expect(assetManager.activeAssets.size).toBe(0);
         handleAssetSyncedSpy.mockReset();
 
-        await assets.a0.notifyListeners('synced', 'a0');
+        await assets.a0.eventListeners.notify('synced', 'a0');
         expect(handleAssetSyncedSpy).toHaveBeenCalledTimes(0);
     });
 

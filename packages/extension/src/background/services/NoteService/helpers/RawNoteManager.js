@@ -1,4 +1,4 @@
-import initEventListeners from '~/utils/initEventListeners';
+import EventListeners from '~/utils/EventListeners';
 import {
     defaultMaxNotes,
     defaultNotesPerBatch,
@@ -44,7 +44,7 @@ export default class RawNoteManager {
 
         this.locked = false;
 
-        initEventListeners(this, ['newNotes']);
+        this.eventListeners = new EventListeners(['newNotes']);
     }
 
     lock() {
@@ -328,7 +328,7 @@ export default class RawNoteManager {
             this.headNotesMapping[asset].push(note);
         });
         toNotify.forEach((assetId) => {
-            this.notifyListeners('newNotes', assetId);
+            this.eventListeners.notify('newNotes', assetId);
         });
 
         return newNotes;
@@ -376,7 +376,7 @@ export default class RawNoteManager {
         });
 
         toNotify.forEach((assetId) => {
-            this.notifyListeners('newNotes', assetId);
+            this.eventListeners.notify('newNotes', assetId);
         });
 
         return newNotes;
