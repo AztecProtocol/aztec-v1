@@ -48,6 +48,9 @@ export default class Iframe {
             return null;
         }
 
+        // clear previous unresolved init
+        this.unbindAwaitFrameReady();
+
         return new Promise((resolve) => {
             this.onReadyCallback = resolve;
             this.bindAwaitFrameReady();
