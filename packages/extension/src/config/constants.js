@@ -24,6 +24,8 @@ export const NOTE_STATUS = {
     DESTROYED: 'DESTROYED',
 };
 
+export const SIGNING_PROVIDER = 'https://bv9t4hwozi.execute-api.us-east-1.amazonaws.com';
+
 export const GANACHE_NETWORK_ID = Object.keys(ACE.networks).pop();
 
 export const NETWORKS = {

@@ -5,9 +5,12 @@
   "author": "AZTEC",
   "main": "app.js",
   "bugs": {
-      "url": "https://github.com/AztecProtocol/AZTEC/issues"
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.21.2",
     "web3": "^1.2.2"
   },
   "devDependencies": {
@@ -25,18 +28,17 @@
   },
   "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
   "keywords": [
-      "aztec",
-      "blockchain",
-      "confidentiality",
-      "cryptography",
-      "ethereum",
-      "privacy",
-      "protocol"
+    "aztec",
+    "blockchain",
+    "confidentiality",
+    "cryptography",
+    "ethereum",
+    "privacy",
+    "protocol"
   ],
   "license": "LGPL-3.0",
   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   }
 }
-
