@@ -15,6 +15,7 @@ module.exports = {
     resolve: {
         extensions: ['.mjs', '.js', '.jsx', '.json'],
         alias: {
+            '~contracts': path.resolve(__dirname, './build/contracts'),
             '~uiModules': path.resolve(__dirname, './src/ui'),
         },
     },
