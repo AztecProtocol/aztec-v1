@@ -46,11 +46,11 @@ class Aztec {
                 contractAddresses,
             });
 
+            ApiPermissionService.setContractConfigs(contractsConfigs);
+
             await ApiPermissionService.ensurePermission();
 
-            const apis = ApiPermissionService.generateApis({
-                contractsConfigs,
-            });
+            const apis = ApiPermissionService.generateApis();
             Object.keys(apis).forEach((name) => {
                 this[name] = apis[name];
             });
