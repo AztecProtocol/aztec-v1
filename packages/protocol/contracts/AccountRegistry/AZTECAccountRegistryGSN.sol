@@ -20,7 +20,11 @@ import "./AZTECAccountRegistry.sol";
 contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
     address aceAddress;
+<<<<<<< HEAD
     ACEModule.ACE ace;
+=======
+ACEModule.ACE ace;
+>>>>>>> ea729dbe... feat(extension): fix import ace contract
     uint24 public constant JOIN_SPLIT_PROOF = 65793;
     using NoteUtils for bytes;
     constructor(
