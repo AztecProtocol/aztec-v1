@@ -24,9 +24,7 @@ import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
 import getSenderAccount from './helpers/senderAccount';
 import configureWeb3Networks from '~utils/configureWeb3Networks';
-import {
-    NETWORKS,
-} from '~config/constants';
+import NETWORKS from '~config/networks';
 
 
 jest.mock('~utils/storage');

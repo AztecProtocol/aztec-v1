@@ -1,6 +1,4 @@
-import {
-    NETWORKS,
-} from '~config/constants';
+import NETWORKS from '~config/networks';
 
 const infuraProjectId = '09c4eed231c840d5ace14ba5389a1a7c';
 

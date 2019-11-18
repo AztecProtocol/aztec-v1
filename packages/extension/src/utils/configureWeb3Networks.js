@@ -1,6 +1,4 @@
-import {
-    NETWORKS,
-} from '~config/constants';
+import NETWORKS from '~config/networks';
 import {
     get,
 } from '~utils/storage';
