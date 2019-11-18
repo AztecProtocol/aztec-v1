@@ -11,6 +11,7 @@ const {
     SwapProof,
 } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
+
 const {
     constants: { ERC20_SCALING_FACTOR },
     proofs: { BURN_PROOF, DIVIDEND_PROOF, JOIN_SPLIT_PROOF, SWAP_PROOF, MINT_PROOF, PRIVATE_RANGE_PROOF, PUBLIC_RANGE_PROOF },
@@ -20,6 +21,7 @@ const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { getNotesForAccount } = require('../helpers/ERC1724');
 const factoryHelpers = require('../helpers/Factory');
+const setupIntegrationTest = require('../setupIntegrationTest');
 
 const ACE = artifacts.require('./ACE');
 const DividendValidator = artifacts.require('./Dividend');
@@ -40,6 +42,7 @@ contract('AZTEC integration', (accounts) => {
     let privateRangeValidator;
     let publicRangeValidator;
     let swapValidator;
+    let erc20;
     let zkAsset;
     let aztecAccount;
     const scalingFactor = new BN(1);
@@ -60,7 +63,7 @@ contract('AZTEC integration', (accounts) => {
         aztecAccount = secp256k1.generateAccount();
 
         // Fund account with ERC20s
-        const tokensTransferred = new BN(500);
+        const tokensTransferred = new BN(5000);
         await erc20.mint(publicOwner, scalingFactor.mul(tokensTransferred));
         await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
     });
@@ -93,14 +96,14 @@ contract('AZTEC integration', (accounts) => {
             expect(swapValidatorAddress).to.equal(swapValidator.address);
         });
 
-        // it('should set zkAsset linkedToken', async () => {
-        //     const linkedTokenAddress = await zkAsset.linkedToken();
-        //     expect(linkedTokenAddress).to.equal(erc20.address);
-        // });
-
         it('should set zkAsset owner', async () => {
             const zkAssetOwner = await zkAsset.owner();
             expect(zkAssetOwner).to.equal(accounts[0]);
+        });
+
+        it('should set zkAsset linkedToken', async () => {
+            const linkedTokenAddress = await zkAsset.linkedToken();
+            expect(linkedTokenAddress).to.equal(erc20.address);
         });
     });
 
@@ -193,8 +196,6 @@ contract('AZTEC integration', (accounts) => {
 
         it('should perform a confidentialTransfer(), with a withdraw proof', async () => {
             // Convert tokens into notes, then withdraw those notes
-
-            // convert tokens into notes
             const depositInputNotes = [];
             const depositInputOwnerAccounts = [];
             const depositOutputNotes = await getNotesForAccount(aztecAccount, [50, 50]);
