@@ -1,9 +1,6 @@
 import NetworkService from '~helpers/NetworkService';
-import {
-    IZkAssetConfig,
-} from '~config/contracts';
+import contracts from '~config/contracts';
 import decodeNoteLogs from './helpers/decodeNoteLogs';
-
 
 export default async function fetchNotes({
     owner,
@@ -12,9 +9,9 @@ export default async function fetchNotes({
     fromAssets = null,
     toBlock = 'latest',
     events = [
-        IZkAssetConfig.events.createNote,
-        IZkAssetConfig.events.destroyNote,
-        IZkAssetConfig.events.updateNoteMetaData,
+        contracts.ZkAsset.events.createNote,
+        contracts.ZkAsset.events.destroyNote,
+        contracts.ZkAsset.events.updateNoteMetaData,
     ],
     networkId,
 } = {}) {
@@ -22,7 +19,7 @@ export default async function fetchNotes({
     const { abi, getPastLogs } = web3Service.eth;
 
     const eventsTopics = events
-        .map(e => IZkAssetConfig.config.abi.find(({ name, type }) => name === e && type === 'event'))
+        .map(e => contracts.ZkAsset.config.abi.find(({ name, type }) => name === e && type === 'event'))
         .map(abi.encodeEventSignature);
 
     const ownerTopics = owner ? abi.encodeParameter('address', owner) : null;

@@ -1,23 +1,13 @@
-import {
-    AZTECAccountRegistryConfig,
-    ACEConfig,
-    IZkAssetConfig,
-} from '~/config/contracts';
+import contracts from '~/config/contracts';
 import {
     warnLog,
 } from '~/utils/log';
-
-const contractMapping = {
-    ACE: ACEConfig,
-    AZTECAccountRegistry: AZTECAccountRegistryConfig,
-    ZkAsset: IZkAssetConfig,
-};
 
 export default function getContract(contractName, networkId) {
     const {
         config,
         networks,
-    } = contractMapping[contractName] || {};
+    } = contracts[contractName] || {};
     if (!config) {
         warnLog(`Contract ${contractName} is not defined in '~/config/contracts'`);
     }
