@@ -75,9 +75,7 @@
     },
     "scripts": {
         "start:ganache": "babel-node scripts/run start",
-        "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
-        "rebuild:contracts": "yarn deploy:contracts && yarn copy",
         "build:dev": "webpack --config webpack-sdk.dev.js",
         "build:prod": "webpack --config webpack-sdk.prod.js",
         "generate:styles": "guacamole generateStyles",
