@@ -5,13 +5,12 @@ const {
     constants: {
         eip712,
     },
-    proofs,
 } = utils;
 
 
 export default ({
     noteHashes,
-    sender,
+    spender,
     spenderApprovals,
     assetAddress,
 }) => {
