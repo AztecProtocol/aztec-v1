@@ -74,7 +74,7 @@ class NetworkSwitcher {
                 config: contractConfig,
                 address: contractAddress,
             } = contractsConfigs[i];
-            if (contractConfig.bytecode === '0x') {
+            if (contractConfig.bytecode === '0x' && !contractAddress) {
                 service.registerInterface(contractConfig);
             } else {
                 service.registerContract(contractConfig, {

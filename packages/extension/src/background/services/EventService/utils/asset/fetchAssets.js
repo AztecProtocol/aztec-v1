@@ -1,8 +1,5 @@
 import Web3Service from '~helpers/NetworkService';
-import {
-    ACEConfig,
-} from '~config/contracts';
-
+import contracts from '~config/contracts';
 
 export default async function fetchAssets({
     fromBlock = 'earliest',
@@ -17,7 +14,7 @@ export default async function fetchAssets({
         };
     }
     const web3Service = await Web3Service({ networkId });
-    const eventName = ACEConfig.events.сreateNoteRegistry;
+    const eventName = contracts.ACE.events.сreateNoteRegistry;
 
     const options = {
         fromBlock,
@@ -32,7 +29,7 @@ export default async function fetchAssets({
 
     try {
         const data = await web3Service
-            .useContract(ACEConfig.name)
+            .useContract(contracts.ACE.name)
             .events(eventName)
             .where(options);
 
