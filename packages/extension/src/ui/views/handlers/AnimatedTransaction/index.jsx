@@ -275,7 +275,7 @@ class AnimatedTransaction extends PureComponent {
         this.goToStep(nextStep, accumData);
     }
 
-    async runTask(accumData) {
+    async runTask(accumData = null) {
         const {
             steps,
             runTask,
@@ -283,13 +283,14 @@ class AnimatedTransaction extends PureComponent {
         const {
             step,
             currentTask: prevTask,
+            data: prevData,
         } = this.state;
         const {
             tasks = [],
         } = steps[step] || {};
         const currentTask = prevTask + 1;
         const task = tasks[currentTask];
-        let data = accumData;
+        let data = accumData || prevData;
 
         if (!task) {
             this.handleGoNext(data);
