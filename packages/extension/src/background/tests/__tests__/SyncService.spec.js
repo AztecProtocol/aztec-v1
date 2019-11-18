@@ -5,10 +5,9 @@ import TestAuthService from './helpers/AuthService';
 import {
     set,
 } from '~utils/storage';
-import ERC20Mintable from '../../../../build/contracts/ERC20Mintable';
-import ZkAssetOwnable from '../../../../build/contracts/ZkAssetOwnable';
-import JoinSplit from '../../../../build/contracts/JoinSplit';
-
+import ERC20Mintable from '~contracts/ERC20Mintable';
+import ZkAssetOwnable from '~contracts/ZkAssetOwnable';
+import JoinSplit from '~contracts/JoinSplit';
 import Web3Service from '~helpers/NetworkService';
 import { fetchNotes } from '../../services/EventService/utils/note';
 import {
