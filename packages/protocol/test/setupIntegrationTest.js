@@ -3,14 +3,13 @@ const { getContractAddressesForNetwork, NetworkId: networkIDs } = require('@azte
 const contractArtifacts = require('@aztec/contract-artifacts');
 const TruffleContract = require('@truffle/contract');
 
-
 class setupIntegrationTest {
     /**
      * Sets up the environment for an integration test. Specifically, it creates Truffle Contract instances
-     * from the aztec contract-artifacts; at the appropriate address in the contract-addresses package. 
-     * 
+     * from the aztec contract-artifacts; at the appropriate address in the contract-addresses package.
+     *
      * Can be used to setup a local development testing environment for an integration test
-     * 
+     *
      * @param {String[]} contractsToDeploy - array of the names of contracts to deploy
      * @param {String} NETWORK - ID of the network integration test setup for
      */
@@ -19,14 +18,9 @@ class setupIntegrationTest {
         this.networkId = networkIDs[NETWORK];
         this.contractsToDeploy = contractsToDeploy;
 
-        if (NETWORK === 'Ropsten') {
-            this.getAddresses()
-            this.getTruffleContracts();
-            this.getContracts();
-        } else if (NETWORK === 'Development') {
-            this.getLocalAddresses();
-            this.getLocalContracts();
-        };
+        this.getAddresses();
+        this.getTruffleContracts();
+        this.getContracts();
     }
 
     /**
@@ -70,6 +64,5 @@ class setupIntegrationTest {
         );
     }
 }
-
 
 module.exports = setupIntegrationTest;
