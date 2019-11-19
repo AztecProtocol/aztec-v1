@@ -131,7 +131,6 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         // If publicValue != 0, enact a token transfer if asset is convertible
         if (publicValue != 0) {
             require(registry.canConvert == true, "asset cannot be converted into public tokens");
-            // Should this logic go into independent behaviour contracts?
             if (publicValue < 0) {
                 transferValue = uint256(-publicValue).mul(registry.scalingFactor);
             } else {
@@ -276,5 +275,9 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         require(noteStatusOld == uint256(NoteStatus.UNSPENT), "input note status is not UNSPENT");
         // Check that the note owner is the expected owner
         require(storedNoteOwner == _noteOwner, "input note owner does not match");
+    }
+
+    function makeAvailable() public onlyOwner {
+        revert("fn not implemented for behaviour version");
     }
 }
