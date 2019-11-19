@@ -10,16 +10,14 @@ import {
 export const updateActionState = async (action) => {
     const timestamp = Date.now();
     const {
-        data: {
-            response,
-        },
+        data,
     } = action;
     const {
         site,
-    } = response || {};
+    } = data || {};
     const newAction = {
         ...action,
-        data: response,
+        data,
         site,
         timestamp,
     };
