@@ -61,3 +61,7 @@ export const errorShape = PropTypes.shape({
     response: PropTypes.object,
     fetal: PropTypes.bool,
 });
+export const gsnConfigShape = PropTypes.shape({
+    isGSNAvailable: PropTypes.bool,
+    proxyContract: PropTypes.string,
+});

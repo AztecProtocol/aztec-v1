@@ -9,6 +9,9 @@ import WithdrawConfirm from '~ui/views/WithdrawConfirm';
 import SignNotes from '~ui/views/SignNotes';
 import TransactionSend from '~ui/views/TransactionSend';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import {
+    gsnConfigShape,
+} from '~ui/config/propTypes';
 
 const metamaskSteps = [
     {
@@ -67,7 +70,7 @@ const gsnSteps = [
         titleKey: 'withdraw.notes.title',
         submitText: 'withdraw.notes.submitText',
         cancelText: 'withdraw.notes.cancelText',
-        content: WithdrawSign,
+        content: SignNotes,
         tasks: [
             {
                 type: 'sign',
@@ -80,7 +83,7 @@ const gsnSteps = [
         titleKey: 'withdraw.send.title',
         submitText: 'withdraw.send.submitText',
         cancelText: 'withdraw.send.cancelText',
-        content: WithdrawSend,
+        content: TransactionSend,
         tasks: [
             {
                 name: 'send',

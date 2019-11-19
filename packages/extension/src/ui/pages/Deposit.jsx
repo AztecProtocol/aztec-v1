@@ -10,6 +10,9 @@ import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import DepositConfirm from '~ui/views/DepositConfirm';
 import DepositApprove from '~ui/views/DepositApprove';
 import TransactionSend from '~ui/views/TransactionSend';
+import {
+    gsnConfigShape,
+} from '~ui/config/propTypes';
 
 const steps = [
     {
@@ -85,7 +88,7 @@ const gsnSteps = [
                 run: apis.asset.confidentialTransferFrom,
             },
         ],
-        content: DepositSend,
+        content: TransactionSend,
         submitText: 'deposit.send.submitText',
         cancelText: 'deposit.send.cancelText',
     },
