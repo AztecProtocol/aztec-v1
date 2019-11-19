@@ -2,7 +2,7 @@ import {
     getNetworkById,
     getContract,
 } from '~/utils/network';
-import AuthService from '~/background/services/AuthService';
+import setNetworkConfig from '~/background/services/ApiService/utils/setNetworkConfig';
 import NetworkService from '~helpers/NetworkService/factory';
 
 const backgroundContracts = [
@@ -17,7 +17,7 @@ export default async function setupClientConfig({
     contractAddresses,
     currentAddress,
 }) {
-    await AuthService.setNetworkConfig({
+    await setNetworkConfig({
         networkId,
         currentAddress,
     });
