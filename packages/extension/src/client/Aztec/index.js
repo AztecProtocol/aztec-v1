@@ -27,7 +27,7 @@ class Aztec {
             providerUrl,
         });
 
-        return new Promise(async (resolve) => {
+        return new Promise(async (resolve, reject) => {
             if (autoRefreshOnProfileChange) {
                 Web3Service.bindProfileChange(async () => this.refreshSession(
                     {
@@ -48,7 +48,11 @@ class Aztec {
 
             ApiPermissionService.setContractConfigs(contractsConfigs);
 
-            await ApiPermissionService.ensurePermission();
+            try {
+                await ApiPermissionService.ensurePermission();
+            } catch (error) {
+                reject(error);
+            }
 
             const apis = ApiPermissionService.generateApis();
             Object.keys(apis).forEach((name) => {
