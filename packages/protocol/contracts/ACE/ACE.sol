@@ -342,6 +342,12 @@ contract ACE is IAZTEC, Ownable, NoteRegistryManager {
         return commonReferenceString;
     }
 
+    /**
+    * @dev Get the address of the relevant validator contract
+    *
+    * @param _proof unique identifier of a particular proof
+    * @return validatorAddress - the address of the validator contract
+    */
     function getValidatorAddress(uint24 _proof) public view returns (address validatorAddress) {
         bool isValidatorDisabled;
         bool queryInvalid;
