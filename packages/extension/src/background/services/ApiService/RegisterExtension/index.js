@@ -3,6 +3,8 @@ import {
 } from '~/config/event';
 import filterStream from '~utils/filterStream';
 import validateUserPermission from '../utils/validateUserPermision';
+import setNetworkConfig from '../utils/setNetworkConfig';
+
 
 const registerExtensionUi = async (query, connection) => {
     const {
