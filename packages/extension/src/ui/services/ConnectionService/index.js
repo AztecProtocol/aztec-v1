@@ -33,7 +33,7 @@ export default {
         clientRequestId: clientRequestId || manager.clientRequestId,
         data: {
             action,
-            response: data,
+            params: data,
         },
     }),
     sendTransaction: async ({

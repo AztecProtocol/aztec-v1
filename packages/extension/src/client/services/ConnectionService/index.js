@@ -71,7 +71,7 @@ class ConnectionService {
 
         const {
             data: {
-                response: {
+                data: {
                     contractsConfigs,
                 } = {},
             },
@@ -97,53 +97,50 @@ class ConnectionService {
 
         [this.port] = ports;
         this.port.onmessage = ({ data }) => {
-            if (data.data.type === uiOpenEvent) {
+            const {
+                type,
+            } = data;
+            if (type === uiOpenEvent) {
                 backgroundFrame.open();
                 return;
             }
-            if (data.data.type === uiCloseEvent) {
+            if (type === uiCloseEvent) {
                 backgroundFrame.close();
                 return;
             }
-            this.MessageSubject.next({
-                ...data,
-                data: {
-                    type: data.type,
-                    ...data.data,
-                },
-            });
+            this.MessageSubject.next(data);
         };
 
         this.messages$.pipe(
-            filter(({ data: { type } }) => type === actionRequestEvent),
+            filter(({ type }) => type === actionRequestEvent),
             mergeMap(data => from(MetaMaskService(data))),
-            tap(data => this.port.postMessage({
+            tap(({
+                requestId,
+                responseId,
+                response,
+            }) => this.port.postMessage({
                 type: actionResponseEvent,
-                requestId: data.requestId,
-                domain: window.location.origin,
+                origin: window.location.origin,
                 clientId: this.clientId,
-                response: data.response,
                 sender: 'WEB_CLIENT',
+                requestId,
+                responseId,
+                data: response,
             })),
         ).subscribe();
     }
 
     postToBackground = async ({
         type,
-        query,
-        args,
+        data,
     }) => {
         const requestId = randomId();
         this.port.postMessage({
             type,
-            query,
-            args: {
-                ...args,
-                site: getSiteData(),
-            },
             clientId: this.clientId,
             requestId,
-            domain: window.location.origin,
+            data,
+            origin: window.location.origin,
             sender: 'WEB_CLIENT',
         });
 
@@ -156,30 +153,31 @@ class ConnectionService {
         } = Web3Service.account || {};
 
         const {
-            data: {
-                response,
-            },
+            data,
         } = await this.postToBackground({
             type: clientRequestEvent,
-            query: queryName,
-            args: {
-                ...args,
-                currentAddress: address,
-                domain: window.location.origin,
+            data: {
+                query: queryName,
+                args: {
+                    ...args,
+                    currentAddress: address,
+                    domain: window.location.origin,
+                    site: getSiteData(),
+                },
             },
         }) || {};
 
-        if (!response || response.error) {
-            throw new ApiError(response);
+        if (!data || data.error) {
+            throw new ApiError(data);
         }
 
-        const responseKey = Object.keys(response)
-            .find(key => !!response[key]);
-        if (response[responseKey].error) {
-            throw new ApiError(response);
+        const dataKey = Object.keys(data)
+            .find(key => !!data[key]);
+        if (data[dataKey].error) {
+            throw new ApiError(data);
         }
 
-        return response[responseKey];
+        return data[dataKey];
     }
 }
 

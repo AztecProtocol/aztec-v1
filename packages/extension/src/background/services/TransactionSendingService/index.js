@@ -3,18 +3,15 @@ import {
 } from '~/utils/storage';
 import Web3Service from '~helpers/NetworkService';
 
-const sendTransaction = async (data) => {
+const sendTransaction = async (query) => {
     const {
         data: {
-            responseId,
-            data: {
-                contract,
-                method,
-                params,
-                contractAddress,
-            },
+            contract,
+            method,
+            params,
+            contractAddress,
         },
-    } = data;
+    } = query;
 
     const networkId = await get('networkId');
     const web3Service = await Web3Service({
@@ -32,13 +29,10 @@ const sendTransaction = async (data) => {
         .sendSigned(...params);
 
     return {
-        ...data,
+        ...query,
         data: {
-            response: {
-                txReceipt: receipt,
-            },
+            txReceipt: receipt,
         },
-        responseId,
     };
 };
 

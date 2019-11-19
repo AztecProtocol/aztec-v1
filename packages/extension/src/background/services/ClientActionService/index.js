@@ -4,26 +4,15 @@ import {
     actionResponseEvent,
 } from '~config/event';
 
-const triggerClientAction = (query, connection) => async () => {
+const triggerClientAction = async (query, connection) => {
     const {
-        data: {
-            data,
-        },
         requestId,
-        ...rest
     } = query;
     connection.ClientActionSubject.next({
-        ...rest,
+        ...query,
         type: actionRequestEvent,
-        requestId,
-        data: {
-            action: data.action,
-            response: {
-                ...data.response,
-            },
-            requestId,
-        },
     });
+
     return filterStream(actionResponseEvent, requestId, connection.message$);
 };
 

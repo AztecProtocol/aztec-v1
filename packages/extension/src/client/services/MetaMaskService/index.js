@@ -4,16 +4,13 @@ import Web3Service from '~/client/services/Web3Service';
 import registerExtension from './registerExtension';
 import signNote from './signNote';
 
-const handleAction = async (data) => {
+const handleAction = async (action, params) => {
     let response = {};
-    const {
-        action,
-    } = data;
     const { address } = Web3Service.account;
 
     switch (action) {
         case 'metamask.register.extension': {
-            const eip712Data = registerExtension(data);
+            const eip712Data = registerExtension(params);
             const method = 'eth_signTypedData_v3';
             const { result } = await Web3Service.sendAsync({
                 method,
@@ -39,12 +36,10 @@ const handleAction = async (data) => {
             // we only need to do this if the proof sender is the user
             // TODO the wallet contract or any contract will be responsible for this
             const {
-                response: {
-                    assetAddress,
-                    amount,
-                    proofHash,
-                },
-            } = data;
+                assetAddress,
+                amount,
+                proofHash,
+            } = params;
 
             await Web3Service
                 .useContract('ACE')
@@ -58,13 +53,11 @@ const handleAction = async (data) => {
         }
         case 'metamask.eip712.signNotes': {
             const {
-                response: {
-                    assetAddress,
-                    noteHashes,
-                    challenge,
-                    sender,
-                },
-            } = data;
+                assetAddress,
+                noteHashes,
+                challenge,
+                sender,
+            } = params;
             const signatures = (await Promise.all(noteHashes.map(async (noteHash) => {
                 const noteSchema = signNote({
                     assetAddress,
@@ -87,12 +80,10 @@ const handleAction = async (data) => {
         }
         case 'metamask.zkAsset.updateNoteMetadata': {
             const {
-                response: {
-                    noteHash,
-                    assetAddress,
-                    metadata,
-                },
-            } = data;
+                noteHash,
+                assetAddress,
+                metadata,
+            } = params;
             await Web3Service
                 .useContract('ZkAsset')
                 .at(assetAddress)
@@ -105,12 +96,10 @@ const handleAction = async (data) => {
         }
         case 'metamask.zkAsset.confidentialTransfer': {
             const {
-                response: {
-                    assetAddress,
-                    proofData,
-                    signatures,
-                },
-            } = data;
+                assetAddress,
+                proofData,
+                signatures,
+            } = params;
             await Web3Service
                 .useContract('ZkAsset')
                 .at(assetAddress)
@@ -123,13 +112,10 @@ const handleAction = async (data) => {
         }
         case 'metamask.aztec.registerAZTECExtension': {
             const {
-                response: {
-                    address,
-                    linkedPublicKey,
-                    spendingPublicKey,
-                    signature,
-                },
-            } = data;
+                linkedPublicKey,
+                spendingPublicKey,
+                signature,
+            } = params;
             await Web3Service
                 .useContract('AZTECAccountRegistry')
                 .method('registerAZTECExtension')
@@ -147,23 +133,28 @@ const handleAction = async (data) => {
     return response;
 };
 
-export default async function MetaMaskService({ data }) {
+export default async function MetaMaskService(query) {
+    let response;
+    let error;
     try {
-        const response = await handleAction(data);
-        return {
-            ...data,
-            response: {
-                ...response,
-                success: true,
-            },
-        };
-    } catch (error) {
-        return {
-            ...data,
-            response: {
-                success: false,
-                error,
-            },
-        };
+        const {
+            action,
+            params,
+        } = query.data;
+        response = await handleAction(action, params);
+        ({
+            error,
+        } = response || {});
+    } catch (e) {
+        error = e;
     }
+
+    return {
+        ...query,
+        response: {
+            ...response,
+            error,
+            success: !error,
+        },
+    };
 }
