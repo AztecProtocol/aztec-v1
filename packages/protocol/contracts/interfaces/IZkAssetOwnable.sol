@@ -41,7 +41,7 @@ interface IZkAssetOwnable {
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
-        bool _status,
+        bool _spenderApproval,
         bytes calldata _signature
     ) external;
 
@@ -50,13 +50,13 @@ interface IZkAssetOwnable {
     * transfer instructions represented by a bytes _proofOutput argument that was outputted
     * from a proof verification contract.
     *
-    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * @param _proofId - uint24 variable which acts as a unique identifier for the proof which
     * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
     * transfer instructions for the ACE
     */
-    function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external;
+    function confidentialTransferFrom(uint24 _proofId, bytes calldata _proofOutput) external;
     
 
     /**
@@ -92,7 +92,7 @@ interface IZkAssetOwnable {
     * @param addressPos - indexer for the desired address, the one to be extracted
     * @return desiredAddress - extracted address specified by the inputs to this function
     */
-    function extractAddress(bytes memory metaData, uint256 addressPos) external returns (address desiredAddress);
+    function extractAddress(bytes calldata metaData, uint256 addressPos) external returns (address desiredAddress);
 
     function isOwner() external view returns (bool);
 

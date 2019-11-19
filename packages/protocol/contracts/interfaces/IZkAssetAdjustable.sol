@@ -52,7 +52,7 @@ interface IZkAssetAdjustable {
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
-        bool _status,
+        bool _spenderApproval,
         bytes calldata _signature
     ) external;
 
@@ -126,7 +126,7 @@ interface IZkAssetAdjustable {
     * @param addressPos - indexer for the desired address, the one to be extracted
     * @return desiredAddress - extracted address specified by the inputs to this function
     */
-    function extractAddress(bytes memory metaData, uint256 addressPos) external returns (address desiredAddress);
+    function extractAddress(bytes calldata metaData, uint256 addressPos) external returns (address desiredAddress);
 
     function isOwner() external view returns (bool);
 
