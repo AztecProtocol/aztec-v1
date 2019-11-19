@@ -36,16 +36,16 @@ export default function acceptConnection() {
                 data,
             } = event;
 
-            event.source.postMessage({
-                type: connectionApprovedEvent,
-                code: '200',
-                response,
-            }, '*', [channel.port2]);
-
             connection.registerClient({
                 data,
                 port: channel.port1,
             });
+
+            event.source.postMessage({
+                type: connectionApprovedEvent,
+                code: '200',
+                data: response,
+            }, '*', [channel.port2]);
         }
     });
 }
