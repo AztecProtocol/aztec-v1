@@ -163,4 +163,6 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         * @param _noteOwner - the address of the owner of the note
     */
     function deleteNote(bytes32 _noteHash, address _noteOwner) internal;
+
+    function makeAvailable() public;
 }

@@ -479,4 +479,10 @@ contract NoteRegistryManager is IAZTEC, Ownable {
             version := or(mul(_first, 0x10000), or(mul(_second, 0x100), _third))
         }
     }
+
+    // used for slow release, useless afterwards
+    function makeAssetAvailable(address _registryOwner) public onlyOwner {
+        NoteRegistry memory registry = registries[_registryOwner];
+        registry.behaviour.makeAvailable();
+    }
 }
