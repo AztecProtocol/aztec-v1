@@ -1,11 +1,12 @@
 {
     "name": "extension",
+    "sideEffects": false,
     "version": "0.0.1",
     "main": "index.js",
     "license": "MIT",
     "dependencies": {
         "@aztec/dev-utils": "0.0.0-semantically-released",
-        "@aztec/guacamole-ui": "^1.1.1",
+        "@aztec/guacamole-ui": "1.1.2",
         "@aztec/protocol": "0.0.0-semantically-released",
         "@aztec/secp256k1": "^1.0.1",
         "@aztec/typed-data": "0.0.0-semantically-released",
@@ -69,8 +70,8 @@
         "uuid": "^3.3.3",
         "web3": "1.2.1",
         "web3-utils": "1.2.1",
-        "webpack": "^4.39.3",
-        "webpack-cli": "^3.3.4",
+        "webpack": "4.41.2",
+        "webpack-cli": "3.3.10",
         "webpack-dev-server": "^3.8.0"
     },
     "scripts": {
