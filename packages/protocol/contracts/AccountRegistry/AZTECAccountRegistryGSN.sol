@@ -20,7 +20,7 @@ import "../ACE/ACE.sol" as ACEModule;
 
 contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
-    ACEModule.IACE ace;
+    ACEModule.ACE ace;
 
     using NoteUtils for bytes;
     constructor(
@@ -29,7 +29,7 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
     ) public {
         GSNRecipient.initialize();
         GSNBouncerSignature.initialize(_trustedAddress);
-        ace = ACEModule.IACE(_ace);
+        ace = ACEModule.ACE(_ace);
     }
 
     function confidentialTransferFrom(address _registryOwner, bytes memory _proofData) public {
