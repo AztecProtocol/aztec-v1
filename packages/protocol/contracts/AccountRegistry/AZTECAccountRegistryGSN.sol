@@ -16,7 +16,6 @@ import "./AZTECAccountRegistry.sol";
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-
 contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
     address aceAddress;
