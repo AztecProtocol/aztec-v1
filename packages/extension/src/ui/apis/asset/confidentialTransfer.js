@@ -1,5 +1,6 @@
 import ConnectionService from '~ui/services/ConnectionService';
 
+
 export default async function confidentialTransfer({
     assetAddress,
     proof,

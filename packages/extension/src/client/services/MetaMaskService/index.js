@@ -3,6 +3,7 @@ import EthCrypto from 'eth-crypto';
 import Web3Service from '~/client/services/Web3Service';
 import registerExtension from './registerExtension';
 import signNote from './signNote';
+import batchSignNotes from './batchSignNotes';
 
 const handleAction = async (data) => {
     let response = {};
@@ -82,6 +83,35 @@ const handleAction = async (data) => {
 
             response = {
                 signatures,
+            };
+            break;
+        }
+        case 'metamask.eip712.batchSignNotes': {
+            const {
+                response: {
+                    assetAddress,
+                    noteHashes,
+                    sender,
+                },
+            } = data;
+
+            const spenderApprovals = noteHashes.map(() => true);
+
+            const noteSchema = batchSignNotes({
+                assetAddress,
+                noteHashes,
+                spenderApprovals,
+                sender,
+            });
+            const method = 'eth_signTypedData_v3';
+            const signature = await Web3Service.sendAsync({
+                method,
+                params: [address, noteSchema],
+                from: address,
+            });
+
+            response = {
+                signature,
             };
             break;
         }

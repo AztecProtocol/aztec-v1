@@ -6,9 +6,15 @@ export default async function signNotes({
     assetAddress,
     proof,
     requestId,
+    gsnConfig,
 }) {
     const noteHashes = inputNotes.map(({ noteHash }) => noteHash);
     const challenge = proof.challengeHex;
+    const {
+        isGSNAvailable,
+        proxyContract,
+    } = gsnConfig;
+    const actualSpender = isGSNAvailable ? proxyContract : sender;
 
     const {
         signatures,
@@ -19,7 +25,7 @@ export default async function signNotes({
             noteHashes,
             assetAddress,
             challenge,
-            sender,
+            sender: actualSpender,
         },
     });
 

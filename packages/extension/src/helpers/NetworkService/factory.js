@@ -1,4 +1,7 @@
 import Web3 from 'web3';
+import {
+    GSNProvider,
+} from '@openzeppelin/gsn-provider';
 import Web3Service from '~/utils/Web3Service';
 import {
     get,
@@ -6,6 +9,8 @@ import {
 import {
     errorLog,
 } from '~utils/log';
+import approveFunction from '~utils/approveGSNFunction';
+import retrieveSigningInfo from './utils/retrieveSigningInfo';
 
 
 // The goals of the web3 service
@@ -34,11 +39,12 @@ class NetworkSwitcher {
 
     ensureWeb3Service = async ({
         networkId,
-        account,
+        account = {
+            address: this.currentAddress,
+        },
     }) => {
         if (!networkId && !this.networkId) {
-            const resp = await get('networkId');
-            this.networkId = resp;
+            this.networkId = await get('networkId');
         }
         const networkIdToUse = networkId || this.networkId;
         const config = this.networksConfigs[networkIdToUse];
@@ -63,10 +69,20 @@ class NetworkSwitcher {
             provider = new Web3.providers.HttpProvider(providerUrl);
         }
 
+        const signingInfo = await retrieveSigningInfo(account.address);
+        const gsnProvider = new GSNProvider(providerUrl, {
+            pollInterval: 15 * 1000,
+            signKey: signingInfo.privateKey,
+            approveFunction,
+            fixedGasPrice: 15e9,
+        });
+
         await service.init({
             provider,
-            account: account || {
-                address: this.currentAddress,
+            account,
+            gsnConfig: {
+                gsnProvider,
+                signingInfo,
             },
         });
         for (let i = 0; i < contractsConfigs.length; i += 1) {

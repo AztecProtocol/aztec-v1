@@ -11,7 +11,6 @@ import {
 import {
     permissionError,
 } from '~utils/error';
-import NetworkService from '~helpers/NetworkService/factory';
 import enableAssetForDomain from './enableAssetForDomain';
 
 const AuthService = {
@@ -66,15 +65,6 @@ const AuthService = {
         return {
             address,
         };
-    },
-    setNetworkConfig: async (config) => {
-        const {
-            networkId,
-        } = config;
-        NetworkService.setNetworkConfig(config);
-        await set({
-            networkId,
-        });
     },
     updateSession: async (address) => {
         const prevSession = await get('session');

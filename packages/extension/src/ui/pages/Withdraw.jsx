@@ -10,7 +10,7 @@ import SignNotes from '~ui/views/SignNotes';
 import TransactionSend from '~ui/views/TransactionSend';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 
-const steps = [
+const metamaskSteps = [
     {
         titleKey: 'withdraw.confirm.title',
         submitTextKey: 'withdraw.confirm.submit',
@@ -50,6 +50,46 @@ const steps = [
     },
 ];
 
+const gsnSteps = [
+    {
+        titleKey: 'withdraw.confirm.title',
+        submitText: 'withdraw.confirm.submitText',
+        cancelText: 'withdraw.confirm.cancelText',
+        content: WithdrawConfirm,
+        tasks: [
+            {
+                name: 'proof',
+                run: apis.proof.withdraw,
+            },
+        ],
+    },
+    {
+        titleKey: 'withdraw.notes.title',
+        submitText: 'withdraw.notes.submitText',
+        cancelText: 'withdraw.notes.cancelText',
+        content: WithdrawSign,
+        tasks: [
+            {
+                type: 'sign',
+                name: 'approve',
+                run: apis.note.signNotes,
+            },
+        ],
+    },
+    {
+        titleKey: 'withdraw.send.title',
+        submitText: 'withdraw.send.submitText',
+        cancelText: 'withdraw.send.cancelText',
+        content: WithdrawSend,
+        tasks: [
+            {
+                name: 'send',
+                run: apis.asset.confidentialTransferFrom,
+            },
+        ],
+    },
+];
+
 const Withdraw = ({
     initialStep,
     assetAddress,
@@ -58,6 +98,11 @@ const Withdraw = ({
     proof,
     numberOfInputNotes,
 }) => {
+    const {
+        isGSNAvailable,
+    } = gsnConfig;
+    const steps = isGSNAvailable ? gsnSteps : metamaskSteps;
+
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
 
@@ -68,6 +113,7 @@ const Withdraw = ({
             transactions,
             proof,
             numberOfInputNotes,
+            gsnConfig,
         };
     };
 
@@ -92,6 +138,7 @@ Withdraw.propTypes = {
         inputNotes: PropTypes.array.isRequired,
     }),
     numberOfInputNotes: PropTypes.number,
+    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Withdraw.defaultProps = {

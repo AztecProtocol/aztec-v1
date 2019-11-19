@@ -6,6 +6,7 @@ import {
 import Provider from '~/config/provider';
 import {
     AZTECAccountRegistryConfig,
+    AZTECAccountRegistryGSNConfig,
     ACEConfig,
     IZkAssetConfig,
 } from '~/config/contracts';
@@ -15,6 +16,7 @@ import getGanacheNetworkId from '~utils/getGanacheNetworkId';
 const contractsForNetwork = (networkId) => {
     const contractsConfigs = [
         AZTECAccountRegistryConfig,
+        AZTECAccountRegistryGSNConfig,
         ACEConfig,
         IZkAssetConfig,
     ];

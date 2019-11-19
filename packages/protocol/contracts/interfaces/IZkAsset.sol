@@ -29,7 +29,7 @@ contract IZkAsset {
         bytes calldata _signature
     ) external;
 
-    function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external;
+    function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public;
     
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public;
 }

@@ -12,6 +12,8 @@ export default async function proveDeposit({
         address,
     } = Web3Service.account;
 
+    const senderValue = sender || address;
+    
     const data = await query({
         type: 'constructProof',
         args: {
@@ -19,7 +21,7 @@ export default async function proveDeposit({
             assetAddress,
             transactions,
             from: from || address,
-            sender: sender || address,
+            sender: senderValue,
             numberOfOutputNotes,
         },
     }) || {};
