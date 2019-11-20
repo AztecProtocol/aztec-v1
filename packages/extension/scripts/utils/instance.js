@@ -16,6 +16,7 @@ const childProcessHandler = (childProcess, {
     onReceiveErrorOutput,
     onError,
     onClose,
+    handleStderrAsNormalOutput,
 }) => {
     let hasStarted = false;
     let onStartCallbacks = [];
@@ -75,7 +76,7 @@ const childProcessHandler = (childProcess, {
         }
     }
 
-    childProcess.stdout.on('data', (data) => {
+    const handleNormalOtput = (data) => {
         const output = data.toString('utf8');
         if (!hasStarted && shouldStart) {
             const onStartMessage = shouldStart(output);
@@ -99,9 +100,16 @@ const childProcessHandler = (childProcess, {
         } else {
             process.stdout.write(output);
         }
-    });
+    };
+
+    childProcess.stdout.on('data', handleNormalOtput);
 
     childProcess.stderr.on('data', (data) => {
+        if (handleStderrAsNormalOutput) {
+            handleNormalOtput(data);
+            return;
+        }
+
         const output = data.toString('utf8');
         if (!shouldStart && hasNext()) {
             stashedErrors.push(output);
@@ -167,6 +175,7 @@ export default function instance(...args) {
         onReceiveErrorOutput,
         onError,
         onClose,
+        handleStderrAsNormalOutput,
     } = options || {};
 
     return childProcessHandler(
@@ -179,6 +188,7 @@ export default function instance(...args) {
             onReceiveErrorOutput,
             onError,
             onClose,
+            handleStderrAsNormalOutput,
         },
     );
 }
