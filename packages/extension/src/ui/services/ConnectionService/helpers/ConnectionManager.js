@@ -39,9 +39,9 @@ class ConnectionManager {
             const handleReceiveMessage = (e) => {
                 if (e.data.type === connectionApprovedEvent) {
                     const {
-                        response,
+                        data,
                     } = e.data;
-                    NetworkService.setConfigs([response]);
+                    NetworkService.setConfigs([data]);
 
                     [this.port] = e.ports;
                     this.port.onmessage = this.handlePortResponse;
@@ -74,9 +74,7 @@ class ConnectionManager {
         const {
             requestId,
             responseId,
-            data: {
-                response: returnData,
-            } = {},
+            data: returnData = {},
         } = data;
         const id = responseId || requestId;
         const callbacks = this.callbacks[id];
@@ -104,8 +102,8 @@ class ConnectionManager {
             type,
             requestId,
             responseId,
-            clientId: this.portId,
             data,
+            clientId: this.portId,
             sender: 'UI_CLIENT',
         });
 

@@ -2,8 +2,10 @@ import apollo from '../../GraphQLService';
 
 export default async function query(request, Query) {
     const {
-        data: { args },
         domain,
+        data: {
+            args,
+        },
     } = request;
 
     const { data } = await apollo.query({
@@ -16,6 +18,6 @@ export default async function query(request, Query) {
 
     return {
         ...request,
-        response: data,
+        data,
     };
 }

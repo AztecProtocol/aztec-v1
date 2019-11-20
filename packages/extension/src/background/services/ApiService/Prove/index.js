@@ -27,12 +27,7 @@ const proofUi = async (query, connection) => {
         type: `ui.asset.prove.${proofType.toLowerCase()}`,
         requestId: query.requestId,
         clientId: query.clientId,
-        data: {
-            response: {
-                ...rest,
-                requestId: query.requestId,
-            },
-        },
+        data: rest,
     });
 
     const resp = await filterStream(
@@ -42,10 +37,10 @@ const proofUi = async (query, connection) => {
     );
     const {
         data,
-    } = resp.data || {};
+    } = resp || {};
     return {
         ...query,
-        response: {
+        data: {
             prove: data,
         },
     };
@@ -74,7 +69,7 @@ const triggerProofUi = async (query, connection) => {
         });
         return {
             ...query,
-            response,
+            data: response,
         };
     }
     return proofUi(query, connection);

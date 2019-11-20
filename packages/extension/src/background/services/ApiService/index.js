@@ -25,7 +25,13 @@ class API {
         const middelware = {
             grantNoteAccess: validateAccounts,
         };
-        const { data: { query, args }, domain } = request;
+        const {
+            data: {
+                query,
+                args,
+            },
+            domain,
+        } = request;
         if (middelware[query]) {
             const {
                 error,

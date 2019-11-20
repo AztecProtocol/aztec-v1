@@ -15,73 +15,72 @@ const registerExtensionUi = async (query, connection) => {
         },
     } = query;
 
-    if (account && !account.registeredAt) {
-        connection.UiActionSubject.next({
-            type: 'ui.register.extension',
-            requestId,
-            data: {
-                response: {
-                    ...account,
-                    ...args,
-                },
-                requestId,
-            },
+    connection.UiActionSubject.next({
+        type: 'ui.register.extension',
+        requestId,
+        data: {
+            ...account,
+            ...args,
+        },
+    });
+
+    const response = await filterStream(
+        uiReturnEvent,
+        query.requestId,
+        connection.MessageSubject.asObservable(),
+    );
+
+    const {
+        data: registeredData,
+    } = response || {};
+    if (registeredData && registeredData.linkedPublicKey) {
+        // call validateUserPermission again to start EventService and NoteService
+        await validateUserPermission({
+            ...args,
+            domain: window.location.origin,
         });
-
-        const response = await filterStream(
-            uiReturnEvent,
-            query.requestId,
-            connection.MessageSubject.asObservable(),
-        );
-        const {
-            data: registeredData,
-        } = response.data || {};
-        if (registeredData && registeredData.linkedPublicKey) {
-            // call validateUserPermission again to start EventService and NoteService
-            await validateUserPermission({
-                ...args,
-                domain: window.location.origin,
-            });
-        }
-
-        return {
-            ...query,
-            response: {
-                account: response,
-            },
-        };
     }
-    return query;
+
+    return response;
 };
 
 const registerExtension = async (query, connection) => {
     const {
-        data: { args },
+        data: {
+            args,
+        },
     } = query;
 
-    const {
+    let {
         userPermission: { account = {} },
     } = await validateUserPermission({
         ...args,
         domain: window.location.origin,
     }) || {};
 
-    if (account && account.blockNumber) {
-        return {
+    let error;
+    if (!account
+        || (!account.blockNumber && !account.registeredAt)
+    ) {
+        const queryWithAccount = {
             ...query,
-            response: {
-                account,
-                error: null,
-            },
+            account: account && account.address
+                ? account
+                : { address: args.currentAddress },
         };
+        ({
+            data: account,
+            error,
+        } = await registerExtensionUi(queryWithAccount, connection));
     }
 
-    const queryWithAccount = {
+    return {
         ...query,
-        account: account && account.address ? account : { address: query.data.args.currentAddress },
+        data: {
+            account,
+            error,
+        },
     };
-
-    return registerExtensionUi(queryWithAccount, connection);
 };
 
 export default registerExtension;

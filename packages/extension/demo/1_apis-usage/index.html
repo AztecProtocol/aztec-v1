@@ -18,7 +18,8 @@
           console.error(error);
           statusElem.innerHTML = `
             <div>
-              Failed to load AZTEC SDK.
+              Failed to load AZTEC SDK.<br/>
+              <button onclick="initAztecSdk()">Retry</button>
             </div>
           `;
           return;

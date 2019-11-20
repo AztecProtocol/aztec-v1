@@ -26,8 +26,11 @@ const AZTECAccount = [
     },
 ];
 
-export default ({ response }) => {
-    const accountRegistryContract = Web3Service.contract('AZTECAccountRegistryGSN');
+export default ({
+    address,
+    linkedPublicKey,
+}) => {
+    const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
 
     const domainData = {
         name: 'AZTECAccountRegistry',
@@ -36,8 +39,8 @@ export default ({ response }) => {
     };
 
     const message = {
-        account: response.address,
-        linkedPublicKey: response.linkedPublicKey,
+        account: address,
+        linkedPublicKey,
     };
 
     const data = JSON.stringify({
