@@ -2,67 +2,63 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~utils/filterStream';
-import AuthService from '../../AuthService';
+import AuthService from '~/background/services/AuthService';
 
 const registerDomain = async (query, connection) => {
-    const registeredDomain = await AuthService.getRegisteredDomain(query.domain);
-
-
-    if (!registeredDomain) {
-        const {
-            webClientId,
-            data: {
-                args,
-            },
-        } = query;
-        const senderPort = connection.connections[webClientId];
-        if (!senderPort) {
-            return null;
-        }
-
-        const {
-            favIconUrl,
-            title,
-            url,
-        } = {};
-
-        connection.UiActionSubject.next({
-            type: 'ui.domain.approve',
-            requestId: query.requestId,
-            clientId: query.clientId,
-            data: {
-                response: {
-                    ...args,
-                    domain: {
-                        iconSrc: favIconUrl,
-                        name: title,
-                        domain: query.domain,
-                        url,
-                        ...query.data.metadata,
-                    },
-                },
-                requestId: query.requestId,
-            },
-        });
-        const reply = await filterStream(
-            uiReturnEvent,
-            query.requestId,
-            connection.MessageSubject.asObservable(),
-        );
-        return {
-            domain: reply,
-        };
+    const {
+        domain,
+    } = query;
+    const {
+        webClientId,
+        requestId,
+        data: {
+            args,
+        },
+    } = query;
+    const senderPort = connection.connections[webClientId];
+    if (!senderPort) {
+        return null;
     }
-    return {
-        domain: registeredDomain,
-    };
+
+    connection.UiActionSubject.next({
+        ...query,
+        type: 'ui.domain.approve',
+        data: {
+            ...args,
+            domain: {
+                domain,
+            },
+        },
+    });
+
+    const resp = await filterStream(
+        uiReturnEvent,
+        requestId,
+        connection.MessageSubject.asObservable(),
+    );
+    const {
+        data: {
+            domain: registeredDomain,
+        } = {},
+    } = resp || {};
+
+    return registeredDomain;
 };
 
 
 export default async (query, connection) => {
-    const response = await registerDomain(query, connection);
+    const {
+        domain,
+    } = query;
+    let registeredDomain = await AuthService.getRegisteredDomain(domain);
+    if (!registeredDomain) {
+        registeredDomain = await registerDomain(query, connection);
+    }
+
     return {
         ...query,
-        response,
+        data: {
+            domain: registeredDomain,
+        },
     };
 };

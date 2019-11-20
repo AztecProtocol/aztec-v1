@@ -1,10 +1,12 @@
 const path = require('path');
+const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const Dotenv = require('dotenv-webpack');
 
 module.exports = {
     mode: 'production',
+    target: 'web',
     devtool: 'source-map',
     entry: {
         aztec: './src/index.js',
@@ -23,6 +25,11 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, './build/sdk'),
         filename: '[name].js',
+    },
+    optimization: {
+        minimize: true,
+        usedExports: true,
+        sideEffects: true,
     },
     module: {
         rules: [
@@ -111,5 +118,13 @@ module.exports = {
         new Dotenv({
             path: './.env.development',
         }),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': "'production'",
+            __DEV__: false,
+        }),
+        new webpack.ContextReplacementPlugin(
+            /moment[/\\]locale$/,
+            'en',
+        ),
     ],
 };

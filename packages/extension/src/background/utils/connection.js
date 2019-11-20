@@ -23,11 +23,14 @@ import {
 import urls from '~config/urls';
 import Iframe from '~/utils/Iframe';
 import {
+    warnLog,
+} from '~/utils/log';
+import {
     permissionError,
 } from '~/utils/error';
+import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     updateActionState,
-    addDomainData,
 } from './connectionUtils';
 import graphQueryMap from '../../ui/queries';
 import ApiService from '../services/ApiService';
@@ -37,14 +40,17 @@ import GraphQLService from '../services/GraphQLService';
 
 class Connection {
     constructor() {
+        this.connections = {};
+        this.requests = {};
+
         this.MessageSubject = new Subject();
+        this.message$ = this.MessageSubject.asObservable();
 
         this.UiActionSubject = new Subject();
         this.ui$ = this.UiActionSubject.asObservable();
 
         this.UiResponseSubject = new Subject();
         this.uiResponse$ = this.UiResponseSubject.asObservable();
-
 
         this.GraphSubject = new Subject();
         this.graph$ = this.GraphSubject.asObservable();
@@ -54,6 +60,7 @@ class Connection {
 
         this.ClientActionSubject = new Subject();
         this.clientAction$ = this.ClientActionSubject.asObservable();
+
         this.containerId = 'aztec-popup-ui';
         this.uiFrame = new Iframe({
             id: 'AZTECSDK-POPUP',
@@ -67,25 +74,22 @@ class Connection {
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
             tap(({ webClientId, ...rest }) => {
-                if (!this.connections[webClientId]) return;
-                this.connections[webClientId].postMessage({
-                    ...rest,
-                });
+                if (!this.connections[webClientId]) {
+                    warnLog(`Cannot find web client '${webClientId}'.`);
+                    return;
+                }
+                this.connections[webClientId].postMessage(rest);
             }),
         ).subscribe();
 
-        this.message$ = this.MessageSubject.asObservable().pipe(
-            // here we need to filter the events int to types
-            map(addDomainData),
-            map(this.withConnectionIds),
-        );
         // respond to  the UI
         this.uiResponse$.pipe(
             tap(({ uiClientId, ...rest }) => {
-                if (!this.connections[uiClientId]) return;
-                this.connections[uiClientId].postMessage({
-                    ...rest,
-                });
+                if (!this.connections[uiClientId]) {
+                    warnLog(`Cannot find ui client '${uiClientId}'.`);
+                    return;
+                }
+                this.connections[uiClientId].postMessage(rest);
             }),
         ).subscribe();
 
@@ -111,11 +115,9 @@ class Connection {
                     webClientId,
                 } = this.requests[requestId];
                 this.ClientResponseSubject.next({
+                    type: uiOpenEvent,
                     requestId,
                     webClientId,
-                    data: {
-                        type: uiOpenEvent,
-                    },
                 });
 
                 await this.uiFrame.init();
@@ -130,69 +132,65 @@ class Connection {
         // we need to setup a stream that relays messages to the client and back to the UI
         this.message$.pipe(
             // we filter the stream here
-            filter(({ data }) => data.type === actionRequestEvent),
-            mergeMap(data => from(ClientActionService.triggerClientAction(data, this)())
-                .pipe(map(result => ({ ...result, responseId: data.data.responseId })))),
-            tap((data) => {
-                this.UiResponseSubject.next(data);
-            }),
+            filter(({ type }) => type === actionRequestEvent),
+            mergeMap(data => from(ClientActionService.triggerClientAction(data, this))),
+            tap(data => this.UiResponseSubject.next(data)),
         ).subscribe();
 
         this.message$.pipe(
-            filter(({ data }) => data.type === sendTransactionEvent),
+            filter(data => data.type === sendTransactionEvent),
             mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
-            tap((data) => {
-                this.UiResponseSubject.next(data);
-            }),
+            tap(data => this.UiResponseSubject.next(data)),
         ).subscribe();
 
         this.message$.pipe(
-            filter(({ data }) => data.type === uiCloseEvent),
+            filter(data => data.type === uiCloseEvent),
             tap((data) => {
                 const {
                     requestId,
+                    data: clientData,
+                } = data;
+                let {
                     webClientId,
                 } = data;
-                const response = data.data.data;
+                if (!webClientId) {
+                    ({
+                        webClientId,
+                    } = this.requests[requestId]);
+                }
                 this.closeUi();
                 this.ClientResponseSubject.next({
+                    type: uiCloseEvent,
                     requestId,
                     webClientId,
-                    data: {
-                        type: uiCloseEvent,
-                        response,
-                    },
                 });
 
                 const {
                     abort,
                     error,
-                } = response;
+                } = clientData;
                 if (abort) {
                     this.ClientResponseSubject.next({
+                        type: clientResponseEvent,
                         requestId,
                         webClientId,
-                        data: {
-                            type: clientResponseEvent,
-                            response: error
-                                ? { error }
-                                : permissionError('user.denied'),
-                        },
+                        data: error
+                            ? { error }
+                            : permissionError('user.denied'),
                     });
-                    this.removeRequest(data);
                 }
+
+                this.removeRequest(requestId);
             }),
         ).subscribe();
 
         this.message$.pipe(
-            filter(({ data }) => data.type === sendQueryEvent),
+            filter(data => data.type === sendQueryEvent),
             mergeMap((data) => {
                 const {
                     data: {
-                        data: {
-                            query,
-                            args,
-                        },
+                        query,
+                        args,
                     },
                 } = data;
                 return from((async () => {
@@ -214,88 +212,43 @@ class Connection {
                 if (!this.connections[uiClientId]) return;
                 this.connections[uiClientId].postMessage({
                     requestId,
-                    data: {
-                        response,
-                    },
+                    data: response,
                 });
             }),
         ).subscribe();
 
-        this.api$ = this.message$.pipe(
-            filter(({ data }) => data.type === clientRequestEvent),
+        this.message$.pipe(
+            filter(data => data.type === clientRequestEvent),
             mergeMap(data => from(ApiService.clientApi(data, this))),
             tap((data) => {
                 this.ClientResponseSubject.next({
                     ...data,
-                    data: {
-                        response: data.response,
-                        type: clientResponseEvent,
-                    },
+                    type: clientResponseEvent,
                 });
-                this.removeRequest(data);
             }),
-        );
-
-        this.api$.subscribe();
+        ).subscribe();
 
         this.message$.pipe(
-            filter(({ data }) => data.type === clientDisconnectEvent),
+            filter(data => data.type === clientDisconnectEvent),
             tap((data) => {
-                const clientData = data.data;
                 this.ClientResponseSubject.next({
                     ...data,
-                    data: {
-                        type: clientResponseEvent,
-                    },
+                    type: clientResponseEvent,
                 });
 
                 this.closeUi();
 
-                const {
-                    requestId,
-                    webClientId,
-                } = data;
                 this.ClientResponseSubject.next({
-                    requestId,
-                    webClientId,
-                    data: {
-                        type: uiCloseEvent,
-                    },
+                    ...data,
+                    type: uiCloseEvent,
                 });
 
-                this.removeClient(clientData);
+                const {
+                    clientId,
+                } = data;
+                this.removeClient(clientId);
             }),
         ).subscribe();
-
-        this.connections = {};
-        this.requests = {};
-    }
-
-    withConnectionIds = ({
-        requestId,
-        senderId,
-        data,
-        sender,
-        ...rest
-    }) => {
-        if (!this.requests[requestId]) {
-            this.requests[requestId] = {};
-        }
-
-        if (sender === 'UI_CLIENT') {
-            this.requests[requestId].uiClientId = senderId;
-        } else if (sender === 'WEB_CLIENT') {
-            this.requests[requestId].webClientId = senderId;
-        }
-
-        return {
-            data,
-            requestId,
-            origin,
-            sender,
-            ...rest,
-            ...this.requests[requestId],
-        };
     }
 
     registerClient = ({
@@ -307,15 +260,39 @@ class Connection {
     }
 
     onMessage = ({
-        origin,
         data,
     }) => {
+        const {
+            clientId,
+            requestId,
+            sender,
+            origin,
+            data: clientData,
+        } = data;
+        if (!this.requests[requestId]) {
+            this.requests[requestId] = {};
+        }
+
+        if (sender === 'UI_CLIENT') {
+            this.requests[requestId].uiClientId = clientId;
+        } else if (sender === 'WEB_CLIENT') {
+            this.requests[requestId].webClientId = clientId;
+        }
+
+        const {
+            uiClientId,
+            webClientId,
+        } = this.requests[requestId];
         this.MessageSubject.next({
-            data,
-            senderId: data.clientId,
-            requestId: data.requestId,
-            origin: data.domain || origin,
-            sender: data.sender,
+            ...data,
+            uiClientId,
+            webClientId,
+            requestId,
+            sender,
+            data: clientData,
+            domain: origin
+                ? getDomainFromUrl(origin)
+                : '',
         });
     }
 
@@ -329,26 +306,17 @@ class Connection {
         window.dispatchEvent(event);
     }
 
-    removeRequest(client) {
-        const {
-            requestId,
-        } = client;
+    removeRequest(requestId) {
         delete this.requests[requestId];
     }
 
-    removeClient(client) {
-        const {
-            clientId,
-        } = client;
-
+    removeClient(clientId) {
         delete this.connections[clientId];
         Object.keys(this.requests).forEach((reqId) => {
             const {
-                [reqId]: {
-                    uiClientId,
-                    webClientId,
-                } = {},
-            } = this.requests;
+                uiClientId,
+                webClientId,
+            } = this.requests[reqId] || {};
             if (uiClientId === clientId || webClientId === clientId) {
                 delete this.requests[reqId];
             }

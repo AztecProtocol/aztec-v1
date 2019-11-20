@@ -27,13 +27,16 @@ const triggerApproveNoteSpending = async (query, connection) => {
         connection.MessageSubject.asObservable(),
     );
 
+    const {
+        data: permission,
+    } = resp || {};
+
     return {
         ...query,
-        response: {
-            permission: {
-                ...resp.data,
-            },
+        data: {
+            permission,
         },
     };
 };
+
 export default triggerApproveNoteSpending;
