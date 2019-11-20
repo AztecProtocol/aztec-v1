@@ -13,12 +13,12 @@ export const infuraConfig = ({ id: networkId, networkName, port }, projectId = i
 const availableNetworks = () => Object.values(NETWORKS).map(({ id }) => id);
 
 const isValidNetworkId = async (networkId) => {
-    const web3NetworkId = new Promise((resolve) => {
+    const web3NetworkId = await new Promise((resolve) => {
         web3.version.getNetwork((error, id) => {
             resolve(id);
         });
     });
-    return availableNetworks().includes(networkId) || web3NetworkId === networkId;
+    return availableNetworks().includes(networkId) || parseInt(web3NetworkId) === parseInt(networkId);
 };
 
 const isInfuraNetworkId = networkId => INFURA_NETWORKS.includes(parseInt(networkId, 10));

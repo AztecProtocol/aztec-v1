@@ -4,7 +4,6 @@ export default async function signNotes({
     inputNotes,
     sender,
     assetAddress,
-    proof,
     requestId,
     gsnConfig,
 }) {
@@ -14,6 +13,7 @@ export default async function signNotes({
         proxyContract,
     } = gsnConfig;
     const actualSpender = isGSNAvailable ? proxyContract : sender;
+    console.log({ actualSpender, isGSNAvailable });
 
     const {
         signature,
@@ -26,6 +26,7 @@ export default async function signNotes({
             sender: actualSpender,
         },
     });
+    console.log({ signature });
 
     return {
         signature,

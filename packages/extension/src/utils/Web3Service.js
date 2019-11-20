@@ -72,7 +72,6 @@ class Web3Service {
         this.web3 = web3;
         this.eth = web3.eth;
         this.networkId = networkId || 0;
-
         if (account) {
             this.account = account;
         } else {
@@ -291,11 +290,11 @@ class Web3Service {
                 gas: 6500000,
                 ...methodSetting,
             });
+            console.log({ estimatedGas });
             const tx = {
                 to: contractAddress,
                 data: encodedData,
                 gas: estimatedGas,
-                gasPrice: 4000000000, // comment it to set gasPrice automatically
                 ...methodSetting,
             };
 

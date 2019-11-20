@@ -16,6 +16,8 @@ export default ({
 }) => {
     const domain = signer.generateZKAssetDomainParams(assetAddress);
     const schema = eip712.MULTIPLE_NOTE_SIGNATURE;
+    console.log(utils, eip712);
+    console.log({ schema });
 
     const message = {
         noteHashes,

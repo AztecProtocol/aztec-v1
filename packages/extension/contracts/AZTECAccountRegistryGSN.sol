@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol"; 
-import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBouncerSignature.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipientSignature.sol";
 
 import "@aztec/protocol/contracts/libs/NoteUtils.sol";
 import "@aztec/protocol/contracts/interfaces/IZkAsset.sol";
@@ -17,7 +17,7 @@ import "./AZTECAccountRegistry.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 
-contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
+contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNRecipientSignature {
 
     using NoteUtils for bytes;
     ACEModule.ACE ace;
@@ -27,7 +27,7 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
         address _trustedAddress
     ) public {
         GSNRecipient.initialize();
-        GSNBouncerSignature.initialize(_trustedAddress);
+        GSNRecipientSignature.initialize(_trustedAddress);
         ace = ACEModule.ACE(_ace);
     }
 
