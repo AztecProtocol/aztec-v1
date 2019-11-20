@@ -41,13 +41,8 @@ const getInitialDataByName = (nameArr) => {
 const MockRoute = ({
     path,
     name,
-    action,
     Component,
 }) => {
-    const {
-        id: actionId,
-        data,
-    } = action || {};
     const nameArr = name.split('.');
     const {
         initialStep,
@@ -64,9 +59,7 @@ const MockRoute = ({
             component={() => (
                 <Popup site={sites[0]}>
                     <Component
-                        {...data}
                         {...props}
-                        actionId={actionId}
                         site={sites[0]}
                         currentAccount={currentAccount || {
                             address: addresses[0],
@@ -82,15 +75,7 @@ const MockRoute = ({
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    action: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        data: PropTypes.object,
-    }),
     Component: PropTypes.func.isRequired,
-};
-
-MockRoute.defaultProps = {
-    action: null,
 };
 
 export default MockRoute;

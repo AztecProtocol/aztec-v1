@@ -10,5 +10,6 @@ export const clientResponseEvent = 'aztec-sdk-api-response';
 export const clientDisconnectEvent = 'aztec-sdk-client-disconnect';
 export const actionRequestEvent = 'aztec-sdk-client-action-request';
 export const actionResponseEvent = 'aztec-sdk-client-action-response';
+export const sendActionEvent = 'aztec-sdk-send-action';
 export const sendQueryEvent = 'aztec-sdk-send-query';
 export const sendTransactionEvent = 'aztec-sdk-send-transaction';

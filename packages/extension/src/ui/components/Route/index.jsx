@@ -18,10 +18,9 @@ const CustomRoute = ({
     goToPage,
 }) => {
     const {
-        id: actionId,
         site,
-        data,
-    } = action || {};
+        ...actionData
+    } = action;
 
     return (
         <Route
@@ -29,9 +28,8 @@ const CustomRoute = ({
             component={() => (
                 <Popup site={site}>
                     <Component
-                        {...data}
+                        {...actionData}
                         gsnConfig={gsnConfig}
-                        actionId={actionId}
                         currentAccount={currentAccount}
                         goToPage={goToPage}
                     />
@@ -48,17 +46,11 @@ CustomRoute.propTypes = {
         linkedPublicKey: PropTypes.string,
     }).isRequired,
     action: PropTypes.shape({
-        id: PropTypes.string.isRequired,
         site: siteShape.isRequired,
-        data: PropTypes.object,
-    }),
+    }).isRequired,
     Component: PropTypes.func.isRequired,
     goToPage: PropTypes.func.isRequired,
     gsnConfig: gsnConfigShape.isRequired,
-};
-
-CustomRoute.defaultProps = {
-    action: null,
 };
 
 export default CustomRoute;

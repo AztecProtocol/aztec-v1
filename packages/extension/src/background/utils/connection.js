@@ -18,6 +18,7 @@ import {
     uiReadyEvent,
     uiOpenEvent,
     uiCloseEvent,
+    sendActionEvent,
     sendQueryEvent,
 } from '~config/event';
 import urls from '~config/urls';
@@ -29,9 +30,6 @@ import {
     permissionError,
 } from '~/utils/error';
 import getDomainFromUrl from '~/utils/getDomainFromUrl';
-import {
-    updateActionState,
-} from './connectionUtils';
 import graphQueryMap from '../../ui/queries';
 import ApiService from '../services/ApiService';
 import ClientActionService from '../services/ClientActionService';
@@ -42,6 +40,7 @@ class Connection {
     constructor() {
         this.connections = {};
         this.requests = {};
+        this.actions = {};
 
         this.MessageSubject = new Subject();
         this.message$ = this.MessageSubject.asObservable();
@@ -98,7 +97,6 @@ class Connection {
         // 2. trigger the UI popup
 
         this.ui$.pipe(
-            mergeMap(action => from(updateActionState(action))),
             map(async (action) => {
                 const {
                     requestId,
@@ -120,7 +118,11 @@ class Connection {
                     webClientId,
                 });
 
-                await this.uiFrame.init();
+                const frame = await this.uiFrame.init();
+                frame.contentWindow.postMessage({
+                    type: sendActionEvent,
+                    action,
+                }, '*');
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';
                 this.uiFrame.open();

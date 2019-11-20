@@ -1,6 +1,5 @@
 import {
     connectionRequestEvent,
-    connectionApprovedEvent,
     uiReadyEvent,
 } from '~/config/event';
 import {
@@ -10,14 +9,15 @@ import {
     randomId,
 } from '~utils/random';
 import LRU from '~utils/caches/LRU';
-import NetworkService from '~/helpers/NetworkService/factory';
+import listenToInitialAction from '../utils/listenToInitialAction';
+import listenToConnectionApproval from '../utils/listenToConnectionApproval';
 
 class ConnectionManager {
     constructor({
         maxActiveResponses = 50,
     } = {}) {
         this.port = null;
-        this.portId = '';
+        this.clientId = '';
         this.callbacks = {};
         this.portResponses = new LRU(maxActiveResponses);
         this.clientRequestId = '';
@@ -29,45 +29,45 @@ class ConnectionManager {
             return null;
         }
 
+        this.clientId = randomId();
+
+        const actionPromise = listenToInitialAction();
+
         window.parent.postMessage({
             type: uiReadyEvent,
         }, '*');
 
-        this.portId = randomId();
-
-        const promise = new Promise((resolve) => {
-            const handleReceiveMessage = (e) => {
-                if (e.data.type === connectionApprovedEvent) {
-                    const {
-                        data,
-                    } = e.data;
-                    NetworkService.setConfigs([data]);
-
-                    [this.port] = e.ports;
-                    this.port.onmessage = this.handlePortResponse;
-                    window.removeEventListener('message', handleReceiveMessage);
-                    resolve();
-                }
-            };
-
-            window.addEventListener('message', handleReceiveMessage);
-        });
+        const portPromise = listenToConnectionApproval();
 
         window.parent.postMessage({
             type: connectionRequestEvent,
             requestId: randomId(),
-            clientId: this.portId,
+            clientId: this.clientId,
             sender: 'UI_CLIENT',
         });
 
-        return promise;
-    }
+        const [
+            action,
+            port,
+        ] = await Promise.all([
+            actionPromise,
+            portPromise,
+        ]);
 
-    setDefaultClientRequestId(clientRequestId) {
-        if (this.clientRequestId) {
-            warnLog(`clientRequestId has been set with '${this.clientRequestId}'.`);
-        }
-        this.clientRequestId = clientRequestId;
+        const {
+            requestId,
+            type,
+            data,
+        } = action;
+
+        this.clientRequestId = requestId;
+        this.port = port;
+        this.port.onmessage = this.handlePortResponse;
+
+        return {
+            type,
+            data,
+        };
     }
 
     handlePortResponse = ({ data }) => {
@@ -103,7 +103,7 @@ class ConnectionManager {
             requestId,
             responseId,
             data,
-            clientId: this.portId,
+            clientId: this.clientId,
             sender: 'UI_CLIENT',
         });
 

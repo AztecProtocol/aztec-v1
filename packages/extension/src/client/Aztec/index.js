@@ -2,7 +2,6 @@ import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiPermissionService from '~/client/services/ApiPermissionService';
 
-
 class Aztec {
     constructor() {
         // TODO - assign mock modules that show warnings when calling apis before enabled
