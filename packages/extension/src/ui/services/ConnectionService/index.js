@@ -23,7 +23,6 @@ export default {
             error,
         },
     }),
-    setDefaultClientRequestId: id => manager.setDefaultClientRequestId(id),
     post: async ({
         clientRequestId = '',
         action,

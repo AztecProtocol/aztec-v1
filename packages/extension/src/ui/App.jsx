@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom';
 import Route from '~uiModules/components/Route';
 import ConnectionService from '~ui/services/ConnectionService';
-import ActionService from '~uiModules/services/ActionService';
 import apis from '~uiModules/apis';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
@@ -52,8 +51,8 @@ class App extends PureComponent {
         } = this.props;
         if (mock) return;
 
-        await ConnectionService.openConnection();
-        await this.loadInitialStates();
+        const action = await ConnectionService.openConnection();
+        await this.loadInitialStates(action);
     }
 
     componentDidUpdate() {
@@ -88,31 +87,25 @@ class App extends PureComponent {
         }
     }
 
-    async loadInitialStates() {
-        const action = await ActionService.last();
-        const gsnConfig = await getGsnConfig();
+    async loadInitialStates(action) {
         if (!action) return;
 
-        let route;
-        if (action.requestId) {
-            const {
-                type,
-                requestId,
-            } = action;
-            ConnectionService.setDefaultClientRequestId(requestId);
-            ({
-                route,
-            } = actions[type] || {});
-        }
+        const gsnConfig = await getGsnConfig();
 
         const {
-            data: {
-                currentAddress,
-            },
+            type,
+            data: actionData,
         } = action;
+        const {
+            currentAddress,
+        } = actionData;
         const currentAccount = {
             address: currentAddress,
         };
+        let route;
+        ({
+            route,
+        } = actions[type] || {});
 
         if (!route
             || route === 'register'
@@ -147,7 +140,7 @@ class App extends PureComponent {
             this.setState(
                 {
                     nextRoute: route,
-                    action,
+                    action: actionData,
                     currentAccount,
                     gsnConfig,
                 },
@@ -158,7 +151,7 @@ class App extends PureComponent {
 
         this.setState({
             loading: false,
-            action,
+            action: actionData,
             currentAccount,
         });
     }
