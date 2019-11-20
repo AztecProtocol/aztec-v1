@@ -1,16 +1,15 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol"; 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBouncerSignature.sol";
+
 import "@aztec/protocol/contracts/libs/NoteUtils.sol";
+import "@aztec/protocol/contracts/interfaces/IZkAsset.sol";
+import "@aztec/protocol/contracts/interfaces/IERC20.sol";
+import "@aztec/protocol/contracts/interfaces/IAZTEC.sol";
 import "@aztec/protocol/contracts/ACE/ACE.sol" as ACEModule;
-
-
-import "../interfaces/IZkAsset.sol";
-import "../interfaces/IERC20.sol";
-import "../interfaces/IAZTEC.sol";
-import "../libs/LibEIP712.sol";
 import "./AZTECAccountRegistry.sol";
+
 
 /**
  * @title AZTECAccountRegistryGSN implementation
@@ -18,18 +17,18 @@ import "./AZTECAccountRegistry.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 
-contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
-
-    ACEModule.IACE ace;
+contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
     using NoteUtils for bytes;
+    ACEModule.ACE ace;
+    uint24 public constant JOIN_SPLIT_PROOF = 65793;
     constructor(
         address _ace,
         address _trustedAddress
     ) public {
         GSNRecipient.initialize();
         GSNBouncerSignature.initialize(_trustedAddress);
-        ace = ACEModule.IACE(_ace);
+        ace = ACEModule.ACE(_ace);
     }
 
     function confidentialTransferFrom(address _registryOwner, bytes memory _proofData) public {
@@ -45,4 +44,6 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
         ace.publicApprove(_registryOwner, _proofHash, _value);
     }
 }
+
+
 

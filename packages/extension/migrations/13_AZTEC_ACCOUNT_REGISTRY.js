@@ -1,8 +1,22 @@
-const AZTECAccountRegistry = artifacts.require('./AZTECAccountRegistry.sol');
+const { fundRecipient } = require('@openzeppelin/gsn-helpers');
+const { toWei } = require('web3-utils');
+const Web3 = require('web3');
 
-module.exports = (deployer) => {
-    return deployer.deploy(
-        AZTECAccountRegistry,
-        1563886150337,
-    )
-};
+const AZTECAccountRegistry = artifacts.require('./AZTECAccountRegistryGSN.sol');
+const ACE = artifacts.require('./ACE.sol');
+
+
+module.exports = deployer => deployer.deploy(
+
+    AZTECAccountRegistry,
+    ACE.address,
+    // TODO change to be from env
+    '0x6794d16143e537a51d6745D3ae6bc99502b4331C',
+).then(async (contract) => {
+    const WEB3_PROVIDER_URL = 'http://127.0.0.1:8545';
+    const web3 = new Web3(WEB3_PROVIDER_URL);
+    await fundRecipient(web3, {
+        recipient: contract.address,
+        amount: toWei('1'),
+    });
+});

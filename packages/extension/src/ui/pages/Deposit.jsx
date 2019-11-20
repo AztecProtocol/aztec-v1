@@ -7,92 +7,11 @@ import makeAsset from '~uiModules/utils/asset';
 import apis from '~uiModules/apis';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import DepositConfirm from '~ui/views/DepositConfirm';
-import DepositApprove from '~ui/views/DepositApprove';
-import TransactionSend from '~ui/views/TransactionSend';
+import { depositSteps } from '~ui/config/steps';
 import {
     gsnConfigShape,
 } from '~ui/config/propTypes';
 
-const steps = [
-    {
-        titleKey: 'deposit.confirm.title',
-        tasks: [
-            {
-                name: 'proof',
-                run: apis.proof.deposit,
-            },
-        ],
-        content: DepositConfirm,
-        submitTextKey: 'deposit.confirm.submit',
-    },
-    {
-        titleKey: 'deposit.approve.title',
-        tasks: [
-            {
-                type: 'sign',
-                name: 'approve',
-                run: apis.ace.publicApprove,
-            },
-        ],
-        content: DepositApprove,
-        submitTextKey: 'deposit.approve.submit',
-    },
-    {
-        titleKey: 'deposit.send.title',
-        tasks: [
-            {
-                name: 'send',
-                run: apis.asset.confidentialTransfer,
-            },
-        ],
-        content: TransactionSend,
-        contentProps: {
-            descriptionKey: 'deposit.send.explain',
-        },
-        submitTextKey: 'deposit.send.submit',
-    },
-];
-
-const gsnSteps = [
-    {
-        titleKey: 'deposit.confirm.title',
-        tasks: [
-            {
-                name: 'proof',
-                run: apis.proof.deposit,
-            },
-        ],
-        content: DepositConfirm,
-        submitText: 'deposit.confirm.submitText',
-        cancelText: 'deposit.confirm.cancelText',
-    },
-    {
-        titleKey: 'deposit.approve.title',
-        tasks: [
-            {
-                type: 'sign',
-                name: 'approve',
-                run: apis.ace.publicApprove,
-            },
-        ],
-        content: DepositApprove,
-        submitText: 'deposit.approve.submitText',
-        cancelText: 'deposit.approve.cancelText',
-    },
-    {
-        titleKey: 'deposit.send.title',
-        tasks: [
-            {
-                name: 'send',
-                run: apis.asset.confidentialTransferFrom,
-            },
-        ],
-        content: TransactionSend,
-        submitText: 'deposit.send.submitText',
-        cancelText: 'deposit.send.cancelText',
-    },
-];
 
 const handleOnStep = (step) => {
     const newProps = {};
@@ -118,7 +37,7 @@ const Deposit = ({
         isGSNAvailable,
         proxyContract,
     } = gsnConfig;
-    const steps = isGSNAvailable ? gsnSteps : metamaskSteps;
+    const steps = isGSNAvailable ? depositSteps.gsn : depositSteps.metamask;
     const actualSender = isGSNAvailable ? proxyContract : sender;
 
     const fetchInitialData = async () => {

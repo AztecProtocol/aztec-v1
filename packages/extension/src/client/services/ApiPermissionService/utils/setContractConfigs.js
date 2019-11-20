@@ -5,7 +5,7 @@ import ERC20Mintable from '~contracts/ERC20Mintable';
 
 const clientContracts = [
     'ACE',
-    'AZTECAccountRegistry',
+    'AZTECAccountRegistryGSN',
 ];
 
 export default function setContractConfigs(contractsConfigs) {
@@ -19,6 +19,7 @@ export default function setContractConfigs(contractsConfigs) {
             config,
             address,
         }) => {
+            console.log(address, config);
             if (!address) {
                 throw new ApiError('input.contract.address.empty', {
                     messageOptions: {

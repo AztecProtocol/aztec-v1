@@ -17,7 +17,7 @@ const uiResolvers = {
         linkedPublicKey: async ({ address }) => {
             const web3Service = await Web3Service();
 
-            return web3Service.useContract('AZTECAccountRegistry')
+            return web3Service.useContract('AZTECAccountRegistryGSN')
                 .method('accountMapping')
                 .call(address);
         },

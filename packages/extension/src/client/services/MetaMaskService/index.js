@@ -161,7 +161,7 @@ const handleAction = async (data) => {
                 },
             } = data;
             await Web3Service
-                .useContract('AZTECAccountRegistry')
+                .useContract('AZTECAccountRegistryGSN')
                 .method('registerAZTECExtension')
                 .send(
                     address,

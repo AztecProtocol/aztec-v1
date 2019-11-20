@@ -69,21 +69,26 @@ class NetworkSwitcher {
             provider = new Web3.providers.HttpProvider(providerUrl);
         }
 
-        const signingInfo = await retrieveSigningInfo(account.address);
-        const gsnProvider = new GSNProvider(providerUrl, {
-            pollInterval: 15 * 1000,
-            signKey: signingInfo.privateKey,
-            approveFunction,
-            fixedGasPrice: 15e9,
-        });
+        let gsnConfig = {};
+
+        if (account && account.address) {
+            const signingInfo = await retrieveSigningInfo(account.address);
+            const gsnProvider = new GSNProvider(providerUrl, {
+                pollInterval: 15 * 1000,
+                signKey: signingInfo.privateKey,
+                approveFunction,
+            });
+            gsnConfig = {
+                signingInfo,
+                gsnProvider,
+            };
+        }
+
 
         await service.init({
             provider,
             account,
-            gsnConfig: {
-                gsnProvider,
-                signingInfo,
-            },
+            gsnConfig,
         });
         for (let i = 0; i < contractsConfigs.length; i += 1) {
             const {

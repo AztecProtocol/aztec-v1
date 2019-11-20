@@ -14,6 +14,6 @@ export default function getContract(contractName, networkId) {
 
     return {
         contract: config,
-        address: (networks && networks[networkId]) || '',
+        address: (networks && networks[networkId]) || config.networks[networkId] ? config.networks[networkId].address : '',
     };
 }
