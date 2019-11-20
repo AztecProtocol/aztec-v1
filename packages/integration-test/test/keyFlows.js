@@ -25,12 +25,26 @@ console.log({ getNotesForAccount});
 
 const Setup = require('../src/setup');
 
+<<<<<<< HEAD:packages/protocol/test/integration/AZTEC.js
+const ACE = artifacts.require('./ACE');
+const DividendValidator = artifacts.require('./Dividend');
+const ERC20Mintable = artifacts.require('./ERC20Mintable');
+const JoinSplitValidator = artifacts.require('./Joinsplit');
+const PublicRangeValidator = artifacts.require('./PublicRange');
+const PrivateRangeValidator = artifacts.require('./PrivateRange');
+const SwapValidator = artifacts.require('./Swap');
+const TestFactory = artifacts.require('./test/TestFactory');
+const ZkAsset = artifacts.require('./zkAssetAdjustable');
+
+contract('AZTEC integration', (accounts) => {
+=======
 const TestFactory = artifacts.require('./TestFactory');
 
 contract.only('AZTEC integration', (accounts) => {
     let upgradeFactoryId;
     let upgradeFactoryContract;
     let aztecAccount;
+>>>>>>> feat(integration-test): initial commit for integration-test pkg:packages/integration-test/test/keyFlows.js
     let ace;
     let dividendValidator;
     let erc20;
@@ -46,6 +60,19 @@ contract.only('AZTEC integration', (accounts) => {
     const publicOwner = accounts[0];
 
     before(async () => {
+<<<<<<< HEAD:packages/protocol/test/integration/AZTEC.js
+        // instantiate all deployed contracts
+        ace = await ACE.at(ACE.address);
+        dividendValidator = await DividendValidator.at(DividendValidator.address);
+        joinSplitValidator = await JoinSplitValidator.at(JoinSplitValidator.address);
+        privateRangeValidator = await PrivateRangeValidator.at(PrivateRangeValidator.address);
+        publicRangeValidator = await PublicRangeValidator.at(PublicRangeValidator.address);
+        swapValidator = await SwapValidator.at(SwapValidator.address);
+
+        erc20 = await ERC20Mintable.at(ERC20Mintable.address);
+        factoryContract = await TestFactory.new(ace.address);
+        zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor, 0, []);
+=======
         const NETWORK = 'Ropsten';
         const contractsToDeploy = [
             'ACE',
@@ -72,6 +99,7 @@ contract.only('AZTEC integration', (accounts) => {
             zkAsset,
         } = setup.getContracts());
 
+>>>>>>> feat(integration-test): initial commit for integration-test pkg:packages/integration-test/test/keyFlows.js
         aztecAccount = secp256k1.generateAccount();
 
         // Fund account with ERC20s
