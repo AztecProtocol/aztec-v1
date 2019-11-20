@@ -1,4 +1,5 @@
 import AZTECAccountRegistryContract from '~contracts/AZTECAccountRegistry.json';
+import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
 import ACE from '~contracts/IAZTEC.json';
 import IZkAsset from '~contracts/IZkAsset.json';
 
@@ -10,7 +11,17 @@ export default {
         },
         config: AZTECAccountRegistryContract,
         networks: {
-            4: '0x91aFc8fA9278615843a08B26Ce97586c5057e717',
+            4: '0x47c4441013b58848a0732cbb6cea2c09e08e0758',
+        },
+    },
+    AZTECAccountRegistryGSN: {
+        name: 'AZTECAccountRegistryGSN',
+        events: {
+            registerExtension: 'RegisterExtension',
+        },
+        config: AZTECAccountRegistryGSNContract,
+        networks: {
+            4: '0x47c4441013b58848a0732cbb6cea2c09e08e0758',
         },
     },
     ACE: {

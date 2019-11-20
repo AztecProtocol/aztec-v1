@@ -1,5 +1,7 @@
 import Web3Service from '~helpers/NetworkService';
-import contracts from '~config/contracts';
+import {
+    ACE,
+} from '~config/contracts';
 import {
     errorLog,
 } from '~utils/log';
@@ -37,14 +39,14 @@ const subscribe = async ({
         return null;
     }
 
-    const eventName = contracts.ACE.events.сreateNoteRegistry;
+    const eventName = ACE.events.сreateNoteRegistry;
 
     const options = {
         fromBlock,
     };
 
     const subscription = (await Web3Service({ networkId }))
-        .useContract(contracts.ACE.name)
+        .useContract(ACE.name)
         .events(eventName)
         .subscribe(options, (error) => {
             if (error) {
@@ -66,7 +68,6 @@ const subscribe = async ({
         },
     };
 };
-
 
 export default {
     subscribe,

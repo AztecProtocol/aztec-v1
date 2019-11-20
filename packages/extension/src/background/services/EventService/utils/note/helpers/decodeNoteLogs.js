@@ -1,5 +1,7 @@
 import abi from 'web3-eth-abi';
-import contracts from '~config/contracts';
+import {
+    ZkAsset,
+} from '~config/contracts';
 import groupBy from '~utils/groupBy';
 import { NOTE_STATUS } from '~config/constants';
 import metadata from '~utils/metadata';
@@ -20,11 +22,11 @@ const decode = (inputs, rawLog) => {
     return decoded;
 };
 
-const findInputsFromAbi = eventName => contracts.ZkAsset.config.abi.find(({ name, type }) => name === eventName && type === 'event').inputs;
+const findInputsFromAbi = eventName => ZkAsset.config.abi.find(({ name, type }) => name === eventName && type === 'event').inputs;
 
 const decodeLog = rawLog => ({
     createNote: () => {
-        const inputs = findInputsFromAbi(contracts.ZkAsset.events.createNote);
+        const inputs = findInputsFromAbi(ZkAsset.events.createNote);
         return {
             ...decode(inputs, rawLog),
             asset: rawLog.address,
@@ -32,7 +34,7 @@ const decodeLog = rawLog => ({
         };
     },
     updateNoteMetaData: () => {
-        const inputs = findInputsFromAbi(contracts.ZkAsset.events.updateNoteMetaData);
+        const inputs = findInputsFromAbi(ZkAsset.events.updateNoteMetaData);
         return {
             ...decode(inputs, rawLog),
             asset: rawLog.address,
@@ -40,7 +42,7 @@ const decodeLog = rawLog => ({
         };
     },
     destroyNote: () => {
-        const inputs = findInputsFromAbi(contracts.ZkAsset.events.destroyNote);
+        const inputs = findInputsFromAbi(ZkAsset.events.destroyNote);
         return {
             ...decode(inputs, rawLog),
             asset: rawLog.address,

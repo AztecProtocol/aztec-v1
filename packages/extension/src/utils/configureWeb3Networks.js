@@ -5,20 +5,20 @@ import {
 
 import Provider from '~/config/provider';
 import {
-    AZTECAccountRegistryConfig,
-    AZTECAccountRegistryGSNConfig,
-    ACEConfig,
-    IZkAssetConfig,
+    AZTECAccountRegistry,
+    AZTECAccountRegistryGSN,
+    ACE,
+    ZkAsset,
 } from '~/config/contracts';
 import NetworkService from '~helpers/NetworkService/factory';
 import getGanacheNetworkId from '~utils/getGanacheNetworkId';
 
 const contractsForNetwork = (networkId) => {
     const contractsConfigs = [
-        AZTECAccountRegistryConfig,
-        AZTECAccountRegistryGSNConfig,
-        ACEConfig,
-        IZkAssetConfig,
+        AZTECAccountRegistry,
+        AZTECAccountRegistryGSN,
+        ACE,
+        ZkAsset,
     ];
 
     return contractsConfigs.map(contractConfig => ({

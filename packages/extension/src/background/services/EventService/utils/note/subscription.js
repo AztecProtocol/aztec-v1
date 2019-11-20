@@ -1,5 +1,7 @@
 import Web3Service from '~helpers/NetworkService';
-import contracts from '~config/contracts';
+import {
+    ZkAsset,
+} from '~config/contracts';
 import {
     errorLog,
 } from '~utils/log';
@@ -23,11 +25,11 @@ const subscribe = async ({
     } = (await Web3Service({ networkId })).eth;
 
     const eventsTopics = [
-        contracts.ZkAsset.events.createNote,
-        contracts.ZkAsset.events.destroyNote,
-        contracts.ZkAsset.events.updateNoteMetaData,
+        ZkAsset.events.createNote,
+        ZkAsset.events.destroyNote,
+        ZkAsset.events.updateNoteMetaData,
     ]
-        .map(e => contracts.ZkAsset.config.abi.find(({ name, type }) => name === e && type === 'event'))
+        .map(e => ZkAsset.config.abi.find(({ name, type }) => name === e && type === 'event'))
         .map(abi.encodeEventSignature);
 
     const ownerTopics = owner ? abi.encodeParameter('address', owner) : null;
