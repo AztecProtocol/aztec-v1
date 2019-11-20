@@ -1,5 +1,4 @@
 import migrateContractsInstance from '../instances/migrateContractsInstance';
-import copyContracts from './copyContracts';
 
 export default function migrateProtocol({
     onError,
@@ -8,11 +7,6 @@ export default function migrateProtocol({
     return migrateContractsInstance({
         packageName: 'protocol',
         onError,
-    }).next(() => {
-        copyContracts({
-            targetPackages: ['protocol'],
-            onError,
-            onClose,
-        });
+        onClose,
     });
 }
