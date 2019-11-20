@@ -11,8 +11,6 @@ export const AZTECAccountRegistryConfig = {
     },
     config: AZTECAccountRegistryContract,
     networks: {
-        // 4: '0x91aFc8fA9278615843a08B26Ce97586c5057e717',
-        // 4: '0xfa60fa7e5115a9f5ef118769c2743a4896715101',
         4: '0x47c4441013b58848a0732cbb6cea2c09e08e0758',
     },
 };
@@ -48,4 +46,11 @@ export const IZkAssetConfig = {
     },
     config: IZkAsset,
     networks: {},
+};
+
+export default {
+    ZkAsset: IZkAssetConfig,
+    ACE: ACEConfig,
+    AZTECAccountRegistryGSN: AZTECAccountRegistryGSNConfig,
+    AZTECAccountRegistry: AZTECAccountRegistryGSNConfig,
 };

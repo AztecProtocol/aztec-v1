@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom';
 import {
     siteShape,
+    gsnConfigShape,
 } from '~/ui/config/propTypes';
 import Popup from '~ui/components/Popup';
 
@@ -13,6 +14,7 @@ const CustomRoute = ({
     currentAccount,
     action,
     Component,
+    gsnConfig,
     goToPage,
 }) => {
     const {
@@ -28,6 +30,7 @@ const CustomRoute = ({
                 <Popup site={site}>
                     <Component
                         {...data}
+                        gsnConfig={gsnConfig}
                         actionId={actionId}
                         currentAccount={currentAccount}
                         goToPage={goToPage}
@@ -51,6 +54,7 @@ CustomRoute.propTypes = {
     }),
     Component: PropTypes.func.isRequired,
     goToPage: PropTypes.func.isRequired,
+    gsnConfig: gsnConfigShape.isRequired,
 };
 
 CustomRoute.defaultProps = {

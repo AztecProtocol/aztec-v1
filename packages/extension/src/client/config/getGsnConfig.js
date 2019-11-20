@@ -1,15 +1,16 @@
-import Web3Service from '~/client/services/Web3Service';
 import {
-    AZTECAccountRegistryGSNConfig,
-} from '~config/contracts';
+    get,
+} from '~/utils/storage';
+import getContract from '~utils/network/getContract';
 import Provider from '~config/provider';
 
 export default async function getGsnConfig() {
-    const networkId = await Web3Service.networkId();
+    const networkId = await get('networkId');
 
     // TODO: check apiKey
     const isGSNAvailable = Provider.isValidNetworkId(networkId);
-    const proxyContract = AZTECAccountRegistryGSNConfig.networks[networkId];
+
+    const proxyContract = getContract('AZTECAccountRegistryGSN', networkId).address;
 
     return {
         isGSNAvailable,

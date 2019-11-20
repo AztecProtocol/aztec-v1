@@ -17,6 +17,7 @@ import ThemeContext from '~ui/views/handlers/ThemeContext';
 import Loading from '~ui/views/Loading';
 import routes from '~uiModules/config/routes';
 import actions from '~ui/config/actions';
+import getGsnConfig from '~client/config/getGsnConfig';
 import './styles/guacamole.css';
 import './styles/_reset.scss';
 
@@ -32,6 +33,7 @@ class App extends PureComponent {
         this.state = {
             loading: !mock,
             currentAccount: null,
+            gsnConfig: {},
             action: null,
             nextRoute: '',
         };
@@ -88,6 +90,7 @@ class App extends PureComponent {
 
     async loadInitialStates() {
         const action = await ActionService.last();
+        const gsnConfig = await getGsnConfig();
         if (!action) return;
 
         let route;
@@ -146,6 +149,7 @@ class App extends PureComponent {
                     nextRoute: route,
                     action,
                     currentAccount,
+                    gsnConfig,
                 },
                 () => this.goToPage(route),
             );
@@ -165,6 +169,7 @@ class App extends PureComponent {
         const {
             currentAccount,
             action,
+            gsnConfig,
         } = this.state;
 
         Object.keys(config).forEach((subName) => {
@@ -195,6 +200,7 @@ class App extends PureComponent {
                         key={path}
                         name={name}
                         path={path}
+                        gsnConfig={gsnConfig}
                         currentAccount={currentAccount}
                         action={action}
                         goToPage={this.goToPage}

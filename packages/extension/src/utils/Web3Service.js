@@ -31,6 +31,7 @@ class Web3Service {
         gsnConfig,
     } = {}) {
         this.reset();
+        this.gsnConfig = gsnConfig;
 
         let web3Provider = provider;
         if (!web3Provider && providerUrl) {

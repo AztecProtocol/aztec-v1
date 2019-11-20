@@ -8,6 +8,7 @@ import generateLinkedPublicKey from './generateLinkedPublicKey';
 import registerExtension from './registerExtension';
 import linkAccountToMetaMask from './linkAccountToMetaMask';
 import sendRegisterAddress from './sendRegisterAddress';
+import sendGSNRegisterTx from './sendGSNRegisterTx';
 import registerAddress from './registerAddress';
 import restoreAccount from './restoreAccount';
 import getAccountKeys from './getAccountKeys';
@@ -21,6 +22,7 @@ export {
     createPwDerivedKey,
     createKeyStore,
     registerExtension,
+    sendGSNRegisterTx,
     linkAccountToMetaMask,
     createSeedPhrase,
     backupSeedPhrase,

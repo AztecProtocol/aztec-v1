@@ -27,7 +27,7 @@ const AZTECAccount = [
 ];
 
 export default ({ response }) => {
-    const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
+    const accountRegistryContract = Web3Service.contract('AZTECAccountRegistryGSN');
 
     const domainData = {
         name: 'AZTECAccountRegistry',
