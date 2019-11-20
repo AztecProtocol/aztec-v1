@@ -5,7 +5,7 @@ import ERC20Mintable from '~contracts/ERC20Mintable';
 
 const clientContracts = [
     'ACE',
-    'AZTECAccountRegistryGSN',
+    'AZTECAccountRegistry',
 ];
 
 export default function setContractConfigs(contractsConfigs) {
@@ -13,25 +13,27 @@ export default function setContractConfigs(contractsConfigs) {
         networkId,
     } = Web3Service;
 
-    contractsConfigs
-        .filter(({ config }) => clientContracts.indexOf(config.contractName) >= 0)
-        .forEach(({
+    clientContracts.forEach((contractName) => {
+        const {
             config,
             address,
-        }) => {
-            if (!address) {
-                throw new ApiError('input.contract.address.empty', {
-                    messageOptions: {
-                        contractName: config.contractName,
-                    },
-                    networkId,
-                    contractName: config.contractName,
-                });
-            }
-            Web3Service.registerContract(config, {
-                address,
+        } = contractsConfigs.find(({ name }) => contractName === name) || {};
+
+        if (!address) {
+            throw new ApiError('input.contract.address.empty', {
+                messageOptions: {
+                    contractName,
+                },
+                networkId,
+                contractName,
             });
+        }
+
+        Web3Service.registerContract(config, {
+            name: contractName,
+            address,
         });
+    });
 
     Web3Service.registerInterface(ERC20Mintable, {
         name: 'ERC20',

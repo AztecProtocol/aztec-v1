@@ -85,27 +85,29 @@ class NetworkSwitcher {
             };
         }
 
-        console.log({ account });
-
-
         await service.init({
             provider,
             account,
             gsnConfig,
         });
-        for (let i = 0; i < contractsConfigs.length; i += 1) {
-            const {
-                config: contractConfig,
-                address: contractAddress,
-            } = contractsConfigs[i];
-            if (contractConfig.bytecode === '0x' && !contractAddress) {
-                service.registerInterface(contractConfig);
+
+        contractsConfigs.forEach(({
+            name,
+            config: contractConfig,
+            address: contractAddress,
+        }) => {
+            if (!contractAddress) {
+                service.registerInterface(contractConfig, {
+                    name,
+                });
             } else {
                 service.registerContract(contractConfig, {
+                    name,
                     address: contractAddress,
                 });
             }
-        }
+        });
+
         this.web3ServicesByNetworks[networkIdToUse] = service;
     };
 

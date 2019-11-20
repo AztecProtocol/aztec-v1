@@ -30,6 +30,7 @@ export default async function setupClientConfig({
             address,
         } = getContract(contractName, networkId);
         return {
+            name: contractName,
             config: contract,
             address: contractAddresses[contractName]
                 || address

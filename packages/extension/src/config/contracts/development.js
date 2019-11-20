@@ -1,4 +1,3 @@
-import AZTECAccountRegistryContract from '~contracts/AZTECAccountRegistry.json';
 import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
 import ACE from '~contracts/ACE.json';
 import IZkAsset from '~contracts/IZkAsset.json';
@@ -9,7 +8,7 @@ export default {
         events: {
             registerExtension: 'RegisterExtension',
         },
-        config: AZTECAccountRegistryContract,
+        config: AZTECAccountRegistryGSNContract,
         networks: {
             4: '0x91aFc8fA9278615843a08B26Ce97586c5057e717',
         },
