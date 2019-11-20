@@ -19,7 +19,6 @@ export default function setContractConfigs(contractsConfigs) {
             config,
             address,
         }) => {
-            console.log(address, config);
             if (!address) {
                 throw new ApiError('input.contract.address.empty', {
                     messageOptions: {

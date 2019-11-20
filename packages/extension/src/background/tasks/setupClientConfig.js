@@ -8,6 +8,7 @@ import NetworkService from '~helpers/NetworkService/factory';
 const backgroundContracts = [
     'ACE',
     'AZTECAccountRegistry',
+    'AZTECAccountRegistryGSN',
     'ZkAsset',
 ];
 

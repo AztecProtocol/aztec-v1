@@ -1,5 +1,7 @@
 import Web3Service from '~helpers/NetworkService';
-import contracts from '~config/contracts';
+import {
+    AZTECAccountRegistry,
+} from '~config/contracts';
 
 export default async function fetchAccount({
     address,
@@ -20,7 +22,7 @@ export default async function fetchAccount({
 
     const web3Service = await Web3Service({ networkId });
 
-    const eventName = contracts.AZTECAccountRegistry.events.registerExtension;
+    const eventName = AZTECAccountRegistry.events.registerExtension;
 
     const options = {
         filter: {
@@ -32,7 +34,7 @@ export default async function fetchAccount({
 
     try {
         const data = await web3Service
-            .useContract(contracts.AZTECAccountRegistry.name)
+            .useContract(AZTECAccountRegistry.name)
             .events(eventName)
             .where(options);
 

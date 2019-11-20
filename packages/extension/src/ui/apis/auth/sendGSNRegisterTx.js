@@ -1,6 +1,6 @@
 import ConnectionService from '~ui/services/ConnectionService';
 import {
-    AZTECAccountRegistryGSNConfig,
+    AZTECAccountRegistryGSN,
 } from '~/config/contracts';
 
 export default async function sendGSNRegisterTx({
@@ -13,7 +13,7 @@ export default async function sendGSNRegisterTx({
         txReceipt,
         error,
     } = await ConnectionService.sendTransaction({
-        contract: AZTECAccountRegistryGSNConfig.name,
+        contract: AZTECAccountRegistryGSN.name,
         method: 'registerAZTECExtension',
         data: [
             address,
