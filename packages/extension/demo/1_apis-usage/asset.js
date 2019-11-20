@@ -72,6 +72,7 @@ async function initAsset() {
   const apisElem = document.getElementById('asset-apis');
   if (!asset.isValid()) {
     apisElem.innerHTML = 'This asset is not valid.';
+    apisElem.style.color = 'red';
   } else {
     allowanceStatus = makeStatusGenerator('allowance-status');
     depositStatus = makeStatusGenerator('deposit-status');
@@ -396,40 +397,40 @@ document.getElementById('app').innerHTML = `
         <br/>
         <div id="send-status"></div>
       </div>
-    </div>
-    <br/>
-    <div>
-      <div>Fetch note from balance:</div>
-      <label>Equal to</label>
-      <input
-        id="fetch-eq-value"
-        type="number"
-        size="10"
-      /><br/>
-      <label>Greater than</label>
-      <input
-        id="fetch-gt-value"
-        type="number"
-        size="10"
-        value="0"
-      /><br/>
-      <label>Less than</label>
-      <input
-        id="fetch-lt-value"
-        type="number"
-        size="10"
-        value="100"
-      /><br/>
-      <label>Number of notes</label>
-      <input
-        id="fetch-count-value"
-        type="number"
-        size="10"
-        value="1"
-      /><br/>
-      <button onclick="fetchNotesFromBalance()">Submit</button><br/>
       <br/>
-      <div id="fetch-status"></div>
+      <div>
+        <div>Fetch note from balance:</div>
+        <label>Equal to</label>
+        <input
+          id="fetch-eq-value"
+          type="number"
+          size="10"
+        /><br/>
+        <label>Greater than</label>
+        <input
+          id="fetch-gt-value"
+          type="number"
+          size="10"
+          value="0"
+        /><br/>
+        <label>Less than</label>
+        <input
+          id="fetch-lt-value"
+          type="number"
+          size="10"
+          value="100"
+        /><br/>
+        <label>Number of notes</label>
+        <input
+          id="fetch-count-value"
+          type="number"
+          size="10"
+          value="1"
+        /><br/>
+        <button onclick="fetchNotesFromBalance()">Submit</button><br/>
+        <br/>
+        <div id="fetch-status"></div>
+      </div>
     </div>
   </div>
 `;
