@@ -36,15 +36,17 @@ class DividendVerifier66561 extends Verifier {
 
         challengeResponse.data.push(...rollingHash.data);
 
-        let reducer = rollingHash.redKeccak(); // "x" in the white paper
+        const reducer = rollingHash.redKeccak(); // "x" in the white paper
         this.data.forEach((item, i) => {
+            const x = reducer.redPow(new BN(i + 1));
+
             const { aBar, gamma, sigma } = item;
-            let challengeX = this.challenge.mul(reducer);
+            let challengeX = this.challenge.mul(x);
             let kBar = item.kBar;
 
             // Notional and target notes
             if (i === 2) {
-                challengeX = this.challenge.redMul(reducer);
+                challengeX = this.challenge.redMul(x);
                 const zaRed = this.proof.za.toRed(bn128.groupReduction);
                 const zbRed = this.proof.zb.toRed(bn128.groupReduction);
 
@@ -52,8 +54,8 @@ class DividendVerifier66561 extends Verifier {
                 kBar = zbRed.redMul(this.data[0].kBar).redSub(zaRed.redMul(this.data[1].kBar));
             }
 
-            const kBarX = kBar.redMul(reducer); // xbk = bk*x
-            const aBarX = aBar.redMul(reducer); // xba = ba*x
+            const kBarX = kBar.redMul(x); // xbk = bk*x
+            const aBarX = aBar.redMul(x); // xba = ba*x
             const B = gamma
                 .mul(kBarX)
                 .add(bn128.h.mul(aBarX))
@@ -69,7 +71,6 @@ class DividendVerifier66561 extends Verifier {
                     this.errors.push(errors.codes.BAD_BLINDING_FACTOR);
                 }
             }
-            reducer = rollingHash.redKeccak();
         });
 
         if (

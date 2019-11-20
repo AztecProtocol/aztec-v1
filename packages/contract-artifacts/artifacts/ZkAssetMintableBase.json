@@ -129,6 +129,32 @@
             "type": "function"
         },
         {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_noteHashes",
+                    "type": "bytes32[]"
+                },
+                {
+                    "name": "_spender",
+                    "type": "address"
+                },
+                {
+                    "name": "_spenderApprovals",
+                    "type": "bool[]"
+                },
+                {
+                    "name": "_batchSignature",
+                    "type": "bytes"
+                }
+            ],
+            "name": "batchConfidentialApprove",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": true,
             "inputs": [],
             "name": "PRIVATE_RANGE_PROOF",

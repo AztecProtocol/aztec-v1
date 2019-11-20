@@ -1,4 +1,5 @@
 const bn128 = require('@aztec/bn128');
+const BN = require('bn.js');
 const { proofs } = require('@aztec/dev-utils');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256, padLeft } = require('web3-utils');
@@ -35,7 +36,7 @@ class JoinSplitProof65793 extends Proof {
      */
     constructBlindingFactors() {
         const inputNotesLength = this.m;
-        let reducer = bn128.zeroBnRed; // "x" in the white paper
+        const reducer = this.rollingHash.redKeccak(); // "x" in the white paper
         this.blindingFactors = this.notes.map((note, i) => {
             const { bk, ba } = this.blindingScalars[i];
             let B;
@@ -43,9 +44,9 @@ class JoinSplitProof65793 extends Proof {
                 B = note.gamma.mul(bk).add(bn128.h.mul(ba));
             } else {
                 // Get next iteration of our rolling hash
-                reducer = this.rollingHash.redKeccak();
-                const xbk = bk.redMul(reducer);
-                const xba = ba.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                const xbk = bk.redMul(x);
+                const xba = ba.redMul(x);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             }
             return { B, bk, ba, reducer };

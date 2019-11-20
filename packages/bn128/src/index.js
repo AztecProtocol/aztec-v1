@@ -7,7 +7,7 @@
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const EC = require('elliptic');
-const { randomHex } = require('web3-utils');
+const { hexToNumberString, randomHex, padLeft } = require('web3-utils');
 
 const decodePoint = require('./decodePoint');
 
@@ -42,6 +42,9 @@ bn128.curve = new EC.curve.short({
     gRed: false,
     g: ['1', '2'],
 });
+
+const hXHex = '0x10f7463e3bdb09c66bcc67cbd978bb8a2fd8883782d177aefc6d155391b1d1b8';
+const hYHex = '0x12c4f960e11ba5bf0184d3433a98127e90a6fdb2d1f12cdb369a5d3870866627';
 
 /**
  * X-Coordinate of AZTEC's second generator point 'h'. Created by taking the keccak256 hash of the ascii string

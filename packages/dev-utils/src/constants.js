@@ -51,7 +51,7 @@ const constants = {
      * @type {string}
      * @default 0xf4e5f833b89894c43804fdb171562eb9d2713b8d71777183712294f428c57775
      */
-    ZERO_VALUE_NOTE_HASH: '0xf4e5f833b89894c43804fdb171562eb9d2713b8d71777183712294f428c57775',
+    ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
 };
 
 /**
@@ -86,8 +86,11 @@ const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5
 // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
 const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462';
 
-// keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool status)"
-const NOTE_SIGNATURE_TYPE_HASH = '0x9fe730639297761b7154c4543e5b6d06ca424c8b46480a40d3181296d5c35815';
+// keccak256 hash of "MultipleNoteSignature(bytes32[] noteHashes,address spender,bool[] spenderApprovals)"
+const MULTIPLE_NOTE_SIGNATURE_TYPE_HASH = '0x0aad58e28366c18fa0a3551d1215f4da4bd3c63c0376bb065dfd436f09e8d55a';
+
+// keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool spenderApproval)"
+const NOTE_SIGNATURE_TYPE_HASH = '0x18b99aa73a945da0bb8640ca1f178720091ea7d80be44da6ee02d9fd334623c2';
 
 constants.eip712 = {
     ACE_DOMAIN_PARAMS: {
@@ -119,6 +122,18 @@ constants.eip712 = {
         primaryType: 'JoinSplitSignature',
     },
     JOIN_SPLIT_SIGNATURE_TYPE_HASH,
+    MULTIPLE_NOTE_SIGNATURE: {
+        types: {
+            MultipleNoteSignature: [
+                { name: 'noteHashes', type: 'bytes32[]' },
+                { name: 'spender', type: 'address' },
+                { name: 'spenderApprovals', type: 'bool[]' },
+            ],
+            EIP712Domain: EIP712_DOMAIN,
+        },
+        primaryType: 'MultipleNoteSignature',
+    },
+    MULTIPLE_NOTE_SIGNATURE_TYPE_HASH,
     NOTE_SIGNATURE: {
         types: {
             NoteSignature: [
