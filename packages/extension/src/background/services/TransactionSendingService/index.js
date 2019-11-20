@@ -3,9 +3,7 @@ import {
 } from '~/utils/storage';
 import Web3Service from '~helpers/NetworkService';
 
-
-const sendTransaction = async (data) => {
-    console.log(data);
+const sendTransaction = async (query) => {
     const {
         data: {
             contract,
@@ -13,7 +11,7 @@ const sendTransaction = async (data) => {
             params,
         },
         responseId,
-    } = data;
+    } = query;
 
     const networkId = await get('networkId');
     const web3Service = await Web3Service({
@@ -26,19 +24,20 @@ const sendTransaction = async (data) => {
             .method(method, true)
             .send(...params);
         return {
-            ...data,
+            ...query,
             data: {
-                response: {
-                    txReceipt: receipt,
-                },
+                txReceipt: receipt,
             },
             responseId,
         };
-    } catch (e) {
-        console.error('GSN service error: ', e);
+    } catch (error) {
+        return {
+            ...query,
+            data: {
+                error,
+            },
+        };
     }
-
-    return null;
 };
 
 // TODO change this to use the gas station network
