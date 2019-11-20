@@ -149,7 +149,7 @@ const handleAction = async (action, params) => {
                 signature,
             } = params;
             await Web3Service
-                .useContract('AZTECAccountRegistryGSN')
+                .useContract('AZTECAccountRegistry')
                 .method('registerAZTECExtension')
                 .send(
                     address,
