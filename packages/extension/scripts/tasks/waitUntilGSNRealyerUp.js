@@ -14,8 +14,8 @@ export default async function waitUntilGSNRealyerUp({
 
     try {
         await waitForRelay(relayUrl);
+        onClose();
     } catch (e) {
         onError(e);
-        onClose();
     }
 }
