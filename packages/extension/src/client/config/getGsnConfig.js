@@ -8,7 +8,7 @@ export default async function getGsnConfig() {
     const networkId = await get('networkId');
 
     // TODO: check apiKey
-    const isGSNAvailable = Provider.isValidNetworkId(networkId);
+    const isGSNAvailable = await Provider.isValidNetworkId(networkId);
 
     const proxyContract = getContract('AZTECAccountRegistryGSN', networkId).address;
 

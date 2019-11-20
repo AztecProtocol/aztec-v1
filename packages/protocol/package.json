@@ -7,7 +7,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "@openzeppelin/contracts-ethereum-package": "^2.3.0",
+    "@openzeppelin/contracts-ethereum-package": "^2.4.0",
     "@openzeppelin/gsn-helpers": "^0.2.1",
     "@openzeppelin/gsn-provider": "^0.1.9",
     "@openzeppelin/network": "^0.2.10",

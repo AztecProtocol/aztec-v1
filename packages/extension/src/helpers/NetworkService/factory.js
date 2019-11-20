@@ -77,12 +77,15 @@ class NetworkSwitcher {
                 pollInterval: 15 * 1000,
                 signKey: signingInfo.privateKey,
                 approveFunction,
+                fixedGasPrice: 2E9,
             });
             gsnConfig = {
                 signingInfo,
                 gsnProvider,
             };
         }
+
+        console.log({ account });
 
 
         await service.init({

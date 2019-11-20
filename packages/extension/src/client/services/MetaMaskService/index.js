@@ -81,30 +81,32 @@ const handleAction = async (action, params) => {
         }
         case 'metamask.eip712.batchSignNotes': {
             const {
-                response: {
-                    assetAddress,
-                    noteHashes,
-                    sender,
-                },
-            } = data;
+                assetAddress,
+                noteHashes,
+                sender,
+            } = params;
+            console.log({ sender });
 
             const spenderApprovals = noteHashes.map(() => true);
+            console.log({ spenderApprovals });
 
             const noteSchema = batchSignNotes({
                 assetAddress,
                 noteHashes,
                 spenderApprovals,
-                sender,
+                spender: sender,
             });
-            const method = 'eth_signTypedData_v3';
-            const signature = await Web3Service.sendAsync({
+            console.log({ noteSchema });
+            const method = 'eth_signTypedData_v4';
+            const { result } = await Web3Service.sendAsync({
                 method,
                 params: [address, noteSchema],
                 from: address,
             });
 
+
             response = {
-                signature,
+                signature: result,
             };
             break;
         }
