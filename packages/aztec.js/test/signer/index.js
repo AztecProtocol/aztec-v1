@@ -162,6 +162,44 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
+        it('should recover publicKey from signNotesForBatchConfidentialApprove() sig params', async () => {
+            const { publicKey, privateKey } = secp256k1.generateAccount();
+            const spender = randomHex(20);
+            const verifyingContract = randomHex(20);
+            const spenderApprovals = [true, true];
+            const testNoteA = await note.create(publicKey, 10);
+            const testNoteB = await note.create(publicKey, 30);
+
+            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
+
+            const signature = signer.signNotesForBatchConfidentialApprove(
+                verifyingContract,
+                noteHashes,
+                spender,
+                spenderApprovals,
+                privateKey,
+            );
+
+            const r = Buffer.from(signature.slice(2, 66), 'hex');
+            const s = Buffer.from(signature.slice(66, 130), 'hex');
+            const v = parseInt(signature.slice(130, 132), 16);
+
+            // Reconstruct messageHash, to use in ecrecover
+            const domain = signer.generateZKAssetDomainParams(verifyingContract);
+            const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
+            const message = {
+                noteHashes,
+                spender,
+                spenderApprovals,
+            };
+
+            const { encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
+            const messageHash = Buffer.from(encodedTypedData.slice(2), 'hex');
+
+            const publicKeyRecover = ethUtil.ecrecover(messageHash, v, r, s).toString('hex');
+            expect(publicKeyRecover).to.equal(publicKey.slice(4));
+        });
+
         it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);

@@ -99,6 +99,7 @@ class PublicRangeProof66563 extends Proof {
             });
 
         let B;
+        const reducer = this.rollingHash.redKeccak();
         this.blindingFactors = this.notes.map((note, i) => {
             const { bk } = blindingScalars[0]; // trivially true for i=0, and enforcing k1 = k2 for i=1
             const { ba } = blindingScalars[i];
@@ -108,9 +109,9 @@ class PublicRangeProof66563 extends Proof {
             }
 
             if (i === 1) {
-                const reducer = this.rollingHash.redKeccak();
-                const xbk = bk.redMul(reducer);
-                const xba = ba.redMul(reducer);
+                const x = reducer.redPow(new BN(i + 1));
+                const xbk = bk.redMul(x);
+                const xba = ba.redMul(x);
                 B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
             }
             return { bk, ba, B };
