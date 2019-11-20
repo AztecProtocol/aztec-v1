@@ -11,8 +11,8 @@ export default async function sendGSNRegisterTx({
 }) {
     const {
         txReceipt,
+        error,
     } = await ConnectionService.sendTransaction({
-
         contract: AZTECAccountRegistryGSNConfig.name,
         method: 'registerAZTECExtension',
         data: [
@@ -22,11 +22,13 @@ export default async function sendGSNRegisterTx({
             signature,
         ],
     }) || {};
+
     const {
         blockNumber,
     } = txReceipt || {};
 
     return {
         blockNumber,
+        error,
     };
 }

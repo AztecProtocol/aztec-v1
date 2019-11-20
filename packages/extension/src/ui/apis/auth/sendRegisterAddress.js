@@ -8,6 +8,7 @@ export default async function sendRegisterAddress({
 }) {
     const {
         txReceipt,
+        error,
     } = await ConnectionService.post({
         action: 'metamask.aztec.registerAZTECExtension',
         data: {
@@ -17,11 +18,13 @@ export default async function sendRegisterAddress({
             signature,
         },
     }) || {};
+
     const {
         blockNumber,
     } = txReceipt || {};
 
     return {
         blockNumber,
+        error,
     };
 }
