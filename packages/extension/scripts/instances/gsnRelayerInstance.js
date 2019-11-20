@@ -7,7 +7,6 @@ import {
     getPort,
 } from './ganacheInstance';
 import {
-    log,
     errorLog,
 } from '../utils/log';
 import {
@@ -54,18 +53,20 @@ export default async function gsnRelayerInstance({
                 errorLog(`✖ GSN Relayer exited with code ${code}`);
             }
             exitOnError();
+        } else {
+            process.stdout.write(output);
         }
     };
+
     const runRelayerCMD = `npx oz-gsn run-relayer --detach --quiet --relayUrl "${relayUrl}" --ethereumNodeURL "${providerUrl}" -f "${from}" --workdir "${workdir}"`;
-    const process = instance(
+    return instance(
         runRelayerCMD,
         {
-            shouldStart: output => output.includes('Starting GSN Relayer'),
+            shouldStart: output => output.includes('Relay is funded and ready!'),
             onReceiveOutput: handleReceiveOutput,
             onError,
             onClose,
+            handleStderrAsNormalOutput: true,
         },
     );
-
-    return process;
 }
