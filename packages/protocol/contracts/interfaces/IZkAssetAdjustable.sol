@@ -12,13 +12,13 @@ import "../libs/ProofUtils.sol";
 import "../ERC1724/ZkAssetOwnable.sol";
 
 /**
- * @title IZkAssetMintable
+ * @title IZkAssetAdjustable
  * @author AZTEC
- * @dev An interface defining the ZkAssetMintable standard.
+ * @dev An interface defining the ZkAssetAdjustable standard.
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
 **/
 
-interface IZkAssetMintable {
+interface IZkAssetAdjustable {
     /**
      * @dev Note owner can approve a third party address, such as a smart contract,
      * to spend multiple notes on their behalf. This allows a batch approval of notes
@@ -55,6 +55,17 @@ interface IZkAssetMintable {
         bool _spenderApproval,
         bytes calldata _signature
     ) external;
+
+    /**
+    * @dev Executes a confidential burning procedure, dependent on the provided proofData
+    * being succesfully validated by the zero-knowledge validator
+    *
+    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofData - bytes array of proof data, outputted from a proof construction
+    */
+    function confidentialBurn(uint24 _proof, bytes calldata _proofData) external;
 
     /**
     * @dev Executes a confidential minting procedure, dependent on the provided proofData
@@ -179,6 +190,8 @@ interface IZkAssetMintable {
     event RedeemTokens(address indexed owner, uint256 value);
     
     event UpdateNoteMetaData(address indexed owner, bytes32 indexed noteHash, bytes metadata);
+
+    event UpdateTotalBurned(bytes32 noteHash, bytes noteData);
 
     event UpdateTotalMinted(bytes32 noteHash, bytes metaData);
 }
