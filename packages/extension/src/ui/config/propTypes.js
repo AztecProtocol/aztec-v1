@@ -10,6 +10,7 @@ export const themeType = PropTypes.oneOf([
 export const siteShape = PropTypes.shape({
     title: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
+    domain: PropTypes.string.isRequired,
     icons: PropTypes.arrayOf(PropTypes.shape({
         href: PropTypes.string.isRequired,
         sizes: PropTypes.string,

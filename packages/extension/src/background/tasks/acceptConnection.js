@@ -2,6 +2,7 @@ import {
     connectionRequestEvent,
     connectionApprovedEvent,
     backgroundReadyEvent,
+    uiCloseEvent,
 } from '~/config/event';
 import urls from '~/config/urls';
 import Connection from '../utils/connection';
@@ -47,5 +48,12 @@ export default function acceptConnection() {
                 data: networkConfig,
             }, '*', [channel.port2]);
         }
+    });
+
+    window.addEventListener(uiCloseEvent, (e) => {
+        const {
+            detail,
+        } = e;
+        connection.abortUi(detail);
     });
 }

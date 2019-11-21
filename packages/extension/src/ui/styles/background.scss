@@ -41,6 +41,7 @@
   transition: all ease 0.5s;
   transform: translateY(100%) scale(0.7);
   opacity: 0;
+  padding: $popup-page-spacing;
   width: $popup-width + $popup-page-spacing * 2;
   height: $popup-height + $popup-page-spacing * 2;
 
@@ -50,15 +51,10 @@
   }
 }
 
-:global(#aztec-popup-ui) {
-  width: $popup-width + $popup-page-spacing * 2;
-  height: $popup-height + $popup-page-spacing * 2;
-}
-
 :global(#aztec-popup-ui),
 :global(#aztec-popup-placeholder) {
-  width: $popup-width + $popup-page-spacing * 2;
-  height: $popup-height + $popup-page-spacing * 2;
+  width: 100%;
+  height: 100%;
 }
 
 @media all and (max-width: $popup-width + $popup-page-spacing * 2 - 1) {

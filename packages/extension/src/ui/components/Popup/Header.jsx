@@ -8,8 +8,6 @@ import {
     Image,
     Clickable,
 } from '@aztec/guacamole-ui';
-import closeWindow from '~/ui/utils/closeWindow';
-import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     siteShape,
 } from '~/ui/config/propTypes';
@@ -18,15 +16,14 @@ import styles from './popup.scss';
 
 const Header = ({
     site,
-    disableClose,
+    onClose,
 }) => {
     const {
         title,
-        url,
+        domain,
         icons,
     } = site;
     const icon = findOptimalIcon(icons, { width: 80, height: 80 });
-    const domain = getDomainFromUrl(url);
 
     return (
         <FlexBox
@@ -71,10 +68,10 @@ const Header = ({
                     </div>
                 </Block>
             </FlexBox>
-            {!disableClose && (
+            {!!onClose && (
                 <div className="flex-fixed">
                     <Clickable
-                        onClick={() => closeWindow(0, true)}
+                        onClick={onClose}
                     >
                         <Icon
                             name="close"
@@ -90,11 +87,11 @@ const Header = ({
 
 Header.propTypes = {
     site: siteShape.isRequired,
-    disableClose: PropTypes.bool,
+    onClose: PropTypes.func,
 };
 
 Header.defaultProps = {
-    disableClose: false,
+    onClose: null,
 };
 
 export default Header;

@@ -27,9 +27,7 @@ const ControlPanel = ({
             >
                 <div id="background-app">
                     <UiPlaceholder initialVisibility>
-                        <div id="app">
-                            {children}
-                        </div>
+                        {children}
                     </UiPlaceholder>
                 </div>
             </BrowserWindow>

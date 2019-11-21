@@ -4,10 +4,8 @@ import {
     Route,
 } from 'react-router-dom';
 import {
-    siteShape,
     gsnConfigShape,
 } from '~/ui/config/propTypes';
-import Popup from '~ui/components/Popup';
 
 const CustomRoute = ({
     path,
@@ -16,28 +14,19 @@ const CustomRoute = ({
     Component,
     gsnConfig,
     goToPage,
-}) => {
-    const {
-        site,
-        ...actionData
-    } = action;
-
-    return (
-        <Route
-            path={path}
-            component={() => (
-                <Popup site={site}>
-                    <Component
-                        {...actionData}
-                        gsnConfig={gsnConfig}
-                        currentAccount={currentAccount}
-                        goToPage={goToPage}
-                    />
-                </Popup>
-            )}
-        />
-    );
-};
+}) => (
+    <Route
+        path={path}
+        component={() => (
+            <Component
+                {...action}
+                gsnConfig={gsnConfig}
+                currentAccount={currentAccount}
+                goToPage={goToPage}
+            />
+        )}
+    />
+);
 
 CustomRoute.propTypes = {
     path: PropTypes.string.isRequired,
@@ -45,9 +34,7 @@ CustomRoute.propTypes = {
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string,
     }).isRequired,
-    action: PropTypes.shape({
-        site: siteShape.isRequired,
-    }).isRequired,
+    action: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
     Component: PropTypes.func.isRequired,
     goToPage: PropTypes.func.isRequired,
     gsnConfig: gsnConfigShape.isRequired,
