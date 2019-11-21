@@ -18,7 +18,7 @@ import routes from '~uiModules/config/routes';
 import actions from '~ui/config/actions';
 import getGsnConfig from '~client/config/getGsnConfig';
 import './styles/guacamole.css';
-import './styles/_reset.scss';
+import './styles/ui.scss';
 
 class App extends PureComponent {
     constructor(props) {
