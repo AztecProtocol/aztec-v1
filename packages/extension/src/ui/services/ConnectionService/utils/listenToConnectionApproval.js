@@ -1,20 +1,22 @@
 import {
     connectionApprovedEvent,
 } from '~/config/event';
-import NetworkService from '~/helpers/NetworkService/factory';
 
 export default async function listenToConnectionApproval() {
     return new Promise((resolve) => {
-        const handleReceiveMessage = (e) => {
+        const handleReceiveMessage = async (e) => {
             if (e.data.type === connectionApprovedEvent) {
                 window.removeEventListener('message', handleReceiveMessage);
 
                 const {
-                    data,
+                    data: clientConfig,
                 } = e.data;
-                NetworkService.setConfigs([data]);
                 const [port] = e.ports;
-                resolve(port);
+
+                resolve({
+                    port,
+                    clientConfig,
+                });
             }
         };
 

@@ -43,6 +43,9 @@ export default async function setupClientConfig({
         title: network.networkName,
         providerUrl: providerUrl || network.providerUrl,
         contractsConfigs,
+        account: {
+            address: currentAddress,
+        },
     };
 
     NetworkService.setConfigs([config]);

@@ -1,7 +1,4 @@
 import ConnectionService from '~ui/services/ConnectionService';
-import {
-    AZTECAccountRegistryGSN,
-} from '~/config/contracts';
 
 export default async function confidentialTransferFrom({
     assetAddress,
@@ -9,7 +6,7 @@ export default async function confidentialTransferFrom({
 }) {
     const proofData = proof.encodeABI(assetAddress);
     const response = await ConnectionService.sendTransaction({
-        contract: AZTECAccountRegistryGSN.name,
+        contract: 'AZTECAccountRegistry',
         method: 'confidentialTransferFrom',
         data: [
             assetAddress,
