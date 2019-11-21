@@ -29,6 +29,7 @@ class Web3Service {
         providerUrl = '',
         account,
         gsnConfig,
+        contractsConfig,
     } = {}) {
         this.reset();
         this.gsnConfig = gsnConfig;
@@ -81,6 +82,25 @@ class Web3Service {
                     address,
                 };
             }
+        }
+
+        if (contractsConfig) {
+            Object.values(contractsConfig).forEach(({
+                name,
+                config,
+                address,
+            }) => {
+                if (!address) {
+                    this.registerInterface(config, {
+                        name,
+                    });
+                } else {
+                    this.registerContract(config, {
+                        name,
+                        address,
+                    });
+                }
+            });
         }
     }
 

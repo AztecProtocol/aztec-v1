@@ -19,7 +19,6 @@ export default async function fetchAztecAccount({
             account,
         } = await fetchAztecAccountOnChain({
             address,
-            networkId,
         }) || {});
     }
 

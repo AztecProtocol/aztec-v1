@@ -1,4 +1,4 @@
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
 } from '~config/contracts';
@@ -6,7 +6,6 @@ import {
     errorLog,
 } from '~utils/log';
 import decodeNoteLogs from './helpers/decodeNoteLogs';
-
 
 const subscribe = async ({
     owner,
@@ -22,7 +21,7 @@ const subscribe = async ({
     const {
         abi,
         subscribe: subscribeOn,
-    } = (await Web3Service({ networkId })).eth;
+    } = Web3Service.eth;
 
     const eventsTopics = [
         ZkAsset.events.createNote,

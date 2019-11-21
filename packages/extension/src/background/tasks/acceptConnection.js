@@ -5,7 +5,7 @@ import {
 } from '~/config/event';
 import urls from '~/config/urls';
 import Connection from '../utils/connection';
-import setupClientConfig from './setupClientConfig';
+import setupNetworkConfig from './setupNetworkConfig';
 
 const {
     origin: uiSourceOrigin,
@@ -17,7 +17,7 @@ export default function acceptConnection() {
     }, '*');
 
     const connection = new Connection();
-    let response;
+    let networkConfig;
 
     window.addEventListener('message', async (event) => {
         if (event.data.type === connectionRequestEvent) {
@@ -26,7 +26,7 @@ export default function acceptConnection() {
             } = event.data;
 
             if (clientProfile && clientProfile.networkId) {
-                response = await setupClientConfig(clientProfile);
+                networkConfig = await setupNetworkConfig(clientProfile);
             } else if (event.origin !== uiSourceOrigin) {
                 return;
             }
@@ -44,7 +44,7 @@ export default function acceptConnection() {
             event.source.postMessage({
                 type: connectionApprovedEvent,
                 code: '200',
-                data: response,
+                data: networkConfig,
             }, '*', [channel.port2]);
         }
     });

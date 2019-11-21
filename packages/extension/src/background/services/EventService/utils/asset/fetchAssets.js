@@ -1,4 +1,4 @@
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
 } from '~config/contracts';
@@ -7,15 +7,7 @@ export default async function fetchAssets({
     fromBlock = 'earliest',
     toBlock = 'latest',
     assetAddress = null,
-    networkId,
 } = {}) {
-    if (!networkId && networkId !== 0) {
-        return {
-            error: new Error("'networkId' cannot be empty in fetchAssets"),
-            assets: null,
-        };
-    }
-    const web3Service = await Web3Service({ networkId });
     const eventName = ACE.events.сreateNoteRegistry;
 
     const options = {
@@ -30,8 +22,8 @@ export default async function fetchAssets({
     }
 
     try {
-        const data = await web3Service
             .useContract(ACE.name)
+        const data = await Web3Service
             .events(eventName)
             .where(options);
 

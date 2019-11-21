@@ -10,7 +10,7 @@ import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
 import mergeResolvers from './utils/mergeResolvers';
 import ConnectionService from '~ui/services/ConnectionService';
-import Web3Service from '~/ui/services/Web3Service';
+import Web3Service from '~/helpers/Web3Service';
 import base from './base';
 
 const uiResolvers = {

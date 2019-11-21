@@ -3,7 +3,7 @@ import {
     warnLog,
     errorLog,
 } from '~utils/log';
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~/helpers/Web3Service';
 import {
     createBulkAssets,
     fetchAssets,
@@ -65,11 +65,9 @@ class SyncManager {
             lastSyncedBlock,
             pausedState,
             subscription,
-            networkId,
         } = this.syncConfig;
-        const web3Service = await Web3Service({ networkId });
 
-        const blocks = await web3Service.eth.getBlockNumber();
+        const blocks = await Web3Service.eth.getBlockNumber();
         const isSubscribedOnNewAssets = !!subscription && !pausedState;
 
         return {
@@ -183,8 +181,7 @@ class SyncManager {
             subscriberOnNewAssets,
         } = this.syncConfig;
 
-        const web3Service = await Web3Service({ networkId });
-        const currentBlock = await web3Service.eth.getBlockNumber();
+        const currentBlock = await Web3Service.eth.getBlockNumber();
         let newLastSyncedBlock = lastSyncedBlock;
         const fromBlock = lastSyncedBlock + 1;
         const toBlock = currentBlock;

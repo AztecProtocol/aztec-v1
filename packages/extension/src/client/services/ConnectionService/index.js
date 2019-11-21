@@ -72,13 +72,13 @@ class ConnectionService {
         const {
             data: {
                 data: {
-                    contractsConfigs,
+                    contractsConfig,
                 } = {},
             },
         } = await backgroundResponse;
 
         return {
-            contractsConfigs,
+            contractsConfig,
         };
     }
 

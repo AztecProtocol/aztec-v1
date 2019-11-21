@@ -40,13 +40,13 @@ class Aztec {
             }
 
             const {
-                contractsConfigs,
+                contractsConfig,
             } = await ConnectionService.openConnection({
                 providerUrl,
                 contractAddresses,
             });
 
-            ApiPermissionService.setContractConfigs(contractsConfigs);
+            ApiPermissionService.setContractConfigs(contractsConfig);
 
             try {
                 await ApiPermissionService.ensurePermission();

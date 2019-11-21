@@ -8,7 +8,7 @@ const clientContracts = [
     'AZTECAccountRegistry',
 ];
 
-export default function setContractConfigs(contractsConfigs) {
+export default function setContractConfigs(contractsConfig) {
     const {
         networkId,
     } = Web3Service;
@@ -17,7 +17,7 @@ export default function setContractConfigs(contractsConfigs) {
         const {
             config,
             address,
-        } = contractsConfigs.find(({ name }) => contractName === name) || {};
+        } = contractsConfig.find(({ name }) => contractName === name) || {};
 
         if (!address) {
             throw new ApiError('input.contract.address.empty', {
