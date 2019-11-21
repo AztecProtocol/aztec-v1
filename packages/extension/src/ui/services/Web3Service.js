@@ -1,3 +1,3 @@
-import Web3Service from '~/helpers/NetworkService';
+import Web3Service from '~/utils/Web3Service';
 
-export default Web3Service();
+export default new Web3Service();

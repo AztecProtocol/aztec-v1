@@ -9,6 +9,7 @@ import {
     randomId,
 } from '~utils/random';
 import LRU from '~utils/caches/LRU';
+import Web3Service from '~/ui/services/Web3Service';
 import listenToInitialAction from '../utils/listenToInitialAction';
 import listenToConnectionApproval from '../utils/listenToConnectionApproval';
 
@@ -48,7 +49,10 @@ class ConnectionManager {
 
         const [
             action,
-            port,
+            {
+                port,
+                clientConfig,
+            },
         ] = await Promise.all([
             actionPromise,
             portPromise,
@@ -63,6 +67,32 @@ class ConnectionManager {
         this.clientRequestId = requestId;
         this.port = port;
         this.port.onmessage = this.handlePortResponse;
+
+        const {
+            providerUrl,
+            contractsConfigs,
+            account,
+        } = clientConfig;
+        await Web3Service.init({
+            providerUrl,
+            account,
+        });
+        Object.values(contractsConfigs).forEach(({
+            name,
+            config,
+            address,
+        }) => {
+            if (!address) {
+                Web3Service.registerInterface(config, {
+                    name,
+                });
+            } else {
+                Web3Service.registerContract(config, {
+                    name,
+                    address,
+                });
+            }
+        });
 
         return {
             type,
