@@ -1,5 +1,4 @@
 import AuthService from '~background/services/AuthService';
-import EventService from '~background/services/EventService';
 import {
     get,
 } from '~utils/storage';
@@ -7,6 +6,8 @@ import {
     ensureAccount,
 } from '../decorators';
 import userModel from '~database/models/user';
+import fetchAsset from './utils/fetchAsset';
+import fetchAztecAccount from './utils/fetchAztecAccount';
 import mergeResolvers from './utils/mergeResolvers';
 import ConnectionService from '~ui/services/ConnectionService';
 import Web3Service from '~helpers/NetworkService';
@@ -16,8 +17,7 @@ const uiResolvers = {
     Account: {
         linkedPublicKey: async ({ address }) => {
             const web3Service = await Web3Service();
-
-            return web3Service.useContract('AZTECAccountRegistryGSN')
+            return web3Service.useContract('AZTECAccountRegistry')
                 .method('accountMapping')
                 .call(address);
         },
@@ -27,14 +27,18 @@ const uiResolvers = {
             id,
         }),
         asset: async (_, { id }) => {
+            const networkId = await get('networkId');
             const {
                 asset,
-            } = await EventService.fetchAsset({ address: id });
+            } = await fetchAsset({
+                address: id,
+                networkId,
+            });
             return asset;
         },
         account: async (_, { address }) => {
             const networkId = await get('networkId');
-            return EventService.fetchAztecAccount({ address, networkId });
+            return fetchAztecAccount({ address, networkId });
         },
         note: async (_, args) => {
             const {

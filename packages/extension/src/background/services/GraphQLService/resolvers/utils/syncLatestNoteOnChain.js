@@ -4,7 +4,6 @@ import {
     errorLog,
 } from '~utils/log';
 
-
 const packNote = (note, asset, noteAccess) => ({
     account: {
         address: noteAccess.address,
@@ -26,20 +25,17 @@ const packNote = (note, asset, noteAccess) => ({
     },
 });
 
-
-export default async function fetchNoteFromIndexedDB(options) {
-    const {
-        noteId: noteHash,
-        account,
-        networkId,
-    } = options;
-
+export default async function syncLatestNoteOnChain({
+    noteId: noteHash,
+    account,
+    networkId,
+}) {
     if (!account) {
         errorLog("'account' cannot be empty");
         return [];
     }
+
     const {
-        error,
         note: onChainNote,
     } = await EventService.fetchLatestNote({
         noteHash,

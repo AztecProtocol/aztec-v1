@@ -1,17 +1,24 @@
 import BigInt from 'apollo-type-bigint';
+import {
+    get,
+} from '~/utils/storage';
 import accountModel from '~database/models/account';
-import EventService from '~/background/services/EventService';
+import fetchAsset from './utils/fetchAsset';
 import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
 import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
 import getAssetBalance from './utils/getAssetBalance';
 
-const getAsset = async (id) => {
-    if (typeof id !== 'string') {
-        return id;
+const getAsset = async (parentAsset) => {
+    if (typeof parentAsset !== 'string') {
+        return parentAsset;
     }
+    const networkId = await get('networkId');
     const {
         asset,
-    } = await EventService.fetchAsset({ address: id });
+    } = await fetchAsset({
+        address: parentAsset,
+        networkId,
+    });
     return asset;
 };
 

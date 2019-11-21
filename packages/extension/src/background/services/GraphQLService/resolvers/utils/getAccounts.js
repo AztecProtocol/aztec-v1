@@ -1,8 +1,7 @@
 import {
     argsError,
 } from '~utils/error';
-import EventService from '~background/services/EventService';
-
+import fetchAztecAccount from './fetchAztecAccount';
 
 export default async function getAccounts(args, ctx = {}) {
     const {
@@ -18,12 +17,10 @@ export default async function getAccounts(args, ctx = {}) {
         networkId = 0,
     } = ctx;
 
-
-    let accounts = await Promise.all(addresses.map(address => EventService.fetchAztecAccount({
+    let accounts = await Promise.all(addresses.map(address => fetchAztecAccount({
         address,
         networkId,
     })));
-
 
     accounts = accounts.map(({
         account,
