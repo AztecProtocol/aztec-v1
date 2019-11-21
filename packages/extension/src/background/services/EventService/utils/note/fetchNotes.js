@@ -1,4 +1,4 @@
-import NetworkService from '~helpers/NetworkService';
+import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
 } from '~config/contracts';
@@ -15,10 +15,8 @@ export default async function fetchNotes({
         ZkAsset.events.destroyNote,
         ZkAsset.events.updateNoteMetaData,
     ],
-    networkId,
 } = {}) {
-    const web3Service = await NetworkService({ networkId });
-    const { abi, getPastLogs } = web3Service.eth;
+    const { abi, getPastLogs } = Web3Service.eth;
 
     const eventsTopics = events
         .map(e => ZkAsset.config.abi.find(({ name, type }) => name === e && type === 'event'))

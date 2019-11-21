@@ -1,5 +1,5 @@
 import Provider from '~config/provider';
-import Web3Service from '~/ui/services/Web3Service';
+import Web3Service from '~/helpers/Web3Service';
 
 export default async function getGsnConfig() {
     // TODO: check apiKey

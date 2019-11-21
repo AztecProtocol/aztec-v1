@@ -9,13 +9,13 @@ export default async function listenToConnectionApproval() {
                 window.removeEventListener('message', handleReceiveMessage);
 
                 const {
-                    data: clientConfig,
+                    data: networkConfig,
                 } = e.data;
                 const [port] = e.ports;
 
                 resolve({
                     port,
-                    clientConfig,
+                    networkConfig,
                 });
             }
         };

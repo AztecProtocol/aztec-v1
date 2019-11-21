@@ -1,7 +1,4 @@
-import {
-    get,
-} from '~/utils/storage';
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~/helpers/Web3Service';
 
 const sendTransaction = async (query) => {
     const {
@@ -13,13 +10,8 @@ const sendTransaction = async (query) => {
         responseId,
     } = query;
 
-    const networkId = await get('networkId');
-    const web3Service = await Web3Service({
-        networkId,
-    });
-
     try {
-        const receipt = await web3Service
+        const receipt = await Web3Service
             .useContract(contract)
             .method(method, true)
             .send(...params);

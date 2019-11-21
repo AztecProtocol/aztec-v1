@@ -1,4 +1,4 @@
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
 } from '~config/contracts';
@@ -32,21 +32,15 @@ const converEvent = (event) => {
 
 const subscribe = async ({
     fromBlock,
-    networkId,
 } = {}) => {
-    if (!networkId) {
-        errorLog("'networkId' cannot be empty in assets subscription");
-        return null;
-    }
-
     const eventName = ACE.events.сreateNoteRegistry;
 
     const options = {
         fromBlock,
     };
 
-    const subscription = (await Web3Service({ networkId }))
         .useContract(ACE.name)
+    const subscription = await Web3Service
         .events(eventName)
         .subscribe(options, (error) => {
             if (error) {

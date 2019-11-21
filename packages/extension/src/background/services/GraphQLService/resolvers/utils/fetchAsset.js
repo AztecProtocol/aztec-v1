@@ -17,7 +17,6 @@ export default async function fetchAsset({
             asset,
         } = await fetchAssetOnChain({
             address,
-            networkId,
         }) || {});
     }
     if (asset

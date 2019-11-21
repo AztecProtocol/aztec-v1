@@ -9,7 +9,7 @@ import {
     randomId,
 } from '~utils/random';
 import LRU from '~utils/caches/LRU';
-import Web3Service from '~/ui/services/Web3Service';
+import Web3Service from '~/helpers/Web3Service';
 import listenToInitialAction from '../utils/listenToInitialAction';
 import listenToConnectionApproval from '../utils/listenToConnectionApproval';
 
@@ -51,12 +51,13 @@ class ConnectionManager {
             action,
             {
                 port,
-                clientConfig,
+                networkConfig,
             },
         ] = await Promise.all([
             actionPromise,
             portPromise,
         ]);
+        console.log('connection established', { action, port, networkConfig });
 
         const {
             requestId,
@@ -68,31 +69,7 @@ class ConnectionManager {
         this.port = port;
         this.port.onmessage = this.handlePortResponse;
 
-        const {
-            providerUrl,
-            contractsConfigs,
-            account,
-        } = clientConfig;
-        await Web3Service.init({
-            providerUrl,
-            account,
-        });
-        Object.values(contractsConfigs).forEach(({
-            name,
-            config,
-            address,
-        }) => {
-            if (!address) {
-                Web3Service.registerInterface(config, {
-                    name,
-                });
-            } else {
-                Web3Service.registerContract(config, {
-                    name,
-                    address,
-                });
-            }
-        });
+        await Web3Service.init(networkConfig);
 
         return {
             type,
