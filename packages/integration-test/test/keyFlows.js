@@ -1,4 +1,4 @@
-/* global artifacts, expect, contract, it:true */
+/* global expect, web3, contract, it:true */
 const {
     BurnProof,
     DividendProof,
@@ -11,6 +11,7 @@ const {
     SwapProof,
 } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
+const { TestFactory } = require('@aztec/contract-artifacts');
 
 const {
     constants: { ERC20_SCALING_FACTOR },
@@ -19,12 +20,10 @@ const {
 const secp256k1 = require('@aztec/secp256k1');
 
 const BN = require('bn.js');
-const { getNotesForAccount, factoryHelpers } = require('../src/utils');
-
-console.log({ getNotesForAccount});
-
+const { getNotesForAccount, generateFactoryId } = require('../src/utils');
 const Setup = require('../src/setup');
 
+<<<<<<< HEAD
 <<<<<<< HEAD:packages/protocol/test/integration/AZTEC.js
 const ACE = artifacts.require('./ACE');
 const DividendValidator = artifacts.require('./Dividend');
@@ -40,6 +39,8 @@ contract('AZTEC integration', (accounts) => {
 =======
 const TestFactory = artifacts.require('./TestFactory');
 
+=======
+>>>>>>> refactor(protocol): implement return of contract object with name keys
 contract.only('AZTEC integration', (accounts) => {
     let upgradeFactoryId;
     let upgradeFactoryContract;
@@ -87,29 +88,41 @@ contract.only('AZTEC integration', (accounts) => {
         ];
         const setup = new Setup(contractsToDeploy, NETWORK);
 
-        await ({
-            ace,
-            dividendValidator,
-            erc20,
-            joinSplitValidator,
-            joinSplitFluidValidator,
-            privateRangeValidator,
-            publicRangeValidator,
-            swapValidator,
-            zkAsset,
-        } = setup.getContracts());
+        ({
+            ACE: ace,
+            Dividend: dividendValidator,
+            ERC20Mintable: erc20,
+            JoinSplit: joinSplitValidator,
+            JoinSplitFluid: joinSplitValidator,
+            PrivateRange: privateRangeValidator,
+            PublicRange: publicRangeValidator,
+            Swap: swapValidator,
+            ZkAsset: zkAsset,
+        } = await setup.getContracts());
+
+        console.log({ ace });
 
 >>>>>>> feat(integration-test): initial commit for integration-test pkg:packages/integration-test/test/keyFlows.js
         aztecAccount = secp256k1.generateAccount();
+<<<<<<< HEAD
+=======
+        // upgradeFactoryId = generateFactoryId(2, 1, 3);
+        // upgradeFactoryContract = await TestFactory.new(ace.address);
+        // await ace.setFactory(upgradeFactoryId, upgradeFactoryContract.address, { from: accounts[0] });
+>>>>>>> refactor(protocol): implement return of contract object with name keys
 
         // Fund account with ERC20s
         const tokensTransferred = new BN(5000);
-        await erc20.mint(publicOwner, scalingFactor.mul(tokensTransferred));
-        await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred));
+        await erc20.mint(publicOwner, scalingFactor.mul(tokensTransferred), { from: accounts[0] });
+        await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), { from: accounts[0] });
     });
 
     describe('Initialisation', async () => {
+<<<<<<< HEAD
         it('should have set ACE owner', async () => {
+=======
+        it('should set ace owner to be deployment address', async () => {
+>>>>>>> refactor(protocol): implement return of contract object with name keys
             const owner = await ace.owner();
             expect(owner).to.equal(accounts[0]);
         });
@@ -383,8 +396,13 @@ contract.only('AZTEC integration', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
+<<<<<<< HEAD
         it('should perform a note registry upgrade', async () => {
             const zkAssetOwner = accounts[0];
+=======
+        it.skip('should perform a note registry upgrade', async () => {
+            const zkAssetOwner = await zkAsset.owner();
+>>>>>>> refactor(protocol): implement return of contract object with name keys
 
             const existingProxy = await ace.registries(zkAssetOwner);
             const newFactoryId = factoryHelpers.generateFactoryId(1, 3, 3);
