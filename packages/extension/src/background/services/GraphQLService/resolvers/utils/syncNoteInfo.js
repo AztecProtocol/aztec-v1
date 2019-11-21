@@ -10,8 +10,7 @@ import {
     argsError,
 } from '~utils/error';
 import Note from '~background/database/models/note';
-import fetchLatestNote from './fetchLatestNote';
-
+import syncLatestNoteOnChain from './syncLatestNoteOnChain';
 
 export default async function syncNoteInfo(args, ctx) {
     const {
@@ -33,7 +32,7 @@ export default async function syncNoteInfo(args, ctx) {
         viewingKey,
     } = metadata(note.metadata).getAccess(userAddress);
     if (!note) {
-        [note] = await fetchLatestNote({
+        [note] = await syncLatestNoteOnChain({
             account: userAddress,
             noteId,
             networkId,

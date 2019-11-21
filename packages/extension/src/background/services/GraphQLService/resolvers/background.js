@@ -7,8 +7,9 @@ import {
 import mergeResolvers from './utils/mergeResolvers';
 import syncUserInfo from './utils/syncUserInfo';
 import getAccounts from './utils/getAccounts';
-import EventService from '~background/services/EventService';
 import NoteService from '~background/services/NoteService';
+import fetchAsset from './utils/fetchAsset';
+import fetchAztecAccount from './utils/fetchAztecAccount';
 import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncNoteInfo from './utils/syncNoteInfo';
@@ -21,8 +22,9 @@ const backgroundResolvers = {
                 id: (args.id || args.currentAddress),
             }),
         })),
-        asset: ensureDomainPermission(async (_, args) => EventService.fetchAsset({
+        asset: ensureDomainPermission(async (_, args, ctx) => fetchAsset({
             address: args.id || args.address,
+            networkId: ctx.networkId,
         })),
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
@@ -47,7 +49,7 @@ const backgroundResolvers = {
                 },
             ),
         })),
-        account: ensureDomainPermission(async (_, args, ctx) => EventService.fetchAztecAccount({
+        account: ensureDomainPermission(async (_, args, ctx) => fetchAztecAccount({
             address: args.currentAddress,
             networkId: ctx.networkId,
         })),
