@@ -1,24 +1,13 @@
-
-
 pragma solidity >=0.5.0 <0.6.0;
-
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
-import "../ERC1724/ZkAsset.sol";
-import "../ACE/ACE.sol";
-import "../ERC20/ERC20Mintable.sol";
-import "../libs/LibEIP712.sol";
-import "../libs/ProofUtils.sol";
-import "../ERC1724/ZkAssetOwnable.sol";
-
 /**
- * @title IZkAssetMintable
+ * @title IZkAssetOwnable
  * @author AZTEC
- * @dev An interface defining the ZkAssetMintable standard.
+ * @dev An interface defining the ZkAssetOwnable standard 
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
-**/
+ **/
 
-interface IZkAssetMintable {
+interface IZkAssetOwnable {
+
     /**
      * @dev Note owner can approve a third party address, such as a smart contract,
      * to spend multiple notes on their behalf. This allows a batch approval of notes
@@ -57,29 +46,17 @@ interface IZkAssetMintable {
     ) external;
 
     /**
-    * @dev Executes a confidential minting procedure, dependent on the provided proofData
-    * being succesfully validated by the zero-knowledge validator
-    *
-    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
-    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
-    * 1) epoch number 2) category number 3) ID number for the proof
-    * @param _proofData - bytes array of proof data, outputted from a proof construction
-    */
-    function confidentialMint(uint24 _proof, bytes calldata _proofData) external;
-
-
-    /**
     * @dev Executes a value transfer mediated by smart contracts. The method is supplied with
     * transfer instructions represented by a bytes _proofOutput argument that was outputted
     * from a proof verification contract.
     *
-    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * @param _proofId - uint24 variable which acts as a unique identifier for the proof which
     * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
     * transfer instructions for the ACE
     */
-    function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external;
+    function confidentialTransferFrom(uint24 _proofId, bytes calldata _proofOutput) external;
     
 
     /**
@@ -179,7 +156,4 @@ interface IZkAssetMintable {
     event RedeemTokens(address indexed owner, uint256 value);
     
     event UpdateNoteMetaData(address indexed owner, bytes32 indexed noteHash, bytes metadata);
-
-    event UpdateTotalMinted(bytes32 noteHash, bytes metaData);
 }
-
