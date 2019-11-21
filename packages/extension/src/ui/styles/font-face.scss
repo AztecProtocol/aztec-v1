@@ -1,18 +1,3 @@
-@import './variables';
-
-:global(#aztec-popup-ui-app) {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: $default-font-family;
-  text-align: center;
-}
-
-$default-font-family: 'Gill Sans', sans-serif;
-:global(.text-code) {
-  font-family: $code-font-family;
-}
-
 @font-face {
   font-family: 'Gill Sans';
   font-weight: 300;
