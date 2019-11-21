@@ -40,7 +40,6 @@ class Connection {
     constructor() {
         this.connections = {};
         this.requests = {};
-        this.actions = {};
 
         this.MessageSubject = new Subject();
         this.message$ = this.MessageSubject.asObservable();

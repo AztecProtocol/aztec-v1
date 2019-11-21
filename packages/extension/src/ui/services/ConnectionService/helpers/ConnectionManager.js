@@ -33,12 +33,11 @@ class ConnectionManager {
         this.clientId = randomId();
 
         const actionPromise = listenToInitialAction();
+        const portPromise = listenToConnectionApproval();
 
         window.parent.postMessage({
             type: uiReadyEvent,
         }, '*');
-
-        const portPromise = listenToConnectionApproval();
 
         window.parent.postMessage({
             type: connectionRequestEvent,
