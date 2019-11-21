@@ -3,7 +3,10 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import posed, { PoseGroup } from 'react-pose';
-import ThemeContext from '~ui/views/handlers/ThemeContext';
+import {
+    uiCloseEvent,
+} from '~/config/event';
+import ThemeContext from '~/ui/views/handlers/ThemeContext';
 import Loading from '~/ui/views/Loading';
 import Popup from '~/ui/components/Popup';
 import PoweredBy from '~/ui/components/PoweredBy';
@@ -28,9 +31,20 @@ const UiPlaceholder = ({
     const [renderOverlay, updateOverlay] = useState(initialVisibility);
     const [setListener, updateSetListener] = useState(initialVisibility);
     const [renderPopup, updatePopup] = useState(initialVisibility);
+    const [eventDetail, updateEventDetail] = useState(null);
+
+    const {
+        site,
+        requestId,
+        webClientId,
+    } = eventDetail || {};
 
     if (!setListener) {
-        window.addEventListener('openAztec', () => {
+        window.addEventListener('openAztec', (e) => {
+            const {
+                detail,
+            } = e;
+            updateEventDetail(detail);
             toggle(true);
             setTimeout(() => updateOverlay(true));
             setTimeout(() => updatePopup(true), 400);
@@ -42,6 +56,16 @@ const UiPlaceholder = ({
         });
         updateSetListener(true);
     }
+
+    const closeWindow = () => {
+        const event = new CustomEvent(uiCloseEvent, {
+            detail: {
+                requestId,
+                webClientId,
+            },
+        });
+        window.dispatchEvent(event);
+    };
 
     return (
         <div id="aztec-popup-container">
@@ -59,14 +83,17 @@ const UiPlaceholder = ({
                     ? 'aztec-popup shown'
                     : 'aztec-popup'}
             >
-                <div id="aztec-popup-ui">
-                    {children}
-                </div>
-                <div id="aztec-popup-placeholder">
-                    <Popup>
+                <Popup
+                    site={site}
+                    onClose={visible ? closeWindow : null}
+                >
+                    <div id="aztec-popup-placeholder">
                         <Loading />
-                    </Popup>
-                </div>
+                    </div>
+                    <div id="aztec-popup-ui">
+                        {children}
+                    </div>
+                </Popup>
                 <ThemeContext.Consumer>
                     {theme => (
                         <PoweredBy

@@ -1,11 +1,11 @@
 @import './variables';
 
-:global(#app) {
-  padding: $popup-page-spacing;
+:global(#aztec-popup-ui-app) {
   width: 100%;
   height: 100%;
   overflow: hidden;
   font-family: $default-font-family;
+  text-align: center;
 }
 
 $default-font-family: 'Gill Sans', sans-serif;

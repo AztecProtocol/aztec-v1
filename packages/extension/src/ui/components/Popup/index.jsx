@@ -18,6 +18,7 @@ const Popup = ({
     className,
     site,
     children,
+    onClose,
 }) => {
     const theme = useContext(ThemeContext);
 
@@ -39,6 +40,7 @@ const Popup = ({
                         <Header
                             theme={theme.name}
                             site={site}
+                            onClose={onClose}
                         />
                     </Block>
                 )}
@@ -63,12 +65,14 @@ Popup.propTypes = {
     className: PropTypes.string,
     site: siteShape,
     children: PropTypes.node,
+    onClose: PropTypes.func,
 };
 
 Popup.defaultProps = {
     className: '',
     site: null,
     children: null,
+    onClose: null,
 };
 
 export default Popup;

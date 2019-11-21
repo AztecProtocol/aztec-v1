@@ -111,6 +111,22 @@ class Connection {
                 const {
                     webClientId,
                 } = this.requests[requestId];
+                const {
+                    site,
+                } = action.data;
+                const siteData = {
+                    ...site,
+                    // find domain here so that we don't have to include
+                    // the entire 'psl' module to client or background-ui
+                    domain: getDomainFromUrl(site.url),
+                };
+
+                this.openUi({
+                    requestId,
+                    webClientId,
+                    site: siteData,
+                });
+
                 this.ClientResponseSubject.next({
                     type: uiOpenEvent,
                     requestId,
@@ -125,7 +141,6 @@ class Connection {
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';
                 this.uiFrame.open();
-                this.openUi();
             }), // we can extend this to automatically close the window after a timeout
         ).subscribe();
 
@@ -297,13 +312,36 @@ class Connection {
         });
     }
 
+    abortUi({
+        requestId,
+        webClientId,
+    }) {
+        this.closeUi();
+        this.ClientResponseSubject.next({
+            type: uiCloseEvent,
+            requestId,
+            webClientId,
+        });
+
+        this.ClientResponseSubject.next({
+            type: clientResponseEvent,
+            requestId,
+            webClientId,
+            data: permissionError('user.denied'),
+        });
+
+        this.removeRequest(requestId);
+    }
+
     closeUi = () => {
         const event = new CustomEvent('closeAztec');
         window.dispatchEvent(event);
     }
 
-    openUi = () => {
-        const event = new CustomEvent('openAztec');
+    openUi = (detail) => {
+        const event = new CustomEvent('openAztec', {
+            detail,
+        });
         window.dispatchEvent(event);
     }
 
