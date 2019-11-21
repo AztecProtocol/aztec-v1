@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 /* global web3 */
 const { getContractAddressesForNetwork, NetworkId: networkIDs } = require('@aztec/contract-addresses');
 const contractArtifacts = require('@aztec/contract-artifacts');
@@ -18,14 +19,15 @@ class Setup {
     constructor(contractsToDeploy, NETWORK) {
         this.NETWORK = NETWORK;
         this.contractsToDeploy = contractsToDeploy;
+        this.provider = web3.currentProvider;
 
-        if (NETWORK !== '1' || NETWORK !== '3' || NETWORK !== '4' || NETWORK !== '42') {
-            this.getLocalAddresses();
-            this.getLocalTruffleContracts();
-        } else {
+        const testNetworks = ['Ropsten', 'Rinkeby', 'Kovan'];
+
+        if (testNetworks.includes(NETWORK)) {
+            console.log('Configuring integration test for', NETWORK, 'network');
             this.networkId = networkIDs[NETWORK];
             this.getAddresses();
-            this.getTruffleContracts();
+            this.getContractPromises();
         }
     }
 
@@ -33,38 +35,36 @@ class Setup {
      * @method getAddresses() - get the addresses for the desired contracts to deploy
      */
     getAddresses() {
-        const allContractAddresses = getContractAddressesForNetwork(this.networkId);
-        this.contractAddresses = this.contractsToDeploy.map((desiredContract) => {
-            if (Object.keys(allContractAddresses).includes(desiredContract)) {
-                return allContractAddresses[desiredContract];
-            }
-        });
+        this.contractAddresses = getContractAddressesForNetwork(this.networkId);
+    }
+
+
+    /**
+     * @method getContractPromises - get the Truffle contracts for desired contracts, with the provider set
+     */
+    getContractPromises() {
+        this.contractPromises = this.contractsToDeploy.map((nameOfContract) => this.getContractPromise(nameOfContract));
     }
 
     /**
-     * @method getLocalAddresses() - get the addresses of locally deployed contracts
+     * @method getContractPromise - get an object whose key is the name of a contract, and the value is a function that
+     * returns the Truffle representation of the contract
+     * @param {string} nameOfContract
      */
-    getLocalAddresses() {
-        // const aceAddress = require('../../build/')
+    getContractPromise(nameOfContract) {
+        const contractObject = {};
+        contractObject[nameOfContract] = async () => {
+            const truffleRepresentation = this.getTruffleContractRepresentation(contractArtifacts[nameOfContract]);
+            return truffleRepresentation.at(this.contractAddresses[nameOfContract]);
+        };
+        return contractObject;
     }
 
-    /**
-     * @method getTruffleContracts() - get the Truffle artifacts for desired contracts, with the provider set
-     */
-    getTruffleContracts() {
-        this.contractInstances = this.contractsToDeploy.map((desiredContract) => {
-            return TruffleContract(contractArtifacts[desiredContract]);
-        });
-
-        // Set providers on contracts
-        const provider = web3.currentProvider;
-        Object.keys(this.contractInstances).forEach((contract) => this.contractInstances[contract].setProvider(provider));
+    getTruffleContractRepresentation(contractArtifact) {
+        const truffleRepresentation = TruffleContract({ abi: contractArtifact.abi, bytecode: contractArtifact.bytecode });
+        truffleRepresentation.setProvider(this.provider);
+        return truffleRepresentation;
     }
-
-    /**
-     * @method getLocalTruffleContracts - get the Truffle artifacts for desired locally deployed contracts
-     */
-    getLocalTruffleContracts() {}
 
     /**
      * @method getContracts() - get the JavaScript objects representing contracts deployed at a specific address, for use
@@ -72,18 +72,15 @@ class Setup {
      * @returns Object containing the desired contracts
      */
     async getContracts() {
-        this.contracts = await Promise.all(
-            Object.keys(this.contractInstances).map((contractInstance, index) => {
-                return this.contractInstances[contractInstance].at(this.contractAddresses[index]);
-            }),
-        );
-    }
+        const contractObject = this.contractPromises.reduce(async (previousPromiseAccumulator, currentContractPromise, currentIndex) => {
+            const accumulator = await previousPromiseAccumulator;
+            const deployedContract = await currentContractPromise[this.contractsToDeploy[currentIndex]]();
+            accumulator[this.contractsToDeploy[currentIndex]] = deployedContract;
+            return { ...accumulator };
+        }, {});
 
-    // {
-    //     "ACE": async function () {
-    //         return aceTruffleRepresentation.at()
-    //     }
-    // }
+        return contractObject;
+    }
 }
 
 module.exports = Setup;
