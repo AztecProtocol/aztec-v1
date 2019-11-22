@@ -17,8 +17,30 @@ contract Behaviour201911 is Behaviour201907 {
     uint256 public constant slowReleaseEnd = 1580515200;
     bool public isAvailableDuringSlowRelease = false;
 
+    modifier onlyIfAvailable() {
+        // Not sensitive to small differences in time
+        require(isAvailableDuringSlowRelease == true || slowReleaseEnd < block.timestamp,
+        "AZTEC is in burn-in period, and this asset is not available");
+        _;
+    }
+
     function makeAvailable() public onlyOwner {
         require(isAvailableDuringSlowRelease == false, "asset is already available");
         isAvailableDuringSlowRelease = true;
+    }
+
+    function updateNoteRegistry(
+        uint24 _proof,
+        bytes memory _proofOutput
+    ) public onlyOwner onlyIfAvailable returns (
+        address publicOwner,
+        uint256 transferValue,
+        int256 publicValue
+    ) {
+        (
+            publicOwner,
+            transferValue,
+            publicValue
+        ) = super.updateNoteRegistry(_proof, _proofOutput);
     }
 }

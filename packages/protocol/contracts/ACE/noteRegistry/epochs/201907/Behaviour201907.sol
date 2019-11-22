@@ -277,7 +277,5 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         require(storedNoteOwner == _noteOwner, "input note owner does not match");
     }
 
-    function makeAvailable() public onlyOwner {
-        revert("fn not implemented for behaviour version");
-    }
+    function makeAvailable() public {}
 }

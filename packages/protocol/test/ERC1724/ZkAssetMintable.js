@@ -1,4 +1,4 @@
-/* global artifacts, expect, contract, beforeEach, it:true */
+/* global web3, artifacts, expect, contract, beforeEach, it:true */
 const { JoinSplitProof, MintProof, note, signer } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
