@@ -41,6 +41,7 @@
   position: relative;
   overflow: hidden;
 }
+
 .header {
   box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -67,11 +68,11 @@ $radius: map-get($rounded-corner-map, 'm');
   }
 }
 
-$close-icon-size: map-get($avatar-sizes-map, 'xl');
+$close-icon-size: map-get($icon-size-map, 'l');
 $site-icon-size: map-get($avatar-sizes-map, 'm');
 
 .site {
-  width: calc(100% - #{$close-icon-size});
+  width: calc(100% - #{$close-icon-size + map-get($spacing-map, 's')});
 }
 
 .site-info {
@@ -83,3 +84,7 @@ $site-icon-size: map-get($avatar-sizes-map, 'm');
   height: $site-icon-size;
 }
 
+.close-button {
+  width: $close-icon-size;
+  height: $close-icon-size;
+}
