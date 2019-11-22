@@ -4,51 +4,12 @@ import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~uiModules/utils/asset';
-import apis from '~uiModules/apis';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import SendConfirm from '~ui/views/SendConfirm';
-import SignNotes from '~ui/views/SignNotes';
-import TransactionSend from '~ui/views/TransactionSend';
+import { sendSteps } from '~ui/config/steps';
+import {
+    gsnConfigShape,
+} from '~ui/config/propTypes';
 
-const steps = [
-    {
-        titleKey: 'send.confirm.title',
-        submitTextKey: 'send.confirm.submit',
-        content: SendConfirm,
-        tasks: [
-            {
-                name: 'proof',
-                run: apis.proof.transfer,
-            },
-        ],
-    },
-    {
-        titleKey: 'send.notes.title',
-        submitTextKey: 'send.notes.submit',
-        content: SignNotes,
-        tasks: [
-            {
-                type: 'sign',
-                name: 'approve',
-                run: apis.note.signNotes,
-            },
-        ],
-    },
-    {
-        titleKey: 'send.send.title',
-        submitTextKey: 'send.send.submit',
-        content: TransactionSend,
-        contentProps: {
-            descriptionKey: 'send.send.explain',
-        },
-        tasks: [
-            {
-                name: 'send',
-                run: apis.asset.confidentialTransfer,
-            },
-        ],
-    },
-];
 
 const Send = ({
     initialStep,
@@ -58,7 +19,12 @@ const Send = ({
     proof,
     numberOfInputNotes,
     numberOfOutputNotes,
+    gsnConfig,
 }) => {
+    const {
+        isGSNAvailable,
+    } = gsnConfig;
+    const steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
@@ -72,6 +38,7 @@ const Send = ({
             numberOfInputNotes,
             numberOfOutputNotes,
             totalAmount,
+            gsnConfig,
         };
     };
 
@@ -97,6 +64,7 @@ Send.propTypes = {
     }),
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
+    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Send.defaultProps = {

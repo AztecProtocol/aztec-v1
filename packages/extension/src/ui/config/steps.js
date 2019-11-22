@@ -1,4 +1,3 @@
-
 import RegisterIntro from '~ui/views/RegisterIntro';
 import BackupKeys from '~ui/views/BackupKeys';
 import CreatePassword from '~ui/views/CreatePassword';
@@ -9,7 +8,91 @@ import DepositApprove from '~ui/views/DepositApprove';
 import TransactionSend from '~ui/views/TransactionSend';
 import WithdrawConfirm from '~ui/views/WithdrawConfirm';
 import SignNotes from '~ui/views/SignNotes';
+import SendConfirm from '~ui/views/SendConfirm';
 import apis from '~uiModules/apis';
+
+export const sendSteps = {
+    gsn: [
+
+        {
+            titleKey: 'send.confirm.title',
+            submitTextKey: 'send.confirm.submit',
+            content: SendConfirm,
+            tasks: [
+                {
+                    name: 'proof',
+                    run: apis.proof.transfer,
+                },
+            ],
+        },
+        {
+            titleKey: 'send.notes.title',
+            submitTextKey: 'send.notes.submit',
+            content: SignNotes,
+            tasks: [
+                {
+                    type: 'sign',
+                    name: 'approve',
+                    run: apis.note.batchSignNotes,
+                },
+            ],
+        },
+        {
+            titleKey: 'send.send.title',
+            submitTextKey: 'send.send.submit',
+            content: TransactionSend,
+            contentProps: {
+                descriptionKey: 'send.send.explain',
+            },
+            tasks: [
+                {
+                    name: 'send',
+                    run: apis.asset.confidentialTransferFrom,
+                },
+            ],
+        },
+    ],
+    metamask: [
+        {
+            titleKey: 'send.confirm.title',
+            submitTextKey: 'send.confirm.submit',
+            content: SendConfirm,
+            tasks: [
+                {
+                    name: 'proof',
+                    run: apis.proof.transfer,
+                },
+            ],
+        },
+        {
+            titleKey: 'send.notes.title',
+            submitTextKey: 'send.notes.submit',
+            content: SignNotes,
+            tasks: [
+                {
+                    type: 'sign',
+                    name: 'approve',
+                    run: apis.note.signNotes,
+                },
+            ],
+        },
+        {
+            titleKey: 'send.send.title',
+            submitTextKey: 'send.send.submit',
+            content: TransactionSend,
+            contentProps: {
+                descriptionKey: 'send.send.explain',
+            },
+            tasks: [
+                {
+                    name: 'send',
+                    run: apis.asset.confidentialTransfer,
+                },
+            ],
+        },
+
+    ],
+};
 
 export const withdrawSteps = {
     gsn: [
@@ -69,7 +152,7 @@ export const withdrawSteps = {
                 {
                     type: 'sign',
                     name: 'approve',
-                    run: apis.note.signNotes,
+                    run: apis.note.batchSignNotes,
                 },
             ],
         },
