@@ -16,6 +16,7 @@
     "bn.js": "^4.11.8",
     "cross-fetch": "^3.0.2",
     "enumify": "^1.0.4",
+    "eth-sig-util": "^2.5.0",
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
     "web3-utils": "1.2.1"
@@ -34,7 +35,6 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-loader": "^3.0.0",
     "eslint-plugin-import": "^2.16.0",
-    "eth-sig-util": "^2.3.0",
     "jsdoc": "^3.5.5",
     "mocha": "^6.0.2",
     "nyc": "^14.1.1",
