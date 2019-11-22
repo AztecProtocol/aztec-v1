@@ -22,8 +22,8 @@ export default async function fetchAssets({
     }
 
     try {
-            .useContract(ACE.name)
         const data = await Web3Service
+            .useContract('ACE')
             .events(eventName)
             .where(options);
 
