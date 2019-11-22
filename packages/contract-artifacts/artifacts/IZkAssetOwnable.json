@@ -195,7 +195,7 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_proof",
+                    "name": "_proofId",
                     "type": "uint24"
                 },
                 {
@@ -273,6 +273,94 @@
             "type": "function"
         },
         {
+            "constant": true,
+            "inputs": [],
+            "name": "isOwner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "renounceOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_epoch",
+                    "type": "uint8"
+                },
+                {
+                    "name": "_proofs",
+                    "type": "uint256"
+                }
+            ],
+            "name": "setProofs",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "_proof",
+                    "type": "uint24"
+                }
+            ],
+            "name": "supportsProof",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": false,
             "inputs": [
                 {
@@ -285,6 +373,20 @@
                 }
             ],
             "name": "updateNoteMetaData",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_factoryId",
+                    "type": "uint24"
+                }
+            ],
+            "name": "upgradeRegistryVersion",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
