@@ -4,7 +4,7 @@ import {
     FlexBox,
     Block,
     Text,
-    Icon,
+    SVG,
     Image,
     Clickable,
 } from '@aztec/guacamole-ui';
@@ -12,6 +12,7 @@ import {
     siteShape,
 } from '~/ui/config/propTypes';
 import findOptimalIcon from '~/ui/utils/findOptimalIcon';
+import closeGlyph from '~/ui/images/close.svg';
 import styles from './popup.scss';
 
 const Header = ({
@@ -71,12 +72,14 @@ const Header = ({
             {!!onClose && (
                 <div className="flex-fixed">
                     <Clickable
+                        className={styles['close-button']}
                         onClick={onClose}
                     >
-                        <Icon
-                            name="close"
-                            size="xl"
-                            color="label"
+                        <SVG
+                            glyph={closeGlyph}
+                            color="grey"
+                            width="100%"
+                            height="100%"
                         />
                     </Clickable>
                 </div>
