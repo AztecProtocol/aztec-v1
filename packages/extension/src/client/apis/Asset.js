@@ -204,17 +204,23 @@ export default class Asset {
         sender = '',
         numberOfInputNotes,
         numberOfOutputNotes,
-    } = {}) => query({
-        type: 'constructProof',
-        args: {
-            proofType: 'TRANSFER_PROOF',
-            assetAddress: this.address,
-            transactions,
-            sender,
-            numberOfInputNotes,
-            numberOfOutputNotes,
-        },
-    });
+    } = {}) => {
+        const {
+            address,
+        } = Web3Service.account;
+
+        return query({
+            type: 'constructProof',
+            args: {
+                proofType: 'TRANSFER_PROOF',
+                assetAddress: this.address,
+                transactions,
+                sender: sender || address,
+                numberOfInputNotes,
+                numberOfOutputNotes,
+            },
+        });
+    };
 
     /**
      *

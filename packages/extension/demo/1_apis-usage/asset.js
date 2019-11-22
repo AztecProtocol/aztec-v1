@@ -113,15 +113,7 @@ async function approveAllowance() {
 async function deposit() {
   const depositInput = document.getElementById('deposit-value');
   const numberOfOutputNotes = parseInt(document.getElementById('deposit-output-number').value, 10);
-  const value = parseInt(depositInput.value);
-  if (!value) {
-    depositStatus.error('× Deposit value must be larger than 0');
-    return;
-  }
-  if (!numberOfOutputNotes) {
-    depositStatus.error('× Number of output notes must be more than 0');
-    return;
-  }
+  const value = parseInt(depositInput.value, 10);
 
   depositStatus.clear();
 
@@ -147,6 +139,7 @@ async function deposit() {
     refreshAssetBalances();
     depositInput.value = '';
   } catch (error) {
+    console.error(error);
     depositStatus.error(error.message);
   }
 }
@@ -155,14 +148,6 @@ async function withdraw() {
   const withdrawInput = document.getElementById('withdraw-value');
   const numberOfInputNotes = parseInt(document.getElementById('withdraw-input-number').value, 10);
   const value = parseInt(withdrawInput.value);
-  if (!value) {
-    withdrawStatus.error('× Withdraw value must be larger than 0');
-    return;
-  }
-  if (!numberOfInputNotes) {
-    withdrawStatus.error('× Number of input notes must be more than 0');
-    return;
-  }
 
   withdrawStatus.clear();
 
@@ -191,6 +176,7 @@ async function withdraw() {
     refreshAssetBalances();
     withdrawInput.value = '';
   } catch (error) {
+    console.error(error);
     withdrawStatus.error(error.message);
   }
 }
@@ -208,14 +194,6 @@ async function send() {
   const valueInput = document.getElementById('send-value');
   const address = addressInput.value.trim();
   const value = parseInt(valueInput.value.trim());
-  if (!address) {
-    sendStatus.error('Please enter an address');
-    return;
-  }
-  if (value <= 0) {
-    sendStatus.error('Value must be larger than 0');
-    return;
-  }
 
   sendStatus.clear();
 
@@ -236,8 +214,6 @@ async function send() {
         },
       ],
       {
-        from: account.address,
-        sender: account.address,
         numberOfInputNotes,
         numberOfOutputNotes,
       },
@@ -247,6 +223,7 @@ async function send() {
     addressInput.value = '';
     valueInput.value = '';
   } catch (error) {
+    console.error(error);
     sendStatus.error(error.message);
   }
 }
@@ -280,6 +257,7 @@ async function fetchNotesFromBalance() {
       numberOfNotes,
     });
   } catch (error) {
+    console.error(error);
     fetchStatus.error(error.message);
     return;
   }
