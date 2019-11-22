@@ -6240,7 +6240,7 @@ eth-sig-util@^1.4.2:
     ethereumjs-abi "git+https://github.com/ethereumjs/ethereumjs-abi.git"
     ethereumjs-util "^5.1.1"
 
-eth-sig-util@^2.3.0:
+eth-sig-util@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/eth-sig-util/-/eth-sig-util-2.5.0.tgz#1018cf8bef2fe275ecbd526cf3248757b0880053"
   integrity sha512-ahApxr+e1cls/GwcFSGsgRLrMqG6D6cBnK9CRHhx97O/s9ow+URIxbPvov8jfE70ZnNBdHMircoSCpi1b4QHjA==
@@ -16610,7 +16610,6 @@ websocket@1.0.29, websocket@^1.0.28:
   dependencies:
     debug "^2.2.0"
     es5-ext "^0.10.50"
-    gulp "^4.0.2"
     nan "^2.14.0"
     typedarray-to-buffer "^3.1.5"
     yaeti "^0.0.6"
