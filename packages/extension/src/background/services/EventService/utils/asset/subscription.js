@@ -1,7 +1,7 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
-} from '~config/contracts';
+} from '~config/contractEvents';
 import {
     errorLog,
 } from '~utils/log';
@@ -33,7 +33,7 @@ const converEvent = (event) => {
 const subscribe = async ({
     fromBlock,
 } = {}) => {
-    const eventName = ACE.events.сreateNoteRegistry;
+    const eventName = ACE.сreateNoteRegistry;
 
     const options = {
         fromBlock,
