@@ -285,10 +285,16 @@ class Web3Service {
             ? args.slice(0, args.length - 1)
             : args;
 
+
+        const estimatedGas = await method(...methodArgs).estimateGas({
+            from: address,
+            ...methodSetting,
+        });
+
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: fromAddress,
-                gas: 6500000,
+                gas: estimatedGas,
                 ...methodSetting,
             });
         }
@@ -305,7 +311,6 @@ class Web3Service {
                 gas: 6500000,
                 ...methodSetting,
             });
-            console.log({ estimatedGas });
             const tx = {
                 to: contractAddress,
                 data: encodedData,
@@ -339,7 +344,7 @@ class Web3Service {
             const options = {
                 from: fromAddress,
                 ...methodSetting,
-                gas: 6500000,
+                gas: estimatedGas,
             };
             const methodSend = method(...methodArgs).send(options);
             methodSend.once('transactionHash', (receipt) => {

@@ -5,7 +5,8 @@ export default async function getGsnConfig() {
     // TODO: check apiKey
     const isGSNAvailable = await Provider.isValidNetworkId(networkId);
 
-    const proxyContract = Web3Service.getAddress('AZTECAccountRegistry');
+    // const isGSNAvailable = false;
+    const proxyContract = getContract('AZTECAccountRegistryGSN', networkId).address;
 
     return {
         isGSNAvailable,

@@ -32,4 +32,11 @@ contract IZkAsset {
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public;
     
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public;
+
+    function batchConfidentialApprove(
+            bytes32[] calldata _noteHashes,
+            address _spender,
+            bool[] calldata _spenderApprovals,
+            bytes calldata _batchSignature
+        ) external;
 }
