@@ -1,7 +1,7 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     AZTECAccountRegistry,
-} from '~config/contracts';
+} from '~config/contractEvents';
 
 export default async function fetchAccount({
     address,
@@ -13,7 +13,7 @@ export default async function fetchAccount({
         };
     }
 
-    const eventName = AZTECAccountRegistry.events.registerExtension;
+    const eventName = AZTECAccountRegistry.registerExtension;
 
     const options = {
         filter: {

@@ -1,14 +1,14 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
-} from '~config/contracts';
+} from '~config/contractEvents';
 
 export default async function fetchAssets({
     fromBlock = 'earliest',
     toBlock = 'latest',
     assetAddress = null,
 } = {}) {
-    const eventName = ACE.events.сreateNoteRegistry;
+    const eventName = ACE.сreateNoteRegistry;
 
     const options = {
         fromBlock,
