@@ -6,6 +6,7 @@ export default async function transfer({
     transactions,
     numberOfInputNotes,
     numberOfOutputNotes,
+    gsnConfig,
 }) {
     return createNoteFromBalance({
         assetAddress,
@@ -13,5 +14,6 @@ export default async function transfer({
         transactions,
         numberOfInputNotes,
         numberOfOutputNotes,
+        gsnConfig,
     });
 }

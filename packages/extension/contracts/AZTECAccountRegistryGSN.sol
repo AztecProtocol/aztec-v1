@@ -31,18 +31,25 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
         ace = ACEModule.ACE(_ace);
     }
 
-    function confidentialTransferFrom(address _registryOwner, bytes memory _proofData) public {
-        (bytes memory proofOutputs) = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
-        IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
-    }
+    function confidentialTransferFrom(address _registryOwner, 
+                                      bytes memory _proofData, 
+                                      bytes32[] memory _noteHashes,
+                                      address _spender,
+                                      bool[] memory _spenderApprovals,
+                                      bytes memory _batchSignature
+                                     ) public {
+                                         if(_batchSignature.length != 0) {
+                                             IZkAsset(_registryOwner).batchConfidentialApprove(_noteHashes, _spender,_spenderApprovals, _batchSignature);
+                                         }
 
-    function confidentialTransfer(address _registryOwner, bytes memory _proofData, bytes memory _signatures) public {
-        IZkAsset(_registryOwner).confidentialTransfer(_proofData, _signatures);
-    }
+                                         (bytes memory proofOutputs) = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
+                                         IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
+                                     }
 
-    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
-        ace.publicApprove(_registryOwner, _proofHash, _value);
-    }
+
+                                     // function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
+                                     //     ace.publicApprove(_registryOwner, _proofHash, _value);
+                                     // }
 }
 
 

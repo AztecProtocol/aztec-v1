@@ -31,6 +31,9 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             "bool[] spenderApprovals",
         ")"
     ));
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
+
+    bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
 
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
@@ -182,14 +185,22 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         require(signatureLog[signatureHash] != true, "signature has already been used");
         signatureLog[signatureHash] = true;
 
-        bytes32 _hashStruct = keccak256(abi.encode(
-            MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
-            keccak256(abi.encode(_noteHashes)),
-            _spender,
-            keccak256(abi.encode(_spenderApprovals))
-        ));
 
-        bytes32 msgHash = hashEIP712Message(_hashStruct);
+        bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
+            EIP712_DOMAIN_TYPEHASH,
+            keccak256("ZK_ASSET"),
+            keccak256("1"),
+            address(this)
+        ));
+        bytes32 msgHash =  keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
+                keccak256(abi.encodePacked(_noteHashes)),
+                _spender,
+                keccak256(abi.encodePacked(_spenderApprovals))
+        ))));
         address signer = recoverSignature(
             msgHash,
             _batchSignature
