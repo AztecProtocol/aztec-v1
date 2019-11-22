@@ -24,8 +24,8 @@ export default async function fetchAccount({
     };
 
     try {
-            .useContract(AZTECAccountRegistry.name)
         const data = await Web3Service
+            .useContract('AZTECAccountRegistry')
             .events(eventName)
             .where(options);
 

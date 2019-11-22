@@ -39,8 +39,8 @@ const subscribe = async ({
         fromBlock,
     };
 
-        .useContract(ACE.name)
     const subscription = await Web3Service
+        .useContract('ACE')
         .events(eventName)
         .subscribe(options, (error) => {
             if (error) {
