@@ -85,10 +85,8 @@ const handleAction = async (action, params) => {
                 noteHashes,
                 sender,
             } = params;
-            console.log({ sender });
 
             const spenderApprovals = noteHashes.map(() => true);
-            console.log({ spenderApprovals });
 
             const noteSchema = batchSignNotes({
                 assetAddress,
@@ -96,14 +94,12 @@ const handleAction = async (action, params) => {
                 spenderApprovals,
                 spender: sender,
             });
-            console.log({ noteSchema });
             const method = 'eth_signTypedData_v4';
             const { result } = await Web3Service.sendAsync({
                 method,
                 params: [address, noteSchema],
                 from: address,
             });
-
 
             response = {
                 signature: result,

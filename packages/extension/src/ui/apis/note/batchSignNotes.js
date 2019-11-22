@@ -7,13 +7,12 @@ export default async function signNotes({
     requestId,
     gsnConfig,
 }) {
-    const noteHashes = inputNotes.map(({ noteHash }) => noteHash);
+    const noteHashes = inputNotes.map(({ noteHash }) => noteHash) || [];
     const {
         isGSNAvailable,
         proxyContract,
     } = gsnConfig;
     const actualSpender = isGSNAvailable ? proxyContract : sender;
-    console.log({ actualSpender, isGSNAvailable });
 
     const {
         signature,
@@ -26,9 +25,12 @@ export default async function signNotes({
             sender: actualSpender,
         },
     });
-    console.log({ signature });
+
 
     return {
+        noteHashes,
+        spender: actualSpender,
+        spenderApprovals: noteHashes.map(() => true),
         signature,
     };
 }
