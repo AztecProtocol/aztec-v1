@@ -84,4 +84,7 @@ export default {
     data: {
         graphql: 'Something went wrong fetching graphQL data',
     },
+    input: {
+        invalid: 'Invalid input.',
+    },
 };
