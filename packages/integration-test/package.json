@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "scripts/test.sh",
+    "lint": "yarn lint:js",
+    "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "test:ropsten": "truffle test ./test/keyFlows.js --network ropsten"
   },
   "repository": {

@@ -10,6 +10,14 @@ const compilerConfig = require('./compiler');
 
 // You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
 // Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
+
+const privateKeys = [
+    process.env.PRIVATE_KEY,
+    process.env.PRIVATE_KEY_2,
+];
+const addressIndexToManage = 0;
+const numAddresses = 2;
+
 function createProvider(network) {
     if (process.env.CI && process.env.CIRCLE_JOB !== 'artifacts') {
         return {};
@@ -24,8 +32,10 @@ function createProvider(network) {
     }
     return () => {
         return new HDWalletProvider(
-            process.env.PRIVATE_KEY || process.env.MNEMONIC,
+            privateKeys || process.env.MNEMONIC,
             `https://${network}.infura.io/v3/` + process.env.INFURA_API_KEY,
+            addressIndexToManage,
+            numAddresses,
         );
     };
 }
