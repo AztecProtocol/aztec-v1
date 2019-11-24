@@ -69,7 +69,7 @@ describe('ZkAsset with GSN', () => {
             console.error(error);
         }
 
-        console.log(response.data);
+        // console.log(response.data);
 
         return response.data.data.dataSignature;
     };
