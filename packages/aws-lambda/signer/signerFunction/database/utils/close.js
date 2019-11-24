@@ -1,4 +1,6 @@
-const sequelize = require('./helpers/connection');
+const {
+    connection,
+} = require('../helpers');
 const {
     log,
     errorLog,
@@ -6,7 +8,7 @@ const {
 
 module.exports = async () => {
     try {
-        await sequelize.close()
+        await connection.getConnection().close()
         log('Connection has been closed successfully.');
         return true;
     } catch (e) {

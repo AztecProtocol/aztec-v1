@@ -1,10 +1,12 @@
 const {
-    Transaction,
+    types: {
+        Transactions,
+    },
 } = require('../../database/models');
 
 
 module.exports = async ({
     dappId,
 }) => {
-    return Transaction.sum('value', { where: { dappId } });
+    return Transactions.sum('value', { where: { dappId } });
 };

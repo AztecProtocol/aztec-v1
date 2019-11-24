@@ -18,7 +18,8 @@ import "./AZTECAccountRegistry.sol";
  **/
 contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
-    address aceAddress;
+    event GSNTransactionProcessed();
+
     ACEModule.ACE ace;
     uint24 public constant JOIN_SPLIT_PROOF = 65793;
     using NoteUtils for bytes;
@@ -42,6 +43,11 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         ace.publicApprove(_registryOwner, _proofHash, _value);
+    }
+
+    function testFunction(bytes memory _proofData) public {
+        emit GSNTransactionProcessed();
+        require(1 == 4, "some error");
     }
 }
 
