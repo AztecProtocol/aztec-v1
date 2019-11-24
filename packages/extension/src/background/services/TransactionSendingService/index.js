@@ -22,9 +22,10 @@ const sendTransaction = async (data) => {
     });
 
     try {
+        const useGSN = true;
         const receipt = await web3Service
             .useContract(contract)
-            .method(method, true)
+            .method(method, useGSN)
             .send(...params);
         return {
             ...data,

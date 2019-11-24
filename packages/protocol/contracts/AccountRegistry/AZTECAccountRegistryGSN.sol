@@ -20,6 +20,8 @@ import "../ACE/ACE.sol" as ACEModule;
 
 contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
+    event GSNTransactionProcessed();
+
     ACEModule.ACE ace;
 
     using NoteUtils for bytes;
@@ -43,6 +45,11 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         ace.publicApprove(_registryOwner, _proofHash, _value);
+    }
+
+    function testFunction(bytes memory _proofData) public {
+        emit GSNTransactionProcessed();
+        require(1 == 4, "some error");
     }
 }
 
