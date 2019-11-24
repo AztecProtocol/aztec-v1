@@ -1,5 +1,7 @@
 const {
-    Dapp,
+    types: {
+        Dapps,
+    },
 } = require('../../database/models');
 const {
     log,
@@ -17,7 +19,7 @@ module.exports = async ({
     }
 
     try {
-        const data = await Dapp.findOne({ where: {
+        const data = await Dapps.findOne({ where: {
             apiKey,
         } });
 

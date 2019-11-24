@@ -4,10 +4,12 @@ const {
     Model,
 } = Sequelize;
 
-class Dapp extends Model {}
-class Transaction extends Model {}
+class Dapps extends Model {}
+class Transactions extends Model {}
+class TransactionEthEvent extends Model {}
 
 module.exports = {
-    Dapp,
-    Transaction,
+    Dapps,
+    Transactions,
+    TransactionEthEvent,
 };

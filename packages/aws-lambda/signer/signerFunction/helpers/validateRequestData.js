@@ -3,13 +3,11 @@ const {
 } = require('../utils/data');
 const {
     isAPIKeyValid,
-    countFreeTransactions,
+    balance,
 } = require('../utils/dapp');
 const {
-    OK_200,
     BAD_400,
     ACCESS_DENIED_401,
-    ACCESS_NOT_FOUND_404,
 } = require('./responses');
 const isTrue = require('./isTrue');
 
@@ -40,8 +38,8 @@ module.exports = async ({
         return ACCESS_DENIED_401();
     }
 
-    const freeTransactions = await countFreeTransactions(apiKey);
-    if (freeTransactions === 0) {
+    const countFreeTransactions = await balance(apiKey);
+    if (countFreeTransactions <= 0) {
         return ACCESS_DENIED_401({
             title: "Not enought free trnsaction, please contact to the dapp's support",
         });

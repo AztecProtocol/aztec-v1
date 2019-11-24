@@ -1,24 +1,72 @@
 const Sequelize = require('sequelize');
-
-const sequelize = new Sequelize('database', 'username', 'password', {
-    host: 'localhost',
-    dialect: 'postgres',
-});
-
-console.error(`TODO: pass db connection to process.env`);
-
-module.exports = sequelize;
+const {
+    getConfig,
+} = require('../config');
 
 
+class Connection {
+    constructor() {
+        this.networkId = null;
+        this.sequelize = null;
+    }
 
-// // eslint-disable-next-line import/no-unresolved
-// const AWS = require('aws-sdk');
-// const {
-//     AWS_REGION,
-// } = require('../../../config/constants');
+    init({
+        networkId,
+    }) {
+        const {
+            username,
+            password,
+            database,
+            host,
+            port,
+            dialect,
+        } = getConfig({
+            networkId,
+        });
 
-// AWS.config.update({
-//     region: AWS_REGION,
-// });
+        this.sequelize = new Sequelize(
+            database,
+            username,
+            password,
+            {
+                host,
+                port,
+                dialect,
+            },
+        );
+    }
 
-// module.exports = new AWS.DynamoDB.DocumentClient();
+    getConnection() {
+        if (!this.sequelize) {
+            throw new Error(`DB connection error for networkId: ${this.networkId}`);
+        }
+        return this.sequelize;
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    getDefaultConnection() {
+        const {
+            username,
+            password,
+            database,
+            host,
+            port,
+            dialect,
+        } = getConfig({
+            database: 'postgres',
+        });
+
+        return new Sequelize(
+            database,
+            username,
+            password,
+            {
+                host,
+                port,
+                dialect,
+            },
+        );
+    }
+}
+
+module.exports = new Connection();

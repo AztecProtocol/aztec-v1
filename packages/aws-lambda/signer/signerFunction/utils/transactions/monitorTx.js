@@ -1,7 +1,9 @@
 const {
-    Transaction,
+    types: {
+        Transactions,
+    },
 } = require('../../database/models');
-const calculateTransactionId = require('../../services/DBClient/helpers/calculateTransactionId');
+const signatureHash = require('../signatureHash');
 const {
     TRANSACTION_STATUS,
     TRANSACTION_TYPE,
@@ -12,19 +14,21 @@ module.exports = async ({
     dappId,
     signature,
     from,
+    nonce,
 }) => {
-    const signatureHash = calculateTransactionId(signature);
+    const hash = signatureHash(signature);
     const status = TRANSACTION_STATUS.PENDING;
     const type = TRANSACTION_TYPE.SPENDING;
     const value = -1;
 
-    const tx = await Transaction.create({
-        signatureHash,
+    const tx = await Transactions.create({
+        signatureHash: hash,
         dappId,
         from,
         status,
         type,
         value,
+        nonce,
     });
 
     return tx;
