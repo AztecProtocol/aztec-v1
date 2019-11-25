@@ -8,11 +8,14 @@ const { toWei, toHex } = require('web3-utils');
 
 const compilerConfig = require('./compiler');
 
-// You must specify a MNEMONIC and INFURA_API_KEY in your .env file
-
 const addressIndexToManage = 1;
 const numAddresses = 2;
 
+let rinkebyProvider = {};
+let mainnetProvider = {};
+let ropstenProvider = {};
+
+// You must specify a MNEMONIC and INFURA_API_KEY in your .env file
 function createProvider(network) {
     if (process.env.CI && process.env.CIRCLE_JOB !== 'artifacts') {
         return {};
@@ -35,9 +38,9 @@ function createProvider(network) {
     };
 }
 
-const rinkebyProvider = createProvider('rinkeby');
-const mainnetProvider = createProvider('mainnet');
-const ropstenProvider = createProvider('ropsten');
+rinkebyProvider = createProvider('rinkeby');
+mainnetProvider = createProvider('mainnet');
+ropstenProvider = createProvider('ropsten');
 
 const engine = new ProviderEngine();
 
@@ -79,36 +82,28 @@ module.exports = {
     },
     networks: {
         development: {
-            provider: function () {
-                return engine
-            },
+            provider: engine,
             gas: 6500000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,
         },
         mainnet: {
-            provider: function () {
-                return mainnetProvider()
-            },
+            provider: mainnetProvider,
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
             skipDryRun: true,
         },
         rinkeby: {
-            provider: function () {
-                return rinkebyProvider()
-            },
+            provider: rinkebyProvider,
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
             skipDryRun: true,
         },
         ropsten: {
-            provider: function () {
-                return ropstenProvider()
-            },
+            provider: ropstenProvider,
             gas: 6000000,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
