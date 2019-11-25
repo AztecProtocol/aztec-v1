@@ -42,17 +42,7 @@ async function refreshBalance() {
 }
 
 async function refreshAllowance() {
-  const account = window.aztec.web3.account();
-  const erc20Address = asset.linkedTokenAddress;
-  const aceAddress = window.aztec.web3.getAddress('ACE');
-  const allowance = await window.aztec.web3
-    .useContract('ERC20')
-    .at(erc20Address)
-    .method('allowance')
-    .call(
-        account.address,
-        aceAddress,
-    );
+  const allowance = await asset.allowanceOfLinkedToken();
   document.getElementById('erc20-allowance').innerHTML = `${allowance}`;
 }
 
