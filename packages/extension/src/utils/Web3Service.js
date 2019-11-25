@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import cloneDeep from 'lodash/cloneDeep';
 import {
     log,
     warnLog,
@@ -187,9 +188,9 @@ class Web3Service {
         return address;
     }
 
-    deployed(contractName, contractAddress = '', useGSN = false) {
+    deployed(contractName, contractAddress = '') {
         let contract;
-        if (!contractAddress && !useGSN) {
+        if (!contractAddress) {
             contract = this.contracts[contractName];
         } else if (this.abis[contractName]) {
             contract = new this.web3.eth.Contract(
@@ -204,12 +205,7 @@ class Web3Service {
         if (!contract) {
             log(`'${contractName}' is not registered as a contract.`);
         }
-        if (useGSN && !this.gsnConfig) {
-            log('Cannot use gsn as "this.gsnConfig" was not set');
-        }
-        if (useGSN && contract) {
-            contract.setProvider(this.gsnConfig.gsnProvider);
-        }
+
         return contract;
     }
 
@@ -276,9 +272,8 @@ class Web3Service {
         });
     }
 
-    triggerMethod = async (type, method, contractAddress, ...args) => {
+    triggerMethod = async (type, method, contractAddress, fromAddress, ...args) => {
         const {
-            address,
             privateKey,
         } = this.account || {};
         const methodSetting = (args.length
@@ -292,7 +287,7 @@ class Web3Service {
 
         if (type === 'call') {
             return method(...methodArgs).call({
-                from: address,
+                from: fromAddress,
                 gas: 6500000,
                 ...methodSetting,
             });
@@ -306,7 +301,7 @@ class Web3Service {
 
             const encodedData = method(...methodArgs).encodeABI();
             const estimatedGas = await method(...methodArgs).estimateGas({
-                from: address,
+                from: fromAddress,
                 gas: 6500000,
                 ...methodSetting,
             });
@@ -340,16 +335,11 @@ class Web3Service {
             });
         }
 
-        let fromAddress = address;
-        if (type === 'sendWithGSN') {
-            fromAddress = this.gsnConfig.signingInfo.address;
-        }
-
         return new Promise(async (resolve, reject) => {
             const options = {
                 from: fromAddress,
                 ...methodSetting,
-                // gas: 6500000,
+                gas: 6500000,
             };
             const methodSend = method(...methodArgs).send(options);
             methodSend.once('transactionHash', (receipt) => {
@@ -379,8 +369,8 @@ class Web3Service {
 
     useContract(contractName, contractAddress = null) {
         return {
-            method: (methodName, useGSN = false) => {
-                const contract = this.deployed(contractName, contractAddress, useGSN);
+            method: (methodName) => {
+                const contract = this.deployed(contractName, contractAddress);
                 if (!contract) {
                     throw new Error(`Cannot call method '${methodName}' of undefined.`);
                 }
@@ -391,10 +381,24 @@ class Web3Service {
                 }
 
                 const address = contractAddress || contract.address;
+                let {
+                    address: userAddress,
+                } = this.account;
                 return {
-                    call: async (...args) => this.triggerMethod('call', method, null, ...args),
-                    send: async (...args) => this.triggerMethod(useGSN ? 'sendWithGSN' : 'send', method, null, ...args),
-                    sendSigned: async (...args) => this.triggerMethod('sendSigned', method, address, ...args),
+                    call: async (...args) => this.triggerMethod('call', method, null, userAddress, ...args),
+                    send: async (...args) => this.triggerMethod('send', method, null, userAddress, ...args),
+                    sendSigned: async (...args) => this.triggerMethod('sendSigned', method, address, userAddress, ...args),
+                    useGSN: async (gsnConfig) => {
+                        if (!gsnConfig) {
+                            log('Cannot use gsn as "this.gsnConfig" was not set');
+                        }
+                        const gsnContract = cloneDeep(contract);
+                        gsnContract.setProvider(gsnConfig.gsnProvider);
+                        userAddress = gsnConfig.signingInfo.address;
+                        return {
+                            send: this.triggerMethod('send', gsnContract.methods[methodName], address, userAddress, gsnConfig),
+                        };
+                    },
                 };
             },
             events: (eventName) => {
