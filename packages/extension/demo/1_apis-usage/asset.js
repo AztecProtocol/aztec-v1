@@ -145,12 +145,6 @@ async function withdraw() {
 
   withdrawStatus.clear();
 
-  const balance = await asset.balance();
-  if (balance < value) {
-    withdrawStatus.error(`× Asset balance (${balance}) is not enough to make a withdraw of ${value}.`);
-    return;
-  }
-
   const account = window.aztec.web3.account();
   const transactions = [
     {
@@ -190,12 +184,6 @@ async function send() {
   const value = parseInt(valueInput.value.trim());
 
   sendStatus.clear();
-
-  const balance = await asset.balance();
-  if (balance < value) {
-    sendStatus.error(`Asset balance (${balance}) is not enough.`);
-    return;
-  }
 
   const account = window.aztec.web3.account();
 

@@ -1,12 +1,8 @@
-import {
-    argsError,
-} from '~utils/error';
-import generateSortedValues from './generateSortedValues';
+import validate from './validate';
 import getStartIndex from './getStartIndex';
 import pickValues from './pickValues';
 import pickKeysByValues from './pickKeysByValues';
-
-const arraySum = arr => arr.reduce((sum, v) => sum + v, 0);
+import arraySum from './arraySum';
 
 export default function pickNotes({
     noteValues,
@@ -18,22 +14,14 @@ export default function pickNotes({
         return [];
     }
 
-    const sortedValues = generateSortedValues(noteValues);
-    const maxSet = sortedValues.slice(-count);
-    const maxSum = arraySum(maxSet);
-    if (minSum > maxSum) {
-        throw argsError('note.pick.minSum', {
-            count,
-            value: minSum,
-        });
-    }
+    const sortedValues = validate({
+        noteValues,
+        minSum,
+        numberOfNotes: count,
+        allowLessNumberOfNotes,
+    });
 
     if (sortedValues.length < count) {
-        if (!allowLessNumberOfNotes) {
-            throw argsError('note.pick.count', {
-                count,
-            });
-        }
         const notes = [];
         sortedValues.forEach((value) => {
             noteValues[value].forEach((key) => {
