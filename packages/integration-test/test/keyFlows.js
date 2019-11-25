@@ -14,7 +14,6 @@ const bn128 = require('@aztec/bn128');
 const { TestFactory } = require('@aztec/contract-artifacts');
 
 const {
-    constants: { ERC20_SCALING_FACTOR },
     proofs: { BURN_PROOF, DIVIDEND_PROOF, JOIN_SPLIT_PROOF, SWAP_PROOF, MINT_PROOF, PRIVATE_RANGE_PROOF, PUBLIC_RANGE_PROOF },
 } = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -22,8 +21,7 @@ const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { getNotesForAccount, generateFactoryId } = require('../src/utils');
 const Setup = require('../src/setup');
-const { NUM_TEST_TOKENS } = require('../src/config');
-
+const config = require('../src/config');
 
 contract.only('AZTEC integration', (accounts) => {
     // let upgradeFactoryId;
@@ -42,29 +40,14 @@ contract.only('AZTEC integration', (accounts) => {
     let firstMintCounterValue;
     let firstMintCounterNote;
 
-    const scalingFactor = ERC20_SCALING_FACTOR;
-
-    // Note: there are two funded accounts:
-    // accounts[0]: 0x72FCb708B5cD17ead637A54E0A23AF7779f4a5E9
-    // accounts[1]: 
-    const publicOwner = accounts[0];
-    const sender = accounts[0];
-    const opts = { from: sender };
+    let publicOwner;
+    let sender;
+    let opts;
+    let delegatedAddress;
+    let setup;
 
     before(async () => {
-        const NETWORK = 'Ropsten';
-        const contractsToDeploy = [
-            'ACE',
-            'Dividend',
-            'ERC20Mintable',
-            'JoinSplit',
-            'JoinSplitFluid',
-            'PrivateRange',
-            'PublicRange',
-            'Swap',
-            'ZkAssetAdjustable',
-        ];
-        const setup = new Setup(contractsToDeploy, NETWORK);
+        setup = new Setup(config, accounts);
 
         ({
             ACE: ace,
@@ -78,19 +61,15 @@ contract.only('AZTEC integration', (accounts) => {
             ZkAssetAdjustable: zkAsset,
         } = await setup.getContracts());
 
+        ({ sender, publicOwner, delegatedAddress, opts } = setup.getTransactionTestingAddresses());
+
+        await setup.fundPublicOwnerAccount(config.scalingFactor);
+
         aztecAccount = secp256k1.generateAccount();
+
         // upgradeFactoryId = generateFactoryId(2, 1, 3);
         // upgradeFactoryContract = await TestFactory.new(ace.address);
         // await ace.setFactory(upgradeFactoryId, upgradeFactoryContract.address, { from: accounts[0] });
-
-
-        // Fund account with ERC20s, if running low
-        const publicOwnerBalance = await erc20.balanceOf(publicOwner);
-        if (publicOwnerBalance < NUM_TEST_TOKENS.mul(scalingFactor)) {
-            const tokensTransferred = new BN(500);
-            await erc20.mint(publicOwner, scalingFactor.mul(tokensTransferred), opts);
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
-        }
     });
 
     describe('Initialisation', async () => {
@@ -133,7 +112,7 @@ contract.only('AZTEC integration', (accounts) => {
         });
     });
 
-    describe('Key flows', async () => {
+    describe('Proof verificaton', async () => {
         it('should verify a dividend proof', async () => {
             const za = 100;
             const zb = 5;
@@ -198,22 +177,18 @@ contract.only('AZTEC integration', (accounts) => {
             const maker = secp256k1.generateAccount();
             const taker = secp256k1.generateAccount();
 
-            const inputNotes = [
-                await note.create(maker.publicKey, bids[0]),
-                await note.create(taker.publicKey, bids[1]),
-            ];
+            const inputNotes = [await note.create(maker.publicKey, bids[0]), await note.create(taker.publicKey, bids[1])];
 
-            const outputNotes = [
-                await note.create(maker.publicKey, asks[0]),
-                await note.create(taker.publicKey, asks[1]),
-            ];
+            const outputNotes = [await note.create(maker.publicKey, asks[0]), await note.create(taker.publicKey, asks[1])];
 
             const proof = new SwapProof(inputNotes, outputNotes, sender);
             const data = proof.encodeABI();
             const { receipt } = await ace.validateProof(SWAP_PROOF, sender, data, opts);
             expect(receipt.status).to.equal(true);
         });
+    });
 
+    describe('Deposit and withdraw proofs', async () => {
         it('should perform a confidentialTransfer(), with a deposit proof', async () => {
             // Convert 100 tokens into two output notes
             const depositInputNotes = [];
@@ -228,7 +203,7 @@ contract.only('AZTEC integration', (accounts) => {
 
             const balancePreTransfer = await erc20.balanceOf(publicOwner);
             const transferAmountBN = new BN(depositPublicValue);
-            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(scalingFactor));
+            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(config.scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: publicOwner });
 
@@ -263,7 +238,7 @@ contract.only('AZTEC integration', (accounts) => {
             const withdrawPublicValue = 100;
 
             const withdrawAmountBN = new BN(withdrawPublicValue);
-            const expectedBalancePostWithdraw = balancePostDeposit.add(withdrawAmountBN.mul(scalingFactor));
+            const expectedBalancePostWithdraw = balancePostDeposit.add(withdrawAmountBN.mul(config.scalingFactor));
 
             const withdrawProof = new JoinSplitProof(
                 withdrawInputNotes,
@@ -280,12 +255,21 @@ contract.only('AZTEC integration', (accounts) => {
             const balancePostWithdraw = await erc20.balanceOf(publicOwner, opts);
             expect(balancePostWithdraw.toString()).to.equal(expectedBalancePostWithdraw.toString());
         });
+    });
+
+    describe('Adjust supply', async () => {
+        before(function checkIfConfigured() {
+            if (!setup.runAdjustSupplyTests) {
+                console.log('Adjust supply tests not configured');
+                this.skip();
+            } else {
+                console.log('Adjust supply tests configured');
+            }
+        });
 
         it('should perform a mint operation', async () => {
             // Mint 3 AZTEC notes, worth a total of 300 tokens
-            firstMintCounterValue = 50;
             const mintedNoteValues = [20, 30];
-
             const zeroMintCounterNote = await note.createZeroValueNote();
             firstMintCounterNote = await note.create(aztecAccount.publicKey, firstMintCounterValue);
             const mintedNotes = await getNotesForAccount(aztecAccount, mintedNoteValues);
@@ -321,11 +305,11 @@ contract.only('AZTEC integration', (accounts) => {
             const { receipt: burnReceipt } = await zkAsset.confidentialBurn(BURN_PROOF, burnData, opts);
             expect(burnReceipt.status).to.equal(true);
         });
+    });
 
+    describe('Delegate note control', async () => {
         it('should delegate note spending control using a confidentialApprove() and allow a confidentialTransferFrom()', async () => {
             // Call confidentialApprove() on two notes to approve the zkAsset to spend on user's behalf
-            const delegatedAddress = accounts[1];
-
             const depositInputNotes = [];
             const depositOutputNotes = await getNotesForAccount(aztecAccount, [50, 10]);
             const depositPublicValue = -60;
@@ -384,13 +368,13 @@ contract.only('AZTEC integration', (accounts) => {
             });
             expect(receipt.status).to.equal(true);
         });
+    });
 
+    describe('Upgradeability', async () => {
         // it.skip('should perform a note registry upgrade', async () => {
         //     const zkAssetOwner = await zkAsset.owner();
-
         //     await zkAsset.upgradeRegistryVersion(upgradeFactoryId, { from: zkAssetOwner });
         //     const topic = web3.utils.keccak256('UpgradeNoteRegistry(address,address,address)');
-
         //     const logs = await new Promise((resolve) => {
         //         web3.eth
         //             .getPastLogs({

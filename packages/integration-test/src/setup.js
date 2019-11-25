@@ -2,7 +2,13 @@
 /* global web3 */
 const { getContractAddressesForNetwork, NetworkId: networkIDs } = require('@aztec/contract-addresses');
 const contractArtifacts = require('@aztec/contract-artifacts');
+const {
+    errors: { codes, AztecError },
+} = require('@aztec/dev-utils');
+const BN = require('bn.js');
 const TruffleContract = require('@truffle/contract');
+
+const { capitaliseFirstChar } = require('./utils');
 
 class Setup {
     /**
@@ -16,18 +22,28 @@ class Setup {
      *                           If deploying and testing locally, this will typically be a
      *                           large number.
      */
-    constructor(contractsToDeploy, NETWORK) {
-        this.NETWORK = NETWORK;
-        this.contractsToDeploy = contractsToDeploy;
+    constructor(config, accounts) {
+        this.NETWORK = config.NETWORK;
+        this.contractsToDeploy = config.contractsToDeploy;
         this.provider = web3.currentProvider;
+        this.accounts = accounts;
+        this.config = config;
+        this.runAdjustSupplyTests = config.runAdjustSupplyTests;
 
-        const testNetworks = ['Ropsten', 'Rinkeby', 'Kovan'];
+        const testNetworks = ['ropsten', 'rinkeby', 'kovan'];
 
-        if (testNetworks.includes(NETWORK)) {
-            console.log('Configuring integration test for', NETWORK, 'network');
-            this.networkId = networkIDs[NETWORK];
+        if (testNetworks.includes(this.NETWORK)) {
+            console.log('Configuring integration test for', this.NETWORK, 'network');
+            this.networkId = networkIDs[capitaliseFirstChar(this.NETWORK)];
             this.getAddresses();
             this.getContractPromises();
+
+            this.getTransactionTestingAddresses();
+        } else {
+            throw new AztecError(codes.UNSUPPORTED_NETWORK, {
+                message: 'Network not recognised, please input: `ropsten`, `rinkeby` or `kovan`',
+                inputNetwork: this.NETWORK,
+            });
         }
     }
 
@@ -37,7 +53,6 @@ class Setup {
     getAddresses() {
         this.contractAddresses = getContractAddressesForNetwork(this.networkId);
     }
-
 
     /**
      * @method getContractPromises - get the Truffle contracts for desired contracts, with the provider set
@@ -67,19 +82,57 @@ class Setup {
     }
 
     /**
-     * @method getContracts() - get the JavaScript objects representing contracts deployed at a specific address, for use
+     * @method getContracts - get the JavaScript objects representing contracts deployed at a specific address, for use
      * in testing
-     * @returns Object containing the desired contracts
+     * @returns {Object} Truffle contracts, representing the contract deployed at a specific address
      */
     async getContracts() {
-        const contractObject = this.contractPromises.reduce(async (previousPromiseAccumulator, currentContractPromise, currentIndex) => {
-            const accumulator = await previousPromiseAccumulator;
-            const deployedContract = await currentContractPromise[this.contractsToDeploy[currentIndex]]();
-            accumulator[this.contractsToDeploy[currentIndex]] = deployedContract;
-            return { ...accumulator };
-        }, {});
+        const contractObject = this.contractPromises.reduce(
+            async (previousPromiseAccumulator, currentContractPromise, currentIndex) => {
+                const accumulator = await previousPromiseAccumulator;
+                const deployedContract = await currentContractPromise[this.contractsToDeploy[currentIndex]]();
+                accumulator[this.contractsToDeploy[currentIndex]] = deployedContract;
+                return { ...accumulator };
+            },
+            {},
+        );
 
+        this.contractObject = contractObject;
         return contractObject;
+    }
+
+    /**
+     * @method getTransactionTestingAddresses - get the Ethereum addresses representing key transaction addresses in tests,
+     * such as sender, publicOwner and delegatedAddress
+     *
+     * @returns {Object} sender, publicOwner, delegatedAddress, opts variables
+     */
+    getTransactionTestingAddresses() {
+        const [sender, delegatedAddress] = this.accounts;
+        const publicOwner = sender;
+        const opts = { from: sender };
+        this.publicOwner = publicOwner;
+        this.opts = opts;
+
+        return { sender, publicOwner, delegatedAddress, opts };
+    }
+
+    /**
+     * @method fundPublicOwnerAccount - fund the publicOwner account with ERC20 tokens if required
+     *
+     * @param scalingFactor - factor to convert between AZTEC note value and ERC20 token value
+     *
+     */
+    async fundPublicOwnerAccount(scalingFactor) {
+        const { ACE: ace, ERC20Mintable: erc20 } = await this.contractObject;
+
+        const publicOwnerBalance = await erc20.balanceOf(this.publicOwner);
+        if (publicOwnerBalance < this.config.numTestTokens.mul(scalingFactor)) {
+            console.log('inside if statement');
+            const tokensTransferred = new BN(this.config.numTestTokens);
+            await erc20.mint(this.publicOwner, scalingFactor.mul(tokensTransferred), this.opts);
+            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), this.opts);
+        }
     }
 }
 
