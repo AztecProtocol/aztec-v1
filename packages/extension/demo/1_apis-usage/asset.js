@@ -117,12 +117,6 @@ async function deposit() {
 
   depositStatus.clear();
 
-  const erc20Balance = await asset.balanceOfLinkedToken();
-  if (erc20Balance < value) {
-    depositStatus.error(`ERC20 balance (${erc20Balance}) is not enough to make a deposit of ${value}.`);
-    return;
-  }
-
   const account = window.aztec.web3.account();
   try {
     await asset.deposit(

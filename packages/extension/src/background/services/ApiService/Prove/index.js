@@ -2,10 +2,8 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~utils/filterStream';
-import {
-    argsError,
-} from '~/utils/error';
 import validateParameters from './validateParameters';
+import validateRequest from './validateRequest';
 import fetchNotesFromBalance from './fetchNotesFromBalance';
 
 const proofUi = async (query, connection) => {
@@ -51,13 +49,19 @@ const triggerProofUi = async (query, connection) => {
         },
     } = query;
 
-    const invalidParams = validateParameters(proofType, data);
-    if (invalidParams) {
+    const invalidParamsResp = validateParameters(proofType, data);
+    if (invalidParamsResp) {
         return {
             ...query,
-            data: argsError('input.invalid', {
-                messages: invalidParams,
-            }),
+            data: invalidParamsResp,
+        };
+    }
+
+    const invalidRequestResp = await validateRequest(proofType, data);
+    if (invalidRequestResp) {
+        return {
+            ...query,
+            data: invalidRequestResp,
         };
     }
 
