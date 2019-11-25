@@ -11,10 +11,7 @@ const compilerConfig = require('./compiler');
 // You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
 // Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
 
-const privateKeys = [
-    process.env.PRIVATE_KEY,
-    process.env.PRIVATE_KEY_2,
-];
+const privateKeys = [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY_2];
 const addressIndexToManage = 0;
 const numAddresses = 2;
 
