@@ -1,6 +1,9 @@
 import {
     warnLog,
 } from '~/utils/log';
+import {
+    argsError,
+} from '~/utils/error';
 import * as schemas from './schemas';
 
 const formatError = (error) => {
@@ -16,8 +19,10 @@ export default function validateParameters(proofType, params) {
     }
 
     const errors = schema.validate(params);
-    if (errors.length) {
-        return errors.map(formatError);
+    if (errors && errors.length > 0) {
+        return argsError('input.invalid', {
+            messages: errors.map(formatError),
+        });
     }
 
     return null;
