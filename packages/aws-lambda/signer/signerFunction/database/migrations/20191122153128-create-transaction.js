@@ -12,9 +12,7 @@ module.exports = {
             STRING,
             INTEGER,
             ENUM,
-            Deferrable: {
-                INITIALLY_IMMEDIATE,
-            },
+            DATE,
         } = DataTypes;
 
         return queryInterface.createTable('Transactions', {
@@ -67,6 +65,14 @@ module.exports = {
             nonce: {
                 type: INTEGER,
                 unique: true,
+                allowNull: false,
+            },
+            createdAt: {
+                type: DATE,
+                allowNull: false,
+            },
+            updatedAt: {
+                type: DATE,
                 allowNull: false,
             },
         });
