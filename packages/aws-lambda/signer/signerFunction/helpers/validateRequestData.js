@@ -4,6 +4,7 @@ const {
 const {
     isAPIKeyValid,
     balance,
+    getDappInfo,
 } = require('../utils/dapp');
 const {
     BAD_400,
@@ -18,16 +19,25 @@ module.exports = async ({
     origin,
 }) => {
     if (!apiKey) {
-        return BAD_400('"ApiKey" parameter is requeired');
+        return {
+            error: BAD_400('"ApiKey" parameter is requeired'),
+            validatedData: { },
+        };
     }
 
     if (!data) {
-        return BAD_400('"data" parameter is requeired');
+        return {
+            error: BAD_400('"data" parameter is requeired'),
+            validatedData: { },
+        };
     }
 
     if (!isValidData(data)) {
         // eslint-disable-next-line max-len
-        return BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to');
+        return {
+            error: BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to'),
+            validatedData: { },
+        };
     }
 
     const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
@@ -35,15 +45,39 @@ module.exports = async ({
         apiKey,
         origin,
     })) {
-        return ACCESS_DENIED_401();
+        return {
+            error: ACCESS_DENIED_401(),
+            validatedData: { },
+        };
     }
 
-    const countFreeTransactions = await balance(apiKey);
+    const {
+        id: dappId,
+    } = await getDappInfo({
+        apiKey,
+    });
+
+    const countFreeTransactions = await balance({
+        dappId,
+    });
     if (countFreeTransactions <= 0) {
-        return ACCESS_DENIED_401({
-            title: "Not enought free trnsaction, please contact to the dapp's support",
-        });
+        return {
+            error: ACCESS_DENIED_401({
+                title: "Not enought free trnsaction, please contact to the dapp's support",
+            }),
+            validatedData: { },
+        };
     }
 
-    return null;
+    return {
+        error: null,
+        validatedData: {
+            apiKey,
+            data,
+            origin,
+            countFreeTransactions,
+            isApiKeyRequired,
+            dappId,
+        },
+    };
 }

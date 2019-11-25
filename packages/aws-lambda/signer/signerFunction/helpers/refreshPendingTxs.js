@@ -14,17 +14,16 @@ module.exports = async ({
     dappId,
     networkId,
 }) => {
-    const pending = await pendingTxs(dappId);
+    const pending = await pendingTxs({
+        dappId,
+    });
     if (!pending.length) return;
 
     const signaturesHashes = pending.map(({
         signatureHash,
     }) => signatureHash);
 
-    const {
-        error,
-        transactions,
-    } = await loadEvents({
+    const transactions = await loadEvents({
         signaturesHashes,
         networkId,
     });
@@ -39,12 +38,4 @@ module.exports = async ({
             signaturesHashes: hashes,
         });
     }
-
-    /**
-     * Update pending txs to Failed status
-     */
-    if (transactions.length) {
-
-    }
-    
 }

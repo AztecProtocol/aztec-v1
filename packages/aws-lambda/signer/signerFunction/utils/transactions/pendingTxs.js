@@ -9,7 +9,9 @@ const {
 } = require('../../config/constants');
 
 
-module.exports = async (dappId) => {
+module.exports = async ({
+    dappId,
+}) => {
     return Transactions.findAll({
         attributes: ['signatureHash'],
         where: {

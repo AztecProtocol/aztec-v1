@@ -3,6 +3,7 @@ const isTrue = require('./isTrue');
 const responses = require('./responses');
 const validateRequestData = require('./validateRequestData');
 const networks = require('./networks');
+const refreshPendingTxs = require('./refreshPendingTxs');
 
 
 module.exports = {
@@ -11,4 +12,5 @@ module.exports = {
     responses,
     validateRequestData,
     networks,
+    refreshPendingTxs,
 }
