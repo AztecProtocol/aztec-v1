@@ -29,10 +29,10 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const { asset } = await ConnectionService.query({
-            type: 'asset',
-            args: { id: this.id },
-        }) || {};
+        const { asset } = await ConnectionService.query(
+            'asset',
+            { id: this.id },
+        ) || {};
 
         if (asset) {
             dataProperties.forEach((key) => {
@@ -42,10 +42,10 @@ export default class Asset {
     };
 
     async balance() {
-        const { asset } = await ConnectionService.query({
-            type: 'assetBalance',
-            args: { id: this.id },
-        }) || {};
+        const { asset } = await ConnectionService.query(
+            'assetBalance',
+            { id: this.id },
+        ) || {};
 
         return (asset && asset.balance) || 0;
     }
@@ -185,9 +185,9 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query({
-            type: 'constructProof',
-            args: {
+        return ConnectionService.query(
+            'constructProof',
+            {
                 proofType: 'DEPOSIT_PROOF',
                 assetAddress: this.address,
                 transactions,
@@ -195,7 +195,7 @@ export default class Asset {
                 sender: sender || address,
                 numberOfOutputNotes,
             },
-        });
+        );
     };
 
     withdraw = async (transactions, {
@@ -206,16 +206,16 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query({
-            type: 'constructProof',
-            args: {
+        return ConnectionService.query(
+            'constructProof',
+            {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
                 transactions,
                 sender: sender || address,
                 numberOfInputNotes,
             },
-        });
+        );
     };
 
     /**
@@ -241,9 +241,9 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query({
-            type: 'constructProof',
-            args: {
+        return ConnectionService.query(
+            'constructProof',
+            {
                 proofType: 'TRANSFER_PROOF',
                 assetAddress: this.address,
                 transactions,
@@ -251,7 +251,7 @@ export default class Asset {
                 numberOfInputNotes,
                 numberOfOutputNotes,
             },
-        });
+        );
     };
 
     /**
@@ -347,9 +347,9 @@ export default class Asset {
     //         address,
     //     } = Web3Service.account;
     //
-    //     return ConnectionService.query({
-    //         type: 'constructProof',
-    //         args: {
+    //     return ConnectionService.query(
+    //         'constructProof',
+    //         {
     //             proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
     //             assetAddress: this.address,
     //             amount,
@@ -358,7 +358,7 @@ export default class Asset {
     //             numberOfInputNotes,
     //             numberOfOutputNotes,
     //         },
-    //     });
+    //     );
     // };
 
     fetchNotesFromBalance = async ({
@@ -371,9 +371,9 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query({
-            type: 'constructProof', // TODO - define another query type
-            args: {
+        return ConnectionService.query(
+            'constructProof', // TODO - define another query type
+            {
                 proofType: 'FETCH_NOTES_FROM_BALANCE',
                 assetAddress: this.address,
                 owner: address,
@@ -382,6 +382,6 @@ export default class Asset {
                 equalTo,
                 numberOfNotes,
             },
-        });
+        );
     };
 }
