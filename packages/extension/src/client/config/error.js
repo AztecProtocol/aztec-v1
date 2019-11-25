@@ -6,6 +6,7 @@ export default {
     },
     erc20: {
         balanceOf: "Cannot get balance of linked token for account '%{account}'.",
+        allowance: "Cannot get allowance of linked token for account '%{account}'.",
         totalSupply: 'Failed to get total supply of linked token.',
     },
     zkAsset: {

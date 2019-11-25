@@ -130,6 +130,39 @@ export default class Asset {
         return balance | 0; // eslint-disable-line no-bitwise
     };
 
+    allowanceOfLinkedToken = async (owner = '', spender = '') => {
+        let allowance = 0;
+        let ownerAddress = owner;
+        if (!ownerAddress) {
+            ({
+                address: ownerAddress,
+            } = Web3Service.account);
+        }
+
+        let spenderAddress = spender;
+        if (!spenderAddress) {
+            spenderAddress = Web3Service.getAddress('ACE');
+        }
+
+        try {
+            allowance = await Web3Service
+                .useContract('ERC20')
+                .at(this.linkedTokenAddress)
+                .method('allowance')
+                .call(
+                    ownerAddress,
+                    spenderAddress,
+                );
+        } catch (error) {
+            throw new ContractError('erc20.allowance', {
+                owner: ownerAddress,
+                spender: spenderAddress,
+            });
+        }
+
+        return allowance | 0; // eslint-disable-line no-bitwise
+    };
+
     /**
      *
      * Deposit
