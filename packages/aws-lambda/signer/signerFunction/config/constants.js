@@ -1,3 +1,7 @@
+const infuraURL = (networkName) => {
+    return `https://${networkName}.infura.io/v3/${process.env.INFURA_PROJECT_KEY}`;
+};
+
 module.exports = {
     AWS_REGION: 'us-east-1',
     DB_TABLE: {
@@ -22,26 +26,32 @@ module.exports = {
         GANACHE: {
             id: null,
             networkName: 'ganache',
+            infuraProviderUrl: null,
         },
         MAIN: {
             id: 1,
             networkName: 'mainnet',
+            infuraProviderUrl: infuraURL('mainnet'),
         },
         ROPSTEN: {
             id: 3,
             networkName: 'ropsten',
+            infuraProviderUrl: infuraURL('ropsten'),
         },
         RINKEBY: {
             id: 4,
             networkName: 'rinkeby',
+            infuraProviderUrl: infuraURL('rinkeby'),
         },
         GOERLI: {
             id: 5,
             networkName: 'goerli',
+            infuraProviderUrl: infuraURL('goerli'),
         },
         KOVAN: {
             id: 42,
             networkName: 'kovan',
+            infuraProviderUrl: infuraURL('kovan'),
         },
     },
 };

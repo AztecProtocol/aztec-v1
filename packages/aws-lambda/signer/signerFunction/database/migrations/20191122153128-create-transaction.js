@@ -43,6 +43,10 @@ module.exports = {
                 type: INTEGER,
                 allowNull: false,
             },
+            actualCharge: {
+                type: INTEGER,
+                allowNull: true,
+            },
             type: {
                 type: ENUM,
                 allowNull: false,
@@ -64,7 +68,6 @@ module.exports = {
             },
             nonce: {
                 type: INTEGER,
-                unique: true,
                 allowNull: false,
             },
             createdAt: {
