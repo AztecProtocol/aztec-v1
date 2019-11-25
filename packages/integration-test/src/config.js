@@ -11,6 +11,7 @@ const {
  * - testNet to run the integration test on
  * - contracts to be tested
  * - number of tokens that are involved in the full test suite, and therefore should be minted
+ * - flags controlling whether particular tests, such as minting, burning and upgrade paths, should be run
  */
 const config = {};
 
@@ -23,6 +24,7 @@ config.contractsToDeploy = [
     'ACE',
     'Dividend',
     'ERC20Mintable',
+    'FactoryBase201907',
     'JoinSplit',
     'JoinSplitFluid',
     'PrivateRange',
@@ -50,6 +52,13 @@ config.numTestTokens = new BN(260);
  * Currently necessary as the test suite does not yet support same asset repeated minting/burning
  */
 config.runAdjustSupplyTests = false;
+
+/**
+ * @param {bool} runUpgrade - flag determining whether the test that performs a note registry upgrade
+ * should be performed. If true, perform the upgrade
+ *
+ */
+config.runUpgrade = false;
 
 /**
  * @param {BN} SCALING_FACTOR - factor to convert between AZTEC note value and ERC20 token value

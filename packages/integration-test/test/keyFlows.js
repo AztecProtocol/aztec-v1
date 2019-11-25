@@ -11,7 +11,6 @@ const {
     SwapProof,
 } = require('aztec.js');
 const bn128 = require('@aztec/bn128');
-const { TestFactory } = require('@aztec/contract-artifacts');
 
 const {
     proofs: { BURN_PROOF, DIVIDEND_PROOF, JOIN_SPLIT_PROOF, SWAP_PROOF, MINT_PROOF, PRIVATE_RANGE_PROOF, PUBLIC_RANGE_PROOF },
@@ -24,19 +23,18 @@ const Setup = require('../src/setup');
 const config = require('../src/config');
 
 contract.only('AZTEC integration', (accounts) => {
-    // let upgradeFactoryId;
-    // let upgradeFactoryContract;
     let aztecAccount;
     let ace;
     let dividendValidator;
     let erc20;
-    // let factoryContract;
     let joinSplitValidator;
     let joinSplitFluidValidator;
     let privateRangeValidator;
     let publicRangeValidator;
     let swapValidator;
+    let upgradeFactory;
     let zkAsset;
+
     let firstMintCounterValue;
     let firstMintCounterNote;
 
@@ -53,6 +51,7 @@ contract.only('AZTEC integration', (accounts) => {
             ACE: ace,
             Dividend: dividendValidator,
             ERC20Mintable: erc20,
+            FactoryBase201907: upgradeFactory,
             JoinSplit: joinSplitValidator,
             JoinSplitFluid: joinSplitFluidValidator,
             PrivateRange: privateRangeValidator,
@@ -66,16 +65,12 @@ contract.only('AZTEC integration', (accounts) => {
         await setup.fundPublicOwnerAccount(config.scalingFactor);
 
         aztecAccount = secp256k1.generateAccount();
-
-        // upgradeFactoryId = generateFactoryId(2, 1, 3);
-        // upgradeFactoryContract = await TestFactory.new(ace.address);
-        // await ace.setFactory(upgradeFactoryId, upgradeFactoryContract.address, { from: accounts[0] });
     });
 
     describe('Initialisation', async () => {
         it('should set ace owner to be deployment address', async () => {
             const owner = await ace.owner();
-            expect(owner).to.equal(accounts[0]);
+            expect(owner).to.equal(sender);
         });
 
         it('should have set ACE common reference string', async () => {
@@ -260,10 +255,8 @@ contract.only('AZTEC integration', (accounts) => {
     describe('Adjust supply', async () => {
         before(function checkIfConfigured() {
             if (!setup.runAdjustSupplyTests) {
-                console.log('Adjust supply tests not configured');
+                console.log('Tests not configured');
                 this.skip();
-            } else {
-                console.log('Adjust supply tests configured');
             }
         });
 
@@ -371,19 +364,29 @@ contract.only('AZTEC integration', (accounts) => {
     });
 
     describe('Upgradeability', async () => {
-        // it.skip('should perform a note registry upgrade', async () => {
-        //     const zkAssetOwner = await zkAsset.owner();
-        //     await zkAsset.upgradeRegistryVersion(upgradeFactoryId, { from: zkAssetOwner });
-        //     const topic = web3.utils.keccak256('UpgradeNoteRegistry(address,address,address)');
-        //     const logs = await new Promise((resolve) => {
-        //         web3.eth
-        //             .getPastLogs({
-        //                 address: ace.address,
-        //                 topics: [topic],
-        //             })
-        //             .then(resolve);
-        //     });
-        //     expect(logs.length).to.not.equal(0);
-        // });
+        before(function checkIfConfigured() {
+            if (!setup.runUpgrade) {
+                console.log('Tests not configured');
+                this.skip();
+            }
+        });
+
+        it('should perform a note registry upgrade', async () => {
+            const upgradeFactoryId = generateFactoryId(2, 1, 1);
+            await ace.setFactory(upgradeFactoryId, upgradeFactory.address, { from: sender });
+
+            const zkAssetOwner = await zkAsset.owner();
+            await zkAsset.upgradeRegistryVersion(upgradeFactoryId, { from: zkAssetOwner });
+            const topic = web3.utils.keccak256('UpgradeNoteRegistry(address,address,address)');
+            const logs = await new Promise((resolve) => {
+                web3.eth
+                    .getPastLogs({
+                        address: ace.address,
+                        topics: [topic],
+                    })
+                    .then(resolve);
+            });
+            expect(logs.length).to.not.equal(0);
+        });
     });
 });

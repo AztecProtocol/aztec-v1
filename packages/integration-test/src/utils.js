@@ -27,7 +27,6 @@ utils.getNotesForAccount = async (aztecAccount, noteValues) => {
 };
 
 /**
- *
  * Generate a factory ID based on three supplied uint8's: epoch, cryptoSystem and
  * assetType
  *

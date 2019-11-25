@@ -54,7 +54,6 @@ engine.start((err) => {
     }
 });
 
-
 /**
  * HACK: Truffle providers should have `send` function, while `ProviderEngine` creates providers with `sendAsync`,
  * but it can be easily fixed by assigning `sendAsync` to `send`.
