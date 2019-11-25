@@ -4,9 +4,9 @@
   "description": "Setup and run a series of integration tests for the AZTEC protocol smart contracts",
   "main": "index.js",
   "scripts": {
-    "test": "scripts/test.sh",
     "lint": "yarn lint:js",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
+    "test:testNets": "scripts/test.sh",
     "test:ropsten": "truffle test ./test/integration.js --network ropsten",
     "test:rinkeby": "truffle test ./test/integration.js --network rinkeby"
   },

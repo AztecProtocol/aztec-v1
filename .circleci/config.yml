@@ -75,6 +75,17 @@ jobs:
             - run:
                 name: "Test Packages"
                 command: yarn test
+    testNet:
+        working_directory: ~/repo
+        docker:
+            - image: circleci/node:10.15.3
+        steps:
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run:
+                name: "TestNet integration test"
+                command: yarn test:integration
     artifacts:
         working_directory: ~/repo
         docker:
@@ -158,6 +169,14 @@ workflows:
                 filters:
                     branches:
                         ignore: gh-pages
+            - testNet:
+                requires:
+                    - build
+                filters:
+                    branches:
+                        ignore: gh-pages
+                #     - lint
+                #     - test
             - artifacts:
                 requires:
                     - lint
