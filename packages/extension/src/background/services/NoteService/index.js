@@ -6,6 +6,7 @@ import {
 } from '~utils/storage';
 import Note from '~background/database/models/note';
 import ApiSessionManager from './helpers/ApiSessionManager';
+import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';
 import pickNotesInRange from './utils/pickNotesInRange';
 
@@ -45,6 +46,54 @@ export default {
         assetId,
         ({ balance }) => balance,
     ),
+    validatePick: async (
+        networkId,
+        ownerAddress,
+        assetId,
+        minSum,
+        {
+            numberOfNotes = 1,
+            allowLessNumberOfNotes = true,
+        } = {},
+    ) => {
+        if (numberOfNotes <= 0) {
+            return null;
+        }
+
+        return manager.ensureSynced(
+            networkId,
+            ownerAddress,
+            assetId,
+            async ({
+                balance,
+                noteValues,
+            }) => {
+                if (balance < minSum) {
+                    return argsError('note.pick.sum', {
+                        messageOptions: {
+                            count: numberOfNotes,
+                        },
+                        balance,
+                        numberOfNotes,
+                        value: minSum,
+                    });
+                }
+
+                try {
+                    validate({
+                        noteValues,
+                        minSum,
+                        numberOfNotes,
+                        allowLessNumberOfNotes,
+                    });
+                } catch (error) {
+                    return error;
+                }
+
+                return null;
+            },
+        );
+    },
     pick: async (
         networkId,
         ownerAddress,
