@@ -20,7 +20,7 @@ import "../ACE/ACE.sol" as ACEModule;
 
 contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
-    event GSNTransactionProcessed();
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
     ACEModule.ACE ace;
 
@@ -47,9 +47,14 @@ contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSN
         ace.publicApprove(_registryOwner, _proofHash, _value);
     }
 
-    function testFunction(bytes memory _proofData) public {
-        emit GSNTransactionProcessed();
-        require(1 == 4, "some error");
+    /*
+    https://docs.openzeppelin.com/contracts/2.x/gsn
+    */
+    function postRelayedCall(bytes calldata context, bool success, uint actualCharge, bytes32 preRetVal) external { 
+        (, bytes memory approveData) = abi.decode(context, (address, bytes));
+
+        emit GSNTransactionProcessed(keccak256(approveData), success, actualCharge);
     }
+
 }
 

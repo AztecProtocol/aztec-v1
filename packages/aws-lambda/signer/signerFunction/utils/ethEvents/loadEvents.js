@@ -34,20 +34,19 @@ module.exports = async ({
         .events(GSNTransactionProcessed)
         .where(options);
 
-    const transactions = events.map(({
+    return events.map(({
         blockNumber,
         transactionHash,
         returnValues: {
             signatureHash,
+            success,
+            actualCharge,
         },
     }) => ({
         blockNumber,
         signatureHash,
         transactionHash,
+        success,
+        actualCharge,
     }));
-
-    return {
-        error: null,
-        transactions,
-    };
 }
