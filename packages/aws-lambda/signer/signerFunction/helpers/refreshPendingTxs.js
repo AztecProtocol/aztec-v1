@@ -2,7 +2,8 @@ const {
     loadEvents,
 } = require('../utils/ethEvents');
 const {
-    setStatusForTxs,
+    updateExpiredTxs,
+    updateMultipleTxs,
     pendingTxs,
 } = require('../utils/transactions')
 const {
@@ -28,14 +29,35 @@ module.exports = async ({
         networkId,
     });
 
+    const transactionsOK = transactions.filter(({ success }) => success);
+    const transactionsFailed = transactions.filter(({ success }) => !success);
+
     /**
      * Update pending txs to OK status
      */
-    if (transactions.length) {
-        const hashes = transactions.map(({ signatureHashe }) => signatureHashe);
-        setStatusForTxs({
+    if (transactionsOK.length) {
+        const updateTxs = transactionsOK.map(tx => ({
+            signatureHash: tx.signatureHash,
+            actualCharge: tx.actualCharge,
             status: TRANSACTION_STATUS.OK,
-            signaturesHashes: hashes,
-        });
+        }));
+        await updateMultipleTxs(updateTxs);
     }
-}
+
+    /**
+     * Update pending txs to Failed status
+     */
+    if (transactionsFailed.length) {
+        const updateTxs = transactionsFailed.map(tx => ({
+            signatureHash: tx.signatureHash,
+            actualCharge: tx.actualCharge,
+            status: TRANSACTION_STATUS.FAILED,
+        }));
+        await updateMultipleTxs(updateTxs);
+    }
+
+    /**
+     * Update pending txs to Expired status
+     */
+    await updateExpiredTxs();
+};

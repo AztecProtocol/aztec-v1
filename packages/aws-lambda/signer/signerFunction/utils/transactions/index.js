@@ -1,10 +1,12 @@
 const monitorTx = require('./monitorTx');
-const setStatusForTxs = require('./setStatusForTxs');
+const updateExpiredTxs = require('./updateExpiredTxs');
 const pendingTxs = require('./pendingTxs');
+const updateMultipleTxs = require('./updateMultipleTxs');
 
 
 module.exports = {
     monitorTx,
-    setStatusForTxs,
+    updateExpiredTxs,
     pendingTxs,
+    updateMultipleTxs,
 };

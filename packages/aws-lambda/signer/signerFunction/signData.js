@@ -5,7 +5,6 @@ const {
     OK_200,
     NOT_FOUND_404,
     BAD_400,
-    ACCESS_DENIED_401,
 } = require('./helpers/responses');
 const {
     validateRequestData,
@@ -29,10 +28,6 @@ const {
     NETWORKS,
 } = require('./config/constants');
 const isTrue = require('./helpers/isTrue');
-const {
-    balance,
-    getDappInfo,
-} = require('./utils/dapp');
 
 
 const initializeDB = ({
@@ -90,16 +85,14 @@ const initialize = ({
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  * 
  */
-exports.signTxHandler = async (event) => {
+exports.migrationHandler = async (event) => {
     if (event.httpMethod !== 'POST') {
         return NOT_FOUND_404();
     }
     const {
         apiKey,
-        networkId,
-    } = event.pathParameters || {};
-    const {
         data,
+        networkId,
     } = getParameters(event) || {};
     const origin = getOrigin(event);
 
@@ -115,6 +108,9 @@ exports.signTxHandler = async (event) => {
 
     const {
         error: validationError,
+        validatedData: {
+            dappId,
+        },
     } = await validateRequestData({
         apiKey: {
             isRequired: isApiKeyRequired,
@@ -137,26 +133,12 @@ exports.signTxHandler = async (event) => {
         return validationError;
     }
 
-    const {
-        id: dappId,
-    } = await getDappInfo({
-        apiKey,
-    });
-
     try {
         if (isApiKeyRequired) {
             await refreshPendingTxs({
                 dappId,
                 networkId,
             });
-            const countFreeTransactions = await balance({
-                dappId,
-            });
-            if (countFreeTransactions <= 0) {
-                return ACCESS_DENIED_401({
-                    title: "Not enought free trnsaction, please contact to the dapp's support",
-                });
-            }
         }
 
         const {
