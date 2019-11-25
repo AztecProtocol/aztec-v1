@@ -1,25 +1,14 @@
 const {
-    signData,
-} = require('./utils/signer');
-const {
     OK_200,
     NOT_FOUND_404,
     BAD_400,
-    ACCESS_DENIED_401,
 } = require('./helpers/responses');
 const {
     validateRequestData,
     registerContracts,
     refreshPendingTxs,
 } = require('./helpers');
-const {
-    getOrigin,
-    getParameters,
-} = require('./utils/event');
 const web3Service = require('./services/Web3Service');
-const {
-    monitorTx,
-} = require('./utils/transactions');
 const {
     errorLog,
 } = require('./utils/log');
@@ -28,7 +17,6 @@ const db = require('./database');
 const {
     NETWORKS,
 } = require('./config/constants');
-const isTrue = require('./helpers/isTrue');
 const {
     balance,
     getDappInfo,
@@ -90,20 +78,14 @@ const initialize = ({
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  * 
  */
-exports.signTxHandler = async (event) => {
-    if (event.httpMethod !== 'POST') {
+exports.balanceHandler = async (event) => {
+    if (event.httpMethod !== 'GET') {
         return NOT_FOUND_404();
     }
     const {
         apiKey,
         networkId,
     } = event.pathParameters || {};
-    const {
-        data,
-    } = getParameters(event) || {};
-    const origin = getOrigin(event);
-
-    const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
 
     try {
         initialize({
@@ -117,16 +99,8 @@ exports.signTxHandler = async (event) => {
         error: validationError,
     } = await validateRequestData({
         apiKey: {
-            isRequired: isApiKeyRequired,
-            value: apiKey,
-        },
-        origin: {
-            isRequired: isApiKeyRequired,
-            value: origin,
-        },
-        data: {
             isRequired: true,
-            value: data,
+            value: apiKey,
         },
         networkId: {
             isRequired: true,
@@ -144,38 +118,16 @@ exports.signTxHandler = async (event) => {
     });
 
     try {
-        if (isApiKeyRequired) {
-            await refreshPendingTxs({
-                dappId,
-                networkId,
-            });
-            const countFreeTransactions = await balance({
-                dappId,
-            });
-            if (countFreeTransactions <= 0) {
-                return ACCESS_DENIED_401({
-                    title: "Not enought free trnsaction, please contact to the dapp's support",
-                });
-            }
-        }
-
-        const {
-            messageHash: dataHash,
-            signature,
-        } = signData(data);
-
-        if (isApiKeyRequired) {
-            await monitorTx({
-                ...data,
-                dappId,
-                signature,
-            });
-        }
+        await refreshPendingTxs({
+            dappId,
+            networkId,
+        });
+        const countFreeTransactions = await balance({
+            dappId,
+        });
 
         return OK_200({
-            data,
-            dataHash,
-            dataSignature: signature,
+            hasFreeTransactions: countFreeTransactions > 0,
         });
 
     } catch (e) {

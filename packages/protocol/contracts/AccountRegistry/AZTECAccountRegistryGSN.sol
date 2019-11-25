@@ -18,7 +18,7 @@ import "./AZTECAccountRegistry.sol";
  **/
 contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
-    event GSNTransactionProcessed();
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
     ACEModule.ACE ace;
     uint24 public constant JOIN_SPLIT_PROOF = 65793;
@@ -45,9 +45,14 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
         ace.publicApprove(_registryOwner, _proofHash, _value);
     }
 
-    function testFunction(bytes memory _proofData) public {
-        emit GSNTransactionProcessed();
-        require(1 == 4, "some error");
+    /*
+    https://docs.openzeppelin.com/contracts/2.x/gsn
+    */
+    function postRelayedCall(bytes calldata context, bool success, uint actualCharge, bytes32 preRetVal) external { 
+        (, bytes memory approveData) = abi.decode(context, (address, bytes));
+
+        emit GSNTransactionProcessed(keccak256(approveData), success, actualCharge);
     }
+
 }
 
