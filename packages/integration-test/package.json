@@ -1,14 +1,14 @@
 {
   "name": "@aztec/integration-test",
   "version": "0.0.0",
-  "description": "Setup and run a series of testnet integration tests for the AZTEC protocol smart contracts",
+  "description": "Setup and run a series of integration tests for the AZTEC protocol smart contracts",
   "main": "index.js",
   "scripts": {
     "test": "scripts/test.sh",
     "lint": "yarn lint:js",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
-    "test:ropsten": "truffle test ./test/keyFlows.js --network ropsten",
-    "test:rinkeby": "truffle test ./test/keyFlows.js --network rinkeby"
+    "test:ropsten": "truffle test ./test/integration.js --network ropsten",
+    "test:rinkeby": "truffle test ./test/integration.js --network rinkeby"
   },
   "repository": {
     "type": "git",

@@ -22,7 +22,7 @@ const { getNotesForAccount, generateFactoryId } = require('../src/utils');
 const Setup = require('../src/setup');
 const config = require('../src/config');
 
-contract.only('AZTEC integration', (accounts) => {
+contract('Integration', (accounts) => {
     let aztecAccount;
     let ace;
     let dividendValidator;
@@ -51,7 +51,7 @@ contract.only('AZTEC integration', (accounts) => {
             ACE: ace,
             Dividend: dividendValidator,
             ERC20Mintable: erc20,
-            FactoryBase201907: upgradeFactory,
+            FactoryAdjustable201907: upgradeFactory,
             JoinSplit: joinSplitValidator,
             JoinSplitFluid: joinSplitFluidValidator,
             PrivateRange: privateRangeValidator,
@@ -262,6 +262,7 @@ contract.only('AZTEC integration', (accounts) => {
 
         it('should perform a mint operation', async () => {
             // Mint 3 AZTEC notes, worth a total of 300 tokens
+            firstMintCounterValue = 50;
             const mintedNoteValues = [20, 30];
             const zeroMintCounterNote = await note.createZeroValueNote();
             firstMintCounterNote = await note.create(aztecAccount.publicKey, firstMintCounterValue);
@@ -300,7 +301,7 @@ contract.only('AZTEC integration', (accounts) => {
         });
     });
 
-    describe('Delegate note control', async () => {
+    describe.only('Delegate note control', async () => {
         it('should delegate note spending control using a confidentialApprove() and allow a confidentialTransferFrom()', async () => {
             // Call confidentialApprove() on two notes to approve the zkAsset to spend on user's behalf
             const depositInputNotes = [];
@@ -372,7 +373,7 @@ contract.only('AZTEC integration', (accounts) => {
         });
 
         it('should perform a note registry upgrade', async () => {
-            const upgradeFactoryId = generateFactoryId(2, 1, 1);
+            const upgradeFactoryId = generateFactoryId(2, 1, 3);
             await ace.setFactory(upgradeFactoryId, upgradeFactory.address, { from: sender });
 
             const zkAssetOwner = await zkAsset.owner();

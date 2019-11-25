@@ -5,7 +5,6 @@ const contractArtifacts = require('@aztec/contract-artifacts');
 const {
     errors: { codes, AztecError },
 } = require('@aztec/dev-utils');
-const BN = require('bn.js');
 const TruffleContract = require('@truffle/contract');
 
 const { capitaliseFirstChar } = require('./utils');
@@ -24,6 +23,7 @@ class Setup {
         this.config = config;
         this.NETWORK = config.NETWORK;
         this.runAdjustSupplyTests = config.runAdjustSupplyTests;
+        this.runUpgrade = config.runUpgrade;
         this.contractsToDeploy = config.contractsToDeploy;
 
         this.provider = web3.currentProvider;
@@ -35,7 +35,6 @@ class Setup {
             this.networkId = networkIDs[capitaliseFirstChar(this.NETWORK)];
             this.getAddresses();
             this.getContractPromises();
-
             this.getTransactionTestingAddresses();
         } else {
             throw new AztecError(codes.UNSUPPORTED_NETWORK, {
@@ -118,6 +117,9 @@ class Setup {
      * @returns {Object} Truffle contracts, representing the contract deployed at a specific address
      */
     async getContracts() {
+        // const allContractObjects = await Promise.all(this.contractPromises
+        //     .map(async p => p ))
+        //     .reduce()
         const allContractObjects = this.contractPromises.reduce(
             async (previousPromiseAccumulator, currentContractPromise, currentIndex) => {
                 const accumulator = await previousPromiseAccumulator;
@@ -150,7 +152,7 @@ class Setup {
 
     /**
      * @method fundPublicOwnerAccount - fund the publicOwner account with ERC20 tokens, if the balance is less
-     * than the number required for the test suite to run.
+     * than the number required for the test suite to run. Approve ACE to spend the relevant number of tokens
      *
      * Num of tokens required for test suite to run given by numTestTokens on the config object.
      *
@@ -159,12 +161,16 @@ class Setup {
      */
     async fundPublicOwnerAccount(scalingFactor) {
         const { ACE: ace, ERC20Mintable: erc20 } = await this.allContractObjects;
+        const tokensToBeTransferred = this.config.numTestTokens.mul(scalingFactor);
 
         const publicOwnerBalance = await erc20.balanceOf(this.publicOwner);
-        if (publicOwnerBalance < this.config.numTestTokens.mul(scalingFactor)) {
-            const tokensTransferred = new BN(this.config.numTestTokens);
-            await erc20.mint(this.publicOwner, scalingFactor.mul(tokensTransferred), this.opts);
-            await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), this.opts);
+        if (publicOwnerBalance.lt(tokensToBeTransferred)) {
+            await erc20.mint(this.publicOwner, tokensToBeTransferred, this.opts);
+        }
+
+        const publicOwnerApproval = await erc20.allowance(this.publicOwner, ace.address);
+        if (publicOwnerApproval.lt(tokensToBeTransferred)) {
+            await erc20.approve(ace.address, tokensToBeTransferred, this.opts);
         }
     }
 }
