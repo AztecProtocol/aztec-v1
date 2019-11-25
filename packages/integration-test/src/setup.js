@@ -117,18 +117,14 @@ class Setup {
      * @returns {Object} Truffle contracts, representing the contract deployed at a specific address
      */
     async getContracts() {
-        // const allContractObjects = await Promise.all(this.contractPromises
-        //     .map(async p => p ))
-        //     .reduce()
-        const allContractObjects = this.contractPromises.reduce(
-            async (previousPromiseAccumulator, currentContractPromise, currentIndex) => {
-                const accumulator = await previousPromiseAccumulator;
-                const deployedContract = await currentContractPromise[this.contractsToDeploy[currentIndex]]();
-                accumulator[this.contractsToDeploy[currentIndex]] = deployedContract;
-                return { ...accumulator };
-            },
-            {},
-        );
+        const allContractObjects = (await Promise.all(
+            this.contractPromises.map(async (currentContractPromise, index) =>
+                currentContractPromise[this.contractsToDeploy[index]](),
+            ),
+        )).reduce((accumulator, currentContractObject, currentIndex) => {
+            accumulator[this.contractsToDeploy[currentIndex]] = currentContractObject;
+            return { ...accumulator };
+        }, {});
 
         this.allContractObjects = allContractObjects;
         return allContractObjects;
