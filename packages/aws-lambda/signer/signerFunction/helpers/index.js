@@ -4,6 +4,7 @@ const responses = require('./responses');
 const validateRequestData = require('./validateRequestData');
 const networks = require('./networks');
 const refreshPendingTxs = require('./refreshPendingTxs');
+const validateNetworkId = require('./validateNetworkId');
 
 
 module.exports = {
@@ -13,4 +14,5 @@ module.exports = {
     validateRequestData,
     networks,
     refreshPendingTxs,
+    validateNetworkId,
 }

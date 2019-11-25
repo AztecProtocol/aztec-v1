@@ -2,9 +2,6 @@ const {
     isValidData,
 } = require('../utils/data');
 const {
-    isAPIKeyValid,
-} = require('../utils/dapp');
-const {
     BAD_400,
     ACCESS_DENIED_401,
 } = require('./responses');
@@ -12,6 +9,7 @@ const {
     getDappInfo,
     isOriginBelongsToApiKeyValid,
 } = require('../utils/dapp')
+const validateNetworkId = require('./validateNetworkId');
 
 
 module.exports = async ({
@@ -39,10 +37,16 @@ module.exports = async ({
         };
     }
 
-    if (isRequiredNetworkId && !networkIdValue) {
-        return {
-            error: BAD_400('"networkId" parameter is required'),
-            validatedData: null,
+    if (isRequiredNetworkId) {
+        const {
+            error,
+            isValid,
+        } = validateNetworkId(networkIdValue);
+        if (!isValid) {
+            return {
+                error,
+                validatedData: null,
+            }
         }
     }
 
