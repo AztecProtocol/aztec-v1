@@ -1,7 +1,18 @@
 const { note } = require('aztec.js');
 
-
 const utils = {};
+
+/**
+ * Make the first letter of a given single word input string capitalised
+ *
+ * @capitaliseFirstChar
+ * @param {string} stringToCapitalise - input for which the first letter should be capitalised
+ *
+ * @returns {string} - input string with first letter capitalised
+ */
+utils.capitaliseFirstChar = (stringToCapitalise) => {
+    return stringToCapitalise.charAt(0).toUpperCase() + stringToCapitalise.slice(1);
+};
 
 /**
  * Generate a set of notes, given the desired note values and account of the owner
@@ -31,4 +42,3 @@ utils.generateFactoryId = (epoch, cryptoSystem, assetType) => {
 };
 
 module.exports = utils;
-
