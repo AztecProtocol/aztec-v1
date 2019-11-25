@@ -1,5 +1,7 @@
 const web3Service = require('../../services/Web3Service');
-const AZTECAccountRegistryGSNConfig = require('../../config/contracts');
+const {
+    AZTECAccountRegistryGSNConfig,
+} = require('../../config/contracts');
 
 
 module.exports = async ({
@@ -26,33 +28,26 @@ module.exports = async ({
         networks,
     } = AZTECAccountRegistryGSNConfig;
 
-    try {
-        const events = await web3Service
-            .useContract(AZTECAccountRegistryGSNContract)
-            .at(networks[networkId])
-            .events(GSNTransactionProcessed)
-            .where(options);
+    const events = await web3Service
+        .useContract(AZTECAccountRegistryGSNContract)
+        .at(networks[networkId])
+        .events(GSNTransactionProcessed)
+        .where(options);
 
-        const transactions = events.map(({
-            blockNumber,
-            transactionHash,
-            returnValues: {
-                signatureHash,
-            },
-        }) => ({
-            blockNumber,
+    const transactions = events.map(({
+        blockNumber,
+        transactionHash,
+        returnValues: {
             signatureHash,
-            transactionHash,
-        }));
+        },
+    }) => ({
+        blockNumber,
+        signatureHash,
+        transactionHash,
+    }));
 
-        return {
-            error: null,
-            transactions,
-        };
-    } catch (error) {
-        return {
-            error,
-            transactions: null,
-        };
-    }
+    return {
+        error: null,
+        transactions,
+    };
 }
