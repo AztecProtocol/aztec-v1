@@ -99,11 +99,11 @@ contract Behaviour201907 is NoteRegistryBehaviour {
         canAdjustSupply = registry.canAdjustSupply;
     }
 
-    function burn(bytes calldata /* _proofOutputs */) external onlyOwner {
+    function burn(bytes memory /* _proofOutputs */) public onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not burnable");
     }
 
-    function mint(bytes calldata  /* _proofOutputs */) external onlyOwner {
+    function mint(bytes memory  /* _proofOutputs */) public onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not mintable");
     }
 

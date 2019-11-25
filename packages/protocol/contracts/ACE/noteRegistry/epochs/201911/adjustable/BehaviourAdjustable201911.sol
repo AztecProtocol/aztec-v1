@@ -15,4 +15,12 @@ import "../../201907/adjustable/BehaviourAdjustable201907.sol";
  **/
 contract BehaviourAdjustable201911 is Behaviour201911, BehaviourAdjustable201907 {
     constructor () BehaviourAdjustable201907() public {}
+
+    function burn(bytes memory _proofOutputs) public onlyOwner onlyIfAvailable {
+        super.burn(_proofOutputs);
+    }
+
+    function mint(bytes memory _proofOutputs) public onlyOwner onlyIfAvailable {
+        super.mint(_proofOutputs);
+    }
 }
