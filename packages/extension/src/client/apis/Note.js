@@ -25,10 +25,10 @@ export default class Note {
     async refresh() {
         const {
             note,
-        } = await ConnectionService.query({
-            type: 'note',
-            args: { id: this.id },
-        }) || {};
+        } = await ConnectionService.query(
+            'note',
+            { id: this.id },
+        ) || {};
 
         if (note) {
             dataProperties.forEach((key) => {
@@ -46,10 +46,10 @@ export default class Note {
         }
         const {
             note,
-        } = await ConnectionService.query({
-            type: 'noteWithViewingKey',
-            args: { id: this.id },
-        }) || {};
+        } = await ConnectionService.query(
+            'noteWithViewingKey',
+            { id: this.id },
+        ) || {};
 
         if (!note || !note.decryptedViewingKey) {
             return null;
@@ -77,13 +77,13 @@ export default class Note {
             ? [addresses]
             : addresses;
 
-        const { permission } = await query({
-            type: 'grantNoteAccess',
-            args: {
+        const { permission } = await ConnectionService.query(
+            'grantNoteAccess',
+            {
                 id: this.id,
-                addresses,
+                addresses: addressList,
             },
-        }) || {};
+        ) || {};
     }
 
     /**

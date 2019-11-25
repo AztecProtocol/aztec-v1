@@ -7,9 +7,9 @@ export default async function proveMint({
     assetAddress,
     numberOfOutputNotes,
 }) {
-    const data = await ConnectionService.query({
-        type: 'constructProof',
-        args: {
+    const data = await ConnectionService.query(
+        'constructProof',
+        {
             proofType: 'MINT_PROOF',
             transactions,
             from,
@@ -17,7 +17,7 @@ export default async function proveMint({
             sender,
             numberOfOutputNotes,
         },
-    }) || {};
+    ) || {};
 
 
     return data;
