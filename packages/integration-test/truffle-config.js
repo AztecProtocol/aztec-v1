@@ -8,19 +8,17 @@ const { toWei, toHex } = require('web3-utils');
 
 const compilerConfig = require('./compiler');
 
-// You must specify PRIVATE_KEY and INFURA_API_KEY in your .env file
-// Feel free to replace PRIVATE_KEY with a MNEMONIC to use an hd wallet
+// You must specify a MNEMONIC and INFURA_API_KEY in your .env file
 
-const privateKeys = [process.env.PRIVATE_KEY, process.env.PRIVATE_KEY_2];
-const addressIndexToManage = 0;
+const addressIndexToManage = 1;
 const numAddresses = 2;
 
 function createProvider(network) {
     if (process.env.CI && process.env.CIRCLE_JOB !== 'artifacts') {
         return {};
     }
-    if (!process.env.PRIVATE_KEY && !process.env.MNEMONIC) {
-        console.log('Please set either your PRIVATE_KEY or MNEMONIC in a .env file');
+    if (!process.env.MNEMONIC) {
+        console.log('Please set a MNEMONIC in a .env file');
         process.exit(1);
     }
     if (!process.env.INFURA_API_KEY) {
@@ -29,7 +27,7 @@ function createProvider(network) {
     }
     return () => {
         return new HDWalletProvider(
-            privateKeys || process.env.MNEMONIC,
+            process.env.MNEMONIC,
             `https://${network}.infura.io/v3/` + process.env.INFURA_API_KEY,
             addressIndexToManage,
             numAddresses,

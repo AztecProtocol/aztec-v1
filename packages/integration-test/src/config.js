@@ -24,7 +24,7 @@ config.contractsToDeploy = [
     'ACE',
     'Dividend',
     'ERC20Mintable',
-    'FactoryBase201907',
+    'FactoryAdjustable201907',
     'JoinSplit',
     'JoinSplitFluid',
     'PrivateRange',

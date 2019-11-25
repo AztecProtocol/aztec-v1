@@ -14,10 +14,10 @@ fi
 ./node_modules/.bin/truffle version
 
 # Run Ropsten integration test
-./node_modules/.bin/truffle test ./test/keyFlows.js --network ropsten
+./node_modules/.bin/truffle test ./test/integration.js --network ropsten
 
 # Run Rinkeby integration test
-./node_modules/.bin/truffle test ./test/keyFlows.js --network rinkeby
+./node_modules/.bin/truffle test ./test/integration.js --network rinkeby
 
 
 
