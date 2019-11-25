@@ -56,6 +56,16 @@ export default {
             notEnough: 'Asset balance is not enough.',
         },
     },
+    erc20: {
+        deposit: {
+            allowance: {
+                notEnough: 'ERC20 allowance (%{allowance}) is not enough to make a deposit of %{depositAmount}.',
+            },
+            balance: {
+                notEnough: 'ERC20 balance (%{balance}) is not enough to make a deposit of %{depositAmount}.',
+            },
+        },
+    },
     note: {
         viewingKey: {
             encrypt: 'Failed to encrypt viewing key.',

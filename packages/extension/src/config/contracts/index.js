@@ -10,6 +10,7 @@ const {
     AZTECAccountRegistryGSN,
     ACE,
     ZkAsset,
+    ERC20,
 } = contracts;
 
 export {
@@ -17,4 +18,5 @@ export {
     AZTECAccountRegistryGSN,
     ACE,
     ZkAsset,
+    ERC20,
 };

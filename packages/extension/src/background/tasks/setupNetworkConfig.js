@@ -12,6 +12,7 @@ const backgroundContracts = [
     'AZTECAccountRegistry',
     'AZTECAccountRegistryGSN',
     'ZkAsset',
+    'ERC20',
 ];
 
 export default async function setupNetworkConfig({

@@ -1,6 +1,7 @@
 import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
 import ACE from '~contracts/IAZTEC.json';
 import IZkAsset from '~contracts/IZkAsset.json';
+import IERC20 from '~contracts/IERC20.json';
 
 export default {
     AZTECAccountRegistry: {
@@ -41,6 +42,11 @@ export default {
             destroyNote: 'DestroyNote',
         },
         config: IZkAsset,
+        networks: {},
+    },
+    ERC20: {
+        name: 'ERC20',
+        config: IERC20,
         networks: {},
     },
 };
