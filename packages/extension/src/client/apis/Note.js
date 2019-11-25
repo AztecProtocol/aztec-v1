@@ -1,7 +1,7 @@
 import {
     fromViewingKey,
 } from '~utils/note';
-import query from '~client/utils/query';
+import ConnectionService from '~/client/services/ConnectionService';
 import proofFactory from './noteProofFactory';
 
 const dataProperties = [
@@ -25,7 +25,7 @@ export default class Note {
     async refresh() {
         const {
             note,
-        } = await query({
+        } = await ConnectionService.query({
             type: 'note',
             args: { id: this.id },
         }) || {};
@@ -46,7 +46,7 @@ export default class Note {
         }
         const {
             note,
-        } = await query({
+        } = await ConnectionService.query({
             type: 'noteWithViewingKey',
             args: { id: this.id },
         }) || {};

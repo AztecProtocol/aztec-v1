@@ -6,9 +6,9 @@ import {
 } from '~utils/note';
 import asyncMap from '~utils/asyncMap';
 import Web3Service from '~/client/services/Web3Service';
+import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
-import query from '~client/utils/query';
 // import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
 
@@ -19,7 +19,7 @@ const {
 export default async function proveBurn({
     assetAddress,
     notes,
-    sender,
+    // sender,
 }) {
     const notesOwner = {};
 
@@ -50,7 +50,7 @@ export default async function proveBurn({
     } else {
         const {
             utilityNote,
-        } = await query(`
+        } = await ConnectionService.query(`
             utilityNote(id: "${confidentialTotalBurned}") {
                 note {
                     decryptedViewingKey

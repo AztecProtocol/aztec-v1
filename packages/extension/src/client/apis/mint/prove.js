@@ -1,4 +1,4 @@
-import query from '~client/utils/query';
+import ConnectionService from '~/client/services/ConnectionService';
 
 export default async function proveMint({
     transactions,
@@ -7,7 +7,7 @@ export default async function proveMint({
     assetAddress,
     numberOfOutputNotes,
 }) {
-    const data = await query({
+    const data = await ConnectionService.query({
         type: 'constructProof',
         args: {
             proofType: 'MINT_PROOF',

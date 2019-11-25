@@ -1,8 +1,7 @@
 import Web3Service from '~/client/services/Web3Service';
-import query from '~client/utils/query';
+import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~client/utils/ContractError';
 import ApiError from '~client/utils/ApiError';
-import proofFactory from './assetProofFactory';
 
 const dataProperties = [
     'address',
@@ -30,7 +29,7 @@ export default class Asset {
     }
 
     refresh = async () => {
-        const { asset } = await query({
+        const { asset } = await ConnectionService.query({
             type: 'asset',
             args: { id: this.id },
         }) || {};
@@ -43,7 +42,7 @@ export default class Asset {
     };
 
     async balance() {
-        const { asset } = await query({
+        const { asset } = await ConnectionService.query({
             type: 'assetBalance',
             args: { id: this.id },
         }) || {};
@@ -186,7 +185,7 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return query({
+        return ConnectionService.query({
             type: 'constructProof',
             args: {
                 proofType: 'DEPOSIT_PROOF',
@@ -207,7 +206,7 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return query({
+        return ConnectionService.query({
             type: 'constructProof',
             args: {
                 proofType: 'WITHDRAW_PROOF',
@@ -242,7 +241,7 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return query({
+        return ConnectionService.query({
             type: 'constructProof',
             args: {
                 proofType: 'TRANSFER_PROOF',
@@ -274,16 +273,14 @@ export default class Asset {
      *
      * @returns ([Notes!])
      */
-    swap = async (swap, {
-        sender = '',
-    } = {}) => proofFactory(
-        'swap',
-        {
-            assetAddress: this.address,
-            swap,
-            sender,
-        },
-    );
+    swap = async (
+    // swap,
+    // {
+    //     sender = '',
+    // } = {},
+    ) => {
+        // TODO
+    };
 
 
     /**
@@ -300,23 +297,18 @@ export default class Asset {
      *
      * @returns ([Notes!])
      */
-    mint = async (transactions, {
-        sender = '',
-        numberOfOutputNotes = 1,
-    } = {}) => {
+    mint = async (
+    // transactions,
+    // {
+    //     sender = '',
+    //     numberOfOutputNotes = 1,
+    // } = {},
+    ) => {
         if (!this.canAdjustSupply) {
             throw new ApiError('api.mint.notValid');
         }
 
-        return proofFactory(
-            'mint',
-            {
-                assetAddress: this.address,
-                transactions,
-                sender,
-                numberOfOutputNotes,
-            },
-        );
+        // TODO
     };
 
     /**
@@ -333,32 +325,29 @@ export default class Asset {
      *
      * @returns ([Notes!])
      */
-    burn = async (notes, {
-        sender = '',
-    } = {}) => {
+    burn = async (
+    // notes,
+    // {
+    //     sender = '',
+    // } = {},
+    ) => {
         if (!this.canAdjustSupply) {
             throw new ApiError('api.burn.notValid');
         }
 
-        return proofFactory(
-            'burn',
-            {
-                assetAddress: this.address,
-                notes,
-                sender,
-            },
-        );
+        // TODO
     };
 
     // createNoteFromBalance = async (amount, {
     //     userAccess = [],
     //     numberOfInputNotes,
+    //     numberOfOutputNotes = 1,
     // } = {}) => {
     //     const {
     //         address,
     //     } = Web3Service.account;
     //
-    //     return query({
+    //     return ConnectionService.query({
     //         type: 'constructProof',
     //         args: {
     //             proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
@@ -367,7 +356,7 @@ export default class Asset {
     //             owner: address,
     //             userAccess,
     //             numberOfInputNotes,
-    //             numberOfOutputNotes: 1,
+    //             numberOfOutputNotes,
     //         },
     //     });
     // };
@@ -382,7 +371,7 @@ export default class Asset {
             address,
         } = Web3Service.account;
 
-        return query({
+        return ConnectionService.query({
             type: 'constructProof', // TODO - define another query type
             args: {
                 proofType: 'FETCH_NOTES_FROM_BALANCE',
