@@ -7,7 +7,11 @@ const {
     validateRequestData,
     registerContracts,
     refreshPendingTxs,
+    validateNetworkId,
 } = require('./helpers');
+const {
+    getParameters,
+} = require('./utils/event');
 const web3Service = require('./services/Web3Service');
 const {
     errorLog,
@@ -83,17 +87,23 @@ exports.balanceHandler = async (event) => {
         return NOT_FOUND_404();
     }
     const {
-        apiKey,
-        networkId,
-    } = event.pathParameters || {};
-
-    try {
-        initialize({
+        path: {
+            apiKey,
             networkId,
-        });
-    } catch (e) {
-        return BAD_400(e.toString());
+        },
+    } = getParameters(event) || {};
+
+    const {
+        isValid,
+        error: networkIdError,
+    } = validateNetworkId(networkId);
+    if (!isValid) {
+        return networkIdError;
     }
+
+    initialize({
+        networkId,
+    });
 
     const {
         error: validationError,

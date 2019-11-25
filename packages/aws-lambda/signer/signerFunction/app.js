@@ -11,6 +11,7 @@ const {
     validateRequestData,
     registerContracts,
     refreshPendingTxs,
+    validateNetworkId,
 } = require('./helpers');
 const {
     getOrigin,
@@ -53,9 +54,6 @@ const initializeWeb3Service = ({
     networkId,
 }) => {
     const network = Object.values(NETWORKS).find(({ id }) => id === networkId);
-    if (!network || !networkId) {
-        throw new Error('Passed not right "networkId"');
-    }
     const account = {
         address: process.env.SIGNER_ADDRESS,
         privateKey: process.env.SIGNER_PRIVATE_KEY,
@@ -95,24 +93,29 @@ exports.signTxHandler = async (event) => {
         return NOT_FOUND_404();
     }
     const {
-        apiKey,
-        networkId,
-    } = event.pathParameters || {};
-    const {
-        data,
-    } = getParameters(event) || {};
-    const origin = getOrigin(event);
-
-    const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
-
-    try {
-        initialize({
+        body: {
+            data,
+        },
+        path: {
+            apiKey,
             networkId,
-        });
-    } catch (e) {
-        return BAD_400(e.toString());
+        },
+    } = getParameters(event) || {};
+
+    const {
+        isValid,
+        error: networkIdError,
+    } = validateNetworkId(networkId);
+    if (!isValid) {
+        return networkIdError;
     }
 
+    initialize({
+        networkId,
+    });
+
+    const origin = getOrigin(event);
+    const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
     const {
         error: validationError,
     } = await validateRequestData({
