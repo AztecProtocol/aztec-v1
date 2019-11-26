@@ -1,45 +1,33 @@
-import { handleQuery } from '../../../utils/connectionUtils';
 import {
-    dataError,
+    argsError,
 } from '~utils/error';
+import query from './query';
 
 export default async function validateExtensionAccount(accountAddress) {
-    const validAddress = accountAddress;
-    if (accountAddress && !validAddress) {
-        throw dataError('input.address.notValid', {
-            address: accountAddress,
-        });
-    }
-
+    const request = {
+        domain: window.location.origin,
+    };
     const {
-        response,
-    } = await handleQuery({
-        query: `
-        user(id: "${validAddress}") {
+        user: {
+            account,
+        },
+    } = await query(request, `
+        user(id: "${accountAddress}") {
             account {
-                address
                 linkedPublicKey
                 spendingPublicKey
             }
-            error {
-                type
-                key
-                message
-                response
-            }
         }
-    `,
-    });
+    `);
 
-    const {
-        account,
-    } = response || {};
-
-    if (!account) {
-        throw dataError('account.not.linked', {
-            addresses: accountAddress,
+    if (!account
+        || !account.linkedPublicKey
+        || !account.spendingPublicKey
+    ) {
+        return argsError('account.not.linked', {
+            addresses: [accountAddress],
         });
     }
 
-    return response;
+    return null;
 }

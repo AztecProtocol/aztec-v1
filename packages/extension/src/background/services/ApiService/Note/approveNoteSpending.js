@@ -28,15 +28,10 @@ const triggerApproveNoteSpending = async (query, connection) => {
     );
 
     const {
-        data: permission,
+        data,
     } = resp || {};
 
-    return {
-        ...query,
-        data: {
-            permission,
-        },
-    };
+    return data;
 };
 
 export default triggerApproveNoteSpending;

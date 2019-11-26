@@ -1,22 +1,21 @@
-import apollo from '../../GraphQLService';
 import AccountsQuery from '../queries/AccountsQuery';
+import query from './query';
 
 export default async function validateAccounts({
     addresses,
-    domain,
-    currentAddress,
 }) {
-    const {
+    const request = {
+        domain: window.location.origin,
         data: {
-            accounts: accountsResponse,
+            args: {
+                addressArrStr: addresses,
+            },
         },
-    } = await apollo.query({
-        query: AccountsQuery,
-        variables: {
-            addressArrStr: addresses,
-            domain,
-            currentAddress,
-        },
-    });
-    return accountsResponse;
+    };
+
+    const {
+        accounts: response,
+    } = await query(request, AccountsQuery);
+
+    return response.error ? response : null;
 }

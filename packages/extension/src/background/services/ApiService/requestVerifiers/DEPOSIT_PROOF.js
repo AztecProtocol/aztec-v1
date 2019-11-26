@@ -3,6 +3,8 @@ import {
     argsError,
 } from '~/utils/error';
 import Asset from '~/background/database/models/asset';
+import validateExtensionAccount from '../utils/validateExtensionAccount';
+import validateAccounts from '../utils/validateAccounts';
 
 export default async function verifyDepositRequest({
     assetAddress,
@@ -53,6 +55,19 @@ export default async function verifyDepositRequest({
             balance,
             depositAmount,
         });
+    }
+
+    const ownerError = await validateExtensionAccount(from);
+    if (ownerError) {
+        return ownerError;
+    }
+
+    const addresses = transactions.map(({ to }) => to);
+    const invalidAddressError = await validateAccounts({
+        addresses,
+    });
+    if (invalidAddressError) {
+        return invalidAddressError;
     }
 
     return null;

@@ -4,7 +4,7 @@ import {
 import filterStream from '~utils/filterStream';
 import AuthService from '~/background/services/AuthService';
 
-const registerDomain = async (query, connection) => {
+const registerDomainUi = async (query, connection) => {
     const {
         domain,
     } = query;
@@ -31,34 +31,30 @@ const registerDomain = async (query, connection) => {
         },
     });
 
-    const resp = await filterStream(
+    return filterStream(
         uiReturnEvent,
         requestId,
         connection.MessageSubject.asObservable(),
     );
-    const {
-        data: {
-            domain: registeredDomain,
-        } = {},
-    } = resp || {};
-
-    return registeredDomain;
 };
 
-
-export default async (query, connection) => {
+export default async function registerDomain(query, connection) {
     const {
         domain,
     } = query;
     let registeredDomain = await AuthService.getRegisteredDomain(domain);
+    let error;
     if (!registeredDomain) {
-        registeredDomain = await registerDomain(query, connection);
+        ({
+            data: {
+                domain: registeredDomain,
+                error,
+            } = {},
+        } = await registerDomainUi(query, connection) || {});
     }
 
     return {
-        ...query,
-        data: {
-            domain: registeredDomain,
-        },
+        domain: registeredDomain,
+        error,
     };
-};
+}

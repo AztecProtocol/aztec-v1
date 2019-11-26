@@ -1,22 +1,11 @@
 import Schema from 'validate';
+import addressType from './types/address';
 import transactionsType from './types/transactions';
 
 export default new Schema({
-    assetAddress: {
-        type: String,
-        length: 42,
-        required: true,
-    },
-    from: {
-        type: String,
-        length: 42,
-        required: true,
-    },
-    sender: {
-        type: String,
-        length: 42,
-        required: true,
-    },
+    assetAddress: addressType.isRequired,
+    from: addressType.isRequired,
+    sender: addressType.isRequired,
     numberOfOutputNotes: {
         type: Number,
         size: {

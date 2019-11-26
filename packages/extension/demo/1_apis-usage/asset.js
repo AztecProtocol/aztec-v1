@@ -1,6 +1,9 @@
 'use strict';
 
 const zkAssetAddress = document.body.getAttribute('asset');
+const {
+    address: accountAddress,
+} = window.aztec.web3.account();
 let asset;
 let allowanceStatus;
 let depositStatus;
@@ -101,19 +104,19 @@ async function approveAllowance() {
 }
 
 async function deposit() {
-  const depositInput = document.getElementById('deposit-value');
   const numberOfOutputNotes = parseInt(document.getElementById('deposit-output-number').value, 10);
+  const toAddress = document.getElementById('deposit-to-address').value;
+  const depositInput = document.getElementById('deposit-value');
   const value = parseInt(depositInput.value, 10);
 
   depositStatus.clear();
 
-  const account = window.aztec.web3.account();
   try {
     await asset.deposit(
       [
         {
           amount: value,
-          to: account.address,
+          to: toAddress,
         },
       ],
       {
@@ -130,6 +133,7 @@ async function deposit() {
 
 async function withdraw() {
   const withdrawInput = document.getElementById('withdraw-value');
+  const toAddress = document.getElementById('withdraw-to-address').value;
   const numberOfInputNotes = parseInt(document.getElementById('withdraw-input-number').value, 10);
   const value = parseInt(withdrawInput.value);
 
@@ -139,7 +143,7 @@ async function withdraw() {
   const transactions = [
     {
       amount: value,
-      to: account.address,
+      to: toAddress,
     },
   ];
 
@@ -290,6 +294,13 @@ document.getElementById('app').innerHTML = `
           size="2"
           value="2"
         /><br/>
+        <label>To</label>
+        <input
+          id="deposit-to-address"
+          type="text"
+          size="42"
+          value="${accountAddress}"
+        /><br/>
         <button onclick="deposit()">Submit</button><br/>
         <br/>
         <div id="deposit-status"></div>
@@ -309,6 +320,13 @@ document.getElementById('app').innerHTML = `
           type="number"
           size="2"
           value="2"
+        /><br/>
+        <label>To</label>
+        <input
+          id="withdraw-to-address"
+          type="text"
+          size="42"
+          value="${accountAddress}"
         /><br/>
         <button onclick="withdraw()">Submit</button><br/>
         <br/>

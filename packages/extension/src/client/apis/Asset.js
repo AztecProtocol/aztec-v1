@@ -42,12 +42,12 @@ export default class Asset {
     };
 
     async balance() {
-        const { asset } = await ConnectionService.query(
+        const { balance } = await ConnectionService.query(
             'assetBalance',
             { id: this.id },
         ) || {};
 
-        return (asset && asset.balance) || 0;
+        return balance || 0;
     }
 
     notifySubscribers = (type, response) => {
@@ -372,9 +372,8 @@ export default class Asset {
         } = Web3Service.account;
 
         return ConnectionService.query(
-            'constructProof', // TODO - define another query type
+            'fetchNotesFromBalance',
             {
-                proofType: 'FETCH_NOTES_FROM_BALANCE',
                 assetAddress: this.address,
                 owner: address,
                 greaterThan,
