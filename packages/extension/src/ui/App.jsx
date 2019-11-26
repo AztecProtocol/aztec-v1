@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import Route from '~uiModules/components/Route';
 import ConnectionService from '~ui/services/ConnectionService';
+import Web3Service from '~/helpers/Web3Service';
 import apis from '~uiModules/apis';
 import i18n from '~ui/helpers/i18n';
 import router from '~ui/helpers/router';
@@ -97,8 +98,8 @@ class App extends PureComponent {
             data: actionData,
         } = action;
         const {
-            currentAddress,
-        } = actionData;
+            address: currentAddress,
+        } = Web3Service.account;
         const currentAccount = {
             address: currentAddress,
         };
