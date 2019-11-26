@@ -1,11 +1,10 @@
 import {
     argsError,
 } from '~utils/error';
-import generateSortedValues from './generateSortedValues';
 import arraySum from './arraySum';
 
 export default function validate({
-    noteValues,
+    sortedValues,
     minSum,
     numberOfNotes,
     allowLessNumberOfNotes = true,
@@ -14,7 +13,6 @@ export default function validate({
         return [];
     }
 
-    const sortedValues = generateSortedValues(noteValues);
     const maxSet = sortedValues.slice(-numberOfNotes);
     const maxSum = arraySum(maxSet);
     if (minSum > maxSum) {

@@ -291,6 +291,7 @@ class AssetManager {
         return {
             balance,
             noteValues,
+            getSortedValues: () => this.noteBucketCache.getSortedValues(assetId),
         };
     }
 }

@@ -5,6 +5,7 @@ import pickKeysByValues from './pickKeysByValues';
 import arraySum from './arraySum';
 
 export default function pickNotes({
+    sortedValues,
     noteValues,
     minSum,
     numberOfNotes: count = 1,
@@ -14,8 +15,8 @@ export default function pickNotes({
         return [];
     }
 
-    const sortedValues = validate({
-        noteValues,
+    validate({
+        sortedValues,
         minSum,
         numberOfNotes: count,
         allowLessNumberOfNotes,

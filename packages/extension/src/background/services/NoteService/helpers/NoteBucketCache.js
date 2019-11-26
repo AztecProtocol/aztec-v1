@@ -1,9 +1,10 @@
-import CacheManager from '~utils/caches/helpers/CacheManager';
+import CacheManager from '~/utils/caches/helpers/CacheManager';
 import {
     defaultMaxAssets,
     defaultMaxNotes,
 } from '../config';
 import sizeOfNoteValues from '../utils/sizeOfNoteValues';
+import generateSortedValues from '../utils/generateSortedValues';
 
 export default class NoteBucketCache {
     constructor({
@@ -21,6 +22,7 @@ export default class NoteBucketCache {
          *         [value]: [NoteKey!],
          *     }
          */
+        this.sortedValuesCache = new CacheManager(maxAssets);
     }
 
     import({
@@ -65,6 +67,7 @@ export default class NoteBucketCache {
             .reverse()
             .forEach((assetId) => {
                 if (!assetNotes[assetId]) return;
+                this.sortedValuesCache.remove(assetId);
                 this.cache.add(assetId, assetNotes[assetId]);
                 this.memoryUsage += this.sizeMapping[assetId];
             });
@@ -99,6 +102,7 @@ export default class NoteBucketCache {
                 return false;
             }
 
+            this.sortedValuesCache.remove(toDelete);
             this.cache.remove(toDelete);
             this.memoryUsage -= this.sizeMapping[toDelete];
             delete this.sizeMapping[toDelete];
@@ -121,6 +125,7 @@ export default class NoteBucketCache {
             this.ensureEnoughMemory(assetId, extraSize);
         }
 
+        this.sortedValuesCache.remove(assetId);
         this.cache.add(assetId, noteValues);
         this.sizeMapping[assetId] = size;
         this.memoryUsage += size;
@@ -150,6 +155,7 @@ export default class NoteBucketCache {
             noteValues[value].push(key);
         }
 
+        this.sortedValuesCache.remove(assetId);
         if (!this.sizeMapping[assetId]) {
             this.sizeMapping[assetId] = 0;
         }
@@ -177,6 +183,7 @@ export default class NoteBucketCache {
 
         noteValues[value].splice(idx, 1);
 
+        this.sortedValuesCache.remove(assetId);
         this.sizeMapping[assetId] -= 1;
         this.memoryUsage -= 1;
         return true;
@@ -192,5 +199,17 @@ export default class NoteBucketCache {
         }
 
         return this.cache.get(assetId);
+    }
+
+    getSortedValues(assetId) {
+        if (this.sortedValuesCache.has(assetId)) {
+            this.sortedValuesCache.increasePriority(assetId);
+        } else {
+            const noteValues = this.get(assetId);
+            const sortedValues = generateSortedValues(noteValues);
+            this.sortedValuesCache.add(assetId, sortedValues);
+        }
+
+        return this.sortedValuesCache.get(assetId);
     }
 }
