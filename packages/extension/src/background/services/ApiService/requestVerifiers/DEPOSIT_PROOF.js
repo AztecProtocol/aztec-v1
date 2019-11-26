@@ -14,13 +14,19 @@ export default async function verifyDepositRequest({
     const { networkId } = Web3Service;
     const {
         linkedTokenAddress,
+        scalingFactor: scalingFactorStr,
     } = await Asset.get(
         { networkId },
         { registryOwner: assetAddress },
     );
 
-    const depositAmount = transactions
+    // TODO - shoule be big number
+    const scalingFactor = parseInt(scalingFactorStr, 10);
+
+    const notesValue = transactions
         .reduce((sum, { amount }) => sum + amount, 0);
+
+    const depositAmount = notesValue * scalingFactor;
 
     const aceAddress = Web3Service.getAddress('ACE');
 
@@ -38,6 +44,7 @@ export default async function verifyDepositRequest({
         return argsError('erc20.deposit.allowance.notEnough', {
             allowance,
             depositAmount,
+            notesValue,
         });
     }
 
@@ -54,6 +61,7 @@ export default async function verifyDepositRequest({
         return argsError('erc20.deposit.balance.notEnough', {
             balance,
             depositAmount,
+            notesValue,
         });
     }
 
