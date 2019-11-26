@@ -1,5 +1,5 @@
 import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
-import ACE from '~contracts/IAZTEC.json';
+import ACE from '~contracts/ACE.json';
 import IZkAsset from '~contracts/IZkAsset.json';
 import IERC20 from '~contracts/IERC20.json';
 
@@ -11,7 +11,7 @@ export default {
         },
         config: AZTECAccountRegistryGSNContract,
         networks: {
-            4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
+            4: '0xC13dE0b75fF8C1DBa6CeB65f9bC28cB43AA6c2a1',
         },
     },
     AZTECAccountRegistryGSN: {
@@ -21,7 +21,7 @@ export default {
         },
         config: AZTECAccountRegistryGSNContract,
         networks: {
-            4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
+            4: '0xC13dE0b75fF8C1DBa6CeB65f9bC28cB43AA6c2a1',
         },
     },
     ACE: {
@@ -31,7 +31,7 @@ export default {
         },
         config: ACE,
         networks: {
-            4: '0x66279F02E177867067895C6CF8bD6A02C03f2206',
+            4: '0x9be0e65c568FDDA547AD9879e565d3d48C43408E',
         },
     },
     ZkAsset: {

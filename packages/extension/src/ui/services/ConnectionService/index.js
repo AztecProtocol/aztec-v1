@@ -36,12 +36,14 @@ export default {
         },
     }),
     sendTransaction: async ({
+        clientRequestId = '',
         contract,
         contractAddress,
         method,
         data,
     }) => manager.postToBackground({
         type: sendTransactionEvent,
+        clientRequestId: clientRequestId || manager.clientRequestId,
         data: {
             contract,
             contractAddress,
