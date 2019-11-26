@@ -13,8 +13,7 @@ export default async function getAccounts(args, ctx = {}) {
     } = args;
 
     const {
-        // TODO: remove default value, when it will be passed here.
-        networkId = 0,
+        networkId,
     } = ctx;
 
     let accounts = await Promise.all(addresses.map(address => fetchAztecAccount({
@@ -22,9 +21,9 @@ export default async function getAccounts(args, ctx = {}) {
         networkId,
     })));
 
-    accounts = accounts.map(({
-        account,
-    }) => (account));
+    accounts = accounts
+        .map(({ account }) => account)
+        .filter(a => a);
     const onChainAccounts = accounts || [];
     const invalidAccounts = addresses
         .filter((addr) => {
