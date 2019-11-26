@@ -7,7 +7,9 @@ import { registerSteps } from '~ui/config/steps';
 
 const Register = ({
     initialStep,
-    address,
+    currentAccount: {
+        address,
+    },
     linkedPublicKey,
     seedPhrase,
     gsnConfig,
@@ -34,14 +36,15 @@ const Register = ({
 
 Register.propTypes = {
     initialStep: PropTypes.number,
-    address: PropTypes.string,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    }).isRequired,
     linkedPublicKey: PropTypes.string,
     seedPhrase: PropTypes.string,
 };
 
 Register.defaultProps = {
     initialStep: 0,
-    address: '',
     linkedPublicKey: '',
     seedPhrase: '',
 };
