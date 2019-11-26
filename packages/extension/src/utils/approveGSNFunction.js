@@ -1,10 +1,12 @@
 import axios from 'axios';
+import { get } from '~/utils/storage';
+import ClientActionService from '~background/services/ClientActionService';
 import {
-    SIGNING_PROVIDER,
-} from '~config/constants';
+    actionRequestEvent,
+} from '~config/event';
 
 
-export default async ({
+export default (query, connection) => async ({
     from,
     to,
     encodedFunctionCall,
@@ -15,16 +17,32 @@ export default async ({
     relayerAddress,
     relayHubAddress,
 }) => {
-    const data = {
-        from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress,
+    const apiKey = await get('apiKey') || 'test1234';
+    const networkId = await get('networkId');
+
+    const params = {
+        from,
+        to,
+        encodedFunctionCall,
+        txFee,
+        gasPrice,
+        gas,
+        nonce,
+        relayerAddress,
+        relayHubAddress,
+        apiKey,
+        networkId,
     };
-    console.warn('TODO: approveGSNFunction handle dev / prod url');
 
-    const response = await axios.post(`${SIGNING_PROVIDER}/Stage/sign-data`, {
-        data,
-        apiKey: 'aztecprotocol_api_key',
-    });
 
-    console.log(`Lambda response: ${JSON.stringify(response)}`);
-    return response.data.data.dataSignature;
+    const response = await ClientActionService.triggerClientAction({
+        ...query,
+        data: {
+            type: actionRequestEvent,
+            action: 'gsn.sign.transaction',
+            params,
+        },
+    }, connection);
+
+    return response.data.dataSignature;
 };

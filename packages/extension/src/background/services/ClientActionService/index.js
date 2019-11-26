@@ -8,10 +8,12 @@ const triggerClientAction = async (query, connection) => {
     const {
         requestId,
     } = query;
+    console.log(query);
     connection.ClientActionSubject.next({
         ...query,
         type: actionRequestEvent,
     });
+    console.log('here');
 
     return filterStream(actionResponseEvent, requestId, connection.message$);
 };

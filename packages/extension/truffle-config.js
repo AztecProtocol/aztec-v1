@@ -33,7 +33,7 @@ module.exports = {
                 return new HDWalletProvider(process.env.GANACHE_TESTING_ACCOUNT_0_MNEMONIC, `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`);
             },
             network_id: 4,
-            gas: 4500000,
+            gas: 5500000,
             gasPrice: 10000000000,
         },
     },
