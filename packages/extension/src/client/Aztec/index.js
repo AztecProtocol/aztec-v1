@@ -14,6 +14,7 @@ class Aztec {
         {
             provider = null,
             providerUrl = '',
+            apiKey = '',
             contractAddresses = {
                 ACE: '',
                 AZTECAccountRegistry: '',
@@ -43,6 +44,7 @@ class Aztec {
                 contractsConfig,
             } = await ConnectionService.openConnection({
                 providerUrl,
+                apiKey,
                 contractAddresses,
             });
 

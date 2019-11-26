@@ -1,6 +1,8 @@
 import Web3Service from '~/helpers/Web3Service';
 
-const sendTransaction = async (query) => {
+import getGsnConfig from '~utils/getGSNConfig';
+
+const sendTransaction = async (query, connection) => {
     const {
         data: {
             contract,
@@ -11,9 +13,11 @@ const sendTransaction = async (query) => {
     } = query;
 
     try {
+        const gsnConfig = await getGsnConfig();
         const receipt = await Web3Service
             .useContract(contract)
             .method(method, true)
+            .useGSN(gsnConfig)
             .send(...params);
         return {
             ...query,

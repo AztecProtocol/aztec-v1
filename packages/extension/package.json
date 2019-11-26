@@ -70,6 +70,7 @@
         "scrypt-async": "^2.0.1",
         "svg-sprite-loader": "^4.1.6",
         "terminal-kit": "^1.31.3",
+        "truffle-hdwallet-provider": "^1.0.17",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
         "uuid": "^3.3.3",
