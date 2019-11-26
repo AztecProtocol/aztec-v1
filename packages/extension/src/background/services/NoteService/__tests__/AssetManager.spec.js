@@ -188,6 +188,7 @@ describe('AssetManager.ensureSynced', () => {
         expect(cb).toHaveBeenCalledWith({
             balance: 0,
             noteValues: {},
+            getSortedValues: expect.any(Function),
         });
     });
 });

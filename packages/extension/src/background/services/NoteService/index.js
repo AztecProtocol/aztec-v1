@@ -66,7 +66,7 @@ export default {
             assetId,
             async ({
                 balance,
-                noteValues,
+                getSortedValues,
             }) => {
                 if (balance < minSum) {
                     return argsError('note.pick.sum', {
@@ -80,8 +80,9 @@ export default {
                 }
 
                 try {
+                    const sortedValues = getSortedValues();
                     validate({
-                        noteValues,
+                        sortedValues,
                         minSum,
                         numberOfNotes,
                         allowLessNumberOfNotes,
@@ -115,6 +116,7 @@ export default {
             async ({
                 balance,
                 noteValues,
+                getSortedValues,
             }) => {
                 if (balance < minSum) {
                     throw argsError('note.pick.sum', {
@@ -124,8 +126,10 @@ export default {
                     });
                 }
 
+                const sortedValues = getSortedValues();
                 const noteKeyData = pickNotes({
                     noteValues,
+                    sortedValues,
                     minSum,
                     numberOfNotes,
                     allowLessNumberOfNotes,

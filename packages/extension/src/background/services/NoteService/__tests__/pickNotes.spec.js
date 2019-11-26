@@ -1,30 +1,9 @@
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
+import generateSortedValues from '../utils/generateSortedValues';
 import pickNotes from '../utils/pickNotes';
-import generateSortedValues from '../utils/pickNotes/generateSortedValues';
 import getStartIndex from '../utils/pickNotes/getStartIndex';
 import pickKeysByValues from '../utils/pickNotes/pickKeysByValues';
 import * as pickValues from '../utils/pickNotes/pickValues';
-
-describe('generateSortedValues', () => {
-    it('return an array of sorted values from input noteValues mapping', () => {
-        const noteValues = {
-            4: ['n:6'],
-            1: ['n:2', 'n:3'],
-            10: ['n:4'],
-            12: [],
-            0: ['n:1', 'n:5'],
-        };
-        const values = generateSortedValues(noteValues);
-        expect(values).toEqual([
-            0,
-            0,
-            1,
-            1,
-            4,
-            10,
-        ]);
-    });
-});
 
 describe('getStartIndex', () => {
     it('return a start index that will guarantee at least one valid combination from that point', () => {
@@ -90,15 +69,18 @@ describe('pickNotes', () => {
             10: ['n:4'],
             12: [],
         };
+        const sortedValues = generateSortedValues(noteValues);
 
         expect(pickNotes({
             noteValues,
+            sortedValues,
             minSum: 6,
             numberOfNotes: 0,
         })).toEqual([]);
 
         expect(pickNotes({
             noteValues,
+            sortedValues,
             minSum: 6,
             numberOfNotes: 1,
         })).toEqual([
@@ -110,6 +92,7 @@ describe('pickNotes', () => {
 
         expect(pickNotes({
             noteValues,
+            sortedValues,
             minSum: 13,
             numberOfNotes: 2,
         })).toEqual([
@@ -131,6 +114,7 @@ describe('pickNotes', () => {
                 10: ['n:1'],
                 100: ['n:2'],
             },
+            sortedValues: [0, 10, 100],
             minSum: 1000,
             numberOfNotes: 1,
         })).toBe('note.pick.minSum');
@@ -142,6 +126,7 @@ describe('pickNotes', () => {
                 2: ['n:1'],
                 5: ['n:0'],
             },
+            sortedValues: [2, 5],
             minSum: 6,
             numberOfNotes: 3,
         })).toEqual([
@@ -162,6 +147,7 @@ describe('pickNotes', () => {
                 2: ['n:1'],
                 5: ['n:0'],
             },
+            sortedValues: [2, 5],
             minSum: 1,
             numberOfNotes: 3,
             allowLessNumberOfNotes: false,
@@ -175,12 +161,16 @@ describe('pickNotes', () => {
                 2,
             ]);
 
+        const noteValues = {
+            1: ['n:0', 'n:1', 'n:2', 'n:3', 'n:4'],
+            2: ['n:5', 'n:6'],
+            3: ['n:7'],
+        };
+        const sortedValues = generateSortedValues(noteValues);
+
         pickNotes({
-            noteValues: {
-                1: ['n:0', 'n:1', 'n:2', 'n:3', 'n:4'],
-                2: ['n:5', 'n:6'],
-                3: ['n:7'],
-            },
+            noteValues,
+            sortedValues,
             minSum: 4,
             numberOfNotes: 2,
         });
@@ -199,12 +189,16 @@ describe('pickNotes', () => {
                 1,
             ]);
 
+        const noteValues = {
+            1: ['n:0', 'n:1', 'n:2', 'n:3', 'n:4'],
+            2: ['n:5', 'n:6'],
+            3: ['n:7'],
+        };
+        const sortedValues = generateSortedValues(noteValues);
+
         pickNotes({
-            noteValues: {
-                1: ['n:0', 'n:1', 'n:2', 'n:3', 'n:4'],
-                2: ['n:5', 'n:6'],
-                3: ['n:7'],
-            },
+            noteValues,
+            sortedValues,
             minSum: 4,
             numberOfNotes: 3,
         });
