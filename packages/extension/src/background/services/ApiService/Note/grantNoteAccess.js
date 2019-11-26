@@ -28,15 +28,10 @@ const triggerGrantNoteAccessUi = async (query, connection) => {
         connection.MessageSubject.asObservable(),
     );
     const {
-        data: permission,
+        data,
     } = resp || {};
 
-    return {
-        ...query,
-        data: {
-            permission,
-        },
-    };
+    return data;
 };
 
 export default triggerGrantNoteAccessUi;

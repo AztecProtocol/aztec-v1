@@ -25,15 +25,15 @@ export default async function getAccounts(args, ctx = {}) {
         .map(({ account }) => account)
         .filter(a => a);
     const onChainAccounts = accounts || [];
-    const invalidAccounts = addresses
+    const invalidAddresses = addresses
         .filter((addr) => {
             const account = onChainAccounts.find(a => a.address === addr);
             return !account || !account.linkedPublicKey;
         });
 
-    if (invalidAccounts.length > 0) {
+    if (invalidAddresses.length > 0) {
         throw argsError('account.not.linked', {
-            invalidAccounts,
+            addresses: invalidAddresses,
         });
     }
 

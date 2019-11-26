@@ -2,12 +2,12 @@ const transactionsType = {
     type: Array,
     each: {
         to: {
-            type: 'string',
+            type: String,
             length: 42,
             required: true,
         },
         amount: {
-            type: 'number',
+            type: Number,
             size: {
                 min: 1,
             },

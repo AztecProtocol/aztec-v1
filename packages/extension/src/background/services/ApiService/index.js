@@ -1,50 +1,60 @@
 import registerExtension from './RegisterExtension';
 import registerDomain from './RegisterDomain';
-import validateAccounts from './utils/validateAccounts';
 import prove from './Prove';
 import asset from './Asset';
+import assetBalance from './Asset/getBalance';
+import fetchNotesFromBalance from './Asset/fetchNotesFromBalance';
 import note from './Note';
 import noteWithViewingKey from './Note/exportViewingKey';
 import grantNoteAccess from './Note/grantNoteAccess';
-import assetBalance from './Asset/getBalance';
+import validateParameters from './middlewares/validateParameters';
+import validateRequest from './middlewares/validateRequest';
 
-class API {
-    constructor() {
-        this.registerExtension = registerExtension;
-        this.registerDomain = registerDomain;
-        this.asset = asset;
-        this.note = note;
-        this.noteWithViewingKey = noteWithViewingKey;
-        this.grantNoteAccess = grantNoteAccess;
-        this.assetBalance = assetBalance;
-        this.constructProof = prove;
-    }
+const apis = {
+    registerExtension,
+    registerDomain,
+    asset,
+    assetBalance,
+    fetchNotesFromBalance,
+    note,
+    noteWithViewingKey,
+    grantNoteAccess,
+    constructProof: prove,
+};
 
-    async clientApi(request, connection) {
-        // TODO move all auth here
-        const middelware = {
-            grantNoteAccess: validateAccounts,
+const clientApi = async (request, connection) => {
+    // TODO move all auth here
+    const {
+        data: {
+            query,
+            args,
+        },
+    } = request;
+
+    const invalidParamsResp = validateParameters(query, args);
+    if (invalidParamsResp) {
+        return {
+            ...request,
+            data: invalidParamsResp,
         };
-        const {
-            data: {
-                query,
-                args,
-            },
-            domain,
-        } = request;
-        if (middelware[query]) {
-            const {
-                error,
-            } = await middelware[query]({ ...args, domain });
-            if (error) {
-                return {
-                    ...request,
-                    ...error,
-                };
-            }
-        }
-        return this[query](request, connection);
     }
-}
 
-export default new API();
+    const invalidRequestResp = await validateRequest(query, args);
+    if (invalidRequestResp) {
+        return {
+            ...request,
+            data: invalidRequestResp,
+        };
+    }
+
+    const data = await apis[query](request, connection);
+
+    return {
+        ...request,
+        data,
+    };
+};
+
+export default {
+    clientApi,
+};

@@ -2,82 +2,55 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~utils/filterStream';
-import validateUserPermission from '../utils/validateUserPermision';
+import query from '../utils/query';
+import UserPermissionQuery from '../queries/UserPermissionQuery';
 
-const registerExtensionUi = async (query, connection) => {
+const registerExtensionUi = async (request, connection) => {
     const {
-        account,
         requestId,
         data: {
             args,
         },
-    } = query;
+    } = request;
 
     connection.UiActionSubject.next({
+        ...request,
         type: 'ui.register.extension',
-        requestId,
-        data: {
-            ...account,
-            ...args,
-        },
+        data: args,
     });
 
-    const response = await filterStream(
+    return filterStream(
         uiReturnEvent,
-        query.requestId,
+        requestId,
         connection.MessageSubject.asObservable(),
     );
-
-    const {
-        data: registeredData,
-    } = response || {};
-    if (registeredData && registeredData.linkedPublicKey) {
-        // call validateUserPermission again to start EventService and NoteService
-        await validateUserPermission({
-            ...args,
-            domain: window.location.origin,
-        });
-    }
-
-    return response;
 };
 
-const registerExtension = async (query, connection) => {
-    const {
-        data: {
-            args,
-        },
-    } = query;
-
+const registerExtension = async (request, connection) => {
     let {
         userPermission: { account = {} },
-    } = await validateUserPermission({
-        ...args,
-        domain: window.location.origin,
-    }) || {};
+    } = await query(request, UserPermissionQuery) || {};
 
     let error;
     if (!account
         || (!account.blockNumber && !account.registeredAt)
     ) {
-        const queryWithAccount = {
-            ...query,
-            account: account && account.address
-                ? account
-                : { address: args.currentAddress },
-        };
         ({
-            data: account,
-            error,
-        } = await registerExtensionUi(queryWithAccount, connection));
+            data: {
+                error,
+                ...account
+            } = {},
+        } = await registerExtensionUi(request, connection));
+
+        if (account.linkedPublicKey) {
+            // call validateUserPermission again to start EventService and NoteService
+            await query(request, UserPermissionQuery);
+        }
     }
 
     return {
-        ...query,
-        data: {
-            account,
-            error,
-        },
+        account,
+        error,
     };
 };
 

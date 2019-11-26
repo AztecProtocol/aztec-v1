@@ -1,10 +1,10 @@
 import Web3Service from '~/helpers/Web3Service';
 import NoteService from '~/background/services/NoteService';
 
-export default async function verifyTransferRequest({
+export default async function ensureInputNotes({
     assetAddress,
-    transactions,
     numberOfInputNotes,
+    amount,
 }) {
     const {
         networkId,
@@ -13,26 +13,23 @@ export default async function verifyTransferRequest({
         },
     } = Web3Service;
 
-    const totalAmount = transactions
-        .reduce((sum, { amount }) => sum + amount, 0);
-
-    let error = null;
+    let errorResponse = null;
     try {
         const resp = await NoteService.validatePick(
             networkId,
             address,
             assetAddress,
-            totalAmount,
+            amount,
             {
                 numberOfNotes: numberOfInputNotes,
             },
         );
         if (resp && resp.error) {
-            error = resp;
+            errorResponse = resp;
         }
     } catch (e) {
-        error = e;
+        errorResponse = e;
     }
 
-    return error;
+    return errorResponse;
 }
