@@ -5,14 +5,15 @@ import {
 } from '~/config/provider';
 
 export default function getNetworkById(networkId) {
-    let network = Object.keys(networks)
+    const networkKey = Object.keys(networks)
         .find(name => networks[name].id === networkId);
+    let network = networks[networkKey];
     if (network) {
         const {
             providerUrl,
         } = infuraConfig({
             id: networkId,
-            networkName: network.networkName,
+            networkName: networks[networkKey].networkName,
         });
         network.providerUrl = providerUrl;
     } else {

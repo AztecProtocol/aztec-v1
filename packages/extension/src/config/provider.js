@@ -7,7 +7,7 @@ const infuraProjectId = '09c4eed231c840d5ace14ba5389a1a7c';
 export const infuraConfig = ({ id: networkId, networkName, port }, projectId = infuraProjectId) => ({
     title: networkName,
     networkId,
-    providerUrl: `http://localhost:${port}`,
+    providerUrl: `wss://${networkName}.infura.io/ws/v3/${infuraProjectId}`,
 });
 
 const availableNetworks = () => Object.values(NETWORKS).map(({ id }) => id);
