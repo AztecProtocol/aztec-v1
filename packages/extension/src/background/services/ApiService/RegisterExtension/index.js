@@ -8,15 +8,11 @@ import UserPermissionQuery from '../queries/UserPermissionQuery';
 const registerExtensionUi = async (request, connection) => {
     const {
         requestId,
-        data: {
-            args,
-        },
     } = request;
 
     connection.UiActionSubject.next({
         ...request,
         type: 'ui.register.extension',
-        data: args,
     });
 
     return filterStream(

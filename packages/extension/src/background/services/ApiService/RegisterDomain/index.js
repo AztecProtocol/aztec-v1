@@ -6,27 +6,24 @@ import AuthService from '~/background/services/AuthService';
 
 const registerDomainUi = async (query, connection) => {
     const {
-        domain,
-    } = query;
-    const {
-        webClientId,
         requestId,
+        domain,
         data: {
             args,
+            ...rest
         },
     } = query;
-    const senderPort = connection.connections[webClientId];
-    if (!senderPort) {
-        return null;
-    }
 
     connection.UiActionSubject.next({
         ...query,
         type: 'ui.domain.approve',
         data: {
-            ...args,
-            domain: {
-                domain,
+            ...rest,
+            args: {
+                ...args,
+                domain: {
+                    domain,
+                },
             },
         },
     });

@@ -8,15 +8,13 @@ export default async function triggerProofUi(query, connection) {
         data: {
             args: {
                 proofType,
-                ...rest
             },
         },
     } = query;
+
     connection.UiActionSubject.next({
+        ...query,
         type: `ui.asset.prove.${proofType.toLowerCase()}`,
-        requestId: query.requestId,
-        clientId: query.clientId,
-        data: rest,
     });
 
     const {

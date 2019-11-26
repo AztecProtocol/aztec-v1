@@ -149,21 +149,13 @@ class ConnectionService {
 
     async query(queryName, args = {}) {
         const {
-            address,
-        } = Web3Service.account || {};
-
-        const {
             data,
         } = await this.postToBackground({
             type: clientRequestEvent,
             data: {
                 query: queryName,
-                args: {
-                    ...args,
-                    currentAddress: address,
-                    domain: window.location.origin,
-                    site: getSiteData(),
-                },
+                args,
+                site: getSiteData(),
             },
         }) || {};
 
