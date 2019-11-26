@@ -141,6 +141,88 @@ describe('AssetManager.init', () => {
     });
 });
 
+describe('AssetManager.isSynced', () => {
+    it('asset is synced when it is marked as synced and its data are still in noteBucketCache', () => {
+        assetManager.assetMapping.a0 = { synced: true };
+        assetManager.noteBucketCache.set('a0', {});
+        expect(assetManager.isSynced('a0')).toBe(true);
+    });
+
+    it('asset is not synced if it is not marked as synced', () => {
+        assetManager.assetMapping.a0 = { synced: false };
+        assetManager.noteBucketCache.set('a0', {});
+        expect(assetManager.isSynced('a0')).toBe(false);
+    });
+
+    it('asset is not synced if its data are not in noteBucketCache', () => {
+        assetManager.assetMapping.a0 = { synced: true };
+        expect(assetManager.isSynced('a0')).toBe(false);
+    });
+});
+
+describe('AssetManager.ensureSynced', () => {
+    let waitInQueueSpy;
+    let mockIsSynced;
+
+    beforeEach(() => {
+        waitInQueueSpy = jest.spyOn(assetManager, 'waitInQueue')
+            .mockImplementation(() => jest.fn());
+        mockIsSynced = jest.spyOn(assetManager, 'isSynced')
+            .mockImplementation(() => false);
+    });
+
+    it('be added to queue if not synced', async () => {
+        const cb = jest.fn();
+        await assetManager.ensureSynced('a0', cb);
+        expect(waitInQueueSpy).toHaveBeenCalledTimes(1);
+        expect(waitInQueueSpy).toHaveBeenCalledWith('a0', cb);
+        expect(cb).toHaveBeenCalledTimes(0);
+    });
+
+    it('trigger callback if synced', async () => {
+        mockIsSynced.mockImplementationOnce(() => true);
+        const cb = jest.fn();
+        await assetManager.ensureSynced('a0', cb);
+        expect(waitInQueueSpy).toHaveBeenCalledTimes(0);
+        expect(cb).toHaveBeenCalledTimes(1);
+        expect(cb).toHaveBeenCalledWith({
+            balance: 0,
+            noteValues: {},
+        });
+    });
+});
+
+describe('AssetManager .waitInQueue and .flushQueue', () => {
+    it('add callback to queue of given asset and return a promise', () => {
+        expect(assetManager.callbackCache.cache).toEqual({});
+
+        const queuePromise = assetManager.waitInQueue('a0', jest.fn());
+        assetManager.waitInQueue('a1', jest.fn());
+        assetManager.waitInQueue('a1', jest.fn());
+
+        expect(queuePromise).toBeInstanceOf(Promise);
+        expect(assetManager.callbackCache.cache).toEqual({
+            a0: [expect.any(Function)],
+            a1: [expect.any(Function), expect.any(Function)],
+        });
+    });
+
+    it('trigger all the callbacks for a given asset', async () => {
+        const cb0 = jest.fn();
+        assetManager.waitInQueue('a0', cb0);
+        const cb1 = jest.fn();
+        assetManager.waitInQueue('a1', cb1);
+        const cb2 = jest.fn();
+        assetManager.waitInQueue('a0', cb2);
+
+        await assetManager.flushQueue('a0');
+
+        expect(cb0).toHaveBeenCalledTimes(1);
+        expect(cb1).toHaveBeenCalledTimes(0);
+        expect(cb2).toHaveBeenCalledTimes(1);
+    });
+});
+
 describe('AssetManager.syncNext', () => {
     beforeEach(() => {
         assetManager.locked = false;
@@ -226,10 +308,17 @@ describe('AssetManager.syncNext', () => {
         await assets.a0.eventListeners.notify('synced', 'a0');
         expect(handleAssetSyncedSpy).toHaveBeenCalledTimes(0);
     });
+});
 
-    it('can be triggered by handleNewRawNotes', () => {
-        const syncNextSpy = jest.spyOn(assetManager, 'syncNext')
+describe('AssetManager.handleNewRawNotes', () => {
+    let syncNextSpy;
+
+    beforeEach(() => {
+        syncNextSpy = jest.spyOn(assetManager, 'syncNext')
             .mockImplementation(jest.fn());
+    });
+
+    it('trigger syncNext if receive a new asset', () => {
         expect(syncNextSpy).toHaveBeenCalledTimes(0);
 
         const newAssetId = randomId();
@@ -242,20 +331,30 @@ describe('AssetManager.syncNext', () => {
         expect(syncNextSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('will not be triggered by handleNewRawNotes if the asset is already in queues', () => {
-        const syncNextSpy = jest.spyOn(assetManager, 'syncNext')
-            .mockImplementation(jest.fn());
+    it('will not trigger syncNext if the asset is in pending queue', () => {
+        const assets = generateMockAssets(['a0', 'a1']);
+        assetManager.assetMapping = assets;
+        assetManager.pendingAssets.addToBottom(assets.a0);
+        assetManager.pendingAssets.addToBottom(assets.a1);
+        expect(assetManager.pendingAssets.size).toBe(2);
 
+        assetManager.handleNewRawNotes('a0');
+        assetManager.handleNewRawNotes('a1');
+        expect(syncNextSpy).toHaveBeenCalledTimes(0);
+        expect(assetManager.pendingAssets.size).toBe(2);
+    });
+
+    it('will add asset to pending queue if it is in active queue', () => {
         const assets = generateMockAssets(['a0', 'a1']);
         assetManager.assetMapping = assets;
         assetManager.activeAssets.addToBottom(assets.a0);
         assetManager.pendingAssets.addToBottom(assets.a1);
+        expect(assetManager.pendingAssets.size).toBe(1);
 
         assetManager.handleNewRawNotes('a0');
-        expect(syncNextSpy).toHaveBeenCalledTimes(0);
-
         assetManager.handleNewRawNotes('a1');
-        expect(syncNextSpy).toHaveBeenCalledTimes(0);
+        expect(syncNextSpy).toHaveBeenCalledTimes(1);
+        expect(assetManager.pendingAssets.size).toBe(2);
     });
 });
 
