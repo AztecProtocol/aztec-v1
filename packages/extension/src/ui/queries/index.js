@@ -1,7 +1,7 @@
 import PickNotesQuery from './PickNotesQuery';
-import NoteQuery from './NoteWithViewingQuery';
+import NoteWithViewingQuery from './NoteWithViewingQuery';
 
 export default {
     'asset.pickNotesFromBalance': PickNotesQuery,
-    note: NoteQuery,
+    note: NoteWithViewingQuery,
 };

@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 
 export default gql`
     query fetchNotesFromBalance(
-          $assetId: String!,
+          $assetAddress: String!,
           $domain: String!,
           $currentAddress: String!,
           $equalTo: Int,
@@ -15,7 +15,7 @@ export default gql`
         fetchNotesFromBalance(
             domain: $domain,
             currentAddress: $currentAddress,
-            assetId: $assetId,
+            assetId: $assetAddress,
             equalTo: $equalTo,
             greaterThan: $greaterThan,
             lessThan: $lessThan,

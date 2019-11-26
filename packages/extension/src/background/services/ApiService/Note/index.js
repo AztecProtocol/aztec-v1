@@ -1,4 +1,4 @@
 import query from '../utils/query';
-import NoteQuery from '../../../../ui/queries/NoteQuery';
+import NoteQuery from '../queries/NoteQuery';
 
 export default async request => query(request, NoteQuery);
