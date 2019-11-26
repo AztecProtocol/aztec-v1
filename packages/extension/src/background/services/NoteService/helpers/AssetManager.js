@@ -149,8 +149,8 @@ class AssetManager {
         }
 
         this.activeAssets.remove(asset);
-        this.flushCallbacks(assetId);
         asset.eventListeners.remove('synced', this.handleAssetSynced);
+        this.flushQueue(assetId);
         this.syncNext();
 
         if (asset.modified) {
@@ -194,12 +194,12 @@ class AssetManager {
         return this.noteBucketCache.has(assetId);
     }
 
-    async flushCallbacks(assetId) {
+    async flushQueue(assetId) {
         const callbacks = this.callbackCache.remove(assetId);
         if (!callbacks) return;
 
         const asset = this.get(assetId);
-        callbacks.forEach(cb => cb(asset));
+        await Promise.all(callbacks.map(cb => cb(asset)));
     }
 
     async waitInQueue(assetId, cb) {
