@@ -17,7 +17,7 @@ import ThemeContext from '~ui/views/handlers/ThemeContext';
 import Loading from '~ui/views/Loading';
 import routes from '~uiModules/config/routes';
 import actions from '~ui/config/actions';
-import getGsnConfig from '~client/config/getGsnConfig';
+import getGsnConfig from '~utils/getGSNConfig';
 import './styles/guacamole.css';
 import './styles/ui.scss';
 

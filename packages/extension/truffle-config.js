@@ -1,3 +1,7 @@
+const HDWalletProvider = require('truffle-hdwallet-provider');
+require('dotenv').config({ path: '.env.development' });
+
+
 module.exports = {
     compilers: {
         solc: {
@@ -23,6 +27,14 @@ module.exports = {
             gas: 6500000,
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,
+        },
+        rinkeby: {
+            provider() {
+                return new HDWalletProvider(process.env.GANACHE_TESTING_ACCOUNT_0_MNEMONIC, `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`);
+            },
+            network_id: 4,
+            gas: 4500000,
+            gasPrice: 10000000000,
         },
     },
 };

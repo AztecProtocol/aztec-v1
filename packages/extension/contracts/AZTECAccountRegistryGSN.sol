@@ -22,14 +22,11 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
     using NoteUtils for bytes;
     ACEModule.ACE ace;
     uint24 public constant JOIN_SPLIT_PROOF = 65793;
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);    
     constructor(
         address _ace,
         address _trustedAddress
-    ) public {
-        GSNRecipient.initialize();
-        GSNRecipientSignature.initialize(_trustedAddress);
-        ace = ACEModule.ACE(_ace);
-    }
+    ) public { GSNRecipient.initialize(); GSNRecipientSignature.initialize(_trustedAddress); ace = ACEModule.ACE(_ace); }
 
     function confidentialTransferFrom(address _registryOwner, 
                                       bytes memory _proofData, 
@@ -50,6 +47,10 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
                                      // function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
                                      //     ace.publicApprove(_registryOwner, _proofHash, _value);
                                      // }
+                                     function postRelayedCall(bytes calldata context, bool success, uint actualCharge, bytes32 preRetVal) external { 
+                                         (, bytes memory approveData) = abi.decode(context, (address, bytes));
+                                         emit GSNTransactionProcessed(keccak256(approveData), success, actualCharge);
+                                     }
 }
 
 
