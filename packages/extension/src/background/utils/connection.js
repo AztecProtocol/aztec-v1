@@ -72,6 +72,7 @@ class Connection {
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
             tap(({ webClientId, ...rest }) => {
+                console.log({ rest });
                 if (!this.connections[webClientId]) {
                     warnLog(`Cannot find web client '${webClientId}'.`);
                     return;
@@ -155,7 +156,7 @@ class Connection {
 
         this.message$.pipe(
             filter(data => data.type === sendTransactionEvent),
-            mergeMap(data => from(TransactionSendingService.sendTransaction(data))),
+            mergeMap(data => from(TransactionSendingService.sendTransaction(data, this))),
             tap(data => this.UiResponseSubject.next(data)),
         ).subscribe();
 
@@ -363,4 +364,4 @@ class Connection {
     }
 }
 
-export default Connection;
+export default new Connection();

@@ -17,7 +17,7 @@ export default function acceptConnection() {
         type: backgroundReadyEvent,
     }, '*');
 
-    const connection = new Connection();
+    const connection = Connection;
     let networkConfig;
 
     window.addEventListener('message', async (event) => {
