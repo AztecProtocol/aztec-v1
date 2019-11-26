@@ -37,6 +37,7 @@ class Web3Service {
 
         let web3Provider = provider;
         if (!web3Provider && providerUrl) {
+            console.log({ providerUrl });
             if (providerUrl.match(/^wss?:\/\//)) {
                 web3Provider = new Web3.providers.WebsocketProvider(providerUrl);
             } else {
@@ -287,7 +288,7 @@ class Web3Service {
 
 
         const estimatedGas = await method(...methodArgs).estimateGas({
-            from: address,
+            from: fromAddress,
             ...methodSetting,
         });
 
@@ -393,7 +394,8 @@ class Web3Service {
                     call: async (...args) => this.triggerMethod('call', method, null, userAddress, ...args),
                     send: async (...args) => this.triggerMethod('send', method, null, userAddress, ...args),
                     sendSigned: async (...args) => this.triggerMethod('sendSigned', method, address, userAddress, ...args),
-                    useGSN: async (gsnConfig) => {
+                    useGSN: (gsnConfig) => {
+                        console.log({ gsnConfig });
                         if (!gsnConfig) {
                             log('Cannot use gsn as "this.gsnConfig" was not set');
                         }
@@ -401,7 +403,7 @@ class Web3Service {
                         gsnContract.setProvider(gsnConfig.gsnProvider);
                         userAddress = gsnConfig.signingInfo.address;
                         return {
-                            send: this.triggerMethod('send', gsnContract.methods[methodName], address, userAddress, gsnConfig),
+                            send: async (...args) => this.triggerMethod('send', gsnContract.methods[methodName], null, userAddress, ...args),
                         };
                     },
                 };
