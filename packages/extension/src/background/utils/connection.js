@@ -99,6 +99,10 @@ class Connection {
             map(async (action) => {
                 const {
                     requestId,
+                    data: {
+                        site,
+                        args,
+                    },
                 } = action;
 
                 const loadingElem = document.getElementById('aztec-popup-placeholder');
@@ -111,20 +115,16 @@ class Connection {
                 const {
                     webClientId,
                 } = this.requests[requestId];
-                const {
-                    site,
-                } = action.data;
-                const siteData = {
-                    ...site,
-                    // find domain here so that we don't have to include
-                    // the entire 'psl' module to client or background-ui
-                    domain: getDomainFromUrl(site.url),
-                };
 
                 this.openUi({
                     requestId,
                     webClientId,
-                    site: siteData,
+                    site: {
+                        ...site,
+                        // find domain here so that we don't have to include
+                        // the entire 'psl' module to client or background-ui
+                        domain: getDomainFromUrl(site.url),
+                    },
                 });
 
                 this.ClientResponseSubject.next({
@@ -136,7 +136,10 @@ class Connection {
                 const frame = await this.uiFrame.init();
                 frame.contentWindow.postMessage({
                     type: sendActionEvent,
-                    action,
+                    action: {
+                        ...action,
+                        data: args,
+                    },
                 }, '*');
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';

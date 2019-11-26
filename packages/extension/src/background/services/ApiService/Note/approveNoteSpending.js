@@ -5,31 +5,21 @@ import filterStream from '~utils/filterStream';
 
 const triggerApproveNoteSpending = async (query, connection) => {
     const {
-        data: {
-            args,
-        },
+        requestId,
     } = query;
-    connection.UiActionSubject.next({
-        type: 'ui.note.approveSpending',
-        requestId: query.requestId,
-        clientId: query.clientId,
-        data: {
-            response: {
-                ...args,
-                requestId: query.requestId,
-            },
-        },
-    });
 
-    const resp = await filterStream(
-        uiReturnEvent,
-        query.requestId,
-        connection.MessageSubject.asObservable(),
-    );
+    connection.UiActionSubject.next({
+        ...query,
+        type: 'ui.note.approveSpending',
+    });
 
     const {
         data,
-    } = resp || {};
+    } = await filterStream(
+        uiReturnEvent,
+        requestId,
+        connection.MessageSubject.asObservable(),
+    ) || {};
 
     return data;
 };
