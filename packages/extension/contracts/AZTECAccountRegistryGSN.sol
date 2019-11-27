@@ -17,7 +17,7 @@ import "./AZTECAccountRegistry.sol";
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 
-contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient {
+contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNRecipientSignature {
 
     using NoteUtils for bytes;
     ACEModule.ACE ace;
@@ -28,32 +28,9 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient {
         address _trustedAddress
     ) public {
         GSNRecipient.initialize(); 
-        // GSNRecipientSignature.initialize(_trustedAddress); 
+        GSNRecipientSignature.initialize(_trustedAddress); 
         ace = ACEModule.ACE(_ace);
     }
-function acceptRelayedCall(
-        address relay,
-        address from,
-        bytes calldata encodedFunction,
-        uint256 transactionFee,
-        uint256 gasPrice,
-        uint256 gasLimit,
-        uint256 nonce,
-        bytes calldata approvalData,
-        uint256
-    )
-        external
-        view
-        returns (uint256, bytes memory)
-    {
-        return _approveRelayedCall();
-    }
-  function preRelayedCall(bytes calldata context) external returns (bytes32) { 
-  }
-  function setHub(address hub) external {
-    _upgradeRelayHub(hub);
-  }
-
 
     function confidentialTransferFrom(address _registryOwner, 
                                       bytes memory _proofData, 
