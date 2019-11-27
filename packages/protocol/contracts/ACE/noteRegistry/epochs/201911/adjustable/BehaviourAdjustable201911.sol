@@ -6,9 +6,9 @@ import "../Behaviour201911.sol";
 import "../../201907/adjustable/BehaviourAdjustable201907.sol";
 
 /**
- * @title BehaviourBase201907
+ * @title BehaviourBase201911
  * @author AZTEC
- * @dev This contract extends Behaviour201907.
+ * @dev This contract extends Behaviour201911 and BehaviourAdjustable201907.
         Methods are documented in interface.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.

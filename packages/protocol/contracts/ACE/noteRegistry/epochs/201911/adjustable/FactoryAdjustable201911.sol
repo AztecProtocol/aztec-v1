@@ -4,7 +4,7 @@ import "../../../interfaces/NoteRegistryFactory.sol";
 import "./BehaviourAdjustable201911.sol";
 
 /**
-  * @title FactoryAdjustable201907
+  * @title FactoryAdjustable201911
   * @author AZTEC
   * @dev Deploys a BehaviourAdjustable201911
   * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.

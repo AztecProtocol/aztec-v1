@@ -190,15 +190,12 @@ contract Behaviour201907 is NoteRegistryBehaviour {
 
     function createNote(bytes32 _noteHash, address _noteOwner) internal {
         // set up some temporary variables we'll need
-        uint256 noteStatusNew = uint256(NoteStatus.UNSPENT);
-        uint256 noteStatusOld;
+        uint256 noteStatus = uint256(NoteStatus.UNSPENT);
 
         Note storage notePtr = registry.notes[_noteHash];
+        require(notePtr.status == uint256(NoteStatus.DOES_NOT_EXIST), "output note exists");
         // We manually pack our note struct in Yul, because Solidity can be a bit liberal with gas when doing this
         assembly {
-            // Load the status flag for this note - we check this equals DOES_NOT_EXIST outside asm block
-            noteStatusOld := and(sload(notePtr_slot), 0xff)
-
             // Write a new note into storage
             sstore(
                 notePtr_slot,
@@ -206,7 +203,7 @@ contract Behaviour201907 is NoteRegistryBehaviour {
                 or(
                     or(
                         // `status` occupies byte position 0
-                        and(noteStatusNew, 0xff), // mask to 1 byte (uint8)
+                        and(noteStatus, 0xff), // mask to 1 byte (uint8)
                         // `createdOn` occupies byte positions 1-5 => shift by 8 bits
                         shl(8, and(timestamp, 0xffffffffff)) // mask timestamp to 40 bits
                     ),
@@ -215,7 +212,6 @@ contract Behaviour201907 is NoteRegistryBehaviour {
                 )
             )
         }
-        require(noteStatusOld == uint256(NoteStatus.DOES_NOT_EXIST), "output note exists");
     }
 
     function deleteNote(bytes32 _noteHash, address _noteOwner) internal {

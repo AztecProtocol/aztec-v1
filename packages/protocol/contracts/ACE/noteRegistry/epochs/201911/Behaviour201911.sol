@@ -3,12 +3,14 @@ pragma solidity >=0.5.0 <0.6.0;
 import "../201907/Behaviour201907.sol";
 
 /**
- * @title Behaviour201907
+ * @title Behaviour201911
  * @author AZTEC
  * @dev Details the methods and the storage schema of a note registry.
         Is an ownable contract, and should always inherrit from the previous
         epoch of the behaviour contract. This contract defines the shared methods
-        between all asset types for the 201907 generation (epoch 1).
+        between all asset types for the 201911 generation (epoch 2).
+
+        This epoch adds the ability to slow release assets for a fixed amount of time.
  * Methods are documented in interface.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
