@@ -5,6 +5,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import {
+    assetShape,
+} from '~/ui/config/propTypes';
 import formatNumber from '~ui/utils/formatNumber';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
@@ -36,7 +39,12 @@ const DepositConfirm = ({
                                     type: 'user',
                                     address: fromAddress,
                                 }}
-                                content={<Text text={formatAddress(fromAddress, 10, 4)} size="xs" />}
+                                content={(
+                                    <Text
+                                        text={formatAddress(fromAddress, 10, 4)}
+                                        size="xs"
+                                    />
+                                )}
                                 size="xxs"
                                 textSize="xs"
                             />
@@ -51,7 +59,16 @@ const DepositConfirm = ({
                                     ...asset,
                                     type: 'asset',
                                 }}
-                                content={<Text text={formatAddress(asset.address, 10, 4)} size="xs" color="secondary" />}
+                                content={(
+                                    <Text
+                                        text={asset.name
+                                            ? `${asset.name} (${formatAddress(asset.address, 6, 4)})`
+                                            : formatAddress(asset.address, 10, 4)
+                                        }
+                                        size="xs"
+                                        color="secondary"
+                                    />
+                                )}
                                 size="xxs"
                                 textSize="xs"
                             />
@@ -112,10 +129,7 @@ const DepositConfirm = ({
 );
 
 DepositConfirm.propTypes = {
-    asset: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        decimals: PropTypes.number.isRequired,
-    }).isRequired,
+    asset: assetShape.isRequired,
     from: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({
         amount: PropTypes.number.isRequired,
