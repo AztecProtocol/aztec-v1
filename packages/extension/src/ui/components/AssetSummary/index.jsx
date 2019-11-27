@@ -7,9 +7,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import ProfileIcon from '~ui/components/ProfileIcon';
 import Button from '~ui/components/Button';
 
@@ -17,7 +15,8 @@ const AssetSummary = ({
     className,
     address,
     linkedTokenAddress,
-    code,
+    name,
+    decimals,
     balance,
 }) => (
     <Block
@@ -34,13 +33,13 @@ const AssetSummary = ({
         />
         <Block top="m">
             <Text
-                text={i18n.token(code)}
+                text={name}
                 size="m"
             />
         </Block>
         <Block padding="m 0">
             <Text
-                text={formatValue(code, balance)}
+                text={formatNumber(balance, decimals)}
                 size="l"
                 weight="semibold"
             />
@@ -74,13 +73,14 @@ AssetSummary.propTypes = {
     className: PropTypes.string,
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
-    code: PropTypes.string,
+    name: PropTypes.string,
+    decimals: PropTypes.number.isRequired,
     balance: PropTypes.number.isRequired,
 };
 
 AssetSummary.defaultProps = {
     className: '',
-    code: '',
+    name: '',
 };
 
 export default AssetSummary;

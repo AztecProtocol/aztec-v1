@@ -4,6 +4,9 @@ import {
     Block,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import {
+    assetShape,
+} from '~/ui/config/propTypes';
 import PopupContent from '~ui/components/PopupContent';
 import AssetSummary from '~ui/components/AssetSummary';
 import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
@@ -11,7 +14,8 @@ import TransactionHistorySummary from '~ui/components/TransactionHistorySummary'
 const Asset = ({
     address,
     linkedTokenAddress,
-    code,
+    name,
+    decimals,
     balance,
     pastTransactions,
     isLoadingTransactions,
@@ -23,7 +27,8 @@ const Asset = ({
             <AssetSummary
                 address={address}
                 linkedTokenAddress={linkedTokenAddress}
-                code={code}
+                name={name}
+                decimals={decimals}
                 balance={balance}
             />
         </Block>
@@ -37,13 +42,12 @@ const Asset = ({
 Asset.propTypes = {
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
-    code: PropTypes.string,
+    name: PropTypes.string,
+    decimals: PropTypes.number.isRequired,
     balance: PropTypes.number,
     pastTransactions: PropTypes.arrayOf(PropTypes.shape({
         type: PropTypes.string.isRequired,
-        asset: PropTypes.shape({
-            code: PropTypes.string.isRequired,
-        }),
+        asset: assetShape.isRequired,
         address: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         timestamp: PropTypes.number.isRequired,
@@ -52,7 +56,7 @@ Asset.propTypes = {
 };
 
 Asset.defaultProps = {
-    code: '',
+    name: '',
     balance: null,
     pastTransactions: [],
     isLoadingTransactions: false,

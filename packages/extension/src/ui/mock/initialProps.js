@@ -64,7 +64,7 @@ export default {
         ...assets[0],
         prev: 'account',
         pastTransactions: pastTransactions
-            .filter(({ asset }) => asset.code === assets[0].code)
+            .filter(({ asset }) => asset.address === assets[0].address)
             .slice(0, 2),
     },
     'account.duplicated': {

@@ -51,11 +51,11 @@ export default mergeApis(realApis, {
     asset: {
         getAssets: async () => assets,
         getDomainAssets: async () => assets,
-        getPastTransactions: async (assetCode = '', count = 2) => {
-            const transactions = !assetCode
+        getPastTransactions: async (assetAddress = '', count = 2) => {
+            const transactions = !assetAddress
                 ? pastTransactions
                 : pastTransactions
-                    .filter(({ asset }) => asset.code === assetCode);
+                    .filter(({ asset }) => asset.address === assetAddress);
 
             return !count
                 ? transactions

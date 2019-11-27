@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
     emptyIntValue,
 } from '~ui/config/settings';
-import makeAsset from '~uiModules/utils/asset';
+import makeAsset from '~uiModules/utils/makeAsset';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import { withdrawSteps } from '~ui/config/steps';
 import {

@@ -20,7 +20,10 @@ export const siteShape = PropTypes.shape({
 export const assetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
-    code: PropTypes.string,
+    name: PropTypes.string,
+    icon: PropTypes.string,
+    symbol: PropTypes.string,
+    decimals: PropTypes.number,
 });
 
 export const profileType = PropTypes.oneOf([

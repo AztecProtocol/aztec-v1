@@ -9,9 +9,7 @@ import {
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
@@ -86,7 +84,7 @@ const SendConfirm = ({
                         title={i18n.t('deposit.amount.total')}
                         content={(
                             <Text
-                                text={formatValue(asset.code, totalAmount)}
+                                text={formatNumber(totalAmount, asset.decimals)}
                                 size="xs"
                                 contentSize="s"
                                 color="green"
@@ -119,7 +117,7 @@ const SendConfirm = ({
                             size="xxs"
                             footnote={(
                                 <Text
-                                    text={`+${formatValue(asset.code, amount)}`}
+                                    text={`+${formatNumber(amount, asset.decimals)}`}
                                     color="green"
                                 />
                             )}

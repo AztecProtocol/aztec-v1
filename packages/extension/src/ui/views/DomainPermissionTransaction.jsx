@@ -29,8 +29,9 @@ const DomainPermissionTransaction = ({
     let moreItems;
     if (assets.length > 1) {
         assets.slice(0, visibleAssets).forEach(({
-            address, linkedTokenAddress,
-            code,
+            name,
+            address,
+            linkedTokenAddress,
         }) => {
             icons.push({
                 profile: {
@@ -39,7 +40,7 @@ const DomainPermissionTransaction = ({
                     linkedTokenAddress,
                 },
                 tooltip: hasRealAssets
-                    ? i18n.token(code) || formatAddress(address, 12, 6)
+                    ? name || formatAddress(address, 12, 6)
                     : '',
             });
         });
@@ -94,7 +95,7 @@ const DomainPermissionTransaction = ({
                                     <div>
                                         <Text
                                             size="s"
-                                            text={i18n.token(firstAsset.code)}
+                                            text={firstAsset.name}
                                             weight="semibold"
                                             showEllipsis
                                         />
