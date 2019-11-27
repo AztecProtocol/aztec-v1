@@ -11,7 +11,7 @@ export default {
         },
         config: AZTECAccountRegistryGSNContract,
         networks: {
-            4: '0xC13dE0b75fF8C1DBa6CeB65f9bC28cB43AA6c2a1',
+            4: '0x6AD5bBF80770165578E89959b78e124D8c8F8af4',
         },
     },
     AZTECAccountRegistryGSN: {
@@ -21,7 +21,7 @@ export default {
         },
         config: AZTECAccountRegistryGSNContract,
         networks: {
-            4: '0xC13dE0b75fF8C1DBa6CeB65f9bC28cB43AA6c2a1',
+            4: '0x6AD5bBF80770165578E89959b78e124D8c8F8af4',
         },
     },
     ACE: {
