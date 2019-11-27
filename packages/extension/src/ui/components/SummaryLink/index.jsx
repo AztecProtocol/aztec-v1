@@ -34,6 +34,7 @@ const SummaryLink = ({
             >
                 <ProfileIcon
                     {...profile}
+                    src={profile.icon}
                     size="s"
                 />
             </Block>

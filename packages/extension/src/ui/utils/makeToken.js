@@ -1,4 +1,11 @@
 import contractMetadataMapping from 'eth-contract-metadata';
+import urls from '~/config/urls';
+
+const formatIconUrl = (icon) => {
+    if (!icon) return '';
+
+    return `${urls.public}/tokens/${icon}`;
+};
 
 export default function makeToken(address) {
     const {
@@ -12,6 +19,6 @@ export default function makeToken(address) {
         name,
         symbol,
         decimals,
-        icon: logo,
+        icon: formatIconUrl(logo),
     };
 }
