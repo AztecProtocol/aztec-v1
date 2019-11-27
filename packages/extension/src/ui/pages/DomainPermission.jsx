@@ -29,9 +29,6 @@ const DomainPermission = ({
     domain,
 }) => {
     const fetchInitialData = async () => {
-        const {
-            address,
-        } = await apis.auth.getCurrentUser() || {};
         const assets = await apis.asset.getDomainAssets(domain.domain);
         const assetPlaceholders = assets && assets.length > 0
             ? []
@@ -42,7 +39,6 @@ const DomainPermission = ({
 
         return {
             domain,
-            address,
             assets,
             assetPlaceholders,
         };
