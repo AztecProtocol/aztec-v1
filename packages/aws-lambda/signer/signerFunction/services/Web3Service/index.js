@@ -34,7 +34,7 @@ class Web3Service {
         }
     }
 
-    signData(
+    async signData(
         data,
         account = this.account,
     ) {
@@ -65,8 +65,16 @@ class Web3Service {
             relayHubAddress,
             to,
         )
-
-        return this.web3.eth.accounts.sign(solSha3, privateKey);
+        const {
+            message,
+            messageHash,
+            signature,
+        } = await this.web3.eth.accounts.sign(solSha3, privateKey);
+        return {
+            message,
+            messageHash,
+            signature: fixSignature(signature),
+        };
     }
 
     registerInterface(
