@@ -14,7 +14,7 @@ function cmdStatus(umzug) {
         }).then(pending => {
             result.pending = pending;
             return result;
-        }).then(({ executedRaw, pendingRaw }) => {
+        }).then(({ executed: executedRaw, pending: pendingRaw }) => {
             const executed = executedRaw.map(m => ({
                 ...m,
                 name: path.basename(m.file, '.js'),
