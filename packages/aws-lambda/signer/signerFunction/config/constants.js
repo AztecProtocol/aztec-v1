@@ -26,7 +26,8 @@ module.exports = {
         GANACHE: {
             id: null,
             networkName: 'ganache',
-            infuraProviderUrl: null,
+            // we use kovan infura just for ganache
+            infuraProviderUrl: infuraURL('kovan'),
         },
         MAIN: {
             id: 1,

@@ -12,6 +12,7 @@ const {
     registerContracts,
     refreshPendingTxs,
     validateNetworkId,
+    isGanacheNetwork,
 } = require('./helpers');
 const {
     getOrigin,
@@ -50,14 +51,34 @@ const initializeDB = ({
     initModels();
 };
 
-const initializeWeb3Service = ({
-    networkId,
-}) => {
-    const network = Object.values(NETWORKS).find(({ id }) => id === networkId);
-    const account = {
+const getTrustedAccount = (networkId) => {
+    const isGanache = isGanacheNetwork(networkId);
+    if (isGanache) {
+        return {
+            address: process.env.SIGNER_GANACHE_ADDRESS,
+            privateKey: process.env.SIGNER_GANACHE_PRIVATE_KEY,
+        };
+    }
+
+    return {
         address: process.env.SIGNER_ADDRESS,
         privateKey: process.env.SIGNER_PRIVATE_KEY,
     };
+}
+
+const getNetworkConfig = (networkId)=> {
+    const isGanache = isGanacheNetwork(networkId);
+    if (isGanache) {
+        return NETWORKS.GANACHE;
+    };
+    return Object.values(NETWORKS).find(({ id }) => id === networkId);
+}
+
+const initializeWeb3Service = ({
+    networkId,
+}) => {
+    const account = getTrustedAccount(networkId);
+    const network = getNetworkConfig(networkId);
     web3Service.init({
         providerURL: network.infuraProviderUrl,
         account,
@@ -110,12 +131,19 @@ exports.signTxHandler = async (event) => {
         return networkIdError;
     }
 
-    initialize({
-        networkId,
-    });
+    const isGanache = isGanacheNetwork(networkId);
+    if (isGanache) {
+        initializeWeb3Service({
+            networkId,
+        });
+    } else {
+        initialize({
+            networkId,
+        });
+    }
 
     const origin = getOrigin(event);
-    const isApiKeyRequired = isTrue(process.env.API_KEY_REQUIRED);
+    const isApiKeyRequired = isGanache ? false : isTrue(process.env.API_KEY_REQUIRED);
     const {
         error: validationError,
     } = await validateRequestData({
@@ -140,14 +168,16 @@ exports.signTxHandler = async (event) => {
         return validationError;
     }
 
-    const {
-        id: dappId,
-    } = await getDappInfo({
-        apiKey,
-    });
-
     try {
+        let dappId;
         if (isApiKeyRequired) {
+            const {
+                id,
+            } = await getDappInfo({
+                apiKey,
+            });
+            dappId = id;
+
             await refreshPendingTxs({
                 dappId,
                 networkId,
@@ -157,7 +187,7 @@ exports.signTxHandler = async (event) => {
             });
             if (countFreeTransactions <= 0) {
                 return ACCESS_DENIED_401({
-                    title: "Not enought free trnsaction, please contact to the dapp's support",
+                    title: "Not enough free transaction, please contact to the dapp's support",
                 });
             }
         }
@@ -175,11 +205,15 @@ exports.signTxHandler = async (event) => {
             });
         }
 
-        return OK_200({
+        const result = {
             data,
             dataHash,
             dataSignature: signature,
-        });
+        };
+        if (isGanache) {
+            result.isGanache = true;
+        }
+        return OK_200(result);
 
     } catch (e) {
         errorLog(e);
