@@ -1,17 +1,17 @@
-import apollo from '~ui/apis/helpers/apollo';
-import {
-    getCurrentUser,
-} from '~ui/apis/auth';
+import Web3Service from '~/helpers/Web3Service';
+import assetModel from '~/background/database/models/asset';
 
 export default async function getLinkedTokenAddress(assetAddress) {
-    const currentAddress = await getCurrentUser();
     const {
-        asset,
-    } = await apollo.query(`
-        asset(id: "${assetAddress}", currentAddress: "${currentAddress}") {
-            linkedTokenAddress
-        }
-    `) || {};
+        networkId,
+    } = Web3Service;
+    const {
+        registryOwner,
+        linkedTokenAddress,
+    } = await assetModel.get(
+        { networkId },
+        { registryOwner: assetAddress },
+    ) || {};
 
-    return asset && asset.linkedTokenAddress;
+    return (registryOwner === assetAddress && linkedTokenAddress) || '';
 }
