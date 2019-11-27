@@ -86,7 +86,7 @@ class Web3Service {
         }
 
         if (contractsConfig) {
-            Object.values(contractsConfig).forEach(({
+            contractsConfig.forEach(({
                 name,
                 config,
                 address,

@@ -33,7 +33,10 @@ export default {
     input: {
         contract: {
             address: {
-                empty: 'Please provide an address for contract "%{contractName}"',
+                empty: {
+                    _: 'Please provide valid addresses for contracts %{contractName}',
+                    1: 'Please provide an address for contract %{contractName}',
+                },
             },
         },
         address: {
