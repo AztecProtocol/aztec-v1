@@ -7,8 +7,8 @@
 const truffleAssert = require('truffle-assertions');
 
 // ### Artifacts
-const NoteRegistryBehaviour = artifacts.require('./noteRegistry/epochs/201907/base/BehaviourBase201907');
-const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
+const NoteRegistryBehaviour = artifacts.require('./noteRegistry/epochs/201912/base/BehaviourBase201912');
+const NoteRegistryFactory = artifacts.require('./noteRegistry/epochs/201912/base/FactoryBase201912');
 
 contract('NoteRegistryFactory', (accounts) => {
     const [owner, notOwner] = accounts;
