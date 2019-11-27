@@ -19,8 +19,6 @@ const handleAction = async (action, params) => {
                 networkId,
                 ...data
             } = params;
-            console.log({ data });
-
 
             const lambdaResponse = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
 
