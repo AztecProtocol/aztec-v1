@@ -49,8 +49,7 @@ export default async function setupNetworkConfig({
             name: contractName,
             config: contract,
             address: contractAddresses[contractName]
-                || address
-                || (contract.networks[networkId] || {}).address,
+                || address,
         };
     });
 
