@@ -39,6 +39,7 @@ const ProfileIconGroup = ({
             >
                 <ProfileIcon
                     {...profile}
+                    src={profile.icon}
                     theme={theme}
                     size={size}
                     tooltip={tooltip}

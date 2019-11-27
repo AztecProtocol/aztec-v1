@@ -6,6 +6,7 @@ import {
 import {
     randomId,
 } from '~/utils/random';
+import makeAsset from '~/ui/utils/makeAsset';
 import DomainPermissionTransaction from '~/ui/views/DomainPermissionTransaction';
 import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
 import apis from '~uiModules/apis';
@@ -29,13 +30,16 @@ const DomainPermission = ({
     domain,
 }) => {
     const fetchInitialData = async () => {
-        const assets = await apis.asset.getDomainAssets(domain.domain);
-        const assetPlaceholders = assets && assets.length > 0
-            ? []
-            : [...Array(3)].map(() => ({
+        let assets = await apis.asset.getDomainAssets(domain.domain);
+        let assetPlaceholders = [];
+        if (assets && assets.length) {
+            assets = await Promise.all(assets.map(makeAsset));
+        } else {
+            assetPlaceholders = [...Array(3)].map(() => ({
                 address: `0x${randomId(ADDRESS_LENGTH)}`,
                 linkedTokenAddress: `0x${randomId(ADDRESS_LENGTH)}`,
             }));
+        }
 
         return {
             domain,

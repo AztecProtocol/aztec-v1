@@ -15,6 +15,7 @@ const AssetSummary = ({
     className,
     address,
     linkedTokenAddress,
+    icon,
     name,
     decimals,
     balance,
@@ -29,6 +30,7 @@ const AssetSummary = ({
             type="asset"
             address={address}
             linkedTokenAddress={linkedTokenAddress}
+            src={icon}
             size="l"
         />
         <Block top="m">
@@ -73,6 +75,7 @@ AssetSummary.propTypes = {
     className: PropTypes.string,
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
+    icon: PropTypes.string,
     name: PropTypes.string,
     decimals: PropTypes.number.isRequired,
     balance: PropTypes.number.isRequired,
@@ -81,6 +84,7 @@ AssetSummary.propTypes = {
 AssetSummary.defaultProps = {
     className: '',
     name: '',
+    icon: '',
 };
 
 export default AssetSummary;

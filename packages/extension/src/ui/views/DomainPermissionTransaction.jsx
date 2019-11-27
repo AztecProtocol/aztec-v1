@@ -32,12 +32,14 @@ const DomainPermissionTransaction = ({
             name,
             address,
             linkedTokenAddress,
+            icon,
         }) => {
             icons.push({
                 profile: {
                     type: 'asset',
                     address,
                     linkedTokenAddress,
+                    icon,
                 },
                 tooltip: hasRealAssets
                     ? name || formatAddress(address, 12, 6)
@@ -48,6 +50,7 @@ const DomainPermissionTransaction = ({
             moreItems = assets.slice(visibleAssets).map(({
                 address,
                 linkedTokenAddress,
+                icon,
             }, i) => (
                 <ListItem
                     key={+i}
@@ -56,6 +59,7 @@ const DomainPermissionTransaction = ({
                         type: 'asset',
                         address,
                         linkedTokenAddress,
+                        src: icon,
                     }}
                     content={formatAddress(address, 12, 6)}
                     size="xxs"

@@ -32,6 +32,12 @@ export const themeStyleMapping = {
     },
 };
 
+const defaultIconMapping = {
+    asset: 'blur_on',
+    token: 'blur_on',
+    user: 'person',
+};
+
 const ProfileIcon = ({
     className,
     theme,
@@ -73,6 +79,7 @@ const ProfileIcon = ({
                 size={size}
                 shape="circular"
                 layer={1}
+                iconName={defaultIconMapping[type]}
                 {...style}
             />
         );
@@ -127,7 +134,6 @@ ProfileIcon.propTypes = {
     theme: themeType,
     type: profileType,
     address: PropTypes.string,
-    linkedTokenAddress: PropTypes.string,
     src: PropTypes.string,
     alt: PropTypes.string,
     tooltip: PropTypes.oneOfType([
@@ -141,7 +147,6 @@ ProfileIcon.defaultProps = {
     className: '',
     theme: 'primary',
     address: '',
-    linkedTokenAddress: '',
     type: '',
     src: '',
     alt: '',

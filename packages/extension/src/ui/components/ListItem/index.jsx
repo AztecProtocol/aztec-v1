@@ -55,6 +55,7 @@ const ListItem = ({
             >
                 <ProfileIcon
                     {...profile}
+                    src={profile.icon}
                     className="flex-fixed"
                     theme={theme}
                     size={size}

@@ -75,6 +75,7 @@ const Connection = ({
                 >
                     <ProfileIcon
                         {...fromProfile}
+                        src={fromProfile.icon}
                         fromTooltip={fromTooltip}
                         theme={theme}
                         size={size}
