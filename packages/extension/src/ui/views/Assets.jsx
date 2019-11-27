@@ -7,6 +7,9 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
+import {
+    assetShape,
+} from '~/ui/config/propTypes';
 import PopupContent from '~ui/components/PopupContent';
 import AssetSummaryLink from '~ui/components/AssetSummaryLink';
 import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
@@ -62,15 +65,10 @@ const Assets = ({
 );
 
 Assets.propTypes = {
-    assets: PropTypes.arrayOf(PropTypes.shape({
-        code: PropTypes.string,
-        balance: PropTypes.number.isRequired,
-    })),
+    assets: PropTypes.arrayOf(assetShape),
     pastTransactions: PropTypes.arrayOf(PropTypes.shape({
         type: PropTypes.string.isRequired,
-        asset: PropTypes.shape({
-            code: PropTypes.string,
-        }),
+        asset: assetShape.isRequired,
         address: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
         timestamp: PropTypes.number.isRequired,

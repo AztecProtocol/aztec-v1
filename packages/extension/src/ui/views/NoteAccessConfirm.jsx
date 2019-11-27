@@ -8,9 +8,7 @@ import {
     assetShape,
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
@@ -61,7 +59,7 @@ const NoteAccessConfirm = ({
                         />
                         <ListRow
                             title={i18n.t('note.value')}
-                            content={formatValue(asset.code, value)}
+                            content={formatNumber(value, asset.decimals)}
                             color="primary"
                         />
                     </Block>

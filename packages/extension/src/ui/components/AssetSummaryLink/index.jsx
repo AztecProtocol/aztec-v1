@@ -6,17 +6,15 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import SummaryLink from '~ui/components/SummaryLink';
 
 const AssetSummaryLink = ({
     className,
     address,
     linkedTokenAddress,
-    code,
+    name,
+    decimals,
     balance,
     onClick,
 }) => (
@@ -40,7 +38,7 @@ const AssetSummaryLink = ({
             >
                 <Block padding="s">
                     <Text
-                        text={i18n.token(code)}
+                        text={name}
                     />
                 </Block>
             </Col>
@@ -49,7 +47,7 @@ const AssetSummaryLink = ({
                 margin="none"
             >
                 <Text
-                    text={formatValue(code, balance)}
+                    text={formatNumber(balance, decimals)}
                 />
             </Col>
         </Row>
@@ -60,14 +58,15 @@ AssetSummaryLink.propTypes = {
     className: PropTypes.string,
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
-    code: PropTypes.string,
+    name: PropTypes.string,
+    decimals: PropTypes.number.isRequired,
     balance: PropTypes.number.isRequired,
     onClick: PropTypes.func,
 };
 
 AssetSummaryLink.defaultProps = {
     className: '',
-    code: '',
+    name: '',
     onClick: null,
 };
 

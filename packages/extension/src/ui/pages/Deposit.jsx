@@ -3,15 +3,13 @@ import PropTypes from 'prop-types';
 import {
     emptyIntValue,
 } from '~/ui/config/settings';
-import makeAsset from '~uiModules/utils/asset';
-import apis from '~uiModules/apis';
+import makeAsset from '~/ui/utils/makeAsset';
 import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import { depositSteps } from '~ui/config/steps';
 import {
     gsnConfigShape,
 } from '~ui/config/propTypes';
-
 
 const handleOnStep = (step) => {
     const newProps = {};

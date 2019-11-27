@@ -42,21 +42,26 @@ export const addresses = [
 
 export const assets = [
     {
-        code: 'dai',
+        name: 'Dai Stablecoin',
+        symbol: 'DAI',
+        decimals: 18,
         address: randomAddress(),
         linkedTokenAddress: randomAddress(),
         icon: daiIcon,
         balance: 0.51232,
     },
     {
-        code: 'usdc',
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
         address: randomAddress(),
         linkedTokenAddress: randomAddress(),
         icon: usdcIcon,
         balance: 2832.21,
     },
     {
-        code: 'cc',
+        name: 'C Coin',
+        symbol: 'CC',
         address: randomAddress(),
         linkedTokenAddress: randomAddress(),
         balance: 0,

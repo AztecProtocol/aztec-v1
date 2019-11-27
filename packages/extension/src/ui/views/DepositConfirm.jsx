@@ -5,9 +5,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
@@ -61,7 +59,7 @@ const DepositConfirm = ({
                     />
                     <ListRow
                         title={i18n.t('deposit.amount.total')}
-                        content={formatValue(asset.code, totalAmount)}
+                        content={formatNumber(totalAmount, asset.decimals)}
                         size="xs"
                         contentSize="s"
                         color="green"
@@ -92,7 +90,7 @@ const DepositConfirm = ({
                             size="xxs"
                             footnote={(
                                 <Text
-                                    text={`+${formatValue(asset.code, amount)}`}
+                                    text={`+${formatNumber(amount, asset.decimals)}`}
                                     color="green"
                                 />
                             )}
@@ -116,7 +114,7 @@ const DepositConfirm = ({
 DepositConfirm.propTypes = {
     asset: PropTypes.shape({
         address: PropTypes.string.isRequired,
-        code: PropTypes.string,
+        decimals: PropTypes.number.isRequired,
     }).isRequired,
     from: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(PropTypes.shape({

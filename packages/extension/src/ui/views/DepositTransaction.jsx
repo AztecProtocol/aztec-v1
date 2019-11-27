@@ -10,9 +10,7 @@ import {
 import {
     assetShape,
 } from '~ui/config/propTypes';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import formatAddress from '~ui/utils/formatAddress';
 import i18n from '~ui/helpers/i18n';
 import apis from '~uiModules/apis';
@@ -69,9 +67,10 @@ const DepositTransaction = ({
     onClose,
 }) => {
     const {
-        code,
         address: assetAddress,
         linkedTokenAddress,
+        name: assetName,
+        decimals,
     } = asset;
 
     const initialData = {
@@ -90,7 +89,7 @@ const DepositTransaction = ({
         <div>
             <Block bottom="s">
                 <Text
-                    text={formatValue(code, amount)}
+                    text={formatNumber(amount, decimals)}
                     size="m"
                     color="primary"
                     weight="semibold"
@@ -103,7 +102,7 @@ const DepositTransaction = ({
                         type: 'token',
                         address: assetAddress,
                         linkedTokenAddress,
-                        alt: code,
+                        alt: assetName,
                     },
                     description: formatAddress(linkedTokenAddress, 6, 4),
                 }}

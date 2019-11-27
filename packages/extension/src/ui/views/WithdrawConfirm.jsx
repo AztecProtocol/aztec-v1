@@ -5,9 +5,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
-import {
-    formatValue,
-} from '~ui/utils/asset';
+import formatNumber from '~ui/utils/formatNumber';
 import {
     assetShape,
 } from '~/ui/config/propTypes';
@@ -20,9 +18,9 @@ import Ticket from '~ui/components/Ticket';
 const WithdrawConfirm = ({
     asset: {
         address: assetAddress,
-        name,
         linkedTokenAddress,
-        code,
+        name,
+        decimals,
     },
     transactions: [firstTransaction],
 }) => (
@@ -71,7 +69,7 @@ const WithdrawConfirm = ({
                             size="xxs"
                             footnote={(
                                 <Text
-                                    text={`+${formatValue(code, firstTransaction.amount)}`}
+                                    text={`+${formatNumber(firstTransaction.amount, decimals)}`}
                                     color="green"
                                 />
                             )}

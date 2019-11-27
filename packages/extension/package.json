@@ -36,6 +36,7 @@
         "dexie": "^2.0.4",
         "dotenv": "^8.0.0",
         "dotenv-webpack": "^1.7.0",
+        "eth-contract-metadata": "^1.11.0",
         "eth-crypto": "^1.5.0",
         "eth-sig-util": "^2.2.0",
         "ethereumjs-wallet": "^0.6.3",
