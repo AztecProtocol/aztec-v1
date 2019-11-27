@@ -19,9 +19,10 @@ const handleAction = async (action, params) => {
                 networkId,
                 ...data
             } = params;
+            console.log({ data });
 
 
-            const response = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
+            const lambdaResponse = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
 
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 mode: 'cors', // no-cors, *cors, same-origin
@@ -35,13 +36,11 @@ const handleAction = async (action, params) => {
             });
             const {
                 data: {
-                    data: {
-                    },
                     dataSignature,
                 },
-            } = await response.json();
+            } = await lambdaResponse.json();
 
-            return { dataSignature };
+            response = { dataSignature };
             break;
         }
         case 'metamask.register.extension': {
