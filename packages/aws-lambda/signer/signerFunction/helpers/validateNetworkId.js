@@ -4,6 +4,7 @@ const {
 const {
     ids,
 } = require('./networks');
+const isGanacheNetwork = require('./isGanacheNetwork');
 
 
 module.exports = (networkId) => {
@@ -14,12 +15,15 @@ module.exports = (networkId) => {
         };
     }
 
-    if (!ids.includes(networkId)) {
+    const isGanage = isGanacheNetwork(networkId);
+    if (!ids.includes(networkId) && !isGanage) {
         return {
-            error: BAD_400('"networkId" parameter has to be numeric value'),
+            error: BAD_400(`"networkId" parameter has to be one of ${ids.join(', ')} values or ganache networkId`),
             isValid: false,
         };
     }
+
+
     return {
         error: null,
         isValid: true,
