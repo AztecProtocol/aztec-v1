@@ -195,7 +195,7 @@ exports.signTxHandler = async (event) => {
         const {
             messageHash: dataHash,
             signature,
-        } = signData(data);
+        } = await signData(data);
 
         if (isApiKeyRequired) {
             await monitorTx({
