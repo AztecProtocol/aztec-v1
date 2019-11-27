@@ -3,7 +3,7 @@ const {
     errorLog,
 } = require('../log');
 
-module.exports = (data, accout) => {
+module.exports = async (data, accout) => {
     if (!data) {
         errorLog('Data cannot be empty');
         return null;
