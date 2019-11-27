@@ -8,6 +8,7 @@ const {
     registerContracts,
     refreshPendingTxs,
     validateNetworkId,
+    isGanacheNetwork,
 } = require('./helpers');
 const {
     getParameters,
@@ -99,6 +100,14 @@ exports.balanceHandler = async (event) => {
     } = validateNetworkId(networkId);
     if (!isValid) {
         return networkIdError;
+    }
+
+    const isGanache = isGanacheNetwork(networkId);
+    if (isGanache) {
+        return OK_200({
+            hasFreeTransactions: true,
+            isGanache: true,
+        });
     }
 
     initialize({
