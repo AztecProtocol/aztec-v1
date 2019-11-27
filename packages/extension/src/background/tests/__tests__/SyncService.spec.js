@@ -306,6 +306,7 @@ describe('ZkAsset', () => {
         await NoteService.save();
 
         const balance = await NoteService.getBalance(
+            networkId,
             userAddress,
             zkAssetAddress,
         );
