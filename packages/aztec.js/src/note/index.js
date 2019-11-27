@@ -1,5 +1,5 @@
 const bn128 = require('@aztec/bn128');
-const { addAccess, METADATA_AZTEC_DATA_LENGTH, encryptedViewingKey } = require('@aztec/note-access');
+const { generateAccessMetaData } = require('@aztec/note-access');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { padLeft, toHex } = require('web3-utils');
@@ -26,11 +26,11 @@ class Note {
      *
      * @param {string} publicKey hex-formatted public key
      * @param {string} viewingKey hex-formatted viewing key
+     * @param {Object} access mapping between an Ethereum address and the linked publickey
      * @param {string} owner Ethereum address of note owner
      * @param {Object} setupPoint trusted setup point
-     * @param {Object} access mapping between an Ethereum address and the linked publickey
      */
-    constructor(publicKey, viewingKey, owner = '0x', setupPoint, access) {
+    constructor(publicKey, viewingKey, access, owner = '0x', setupPoint) {
         if (publicKey && viewingKey) {
             throw new Error('expected one of publicKey or viewingKey, not both');
         }
@@ -199,27 +199,10 @@ class Note {
      * @returns {string} customData - customMetaData which will grant the specified Ethereum address(s)
      * access to a note
      */
-    grantNoteAccess(access) {
-        let accessUsers = access;
-        if (typeof access === 'string') {
-            accessUsers = [
-                {
-                    address: this.owner,
-                    linkedPublicKey: access,
-                },
-            ];
-        } else if (!Array.isArray(access)) {
-            accessUsers = [access];
-        }
-        const realViewingKey = this.getView();
-        const metaDataAccess = accessUsers.map(({ address, linkedPublicKey }) => {
-            return {
-                address,
-                viewingKey: encryptedViewingKey(linkedPublicKey, realViewingKey).toHexString(),
-            };
-        });
-        const newMetaData = addAccess('', metaDataAccess);
-        return newMetaData.slice(METADATA_AZTEC_DATA_LENGTH);
+    grantViewAccess() {
+        const noteViewKey = this.getView();
+        const metaData = generateAccessMetaData(this.access, noteViewKey, this.owner);
+        this.setMetaData(`0x${metaData}`);
     }
 
     /**
@@ -265,7 +248,7 @@ note.create = async (spendingPublicKey, value, access, noteOwner) => {
     const viewingKey = `0x${a}${k}${ephemeral}`;
     const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
     const setupPoint = await setup.fetchPoint(value);
-    return new Note(null, viewingKey, owner, setupPoint, access);
+    return new Note(null, viewingKey, access, owner, setupPoint);
 };
 
 /**
@@ -345,7 +328,7 @@ note.fromPublicKey = (publicKey) => {
 note.fromViewKey = async (viewingKey) => {
     const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
     const setupPoint = await setup.fetchPoint(k.toNumber());
-    const newNote = new Note(null, viewingKey, undefined, setupPoint);
+    const newNote = new Note(null, viewingKey, null, undefined, setupPoint);
     return newNote;
 };
 
