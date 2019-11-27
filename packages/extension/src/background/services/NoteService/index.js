@@ -37,11 +37,11 @@ export default {
         notes,
     }),
     getBalance: async (
-        // TODO - pass networkId
+        networkId,
         ownerAddress,
         assetId,
     ) => manager.ensureSynced(
-        manager.networkId,
+        networkId,
         ownerAddress,
         assetId,
         ({ balance }) => balance,
