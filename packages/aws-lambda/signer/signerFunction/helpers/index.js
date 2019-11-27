@@ -5,6 +5,7 @@ const validateRequestData = require('./validateRequestData');
 const networks = require('./networks');
 const refreshPendingTxs = require('./refreshPendingTxs');
 const validateNetworkId = require('./validateNetworkId');
+const isGanacheNetwork = require('./isGanacheNetwork');
 
 
 module.exports = {
@@ -15,4 +16,5 @@ module.exports = {
     networks,
     refreshPendingTxs,
     validateNetworkId,
+    isGanacheNetwork,
 }

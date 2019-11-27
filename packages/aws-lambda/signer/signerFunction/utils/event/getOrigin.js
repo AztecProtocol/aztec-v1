@@ -2,5 +2,7 @@ module.exports = (event) => {
     const {
         headers,
     } = event;
-    return (headers || {}).Origin;
+    const h = headers || {};
+
+    return h.Origin || h.origin;
 };
