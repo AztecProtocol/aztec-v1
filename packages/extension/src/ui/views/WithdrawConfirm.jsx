@@ -34,7 +34,7 @@ const WithdrawConfirm = ({
                 />
                 <Block padding="0 s" inline>
                     <Text
-                        text={firstTransaction.amount}
+                        text={formatNumber(firstTransaction.amount, decimals)}
                         size="xl"
                         weight="bold"
                     />

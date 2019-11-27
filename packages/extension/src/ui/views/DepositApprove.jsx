@@ -8,6 +8,7 @@ import {
 import {
     assetShape,
 } from '~/ui/config/propTypes';
+import formatNumber from '~/ui/utils/formatNumber';
 import i18n from '~ui/helpers/i18n';
 import approveGlyph from '~ui/images/approve.svg';
 import PopupContent from '~ui/components/PopupContent';
@@ -24,13 +25,15 @@ const DepositApprove = ({
                     size="xl"
                     weight="light"
                 />
+                <Block padding="0 s" inline>
+                    <Text
+                        text={formatNumber(totalAmount, asset.decimals)}
+                        size="xl"
+                        weight="bold"
+                    />
+                </Block>
                 <Text
-                    text={totalAmount}
-                    size="xl"
-                    weight="bold"
-                />
-                <Text
-                    text={asset.name || ' ERC20 Tokens'}
+                    text={asset.name || 'ERC20 Tokens'}
                     size="xl"
                     weight="light"
                 />

@@ -33,7 +33,7 @@ const SendConfirm = ({
                 />
                 <Block padding="0 s" inline>
                     <Text
-                        text={totalAmount}
+                        text={formatNumber(totalAmount, asset.decimals)}
                         size="xl"
                         weight="bold"
                     />
@@ -74,7 +74,10 @@ const SendConfirm = ({
                                     ...asset,
                                     type: 'asset',
                                 }}
-                                content={formatAddress(asset.address, 16, 6)}
+                                content={asset.name
+                                    ? `${asset.name} (${formatAddress(asset.address, 6, 4)})`
+                                    : formatAddress(asset.address, 16, 6)
+                                }
                                 size="xxs"
                                 textSize="xs"
                             />
