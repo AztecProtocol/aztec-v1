@@ -87,6 +87,7 @@
         "deploy:contracts": "babel-node scripts/run deployContracts",
         "build:dev": "webpack --config webpack-sdk.dev.js",
         "build:prod": "webpack --config webpack-sdk.prod.js",
+        "copy": "babel-node scripts/run copy",
         "generate:styles": "guacamole generateStyles",
         "generate:testData": "babel-node ./tests/generateTestData",
         "lint": "eslint ./ --color",

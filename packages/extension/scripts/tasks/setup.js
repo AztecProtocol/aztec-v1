@@ -15,6 +15,7 @@ import pipeTasks, {
 import stopProcesses from '../utils/stopProcesses';
 import deployContracts from './deployContracts';
 import waitUntilGSNRealyerUp from './waitUntilGSNRealyerUp';
+import copy from './copy';
 
 export default function setup({
     onStart,
@@ -122,6 +123,7 @@ export default function setup({
                 deployContracts,
                 logTask('Successfully deployed contracts to ganache.'),
                 waitUntilGSNRealyerUp,
+                copy,
             ],
             {
                 onError: handleBuildError,
