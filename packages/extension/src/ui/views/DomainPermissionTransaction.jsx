@@ -6,12 +6,6 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
-    ADDRESS_LENGTH,
-} from '~/config/constants';
-import {
-    randomId,
-} from '~/utils/random';
-import {
     assetShape,
     errorShape,
 } from '~ui/config/propTypes';
@@ -23,17 +17,12 @@ import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
 const DomainPermissionTransaction = ({
     assets: realAssets,
+    assetPlaceholders,
     error,
     visibleAssets,
 }) => {
-    const hasRealAssets = realAssets && realAssets.length > 0;
-    const assets = hasRealAssets
-        ? realAssets
-        : [...Array(visibleAssets)].map(() => ({
-            address: `0x${randomId(ADDRESS_LENGTH)}`,
-            linkedTokenAddress: `0x${randomId(ADDRESS_LENGTH)}`,
-        }));
-
+    const hasRealAssets = realAssets.length > 0;
+    const assets = hasRealAssets ? realAssets : assetPlaceholders;
     const [firstAsset] = assets;
 
     const icons = [];
@@ -142,12 +131,14 @@ const DomainPermissionTransaction = ({
 
 DomainPermissionTransaction.propTypes = {
     assets: PropTypes.arrayOf(assetShape),
+    assetPlaceholders: PropTypes.arrayOf(assetShape),
     error: errorShape,
     visibleAssets: PropTypes.number,
 };
 
 DomainPermissionTransaction.defaultProps = {
     assets: [],
+    assetPlaceholders: [],
     error: null,
     visibleAssets: 3,
 };
