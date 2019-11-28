@@ -20,7 +20,8 @@ const handleAction = async (action, params) => {
                 ...data
             } = params;
 
-            const lambdaResponse = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
+
+            const response = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
 
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 mode: 'cors', // no-cors, *cors, same-origin
@@ -34,12 +35,11 @@ const handleAction = async (action, params) => {
             });
             const {
                 data: {
-                    dataSignature,
+                    approvalData,
                 },
-            } = await lambdaResponse.json();
+            } = await response.json();
 
-            response = { dataSignature };
-            break;
+            return { approvalData };
         }
         case 'metamask.register.extension': {
             const eip712Data = registerExtension(params);

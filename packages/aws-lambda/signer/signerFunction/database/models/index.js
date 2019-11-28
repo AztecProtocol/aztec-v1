@@ -1,3 +1,8 @@
 const types = require('./types');
+const init = require('./init');
 
-module.exports = types;
+
+module.exports = {
+    types,
+    init,
+};

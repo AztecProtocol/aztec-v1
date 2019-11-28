@@ -1,12 +1,12 @@
-const sequelize = require('./helpers/connection');
+const connection = require('../helpers/connection');
 const {
     log,
     errorLog,
-} = require('../utils/log');
+} = require('../../utils/log');
 
 module.exports = async () => {
     try {
-        await sequelize.authenticate()
+        await connection.getConnection().authenticate();
         log('Connection has been established successfully.');
         return true;
     } catch (e) {

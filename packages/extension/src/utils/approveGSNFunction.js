@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { get } from '~/utils/storage';
 import ClientActionService from '~background/services/ClientActionService';
 import {
@@ -17,7 +16,7 @@ export default (query, connection) => async ({
     relayerAddress,
     relayHubAddress,
 }) => {
-    const apiKey = await get('apiKey');
+    const apiKey = await get('apiKey') || 'test1234';
     const networkId = await get('networkId');
 
     const params = {
@@ -44,5 +43,5 @@ export default (query, connection) => async ({
         },
     }, connection);
 
-    return response.data.dataSignature;
+    return response.data.approvalData;
 };

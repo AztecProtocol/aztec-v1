@@ -1,33 +1,137 @@
 const {
-    signData,
+    approveData,
+    trustedAccount,
 } = require('./utils/signer');
 const {
     OK_200,
-    ACCESS_NOT_FOUND_404,
+    NOT_FOUND_404,
+    BAD_400,
+    ACCESS_DENIED_401,
 } = require('./helpers/responses');
-const validationErrors = require('./helpers/validationErrors');
 const {
-    getOrigin,
+    validateRequestData,
+    registerContracts,
+    refreshPendingTxs,
+    validateNetworkId,
+    getNetworkConfig,
+} = require('./helpers');
+const {
     getParameters,
 } = require('./utils/event');
 const web3Service = require('./services/Web3Service');
 const {
     monitorTx,
+} = require('./utils/transactions');
+const {
+    errorLog,
+} = require('./utils/log');
+const dbConnection = require('./database/helpers/connection');
+const db = require('./database');
+const {
+    balance,
     getDappInfo,
-} = require('./utils/dapp')
+} = require('./utils/dapp');
 
 
-const initialize = () => {
-    const providerURL = process.env.WEB3_PROVIDER_URL;
-    const account = {
-        address: process.env.SIGNER_ADDRESS,
-        privateKey: process.env.SIGNER_PRIVATE_KEY,
-    };
+const initializeDB = ({
+    networkId,
+}) => {
+    dbConnection.init({
+        networkId,
+    });
+    const {
+        models: {
+            init: initModels,
+        },
+    } = db;
+    initModels();
+};
+
+const initializeWeb3Service = ({
+    networkId,
+}) => {
+    const account = trustedAccount(networkId);
+    const network = getNetworkConfig(networkId);
     web3Service.init({
-        providerURL,
+        providerURL: network.infuraProviderUrl,
         account,
     });
+    registerContracts();
 };
+
+const initialize = ({
+    networkId,
+    authorizationRequired,
+}) => {
+    if(authorizationRequired) {
+        initializeDB({
+            networkId,
+        });
+    }
+    initializeWeb3Service({
+        networkId,
+    });
+};
+
+const authorizedApprovalData = async ({
+    networkId,
+    apiKey,
+    data,
+}) => {
+    const {
+        id: dappId,
+    } = await getDappInfo({
+        apiKey,
+    });
+
+    await refreshPendingTxs({
+        dappId,
+        networkId,
+    });
+    const countFreeTransactions = await balance({
+        dappId,
+    });
+    if (countFreeTransactions <= 0) {
+        return {
+            error: ACCESS_DENIED_401({
+                title: "Not enough free transaction, please contact to the dapp's support",
+            }),
+            result: null,
+        }
+    }
+
+    const result = await approveData(data);
+    const {
+        signature,
+    } = result;
+
+    await monitorTx({
+        ...data,
+        dappId,
+        signature,
+    });
+
+    return {
+        error: null,
+        result,
+    }
+};
+
+const unauthorizedApprovalData = async ({
+    data,
+}) => {
+    const result = await approveData(data);
+    return {
+        error: null,
+        result,
+    }
+}
+
+const responseOptions = (origin) => ({
+    headers: {
+        'Access-Control-Allow-Origin': origin,
+    },
+});
 
 /**
  *
@@ -41,47 +145,88 @@ const initialize = () => {
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  * 
  */
-exports.lambdaHandler = async (event) => {
+exports.signTxHandler = async (event) => {
     if (event.httpMethod !== 'POST') {
-        return ACCESS_NOT_FOUND_404();
+        return NOT_FOUND_404();
     }
-    initialize();
-
     const {
-        apiKey,
-        data,
+        body: {
+            data,
+        },
+        path: {
+            apiKey,
+            networkId,
+        },
+        headers: {
+            origin,
+        },
     } = getParameters(event) || {};
-    const origin = getOrigin(event);
 
-    const validationError = validationErrors({
-        apiKey,
-        origin,
-        data,
-    });
-    if (validationError) {
-        return validationError;
-    }
+    try {
+        const {
+            isValid,
+            authorizationRequired,
+            error: networkError,
+        } = validateNetworkId(networkId);
+        if (!isValid) {
+            return networkError;
+        }
 
-    const {
-        messageHash: dataHash,
-        signature,
-    } = signData(data);
-    const {
-        dappId,
-    } = await getDappInfo(apiKey);
-    const {
-        from,
-    } = data;
+        initialize({
+            networkId,
+            authorizationRequired,
+        });
 
-    await monitorTx({
-        dappId,
-        signature,
-        from,
-    });
+        const {
+            error: validationError,
+        } = await validateRequestData({
+            apiKey: {
+                isRequired: authorizationRequired,
+                value: apiKey,
+            },
+            origin: {
+                isRequired: authorizationRequired,
+                value: origin,
+            },
+            data: {
+                isRequired: true,
+                value: data,
+            },
+            networkId: {
+                isRequired: true,
+                value: networkId,
+            },
+        });
+        if (validationError) {
+            return validationError;
+        }
 
-    return OK_200({
-        data,
-        dataHash,
-        dataSignature: signature,
-    });
+        let resp;
+        if (authorizationRequired) {
+            resp = await authorizedApprovalData({
+                networkId,
+                apiKey,
+                data,
+            });
+        } else {
+            resp = await unauthorizedApprovalData({
+                data,
+            });
+        }
+        const {
+            error: approvalError,
+            result,
+        } = resp;
+        if (approvalError) {
+            return approvalError;
+        }
+        const options = responseOptions(origin);
+        return OK_200(result, options);
+
+    } catch (e) {
+        errorLog(e);
+        return BAD_400({
+            message: e.message,
+        });
+    };
 };
