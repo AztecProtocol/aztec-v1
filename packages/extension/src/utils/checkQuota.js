@@ -18,7 +18,7 @@ export default async () => {
             credentials: 'same-origin', // include, *same-origin, omit
         });
 
-        const { data } await lambdaResponse.json();
+        const { data } = await lambdaResponse.json();
         hasFreeTransactions = data.hasFreeTransactions;
     }
 
