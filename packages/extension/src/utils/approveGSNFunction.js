@@ -17,8 +17,10 @@ export default (query, connection) => async ({
     relayerAddress,
     relayHubAddress,
 }) => {
-    const apiKey = await get('apiKey') || 'test1234';
+    const apiKey = await get('apiKey');
     const networkId = await get('networkId');
+    // we need to check the quota
+    const quotaResponse = window.fetch()
 
     const params = {
         from,

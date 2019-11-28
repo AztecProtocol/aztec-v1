@@ -306,11 +306,6 @@ class Web3Service {
             }
 
             const encodedData = method(...methodArgs).encodeABI();
-            const estimatedGas = await method(...methodArgs).estimateGas({
-                from: fromAddress,
-                gas: 6500000,
-                ...methodSetting,
-            });
             const tx = {
                 to: contractAddress,
                 data: encodedData,

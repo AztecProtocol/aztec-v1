@@ -20,25 +20,11 @@ export default async function setupNetworkConfig({
     networkId,
     contractAddresses,
     currentAddress,
+    apiKey,
 }) {
     const account = {
         address: currentAddress,
     };
-
-    // let gsnConfig;
-    // if (account.address) {
-    //     const signingInfo = await retrieveSigningInfo(account.address);
-    //     const gsnProvider = new GSNProvider(providerUrl, {
-    //         pollInterval: 15 * 1000,
-    //         signKey: signingInfo.privateKey,
-    //         approveFunction,
-    //         fixedGasPrice: 2E9,
-    //     });
-    //     gsnConfig = {
-    //         signingInfo,
-    //         gsnProvider,
-    //     };
-    // }
 
     const contractsConfig = backgroundContracts.map((contractName) => {
         const {
@@ -68,6 +54,7 @@ export default async function setupNetworkConfig({
 
     await set({
         networkId,
+        apiKey,
     });
 
     await Web3Service.init(config);

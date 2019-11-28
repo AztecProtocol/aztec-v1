@@ -56,7 +56,6 @@ class ConnectionManager {
             actionPromise,
             portPromise,
         ]);
-        console.log('connection established', { action, port, networkConfig });
 
         const {
             requestId,
