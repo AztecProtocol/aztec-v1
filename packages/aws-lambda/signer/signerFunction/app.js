@@ -15,7 +15,6 @@ const {
     isGanacheNetwork,
 } = require('./helpers');
 const {
-    getOrigin,
     getParameters,
 } = require('./utils/event');
 const web3Service = require('./services/Web3Service');
@@ -88,10 +87,13 @@ const initializeWeb3Service = ({
 
 const initialize = ({
     networkId,
+    isGanache,
 }) => {
-    initializeDB({
-        networkId,
-    });
+    if(!isGanache) {
+        initializeDB({
+            networkId,
+        });
+    }
     initializeWeb3Service({
         networkId,
     });
@@ -121,28 +123,25 @@ exports.signTxHandler = async (event) => {
             apiKey,
             networkId,
         },
+        headers: {
+            origin,
+        },
     } = getParameters(event) || {};
 
     const {
         isValid,
+        isGanache,
         error: networkIdError,
     } = validateNetworkId(networkId);
     if (!isValid) {
         return networkIdError;
     }
 
-    const isGanache = isGanacheNetwork(networkId);
-    if (isGanache) {
-        initializeWeb3Service({
-            networkId,
-        });
-    } else {
-        initialize({
-            networkId,
-        });
-    }
+    initialize({
+        networkId,
+        isGanache,
+    });
 
-    const origin = getOrigin(event);
     const isApiKeyRequired = isGanache ? false : isTrue(process.env.API_KEY_REQUIRED);
     const {
         error: validationError,
