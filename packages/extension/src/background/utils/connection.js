@@ -72,7 +72,6 @@ class Connection {
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
             tap(({ webClientId, ...rest }) => {
-                console.log({ rest });
                 if (!this.connections[webClientId]) {
                     warnLog(`Cannot find web client '${webClientId}'.`);
                     return;
