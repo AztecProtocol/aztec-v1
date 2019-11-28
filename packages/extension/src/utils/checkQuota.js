@@ -7,6 +7,7 @@ import {
 export default async () => {
     const apiKey = await get('apiKey');
     const networkId = await get('networkId');
+    let hasFreeTransactions = false;
     // we need to check the quota
     if (apiKey) {
         const lambdaResponse = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
@@ -17,11 +18,8 @@ export default async () => {
             credentials: 'same-origin', // include, *same-origin, omit
         });
 
-        const {
-            data: {
-                hasFreeTransactions,
-            },
-        } = await lambdaResponse.json();
+        const { data } await lambdaResponse.json();
+        hasFreeTransactions = data.hasFreeTransactions;
     }
 
     return !!apiKey && hasFreeTransactions;
