@@ -19,8 +19,6 @@ export default (query, connection) => async ({
 }) => {
     const apiKey = await get('apiKey');
     const networkId = await get('networkId');
-    // we need to check the quota
-    const quotaResponse = window.fetch()
 
     const params = {
         from,
