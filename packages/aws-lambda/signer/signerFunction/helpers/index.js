@@ -6,6 +6,7 @@ const networks = require('./networks');
 const refreshPendingTxs = require('./refreshPendingTxs');
 const validateNetworkId = require('./validateNetworkId');
 const isGanacheNetwork = require('./isGanacheNetwork');
+const getNetworkConfig = require('./getNetworkConfig');
 
 
 module.exports = {
@@ -17,4 +18,5 @@ module.exports = {
     refreshPendingTxs,
     validateNetworkId,
     isGanacheNetwork,
+    getNetworkConfig,
 }

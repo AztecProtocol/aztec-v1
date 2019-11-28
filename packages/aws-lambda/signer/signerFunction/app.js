@@ -1,5 +1,6 @@
 const {
-    signData,
+    approveData,
+    trustedAccount,
 } = require('./utils/signer');
 const {
     OK_200,
@@ -12,7 +13,7 @@ const {
     registerContracts,
     refreshPendingTxs,
     validateNetworkId,
-    isGanacheNetwork,
+    getNetworkConfig,
 } = require('./helpers');
 const {
     getParameters,
@@ -26,10 +27,6 @@ const {
 } = require('./utils/log');
 const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
-const {
-    NETWORKS,
-} = require('./config/constants');
-const isTrue = require('./helpers/isTrue');
 const {
     balance,
     getDappInfo,
@@ -50,33 +47,10 @@ const initializeDB = ({
     initModels();
 };
 
-const getTrustedAccount = (networkId) => {
-    const isGanache = isGanacheNetwork(networkId);
-    if (isGanache) {
-        return {
-            address: process.env.SIGNER_GANACHE_ADDRESS,
-            privateKey: process.env.SIGNER_GANACHE_PRIVATE_KEY,
-        };
-    }
-
-    return {
-        address: process.env.SIGNER_ADDRESS,
-        privateKey: process.env.SIGNER_PRIVATE_KEY,
-    };
-}
-
-const getNetworkConfig = (networkId)=> {
-    const isGanache = isGanacheNetwork(networkId);
-    if (isGanache) {
-        return NETWORKS.GANACHE;
-    };
-    return Object.values(NETWORKS).find(({ id }) => id === networkId);
-}
-
 const initializeWeb3Service = ({
     networkId,
 }) => {
-    const account = getTrustedAccount(networkId);
+    const account = trustedAccount(networkId);
     const network = getNetworkConfig(networkId);
     web3Service.init({
         providerURL: network.infuraProviderUrl,
@@ -87,9 +61,9 @@ const initializeWeb3Service = ({
 
 const initialize = ({
     networkId,
-    isGanache,
+    authorizationRequired,
 }) => {
-    if(!isGanache) {
+    if(authorizationRequired) {
         initializeDB({
             networkId,
         });
@@ -98,6 +72,66 @@ const initialize = ({
         networkId,
     });
 };
+
+const authorizedApprovalData = async ({
+    networkId,
+    apiKey,
+    data,
+}) => {
+    const {
+        id: dappId,
+    } = await getDappInfo({
+        apiKey,
+    });
+
+    await refreshPendingTxs({
+        dappId,
+        networkId,
+    });
+    const countFreeTransactions = await balance({
+        dappId,
+    });
+    if (countFreeTransactions <= 0) {
+        return {
+            error: ACCESS_DENIED_401({
+                title: "Not enough free transaction, please contact to the dapp's support",
+            }),
+            result: null,
+        }
+    }
+
+    const result = await approveData(data);
+    const {
+        signature,
+    } = result;
+
+    await monitorTx({
+        ...data,
+        dappId,
+        signature,
+    });
+
+    return {
+        error: null,
+        result,
+    }
+};
+
+const unauthorizedApprovalData = async ({
+    data,
+}) => {
+    const result = await approveData(data);
+    return {
+        error: null,
+        result,
+    }
+}
+
+const responseOptions = (origin) => ({
+    headers: {
+        'Access-Control-Allow-Origin': origin,
+    },
+});
 
 /**
  *
@@ -128,96 +162,71 @@ exports.signTxHandler = async (event) => {
         },
     } = getParameters(event) || {};
 
-    const {
-        isValid,
-        isGanache,
-        error: networkIdError,
-    } = validateNetworkId(networkId);
-    if (!isValid) {
-        return networkIdError;
-    }
-
-    initialize({
-        networkId,
-        isGanache,
-    });
-
-    const isApiKeyRequired = isGanache ? false : isTrue(process.env.API_KEY_REQUIRED);
-    const {
-        error: validationError,
-    } = await validateRequestData({
-        apiKey: {
-            isRequired: isApiKeyRequired,
-            value: apiKey,
-        },
-        origin: {
-            isRequired: isApiKeyRequired,
-            value: origin,
-        },
-        data: {
-            isRequired: true,
-            value: data,
-        },
-        networkId: {
-            isRequired: true,
-            value: networkId,
-        },
-    });
-    if (validationError) {
-        return validationError;
-    }
-
     try {
-        let dappId;
-        if (isApiKeyRequired) {
-            const {
-                id,
-            } = await getDappInfo({
-                apiKey,
-            });
-            dappId = id;
-
-            await refreshPendingTxs({
-                dappId,
-                networkId,
-            });
-            const countFreeTransactions = await balance({
-                dappId,
-            });
-            if (countFreeTransactions <= 0) {
-                return ACCESS_DENIED_401({
-                    title: "Not enough free transaction, please contact to the dapp's support",
-                });
-            }
+        const {
+            isValid,
+            authorizationRequired,
+            error: networkError,
+        } = validateNetworkId(networkId);
+        if (!isValid) {
+            return networkError;
         }
+
+        initialize({
+            networkId,
+            authorizationRequired,
+        });
 
         const {
-            messageHash: dataHash,
-            signature,
-        } = await signData(data);
+            error: validationError,
+        } = await validateRequestData({
+            apiKey: {
+                isRequired: authorizationRequired,
+                value: apiKey,
+            },
+            origin: {
+                isRequired: authorizationRequired,
+                value: origin,
+            },
+            data: {
+                isRequired: true,
+                value: data,
+            },
+            networkId: {
+                isRequired: true,
+                value: networkId,
+            },
+        });
+        if (validationError) {
+            return validationError;
+        }
 
-        if (isApiKeyRequired) {
-            await monitorTx({
-                ...data,
-                dappId,
-                signature,
+        let resp;
+        if (authorizationRequired) {
+            resp = await authorizedApprovalData({
+                networkId,
+                apiKey,
+                data,
+            });
+        } else {
+            resp = await unauthorizedApprovalData({
+                data,
             });
         }
-
-        const result = {
-            data,
-            dataHash,
-            dataSignature: signature,
-        };
-        if (isGanache) {
-            result.isGanache = true;
+        const {
+            error: approvalError,
+            result,
+        } = resp;
+        if (approvalError) {
+            return approvalError;
         }
-        return OK_200(result);
+        const options = responseOptions(origin);
+        return OK_200(result, options);
 
     } catch (e) {
         errorLog(e);
         return BAD_400({
-            message: e.toString(),
+            message: e.message,
         });
-    }
+    };
 };

@@ -4,6 +4,7 @@ const {
 const {
     ids,
 } = require('./networks');
+const isTrue = require('./isTrue');
 const isGanacheNetwork = require('./isGanacheNetwork');
 
 
@@ -12,22 +13,25 @@ module.exports = (networkId) => {
         return {
             error: BAD_400('"networkId" parameter is required'),
             isValid: false,
-            isGanage: false,
+            isGanache: false,
         };
     }
 
-    const isGanage = isGanacheNetwork(networkId);
-    if (!ids.includes(networkId) && !isGanage) {
+    const isGanache = isGanacheNetwork(networkId);
+    const authorizationRequired = isGanache ? false : isTrue(process.env.API_KEY_REQUIRED);
+    if (!ids.includes(networkId) && !isGanache) {
         return {
             error: BAD_400(`"networkId" parameter has to be one of ${ids.join(', ')} values or ganache networkId`),
             isValid: false,
-            isGanage: false,
+            isGanache: false,
+            authorizationRequired,
         };
     }
 
     return {
         error: null,
         isValid: true,
-        isGanage,
+        isGanache,
+        authorizationRequired,
     };
 };
