@@ -24,7 +24,6 @@ export default async function deposit({
     numberOfOutputNotes,
     sender,
 }) {
-    console.log({ sender });
     const notesOwner = await getNoteOwnerAccount(owner);
     if (!notesOwner) {
         throw new ApiError('account.not.linked', {

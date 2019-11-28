@@ -41,6 +41,7 @@ class ConnectionService {
     async openConnection({
         providerUrl,
         contractAddresses,
+        apiKey,
     }) {
         const {
             networkId,
@@ -65,6 +66,7 @@ class ConnectionService {
                 providerUrl,
                 contractAddresses,
                 networkId,
+                apiKey,
                 currentAddress: account.address,
             },
         }, '*');

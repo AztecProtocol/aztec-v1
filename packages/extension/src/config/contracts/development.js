@@ -31,7 +31,7 @@ export default {
         },
         config: ACE,
         networks: {
-            4: '0x9be0e65c568FDDA547AD9879e565d3d48C43408E',
+            4: '0x9c9dDe0cdB0CEa502Cc7Bc8Cd82fA06Ce478EBF6',
         },
     },
     ZkAsset: {

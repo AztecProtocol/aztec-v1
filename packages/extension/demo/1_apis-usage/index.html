@@ -13,7 +13,9 @@
       async function initAztecSdk() {
         const statusElem = document.getElementById('sdk-status');
         try {
-          await window.aztec.enable();
+          await window.aztec.enable({
+            apiKey: 'test1234'
+          });
         } catch (error) {
           console.error(error);
           statusElem.innerHTML = `
