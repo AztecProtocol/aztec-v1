@@ -16,10 +16,10 @@ import "./AZTECAccountRegistry.sol";
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-
 contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
 
-    address aceAddress;
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
+
     ACEModule.ACE ace;
     uint24 public constant JOIN_SPLIT_PROOF = 65793;
     using NoteUtils for bytes;
@@ -44,5 +44,15 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
         ace.publicApprove(_registryOwner, _proofHash, _value);
     }
+
+    /*
+    https://docs.openzeppelin.com/contracts/2.x/gsn
+    */
+    function postRelayedCall(bytes calldata context, bool success, uint actualCharge, bytes32 preRetVal) external { 
+        (, bytes memory approveData) = abi.decode(context, (address, bytes));
+
+        emit GSNTransactionProcessed(keccak256(approveData), success, actualCharge);
+    }
+
 }
 
