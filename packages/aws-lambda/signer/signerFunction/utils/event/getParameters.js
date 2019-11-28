@@ -1,3 +1,6 @@
+const getOrigin = require('./getOrigin');
+
+
 module.exports = (event) => {
     const body = event.body ? JSON.parse(event.body) : {};
 
@@ -9,8 +12,12 @@ module.exports = (event) => {
         apiKey,
         networkId: parseInt(networkIdStr, 10),
     }
+    const headers = {
+        origin: getOrigin(event),
+    };
     return {
         body,
         path,
+        headers,
     };
 };

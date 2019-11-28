@@ -1,7 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/GSN/bouncers/GSNBouncerSignature.sol";
 import "@aztec/protocol/contracts/libs/NoteUtils.sol";
 import "@aztec/protocol/contracts/ACE/ACE.sol" as ACEModule;
 
@@ -11,18 +10,19 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/IAZTEC.sol";
 import "../libs/LibEIP712.sol";
 import "./AZTECAccountRegistry.sol";
+import "./GSNRecipientTimestampSignature.sol";
 
 /**
  * @title AZTECAccountRegistryGSN implementation
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-
-contract AZTECAccountRegistryGSN is LibEIP712, IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNBouncerSignature {
-
-    ACEModule.IACE ace;
-
+contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNRecipientTimestampSignature {
     using NoteUtils for bytes;
+    ACEModule.ACE ace;
+    uint24 public constant JOIN_SPLIT_PROOF = 65793;
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
+
     constructor(
         address _ace,
         address _trustedAddress
