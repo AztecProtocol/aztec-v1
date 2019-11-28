@@ -62,7 +62,7 @@ contract GSNRecipientTimestampSignature is Initializable, GSNRecipient {
         (
             uint256 maxTimestamp,
             bytes memory signature
-        ) = abi.decode(context, (uint256, bytes));
+        ) = abi.decode(approvalData, (uint256, bytes));
 
         bytes memory blob = abi.encodePacked(
             relay,
@@ -77,6 +77,7 @@ contract GSNRecipientTimestampSignature is Initializable, GSNRecipient {
             maxTimestamp // Prevents sends tx after long perion of time
         );
         context = abi.encode(signature);
+
         if (keccak256(blob).toEthSignedMessageHash().recover(signature) == _trustedSigner) {
             if (block.timestamp > maxTimestamp) {
                 return _rejectRelayedCall(uint256(GSNRecipientSignatureErrorCodes.INVALID_TIMESTAMP), context);

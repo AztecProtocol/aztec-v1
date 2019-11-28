@@ -26,7 +26,7 @@ contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, 
         address _trustedAddress
     ) public {
         GSNRecipient.initialize();
-        GSNRecipientSignature.initialize(_trustedAddress);
+        GSNRecipientTimestampSignature.initialize(_trustedAddress);
         ace = ACEModule.ACE(_ace);
     }
 
