@@ -12,6 +12,7 @@ module.exports = (networkId) => {
         return {
             error: BAD_400('"networkId" parameter is required'),
             isValid: false,
+            isGanage: false,
         };
     }
 
@@ -20,12 +21,13 @@ module.exports = (networkId) => {
         return {
             error: BAD_400(`"networkId" parameter has to be one of ${ids.join(', ')} values or ganache networkId`),
             isValid: false,
+            isGanage: false,
         };
     }
-
 
     return {
         error: null,
         isValid: true,
+        isGanage,
     };
 };
