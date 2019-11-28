@@ -1,4 +1,7 @@
 const {
+    trustedAccount,
+} = require('./utils/signer');
+const {
     OK_200,
     NOT_FOUND_404,
     BAD_400,
@@ -8,7 +11,7 @@ const {
     registerContracts,
     refreshPendingTxs,
     validateNetworkId,
-    isGanacheNetwork,
+    getNetworkConfig,
 } = require('./helpers');
 const {
     getParameters,
@@ -19,9 +22,6 @@ const {
 } = require('./utils/log');
 const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
-const {
-    NETWORKS,
-} = require('./config/constants');
 const {
     balance,
     getDappInfo,
@@ -45,14 +45,8 @@ const initializeDB = ({
 const initializeWeb3Service = ({
     networkId,
 }) => {
-    const network = Object.values(NETWORKS).find(({ id }) => id === networkId);
-    if (!network || !networkId) {
-        throw new Error('Passed not right "networkId"');
-    }
-    const account = {
-        address: process.env.SIGNER_ADDRESS,
-        privateKey: process.env.SIGNER_PRIVATE_KEY,
-    };
+    const account = trustedAccount(networkId);
+    const network = getNetworkConfig(networkId);
     web3Service.init({
         providerURL: network.infuraProviderUrl,
         account,
@@ -62,14 +56,58 @@ const initializeWeb3Service = ({
 
 const initialize = ({
     networkId,
+    authorizationRequired,
 }) => {
-    initializeDB({
-        networkId,
-    });
+    if(authorizationRequired) {
+        initializeDB({
+            networkId,
+        });
+    }
     initializeWeb3Service({
         networkId,
     });
 };
+
+const authorizedHasFreeTransactions = async ({
+    networkId,
+    apiKey,
+}) => {
+    const {
+        id: dappId,
+    } = await getDappInfo({
+        apiKey,
+    });
+
+    await refreshPendingTxs({
+        dappId,
+        networkId,
+    });
+    const countFreeTransactions = await balance({
+        dappId,
+    });
+
+    return {
+        error: null,
+        result: {
+            hasFreeTransactions: countFreeTransactions > 0,
+        },
+    }
+};
+
+const unauthorizedHasFreeTransactions = async () => {
+    return {
+        error: null,
+        result: {
+            hasFreeTransactions: true,
+        },
+    }
+}
+
+const responseOptions = (origin) => ({
+    headers: {
+        'Access-Control-Allow-Origin': origin,
+    },
+});
 
 /**
  *
@@ -92,67 +130,72 @@ exports.balanceHandler = async (event) => {
             apiKey,
             networkId,
         },
+        headers: {
+            origin,
+        },
     } = getParameters(event) || {};
 
-    const {
-        isValid,
-        error: networkIdError,
-    } = validateNetworkId(networkId);
-    if (!isValid) {
-        return networkIdError;
-    }
-
-    const isGanache = isGanacheNetwork(networkId);
-    if (isGanache) {
-        return OK_200({
-            hasFreeTransactions: true,
-            isGanache: true,
-        });
-    }
-
-    initialize({
-        networkId,
-    });
-
-    const {
-        error: validationError,
-    } = await validateRequestData({
-        apiKey: {
-            isRequired: true,
-            value: apiKey,
-        },
-        networkId: {
-            isRequired: true,
-            value: networkId,
-        },
-    });
-    if (validationError) {
-        return validationError;
-    }
-
-    const {
-        id: dappId,
-    } = await getDappInfo({
-        apiKey,
-    });
-
     try {
-        await refreshPendingTxs({
-            dappId,
+        const {
+            isValid,
+            authorizationRequired,
+            error: networkError,
+        } = validateNetworkId(networkId);
+        if (!isValid) {
+            return networkError;
+        }
+
+        initialize({
             networkId,
-        });
-        const countFreeTransactions = await balance({
-            dappId,
+            authorizationRequired,
         });
 
-        return OK_200({
-            hasFreeTransactions: countFreeTransactions > 0,
+        const {
+            error: validationError,
+        } = await validateRequestData({
+            apiKey: {
+                isRequired: authorizationRequired,
+                value: apiKey,
+            },
+            origin: {
+                isRequired: authorizationRequired,
+                value: origin,
+            },
+            data: {
+                isRequired: false,
+            },
+            networkId: {
+                isRequired: true,
+                value: networkId,
+            },
         });
+        if (validationError) {
+            return validationError;
+        }
+
+        let resp;
+        if (authorizationRequired) {
+            resp = await authorizedHasFreeTransactions({
+                networkId,
+                apiKey,
+            });
+        } else {
+            resp = await unauthorizedHasFreeTransactions();
+        }
+        const {
+            error: freeTransactionsError,
+            result,
+        } = resp;
+        if (freeTransactionsError) {
+            return freeTransactionsError;
+        }
+        const options = responseOptions(origin);
+        return OK_200(result, options);
 
     } catch (e) {
         errorLog(e);
         return BAD_400({
-            message: e.toString(),
+            message: e.message,
         });
-    }
+    };
 };
