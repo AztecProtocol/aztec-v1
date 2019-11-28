@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { get } from '~/utils/storage';
 import ClientActionService from '~background/services/ClientActionService';
 import {
@@ -44,5 +43,5 @@ export default (query, connection) => async ({
         },
     }, connection);
 
-    return response.data.dataSignature;
+    return response.data.approvalData;
 };

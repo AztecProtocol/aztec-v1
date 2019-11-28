@@ -35,14 +35,11 @@ const handleAction = async (action, params) => {
             });
             const {
                 data: {
-                    data: {
-                    },
-                    dataSignature,
+                    approvalData,
                 },
             } = await response.json();
 
-            return { dataSignature };
-            break;
+            return { approvalData };
         }
         case 'metamask.register.extension': {
             const eip712Data = registerExtension(params);

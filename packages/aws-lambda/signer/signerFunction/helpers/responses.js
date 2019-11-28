@@ -1,6 +1,6 @@
 const baseResponse = {
     isBase64Encoded: false,
-    'headers': {
+    headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
     },
@@ -9,9 +9,19 @@ const baseResponse = {
 const successResponse = ({
     statusCode = 200,
     data = {},
+    options: {
+        headers = {},
+    } = {},
 }) => {
-    return {
+    const responseOptions = {
         ...baseResponse,
+        headers: {
+            ...baseResponse.headers,
+            ...headers,
+        },
+    };
+    return {
+        ...responseOptions,
         statusCode,
         body: JSON.stringify({
             data,
@@ -22,9 +32,19 @@ const successResponse = ({
 const badResponse = ({
     statusCode = 400,
     message = 'Bad request',
+    options: {
+        headers = {},
+    } = {},
 }) => {
-    return {
+    const responseOptions = {
         ...baseResponse,
+        headers: {
+            ...baseResponse.headers,
+            ...headers,
+        },
+    };
+    return {
+        ...responseOptions,
         statusCode,
         body: JSON.stringify({
             error: {
@@ -34,15 +54,18 @@ const badResponse = ({
     };
 };
 
-const OK_200 = (data) => successResponse({
+const OK_200 = (data, options) => successResponse({
     data,
+    options,
 });
 
-const BAD_400 = (message) => badResponse({
+const BAD_400 = (message, options) => badResponse({
     message,
+    options,
 });
 
 const ACCESS_DENIED_401 = (message = 'Access Denied') => badResponse({
+    statusCode: 401,
     message,
 });
 

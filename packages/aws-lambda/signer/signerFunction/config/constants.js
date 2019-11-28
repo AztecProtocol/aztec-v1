@@ -3,7 +3,7 @@ const infuraURL = (networkName) => {
 };
 
 module.exports = {
-    AWS_REGION: 'us-east-1',
+    TIME_TO_SEND_GSN_TRANSACTION: 86400, // One day 86400
     DB_TABLE: {
         GSN_API_KEY: 'aztec_gsn_api_keys',
         GSN_TRANSACTIONS: 'aztec_gsn_transactions',
