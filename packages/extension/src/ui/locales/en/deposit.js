@@ -7,7 +7,7 @@ export default {
     approve: {
         title: 'Approve Spend',
         submit: 'Approve',
-        amount: 'Deposit ',
+        amount: 'Deposit',
         explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
     },
     send: {
