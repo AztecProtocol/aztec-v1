@@ -30,12 +30,24 @@ class Setup {
         this.accounts = accounts;
 
         const networks = ['ropsten', 'rinkeby', 'kovan', 'mainnet'];
+
         if (networks.includes(this.NETWORK)) {
             console.log('Configuring integration test for', this.NETWORK, 'network');
             this.networkId = networkIDs[capitaliseFirstChar(this.NETWORK)];
-            this.getAddresses();
-            this.getContractPromises();
-            this.getTransactionTestingAddresses();
+            this.contractAddresses = this.getAddresses();
+            this.contractPromises = this.getContractPromises();
+            this.allContractObjects = this.generateContracts();
+
+
+            const [sender, delegatedAddress] = this.accounts;
+            const publicOwner = sender;
+            const opts = { from: sender };
+
+            this.sender = sender;
+            this.publicOwner = publicOwner;
+            this.delegatedAddress = delegatedAddress;
+            this.opts = opts;
+
         } else {
             throw new AztecError(codes.UNSUPPORTED_NETWORK, {
                 message: 'Network not recognised, please input: `ropsten`, `rinkeby`, `kovan` or `mainnet`',
@@ -48,21 +60,22 @@ class Setup {
      * @method getAddresses() - get the addresses for the desired contracts to deploy
      */
     getAddresses() {
-        try {
-            this.contractAddresses = getContractAddressesForNetwork(this.networkId);
-        } catch (err) {
+        const contractAddresses = getContractAddressesForNetwork(this.networkId);
+
+        if (contractAddresses === undefined) {
             throw new AztecError(codes.NO_CONTRACT_ADDRESSES, {
                 message: 'No contract addresses exist for the given network ID in @aztec/contract-addresses',
                 networkId: this.networkId,
             });
         }
+        return contractAddresses;
     }
 
     /**
      * @method getContractPromises - get the Truffle contracts for desired contracts, with the provider set
      */
     getContractPromises() {
-        this.contractPromises = this.contractsToDeploy.map((nameOfContract) => this.getContractPromise(nameOfContract));
+        return this.contractsToDeploy.map((nameOfContract) => this.getContractPromise(nameOfContract));
     }
 
     /**
@@ -72,26 +85,23 @@ class Setup {
      */
     getContractPromise(nameOfContract) {
         const contractObject = {};
-        let extractedContractArtifact;
-        let extractedContractAddress;
 
-        try {
-            extractedContractArtifact = contractArtifacts[nameOfContract];
-        } catch (err) {
+        const extractedContractArtifact = contractArtifacts[nameOfContract];
+        if (extractedContractArtifact === undefined) {
             throw new AztecError(codes.NO_CONTRACT_ARTIFACT, {
                 message: 'Requested contract does not exist in @aztec/contract-artifacts',
                 requestedContract: nameOfContract,
             });
         }
 
-        try {
-            extractedContractAddress = this.contractAddresses[nameOfContract];
-        } catch (err) {
+        const extractedContractAddress = this.contractAddresses[nameOfContract];
+        if (extractedContractAddress === undefined) {
             throw new AztecError(codes.NO_CONTRACT_ADDRESS, {
                 message: 'Requested contract does not have a deployed address in @aztec/contract-addresses',
                 requestedContract: nameOfContract,
             });
-        }
+        };
+
 
         contractObject[nameOfContract] = async () => {
             const truffleRepresentation = this.getTruffleContractRepresentation(extractedContractArtifact);
@@ -112,11 +122,11 @@ class Setup {
     }
 
     /**
-     * @method getContracts - get the JavaScript objects representing contracts deployed at a specific address, for use
+     * @method generateContracts - generate the JavaScript objects representing contracts deployed at a specific address, for use
      * in testing
      * @returns {Object} Truffle contracts, representing the contract deployed at a specific address
      */
-    async getContracts() {
+    async generateContracts() {
         const allContractObjects = (await Promise.all(
             this.contractPromises.map(async (currentContractPromise, index) =>
                 currentContractPromise[this.contractsToDeploy[index]](),
@@ -126,8 +136,15 @@ class Setup {
             return { ...accumulator };
         }, {});
 
-        this.allContractObjects = allContractObjects;
         return allContractObjects;
+    }
+
+    /**
+     * @method getContracts - get the JavaScript objects representing contracta deployed at a specific address
+     * @returns {Object} - Truffle contracts, representing the contract deployed at a specific address
+     */
+    getContracts() {
+        return this.allContractObjects;
     }
 
     /**
@@ -137,11 +154,7 @@ class Setup {
      * @returns {Object} sender, publicOwner, delegatedAddress, opts variables
      */
     getTransactionTestingAddresses() {
-        const [sender, delegatedAddress] = this.accounts;
-        const publicOwner = sender;
-        const opts = { from: sender };
-        this.publicOwner = publicOwner;
-        this.opts = opts;
+        const { sender, publicOwner, delegatedAddress, opts } = this;
 
         return { sender, publicOwner, delegatedAddress, opts };
     }
@@ -159,11 +172,13 @@ class Setup {
         const { ACE: ace, ERC20Mintable: erc20 } = await this.allContractObjects;
         const tokensToBeTransferred = this.config.numTestTokens.mul(scalingFactor);
 
+        // mint tokens
         const publicOwnerBalance = await erc20.balanceOf(this.publicOwner);
         if (publicOwnerBalance.lt(tokensToBeTransferred)) {
             await erc20.mint(this.publicOwner, tokensToBeTransferred, this.opts);
         }
 
+        // approve tokens
         const publicOwnerApproval = await erc20.allowance(this.publicOwner, ace.address);
         if (publicOwnerApproval.lt(tokensToBeTransferred)) {
             await erc20.approve(ace.address, tokensToBeTransferred, this.opts);

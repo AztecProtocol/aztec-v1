@@ -11,7 +11,7 @@ const utils = {};
  * @returns {string} - input string with first letter capitalised
  */
 utils.capitaliseFirstChar = (stringToCapitalise) => {
-    return stringToCapitalise.charAt(0).toUpperCase() + stringToCapitalise.slice(1);
+    return stringToCapitalise[0].toUpperCase() + stringToCapitalise.slice(1);
 };
 
 /**
