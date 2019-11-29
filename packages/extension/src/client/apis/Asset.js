@@ -198,8 +198,9 @@ export default class Asset {
         );
     };
 
-    withdraw = async (transactions, {
+    withdraw = async (amount, {
         sender = '',
+        to,
         numberOfInputNotes,
     } = {}) => {
         const {
@@ -211,8 +212,9 @@ export default class Asset {
             {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
-                transactions,
+                amount,
                 sender: sender || address,
+                to: to || address,
                 numberOfInputNotes,
             },
         );
