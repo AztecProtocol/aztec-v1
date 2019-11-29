@@ -18,7 +18,7 @@ jobs:
                 command: |
                   LAST_SUCCESSFUL_BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/tree/develop?filter=successful&limit=1"
                   LAST_SUCCESSFUL_COMMIT=`curl -Ss -u "$CIRCLE_TOKEN:" $LAST_SUCCESSFUL_BUILD_URL | jq -r '.[0]["vcs_revision"]'`
-                  CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ | cut -d/ -f2 | uniq | paste -sd\| -)
+                  CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ || true | cut -d/ -f2 | uniq | paste -sd\| -)
             - restore_cache:
                 keys:
                     - modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
@@ -28,9 +28,6 @@ jobs:
             - run:
                 name: "Build Packages"
                 command: yarn build
-            - run:
-                name: "TEST"
-                command: CHANGED_MODULES=$(git diff --name-only abf464fd02c8ad250e4095be21790d84e07f98ca | grep ^packages\/.*\/ | cut -d/ -f2 | uniq | paste -sd\| -)
             - save_cache:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
