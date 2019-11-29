@@ -1,7 +1,6 @@
 import { utils } from 'web3';
 
 export default function _addAccess(metadata, access) {
-    // eslint-disable-line no-underscore-dangle
     const noteAccess = Array.isArray(access) ? access : [access];
     const { addresses, viewingKeys } = metadata;
     const newAddresses = [];

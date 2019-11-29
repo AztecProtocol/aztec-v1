@@ -17,6 +17,7 @@ export default function constructor(metadataStr) {
     }, []);
 
     config.forEach(({ name, length, startAt }) => {
+        console.log('in metadata start');
         const isDynamic = !!startAt;
         const isLenVar = lenVars.indexOf(name) >= 0;
 
@@ -26,8 +27,11 @@ export default function constructor(metadataStr) {
             start += DYNAMIC_VAR_CONFIG_LENGTH;
         }
 
+        console.log({ numberOfVars });
         const arr = [];
         for (let i = 0; i < numberOfVars; i += 1) {
+            console.log({ numberOfVars });
+            console.log('i: ', i);
             let segLen;
             if (isLenVar) {
                 segLen = length;

@@ -39,6 +39,11 @@ class Note {
          * @member {string}
          */
         this.owner = owner;
+
+        /**
+         * Access object, specifying Ethereum address to be granted note access
+         */
+        this.access = access;
         if (publicKey) {
             if (typeof publicKey !== 'string') {
                 throw new Error(`expected key type ${typeof publicKey} to be of type string`);
@@ -97,11 +102,9 @@ class Note {
          */
         this.noteHash = getNoteHash(this.gamma, this.sigma);
 
+        // Grant view access to the addresses specified in access
         if (access) {
-            console.log('in the set access');
-            const customData = this.grantNoteAccess(access);
-            console.log({ customData });
-            this.setMetaData(customData);
+            this.grantViewAccess(access)
         }
     }
 

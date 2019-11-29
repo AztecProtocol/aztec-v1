@@ -1,6 +1,6 @@
 import { utils } from 'web3';
-import { DYNAMIC_VAR_CONFIG_LENGTH, MIN_BYTES_VAR_LENGTH } from '~config/constants';
-import config from '~config/metadata';
+import { DYNAMIC_VAR_CONFIG_LENGTH, MIN_BYTES_VAR_LENGTH } from '../config/constants';
+import config from '../config/metadata';
 
 const toConfigVar = (num) => num.toString(16).padStart(DYNAMIC_VAR_CONFIG_LENGTH, '0');
 const ensureMinVarSize = (str, len) => str.padStart(Math.max(len || str.length, MIN_BYTES_VAR_LENGTH), '0');

@@ -1,5 +1,5 @@
-import { warnLog } from '~/log';
-import { decryptMessage } from '~/crypto';
+import { warnLog } from '../log';
+import { decryptMessage } from '../crypto';
 import lengthConfig from './lengthConfig';
 
 export default function decrypt(privateKey, encrypted) {

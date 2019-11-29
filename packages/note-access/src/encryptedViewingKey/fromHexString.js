@@ -1,6 +1,6 @@
-import { VIEWING_KEY_LENGTH } from '~config/constants';
-import { warnLog } from '~log';
-import recoverFromHexString from '~/crypto/fromHexString';
+import { VIEWING_KEY_LENGTH } from '../config/constants';
+import { warnLog } from '../log';
+import recoverFromHexString from '../crypto/fromHexString';
 import decrypt from './decrypt';
 
 export default function fromHexString(str) {
