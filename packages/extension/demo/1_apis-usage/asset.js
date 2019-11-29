@@ -140,17 +140,12 @@ async function withdraw() {
   withdrawStatus.clear();
 
   const account = window.aztec.web3.account();
-  const transactions = [
-    {
-      amount: value,
-      to: toAddress,
-    },
-  ];
 
   try {
     await asset.withdraw(
-      transactions,
+      value,
       {
+          to: toAddress,
           numberOfInputNotes,
       },
     );

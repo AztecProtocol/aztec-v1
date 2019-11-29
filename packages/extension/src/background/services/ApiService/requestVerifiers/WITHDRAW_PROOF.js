@@ -4,17 +4,15 @@ import validateAccounts from '../utils/validateAccounts';
 
 export default async function verifyWithdrawRequest({
     assetAddress,
+    amount,
     sender,
-    transactions,
+    to,
     numberOfInputNotes,
 }) {
-    const totalAmount = transactions
-        .reduce((sum, { amount }) => sum + amount, 0);
-
     const noteError = await ensureInputNotes({
         assetAddress,
         numberOfInputNotes,
-        amount: totalAmount,
+        amount,
     });
     if (noteError) {
         return noteError;
@@ -25,9 +23,8 @@ export default async function verifyWithdrawRequest({
         return senderError;
     }
 
-    const addresses = transactions.map(({ to }) => to);
     const invalidAddressError = await validateAccounts({
-        addresses,
+        addresses: [to],
     });
     if (invalidAddressError) {
         return invalidAddressError;

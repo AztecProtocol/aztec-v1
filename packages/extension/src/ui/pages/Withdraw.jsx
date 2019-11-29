@@ -3,19 +3,19 @@ import PropTypes from 'prop-types';
 import {
     emptyIntValue,
 } from '~ui/config/settings';
-import makeAsset from '~uiModules/utils/makeAsset';
+import makeAsset from '~/ui/utils/makeAsset';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import { withdrawSteps } from '~ui/config/steps';
 import {
     gsnConfigShape,
 } from '~ui/config/propTypes';
 
-
 const Withdraw = ({
     initialStep,
     assetAddress,
+    amount,
     sender,
-    transactions,
+    to,
     proof,
     numberOfInputNotes,
     gsnConfig,
@@ -31,8 +31,9 @@ const Withdraw = ({
         return {
             assetAddress,
             asset,
+            amount,
             sender,
-            transactions,
+            to,
             proof,
             numberOfInputNotes,
             gsnConfig,
@@ -51,11 +52,9 @@ const Withdraw = ({
 Withdraw.propTypes = {
     initialStep: PropTypes.number,
     assetAddress: PropTypes.string.isRequired,
+    amount: PropTypes.number.isRequired,
     sender: PropTypes.string.isRequired,
-    transactions: PropTypes.arrayOf(PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        to: PropTypes.string.isRequired,
-    })).isRequired,
+    to: PropTypes.string.isRequired,
     proof: PropTypes.shape({
         inputNotes: PropTypes.array.isRequired,
     }),

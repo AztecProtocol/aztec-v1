@@ -22,7 +22,8 @@ const WithdrawConfirm = ({
         name,
         decimals,
     },
-    transactions: [firstTransaction],
+    to,
+    amount,
 }) => (
     <PopupContent
         title={(
@@ -34,7 +35,7 @@ const WithdrawConfirm = ({
                 />
                 <Block padding="0 s" inline>
                     <Text
-                        text={formatNumber(firstTransaction.amount, decimals)}
+                        text={formatNumber(amount, decimals)}
                         size="xl"
                         weight="bold"
                     />
@@ -61,21 +62,21 @@ const WithdrawConfirm = ({
                 to={{
                     profile: {
                         type: 'user',
-                        address: firstTransaction.to,
+                        address: to,
                     },
                     tooltip: (
                         <ListItem
-                            content={formatAddress(firstTransaction.to, 6, 4)}
+                            content={formatAddress(to, 6, 4)}
                             size="xxs"
                             footnote={(
                                 <Text
-                                    text={`+${formatNumber(firstTransaction.amount, decimals)}`}
+                                    text={`+${formatNumber(amount, decimals)}`}
                                     color="green"
                                 />
                             )}
                         />
                     ),
-                    description: formatAddress(firstTransaction.to, 6, 4),
+                    description: formatAddress(to, 6, 4),
                 }}
                 size="s"
                 actionIconName="double_arrow"
@@ -92,12 +93,8 @@ const WithdrawConfirm = ({
 
 WithdrawConfirm.propTypes = {
     asset: assetShape.isRequired,
-    transactions: PropTypes.arrayOf(
-        PropTypes.shape({
-            to: PropTypes.string.isRequired,
-            amount: PropTypes.number.isRequired,
-        }),
-    ).isRequired,
+    to: PropTypes.string.isRequired,
+    amount: PropTypes.number.isRequired,
 };
 
 export default WithdrawConfirm;
