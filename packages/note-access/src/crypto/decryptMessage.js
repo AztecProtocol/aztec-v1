@@ -1,6 +1,6 @@
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
-import { errorLog } from '~/log';
+import { errorLog } from '../log';
 
 export default function decryptMessage(privateKey, encryptedData) {
     if (typeof encryptedData === 'string') {
