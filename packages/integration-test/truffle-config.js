@@ -83,28 +83,28 @@ module.exports = {
     networks: {
         development: {
             provider: engine,
-            gas: 6500000,
+            gas: 10e6,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,
         },
         mainnet: {
             provider: mainnetProvider,
-            gas: 6000000,
+            gas: 10e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
             skipDryRun: true,
         },
         rinkeby: {
             provider: rinkebyProvider,
-            gas: 6000000,
+            gas: 10e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
             skipDryRun: true,
         },
         ropsten: {
             provider: ropstenProvider,
-            gas: 6000000,
+            gas: 8e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
             skipDryRun: true,
