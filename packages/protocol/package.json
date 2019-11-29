@@ -33,7 +33,7 @@
     "mocha": "^6.0.2",
     "shx": "^0.3.2",
     "solhint": "^2.0.0",
-    "truffle": "5.0.17",
+    "truffle": "5.1.2",
     "truffle-assertions": "^0.9.1",
     "truffle-hdwallet-provider": "1.0.17",
     "web3": "1.2.1",
