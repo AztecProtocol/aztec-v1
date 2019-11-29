@@ -14,7 +14,6 @@ const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
 
 
-
 const initializeDB = ({
     networkId,
 }) => {

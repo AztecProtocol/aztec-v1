@@ -158,7 +158,7 @@ exports.balanceHandler = async (event) => {
                 value: apiKey,
             },
             origin: {
-                isRequired: authorizationRequired,
+                isRequired: false,
                 value: origin,
             },
             data: {
