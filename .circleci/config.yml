@@ -21,7 +21,7 @@ jobs:
                   CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ | cut -d/ -f2 | uniq | paste -sd\| -)
             - restore_cache:
                 keys:
-                    - modules-{{ Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
+                    - modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
             - run:
                 name: "Install Dependencies"
                 command: yarn install
@@ -62,7 +62,7 @@ jobs:
                 name: "Test Packages"
                 command: yarn test
             - save_cache:
-                key: modules-{{ Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
+                key: modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
                 paths:
                     - ~/repo/packages/aztec.js/node_modules
                     - ~/repo/packages/aztec.js/dist
