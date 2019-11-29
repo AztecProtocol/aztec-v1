@@ -35,7 +35,7 @@ config.contractsToDeploy = [
 
 /**
  * @constant {string} NETWORK - name of the test network for which the integration test is to be run.
- * Extracted from the flag passed to the truffle test command - it is the last flag to be passed
+ * Extracted from the argument passed to the truffle test command - it is the last argument to be passed
  */
 config.NETWORK = process.argv[process.argv.length - 1];
 
