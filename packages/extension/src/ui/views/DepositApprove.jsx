@@ -33,7 +33,7 @@ const DepositApprove = ({
                     />
                 </Block>
                 <Text
-                    text={asset.name || 'ERC20 Tokens'}
+                    text={asset.name || i18n.t('asset.erc20.token', totalAmount)}
                     size="xl"
                     weight="light"
                 />
