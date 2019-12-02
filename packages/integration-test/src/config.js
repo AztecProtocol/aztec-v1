@@ -55,7 +55,7 @@ config.runAdjustSupplyTests = false;
 
 /**
  * @param {bool} runUpgrade - flag determining whether the test that performs a note registry upgrade
- * should be performed. If true, perform the upgrade
+ * should be performed. If true, perform the upgrade test
  *
  */
 config.runUpgrade = false;
