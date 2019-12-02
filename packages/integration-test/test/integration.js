@@ -20,7 +20,7 @@ const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { getNotesForAccount, generateFactoryId } = require('../src/utils');
 const Setup = require('../src/setup');
-const config = require('../src/config');
+
 
 contract('Integration', (accounts) => {
     let aztecAccount;
@@ -45,7 +45,7 @@ contract('Integration', (accounts) => {
     let setup;
 
     before(async () => {
-        setup = new Setup(accounts, config);
+        setup = new Setup(accounts);
 
         ({
             ACE: ace,
@@ -62,7 +62,7 @@ contract('Integration', (accounts) => {
 
         ({ sender, publicOwner, delegatedAddress, opts } = setup.getTransactionTestingAddresses());
 
-        await setup.fundPublicOwnerAccount(config.scalingFactor);
+        await setup.fundPublicOwnerAccount();
 
         aztecAccount = secp256k1.generateAccount();
     });
@@ -198,7 +198,7 @@ contract('Integration', (accounts) => {
 
             const balancePreTransfer = await erc20.balanceOf(publicOwner);
             const transferAmountBN = new BN(depositPublicValue);
-            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(config.scalingFactor));
+            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(setup.scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: publicOwner });
 
@@ -233,7 +233,7 @@ contract('Integration', (accounts) => {
             const withdrawPublicValue = 100;
 
             const withdrawAmountBN = new BN(withdrawPublicValue);
-            const expectedBalancePostWithdraw = balancePostDeposit.add(withdrawAmountBN.mul(config.scalingFactor));
+            const expectedBalancePostWithdraw = balancePostDeposit.add(withdrawAmountBN.mul(setup.scalingFactor));
 
             const withdrawProof = new JoinSplitProof(
                 withdrawInputNotes,
@@ -366,7 +366,7 @@ contract('Integration', (accounts) => {
 
     describe('Upgradeability', async () => {
         before(function checkIfConfigured() {
-            if (!setup.runUpgrade) {
+            if (!setup.runUpgradeTest) {
                 console.log('Tests not configured');
                 this.skip();
             }
