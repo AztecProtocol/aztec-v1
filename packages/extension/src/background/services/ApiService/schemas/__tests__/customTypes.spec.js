@@ -87,41 +87,51 @@ describe('bigNumber type', () => {
         });
     });
 
-    it('set to be required', () => {
+    it('can be required', () => {
         const bnSchema = makeSchema({
-            value: bigNumberType
-                .withSize({
-                    gte: 4,
-                    lt: 11,
-                })
-                .isRequired,
+            id: bigNumberType.isRequired,
+            item: {
+                name: {
+                    type: 'string',
+                },
+                price: bigNumberType
+                    .withSize({
+                        gt: 0,
+                    })
+                    .isRequired,
+                discount: bigNumberType,
+            },
         });
 
-        [
-            4,
-            5,
-            new BN(6),
-            new BN('7'),
-            '8',
-            9,
-            10,
-        ].forEach((validValue) => {
-            expect(bnSchema.validate({
-                value: validValue,
-            })).toBe(null);
-        });
+        expect(bnSchema.validate({
+            id: 2,
+            item: {
+                name: 'jellybean',
+                price: 30,
+                discount: 24,
+            },
+        })).toBe(null);
 
-        [
-            0,
-            '1',
-            new BN(2),
-            new BN('3'),
-            11,
-            12,
-        ].forEach((invalidValue) => {
-            expect(bnSchema.validate({
-                value: invalidValue,
-            })).toMatch(/value/);
-        });
+        expect(bnSchema.validate({
+            id: 2,
+            item: {
+                name: 'jellybean',
+                price: 30,
+            },
+        })).toBe(null);
+
+        expect(bnSchema.validate({
+            id: 2,
+            item: {
+                name: 'jellybean',
+            },
+        })).toMatch(/item.price/);
+
+        expect(bnSchema.validate({
+            item: {
+                name: 'jellybean',
+                price: 30,
+            },
+        })).toMatch(/id/);
     });
 });

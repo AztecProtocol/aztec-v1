@@ -77,32 +77,41 @@ const validateType = (targetType, val, path) => {
 const compMapping = {
     eq: {
         exec: (v1, v2) => v1 === v2,
+        comp: [0],
         text: 'equal to',
     },
     gte: {
         exec: (v1, v2) => v1 >= v2,
+        comp: [0, 1],
         text: 'greater than or equal to',
     },
     gt: {
         exec: (v1, v2) => v1 > v2,
+        comp: [1],
         text: 'greater than',
     },
     lte: {
         exec: (v1, v2) => v1 <= v2,
+        comp: [0, -1],
         text: 'less than or equal to',
     },
     lt: {
         exec: (v1, v2) => v1 < v2,
+        comp: [-1],
         text: 'less than',
     },
 };
 
 const validateValue = (name, size, val, valSize, path) => {
     let compVars = {};
+    let customComp;
     if (typeOf(size) === 'number') {
         compVars.eq = size;
     } else if (size) {
-        compVars = size;
+        ({
+            comp: customComp,
+            ...compVars
+        } = size);
     }
 
     let error;
@@ -111,10 +120,13 @@ const validateValue = (name, size, val, valSize, path) => {
             const targetValue = compVars[operator];
             const {
                 exec,
+                comp,
                 text,
             } = compMapping[operator] || {};
             let isValid;
-            if (typeOf(targetValue) === 'function') {
+            if (customComp) {
+                isValid = comp.indexOf(customComp(val, targetValue)) >= 0;
+            } else if (typeOf(targetValue) === 'function') {
                 isValid = targetValue(val);
             } else if (exec) {
                 isValid = exec(valSize, targetValue);

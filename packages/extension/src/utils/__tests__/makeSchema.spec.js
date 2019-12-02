@@ -621,4 +621,81 @@ describe('makeSchema', () => {
             })).toMatch(/profile.id/);
         });
     });
+
+    it('acccept custom compare function', () => {
+        const schema = makeSchema({
+            oct: {
+                type: ['string', 'number'],
+                size: {
+                    gt: '3',
+                    lt: 77,
+                    comp: (val, targetValue) => {
+                        const diff = parseInt(val, 8) - parseInt(targetValue, 8);
+                        if (diff === 0) {
+                            return diff;
+                        }
+                        return diff > 0 ? 1 : -1;
+                    },
+                },
+            },
+            hex: {
+                type: ['string', 'number'],
+                size: {
+                    gte: 4,
+                    lte: '1c',
+                    comp: (val, targetValue) => {
+                        const diff = parseInt(val, 16) - parseInt(targetValue, 16);
+                        if (diff === 0) {
+                            return diff;
+                        }
+                        return diff > 0 ? 1 : -1;
+                    },
+                },
+            },
+        });
+
+        [
+            4,
+            '5',
+            75,
+            '76',
+        ].forEach((validOct) => {
+            expect(schema.validate({
+                oct: validOct,
+            })).toBe(null);
+        });
+
+        [
+            2,
+            '3',
+            77,
+            '80',
+        ].forEach((invalidOct) => {
+            expect(schema.validate({
+                oct: invalidOct,
+            })).toMatch(/oct/);
+        });
+
+        [
+            4,
+            '5',
+            '1c',
+        ].forEach((validHex) => {
+            expect(schema.validate({
+                hex: validHex,
+            })).toBe(null);
+        });
+
+        [
+            2,
+            '3',
+            '1d',
+            20,
+            'ab',
+        ].forEach((invalidHex) => {
+            expect(schema.validate({
+                hex: invalidHex,
+            })).toMatch(/hex/);
+        });
+    });
 });
