@@ -33,7 +33,7 @@ jobs:
                 paths:
                     - ~/repo
             - save_cache:
-                key: modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
+                key: modules-{{ .Branch }}-aztecjs-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
                     - ~/repo/packages/aztec.js/node_modules
                     - ~/repo/packages/aztec.js/dist
