@@ -174,7 +174,8 @@ workflows:
                     - build
                 filters:
                     branches:
-                        ignore: gh-pages
+                        only:
+                            - develop
             - artifacts:
                 requires:
                     - lint
