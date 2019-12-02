@@ -47,8 +47,8 @@ export default async function createNoteFromBalance({
         ? customNumberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
 
+    let outputNotesOwnerAddress;
     const outputNotesOwnerMapping = {};
-    let outputNotesOwner = inputNotesOwner;
     if (transactions && transactions.length) {
         await asyncForEach(transactions, async ({ to }) => {
             if (outputNotesOwnerMapping[to]) return;
@@ -60,11 +60,12 @@ export default async function createNoteFromBalance({
         if (amount && inputAmount !== amount) {
             errorLog(`Input amount (${amount}) does not match total transactions (${inputAmount}).`);
         }
-    } else if (owner) {
-        if (owner !== inputNotesOwner.address) {
-            outputNotesOwner = await getExtensionAccount(owner);
-        }
-        outputNotesOwnerMapping[outputNotesOwner.address] = outputNotesOwner;
+    } else if (numberOfOutputNotes > 0) {
+        outputNotesOwnerAddress = owner || publicOwner || inputNotesOwner.address;
+        const outputNotesOwner = outputNotesOwnerAddress === inputNotesOwner.address
+            ? inputNotesOwner
+            : await getExtensionAccount(outputNotesOwnerAddress);
+        outputNotesOwnerMapping[outputNotesOwnerAddress] = outputNotesOwner;
     }
 
     const {
@@ -129,7 +130,6 @@ export default async function createNoteFromBalance({
         );
         outputValues.push(extraAmount);
         outputNotes.push(remainderNote);
-        outputNotesOwnerMapping[inputNotesOwner.address] = inputNotesOwner;
     }
 
     if (transactions) {
@@ -161,11 +161,12 @@ export default async function createNoteFromBalance({
         );
         outputValues.push(...values);
 
+        const notesOwner = outputNotesOwnerMapping[outputNotesOwnerAddress];
         const newNotes = await createNotes(
             values,
-            outputNotesOwner.spendingPublicKey,
-            outputNotesOwner.address,
-            outputNotesOwner.linkedPublicKey,
+            notesOwner.spendingPublicKey,
+            notesOwner.address,
+            notesOwner.linkedPublicKey,
         );
         outputNotes.push(...newNotes);
     }
