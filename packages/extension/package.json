@@ -1,6 +1,9 @@
 {
     "name": "extension",
-    "sideEffects": false,
+    "sideEffects": [
+        "**/*.css",
+        "**/*.scss"
+    ],
     "version": "0.0.1",
     "main": "index.js",
     "license": "MIT",
