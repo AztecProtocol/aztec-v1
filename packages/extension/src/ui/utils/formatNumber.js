@@ -1,7 +1,6 @@
-const isFloatValue = value => `${value}`.indexOf('.') >= 0;
+const isFloatValue = strVal => strVal.indexOf('.') >= 0;
 
-const shiftRight10 = (intValue, count) => {
-    const strVal = `${intValue}`;
+const shiftRight10 = (strVal, count) => {
     const cutAt = Math.max(0, strVal.length - count);
     const intStr = strVal.substr(0, cutAt) || '0';
     const fractionStr = strVal.length > count
@@ -12,14 +11,13 @@ const shiftRight10 = (intValue, count) => {
         : intStr;
 };
 
-const formatInt = (intValue) => {
-    const intStr = `${intValue}`;
-    const segCount = Math.ceil(intStr.length / 3);
+const formatInt = (strVal) => {
+    const segCount = Math.ceil(strVal.length / 3);
     const segments = [];
     for (let i = 0; i < segCount; i += 1) {
-        const end = intStr.length - (3 * i);
+        const end = strVal.length - (3 * i);
         const start = Math.max(0, end - 3);
-        segments[segCount - i - 1] = intStr.substring(start, end);
+        segments[segCount - i - 1] = strVal.substring(start, end);
     }
     return segments.join(',');
 };
@@ -37,12 +35,12 @@ const formatFraction = (fractionValue, decimals) => {
 };
 
 export default function formatNumber(value, decimals) {
-    let floatValue = value;
-    if (decimals > 0 && !isFloatValue(floatValue)) {
-        floatValue = shiftRight10(floatValue, decimals);
+    let strVal = `${value}`;
+    if (decimals > 0 && !isFloatValue(strVal)) {
+        strVal = shiftRight10(strVal, decimals);
     }
 
-    const [intValue, fractionValue] = `${floatValue}`.split('.');
+    const [intValue, fractionValue] = strVal.split('.');
     const intStr = formatInt(intValue);
     const fractionStr = formatFraction(fractionValue, decimals);
 

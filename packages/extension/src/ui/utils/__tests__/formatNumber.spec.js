@@ -49,6 +49,9 @@ describe('formatValue', () => {
         expect(formatNumber(new BN('1000000000000000001'), 2))
             .toBe('10,000,000,000,000,000.01');
 
+        expect(formatNumber('10000000000000000.012345', 3))
+            .toBe('10,000,000,000,000,000.012');
+
         expect(formatNumber(new BN('1234567890987654321'), 0))
             .toBe('1,234,567,890,987,654,321');
     });
