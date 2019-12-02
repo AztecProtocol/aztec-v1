@@ -1,6 +1,6 @@
 import makeSchema from '~/utils/makeSchema';
-import addressType from './types/address';
+import noteHashType from './types/noteHash';
 
 export default makeSchema({
-    id: addressType.isRequired,
+    id: noteHashType.isRequired,
 });
