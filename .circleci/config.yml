@@ -19,8 +19,6 @@ jobs:
                   LAST_SUCCESSFUL_BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/tree/develop?filter=successful&limit=1"
                   LAST_SUCCESSFUL_COMMIT=`curl -Ss -u "$CIRCLE_TOKEN:" $LAST_SUCCESSFUL_BUILD_URL | jq -r '.[0]["vcs_revision"]'`
                   CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ || true | cut -d/ -f2 | uniq | paste -sd\| -)
-                  echo 'export CHANGED_MODULES=$CHANGED_MODULES' >> $BASH_ENV
-                  echo 'export LAST_SUCCESSFUL_COMMIT=$LAST_SUCCESSFUL_COMMIT' >> $BASH_ENV
             - restore_cache:
                 keys:
                     - modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
@@ -34,6 +32,11 @@ jobs:
                 key: repo-{{ .Environment.CIRCLE_SHA1 }}
                 paths:
                     - ~/repo
+            - save_cache:
+                key: modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
+                paths:
+                    - ~/repo/packages/aztec.js/node_modules
+                    - ~/repo/packages/aztec.js/dist
     lint:
         working_directory: ~/repo
         docker:
@@ -60,11 +63,6 @@ jobs:
             - run:
                 name: "Test Packages"
                 command: yarn test
-            - save_cache:
-                key: modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
-                paths:
-                    - ~/repo/packages/aztec.js/node_modules
-                    - ~/repo/packages/aztec.js/dist
     artifacts:
         working_directory: ~/repo
         docker:
