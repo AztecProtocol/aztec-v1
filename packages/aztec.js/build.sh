@@ -1,6 +1,18 @@
 #!/bin/bash
 
 echo $CHANGED_MODULES;
+if [ "$CI" = true ]; then
+    echo "CI is true";
+fi
+
+if [ ! -d "dist" ]; then
+    echo "dist does not exist";
+fi
+
+if [[ "aztec.js" =~ $CHANGED_MODULES ]]; then
+    echo "aztec.js not in changedmodules";
+fi
+
 
 if [ "$PROD" = true ]; then
     if [ "$CI" = true ] && [ ! -d "dist" ] || [[ "aztec.js" =~ $CHANGED_MODULES ]] || [ ! "$CI" = true ]; then
