@@ -17,9 +17,6 @@ let ropstenProvider = {};
 
 // You must specify a MNEMONIC and INFURA_API_KEY in your .env file
 function createProvider(network) {
-    if (process.env.CI && process.env.CIRCLE_JOB !== 'artifacts') {
-        return {};
-    }
     if (!process.env.MNEMONIC) {
         console.log('Please set a MNEMONIC in a .env file');
         process.exit(1);

@@ -91,8 +91,6 @@ engine.start((err) => {
 engine.send = engine.sendAsync.bind(engine);
 engine.stop();
 
-console.log('ropsten provider: ', ropstenProvider);
-
 module.exports = {
     compilers: {
         solc: {
@@ -114,7 +112,7 @@ module.exports = {
     networks: {
         development: {
             provider: engine,
-            gas: 10e6,
+            gas: 6500000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
             port: 8545,

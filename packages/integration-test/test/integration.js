@@ -21,7 +21,6 @@ const BN = require('bn.js');
 const { getNotesForAccount, generateFactoryId } = require('../src/utils');
 const Setup = require('../src/setup');
 
-
 contract('Integration', (accounts) => {
     let aztecAccount;
     let ace;
