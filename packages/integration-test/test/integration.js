@@ -45,7 +45,7 @@ contract('Integration', (accounts) => {
     let setup;
 
     before(async () => {
-        setup = new Setup(config, accounts);
+        setup = new Setup(accounts, config);
 
         ({
             ACE: ace,
