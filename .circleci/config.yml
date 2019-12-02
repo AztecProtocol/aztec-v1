@@ -23,7 +23,7 @@ jobs:
                   echo $CIRCLE_SHA1 > /tmp/current-commit
             - restore_cache:
                 keys:
-                    - modules-{{ .Branch }}-aztecjs-{{ checksum "/tmp/last-successfull-commit" }}
+                    - modules-{{ .Branch }}-aztecjs-{{ checksum "/tmp/last-successful-commit" }}
             - run:
                 name: "Install Dependencies"
                 command: yarn install
