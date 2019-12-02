@@ -9,7 +9,7 @@ export default async function verifyTransferRequest({
     numberOfInputNotes,
 }) {
     const totalAmount = transactions
-        .reduce((sum, { amount }) => sum + amount, 0);
+        .reduce((sum, { amount }) => sum + Number(amount), 0);
 
     const noteError = await ensureInputNotes({
         assetAddress,
