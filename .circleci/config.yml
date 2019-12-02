@@ -48,7 +48,6 @@ jobs:
                     - ~/repo/packages/contract-addresses/lib
                     - ~/repo/packages/contract-artifacts/lib
                     - ~/repo/packages/dev-utils/lib
-
     lint:
         working_directory: ~/repo
         docker:
