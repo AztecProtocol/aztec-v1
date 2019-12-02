@@ -23,7 +23,7 @@ jobs:
                   echo $CIRCLE_SHA1 > /tmp/current-commit
             - restore_cache:
                 keys:
-                    - modules-{{ .Branch }}-aztecjs-{{ checksum "/tmp/last-successful-commit" }}
+                    - build-cache-{{ .Branch }}-{{ checksum "/tmp/last-successful-commit" }}
             - run:
                 name: "Install Dependencies"
                 command: yarn install
@@ -35,10 +35,17 @@ jobs:
                 paths:
                     - ~/repo
             - save_cache:
-                key: modules-{{ .Branch }}-aztecjs-{{ checksum "/tmp/current-commit" }}
+                key: build-cache-{{ .Branch }}-{{ checksum "/tmp/last-successful-commit" }}
                 paths:
                     - ~/repo/packages/aztec.js/node_modules
+                    - ~/repo/packages/protocol/node_modules
+                    - ~/repo/packages/bn128/node_modules
+                    - ~/repo/packages/dev-utils/node_modules
+                    - ~/repo/packages/extension/node_modules
+                    - ~/repo/packages/secp256k1/node_modules
                     - ~/repo/packages/aztec.js/dist
+                    - ~/repo/packages/bn128/dist
+
     lint:
         working_directory: ~/repo
         docker:
