@@ -35,7 +35,7 @@ jobs:
                 paths:
                     - ~/repo
             - save_cache:
-                key: build-cache-{{ .Branch }}-{{ checksum "/tmp/last-successful-commit" }}
+                key: build-cache-{{ .Branch }}-{{ checksum "/tmp/current-commit" }}
                 paths:
                     - ~/repo/packages/aztec.js/node_modules
                     - ~/repo/packages/protocol/node_modules
