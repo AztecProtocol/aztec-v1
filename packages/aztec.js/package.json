@@ -69,9 +69,9 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "build": "./build.sh",
+    "build": "PROD=false ./build.sh",
     "build:docs": "jsdoc --configure ./.jsdoc.json",
-    "build:prod": "webpack --config ./webpack.prod.js",
+    "build:prod": "PROD=true ./build.sh",
     "clean": "shx rm -rf ./.nyc_output ./build ./coverage ./coverageEnv ./coverage.json ./dist ./docs || true",
     "coverage": "nyc mocha ./test --bail --trace-warnings --exit --colors --recursive --reporter spec",
     "lint": "eslint --ignore-path ../../.eslintignore .",
