@@ -21,6 +21,8 @@ jobs:
                   CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ || true | cut -d/ -f2 | uniq | paste -sd\| -)
                   echo $LAST_SUCCESSFUL_COMMIT > /tmp/last-successful-commit
                   echo $CIRCLE_SHA1 > /tmp/current-commit
+                  echo $LAST_SUCCESSFUL_COMMIT
+                  echo $CIRCLE_SHA1
             - restore_cache:
                 keys:
                     - build-cache-{{ .Branch }}-{{ checksum "/tmp/last-successful-commit" }}
