@@ -9,4 +9,4 @@ export default function randomInt(from = null, to = null, rand = Math.random) {
     return start + Math.floor(rand() * (offset + 1));
 }
 
-export const makeRandomInt = rand => (from, to) => randomInt(from, to, rand);
+export const makeRandomInt = (rand) => (from, to) => randomInt(from, to, rand);

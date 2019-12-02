@@ -1,16 +1,10 @@
 import { randomHex } from 'web3-utils';
 
-import {
-    userAccount,
-    userAccount2,
-} from './helpers/testUsers';
-import {
-    VIEWING_KEY_LENGTH,
-} from '../src/config/constants';
+import { userAccount, userAccount2 } from './helpers/testUsers';
+import { VIEWING_KEY_LENGTH } from '../src/config/constants';
 
 import metadata from '../src/metadata';
 import generateAccessMetaData from '../src/generateAccessMetaData';
-
 
 describe('Generate access metaData', () => {
     const viewKeyNumBytes = 69;

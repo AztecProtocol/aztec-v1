@@ -16,8 +16,4 @@ export default function randomSumArray(sum, arraySize = 1, rand = Math.random) {
     return sumArr;
 }
 
-export const makeRandomSumArray = rand => (sum, arraySize) => makeRandomSumArray(
-    sum,
-    arraySize,
-    rand,
-);
+export const makeRandomSumArray = (rand) => (sum, arraySize) => makeRandomSumArray(sum, arraySize, rand);

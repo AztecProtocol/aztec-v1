@@ -1,6 +1,4 @@
-import {
-    utils,
-} from 'web3';
+import { utils } from 'web3';
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
@@ -8,14 +6,11 @@ import {
     MIN_BYTES_VAR_LENGTH,
     DYNAMIC_VAR_CONFIG_LENGTH,
 } from '../src/config/constants';
-import metadata, {
-    toString,
-    addAccess,
-} from '../src/metadata';
+import metadata, { toString, addAccess } from '../src/metadata';
 
-const base16 = num => num.toString(16);
+const base16 = (num) => num.toString(16);
 const padVar = (val, padWith = '0') => `${base16(val)}`.padStart(DYNAMIC_VAR_CONFIG_LENGTH, padWith);
-const padOffset = offset => padVar(offset / 2);
+const padOffset = (offset) => padVar(offset / 2);
 const padValues = (val, valLen) => `${padVar(valLen ? val.length / valLen : 0)}${val}`;
 
 const aztecData = ''.padEnd(METADATA_AZTEC_DATA_LENGTH, 'a');
@@ -36,8 +31,8 @@ for (let i = 0; i < numberOfAccounts; i += 1) {
     viewingKeyBytes.push(`0x${viewingKey}`);
 }
 const addressesStr = addresses
-    .map(a => utils.toChecksumAddress(a).slice(2))
-    .map(a => a.padStart(MIN_BYTES_VAR_LENGTH, '0'))
+    .map((a) => utils.toChecksumAddress(a).slice(2))
+    .map((a) => a.padStart(MIN_BYTES_VAR_LENGTH, '0'))
     .join('');
 const viewingKeysStr = viewingKeys.join('');
 
@@ -49,7 +44,7 @@ for (let i = 0; i < numberOfNewAccounts; i += 1) {
     newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cf${i}`));
 }
 
-const fixedOffset = METADATA_AZTEC_DATA_LENGTH + (DYNAMIC_VAR_CONFIG_LENGTH * 3);
+const fixedOffset = METADATA_AZTEC_DATA_LENGTH + DYNAMIC_VAR_CONFIG_LENGTH * 3;
 
 describe('metadata toString', () => {
     it('generate a metadata string from data object', () => {
@@ -70,12 +65,14 @@ describe('metadata toString', () => {
 
         expect(expectedStr).toMatch(/^0x[0-9a-f]+$/i);
 
-        expect(toString({
-            aztecData,
-            addresses,
-            viewingKeys,
-            appData,
-        })).toBe(expectedStr);
+        expect(
+            toString({
+                aztecData,
+                addresses,
+                viewingKeys,
+                appData,
+            }),
+        ).toBe(expectedStr);
     });
 
     it('allow values in data object with prefix 0x', () => {
@@ -86,12 +83,14 @@ describe('metadata toString', () => {
             appData,
         });
 
-        expect(toString({
-            aztecData: aztecDataByte,
-            addresses: addressBytes,
-            viewingKeys: viewingKeyBytes,
-            appData: appDataByte,
-        })).toBe(expectedStr);
+        expect(
+            toString({
+                aztecData: aztecDataByte,
+                addresses: addressBytes,
+                viewingKeys: viewingKeyBytes,
+                appData: appDataByte,
+            }),
+        ).toBe(expectedStr);
     });
 
     it('allow undefined data in object', () => {
@@ -100,16 +99,18 @@ describe('metadata toString', () => {
             aztecData,
             padOffset(fixedOffset),
             padOffset(fixedOffset + DYNAMIC_VAR_CONFIG_LENGTH),
-            padOffset(fixedOffset + (DYNAMIC_VAR_CONFIG_LENGTH * 2)),
+            padOffset(fixedOffset + DYNAMIC_VAR_CONFIG_LENGTH * 2),
             padValues('', MIN_BYTES_VAR_LENGTH),
             padValues('', VIEWING_KEY_LENGTH),
             padValues(appData, appData.length),
         ].join('');
 
-        expect(toString({
-            aztecData,
-            appData,
-        })).toBe(expectedStr);
+        expect(
+            toString({
+                aztecData,
+                appData,
+            }),
+        ).toBe(expectedStr);
     });
 
     it('allow empty object', () => {
@@ -118,7 +119,7 @@ describe('metadata toString', () => {
             ''.padStart(METADATA_AZTEC_DATA_LENGTH, '0'),
             padOffset(fixedOffset),
             padOffset(fixedOffset + DYNAMIC_VAR_CONFIG_LENGTH),
-            padOffset(fixedOffset + (DYNAMIC_VAR_CONFIG_LENGTH * 2)),
+            padOffset(fixedOffset + DYNAMIC_VAR_CONFIG_LENGTH * 2),
             padValues('', MIN_BYTES_VAR_LENGTH),
             padValues('', VIEWING_KEY_LENGTH),
             padValues('', 0),
@@ -188,14 +189,8 @@ describe('metadata constructor', () => {
             address: newAddressBytes[0],
             viewingKey: newViewingKeyBytes[0],
         });
-        expect(m.addresses).toEqual([
-            ...addressBytes,
-            newAddressBytes[0],
-        ].map(utils.toChecksumAddress));
-        expect(m.viewingKeys).toEqual([
-            ...viewingKeyBytes,
-            newViewingKeyBytes[0],
-        ]);
+        expect(m.addresses).toEqual([...addressBytes, newAddressBytes[0]].map(utils.toChecksumAddress));
+        expect(m.viewingKeys).toEqual([...viewingKeyBytes, newViewingKeyBytes[0]]);
     });
 
     it('add multiple access to metadata object', () => {
@@ -210,16 +205,8 @@ describe('metadata constructor', () => {
                 viewingKey: newViewingKeyBytes[1],
             },
         ]);
-        expect(m.addresses).toEqual([
-            ...addressBytes,
-            newAddressBytes[0],
-            newAddressBytes[1],
-        ].map(utils.toChecksumAddress));
-        expect(m.viewingKeys).toEqual([
-            ...viewingKeyBytes,
-            newViewingKeyBytes[0],
-            newViewingKeyBytes[1],
-        ]);
+        expect(m.addresses).toEqual([...addressBytes, newAddressBytes[0], newAddressBytes[1]].map(utils.toChecksumAddress));
+        expect(m.viewingKeys).toEqual([...viewingKeyBytes, newViewingKeyBytes[0], newViewingKeyBytes[1]]);
     });
 
     it('will not add existing access to metadata object', () => {
@@ -228,27 +215,15 @@ describe('metadata constructor', () => {
             address: newAddressBytes[0],
             viewingKey: newViewingKeyBytes[0],
         });
-        expect(m.addresses).toEqual([
-            ...addressBytes,
-            newAddressBytes[0],
-        ].map(utils.toChecksumAddress));
-        expect(m.viewingKeys).toEqual([
-            ...viewingKeyBytes,
-            newViewingKeyBytes[0],
-        ]);
+        expect(m.addresses).toEqual([...addressBytes, newAddressBytes[0]].map(utils.toChecksumAddress));
+        expect(m.viewingKeys).toEqual([...viewingKeyBytes, newViewingKeyBytes[0]]);
 
         m.addAccess({
             address: newAddressBytes[0],
             viewingKey: newViewingKeyBytes[0],
         });
-        expect(m.addresses).toEqual([
-            ...addressBytes,
-            newAddressBytes[0],
-        ].map(utils.toChecksumAddress));
-        expect(m.viewingKeys).toEqual([
-            ...viewingKeyBytes,
-            newViewingKeyBytes[0],
-        ]);
+        expect(m.addresses).toEqual([...addressBytes, newAddressBytes[0]].map(utils.toChecksumAddress));
+        expect(m.viewingKeys).toEqual([...viewingKeyBytes, newViewingKeyBytes[0]]);
 
         m.addAccess([
             {
@@ -260,16 +235,8 @@ describe('metadata constructor', () => {
                 viewingKey: newViewingKeyBytes[1],
             },
         ]);
-        expect(m.addresses).toEqual([
-            ...addressBytes,
-            newAddressBytes[0],
-            newAddressBytes[1],
-        ].map(utils.toChecksumAddress));
-        expect(m.viewingKeys).toEqual([
-            ...viewingKeyBytes,
-            newViewingKeyBytes[0],
-            newViewingKeyBytes[1],
-        ]);
+        expect(m.addresses).toEqual([...addressBytes, newAddressBytes[0], newAddressBytes[1]].map(utils.toChecksumAddress));
+        expect(m.viewingKeys).toEqual([...viewingKeyBytes, newViewingKeyBytes[0], newViewingKeyBytes[1]]);
     });
 });
 
@@ -291,14 +258,8 @@ describe('addAccess util', () => {
 
         expect(newMetadata).toMatchObject({
             aztecData: aztecDataByte,
-            addresses: [
-                ...addressBytes,
-                newAddressBytes[0],
-            ].map(utils.toChecksumAddress),
-            viewingKeys: [
-                ...viewingKeyBytes,
-                newViewingKeyBytes[0],
-            ],
+            addresses: [...addressBytes, newAddressBytes[0]].map(utils.toChecksumAddress),
+            viewingKeys: [...viewingKeyBytes, newViewingKeyBytes[0]],
             appData: appDataByte,
         });
     });
@@ -311,14 +272,8 @@ describe('addAccess util', () => {
 
         const expectedStr = toString({
             aztecData: aztecDataByte,
-            addresses: [
-                ...addressBytes,
-                newAddressBytes[0],
-            ].map(utils.toChecksumAddress),
-            viewingKeys: [
-                ...viewingKeyBytes,
-                newViewingKeyBytes[0],
-            ],
+            addresses: [...addressBytes, newAddressBytes[0]].map(utils.toChecksumAddress),
+            viewingKeys: [...viewingKeyBytes, newViewingKeyBytes[0]],
             appData: appDataByte,
         });
         expect(newMetadata).toBe(expectedStr);
@@ -338,16 +293,8 @@ describe('addAccess util', () => {
 
         expect(metadata(newMetadata)).toMatchObject({
             aztecData: aztecDataByte,
-            addresses: [
-                ...addressBytes,
-                newAddressBytes[0],
-                newAddressBytes[1],
-            ].map(utils.toChecksumAddress),
-            viewingKeys: [
-                ...viewingKeyBytes,
-                newViewingKeyBytes[0],
-                newViewingKeyBytes[1],
-            ],
+            addresses: [...addressBytes, newAddressBytes[0], newAddressBytes[1]].map(utils.toChecksumAddress),
+            viewingKeys: [...viewingKeyBytes, newViewingKeyBytes[0], newViewingKeyBytes[1]],
             appData: appDataByte,
         });
     });
@@ -379,13 +326,13 @@ describe('addAccess util', () => {
         ]);
 
         const addressStr = padValues(
-            utils.toChecksumAddress(addresses[0]).slice(2).padStart(MIN_BYTES_VAR_LENGTH, '0'),
+            utils
+                .toChecksumAddress(addresses[0])
+                .slice(2)
+                .padStart(MIN_BYTES_VAR_LENGTH, '0'),
             MIN_BYTES_VAR_LENGTH,
         );
-        const viewingKeyStr = padValues(
-            viewingKeys[0].padStart(MIN_BYTES_VAR_LENGTH, '0'),
-            VIEWING_KEY_LENGTH,
-        );
+        const viewingKeyStr = padValues(viewingKeys[0].padStart(MIN_BYTES_VAR_LENGTH, '0'), VIEWING_KEY_LENGTH);
         const expectedStr = [
             '0x',
             ''.padStart(METADATA_AZTEC_DATA_LENGTH, '0'),

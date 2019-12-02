@@ -1,40 +1,19 @@
-import {
-    userAccount,
-} from './helpers/testUsers';
-import {
-    randomId,
-} from '../src/random';
-import {
-    encryptMessage,
-    batchEncrypt,
-    decryptMessage,
-    batchDecrypt,
-    fromHexString,
-} from '../src/crypto';
+import { userAccount } from './helpers/testUsers';
+import { randomId } from '../src/random';
+import { encryptMessage, batchEncrypt, decryptMessage, batchDecrypt, fromHexString } from '../src/crypto';
 import nacl from '../src/crypto/nacl';
 import lengthConfig from '../src/crypto/lengthConfig';
 
-const {
-    linkedPublicKey: publicKey,
-    linkedPrivateKey: privateKey,
-} = userAccount;
+const { linkedPublicKey: publicKey, linkedPrivateKey: privateKey } = userAccount;
 
 describe('encryptMessage', () => {
     it('take publicKey and message and return an EncryptedMessage object', () => {
         const message = 'my secret';
         const encrypted = encryptMessage(publicKey, message);
-        expect(Object.keys(encrypted).sort()).toEqual([
-            'decrypt',
-            'export',
-            'toHexString',
-        ]);
+        expect(Object.keys(encrypted).sort()).toEqual(['decrypt', 'export', 'toHexString']);
 
         const encryptedObj = encrypted.export();
-        expect(Object.keys(encryptedObj).sort()).toEqual([
-            'ciphertext',
-            'ephemPublicKey',
-            'nonce',
-        ]);
+        expect(Object.keys(encryptedObj).sort()).toEqual(['ciphertext', 'ephemPublicKey', 'nonce']);
 
         const encryptedHex = encrypted.toHexString();
         expect(encryptedHex).toMatch(/^0x[0-9a-f]{1,}$/i);
@@ -75,12 +54,8 @@ describe('decryptMessage', () => {
 describe('batchDecrypt', () => {
     it('decrypt multiple EncryptedMessage objects', () => {
         const fromSecretKeySpy = jest.spyOn(nacl.box.keyPair, 'fromSecretKey');
-        const messages = [
-            'my secret',
-            'my second secret',
-            'my last secret',
-        ];
-        const encryptedData = messages.map(message => encryptMessage(publicKey, message));
+        const messages = ['my secret', 'my second secret', 'my last secret'];
+        const encryptedData = messages.map((message) => encryptMessage(publicKey, message));
         const recovered = batchDecrypt(privateKey, encryptedData);
         expect(recovered).toEqual(messages);
         expect(fromSecretKeySpy).toHaveBeenCalledTimes(1);
@@ -89,11 +64,7 @@ describe('batchDecrypt', () => {
 
 describe('batchEncrypt', () => {
     it('encrypt multiple messages at the same time', () => {
-        const messages = [
-            'my secret',
-            'my second secret',
-            'my last secret',
-        ];
+        const messages = ['my secret', 'my second secret', 'my last secret'];
         const encryptedData = batchEncrypt(publicKey, messages);
         const recovered = batchDecrypt(privateKey, encryptedData);
         expect(recovered).toEqual(messages);
@@ -111,11 +82,9 @@ describe('fromHexString', () => {
 
     it('return null if the input string does not reach a minimum length', () => {
         const warnings = [];
-        const warnSpy = jest.spyOn(console, 'warn')
-            .mockImplementation((...message) => warnings.push(message));
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation((...message) => warnings.push(message));
 
-        const minLen = Object.values(lengthConfig)
-            .reduce((accum, len) => accum + len, 0);
+        const minLen = Object.values(lengthConfig).reduce((accum, len) => accum + len, 0);
 
         const encrypted = fromHexString(randomId(minLen));
         expect(encrypted.decrypt(privateKey)).toBe('');

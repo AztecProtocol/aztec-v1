@@ -18,11 +18,7 @@ const pick = (count, start, end, rand) => {
     leftCount += Math.max(0, Math.max(0, rightCount - rightLen));
     rightCount += Math.max(0, Math.max(0, leftCount - leftLen));
 
-    return [
-        ...pick(leftCount, start, mid - 1, rand),
-        mid,
-        ...pick(rightCount, mid + 1, end, rand),
-    ];
+    return [...pick(leftCount, start, mid - 1, rand), mid, ...pick(rightCount, mid + 1, end, rand)];
 };
 
 export default function randomInts(count, from = null, to = null, rand = Math.random) {
@@ -33,11 +29,9 @@ export default function randomInts(count, from = null, to = null, rand = Math.ra
     } else {
         offset = from !== null ? from : 2 ** 32;
     }
-    const [start, end] = offset >= 0
-        ? [pivot, pivot + offset]
-        : [pivot + offset, pivot];
+    const [start, end] = offset >= 0 ? [pivot, pivot + offset] : [pivot + offset, pivot];
 
     return pick(count, start, end, rand);
 }
 
-export const makeRandomInts = rand => (count, from, to) => randomInts(count, from, to, rand);
+export const makeRandomInts = (rand) => (count, from, to) => randomInts(count, from, to, rand);

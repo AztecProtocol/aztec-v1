@@ -1,8 +1,6 @@
-
 import addAccess from './metadata/addAccess';
 import encryptedViewingKey from './encryptedViewingKey';
 import { METADATA_AZTEC_DATA_LENGTH } from './config/constants';
-
 
 /**
  * @method grantAccess - grant an Ethereum address view access to a note
@@ -32,5 +30,4 @@ export default function generateAccessMetaData(access, noteViewKey, owner) {
     });
     const newMetaData = addAccess('', metaDataAccess);
     return newMetaData.slice(METADATA_AZTEC_DATA_LENGTH + 2);
-};
-
+}
