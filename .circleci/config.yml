@@ -16,13 +16,16 @@ jobs:
             - run:
                 name: "Set caching variables"
                 command: |
+                  set -x
                   LAST_SUCCESSFUL_BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/tree/develop?filter=successful&limit=1"
                   LAST_SUCCESSFUL_COMMIT=`curl -Ss -u "$CIRCLE_TOKEN:" $LAST_SUCCESSFUL_BUILD_URL | jq -r '.[0]["vcs_revision"]'`
                   CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ || true | cut -d/ -f2 | uniq | paste -sd\| -)
                   echo $LAST_SUCCESSFUL_COMMIT > /tmp/last-successful-commit
                   echo $CIRCLE_SHA1 > /tmp/current-commit
-                  echo $LAST_SUCCESSFUL_COMMIT
-                  echo $CIRCLE_SHA1
+                  echo $CHANGED_MODULES > /tmp/changed-modules
+            - run:
+                name: "test"
+                command: cat /tmp/changed-modules;
             - restore_cache:
                 keys:
                     - build-cache-{{ .Branch }}-{{ checksum "/tmp/last-successful-commit" }}
