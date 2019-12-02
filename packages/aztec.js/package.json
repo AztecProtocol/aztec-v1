@@ -69,7 +69,7 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "build": "sh ./build.sh",
+    "build": "./build.sh",
     "build:docs": "jsdoc --configure ./.jsdoc.json",
     "build:prod": "webpack --config ./webpack.prod.js",
     "clean": "shx rm -rf ./.nyc_output ./build ./coverage ./coverageEnv ./coverage.json ./dist ./docs || true",
