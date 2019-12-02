@@ -104,7 +104,7 @@ class Note {
 
         // Grant view access to the addresses specified in access
         if (access) {
-            this.grantViewAccess(access)
+            this.grantViewAccess(access);
         }
     }
 

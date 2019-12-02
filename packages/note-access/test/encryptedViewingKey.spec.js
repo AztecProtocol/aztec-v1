@@ -1,27 +1,14 @@
-import {
-    userAccount,
-} from './helpers/testUsers';
-import {
-    REAL_VIEWING_KEY_LENGTH,
-    VIEWING_KEY_LENGTH,
-} from '../src/config/constants';
-import {
-    randomId,
-} from '../src/random';
-import encryptedViewingKey, {
-    fromHexString,
-} from '../src/encryptedViewingKey';
+import { userAccount } from './helpers/testUsers';
+import { REAL_VIEWING_KEY_LENGTH, VIEWING_KEY_LENGTH } from '../src/config/constants';
+import { randomId } from '../src/random';
+import encryptedViewingKey, { fromHexString } from '../src/encryptedViewingKey';
 import lengthConfig from '../src/encryptedViewingKey/lengthConfig';
 
-const {
-    linkedPublicKey: publicKey,
-    linkedPrivateKey: privateKey,
-} = userAccount;
+const { linkedPublicKey: publicKey, linkedPrivateKey: privateKey } = userAccount;
 
 describe('encryptedViewingKey', () => {
     let warnings = [];
-    const warnSpy = jest.spyOn(console, 'warn')
-        .mockImplementation(message => warnings.push(message));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation((message) => warnings.push(message));
 
     beforeEach(() => {
         warnSpy.mockClear();
@@ -32,18 +19,10 @@ describe('encryptedViewingKey', () => {
 
     it('encrypt real viewing key and return an EncryptedMessage object', () => {
         const encrypted = encryptedViewingKey(publicKey, realViewingKey);
-        expect(Object.keys(encrypted).sort()).toEqual([
-            'decrypt',
-            'export',
-            'toHexString',
-        ]);
+        expect(Object.keys(encrypted).sort()).toEqual(['decrypt', 'export', 'toHexString']);
 
         const viewingKeyData = encrypted.export();
-        expect(Object.keys(viewingKeyData).sort()).toEqual([
-            'ciphertext',
-            'ephemPublicKey',
-            'nonce',
-        ]);
+        expect(Object.keys(viewingKeyData).sort()).toEqual(['ciphertext', 'ephemPublicKey', 'nonce']);
         Object.keys(viewingKeyData).forEach((key) => {
             expect(viewingKeyData[key].length).toBe(lengthConfig[key] + 2);
         });
