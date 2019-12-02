@@ -19,9 +19,11 @@ jobs:
                   LAST_SUCCESSFUL_BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/tree/develop?filter=successful&limit=1"
                   LAST_SUCCESSFUL_COMMIT=`curl -Ss -u "$CIRCLE_TOKEN:" $LAST_SUCCESSFUL_BUILD_URL | jq -r '.[0]["vcs_revision"]'`
                   CHANGED_MODULES=$(git diff --name-only $LAST_SUCCESSFUL_COMMIT | grep ^packages\/.*\/ || true | cut -d/ -f2 | uniq | paste -sd\| -)
+                  echo $LAST_SUCCESSFUL_COMMIT > /tmp/last-successful-commit
+                  echo $CIRCLE_SHA1 > /tmp/current-commit
             - restore_cache:
                 keys:
-                    - modules-{{ .Branch }}-aztecjs-{{ .Environment.LAST_SUCCESSFUL_COMMIT }}
+                    - modules-{{ .Branch }}-aztecjs-{{ checksum "/tmp/last-successfull-commit" }}
             - run:
                 name: "Install Dependencies"
                 command: yarn install
@@ -33,7 +35,7 @@ jobs:
                 paths:
                     - ~/repo
             - save_cache:
-                key: modules-{{ .Branch }}-aztecjs-{{ .Environment.CIRCLE_SHA1 }}
+                key: modules-{{ .Branch }}-aztecjs-{{ checksum "/tmp/current-commit" }}
                 paths:
                     - ~/repo/packages/aztec.js/node_modules
                     - ~/repo/packages/aztec.js/dist

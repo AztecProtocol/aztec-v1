@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo $CHANGED_MODULES;
 
 if [ "$CI" = true ] && [ ! -d "dist" ] || [[ "aztec.js" =~ $CHANGED_MODULES ]]; then
