@@ -19,7 +19,7 @@ fi
 ./node_modules/.bin/truffle test ./test/integration.js --network rinkeby
 
 
-if [ "$ENV_EXISTS" -eq "0" ]; then
+if [ "$ENV_EXISTS" -eq 0 ]; then
   rm ".env"
   echo "Deleted added .env"
 fi
