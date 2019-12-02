@@ -16,6 +16,7 @@ services:
       - DB_DATABASE_PREFIX=$DB_DATABASE_PREFIX
       - DB_HOST=$DB_HOST
       - DB_PORT=$DB_PORT
+      - COOKIES_PASSWORD=$COOKIES_PASSWORD
     ports:
       - "80:8080"
     volumes:

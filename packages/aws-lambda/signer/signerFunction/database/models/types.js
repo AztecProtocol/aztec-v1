@@ -6,10 +6,10 @@ const {
 
 class Dapps extends Model {}
 class Transactions extends Model {}
-class TransactionEthEvent extends Model {}
+class Users extends Model {}
 
 module.exports = {
     Dapps,
     Transactions,
-    TransactionEthEvent,
+    Users,
 };

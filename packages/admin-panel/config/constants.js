@@ -1,4 +1,8 @@
 module.exports = {
+    USER_TYPE: {
+        ADMIN: 'admin',
+        USER: 'user',
+    },
     TRANSACTION_TYPE: {
         PURCHASE: 'purchase',
         REFUND: 'refund',
@@ -13,6 +17,8 @@ module.exports = {
     SHA3_LENGTH: 66,
     TRANSACTION_HASH_LENGTH: 66,
     ETH_ADDRESS_LENGTH: 42,
+    EMAIL_ADDRESS_LEGNTH: 60,
+    PASSWORD_HASH_LEGNTH: 60,
     NETWORKS: {
         MAIN: {
             id: 1,

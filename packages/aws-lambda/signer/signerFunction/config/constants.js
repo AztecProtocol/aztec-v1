@@ -15,9 +15,15 @@ module.exports = {
         FAILED: 'failed',
         EXPIRED: 'expired',
     },
+    USER_TYPE: {
+        ADMIN: 'admin',
+        USER: 'user',
+    },
     SHA3_LENGTH: 66,
     TRANSACTION_HASH_LENGTH: 66,
     ETH_ADDRESS_LENGTH: 42,
+    EMAIL_ADDRESS_LEGNTH: 60,
+    PASSWORD_HASH_LEGNTH: 60,
     NETWORKS: {
         GANACHE: {
             id: null,

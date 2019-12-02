@@ -11,8 +11,11 @@
     "admin-bro": "^1.4.2",
     "admin-bro-expressjs": "^0.3.0",
     "admin-bro-sequelizejs": "^0.2.6",
+    "bcrypt": "^3.0.7",
     "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
     "pg": "^7.12.1",
     "pg-hstore": "^2.3.3",
     "sequelize": "^5.21.2"
@@ -24,7 +27,7 @@
     "node": ">=8.3"
   },
   "scripts": {
-    "dev": "nodemon app.js" 
+    "dev": "nodemon app.js"
   },
   "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
   "keywords": [

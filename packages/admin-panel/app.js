@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const AdminBro = require('admin-bro')
 const AdminBroSequelize = require('admin-bro-sequelizejs')
 const AdminBroExpressjs = require('admin-bro-expressjs');
+const bcrypt = require('bcrypt');
+
 
 const {
     models,
@@ -30,21 +32,45 @@ const configureResourses = () => {
         ids,
     } = networks;
     ids.forEach(networkId => {
-        const networkConf = getNetworkConfig(networkId);
+        const networkConfig = getNetworkConfig(networkId);
         const sequelize = connection.getConnection(networkId);
         const db = models(sequelize);
-        const options = getBroOptions(db, networkId);
+        const options = getBroOptions(db, networkConfig);
+        const {
+            Users,
+        } = db;
 
         AdminBro.registerAdapter(AdminBroSequelize)
-        const rootPath = `/${networkConf.networkName}`;
+        const rootPath = `/${networkConfig.networkName}`;
+        const loginPath = `${rootPath}/admin`;
+        const logoutPath = `${rootPath}/admin`;
         const adminBro = new AdminBro({
             databases: [db],
             ...options,
             rootPath,
+            loginPath,
+            logoutPath,
         });
 
         // Build and use a router which will handle all AdminBro routes
-        const router = AdminBroExpressjs.buildRouter(adminBro);
+        const router = AdminBroExpressjs.buildAuthenticatedRouter(adminBro, {
+            authenticate: async (email, password) => {
+                const user = await Users.findOne({ where: {
+                    email: {
+                        $like: email,
+                    },
+                    isEnabled: true,
+                }});
+                if (user) {
+                    const matched = await bcrypt.compare(password, user.passwordHash);
+                    if (matched) {
+                        return user;
+                    }
+                }
+                return false;
+            },
+            cookiePassword: process.env.COOKIES_PASSWORD,
+        });
         app.use(adminBro.options.rootPath, router);
     });
 }
