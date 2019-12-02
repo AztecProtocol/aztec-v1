@@ -1,5 +1,7 @@
 import BN from 'bn.js';
 
+const zero = new BN(0);
+
 const bigNumberType = {
     type: (val) => {
         let bn;
@@ -18,14 +20,21 @@ bigNumberType.isRequired = {
 };
 
 bigNumberType.withSize = (size) => {
-    const customSize = {};
-    if (typeof size === 'number') {
-        customSize.eq = val => new BN(val).eq(new BN(size));
+    let customSize = {};
+    if (typeof size !== 'object') {
+        customSize.eq = `${size}`;
     } else {
-        Object.keys(size).forEach((operator) => {
-            customSize[operator] = val => new BN(val)[operator](new BN(size[operator]));
-        });
+        customSize = {
+            ...size,
+        };
     }
+    customSize.comp = (val, target) => {
+        const diff = new BN(val).sub(new BN(target));
+        if (diff.eq(zero)) {
+            return 0;
+        }
+        return diff.gt(zero) ? 1 : -1;
+    };
 
     return {
         ...bigNumberType,
