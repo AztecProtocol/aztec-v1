@@ -3,8 +3,10 @@
 const { getContractAddressesForNetwork, NetworkId: networkIDs } = require('@aztec/contract-addresses');
 const contractArtifacts = require('@aztec/contract-artifacts');
 const {
+    constants: { ERC20_SCALING_FACTOR },
     errors: { codes, AztecError },
 } = require('@aztec/dev-utils');
+const BN = require('bn.js');
 const TruffleContract = require('@truffle/contract');
 
 const { capitaliseFirstChar } = require('./utils');
@@ -16,13 +18,13 @@ class Setup {
      *
      * Can be used to setup a local development testing environment for an integration test
      *
-     * @param {Object} conig - config used to modify the test environment setup
      * @param {String} accounts - Ethereum addresses to be used in the test
+     * @param {Object} config - optional config, used to modify the test environment setup
      */
     constructor(accounts, config) {
-        // this.initialiseConfig(config);
+        this.initialiseConfig(config);
 
-        this.NETWORK = config.NETWORK;
+        this.NETWORK = this.config.NETWORK;
         const networks = ['ropsten', 'rinkeby', 'kovan', 'mainnet'];
 
         if (networks.includes(this.NETWORK)) {
@@ -33,20 +35,19 @@ class Setup {
             const opts = { from: sender };
 
             this.accounts = accounts;
-            this.config = config;
-            this.contractsToDeploy = config.contractsToDeploy;
+            this.contractsToDeploy = this.config.contractsToDeploy;
             this.delegatedAddress = delegatedAddress;
             this.opts = opts;
             this.provider = web3.currentProvider;
             this.publicOwner = publicOwner;
-            this.runAdjustSupplyTests = config.runAdjustSupplyTests;
-            this.runUpgrade = config.runUpgrade;
+            this.runAdjustSupplyTests = this.config.runAdjustSupplyTests;
+            this.runUpgradeTest = this.config.runUpgradeTest;
             this.sender = sender;
+            this.scalingFactor = this.config.scalingFactor;
 
             this.networkId = networkIDs[capitaliseFirstChar(this.NETWORK)];
             this.contractAddresses = this.getAddresses();
             this.contractPromises = this.getContractPromises();
-            this.allContractObjects = this.generateContracts();
         } else {
             throw new AztecError(codes.UNSUPPORTED_NETWORK, {
                 message: 'Network not recognised, please input: `ropsten`, `rinkeby`, `kovan` or `mainnet`',
@@ -64,9 +65,9 @@ class Setup {
      * @param scalingFactor - factor to convert between AZTEC note value and ERC20 token value
      *
      */
-    async fundPublicOwnerAccount(scalingFactor) {
+    async fundPublicOwnerAccount() {
         const { ACE: ace, ERC20Mintable: erc20 } = await this.allContractObjects;
-        const tokensToBeTransferred = this.config.numTestTokens.mul(scalingFactor);
+        const tokensToBeTransferred = this.config.numTestTokens.mul(this.scalingFactor);
 
         // mint tokens
         const publicOwnerBalance = await erc20.balanceOf(this.publicOwner);
@@ -143,12 +144,12 @@ class Setup {
     }
 
     /**
-     * @method generateContracts - generate the JavaScript objects representing contracts deployed at a specific address, for use
-     * in testing
+     * @method getContracts - generate and get the JavaScript objects representing contracts deployed at a specific address,
+     * for use in testing
      * @returns {Object} Truffle contracts, representing the contract deployed at a specific address. The keys are the contract names,
      * the values are the Truffle contract at a particular address
      */
-    async generateContracts() {
+    async getContracts() {
         const allContractObjects = (await Promise.all(
             this.contractPromises.map(async (currentContractPromise) => Promise.all(currentContractPromise)),
         )).reduce((accumulator, currentContractArray) => {
@@ -159,14 +160,6 @@ class Setup {
 
         this.allContractObjects = allContractObjects;
         return allContractObjects;
-    }
-
-    /**
-     * @method getContracts - get the JavaScript objects representing contracta deployed at a specific address
-     * @returns {Object} - Truffle contracts, representing the contract deployed at a specific address
-     */
-    getContracts() {
-        return this.allContractObjects;
     }
 
     /**
@@ -181,15 +174,69 @@ class Setup {
         return { sender, publicOwner, delegatedAddress, opts };
     }
 
-    // /**
-    //  * @method initialiseConfig -
-    //  * @returns
-    //  */
-    // initialiseConfig(config) {
-    //     const defaultConfig {
+    /**
+     * @method initialiseConfig - define and set the configuration to be used for the integration test
+     * @param {Object} config -  setup the integration test according to the specific scenario and environment the
+     * user wishes to test. If not provided, the defaultConfig is used
+     */
+    initialiseConfig(config) {
+        const defaultConfig = {
+            /**
+             * @param {string[]} contractsToDeploy - Names of the various contracts for which Truffle contracts should be
+             * created to represent those contracts deployed on the relevant testNet
+             */
+            contractsToDeploy: [
+                'ACE',
+                'Dividend',
+                'ERC20Mintable',
+                'FactoryAdjustable201907',
+                'JoinSplit',
+                'JoinSplitFluid',
+                'PrivateRange',
+                'PublicRange',
+                'Swap',
+                'ZkAssetAdjustable',
+            ],
 
-    //     }
-    // }
+            /**
+             * @constant {string} NETWORK - name of the test network for which the integration test is to be run.
+             * Extracted from the argument passed to the truffle test command - it is the last argument to be passed
+             */
+            NETWORK: process.argv[process.argv.length - 1],
+
+            /**
+             * @constant {BN} numTestTokens - number of ERC20 tokens used during the integration test,
+             * and therefore the required minimum balance of the spending account
+             */
+            numTestTokens: new BN(260),
+
+            /**
+             * @param {Bool} runAdjustSupplyTests - boolean determining whether the adjust supply related integration
+             * tests should be run. Set to true if so, false if not
+             *
+             * Currently necessary as the test suite does not yet support same asset repeated minting/burning
+             */
+            runAdjustSupplyTests: false,
+
+            /**
+             * @param {bool} runUpgradeTest - boolean determining whether the test that performs a note registry upgrade
+             * should be performed. Set to true if so, false if not
+             *
+             */
+            runUpgradeTest: false,
+
+            /**
+             * @param {BN} scalingFactor - factor to convert between AZTEC note value and ERC20 token value
+             */
+            scalingFactor: ERC20_SCALING_FACTOR,
+        };
+
+        if (config) {
+            this.config = config;
+        } else {
+            this.config = defaultConfig;
+        }
+    }
 }
 
 module.exports = Setup;

@@ -83,7 +83,7 @@ if [ "$MODE" = "profile" ]; then
 fi
 
 
-if [ $ENV_EXISTS -eq 0 ]; then
+if [ "$ENV_EXISTS" -eq "0" ]; then
   rm ".env"
   echo "Deleted added .env"
 fi

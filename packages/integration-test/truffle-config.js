@@ -8,7 +8,7 @@ const { toWei, toHex } = require('web3-utils');
 
 const compilerConfig = require('./compiler');
 
-const addressIndexToManage = 1;
+const addressIndexToManage = process.env.ACCOUNT_INDEX;
 const numAddresses = 2;
 
 let rinkebyProvider = {};
