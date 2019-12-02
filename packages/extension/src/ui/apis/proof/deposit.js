@@ -39,14 +39,17 @@ export default async function deposit({
         ? numberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
     const outputTransactionNotes = await Promise.all(
-        transactions.map(async (tx) => {
-            const noteValues = randomSumArray(tx.amount, numberOfNotes);
+        transactions.map(async ({
+            amount,
+            to,
+        }) => {
+            const noteValues = randomSumArray(amount, numberOfNotes);
             const {
                 linkedPublicKey,
-            } = await getExtensionAccount(tx.to) || {};
+            } = await getExtensionAccount(to) || {};
             if (!linkedPublicKey) {
                 throw new ApiError('account.not.linked', {
-                    address: tx.to,
+                    address: to,
                 });
             }
 
@@ -54,7 +57,7 @@ export default async function deposit({
                 noteValues,
                 // TODO this needs to change to the actual spending public key
                 spendingPublicKey,
-                tx.to,
+                to,
                 linkedPublicKey,
             );
             return {

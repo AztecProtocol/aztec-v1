@@ -1,34 +1,34 @@
-import Schema from 'validate';
+import makeSchema from '~/utils/makeSchema';
 import addressType from './types/address';
 
-export default new Schema({
+export default makeSchema({
     assetAddress: addressType.isRequired,
     owner: addressType.isRequired,
     equalTo: {
-        type: Number,
+        type: 'integer',
         size: {
-            min: 0,
+            gte: 0,
         },
     },
     greaterThan: {
-        type: Number,
+        type: 'integer',
         size: {
-            min: 0,
+            gte: 0,
         },
     },
     lessThan: {
-        type: Number,
+        type: 'integer',
         size: {
-            min: 0,
+            gte: 0,
         },
     },
     numberOfNotes: {
-        type: Number,
+        type: 'integer',
         size: {
-            min: 1,
+            gte: 1,
         },
     },
     allowLessNumberOfNotes: {
-        type: Boolean,
+        type: 'boolean',
     },
 });

@@ -39,6 +39,7 @@ const assetProfileShape = PropTypes.shape({
     type: PropTypes.oneOf(['asset', 'token']),
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
+    icon: PropTypes.string,
 });
 
 const userProfileShape = PropTypes.shape({
@@ -65,7 +66,20 @@ export const errorShape = PropTypes.shape({
     response: PropTypes.object,
     fetal: PropTypes.bool,
 });
+
 export const gsnConfigShape = PropTypes.shape({
     isGSNAvailable: PropTypes.bool,
     proxyContract: PropTypes.string,
+});
+
+export const inputAmountType = PropTypes.string;
+
+export const inputTransactionShape = PropTypes.shape({
+    amount: inputAmountType.isRequired,
+    to: PropTypes.string.isRequired,
+});
+
+export const transactionShape = PropTypes.shape({
+    amount: PropTypes.number.isRequired,
+    to: PropTypes.string.isRequired,
 });

@@ -1,22 +1,17 @@
+import bigNumberType from './bigNumber';
+import addressType from './address';
+
 const transactionsType = {
-    type: Array,
+    type: 'array',
     each: {
-        to: {
-            type: String,
-            length: 42,
-            required: true,
-        },
-        amount: {
-            type: Number,
-            size: {
-                min: 1,
-            },
-            required: true,
-        },
+        to: addressType.isRequired,
+        amount: bigNumberType
+            .withSize({ gte: 1 })
+            .isRequired,
         numberOfOutputNotes: {
-            type: Number,
+            type: 'integer',
             size: {
-                min: 1,
+                gte: 1,
             },
         },
     },
@@ -24,6 +19,9 @@ const transactionsType = {
 
 transactionsType.isRequired = {
     ...transactionsType,
+    size: {
+        gte: 1,
+    },
     required: true,
 };
 

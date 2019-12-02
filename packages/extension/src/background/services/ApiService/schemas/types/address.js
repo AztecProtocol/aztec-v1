@@ -1,5 +1,5 @@
 const addressType = {
-    type: String,
+    type: 'string',
     match: /^0x[0-9a-f]{40}$/i,
 };
 

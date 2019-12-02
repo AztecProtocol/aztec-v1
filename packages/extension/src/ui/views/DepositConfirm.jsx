@@ -7,6 +7,7 @@ import {
 import i18n from '~ui/helpers/i18n';
 import {
     assetShape,
+    transactionShape,
 } from '~/ui/config/propTypes';
 import formatNumber from '~ui/utils/formatNumber';
 import formatAddress from '~ui/utils/formatAddress';
@@ -131,10 +132,7 @@ const DepositConfirm = ({
 DepositConfirm.propTypes = {
     asset: assetShape.isRequired,
     from: PropTypes.string.isRequired,
-    transactions: PropTypes.arrayOf(PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        to: PropTypes.string.isRequired,
-    })).isRequired,
+    transactions: PropTypes.arrayOf(transactionShape).isRequired,
     amount: PropTypes.number.isRequired,
 };
 

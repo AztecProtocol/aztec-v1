@@ -1,15 +1,15 @@
-import Schema from 'validate';
+import makeSchema from '~/utils/makeSchema';
 import addressType from './types/address';
 import transactionsType from './types/transactions';
 
-export default new Schema({
+export default makeSchema({
     assetAddress: addressType.isRequired,
     from: addressType.isRequired,
     sender: addressType.isRequired,
     numberOfOutputNotes: {
-        type: Number,
+        type: 'integer',
         size: {
-            min: 1,
+            gte: 1,
         },
     },
     transactions: transactionsType.isRequired,

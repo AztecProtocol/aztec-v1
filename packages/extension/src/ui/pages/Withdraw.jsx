@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+    gsnConfigShape,
+    inputAmountType,
+} from '~/ui/config/propTypes';
+import {
     emptyIntValue,
 } from '~ui/config/settings';
 import makeAsset from '~/ui/utils/makeAsset';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import { withdrawSteps } from '~ui/config/steps';
-import {
-    gsnConfigShape,
-} from '~ui/config/propTypes';
 
 const Withdraw = ({
     initialStep,
@@ -31,7 +32,7 @@ const Withdraw = ({
         return {
             assetAddress,
             asset,
-            amount,
+            amount: Number(amount),
             sender,
             to,
             proof,
@@ -52,7 +53,7 @@ const Withdraw = ({
 Withdraw.propTypes = {
     initialStep: PropTypes.number,
     assetAddress: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
+    amount: inputAmountType.isRequired,
     sender: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
     proof: PropTypes.shape({

@@ -1,6 +1,6 @@
-import Schema from 'validate';
+import makeSchema from '~/utils/makeSchema';
 import addressType from './types/address';
 
-export default new Schema({
+export default makeSchema({
     id: addressType.isRequired,
 });
