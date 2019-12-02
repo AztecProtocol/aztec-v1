@@ -1,6 +1,8 @@
 #!/bin/bash
 
 echo $CHANGED_MODULES;
+echo $CI;
+echo "$(pwd)/dist";
 
 if [ "$PROD" = true ]; then
     if [ "$CI" = true ] && [ ! -d "$(pwd)/dist" ] || [[ "aztec.js" =~ $CHANGED_MODULES ]] || [ ! "$CI" = true ]; then
