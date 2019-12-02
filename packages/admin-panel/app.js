@@ -4,6 +4,7 @@ const AdminBro = require('admin-bro')
 const AdminBroSequelize = require('admin-bro-sequelizejs')
 const AdminBroExpressjs = require('admin-bro-expressjs');
 const bcrypt = require('bcrypt');
+const Sequelize = require('sequelize');
 
 
 const {
@@ -23,7 +24,9 @@ const connection = new Connection();
 
 // express server definition
 const app = express();
+
 app.use(bodyParser.json());
+app.use('/static', express.static('public'));
 
 
 // Pass all configuration settings to AdminBro
@@ -45,8 +48,8 @@ const configureResourses = () => {
         const loginPath = `${rootPath}/admin`;
         const logoutPath = `${rootPath}/admin`;
         const adminBro = new AdminBro({
-            databases: [db],
             ...options,
+            databases: [db],
             rootPath,
             loginPath,
             logoutPath,
@@ -57,7 +60,7 @@ const configureResourses = () => {
             authenticate: async (email, password) => {
                 const user = await Users.findOne({ where: {
                     email: {
-                        $like: email,
+                        [Sequelize.Op.like]: email,
                     },
                     isEnabled: true,
                 }});

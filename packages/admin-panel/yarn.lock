@@ -1384,6 +1384,11 @@ color-name@~1.1.4:
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
+colors@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
+  integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
+
 commander@^2.19.0:
   version "2.20.3"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
@@ -1695,6 +1700,11 @@ emotion@^9.1.2:
   dependencies:
     babel-plugin-emotion "^9.2.11"
     create-emotion "^9.2.12"
+
+encode32@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/encode32/-/encode32-1.1.0.tgz#0c54b45fb314ad5502e3c230cb95acdc5e5cd1dd"
+  integrity sha1-DFS0X7MUrVUC48Iwy5Ws3F5c0d0=
 
 encodeurl@~1.0.2:
   version "1.0.2"
@@ -4247,6 +4257,16 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
+
+uuid-apikey@^1.4.6:
+  version "1.4.6"
+  resolved "https://registry.yarnpkg.com/uuid-apikey/-/uuid-apikey-1.4.6.tgz#b340dbe1a675a346c4d9d959a564ffd3e0e766ec"
+  integrity sha512-ulcRze13Ic9nKGWsUgGgc7XJFMKM8nR7Oxc/tEUQeFbGyJzk4M2uO/BhVG1zSgERN/n1eTS15GB6hi/rSC+YSA==
+  dependencies:
+    colors "^1.4.0"
+    commander "^3.0.2"
+    encode32 "^1.1.0"
+    uuid "^3.3.3"
 
 uuid@^3.3.3:
   version "3.3.3"

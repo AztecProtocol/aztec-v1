@@ -18,7 +18,8 @@
     "express-session": "^1.17.0",
     "pg": "^7.12.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.21.2"
+    "sequelize": "^5.21.2",
+    "uuid-apikey": "^1.4.6"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"

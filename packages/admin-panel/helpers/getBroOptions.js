@@ -1,4 +1,6 @@
 const bcrypt = require('bcrypt');
+const uuidAPIKey = require('uuid-apikey');
+const AdminBro = require('admin-bro');
 const {
     USER_TYPE,
 } = require('../config/constants');
@@ -16,10 +18,9 @@ module.exports = (db, networkConfig) => {
         icon: 'fa fa-file-text',
     };
 
-    const canModifyUsers = ({ currentAdmin }) => currentAdmin && currentAdmin.role === USER_TYPE.ADMIN;
+    const isAdmin = ({ currentAdmin }) => currentAdmin && currentAdmin.role === USER_TYPE.ADMIN && currentAdmin.isEnabled;
 
     return {
-        rootPath: '/admin',
         resources: [
             { resource: Transactions,
                 options: {
@@ -45,8 +46,25 @@ module.exports = (db, networkConfig) => {
                     parent,
                     properties: {
                         apiKey: {
-                            isVisible: { list: false, filter: true, show: true, edit: true },
+                            isVisible: { list: false, filter: true, show: true, edit: false },
                         },
+                    },
+                    actions: {
+                        new: {
+                            before: async (request) => {
+                                const {
+                                    apiKey,
+                                } = uuidAPIKey.create();
+                                request.payload.record = {
+                                    ...request.payload.record,
+                                    apiKey,
+                                };
+                                return request;
+                            },
+                            isAccessible: isAdmin,
+                        },
+                        edit: { isAccessible: isAdmin },
+                        delete: { isAccessible: isAdmin },
                     },
                 },
             },
@@ -76,17 +94,23 @@ module.exports = (db, networkConfig) => {
                                 }
                                 return request;
                             },
-                            isAccessible: canModifyUsers,
+                            isAccessible: isAdmin,
                         },
-                        edit: { isAccessible: canModifyUsers },
-                        delete: { isAccessible: canModifyUsers },
+                        edit: { isAccessible: isAdmin },
+                        delete: { isAccessible: isAdmin },
                     },
                 },
             },
         ],
         branding: {
+            logo: '/static/images/logo.svg',
             companyName: 'AZTEC',
             softwareBrothers: false,
+        },
+        dashboard: {
+            handler: async () => {
+            },
+            component: AdminBro.bundle('../components/dashboard'),
         },
     };
 };
