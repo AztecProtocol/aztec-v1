@@ -1,3 +1,3 @@
-import Schema from 'validate';
+import makeSchema from '~/utils/makeSchema';
 
-export default new Schema({});
+export default makeSchema({});

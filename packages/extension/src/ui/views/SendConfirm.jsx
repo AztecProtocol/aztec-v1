@@ -6,6 +6,7 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
+    transactionShape,
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatAddress from '~ui/utils/formatAddress';
@@ -144,10 +145,7 @@ const SendConfirm = ({
 SendConfirm.propTypes = {
     asset: assetShape.isRequired,
     sender: PropTypes.string.isRequired,
-    transactions: PropTypes.arrayOf(PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        to: PropTypes.string.isRequired,
-    })).isRequired,
+    transactions: PropTypes.arrayOf(transactionShape).isRequired,
     totalAmount: PropTypes.number.isRequired,
 };
 

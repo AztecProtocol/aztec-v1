@@ -3,13 +3,15 @@ import PropTypes from 'prop-types';
 import {
     emptyIntValue,
 } from '~/ui/config/settings';
-import makeAsset from '~/ui/utils/makeAsset';
-import returnAndClose from '~ui/helpers/returnAndClose';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import { depositSteps } from '~ui/config/steps';
 import {
+    inputTransactionShape,
     gsnConfigShape,
 } from '~ui/config/propTypes';
+import { depositSteps } from '~ui/config/steps';
+import makeAsset from '~/ui/utils/makeAsset';
+import parseInputTransactions from '~/ui/utils/parseInputTransactions';
+import returnAndClose from '~ui/helpers/returnAndClose';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 
 const handleOnStep = (step) => {
     const newProps = {};
@@ -40,14 +42,18 @@ const Deposit = ({
 
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
-        const amount = transactions.reduce((sum, t) => sum + t.amount, 0);
+        const parsedTransactions = parseInputTransactions(transactions);
+        const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
 
         return {
+            assetAddress,
             asset,
             from,
+            owner: from,
+            publicOwner: from,
             sender: actualSender,
+            transactions: parsedTransactions,
             amount,
-            transactions,
             numberOfOutputNotes,
         };
     };
@@ -57,16 +63,6 @@ const Deposit = ({
             initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
-            initialData={
-                {
-                    assetAddress,
-                    owner: from,
-                    publicOwner: from,
-                    transactions,
-                    sender: actualSender,
-                    numberOfOutputNotes,
-                }
-            }
             onExit={returnAndClose}
             onStep={handleOnStep}
         />
@@ -78,10 +74,7 @@ Deposit.propTypes = {
     from: PropTypes.string.isRequired,
     sender: PropTypes.string.isRequired,
     assetAddress: PropTypes.string.isRequired,
-    transactions: PropTypes.arrayOf(PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        to: PropTypes.string.isRequired,
-    })).isRequired,
+    transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     numberOfOutputNotes: PropTypes.number,
     gsnConfig: gsnConfigShape.isRequired,
 };

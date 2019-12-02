@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import {
     warnLog,
 } from '~/utils/log';
@@ -6,11 +5,6 @@ import {
     argsError,
 } from '~/utils/error';
 import schemas from '../schemas';
-
-const formatError = (error) => {
-    const msg = error.toString();
-    return msg.replace(/^Error:/i, '').trim();
-};
 
 export default function validateParameters(query, args) {
     let schema = schemas[query];
@@ -29,11 +23,10 @@ export default function validateParameters(query, args) {
         return null;
     }
 
-    // validate will change args in place
-    const errors = schema.validate(cloneDeep(args));
-    if (errors && errors.length > 0) {
+    const errorMsg = schema.validate(args);
+    if (errorMsg) {
         return argsError('input.invalid', {
-            messages: errors.map(formatError),
+            message: errorMsg,
         });
     }
 
