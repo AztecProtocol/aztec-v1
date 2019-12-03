@@ -10,6 +10,10 @@ import {
 import {
     addAccess,
 } from '~utils/metadata';
+import {
+    isDestroyed,
+} from '~/utils/noteStatus';
+import * as valueFromViewingKey from '~/utils/note/valueFromViewingKey';
 import noteModel from '~/background/database/models/note';
 import Asset from '../helpers/Asset';
 import NoteBucketCache from '../helpers/NoteBucketCache';
@@ -28,7 +32,7 @@ const transformNote = ({
     hash,
     viewingKey,
 }) => {
-    const blockNumber = randomInt(1000);
+    const blockNumber = randomInt(1, 1000);
     const metadataStr = addAccess('', {
         address: userAccount.address,
         viewingKey,
@@ -191,17 +195,89 @@ describe('Asset.decryptNotes', () => {
     });
 
     it('will update lastSync even when the note is invalid', async () => {
-        const invalidNote = {
-            ...testNotes[0],
-            metadata: '',
-            blockNumber: 10,
-        };
+        const invalidNote = transformNote(testNotes[0]);
+        invalidNote.metadata = '';
 
         await asset.decryptNotes([invalidNote]);
         expect(errors.length).toBe(1);
         expect(asset.balance).toBe(0);
         expect(asset.lastSynced).toBe(invalidNote.blockNumber);
         expect(noteBucketCache.getSize(assetId)).toBe(0);
+    });
+
+    it('will not process destroyed note that is not yet in storage', async () => {
+        const valueFromViewingKeySpy = jest.spyOn(valueFromViewingKey, 'default');
+        let balance = 0;
+        let maxBlockNumber = 0;
+        const totalNotes = 4;
+        const destroyedIndex = randomInt(0, totalNotes - 1);
+        const notes = testNotes
+            .slice(0, totalNotes)
+            .map((note, i) => {
+                const noteData = transformNote(note);
+                if (i === destroyedIndex) {
+                    noteData.status = 'DESTROYED';
+                } else {
+                    balance += note.value;
+                }
+                if (noteData.blockNumber > maxBlockNumber) {
+                    maxBlockNumber = noteData.blockNumber;
+                }
+                return noteData;
+            });
+
+        expect(testNotes[destroyedIndex].value > 0).toBe(true);
+        expect(isDestroyed(notes[destroyedIndex].status)).toBe(true);
+
+        expect(valueFromViewingKeySpy).toHaveBeenCalledTimes(0);
+
+        await asset.decryptNotes(notes);
+
+        expect(errors).toEqual([]);
+        expect(warnings).toEqual([]);
+        expect(asset.balance).toBe(balance);
+        expect(asset.lastSynced).toBe(maxBlockNumber);
+        expect(noteBucketCache.getSize(assetId)).toBe(totalNotes - 1);
+        expect(valueFromViewingKeySpy).toHaveBeenCalledTimes(totalNotes - 1);
+
+        valueFromViewingKeySpy.mockClear();
+    });
+
+    it('will not process note that is already in storage', async () => {
+        const valueFromViewingKeySpy = jest.spyOn(valueFromViewingKey, 'default');
+        let balance = 0;
+        let maxBlockNumber = 0;
+        const totalNotes = 4;
+        const duplicatedIndex = randomInt(0, totalNotes - 1);
+        const notes = testNotes
+            .slice(0, totalNotes)
+            .map((note) => {
+                const noteData = transformNote(note);
+                balance += note.value;
+                if (noteData.blockNumber > maxBlockNumber) {
+                    maxBlockNumber = noteData.blockNumber;
+                }
+                return noteData;
+            });
+
+        expect(testNotes[duplicatedIndex].value > 0).toBe(true);
+        expect(valueFromViewingKeySpy).toHaveBeenCalledTimes(0);
+
+        await asset.decryptNotes([notes[duplicatedIndex]]);
+
+        expect(asset.balance).toBe(testNotes[duplicatedIndex].value);
+        expect(valueFromViewingKeySpy).toHaveBeenCalledTimes(1);
+
+        await asset.decryptNotes(notes);
+
+        expect(errors).toEqual([]);
+        expect(warnings).toEqual([]);
+        expect(asset.balance).toBe(balance);
+        expect(asset.lastSynced).toBe(maxBlockNumber);
+        expect(noteBucketCache.getSize(assetId)).toBe(totalNotes);
+        expect(valueFromViewingKeySpy).toHaveBeenCalledTimes(totalNotes);
+
+        valueFromViewingKeySpy.mockClear();
     });
 });
 
