@@ -90,7 +90,7 @@ describe('dataKey', () => {
                 whatever: 'val',
             },
         )).toBe('');
-        expect(warnings.length).toBe(0);
+        expect(warnings.length).toBe(1);
     });
 
     it('keep variable if key is not defined in data', () => {

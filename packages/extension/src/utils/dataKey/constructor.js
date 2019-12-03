@@ -2,6 +2,7 @@ import {
     warnLog,
 } from '~utils/log';
 import dataKeyConfig from '~config/dataKey';
+import formatStrPattern from '~/utils/formatStrPattern';
 
 export default function dataKey(type, data, config = dataKeyConfig) {
     const pattern = typeof type === 'string' && type.match(/{([^{}]+)}/)
@@ -9,14 +10,9 @@ export default function dataKey(type, data, config = dataKeyConfig) {
         : config[type];
 
     if (!pattern) {
+        warnLog(`Pattern not found for type '${type}'.`);
         return '';
     }
 
-    return pattern.replace(/{([^{}]+)}/ig, (_, key) => {
-        if (!(key in data)) {
-            warnLog(`Data '${key}' not found for type '${type}'.`);
-            return _;
-        }
-        return data[key];
-    });
+    return formatStrPattern(pattern, data);
 }

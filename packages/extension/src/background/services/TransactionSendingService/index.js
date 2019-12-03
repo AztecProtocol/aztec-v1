@@ -5,7 +5,7 @@ import Web3Service from '~/helpers/Web3Service';
 import retrieveSigningInfo from '~utils/retrieveSigningInfo';
 import approveFunction from '~utils/approveGSNFunction';
 import getGsnConfig from '~utils/getGSNConfig';
-import { getNetworkById } from '~utils/network';
+import { getProviderUrl } from '~utils/network';
 
 const sendTransaction = async (query, connection) => {
     const {
@@ -23,7 +23,7 @@ const sendTransaction = async (query, connection) => {
             address,
         } = Web3Service.account;
         const signingInfo = await retrieveSigningInfo(address);
-        const { providerUrl } = getNetworkById(Web3Service.networkId);
+        const providerUrl = getProviderUrl(Web3Service.networkId);
         const gsnProvider = new GSNProvider(providerUrl, {
             pollInterval: 15 * 1000,
             signKey: signingInfo.privateKey,
@@ -31,9 +31,8 @@ const sendTransaction = async (query, connection) => {
         });
         const receipt = await Web3Service
             .useContract(contract)
-            .method(method, true)
+            .method(method)
             .useGSN({
-                ...gsnConfig,
                 signingInfo,
                 gsnProvider,
             })
