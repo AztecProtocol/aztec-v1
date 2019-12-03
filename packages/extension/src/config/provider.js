@@ -1,42 +1,5 @@
-import NETWORKS from '~config/networks';
+export const infuraProjectId = '09c4eed231c840d5ace14ba5389a1a7c';
 
-// get ganache network id
-
-const infuraProjectId = '09c4eed231c840d5ace14ba5389a1a7c';
-
-export const infuraConfig = ({ id: networkId, networkName, port }, projectId = infuraProjectId) => ({
-    title: networkName,
-    networkId,
-    providerUrl: `wss://${networkName}.infura.io/ws/v3/${infuraProjectId}`,
-});
-
-const availableNetworks = () => Object.values(NETWORKS).map(({ id }) => id);
-
-const isValidNetworkId = async (networkId) => {
-    const web3NetworkId = await new Promise((resolve) => {
-        web3.version.getNetwork((error, id) => {
-            resolve(id);
-        });
-    });
-    return availableNetworks().includes(networkId) || parseInt(web3NetworkId) === parseInt(networkId);
-};
-
-const isInfuraNetworkId = networkId => INFURA_NETWORKS.includes(parseInt(networkId, 10));
-
-const getProvider = (networkId) => {
-    if (isInfuraNetworkId(networkId)) {
-        return infuraConfig({
-            id: networkId,
-        }, INFURA_API_KEY);
-    }
-    return ganacheProvider(networkId);
-};
+export const infuraProviderUrlPattern = 'wss://{networkName}.infura.io/ws/v3/{projectId}';
 
 export const defaultProviderUrl = 'ws://localhost:8545';
-
-export default {
-    infuraConfig,
-    availableNetworks,
-    isValidNetworkId,
-    getProvider,
-};

@@ -1,11 +1,9 @@
-import Provider from '~config/provider';
 import Web3Service from '~/helpers/Web3Service';
 
-export default async function getGsnConfig(address) {
+export default async function getGsnConfig() {
     // TODO: check apiKey
-    const isGSNAvailable = await Provider.isValidNetworkId(Web3Service.networkId);
+    const isGSNAvailable = Web3Service.networkId > 0;
 
-    // const isGSNAvailable = false;
     const proxyContract = Web3Service.getAddress('AZTECAccountRegistryGSN');
 
     return {

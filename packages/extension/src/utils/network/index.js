@@ -1,7 +1,7 @@
-import getNetworkById from './getNetworkById';
+import getProviderUrl from './getProviderUrl';
 import getContract from './getContract';
 
 export {
-    getNetworkById,
+    getProviderUrl,
     getContract,
 };
