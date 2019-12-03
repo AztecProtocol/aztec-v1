@@ -1,12 +1,11 @@
 import ApiError from '~client/utils/ApiError';
-import Web3Service from '~/client/services/Web3Service';
 
 const requiredContracts = [
     'ACE',
     'AZTECAccountRegistry',
 ];
 
-export default function validateContractConfigs(contractsConfig) {
+export default function validateContractConfigs(contractsConfig, networkId) {
     const invalidContracts = requiredContracts.filter((contractName) => {
         const {
             address,
@@ -15,10 +14,6 @@ export default function validateContractConfigs(contractsConfig) {
     });
 
     if (invalidContracts.length > 0) {
-        const {
-            networkId,
-        } = Web3Service;
-
         throw new ApiError('input.contract.address.empty', {
             messageOptions: {
                 count: invalidContracts.length,

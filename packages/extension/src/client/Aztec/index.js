@@ -39,7 +39,11 @@ class Aztec {
         });
 
         try {
-            ApiPermissionService.validateContractConfigs(networkConfig.contractsConfig);
+            const {
+                networkId,
+                contractsConfig,
+            } = networkConfig;
+            ApiPermissionService.validateContractConfigs(contractsConfig, networkId);
 
             await Web3Service.init(networkConfig);
 
