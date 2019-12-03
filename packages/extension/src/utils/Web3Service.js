@@ -26,87 +26,53 @@ class Web3Service {
     }
 
     async init({
-        provider = null,
         providerUrl = '',
-        account,
-        gsnConfig,
         contractsConfig,
+        account,
     } = {}) {
         this.reset();
-        this.gsnConfig = gsnConfig;
 
-        let web3Provider = provider;
-        if (!web3Provider && providerUrl) {
+        let provider;
+        if (providerUrl) {
             if (providerUrl.match(/^wss?:\/\//)) {
-                web3Provider = new Web3.providers.WebsocketProvider(providerUrl);
+                provider = new Web3.providers.WebsocketProvider(providerUrl);
             } else {
-                web3Provider = new Web3.providers.HttpProvider(providerUrl);
+                provider = new Web3.providers.HttpProvider(providerUrl);
             }
-        }
-        if (!web3Provider) {
-            web3Provider = window.ethereum;
+        } else {
+            provider = window.ethereum;
         }
 
-        let web3;
-        let networkId;
-        if (web3Provider) {
-            web3 = new Web3(web3Provider);
-            networkId = await web3.eth.net.getId();
-        } else if (window.web3) {
-            ({ web3 } = window);
-            networkId = await new Promise((resolve) => {
-                window.web3.version.getNetwork((_, id) => {
-                    networkId = id;
-                    resolve();
-                });
-            });
-        } else {
+        if (!provider) {
             errorLog('Provider cannot be empty.');
             return;
         }
 
-        if (web3Provider
-            && typeof web3Provider.enable === 'function'
+        if (provider
+            && typeof provider.enable === 'function'
         ) {
-            await web3Provider.enable();
+            await provider.enable();
         }
+
+        const web3 = new Web3(provider);
+        const networkId = await web3.eth.net.getId();
 
         this.web3 = web3;
         this.eth = web3.eth;
         this.networkId = networkId || 0;
+
         if (account) {
             this.account = account;
         } else {
-            const [address] = await this.web3.eth.getAccounts();
-            if (address) {
-                this.account = {
-                    address,
-                };
-            }
+            const [address] = await web3.eth.getAccounts();
+            this.account = {
+                address,
+            };
         }
 
         if (contractsConfig) {
-            contractsConfig.forEach(({
-                name,
-                config,
-                address,
-            }) => {
-                if (!address) {
-                    this.registerInterface(config, {
-                        name,
-                    });
-                } else {
-                    this.registerContract(config, {
-                        name,
-                        address,
-                    });
-                }
-            });
+            this.registerContractsConfig(contractsConfig);
         }
-    }
-
-    async networkId() {
-        return this.web3.eth.net.getId();
     }
 
     registerContract(
@@ -167,6 +133,25 @@ class Web3Service {
         this.abis[interfaceName] = config.abi;
 
         return this.abis[interfaceName];
+    }
+
+    registerContractsConfig(contractsConfig) {
+        contractsConfig.forEach(({
+            name,
+            config,
+            address,
+        }) => {
+            if (!address) {
+                this.registerInterface(config, {
+                    name,
+                });
+            } else {
+                this.registerContract(config, {
+                    name,
+                    address,
+                });
+            }
+        });
     }
 
     hasContract(contractName) {
@@ -272,7 +257,12 @@ class Web3Service {
         });
     }
 
-    triggerMethod = async (type, method, contractAddress, fromAddress, ...args) => {
+    triggerMethod = async (type, {
+        method,
+        contractAddress,
+        fromAddress,
+        args,
+    }) => {
         const {
             privateKey,
         } = this.account || {};
@@ -284,7 +274,6 @@ class Web3Service {
         const methodArgs = methodSetting
             ? args.slice(0, args.length - 1)
             : args;
-
 
         const estimatedGas = await method(...methodArgs).estimateGas({
             from: fromAddress,
@@ -385,23 +374,35 @@ class Web3Service {
                     throw new Error(`Method '${methodName}' is not defined in contract '${contractName}'.`);
                 }
 
-                const address = contractAddress || contract.address;
-                let {
-                    address: userAddress,
-                } = this.account;
                 return {
-                    call: async (...args) => this.triggerMethod('call', method, null, userAddress, ...args),
-                    send: async (...args) => this.triggerMethod('send', method, null, userAddress, ...args),
-                    sendSigned: async (...args) => this.triggerMethod('sendSigned', method, address, userAddress, ...args),
+                    call: async (...args) => this.triggerMethod('call', {
+                        method,
+                        fromAddress: this.account.address,
+                        args,
+                    }),
+                    send: async (...args) => this.triggerMethod('send', {
+                        method,
+                        fromAddress: this.account.address,
+                        args,
+                    }),
+                    sendSigned: async (...args) => this.triggerMethod('sendSigned', {
+                        method,
+                        contractAddress: contractAddress || contract.address,
+                        fromAddress: this.account.address,
+                        args,
+                    }),
                     useGSN: (gsnConfig) => {
                         if (!gsnConfig) {
-                            log('Cannot use gsn as "this.gsnConfig" was not set');
+                            log('Cannot use gsn as "gsnConfig" was not defined');
                         }
                         const gsnContract = cloneDeep(contract);
                         gsnContract.setProvider(gsnConfig.gsnProvider);
-                        userAddress = gsnConfig.signingInfo.address;
                         return {
-                            send: async (...args) => this.triggerMethod('send', gsnContract.methods[methodName], null, userAddress, ...args),
+                            send: async (...args) => this.triggerMethod('send', {
+                                method: gsnContract.methods[methodName],
+                                fromAddress: gsnConfig.signingInfo.address,
+                                args,
+                            }),
                         };
                     },
                 };
@@ -412,10 +413,14 @@ class Web3Service {
                     throw new Error(`Cannot call waitForEvent('${eventName}') of undefined.`);
                 }
                 return {
-                    where: async (options = { filter: {}, fromBlock: 1, toBlock: 'latest' }) => contract.getPastEvents(eventName, {
-                        filter: options.filter,
-                        fromBlock: options.fromBlock,
-                        toBlock: options.toBlock,
+                    where: async ({
+                        filter = {},
+                        fromBlock = 1,
+                        toBlock = 'latest',
+                    }) => contract.getPastEvents(eventName, {
+                        filter,
+                        fromBlock,
+                        toBlock,
                     }),
                     all: async () => contract.getPastEvents('allEvents', {
                         fromBlock: 0,

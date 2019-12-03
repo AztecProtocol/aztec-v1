@@ -2,7 +2,6 @@ import {
     set,
 } from '~utils/storage';
 import {
-    getNetworkById,
     getContract,
 } from '~/utils/network';
 import Web3Service from '~/helpers/Web3Service';
@@ -16,15 +15,18 @@ const backgroundContracts = [
 ];
 
 export default async function setupNetworkConfig({
-    providerUrl,
-    networkId,
-    contractAddresses,
-    currentAddress,
     apiKey,
+    providerUrl = '',
+    contractAddresses = {},
 }) {
-    const account = {
-        address: currentAddress,
-    };
+    await Web3Service.init({
+        providerUrl,
+    });
+
+    const {
+        networkId,
+        account,
+    } = Web3Service;
 
     const contractsConfig = backgroundContracts.map((contractName) => {
         const {
@@ -39,25 +41,16 @@ export default async function setupNetworkConfig({
         };
     });
 
-    const {
-        networkName,
-        providerUrl: networkProviderUrl,
-    } = getNetworkById(networkId);
+    Web3Service.registerContractsConfig(contractsConfig);
 
-    const config = {
+    await set({
+        apiKey,
         networkId,
-        networkName,
-        providerUrl: providerUrl || networkProviderUrl,
+    });
+
+    return {
+        providerUrl,
         contractsConfig,
         account,
     };
-
-    await set({
-        networkId,
-        apiKey,
-    });
-
-    await Web3Service.init(config);
-
-    return config;
 }

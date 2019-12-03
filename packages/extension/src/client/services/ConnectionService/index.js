@@ -24,7 +24,6 @@ import {
     uiOpenEvent,
     uiCloseEvent,
 } from '~config/event';
-import Web3Service from '~/client/services/Web3Service';
 import MetaMaskService from '~/client/services/MetaMaskService';
 import ApiError from '~client/utils/ApiError';
 import getSiteData from '~/client/utils/getSiteData';
@@ -38,16 +37,7 @@ class ConnectionService {
         this.messages$ = null;
     }
 
-    async openConnection({
-        providerUrl,
-        contractAddresses,
-        apiKey,
-    }) {
-        const {
-            networkId,
-            account,
-        } = Web3Service;
-
+    async openConnection(clientProfile) {
         const frame = await backgroundFrame.init();
 
         const backgroundResponse = fromEvent(window, 'message')
@@ -62,26 +52,16 @@ class ConnectionService {
             requestId: randomId(),
             clientId: this.clientId,
             sender: 'WEB_CLIENT',
-            clientProfile: {
-                providerUrl,
-                contractAddresses,
-                networkId,
-                apiKey,
-                currentAddress: account.address,
-            },
+            clientProfile,
         }, '*');
 
         const {
             data: {
-                data: {
-                    contractsConfig,
-                } = {},
+                data: networkConfig,
             },
         } = await backgroundResponse;
 
-        return {
-            contractsConfig,
-        };
+        return networkConfig;
     }
 
     async disconnect() {
