@@ -69,6 +69,7 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
+    "build:dev": "webpack --config ./webpack.dev.js",
     "build": "PROD=false ./build.sh",
     "build:docs": "jsdoc --configure ./.jsdoc.json",
     "build:prod": "PROD=true ./build.sh",
@@ -77,6 +78,6 @@
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "publish:docs": "yarn build:docs && push-dir --allow-unclean --dir ./docs --branch gh-pages --remote docs --cleanup",
     "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-    "watch": "yarn build --watch"
+    "watch": "yarn build:dev --watch"
   }
 }
