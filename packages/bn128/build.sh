@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CHANGED_MODULES=$(cat /tmp/changed-modules);
+echo $CHANGED_MODULES;
 
 if [ "$PROD" = true ]; then
     if [ "$CI" = true ] && [ ! -d "$(pwd)/dist" ] || [[ "bn128" =~ $CHANGED_MODULES ]] || [ ! "$CI" = true ]; then
