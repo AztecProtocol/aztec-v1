@@ -263,9 +263,6 @@ class Web3Service {
         fromAddress,
         args,
     }) => {
-        const {
-            privateKey,
-        } = this.account || {};
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
             && !Array.isArray(args[args.length - 1])
@@ -295,11 +292,6 @@ class Web3Service {
             }
 
             const encodedData = method(...methodArgs).encodeABI();
-            const estimatedGas = await method(...methodArgs).estimateGas({
-                from: fromAddress,
-                gas: 6500000,
-                ...methodSetting,
-            });
             const tx = {
                 to: contractAddress,
                 data: encodedData,
@@ -307,6 +299,9 @@ class Web3Service {
                 ...methodSetting,
             };
 
+            const {
+                privateKey,
+            } = methodSetting || {};
             const signedT = await this.web3.eth.accounts.signTransaction(tx, privateKey);
 
             return new Promise(async (resolve, reject) => {
