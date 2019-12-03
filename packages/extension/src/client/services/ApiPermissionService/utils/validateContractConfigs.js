@@ -6,7 +6,7 @@ const requiredContracts = [
     'AZTECAccountRegistry',
 ];
 
-export default function setContractConfigs(contractsConfig) {
+export default function validateContractConfigs(contractsConfig) {
     const invalidContracts = requiredContracts.filter((contractName) => {
         const {
             address,
@@ -30,21 +30,4 @@ export default function setContractConfigs(contractsConfig) {
             invalidContracts,
         });
     }
-
-    contractsConfig.forEach(({
-        name,
-        config,
-        address,
-    }) => {
-        if (!address) {
-            Web3Service.registerInterface(config, {
-                name,
-            });
-        } else {
-            Web3Service.registerContract(config, {
-                name,
-                address,
-            });
-        }
-    });
 }

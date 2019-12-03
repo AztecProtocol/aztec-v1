@@ -12,9 +12,8 @@ class Aztec {
 
     enable = async (
         {
-            provider = null,
-            providerUrl = '',
             apiKey = '',
+            providerUrl = '',
             contractAddresses = {
                 ACE: '',
                 AZTECAccountRegistry: '',
@@ -22,60 +21,51 @@ class Aztec {
             autoRefreshOnProfileChange = true,
         } = {},
         callback = null,
-    ) => {
-        await Web3Service.init({
-            provider,
-            providerUrl,
-        });
-
-        return new Promise(async (resolve, reject) => {
-            if (autoRefreshOnProfileChange) {
-                Web3Service.bindProfileChange(async () => this.refreshSession(
-                    {
-                        provider,
-                        providerUrl,
-                        contractAddresses,
-                    },
-                    resolve,
-                ));
-            }
-
-            const {
-                contractsConfig,
-            } = await ConnectionService.openConnection({
-                providerUrl,
-                apiKey,
-                contractAddresses,
-            });
-
-            ApiPermissionService.setContractConfigs(contractsConfig);
-
-            try {
-                await ApiPermissionService.ensurePermission();
-            } catch (error) {
-                reject(error);
-            }
-
-            const apis = ApiPermissionService.generateApis();
-            Object.keys(apis).forEach((name) => {
-                this[name] = apis[name];
-            });
-
-            if (autoRefreshOnProfileChange) {
-                Web3Service.bindProfileChange(async () => this.refreshSession({
-                    provider,
+    ) => new Promise(async (resolve, reject) => {
+        if (autoRefreshOnProfileChange) {
+            Web3Service.bindProfileChange(async () => this.refreshSession(
+                {
                     providerUrl,
                     contractAddresses,
-                }));
-            }
+                },
+                resolve,
+            ));
+        }
 
-            if (callback) {
-                callback();
-            }
-
-            resolve();
+        const networkConfig = await ConnectionService.openConnection({
+            apiKey,
+            providerUrl,
+            contractAddresses,
         });
-    };
+
+        try {
+            ApiPermissionService.validateContractConfigs(networkConfig.contractsConfig);
+
+            await Web3Service.init(networkConfig);
+
+            await ApiPermissionService.ensurePermission();
+        } catch (error) {
+            reject(error);
+        }
+
+        const apis = ApiPermissionService.generateApis();
+        Object.keys(apis).forEach((name) => {
+            this[name] = apis[name];
+        });
+
+        if (autoRefreshOnProfileChange) {
+            Web3Service.bindProfileChange(async () => this.refreshSession({
+                providerUrl,
+                contractAddresses,
+            }));
+        }
+
+        if (callback) {
+            callback();
+        }
+
+        resolve();
+    });
 
     async disable() {
         this.web3 = null;

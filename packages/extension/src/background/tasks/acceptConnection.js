@@ -26,7 +26,7 @@ export default function acceptConnection() {
                 clientProfile,
             } = event.data;
 
-            if (clientProfile && clientProfile.networkId) {
+            if (clientProfile) {
                 networkConfig = await setupNetworkConfig(clientProfile);
             } else if (event.origin !== uiSourceOrigin) {
                 return;
