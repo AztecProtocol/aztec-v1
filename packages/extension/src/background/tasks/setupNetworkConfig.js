@@ -49,6 +49,7 @@ export default async function setupNetworkConfig({
     });
 
     return {
+        networkId,
         providerUrl,
         contractsConfig,
         account,
