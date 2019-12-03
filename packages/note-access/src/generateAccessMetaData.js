@@ -3,7 +3,7 @@ import encryptedViewingKey from './encryptedViewingKey';
 import { METADATA_AZTEC_DATA_LENGTH } from './config/constants';
 
 /**
- * @method grantAccess - grant an Ethereum address view access to a note
+ * @method generateAccessMetaData - grant an Ethereum address view access to a note
  * @param {Object} access - mapping between an Ethereum address and the linked public key. The specified address
  * is being granted access to the note
  * @param {} noteViewKey - viewing key of the note
@@ -22,12 +22,13 @@ export default function generateAccessMetaData(access, noteViewKey, owner) {
         accessUsers = [access];
     }
     const realViewingKey = noteViewKey;
-    const metaDataAccess = accessUsers.map(({ address, linkedPublicKey }) => {
+    const noteAccess = accessUsers.map(({ address, linkedPublicKey }) => {
+        const viewingKey = encryptedViewingKey(linkedPublicKey, realViewingKey);
         return {
             address,
-            viewingKey: encryptedViewingKey(linkedPublicKey, realViewingKey).toHexString(),
+            viewingKey: viewingKey.toHexString(),
         };
     });
-    const newMetaData = addAccess('', metaDataAccess);
+    const newMetaData = addAccess('', noteAccess);
     return newMetaData.slice(METADATA_AZTEC_DATA_LENGTH + 2);
 }

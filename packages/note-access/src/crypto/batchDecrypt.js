@@ -1,6 +1,6 @@
+import { errorLog } from '@aztec/dev-utils';
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
-import { errorLog } from '../log';
 
 export default function batchDecrypt(privateKey, encryptedDataArr) {
     const privateKeyHash = privateKey.replace(/^0x/, '');

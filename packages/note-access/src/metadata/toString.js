@@ -1,4 +1,4 @@
-import { utils } from 'web3';
+import { toChecksumAddress } from 'web3-utils';
 import { DYNAMIC_VAR_CONFIG_LENGTH, MIN_BYTES_VAR_LENGTH } from '../config/constants';
 import config from '../config/metadata';
 
@@ -13,7 +13,7 @@ export default function toString(metadataObj) {
         if (metadataObj[name] || (!startAt && length)) {
             const dataArr = Array.isArray(metadataObj[name]) ? metadataObj[name] : [metadataObj[name] || ''];
             data = dataArr
-                .map((v) => (name === 'addresses' && utils.toChecksumAddress(v)) || v)
+                .map((v) => (name === 'addresses' && toChecksumAddress(v)) || v)
                 .map((v) => `${v}`.replace(/^0x/, ''))
                 .map((v) => ensureMinVarSize(v, length))
                 .join('');

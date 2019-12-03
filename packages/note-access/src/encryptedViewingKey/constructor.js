@@ -1,5 +1,5 @@
+import { warnLog } from '@aztec/dev-utils';
 import { REAL_VIEWING_KEY_LENGTH } from '../config/constants';
-import { warnLog } from '../log';
 import { encryptMessage } from '../crypto';
 import decrypt from './decrypt';
 
