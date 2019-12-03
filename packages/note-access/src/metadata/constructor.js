@@ -1,4 +1,4 @@
-import { utils } from 'web3';
+import { toChecksumAddress } from 'web3-utils';
 import config from '../config/metadata';
 import { DYNAMIC_VAR_CONFIG_LENGTH, MIN_BYTES_VAR_LENGTH } from '../config/constants';
 import _addAccess from './_addAccess';
@@ -17,7 +17,6 @@ export default function constructor(metadataStr) {
     }, []);
 
     config.forEach(({ name, length, startAt }) => {
-        console.log('in metadata start');
         const isDynamic = !!startAt;
         const isLenVar = lenVars.indexOf(name) >= 0;
 
@@ -27,11 +26,8 @@ export default function constructor(metadataStr) {
             start += DYNAMIC_VAR_CONFIG_LENGTH;
         }
 
-        console.log({ numberOfVars });
         const arr = [];
         for (let i = 0; i < numberOfVars; i += 1) {
-            console.log({ numberOfVars });
-            console.log('i: ', i);
             let segLen;
             if (isLenVar) {
                 segLen = length;
@@ -45,7 +41,7 @@ export default function constructor(metadataStr) {
                 val = val.slice(segLen - (length || 0));
             }
             if (name === 'addresses') {
-                arr.push(utils.toChecksumAddress(val));
+                arr.push(toChecksumAddress(val));
             } else {
                 arr.push(val ? `0x${val}` : '');
             }

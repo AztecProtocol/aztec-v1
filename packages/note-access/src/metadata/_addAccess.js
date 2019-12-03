@@ -1,4 +1,4 @@
-import { utils } from 'web3';
+import { toChecksumAddress } from 'web3-utils';
 
 export default function _addAccess(metadata, access) {
     const noteAccess = Array.isArray(access) ? access : [access];
@@ -6,7 +6,7 @@ export default function _addAccess(metadata, access) {
     const newAddresses = [];
     const newViewingKeys = [];
     noteAccess.forEach(({ address, viewingKey }) => {
-        const formattedAddress = utils.toChecksumAddress(address);
+        const formattedAddress = toChecksumAddress(address);
         if (addresses.indexOf(formattedAddress) >= 0) return;
         newAddresses.push(formattedAddress);
         newViewingKeys.push(viewingKey);

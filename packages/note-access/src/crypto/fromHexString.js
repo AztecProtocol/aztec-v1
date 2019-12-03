@@ -1,4 +1,4 @@
-import { warnLog } from '../log';
+import { warnLog } from '@aztec/dev-utils';
 import EncryptedMessage from './EncryptedMessage';
 import lengthConfig from './lengthConfig';
 

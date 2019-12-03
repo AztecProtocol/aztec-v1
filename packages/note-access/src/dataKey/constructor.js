@@ -1,4 +1,4 @@
-import { warnLog } from '../log';
+import { warnLog } from '@aztec/dev-utils';
 import dataKeyConfig from '../config/dataKey';
 
 export default function dataKey(type, data, config = dataKeyConfig) {

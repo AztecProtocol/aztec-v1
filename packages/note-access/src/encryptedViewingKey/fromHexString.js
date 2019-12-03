@@ -1,5 +1,5 @@
+import { warnLog } from '@aztec/dev-utils';
 import { VIEWING_KEY_LENGTH } from '../config/constants';
-import { warnLog } from '../log';
 import recoverFromHexString from '../crypto/fromHexString';
 import decrypt from './decrypt';
 

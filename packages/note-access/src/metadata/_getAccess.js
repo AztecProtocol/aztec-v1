@@ -1,9 +1,9 @@
-import { utils } from 'web3';
+import { toChecksumAddress } from 'web3-utils';
 
 export default function _getAccess(metadata, address) {
     const { addresses, viewingKeys } = metadata;
 
-    const idx = addresses.findIndex((a) => a === utils.toChecksumAddress(address));
+    const idx = addresses.findIndex((a) => a === toChecksumAddress(address));
     if (idx < 0) {
         return null;
     }
