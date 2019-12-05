@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -30,12 +31,16 @@ const DepositConfirm = ({
                 align="center"
                 height={3}
             >
-                <Block align="left">
+                <FlexBox
+                    direction="column"
+                    align="space-between"
+                    valign="flex-start"
+                    stretch
+                >
                     <ListRow
                         title={i18n.t('deposit.from')}
                         content={(
                             <ListItem
-                                className="text-code"
                                 profile={{
                                     type: 'user',
                                     address: fromAddress,
@@ -57,16 +62,12 @@ const DepositConfirm = ({
                         title={i18n.t('asset')}
                         content={(
                             <ListItem
-                                className="text-code"
                                 profile={{
                                     ...asset,
                                     type: 'asset',
                                 }}
                                 content={(
-                                    <Text
-                                        size="xxs"
-                                        color="secondary"
-                                    >
+                                    <div>
                                         {asset.name ? `${asset.name} (` : ''}
                                         <HashText
                                             text={asset.address}
@@ -75,7 +76,7 @@ const DepositConfirm = ({
                                             size="s"
                                         />
                                         {asset.name ? ')' : ''}
-                                    </Text>
+                                    </div>
                                 )}
                                 size="xxs"
                                 textSize="xs"
@@ -89,7 +90,7 @@ const DepositConfirm = ({
                         contentSize="s"
                         color="green"
                     />
-                </Block>
+                </FlexBox>
             </Ticket>
         </Block>
         <Block padding="m xl">
@@ -106,7 +107,6 @@ const DepositConfirm = ({
                         to,
                     }) => (
                         <ListItem
-                            className="text-code"
                             profile={{
                                 type: 'user',
                                 address: to,
@@ -121,6 +121,7 @@ const DepositConfirm = ({
                             size="xxs"
                             footnote={(
                                 <Text
+                                    className="text-code"
                                     text={`+${formatNumber(amount, asset.decimals)}`}
                                     color="green"
                                 />
@@ -136,6 +137,7 @@ const DepositConfirm = ({
                 <Text
                     text={i18n.t('deposit.confirm.explain')}
                     size="xs"
+                    color="label"
                 />
             </Block>
         </Block>

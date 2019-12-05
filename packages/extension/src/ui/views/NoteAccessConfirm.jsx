@@ -35,7 +35,7 @@ const NoteAccessConfirm = ({
         >
             <Block padding="m 0">
                 <Ticket
-                    height={2}
+                    height={3}
                     align="center"
                 >
                     <Block align="left">

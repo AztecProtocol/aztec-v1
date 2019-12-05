@@ -22,6 +22,7 @@ const WithdrawConfirm = ({
         name,
         decimals,
     },
+    sender,
     to,
     amount,
 }) => (
@@ -48,57 +49,85 @@ const WithdrawConfirm = ({
             </div>
         )}
     >
-        <Ticket height={2}>
-            <Connection
-                theme="white"
-                from={{
-                    profile: {
-                        type: 'asset',
-                        address: assetAddress,
-                        linkedTokenAddress,
-                    },
-                    description: formatAddress(assetAddress, 6, 4),
-                }}
-                to={{
-                    profile: {
-                        type: 'user',
-                        address: to,
-                    },
-                    tooltip: (
-                        <ListItem
-                            content={(
-                                <HashText
-                                    text={to}
-                                    prefixLength={6}
-                                    suffixLength={4}
-                                />
-                            )}
-                            size="xxs"
-                            footnote={(
-                                <Text
-                                    text={`+${formatNumber(amount, decimals)}`}
-                                    color="green"
-                                />
-                            )}
-                        />
-                    ),
-                    description: (
-                        <HashText
-                            text={to}
-                            prefixLength={6}
-                            suffixLength={4}
-                            size="xxs"
-                        />
-                    ),
-                }}
-                size="s"
-                actionIconName="double_arrow"
-            />
-        </Ticket>
+        <Block padding="l 0">
+            <Ticket height={2}>
+                <Connection
+                    theme="white"
+                    from={{
+                        profile: {
+                            type: 'asset',
+                            address: assetAddress,
+                            linkedTokenAddress,
+                        },
+                        tooltip: (
+                            <ListItem
+                                content={(
+                                    <HashText
+                                        text={sender}
+                                        prefixLength={6}
+                                        suffixLength={4}
+                                    />
+                                )}
+                                size="xxs"
+                                footnote={(
+                                    <Text
+                                        text={`-${formatNumber(amount, decimals)}`}
+                                        color="red"
+                                    />
+                                )}
+                            />
+                        ),
+                        description: (
+                            <HashText
+                                text={assetAddress}
+                                prefixLength={6}
+                                suffixLength={4}
+                                size="xxs"
+                            />
+                        ),
+                    }}
+                    to={{
+                        profile: {
+                            type: 'user',
+                            address: to,
+                        },
+                        tooltip: (
+                            <ListItem
+                                content={(
+                                    <HashText
+                                        text={to}
+                                        prefixLength={6}
+                                        suffixLength={4}
+                                    />
+                                )}
+                                size="xxs"
+                                footnote={(
+                                    <Text
+                                        text={`+${formatNumber(amount, decimals)}`}
+                                        color="green"
+                                    />
+                                )}
+                            />
+                        ),
+                        description: (
+                            <HashText
+                                text={to}
+                                prefixLength={6}
+                                suffixLength={4}
+                                size="xxs"
+                            />
+                        ),
+                    }}
+                    size="s"
+                    actionIconName="double_arrow"
+                />
+            </Ticket>
+        </Block>
         <Block padding="l">
             <Text
                 text={i18n.t('withdraw.confirm.explain')}
                 size="xs"
+                color="label"
             />
         </Block>
     </PopupContent>
@@ -106,6 +135,7 @@ const WithdrawConfirm = ({
 
 WithdrawConfirm.propTypes = {
     asset: assetShape.isRequired,
+    sender: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
     amount: PropTypes.number.isRequired,
 };

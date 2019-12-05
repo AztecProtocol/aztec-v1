@@ -259,6 +259,7 @@ const CreateNoteFromBalanceConfirm = ({
                 <Text
                     text={i18n.t('note.create.fromBalance.explain')}
                     size="xs"
+                    color="label"
                 />
             </Block>
         </PopupContent>
