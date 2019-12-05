@@ -4,7 +4,7 @@ export default async function noteFactory(noteId) {
     const note = new Note({
         id: noteId,
     });
-    await note.refresh();
+    await note.init();
 
     return note;
 }
