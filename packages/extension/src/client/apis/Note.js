@@ -5,7 +5,7 @@ import ConnectionService from '~/client/services/ConnectionService';
 import proofFactory from './noteProofFactory';
 
 const dataProperties = [
-    'hash',
+    'noteHash',
     'value',
     'owner',
     'status',
@@ -19,7 +19,7 @@ export default class Note {
     }
 
     isValid() {
-        return !!this.hash;
+        return !!this.noteHash;
     }
 
     async init() {
