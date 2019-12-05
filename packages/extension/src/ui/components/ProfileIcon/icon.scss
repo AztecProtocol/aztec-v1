@@ -27,6 +27,18 @@
   }
 }
 
+.type-note {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .aztec-icon {
+    position: absolute;
+    transform: scale(0.6);
+  }
+}
+
 .tooltip {
   display: none;
   position: absolute;

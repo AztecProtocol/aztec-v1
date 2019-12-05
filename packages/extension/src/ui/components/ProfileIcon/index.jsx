@@ -43,6 +43,7 @@ const ProfileIcon = ({
     theme,
     type,
     address,
+    noteHash,
     src,
     alt,
     tooltip,
@@ -87,17 +88,25 @@ const ProfileIcon = ({
         iconNode = (
             <ProfileSvg
                 className={classnames(
+                    styles[`type-${type}`],
                     {
                         [wrapperClassName]: !tooltip,
-                        [styles[`type-${type}`]]: type === 'asset',
                     },
                 )}
-                address={address}
+                address={address || noteHash}
                 size={size}
                 alt={alt}
                 colorScheme={colorSchemes[type]}
                 shapeGenerator={shapeGenerators[type]}
-            />
+            >
+                {type === 'note' && (
+                    <AztecSvg
+                        className={styles['aztec-icon']}
+                        theme="light"
+                        size={size}
+                    />
+                )}
+            </ProfileSvg>
         );
     }
 
@@ -134,6 +143,7 @@ ProfileIcon.propTypes = {
     theme: themeType,
     type: profileType,
     address: PropTypes.string,
+    noteHash: PropTypes.string,
     src: PropTypes.string,
     alt: PropTypes.string,
     tooltip: PropTypes.oneOfType([
@@ -147,6 +157,7 @@ ProfileIcon.defaultProps = {
     className: '',
     theme: 'primary',
     address: '',
+    noteHash: '',
     type: '',
     src: '',
     alt: '',

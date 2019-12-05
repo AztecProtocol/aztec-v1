@@ -145,4 +145,10 @@ export default {
             ...generate(20 - addresses.length, randomAddress),
         ],
     },
+    'playground.icons.notes': {
+        type: 'note',
+        noteHashes: [
+            ...generate(20, () => `0x${randomId(64)}`),
+        ],
+    },
 };

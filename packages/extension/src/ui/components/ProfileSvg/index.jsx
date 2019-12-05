@@ -19,6 +19,7 @@ const ProfileSvg = ({
     alt,
     colorScheme,
     shapeGenerator,
+    children: childNode,
 }) => {
     const diameter = parseInt(avatarSizesMap[size], 10);
     const rand = makeRand(address);
@@ -53,6 +54,7 @@ const ProfileSvg = ({
                     />
                 ))}
             </svg>
+            {childNode}
         </div>
     );
 };
@@ -64,6 +66,7 @@ ProfileSvg.propTypes = {
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
     colorScheme: PropTypes.arrayOf(PropTypes.string),
     shapeGenerator: PropTypes.func,
+    children: PropTypes.node,
 };
 
 ProfileSvg.defaultProps = {
@@ -72,6 +75,7 @@ ProfileSvg.defaultProps = {
     size: 'm',
     colorScheme: defaultColorScheme,
     shapeGenerator: defaultShapeGenerator,
+    children: null,
 };
 
 export default ProfileSvg;
