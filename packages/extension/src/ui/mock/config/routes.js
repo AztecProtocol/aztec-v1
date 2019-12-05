@@ -158,6 +158,10 @@ export default {
                         path: 'users',
                         Component: Icons,
                     },
+                    notes: {
+                        path: 'notes',
+                        Component: Icons,
+                    },
                 },
             },
         },

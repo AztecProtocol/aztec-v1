@@ -33,6 +33,7 @@ export const profileType = PropTypes.oneOf([
     'user',
     'aztec',
     'domain',
+    'note',
 ]);
 
 const assetProfileShape = PropTypes.shape({
@@ -48,6 +49,11 @@ const userProfileShape = PropTypes.shape({
     src: PropTypes.string,
 });
 
+const noteProfileShape = PropTypes.shape({
+    type: PropTypes.oneOf(['note']),
+    noteHash: PropTypes.string.isRequired,
+});
+
 const generalProfileShape = PropTypes.shape({
     type: PropTypes.oneOf(['', 'domain', 'aztec']),
     src: PropTypes.string,
@@ -57,6 +63,7 @@ const generalProfileShape = PropTypes.shape({
 export const profileShape = PropTypes.oneOfType([
     assetProfileShape,
     userProfileShape,
+    noteProfileShape,
     generalProfileShape,
 ]);
 

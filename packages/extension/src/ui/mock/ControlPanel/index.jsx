@@ -27,7 +27,9 @@ const ControlPanel = ({
             >
                 <div id="background-app">
                     <UiPlaceholder initialVisibility>
-                        {children}
+                        <div id="aztec-popup-ui-app">
+                            {children}
+                        </div>
                     </UiPlaceholder>
                 </div>
             </BrowserWindow>

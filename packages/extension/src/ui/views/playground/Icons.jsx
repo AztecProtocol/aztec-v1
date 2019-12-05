@@ -44,13 +44,14 @@ const DemoAddress = ({ type }) => { // eslint-disable-line react/prop-types
 const Icons = ({
     type,
     addresses,
+    noteHashes,
 }) => (
     <Block padding="m l">
         <DemoAddress
             type={type}
         />
         <Block padding="m 0">
-            {addresses.map(addr => (
+            {addresses.length > 0 && addresses.map(addr => (
                 <Block
                     key={addr}
                     padding="m"
@@ -59,6 +60,19 @@ const Icons = ({
                     <ProfileIcon
                         type={type}
                         address={addr}
+                        size="l"
+                    />
+                </Block>
+            ))}
+            {noteHashes.length > 0 && noteHashes.map(noteHash => (
+                <Block
+                    key={noteHash}
+                    padding="m"
+                    inline
+                >
+                    <ProfileIcon
+                        type={type}
+                        noteHash={noteHash}
                         size="l"
                     />
                 </Block>
@@ -83,11 +97,13 @@ const Icons = ({
 Icons.propTypes = {
     type: PropTypes.string,
     addresses: PropTypes.arrayOf(PropTypes.string),
+    noteHashes: PropTypes.arrayOf(PropTypes.string),
 };
 
 Icons.defaultProps = {
     type: 'user',
     addresses: [],
+    noteHashes: [],
 };
 
 export default Icons;
