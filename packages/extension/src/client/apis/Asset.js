@@ -52,44 +52,6 @@ export default class Asset {
         return balance || 0;
     }
 
-    notifySubscribers = (type, response) => {
-        const {
-            subscribers,
-        } = this.subscriptions[type];
-        subscribers.forEach(subscriber => subscriber(response, this));
-    };
-
-    addListener(type, cb) {
-        if (!this.subscriptions[type]) return;
-
-        if (!this.subscriptions[type].receipt) {
-            // this.subscriptions[type].receipt = subscribeToContentScript(
-            //     {
-            //         entity: 'asset',
-            //         type,
-            //         assetId: this.id,
-            //     },
-            //     result => this.notifySubscribers(type, result.response),
-            // );
-        }
-
-        this.subscriptions[type].subscribers.add(cb);
-    }
-
-    removeListener(type, cb) {
-        if (!this.subscriptions[type]) return;
-
-        this.subscriptions[type].subscribers.delete(cb);
-
-        if (!this.subscriptions[type].subscribers.size) {
-            this.subscriptions[type].receipt.unsubscribe();
-            this.subscriptions[type] = {
-                receipt: null,
-                subscribers: new Set(),
-            };
-        }
-    }
-
     async totalSupplyOfLinkedToken() {
         let totalSupply;
         try {
