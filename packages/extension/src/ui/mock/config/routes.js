@@ -12,6 +12,7 @@ import NoteAccess from '~/ui/pages/NoteAccess';
 import Deposit from '~/ui/pages/Deposit';
 import Withdraw from '~/ui/pages/Withdraw';
 import Send from '~/ui/pages/Send';
+import CreateNoteFromBalance from '~/ui/pages/CreateNoteFromBalance';
 import Icons from '~/ui/views/playground/Icons';
 
 export default {
@@ -136,6 +137,22 @@ export default {
             send: {
                 path: 'send',
                 Component: Send,
+                initialStep: 2,
+            },
+        },
+    },
+    createNote: {
+        path: 'create-note',
+        Component: CreateNoteFromBalance,
+        routes: {
+            sign: {
+                path: 'sign',
+                Component: CreateNoteFromBalance,
+                initialStep: 1,
+            },
+            send: {
+                path: 'send',
+                Component: CreateNoteFromBalance,
                 initialStep: 2,
             },
         },

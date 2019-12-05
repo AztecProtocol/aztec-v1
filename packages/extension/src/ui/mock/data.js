@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import {
     userAccount,
 } from '~testHelpers/testUsers';
@@ -18,6 +19,11 @@ export const generate = (count, generator) => {
 };
 
 export const randomAddress = () => `0x${randomId(40)}`;
+
+export const randomRawNote = () => ({
+    noteHash: `0x${randomId()}`,
+    k: new BN(randomInt(100)),
+});
 
 export const seedPhrase = 'oyster lemon tornado cat hamster basic similar vote priority purchase planet idle';
 
@@ -77,6 +83,7 @@ export const sites = [
     {
         title: 'Aztec Protocol',
         url: 'https://www.aztecprotocol.com',
+        domain: 'aztecprotocol.com',
         icons: [
             {
                 href: 'https://www.aztecprotocol.com/icons/icon-144x144.png?v=d70c0dfad3304ef3eca84c656c8c63ab',
@@ -94,6 +101,11 @@ export const domains = [
         domain: 'compound.finance',
     },
 ];
+
+export const gsnConfig = {
+    isGSNAvailable: false,
+    proxyContract: randomAddress(),
+};
 
 export const notes = [
     {

@@ -27,8 +27,8 @@ import {
 
 export default async function createNoteFromBalance({
     assetAddress,
-    amount,
     sender,
+    amount,
     owner, // will be ignore if transaction is not empty
     transactions,
     publicOwner,
@@ -121,8 +121,9 @@ export default async function createNoteFromBalance({
     const inputValues = notes.map(({ value }) => value);
     const sum = notes.reduce((accum, { value }) => accum + value, 0);
     const extraAmount = sum - inputAmount;
+    let remainderNote;
     if (extraAmount > 0) {
-        const remainderNote = await createNote(
+        remainderNote = await createNote(
             extraAmount,
             inputNotesOwner.spendingPublicKey,
             inputNotesOwner.address,
@@ -194,7 +195,12 @@ export default async function createNoteFromBalance({
     );
 
     return {
-        inputNotes,
         proof,
+        inputNotes,
+        outputNotes,
+        remainderNote,
+        publicValue,
+        sender: actualSender,
+        owner: publicOwner || inputNotesOwner.address,
     };
 }

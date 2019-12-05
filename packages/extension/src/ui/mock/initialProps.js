@@ -2,7 +2,6 @@ import {
     randomId,
     randomInt,
 } from '~utils/random';
-import i18n from '~ui/helpers/i18n';
 import {
     seedPhrase,
     linkedPublicKey,
@@ -16,6 +15,7 @@ import {
     sendTransactions,
     generate,
     randomAddress,
+    randomRawNote,
 } from './data';
 
 const dummyFunc = () => {};
@@ -114,6 +114,17 @@ export default {
     noteAccess: {
         id: notes[0].noteHash,
         addresses,
+    },
+    createNote: {
+        assetAddress: assets[0].address,
+        amount: randomInt(1, 100),
+        owner: randomAddress(),
+        numberOfOutputNotes: 1,
+    },
+    'createNote.sign': {
+        proof: {
+            inputNotes: generate(5, randomRawNote),
+        },
     },
     mint: {
         asset: assets[0],

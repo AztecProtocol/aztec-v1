@@ -9,6 +9,7 @@ import NoteAccess from '~/ui/pages/NoteAccess';
 import Deposit from '~/ui/pages/Deposit';
 import Withdraw from '~/ui/pages/Withdraw';
 import Send from '~/ui/pages/Send';
+import CreateNoteFromBalance from '~/ui/pages/CreateNoteFromBalance';
 
 export default {
     _: {
@@ -57,5 +58,9 @@ export default {
     send: {
         path: 'send',
         Component: Send,
+    },
+    createNote: {
+        path: 'create-note',
+        Component: CreateNoteFromBalance,
     },
 };

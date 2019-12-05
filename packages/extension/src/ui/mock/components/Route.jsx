@@ -8,6 +8,7 @@ import routes from '../config/routes';
 import {
     addresses,
     sites,
+    gsnConfig,
 } from '../data';
 import initialProps from '../initialProps';
 
@@ -64,6 +65,7 @@ const MockRoute = ({
                         currentAccount={currentAccount || {
                             address: addresses[0],
                         }}
+                        gsnConfig={gsnConfig}
                         initialStep={initialStep}
                     />
                 </Popup>

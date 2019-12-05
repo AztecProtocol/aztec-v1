@@ -10,6 +10,7 @@ let depositStatus;
 let withdrawStatus;
 let sendStatus;
 let fetchStatus;
+let createStatus;
 
 const makeStatusGenerator = (id) => {
   let statusLogs = [];
@@ -72,6 +73,7 @@ async function initAsset() {
     withdrawStatus = makeStatusGenerator('withdraw-status');
     sendStatus = makeStatusGenerator('send-status');
     fetchStatus = makeStatusGenerator('fetch-status');
+    createStatus = makeStatusGenerator('create-status');
     document.getElementById('linked-erc20-address').innerHTML = asset.linkedTokenAddress;
     refreshAssetBalances();
   }
@@ -196,6 +198,41 @@ async function send() {
   } catch (error) {
     console.error(error);
     sendStatus.error(error.message);
+  }
+}
+
+async function createNoteFromBalance() {
+  let numberOfInputNotes = document.getElementById('create-input-number').value.trim();
+  numberOfInputNotes = numberOfInputNotes === ''
+    ? undefined
+    : parseInt(numberOfInputNotes);
+  let numberOfOutputNotes = document.getElementById('create-output-number').value.trim();
+  numberOfOutputNotes = numberOfOutputNotes === ''
+    ? undefined
+    : parseInt(numberOfOutputNotes);
+  const valueInput = document.getElementById('create-amount');
+  const owner = document.getElementById('create-owner').value.trim();
+  const value = parseInt(valueInput.value.trim());
+
+  createStatus.clear();
+
+  const account = window.aztec.web3.account();
+
+  try {
+    await asset.createNoteFromBalance(
+      value,
+      {
+        owner,
+        numberOfInputNotes,
+        numberOfOutputNotes,
+      },
+    );
+
+    refreshAssetBalances();
+    valueInput.value = '';
+  } catch (error) {
+    console.error(error);
+    createStatus.error(error.message);
   }
 }
 
@@ -359,6 +396,40 @@ document.getElementById('app').innerHTML = `
         <button onclick="send()">Submit</button><br/>
         <br/>
         <div id="send-status"></div>
+      </div>
+      <br/>
+      <div>
+        <div>Create note from balance:</div>
+        <label>Amount</label>
+        <input
+          id="create-amount"
+          type="number"
+          size="10"
+        /><br/>
+        <label>Number of input notes</label>
+        <input
+          id="create-input-number"
+          type="number"
+          size="2"
+          value="2"
+        /><br/>
+        <label>Number of output notes</label>
+        <input
+          id="create-output-number"
+          type="number"
+          size="2"
+          value="2"
+        /><br/>
+        <label>New note owner</label>
+        <input
+          id="create-owner"
+          type="text"
+          size="42"
+          value="${accountAddress}"
+        /><br/>
+        <button onclick="createNoteFromBalance()">Submit</button><br/>
+        <br/>
+        <div id="create-status"></div>
       </div>
       <br/>
       <div>
