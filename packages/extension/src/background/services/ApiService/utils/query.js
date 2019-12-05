@@ -1,4 +1,7 @@
 import gql from 'graphql-tag';
+import {
+    errorLog,
+} from '~/utils/log';
 import insertVariablesToGql from '~/utils/insertVariablesToGql';
 import Web3Service from '~/helpers/Web3Service';
 import GraphQLService from '~/background/services/GraphQLService';
@@ -30,7 +33,6 @@ export default async function query(request, Query) {
     }
 
     let data;
-    let errorResponse;
     try {
         ({ data } = await GraphQLService.query({
             query: queryTag,
@@ -41,8 +43,8 @@ export default async function query(request, Query) {
             },
         }) || {});
     } catch (e) {
-        errorResponse = e;
+        errorLog(e);
     }
 
-    return errorResponse || data;
+    return data || {};
 }
