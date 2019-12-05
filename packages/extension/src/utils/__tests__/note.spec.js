@@ -93,19 +93,6 @@ describe('createNote', () => {
         const allowedAccess2 = metadataObj.getAccess(userAccount2.address);
         expect(allowedAccess2.viewingKey.length).toBe(VIEWING_KEY_LENGTH + 2);
     });
-
-    it('warn if owner is empty', async () => {
-        const warnings = [];
-        const warnSpy = jest.spyOn(console, 'warn')
-            .mockImplementation(msg => warnings.push(msg));
-
-        await createNote(10, spendingPublicKey);
-
-        expect(warnings.length).toBe(1);
-        expect(warnings[0]).toMatch(/owner address/i);
-
-        warnSpy.mockRestore();
-    });
 });
 
 describe('valueFromViewingKey', () => {
