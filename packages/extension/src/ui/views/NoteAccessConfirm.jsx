@@ -9,13 +9,13 @@ import {
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
 import formatNumber from '~ui/utils/formatNumber';
-import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
 import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
+import HashText from '~/ui/components/HashText';
 
 const NoteAccessConfirm = ({
     note,
@@ -47,15 +47,39 @@ const NoteAccessConfirm = ({
                                         ...asset,
                                         type: 'asset',
                                     }}
-                                    content={formatAddress(asset.address, 16, 6)}
+                                    content={(
+                                        <HashText
+                                            text={asset.address}
+                                            prefixLength={12}
+                                            suffixLength={4}
+                                            size="s"
+                                        />
+                                    )}
                                     size="xxs"
                                     textSize="xs"
                                 />
                             )}
                         />
                         <ListRow
-                            title={i18n.t('note.hash')}
-                            content={formatAddress(noteHash, 16, 6)}
+                            title={i18n.t('note')}
+                            content={(
+                                <ListItem
+                                    profile={{
+                                        type: 'note',
+                                        noteHash,
+                                    }}
+                                    content={(
+                                        <HashText
+                                            text={noteHash}
+                                            prefixLength={12}
+                                            suffixLength={4}
+                                            size="s"
+                                        />
+                                    )}
+                                    size="xxs"
+                                    textSize="xs"
+                                />
+                            )}
                         />
                         <ListRow
                             title={i18n.t('note.value')}
@@ -76,12 +100,17 @@ const NoteAccessConfirm = ({
                         items={accounts}
                         renderItem={({ address, linkedPublicKey }) => (
                             <ListItem
-                                className="text-code"
                                 profile={{
                                     type: 'user',
                                     address,
                                 }}
-                                content={formatAddress(address, 18, 8)}
+                                content={(
+                                    <HashText
+                                        text={address}
+                                        prefixLength={18}
+                                        suffixLength={8}
+                                    />
+                                )}
                                 size="xxs"
                                 color={linkedPublicKey ? 'default' : 'red'}
                             />

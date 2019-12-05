@@ -7,8 +7,8 @@ import {
 } from '@aztec/guacamole-ui';
 import i18n from '~ui/helpers/i18n';
 import linkGlyph from '~ui/images/link.svg';
-import formatAddress from '~ui/utils/formatAddress';
 import ListItem from '~ui/components/ListItem';
+import HashText from '~/ui/components/HashText';
 import PopupContent from '~ui/components/PopupContent';
 
 const LinkAccount = ({
@@ -37,8 +37,10 @@ const LinkAccount = ({
                         size="xs"
                         weight="light"
                         footnote={(
-                            <Text
-                                text={`${formatAddress(address, 18, 4)}`}
+                            <HashText
+                                text={address}
+                                prefixLength={18}
+                                suffixLength={6}
                                 size="xs"
                                 color="label"
                             />
@@ -49,8 +51,10 @@ const LinkAccount = ({
                         size="xs"
                         weight="light"
                         footnote={(
-                            <Text
-                                text={`${formatAddress(linkedPublicKey, 12, 4)}`}
+                            <HashText
+                                text={linkedPublicKey}
+                                prefixLength={12}
+                                suffixLength={4}
                                 size="xs"
                                 color="label"
                             />

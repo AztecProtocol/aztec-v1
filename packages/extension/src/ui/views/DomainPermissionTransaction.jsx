@@ -10,9 +10,9 @@ import {
     errorShape,
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
-import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import ListItem from '~ui/components/ListItem';
+import HashText from '~/ui/components/HashText';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 
 const DomainPermissionTransaction = ({
@@ -41,9 +41,21 @@ const DomainPermissionTransaction = ({
                     linkedTokenAddress,
                     icon,
                 },
-                tooltip: hasRealAssets
-                    ? name || formatAddress(address, 12, 6)
-                    : '',
+                tooltip: !hasRealAssets
+                    ? null
+                    : (!!name && (
+                        <Text
+                            text={name}
+                            size="xxs"
+                        />
+                    )) || (
+                        <HashText
+                            text={address}
+                            prefixLength={6}
+                            suffixLength={4}
+                            size="xxs"
+                        />
+                    ),
             });
         });
         if (assets.length > visibleAssets) {
@@ -61,7 +73,14 @@ const DomainPermissionTransaction = ({
                         linkedTokenAddress,
                         src: icon,
                     }}
-                    content={formatAddress(address, 12, 6)}
+                    content={(
+                        <HashText
+                            text={address}
+                            prefixLength={6}
+                            suffixLength={4}
+                            size="xxs"
+                        />
+                    )}
                     size="xxs"
                 />
             ));
@@ -103,11 +122,12 @@ const DomainPermissionTransaction = ({
                                             weight="semibold"
                                             showEllipsis
                                         />
-                                        <Text
-                                            className="text-code"
-                                            text={formatAddress(firstAsset.address, 12, 6)}
-                                            color="label"
-                                            size="xxs"
+                                        <HashText
+                                            text={firstAsset.address}
+                                            prefixLength={12}
+                                            suffixLength={6}
+                                            color={firstAsset.name ? 'label' : 'default'}
+                                            size={firstAsset.name ? 'xxs' : 'xs'}
                                         />
                                     </div>
                                 )}

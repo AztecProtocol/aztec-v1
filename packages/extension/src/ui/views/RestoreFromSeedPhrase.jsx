@@ -6,15 +6,14 @@ import PropTypes from 'prop-types';
 import {
     Block,
     TextInput,
-    Text,
 } from '@aztec/guacamole-ui';
 import {
     errorShape,
 } from '~/ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
-import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import ProfileIcon from '~ui/components/ProfileIcon';
+import HashText from '~/ui/components/HashText';
 
 const RestoreFromSeedPhrase = ({
     address,
@@ -47,10 +46,12 @@ const RestoreFromSeedPhrase = ({
                 <Block
                     padding="m 0"
                 >
-                    <Text
-                        className="text-code"
-                        text={formatAddress(address, 16, 10)}
-                        size="xxs"
+                    <HashText
+                        text={address}
+                        prefixLength={18}
+                        suffixLength={6}
+                        color="label"
+                        size="xs"
                     />
                 </Block>
             </Block>

@@ -10,11 +10,11 @@ import {
     transactionShape,
 } from '~/ui/config/propTypes';
 import formatNumber from '~ui/utils/formatNumber';
-import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
+import HashText from '~/ui/components/HashText';
 import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
 
@@ -41,9 +41,11 @@ const DepositConfirm = ({
                                     address: fromAddress,
                                 }}
                                 content={(
-                                    <Text
-                                        text={formatAddress(fromAddress, 10, 4)}
-                                        size="xs"
+                                    <HashText
+                                        text={fromAddress}
+                                        prefixLength={12}
+                                        suffixLength={4}
+                                        size="s"
                                     />
                                 )}
                                 size="xxs"
@@ -62,13 +64,18 @@ const DepositConfirm = ({
                                 }}
                                 content={(
                                     <Text
-                                        text={asset.name
-                                            ? `${asset.name} (${formatAddress(asset.address, 6, 4)})`
-                                            : formatAddress(asset.address, 10, 4)
-                                        }
-                                        size="xs"
+                                        size="xxs"
                                         color="secondary"
-                                    />
+                                    >
+                                        {asset.name ? `${asset.name} (` : ''}
+                                        <HashText
+                                            text={asset.address}
+                                            prefixLength={12}
+                                            suffixLength={4}
+                                            size="s"
+                                        />
+                                        {asset.name ? ')' : ''}
+                                    </Text>
                                 )}
                                 size="xxs"
                                 textSize="xs"
@@ -104,7 +111,13 @@ const DepositConfirm = ({
                                 type: 'user',
                                 address: to,
                             }}
-                            content={formatAddress(to, 12, 4)}
+                            content={(
+                                <HashText
+                                    text={to}
+                                    prefixLength={12}
+                                    suffixLength={4}
+                                />
+                            )}
                             size="xxs"
                             footnote={(
                                 <Text

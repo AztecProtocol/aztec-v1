@@ -9,7 +9,6 @@ import {
     transactionShape,
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
-import formatAddress from '~ui/utils/formatAddress';
 import formatNumber from '~ui/utils/formatNumber';
 import PopupContent from '~ui/components/PopupContent';
 import Ticket from '~ui/components/Ticket';
@@ -17,6 +16,7 @@ import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
 import Separator from '~ui/components/Separator';
 import InplacePopup from '~ui/components/InplacePopup';
+import HashText from '~/ui/components/HashText';
 
 const SendConfirm = ({
     asset,
@@ -61,7 +61,14 @@ const SendConfirm = ({
                                     type: 'user',
                                     address: sender,
                                 }}
-                                content={formatAddress(sender, 16, 6)}
+                                content={(
+                                    <HashText
+                                        text={sender}
+                                        prefixLength={10}
+                                        suffixLength={4}
+                                        size="s"
+                                    />
+                                )}
                                 size="xxs"
                                 textSize="xs"
                             />
@@ -75,10 +82,21 @@ const SendConfirm = ({
                                     ...asset,
                                     type: 'asset',
                                 }}
-                                content={asset.name
-                                    ? `${asset.name} (${formatAddress(asset.address, 6, 4)})`
-                                    : formatAddress(asset.address, 16, 6)
-                                }
+                                content={(
+                                    <Text
+                                        size="xxs"
+                                        color="secondary"
+                                    >
+                                        {asset.name ? `${asset.name} (` : ''}
+                                        <HashText
+                                            text={asset.address}
+                                            prefixLength={asset.name ? 6 : 10}
+                                            suffixLength={4}
+                                            size="s"
+                                        />
+                                        {asset.name ? ')' : ''}
+                                    </Text>
+                                )}
                                 size="xxs"
                                 textSize="xs"
                             />
@@ -117,7 +135,13 @@ const SendConfirm = ({
                                 type: 'user',
                                 address: to,
                             }}
-                            content={formatAddress(to, 12, 6)}
+                            content={(
+                                <HashText
+                                    text={to}
+                                    prefixLength={10}
+                                    suffixLength={4}
+                                />
+                            )}
                             size="xxs"
                             footnote={(
                                 <Text

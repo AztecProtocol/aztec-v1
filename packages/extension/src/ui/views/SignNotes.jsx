@@ -7,8 +7,8 @@ import {
 import Ticket from '~ui/components/Ticket';
 import ListItem from '~ui/components/ListItem';
 import i18n from '~ui/helpers/i18n';
-import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
+import HashText from '~/ui/components/HashText';
 
 const SignNotes = ({
     proof,
@@ -23,8 +23,10 @@ const SignNotes = ({
                 <ListItem
                     key={noteHash}
                     content={(
-                        <Text
-                            text={formatAddress(noteHash, 24, 4)}
+                        <HashText
+                            text={noteHash}
+                            prefixLength={24}
+                            suffixLength={6}
                             size="xxs"
                         />
                     )}
