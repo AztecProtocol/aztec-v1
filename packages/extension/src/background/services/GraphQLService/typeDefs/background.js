@@ -82,7 +82,6 @@ const backgroundTypes = gql`
             lessThan: Int,
             owner: String
             numberOfNotes: Int
-            allowLessNumberOfNotes: Boolean
             currentAddress: String!
             domain: String!
         ): NotesApiResponse

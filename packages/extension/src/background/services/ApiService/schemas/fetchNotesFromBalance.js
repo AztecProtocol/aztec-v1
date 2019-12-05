@@ -28,7 +28,4 @@ export default makeSchema({
             gte: 1,
         },
     },
-    allowLessNumberOfNotes: {
-        type: 'boolean',
-    },
 });
