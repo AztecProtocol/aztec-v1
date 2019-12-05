@@ -1,32 +1,19 @@
 const { expect } = require('chai');
 const abi = require('ethereumjs-abi');
 const ethUtil = require('ethereumjs-util');
-const { padLeft, sha3 } = require('web3-utils');
+const { TypedDataUtils } = require('eth-sig-util');
+const { padLeft, padRight, randomHex, sha3 } = require('web3-utils');
 
 const signer = require('../src');
 
 describe('Signer', () => {
-    let simple;
-    let complex;
     let alphabetical;
+    let arrayData;
+    let complex;
+    let dynamicData;
+    let simple;
 
     before(() => {
-        simple = {
-            types: {
-                Foo: [
-                    { name: 'first', type: 'bytes32' },
-                    { name: 'second', type: 'uint256' },
-                    { name: 'third', type: 'address' },
-                ],
-            },
-            primaryType: 'Foo',
-            message: {
-                first: padLeft('0x13', 64),
-                second: 104344,
-                third: '0x1234567890abcdef10121234567890abcdef1012',
-            },
-        };
-
         alphabetical = {
             types: {
                 ZZZ: [{ name: 'foo', type: 'uint' }],
@@ -41,6 +28,20 @@ describe('Signer', () => {
                 aBar: {
                     bar: '0x12345678',
                 },
+            },
+        };
+
+        arrayData = {
+            types: {
+                Foo: [
+                    { name: 'bytes32Array', type: 'bytes32[]' },
+                    { name: 'boolArray', type: 'bool[]' },
+                ],
+            },
+            primaryType: 'Foo',
+            message: {
+                bytes32Array: [padRight('0xe43', 64), padRight('0xa3d2', 64)],
+                boolArray: [ true, true ],
             },
         };
 
@@ -68,7 +69,39 @@ describe('Signer', () => {
                 },
             },
         };
+
+        dynamicData = {
+            types: {
+                Bar: [
+                    { name: 'dynamicBytes', type: 'bytes' },
+                    { name: 'dynamicString', type: 'string' },
+                ],
+            },
+            primaryType: 'Bar',
+            message: {
+                dynamicBytes: randomHex(20),
+                dynamicString: 'testing',
+            },
+        }
+
+        simple = {
+            types: {
+                Foo: [
+                    { name: 'first', type: 'bytes32' },
+                    { name: 'second', type: 'uint256' },
+                    { name: 'third', type: 'address' },
+                ],
+            },
+            primaryType: 'Foo',
+            message: {
+                first: padLeft('0x13', 64),
+                second: 104344,
+                third: '0x1234567890abcdef10121234567890abcdef1012',
+            },
+        };
+
     });
+
 
     it('should encode a basic struct', () => {
         /* eslint-disable max-len */
@@ -76,6 +109,12 @@ describe('Signer', () => {
         expect(encoded).to.equal(
             '3aa81b362119d90fa0c62bc9627b5aa3913f2821cd4dbbb7fed0b834f269320f000000000000000000000000000000000000000000000000000000000000001300000000000000000000000000000000000000000000000000000000000197980000000000000000000000001234567890abcdef10121234567890abcdef1012',
         );
+    });
+
+    it('should match MetaMask encoding of a basic struct', () => {
+        const encoded = signer.encodeMessageData(simple.types, simple.primaryType, simple.message);
+        const metaMaskEncoded = TypedDataUtils.encodeData(simple.primaryType, simple.message, simple.types);
+        expect(encoded).to.equal(metaMaskEncoded.toString('hex'));
     });
 
     it('should encode a nested struct', () => {
@@ -86,6 +125,24 @@ describe('Signer', () => {
         expect(encoded).to.equal(expected);
     });
 
+    it('should match MetaMask encoding of a nested struct', () => {
+        const encoded = signer.encodeMessageData(complex.types, complex.primaryType, complex.message);
+        const metaMaskEncoded = TypedDataUtils.encodeData(complex.primaryType, complex.message, complex.types);
+        expect(encoded).to.equal(metaMaskEncoded.toString('hex'));
+    });
+
+    it('should match MetaMask encoding of a struct containing bytes32 arrays', () => {
+        const encoded = signer.encodeMessageData(arrayData.types, arrayData.primaryType, arrayData.message);
+        const metaMaskEncoded = TypedDataUtils.encodeData(arrayData.primaryType, arrayData.message, arrayData.types);
+        expect(encoded).to.equal(metaMaskEncoded.toString('hex'));
+    })
+
+    it('should match MetaMask encoding of a struct containing bool arrays', () => {
+        const encoded = signer.encodeMessageData(arrayData.types, arrayData.primaryType, arrayData.message);
+        const metaMaskEncoded = TypedDataUtils.encodeData(arrayData.primaryType, arrayData.message, arrayData.types);
+        expect(encoded).to.equal(metaMaskEncoded.toString('hex'));
+    })
+
     it('should encode a struct', () => {
         const encoded = signer.encodeStruct(simple.primaryType, simple.types);
         expect(encoded).to.equal('Foo(bytes32 first,uint256 second,address third)');
@@ -94,6 +151,12 @@ describe('Signer', () => {
     it('should order struct strings alphabetically', () => {
         const encodedAlphabetical = signer.encodeStruct(alphabetical.primaryType, alphabetical.types);
         expect(encodedAlphabetical).to.equal('Top(ZZZ zfoo,AAA aBar)AAA(bytes32 bar)ZZZ(uint foo)');
+    });
+
+    it('should match MetaMask encoding of dynamic data', () => {
+        const encoded = signer.encodeMessageData(dynamicData.types, dynamicData.primaryType, dynamicData.message);
+        const metaMaskEncoded = TypedDataUtils.encodeData(dynamicData.primaryType, dynamicData.message, dynamicData.types)
+        expect(encoded).to.equal(metaMaskEncoded.toString('hex'));
     });
 
     it('should calculate the keccak256 hash of a struct', () => {
@@ -305,6 +368,7 @@ describe('Reference Implementation', () => {
         const types = {
             Test: [{ name: 'from', type: 'uint256[4]' }],
         };
+
         try {
             encodeData(types, 'Test', { from: [1, 2, 3, 4] });
         } catch (e) {
