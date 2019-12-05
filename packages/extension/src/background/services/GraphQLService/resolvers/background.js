@@ -45,7 +45,6 @@ const backgroundResolvers = {
                     greaterThan: args.greaterThan,
                     lessThan: args.lessThan,
                     numberOfNotes: args.numberOfNotes,
-                    allowLessNumberOfNotes: args.allowLessNumberOfNotes,
                 },
             ),
         })),

@@ -160,7 +160,6 @@ export default {
             greaterThan,
             lessThan,
             numberOfNotes,
-            allowLessNumberOfNotes = true,
         } = {},
     ) => {
         if (typeof numberOfNotes === 'number'
@@ -187,7 +186,7 @@ export default {
                     greaterThan,
                     lessThan,
                     numberOfNotes,
-                    allowLessNumberOfNotes,
+                    allowLessNumberOfNotes: true,
                 });
 
                 const notes = await Promise.all(noteKeyData.map(async ({
