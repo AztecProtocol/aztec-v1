@@ -16,7 +16,6 @@ import Ticket from '~ui/components/Ticket';
 import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
 import Separator from '~ui/components/Separator';
-import InplacePopup from '~ui/components/InplacePopup';
 import HashText from '~/ui/components/HashText';
 
 const SendConfirm = ({
@@ -121,13 +120,14 @@ const SendConfirm = ({
                 title={i18n.t('to')}
             />
             <Block padding="m 0">
-                <InplacePopup
-                    theme="white"
-                    items={transactions}
-                    renderItem={({
-                        amount,
-                        to,
-                    }) => (
+                {transactions.map(({
+                    amount,
+                    to,
+                }, i) => (
+                    <Block
+                        key={+i}
+                        padding="s 0"
+                    >
                         <ListItem
                             profile={{
                                 type: 'user',
@@ -149,11 +149,8 @@ const SendConfirm = ({
                                 />
                             )}
                         />
-                    )}
-                    itemMargin="xs 0"
-                    margin="xs m"
-                    numberOfVisibleItems={2}
-                />
+                    </Block>
+                ))}
             </Block>
             <Block padding="m 0">
                 <Text

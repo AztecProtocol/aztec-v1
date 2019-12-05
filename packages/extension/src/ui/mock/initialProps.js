@@ -94,7 +94,7 @@ export default {
     send: {
         assetAddress: assets[0].address,
         sender: addresses[0],
-        transactions: sendTransactions.slice(0, 1),
+        transactions: sendTransactions,
     },
     'send.sign': {
         proof: {
