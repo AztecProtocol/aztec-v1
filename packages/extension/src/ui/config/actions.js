@@ -17,6 +17,9 @@ export default {
     'ui.asset.prove.transfer_proof': {
         route: 'send',
     },
+    'ui.asset.prove.create_note_from_balance_proof': {
+        route: 'createNote',
+    },
     'ui.note.grantAccess': {
         route: 'noteAccess',
     },

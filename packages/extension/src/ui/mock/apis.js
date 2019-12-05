@@ -4,9 +4,14 @@ import {
 import sleep from '~utils/sleep';
 import realApis from '~ui/apis';
 import {
+    emptyIntValue,
+} from '~/ui/config/settings';
+import {
     addresses,
     assets,
     pastTransactions,
+    randomRawNote,
+    generate,
 } from './data';
 
 const mock = async (data) => {
@@ -68,5 +73,31 @@ export default mergeApis(realApis, {
             value: randomInt(100),
             asset: assets[0],
         }),
+    },
+    proof: {
+        createNoteFromBalance: ({
+            numberOfInputNotes: customNumberOfInputNotes,
+            numberOfOutputNotes: customNumberOfOutputNotes,
+        }) => {
+            const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
+                ? customNumberOfInputNotes
+                : 5;
+            const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
+                ? customNumberOfOutputNotes
+                : 5;
+            const remainderNote = numberOfOutputNotes > 0
+                ? randomRawNote()
+                : null;
+            const outputNotes = generate(numberOfOutputNotes, randomRawNote);
+            if (remainderNote) {
+                outputNotes.push(remainderNote);
+            }
+
+            return {
+                inputNotes: generate(numberOfInputNotes, randomRawNote),
+                outputNotes,
+                remainderNote,
+            };
+        },
     },
 });

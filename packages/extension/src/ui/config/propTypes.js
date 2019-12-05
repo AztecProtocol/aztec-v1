@@ -90,3 +90,10 @@ export const transactionShape = PropTypes.shape({
     amount: PropTypes.number.isRequired,
     to: PropTypes.string.isRequired,
 });
+
+export const rawNoteShape = PropTypes.shape({
+    noteHash: PropTypes.string.isRequired,
+    k: PropTypes.shape({
+        words: PropTypes.arrayOf(PropTypes.number).isRequired,
+    }).isRequired,
+});
