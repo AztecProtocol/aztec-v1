@@ -11,7 +11,6 @@ import {
     notes,
     pastTransactions,
     depositTransactions,
-    withdrawTransactions,
     sendTransactions,
     generate,
     randomAddress,
@@ -84,16 +83,12 @@ export default {
     withdraw: {
         assetAddress: assets[0].address,
         sender: addresses[0],
-        transactions: withdrawTransactions,
+        amount: randomInt(1, 100),
+        to: randomAddress(),
     },
     'withdraw.sign': {
         proof: {
-            inputNotes: generate(5, () => ({
-                noteHash: `0x${randomId()}`,
-                k: {
-                    words: [randomInt(100)],
-                },
-            })),
+            inputNotes: generate(5, randomRawNote),
         },
     },
     send: {
@@ -103,12 +98,7 @@ export default {
     },
     'send.sign': {
         proof: {
-            inputNotes: generate(3, () => ({
-                noteHash: `0x${randomId()}`,
-                k: {
-                    words: [randomInt(100)],
-                },
-            })),
+            inputNotes: generate(3, randomRawNote),
         },
     },
     noteAccess: {
@@ -120,11 +110,6 @@ export default {
         amount: randomInt(1, 100),
         owner: randomAddress(),
         numberOfOutputNotes: 1,
-    },
-    'createNote.sign': {
-        proof: {
-            inputNotes: generate(5, randomRawNote),
-        },
     },
     mint: {
         asset: assets[0],
