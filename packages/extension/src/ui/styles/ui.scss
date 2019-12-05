@@ -6,6 +6,8 @@
   height: 100%;
   overflow: hidden;
   font-family: $default-font-family;
+  font-size: map-get($font-size-map, $default-font-size-key);
+  line-height: map-get($line-height-map, $default-font-size-key);
   text-align: center;
 }
 

@@ -275,9 +275,9 @@ export const lineHeightMap = {
   xs: '20px',
   s: '24px',
   m: '28px',
-  l: '36px',
-  xl: '48px',
-  xxl: '64px',
+  l: '32px',
+  xl: '40px',
+  xxl: '48px',
 };
 export const fontWeightMap = {
   light: 300,

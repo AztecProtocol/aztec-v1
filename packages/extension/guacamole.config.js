@@ -60,5 +60,10 @@ module.exports = {
             xl: '28px',
             xxl: '34px',
         },
+        lineHeightMap: {
+            l: '32px',
+            xl: '40px',
+            xxl: '48px',
+        },
     },
 };
