@@ -25,12 +25,18 @@ export default class Note {
     async init() {
         if (this.isValid()) return;
 
-        const {
-            note,
-        } = await ConnectionService.query(
-            'note',
-            { id: this.id },
-        ) || {};
+        let note;
+        try {
+            note = await ConnectionService.query(
+                'note',
+                { id: this.id },
+            );
+        } catch (error) {
+            // developers can use this.isValid() to check if a note exists
+            if (error.key !== 'note.not.found') {
+                throw error;
+            }
+        }
 
         if (note) {
             dataProperties.forEach((key) => {
@@ -43,9 +49,10 @@ export default class Note {
     // exports an aztec.js note instance for use in proofs
 
     async export() {
-        if (!this.isValid) {
+        if (!this.isValid()) {
             return null;
         }
+
         const {
             note,
         } = await ConnectionService.query(

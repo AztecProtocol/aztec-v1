@@ -86,6 +86,9 @@ export default {
                 1: 'Total number of notes is not enough to pick a note.',
             },
         },
+        not: {
+            found: "Note '%{id}' does not exist.",
+        },
     },
     utilityNote: {
         not: {
