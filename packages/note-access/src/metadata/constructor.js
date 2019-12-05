@@ -7,50 +7,47 @@ import toString from './toString';
 
 export default function constructor(metadataStr) {
     const metadata = {};
-    let start = metadataStr.startsWith('0x') ? 2 : 0;
+    let pointer = metadataStr.startsWith('0x') ? 2 : 0;
 
-    const lenVars = config.reduce((accum, { startAt }) => {
-        if (!startAt) {
-            return accum;
-        }
-        return [...accum, startAt];
-    }, []);
+    config.forEach(({ name, length, startAt: offset }) => {
+        const isDynamic = (offset !== undefined);
+        const isLengthDefinition = !!config.find(({ startAt }) => startAt === name);
 
-    config.forEach(({ name, length, startAt }) => {
-        const isDynamic = !!startAt;
-        const isLenVar = lenVars.indexOf(name) >= 0;
-
-        let numberOfVars = 1;
+        let numberOfValues = 1;
         if (isDynamic) {
-            numberOfVars = parseInt(metadataStr.substr(start, DYNAMIC_VAR_CONFIG_LENGTH), 10);
-            start += DYNAMIC_VAR_CONFIG_LENGTH;
-        }
-
-        const arr = [];
-        for (let i = 0; i < numberOfVars; i += 1) {
-            let segLen;
-            if (isLenVar) {
-                segLen = length;
-            } else {
-                segLen = length !== undefined ? Math.max(length, MIN_BYTES_VAR_LENGTH) : metadataStr.length - start;
-            }
-            let val = metadataStr.substr(start, segLen);
-            if (isLenVar) {
-                val = parseInt(val, 16);
-            } else if (length) {
-                val = val.slice(segLen - (length || 0));
-            }
-            if (name === 'addresses') {
-                arr.push(toChecksumAddress(val));
-            } else {
-                arr.push(val ? `0x${val}` : '');
-            }
-            start += segLen;
+            numberOfValues = parseInt(metadataStr.substr(pointer, DYNAMIC_VAR_CONFIG_LENGTH), 10);
+            pointer += DYNAMIC_VAR_CONFIG_LENGTH;
         }
 
         const isArrayValue = isDynamic && length !== undefined;
+        metadata[name] = (isArrayValue) ? [] : '';
 
-        metadata[name] = isArrayValue ? arr : arr[0] || '';
+        const valueLength = length || metadataStr.length - pointer;
+        const slotLength = Math.max(valueLength, MIN_BYTES_VAR_LENGTH)
+
+        const endPointer = (Number.isNaN(numberOfValues)) ? pointer : (numberOfValues * slotLength) + pointer;
+
+        while (pointer < endPointer) {
+            let value = metadataStr.substr(pointer, slotLength);
+            if (isLengthDefinition) {
+                value = parseInt(value, 16);
+            }
+
+            if (name === 'addresses') {
+                value = value.slice(slotLength - valueLength);
+                value = toChecksumAddress(value);
+            } else {
+                value = (value) ? `0x${value}` : '';
+            }
+
+            if (isArrayValue) {
+                metadata[name].push(value);
+            } else {
+                metadata[name] = value;
+            }
+
+            pointer += slotLength;
+        }
     });
 
     const { addresses, viewingKeys } = metadata;
