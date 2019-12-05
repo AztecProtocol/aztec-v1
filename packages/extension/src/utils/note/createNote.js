@@ -1,8 +1,5 @@
 import aztec from 'aztec.js';
 import {
-    warnLog,
-} from '~utils/log';
-import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~config/constants';
 import encryptedViewingKey from '~utils/encryptedViewingKey';
@@ -12,12 +9,6 @@ import {
 
 export default async function createNote(value, publicKey, owner, access) {
     const note = await aztec.note.create(publicKey, value, owner);
-    if (!owner) {
-        warnLog(`Owner address is empty in createNote().
-            Use address recovered from spendingPublicKey: ${note.owner}.
-            This is usually different than the actual address of the owner of spendingPublicKey.
-        `);
-    }
 
     if (access) {
         let accessUsers = access;
