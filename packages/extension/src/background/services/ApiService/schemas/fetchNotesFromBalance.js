@@ -3,7 +3,6 @@ import addressType from './types/address';
 
 export default makeSchema({
     assetAddress: addressType.isRequired,
-    owner: addressType.isRequired,
     equalTo: {
         type: 'integer',
         size: {

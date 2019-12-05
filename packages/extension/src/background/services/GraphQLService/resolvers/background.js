@@ -38,8 +38,8 @@ const backgroundResolvers = {
         fetchNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
             notes: await NoteService.fetch(
                 ctx.networkId,
-                args.owner,
                 args.assetId,
+                ctx.user.address,
                 {
                     equalTo: args.equalTo,
                     greaterThan: args.greaterThan,
