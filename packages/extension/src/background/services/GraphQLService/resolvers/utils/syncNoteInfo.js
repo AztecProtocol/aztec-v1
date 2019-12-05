@@ -27,10 +27,6 @@ export default async function syncNoteInfo(args, ctx) {
     } = ctx;
 
     let note = await Note.get({ networkId }, noteId);
-
-    const {
-        viewingKey,
-    } = metadata(note.metadata).getAccess(userAddress);
     if (!note) {
         [note] = await syncLatestNoteOnChain({
             account: userAddress,
@@ -41,19 +37,27 @@ export default async function syncNoteInfo(args, ctx) {
 
     if (!note) {
         throw argsError('note.not.found', {
-            noteId,
+            id: noteId,
         });
     }
 
     const {
-        keyStore,
-        session: {
-            pwDerivedKey,
-        },
-    } = ctx;
-    const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
-    const realViewingKey = fromHexString(viewingKey).decrypt(privateKey);
-    const value = valueFromViewingKey(realViewingKey);
+        viewingKey,
+    } = metadata(note.metadata).getAccess(userAddress) || {};
+
+    let value;
+    if (viewingKey) {
+        const {
+            keyStore,
+            session: {
+                pwDerivedKey,
+            },
+        } = ctx;
+
+        const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
+        const realViewingKey = fromHexString(viewingKey).decrypt(privateKey);
+        value = valueFromViewingKey(realViewingKey);
+    }
 
     return {
         ...note,
