@@ -2,7 +2,7 @@
 
 $dot-radius: map-get($spacing-map, 'm');
 $edge-height: $dot-radius * 3;
-$ticket-background: #eff1f6;
+$ticket-background: map-get($color-map, 'white-lighter');
 $ticket-radius: map-get($rounded-corner-map, 's');
 $ticket-spacing-h: map-get($spacing-map, 'l');
 $ticket-spacing-v: map-get($spacing-map, 'l');

@@ -1,4 +1,5 @@
 export default {
+    _: 'Note',
     count: {
         _: '%{count} notes',
         1: 'a note',

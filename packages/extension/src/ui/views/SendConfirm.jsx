@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -49,10 +50,15 @@ const SendConfirm = ({
     >
         <Block padding="m 0">
             <Ticket
-                height={2}
+                height={3}
                 align="center"
             >
-                <Block align="left">
+                <FlexBox
+                    direction="column"
+                    align="space-between"
+                    valign="flex-start"
+                    stretch
+                >
                     <ListRow
                         title={i18n.t('asset.send.from')}
                         content={(
@@ -83,10 +89,7 @@ const SendConfirm = ({
                                     type: 'asset',
                                 }}
                                 content={(
-                                    <Text
-                                        size="xxs"
-                                        color="secondary"
-                                    >
+                                    <div>
                                         {asset.name ? `${asset.name} (` : ''}
                                         <HashText
                                             text={asset.address}
@@ -95,7 +98,7 @@ const SendConfirm = ({
                                             size="s"
                                         />
                                         {asset.name ? ')' : ''}
-                                    </Text>
+                                    </div>
                                 )}
                                 size="xxs"
                                 textSize="xs"
@@ -104,16 +107,12 @@ const SendConfirm = ({
                     />
                     <ListRow
                         title={i18n.t('deposit.amount.total')}
-                        content={(
-                            <Text
-                                text={formatNumber(totalAmount, asset.decimals)}
-                                size="xs"
-                                contentSize="s"
-                                color="green"
-                            />
-                        )}
+                        content={formatNumber(totalAmount, asset.decimals)}
+                        size="xs"
+                        contentSize="s"
+                        color="green"
                     />
-                </Block>
+                </FlexBox>
             </Ticket>
         </Block>
         <Block padding="m xl">
@@ -130,7 +129,6 @@ const SendConfirm = ({
                         to,
                     }) => (
                         <ListItem
-                            className="text-code"
                             profile={{
                                 type: 'user',
                                 address: to,
@@ -145,6 +143,7 @@ const SendConfirm = ({
                             size="xxs"
                             footnote={(
                                 <Text
+                                    className="text-code"
                                     text={`+${formatNumber(amount, asset.decimals)}`}
                                     color="green"
                                 />
@@ -160,6 +159,7 @@ const SendConfirm = ({
                 <Text
                     text={i18n.t('send.confirm.explain')}
                     size="xs"
+                    color="label"
                 />
             </Block>
         </Block>
