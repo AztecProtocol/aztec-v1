@@ -80,7 +80,6 @@ const backgroundTypes = gql`
             equalTo: Int,
             greaterThan: Int,
             lessThan: Int,
-            owner: String
             numberOfNotes: Int
             currentAddress: String!
             domain: String!
