@@ -28,7 +28,9 @@ export default class Asset {
         return !!this.address;
     }
 
-    refresh = async () => {
+    init = async () => {
+        if (this.isValid()) return;
+
         const { asset } = await ConnectionService.query(
             'asset',
             { id: this.id },

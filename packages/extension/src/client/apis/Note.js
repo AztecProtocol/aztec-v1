@@ -22,7 +22,9 @@ export default class Note {
         return !!this.hash;
     }
 
-    async refresh() {
+    async init() {
+        if (this.isValid()) return;
+
         const {
             note,
         } = await ConnectionService.query(
