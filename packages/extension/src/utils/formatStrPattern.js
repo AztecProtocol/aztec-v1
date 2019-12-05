@@ -7,7 +7,7 @@ export default function formatStrPattern(pattern, data) {
         return '';
     }
 
-    return pattern.replace(/{([^{}]+)}/ig, (_, key) => {
+    return pattern.replace(/{([^{]+)}/ig, (_, key) => {
         if (!(key in data)) {
             warnLog(`Data '${key}' not found for pattern '${pattern}'.`);
             return _;
