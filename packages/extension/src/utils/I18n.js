@@ -2,6 +2,10 @@ import Polyglot from 'node-polyglot';
 
 const defaultLocale = 'en';
 
+const isReactElement = type => type
+    && typeof type === 'object'
+    && !!type.$$typeof;
+
 export default class I18n {
     constructor(options = { locale: defaultLocale }) {
         this.polyglot = new Polyglot(options);
@@ -62,7 +66,48 @@ export default class I18n {
         if (!phraseKey) {
             phraseKey = this.polyglot.has(`${key}._`) ? `${key}._` : key;
         }
-        const phrase = this.polyglot.t(phraseKey, options);
+
+        let phraseOptions = options;
+        const hasReactNode = typeof options === 'object'
+            && Object.values(options).some(isReactElement);
+        if (hasReactNode) {
+            phraseOptions = {};
+            Object.keys(options).forEach((optKey) => {
+                phraseOptions[key] = `%{${optKey}}`;
+            });
+        }
+        let phrase = this.polyglot.t(phraseKey, phraseOptions);
+        if (hasReactNode) {
+            const phraseStr = phrase;
+            phrase = [];
+            let start = 0;
+            phraseStr.replace(/%{([^%{]+)}/g, (optVar, optKey, pos) => {
+                if (!(optKey in options)) {
+                    return optVar;
+                }
+                const optVal = options[optKey];
+                const prefix = phraseStr.substring(start, pos);
+                const addStr = (str) => {
+                    const insertAt = typeof phrase[phrase.length - 1] === 'string'
+                        ? phrase.length - 1
+                        : phrase.length;
+                    phrase[insertAt] = `${phrase[insertAt] || ''}${prefix}${str}`;
+                };
+                if (isReactElement(optVal)) {
+                    if (pos !== start) {
+                        addStr('');
+                    }
+                    phrase.push(optVal);
+                } else {
+                    addStr(optVal);
+                }
+                start = pos + optVar.length;
+                return options[optKey];
+            });
+            if (start < phraseStr.length) {
+                phrase.push(phraseStr.substr(start));
+            }
+        }
 
         return phrase;
     }

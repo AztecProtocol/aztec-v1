@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-filename-extension */
+import React from 'react';
 import I18n from '../I18n';
 
 let i18n;
@@ -169,6 +171,49 @@ describe('with variables', () => {
             name: 'Ron',
             count: 10,
         })).toBe('many gifts for Ron');
+    });
+});
+
+describe('with react element', () => {
+    it('accepts react elements as variables and return an array', () => {
+        const phrases = {
+            greetings: 'Hello %{name}!',
+            route: '%{origin} to %{destination}',
+        };
+        i18n.register(phrases);
+
+        expect(i18n.t('greetings', {
+            name: <strong>World</strong>,
+        })).toEqual([
+            'Hello ',
+            <strong>World</strong>,
+            '!',
+        ]);
+
+        expect(i18n.t('route', {
+            origin: <h1>London</h1>,
+            destination: <strong>Paris</strong>,
+        })).toEqual([
+            <h1>London</h1>,
+            ' to ',
+            <strong>Paris</strong>,
+        ]);
+
+        expect(i18n.t('route', {
+            origin: <div>LA</div>,
+            destination: 'Vietnam',
+        })).toEqual([
+            <div>LA</div>,
+            ' to Vietnam',
+        ]);
+
+        expect(i18n.t('route', {
+            origin: 'Cuba',
+            destination: <span>Melbourne</span>,
+        })).toEqual([
+            'Cuba to ',
+            <span>Melbourne</span>,
+        ]);
     });
 });
 
