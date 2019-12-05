@@ -1,4 +1,3 @@
-
 /**
  * Module to construct ECDSA messages for structured data,
  * following the [EIP712]{@link https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md} standard
@@ -38,14 +37,14 @@ signer.encodeMessageData = function encodeMessageData(types, primaryType, messag
         if (type.includes('[')) {
             const arrayRawEncoding = signer.encodeArray(type, message[name]);
             return `${acc}${arrayRawEncoding}`;
-
         }
         return `${acc}${AbiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
     }, sliceKeccak256(signer.encodeStruct(primaryType, types)));
 };
 
 /**
- * Encode an array, according to the method used by MetaMask
+ * Encode an array, according to the method used by MetaMask. Code adapted from MetaMask's
+ * encodeData() method in the eth-sig-util module - https://github.com/MetaMask/eth-sig-util/blob/master/index.js
  *
  * @method encodeArray
  * @param {String} type - type of the data structure to be encoded
@@ -58,10 +57,7 @@ signer.encodeArray = function encodeArray(type, data) {
     const arrayElementTypes = typeValuePairs.map(([individualType]) => individualType);
     const arrayValueTypes = typeValuePairs.map(([, value]) => value);
 
-    return (ethUtil.sha3(ethAbi.rawEncode(
-        arrayElementTypes,
-        arrayValueTypes,
-    ))).toString('hex');
+    return ethUtil.sha3(ethAbi.rawEncode(arrayElementTypes, arrayValueTypes)).toString('hex');
 };
 
 /**

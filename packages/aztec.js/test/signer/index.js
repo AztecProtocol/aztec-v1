@@ -252,7 +252,7 @@ describe('Signer', () => {
         it('signNotesForBatchConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
-            const spenderApprovals = [ true, true ];
+            const spenderApprovals = [true, true];
             const verifyingContract = randomHex(20);
             const testNoteValue = 10;
             const testNoteA = await note.create(aztecAccount.publicKey, testNoteValue);
@@ -286,7 +286,6 @@ describe('Signer', () => {
                 },
             };
 
-
             const aztecSignature = signer.signNotesForBatchConfidentialApprove(
                 verifyingContract,
                 noteHashes,
@@ -294,7 +293,6 @@ describe('Signer', () => {
                 spenderApprovals,
                 aztecAccount.privateKey,
             );
-
 
             // eth-sig-util is the MetaMask signing package
             const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
