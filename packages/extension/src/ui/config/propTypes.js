@@ -79,7 +79,7 @@ export const gsnConfigShape = PropTypes.shape({
     proxyContract: PropTypes.string,
 });
 
-export const inputAmountType = PropTypes.string;
+export const inputAmountType = PropTypes.number;
 
 export const inputTransactionShape = PropTypes.shape({
     amount: inputAmountType.isRequired,

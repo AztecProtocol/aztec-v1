@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 import settings from '~/background/utils/settings';
 import {
     gsnConfigShape,
+    inputAmountType,
 } from '~/ui/config/propTypes';
 import {
     emptyIntValue,
 } from '~ui/config/settings';
+import parseInputAmount from '~/ui/utils/parseInputAmount';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
@@ -16,7 +18,7 @@ const CreateNoteFromBalance = ({
     initialStep,
     currentAccount,
     assetAddress,
-    amount,
+    amount: inputAmount,
     owner,
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
@@ -32,6 +34,7 @@ const CreateNoteFromBalance = ({
         const asset = await makeAsset(assetAddress);
         const accounts = await Promise.all(userAccess.map(apis.account.getExtensionAccount));
         const sender = currentAccount.address;
+        const amount = parseInputAmount(inputAmount);
 
         const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
             ? customNumberOfInputNotes
@@ -88,7 +91,7 @@ CreateNoteFromBalance.propTypes = {
         address: PropTypes.string.isRequired,
     }).isRequired,
     assetAddress: PropTypes.string.isRequired,
-    amount: PropTypes.number.isRequired,
+    amount: inputAmountType.isRequired,
     owner: PropTypes.string.isRequired,
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,

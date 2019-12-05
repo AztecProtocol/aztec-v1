@@ -6,7 +6,8 @@ import {
 } from '~/ui/config/propTypes';
 import {
     emptyIntValue,
-} from '~ui/config/settings';
+} from '~/ui/config/settings';
+import parseInputAmount from '~/ui/utils/parseInputAmount';
 import makeAsset from '~/ui/utils/makeAsset';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import { withdrawSteps } from '~ui/config/steps';
@@ -32,7 +33,7 @@ const Withdraw = ({
         return {
             assetAddress,
             asset,
-            amount: Number(amount),
+            amount: parseInputAmount(amount),
             sender,
             to,
             proof,

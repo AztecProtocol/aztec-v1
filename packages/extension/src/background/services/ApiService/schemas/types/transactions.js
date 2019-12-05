@@ -1,12 +1,14 @@
-import bigNumberType from './bigNumber';
 import addressType from './address';
+import inputAmountType from './inputAmount';
 
 const transactionsType = {
     type: 'array',
     each: {
         to: addressType.isRequired,
-        amount: bigNumberType
-            .withSize({ gte: 1 })
+        amount: inputAmountType
+            .withSize({
+                gte: 1,
+            })
             .isRequired,
         numberOfOutputNotes: {
             type: 'integer',

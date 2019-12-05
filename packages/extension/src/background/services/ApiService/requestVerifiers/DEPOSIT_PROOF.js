@@ -24,7 +24,7 @@ export default async function verifyDepositRequest({
     const scalingFactor = parseInt(scalingFactorStr, 10);
 
     const notesValue = transactions
-        .reduce((sum, { amount }) => sum + Number(amount), 0);
+        .reduce((sum, { amount }) => sum + amount, 0);
 
     const depositAmount = notesValue * scalingFactor;
 

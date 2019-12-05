@@ -190,10 +190,7 @@ export default class Asset {
             {
                 proofType: 'DEPOSIT_PROOF',
                 assetAddress: this.address,
-                transactions: (transactions || []).map(({ amount, to }) => ({
-                    amount: amount ? `${amount}` : 0,
-                    to,
-                })),
+                transactions,
                 from: from || address,
                 sender: sender || address,
                 numberOfOutputNotes,
@@ -215,7 +212,7 @@ export default class Asset {
             {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
-                amount: amount ? `${amount}` : 0,
+                amount,
                 sender: sender || address,
                 to: to || address,
                 numberOfInputNotes,
@@ -251,10 +248,7 @@ export default class Asset {
             {
                 proofType: 'TRANSFER_PROOF',
                 assetAddress: this.address,
-                transactions: (transactions || []).map(({ amount, to }) => ({
-                    amount: amount ? `${amount}` : 0,
-                    to,
-                })),
+                transactions,
                 sender: sender || address,
                 numberOfInputNotes,
                 numberOfOutputNotes,

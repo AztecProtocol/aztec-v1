@@ -5,6 +5,7 @@ import transactionsType from './types/transactions';
 export default makeSchema({
     assetAddress: addressType.isRequired,
     sender: addressType.isRequired,
+    transactions: transactionsType.isRequired,
     numberOfInputNotes: {
         type: 'integer',
         size: {
@@ -17,5 +18,4 @@ export default makeSchema({
             gte: 1,
         },
     },
-    transactions: transactionsType.isRequired,
 });
