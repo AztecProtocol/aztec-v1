@@ -130,15 +130,20 @@ export default class Asset {
      *
      * Deposit
      *
-     * - transactions ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
-     * - options
-     *       sender (Address):          The proof sender.
-     *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
-     *                                  Will use extension's or user's setting if undefined.
-     *       numberOfOutputNotes (Int): Number of new notes for each transaction.
-     *                                  Unless numberOfOutputNotes is defined in that transaction.
+     * - transactions ([Transaction!]!)
+     *       amount (Int!):                The equivalent note value to deposit.
+     *       to (Address!):                The output note owner.
+     *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
+     * - options (Object)
+     *       from (Address):               The linked token owner.
+     *       sender (Address):             The proof sender.
+     *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
+     *                                     Unless numberOfOutputNotes is defined in that transaction.
+     *                                     Will use default value in setting if undefined.
      *
-     * @returns ([Notes!])
+     * @returns (Object)
+     * - success (Boolean)
+     * - amount (Int)
      */
     deposit = async (transactions, {
         from = '',
@@ -162,6 +167,21 @@ export default class Asset {
         );
     };
 
+    /**
+     *
+     * Withdraw
+     *
+     * - amount (Int!):                    The note value to withdraw.
+     * - options (Object)
+     *       sender (Address):             The proof sender.
+     *       to (Address):                 The linked token owner.
+     *       numberOfInputNotes (Int):     Number of notes to be destroyed.
+     *                                     Will use default value in setting if undefined.
+     *
+     * @returns (Object)
+     * - success (Boolean)
+     * - amount (Int)
+     */
     withdraw = async (amount, {
         sender = '',
         to,
@@ -185,19 +205,25 @@ export default class Asset {
     };
 
     /**
-     *
-     * Send
-     *
-     * - transaction ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
-     * - options
-     *       sender (Address):          The proof sender.
-     *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
-     *                                  Will use extension's or user's setting if undefined.
-     *       numberOfOutputNotes (Int): Number of new notes for each transaction.
-     *                                  Unless numberOfOutputNotes is defined in that transaction.
-     *
-     * @returns ([Notes!])
-     */
+    *
+    * Send
+    *
+    * - transactions ([Transaction!]!)
+    *       amount (Int!):                The note value to send.
+    *       to (Address!):                The output note owner.
+    *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
+    * - options (Object)
+    *       sender (Address):             The proof sender.
+    *       numberOfInputNotes (Int):     Number of notes to be destroyed.
+    *                                     Will use default value in setting if undefined.
+    *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
+    *                                     Unless numberOfOutputNotes is defined in that transaction.
+    *                                     Will use default value in setting if undefined.
+    *
+    * @returns (Object)
+    * - success (Boolean)
+    * - amount (Int)
+    */
     send = async (transactions, {
         sender = '',
         numberOfInputNotes,
@@ -304,42 +330,74 @@ export default class Asset {
         // TODO
     };
 
+    /**
+    *
+    * Create Note From Balance
+    *
+    * - amount (Int!)
+    * - options (Object)
+    *       userAccess ([Address!]):      The addresses that are able to see the real note value.
+    *       numberOfInputNotes (Int):     Number of notes to be destroyed.
+    *                                     Will use default value in setting if undefined.
+    *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
+    *                                     Unless numberOfOutputNotes is defined in that transaction.
+    *                                     Will use default value in setting if undefined.
+    *
+    * @returns ([notes!])
+    * - note (Object)
+    *       noteHash (String!)
+    *       value (Int!)
+    */
     createNoteFromBalance = async (amount, {
         userAccess = [],
         numberOfInputNotes,
         numberOfOutputNotes = 1,
-    } = {}) => ConnectionService.query(
-        'constructProof',
-        {
-            proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
-            assetAddress: this.address,
-            amount,
-            userAccess,
-            numberOfInputNotes,
-            numberOfOutputNotes,
-        },
-    );
+    } = {}) => {
+        const {
+            notes,
+        } = await ConnectionService.query(
+            'constructProof',
+            {
+                proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
+                assetAddress: this.address,
+                amount,
+                userAccess,
+                numberOfInputNotes,
+                numberOfOutputNotes,
+            },
+        ) || {};
 
+        return notes;
+    };
+
+    /**
+    *
+    * Fetch Note From Balance
+    *
+    * - options (Object)
+    *       greaterThan (Int)
+    *       lessThan (Int)
+    *       equalTo (Int)
+    *       numberOfNotes (Int)
+    *
+    * @returns ([notes!])
+    * - note (Object)
+    *       noteHash (String!)
+    *       value (Int!)
+    */
     fetchNotesFromBalance = async ({
         greaterThan,
         lessThan,
         equalTo,
         numberOfNotes,
-    } = {}) => {
-        const {
-            address,
-        } = Web3Service.account;
-
-        return ConnectionService.query(
-            'fetchNotesFromBalance',
-            {
-                assetAddress: this.address,
-                owner: address,
-                greaterThan,
-                lessThan,
-                equalTo,
-                numberOfNotes,
-            },
-        );
-    };
+    } = {}) => ConnectionService.query(
+        'fetchNotesFromBalance',
+        {
+            assetAddress: this.address,
+            greaterThan,
+            lessThan,
+            equalTo,
+            numberOfNotes,
+        },
+    );
 }

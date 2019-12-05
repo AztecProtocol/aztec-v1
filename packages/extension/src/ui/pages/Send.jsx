@@ -29,7 +29,7 @@ const Send = ({
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
-        const totalAmount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
 
         return {
             assetAddress,
@@ -39,7 +39,7 @@ const Send = ({
             proof,
             numberOfInputNotes,
             numberOfOutputNotes,
-            totalAmount,
+            amount,
             gsnConfig,
         };
     };

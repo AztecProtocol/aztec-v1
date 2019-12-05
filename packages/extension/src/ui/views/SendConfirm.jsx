@@ -22,7 +22,7 @@ const SendConfirm = ({
     asset,
     sender,
     transactions,
-    totalAmount,
+    amount: totalAmount,
 }) => (
     <PopupContent
         title={(
@@ -167,7 +167,7 @@ SendConfirm.propTypes = {
     asset: assetShape.isRequired,
     sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
-    totalAmount: PropTypes.number.isRequired,
+    amount: PropTypes.number.isRequired,
 };
 
 export default SendConfirm;

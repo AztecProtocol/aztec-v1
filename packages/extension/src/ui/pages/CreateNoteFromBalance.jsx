@@ -2,6 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import settings from '~/background/utils/settings';
 import {
+    valueOf,
+} from '~/utils/note';
+import {
     gsnConfigShape,
     inputAmountType,
 } from '~/ui/config/propTypes';
@@ -11,8 +14,28 @@ import {
 import parseInputAmount from '~/ui/utils/parseInputAmount';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
+import returnAndClose from '~/ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
+
+const handleClose = (accumData) => {
+    const {
+        remainderNote,
+        outputNotes,
+    } = accumData;
+    const targetOutputNotes = !remainderNote
+        ? outputNotes
+        : outputNotes.filter(note => note.noteHash !== remainderNote.noteHash);
+    const notes = targetOutputNotes.map(note => ({
+        noteHash: note.noteHash,
+        value: valueOf(note),
+    }));
+
+    returnAndClose({
+        ...accumData,
+        notes,
+    });
+};
 
 const CreateNoteFromBalance = ({
     initialStep,
@@ -81,6 +104,7 @@ const CreateNoteFromBalance = ({
             initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
+            onExit={handleClose}
         />
     );
 };
