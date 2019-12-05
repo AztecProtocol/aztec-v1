@@ -27,8 +27,6 @@ const CreateNoteFromBalanceConfirm = ({
         address: assetAddress,
         decimals,
     },
-    sender,
-    owner,
     amount,
     numberOfInputNotes,
     numberOfOutputNotes,
@@ -147,23 +145,10 @@ const CreateNoteFromBalanceConfirm = ({
                             ),
                         })),
                         description: (
-                            <FlexBox
-                                valign="baseline"
-                                nowrap
-                            >
-                                <HashText
-                                    text={sender}
-                                    prefixLength={6}
-                                    suffixLength={4}
-                                    size="xxs"
-                                />
-                                <Block left="s">
-                                    <Text
-                                        text={`-${formatNumber(totalInputAmount, decimals)}`}
-                                        color="red"
-                                    />
-                                </Block>
-                            </FlexBox>
+                            <Text
+                                text={`-${formatNumber(totalInputAmount, decimals)}`}
+                                color="red"
+                            />
                         ),
                         moreItems: moreInputNotes,
                     }}
@@ -194,23 +179,10 @@ const CreateNoteFromBalanceConfirm = ({
                             ),
                         })),
                         description: (
-                            <FlexBox
-                                valign="baseline"
-                                nowrap
-                            >
-                                <Block right="s">
-                                    <Text
-                                        text={`+${formatNumber(amount, decimals)}`}
-                                        color="green"
-                                    />
-                                </Block>
-                                <HashText
-                                    text={owner}
-                                    prefixLength={6}
-                                    suffixLength={4}
-                                    size="xxs"
-                                />
-                            </FlexBox>
+                            <Text
+                                text={`+${formatNumber(amount, decimals)}`}
+                                color="green"
+                            />
                         ),
                         moreItems: moreOutputNotes,
                     }}
@@ -268,8 +240,6 @@ const CreateNoteFromBalanceConfirm = ({
 
 CreateNoteFromBalanceConfirm.propTypes = {
     asset: assetShape.isRequired,
-    sender: PropTypes.string.isRequired,
-    owner: PropTypes.string.isRequired,
     amount: PropTypes.number.isRequired,
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,

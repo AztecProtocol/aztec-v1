@@ -19,7 +19,6 @@ const CreateNoteFromBalance = ({
     currentAccount,
     assetAddress,
     amount: inputAmount,
-    owner,
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
     userAccess,
@@ -33,6 +32,7 @@ const CreateNoteFromBalance = ({
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const accounts = await Promise.all(userAccess.map(apis.account.getExtensionAccount));
+        const owner = currentAccount.address;
         const sender = currentAccount.address;
         const amount = parseInputAmount(inputAmount);
 
@@ -92,7 +92,6 @@ CreateNoteFromBalance.propTypes = {
     }).isRequired,
     assetAddress: PropTypes.string.isRequired,
     amount: inputAmountType.isRequired,
-    owner: PropTypes.string.isRequired,
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
     userAccess: PropTypes.arrayOf(PropTypes.string),
