@@ -2,6 +2,7 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~utils/filterStream';
+import responseDataKeys from './responseDataKeys';
 
 export default async function triggerProofUi(query, connection) {
     const {
@@ -25,5 +26,21 @@ export default async function triggerProofUi(query, connection) {
         connection.MessageSubject.asObservable(),
     ) || {};
 
-    return data;
+    if (data.error) {
+        return data;
+    }
+
+    const formatData = {
+        success: data.success || false,
+    };
+    const dataKeys = responseDataKeys[proofType];
+    if (dataKeys) {
+        dataKeys.forEach((key) => {
+            formatData[key] = data[key];
+        });
+    }
+
+    return {
+        proof: formatData,
+    };
 }

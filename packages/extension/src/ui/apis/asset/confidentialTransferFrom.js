@@ -23,5 +23,8 @@ export default async function confidentialTransferFrom({
         ],
     });
 
-    return response;
+    return {
+        ...response,
+        success: !!(response && response.txReceipt),
+    };
 }
