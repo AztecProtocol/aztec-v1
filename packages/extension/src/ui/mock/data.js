@@ -52,7 +52,7 @@ export const assets = [
         symbol: 'DAI',
         decimals: 18,
         address: randomAddress(),
-        linkedTokenAddress: randomAddress(),
+        linkedTokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
         icon: daiIcon,
         balance: 0.51232,
     },
@@ -61,7 +61,7 @@ export const assets = [
         symbol: 'USDC',
         decimals: 6,
         address: randomAddress(),
-        linkedTokenAddress: randomAddress(),
+        linkedTokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         icon: usdcIcon,
         balance: 2832.21,
     },
@@ -152,11 +152,6 @@ export const pastTransactions = [
 ];
 
 export const depositTransactions = generate(3, i => ({
-    amount: randomInt(1, 100),
-    to: addresses[i + 1],
-}));
-
-export const withdrawTransactions = generate(3, i => ({
     amount: randomInt(1, 100),
     to: addresses[i + 1],
 }));

@@ -88,13 +88,18 @@ export default mergeApis(realApis, {
             const remainderNote = numberOfOutputNotes > 0
                 ? randomRawNote()
                 : null;
+            const inputNotes = generate(numberOfInputNotes, randomRawNote);
             const outputNotes = generate(numberOfOutputNotes, randomRawNote);
             if (remainderNote) {
                 outputNotes.push(remainderNote);
             }
 
             return {
-                inputNotes: generate(numberOfInputNotes, randomRawNote),
+                proof: {
+                    inputNotes,
+                    outputNotes,
+                },
+                inputNotes,
                 outputNotes,
                 remainderNote,
             };
