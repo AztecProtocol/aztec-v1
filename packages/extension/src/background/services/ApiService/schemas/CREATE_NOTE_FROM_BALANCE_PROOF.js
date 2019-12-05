@@ -1,15 +1,10 @@
 import makeSchema from '~/utils/makeSchema';
 import addressType from './types/address';
+import inputAmountType from './types/inputAmount';
 
 export default makeSchema({
     assetAddress: addressType.isRequired,
-    amount: {
-        type: 'integer',
-        size: {
-            gte: 0,
-        },
-        required: true,
-    },
+    amount: inputAmountType.isRequired,
     owner: addressType.isRequired,
     numberOfInputNotes: {
         type: 'integer',

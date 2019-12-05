@@ -12,7 +12,7 @@ export default async function verifyWithdrawRequest({
     const noteError = await ensureInputNotes({
         assetAddress,
         numberOfInputNotes,
-        amount: Number(amount),
+        amount,
     });
     if (noteError) {
         return noteError;
