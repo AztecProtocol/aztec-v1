@@ -306,27 +306,19 @@ export default class Asset {
 
     createNoteFromBalance = async (amount, {
         userAccess = [],
-        owner = '',
         numberOfInputNotes,
         numberOfOutputNotes = 1,
-    } = {}) => {
-        const {
-            address,
-        } = Web3Service.account;
-
-        return ConnectionService.query(
-            'constructProof',
-            {
-                proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
-                assetAddress: this.address,
-                amount,
-                owner: owner || address,
-                userAccess,
-                numberOfInputNotes,
-                numberOfOutputNotes,
-            },
-        );
-    };
+    } = {}) => ConnectionService.query(
+        'constructProof',
+        {
+            proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
+            assetAddress: this.address,
+            amount,
+            userAccess,
+            numberOfInputNotes,
+            numberOfOutputNotes,
+        },
+    );
 
     fetchNotesFromBalance = async ({
         greaterThan,

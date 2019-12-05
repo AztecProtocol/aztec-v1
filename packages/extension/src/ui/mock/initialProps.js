@@ -108,7 +108,6 @@ export default {
     createNote: {
         assetAddress: assets[0].address,
         amount: randomInt(1, 100),
-        owner: randomAddress(),
         numberOfOutputNotes: 1,
     },
     mint: {
