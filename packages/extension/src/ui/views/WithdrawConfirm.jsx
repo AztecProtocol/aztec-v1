@@ -9,11 +9,11 @@ import formatNumber from '~ui/utils/formatNumber';
 import {
     assetShape,
 } from '~/ui/config/propTypes';
-import formatAddress from '~ui/utils/formatAddress';
 import PopupContent from '~ui/components/PopupContent';
 import Connection from '~ui/components/Connection';
 import ListItem from '~ui/components/ListItem';
 import Ticket from '~ui/components/Ticket';
+import HashText from '~/ui/components/HashText';
 
 const WithdrawConfirm = ({
     asset: {
@@ -66,7 +66,13 @@ const WithdrawConfirm = ({
                     },
                     tooltip: (
                         <ListItem
-                            content={formatAddress(to, 6, 4)}
+                            content={(
+                                <HashText
+                                    text={to}
+                                    prefixLength={6}
+                                    suffixLength={4}
+                                />
+                            )}
                             size="xxs"
                             footnote={(
                                 <Text
@@ -76,7 +82,14 @@ const WithdrawConfirm = ({
                             )}
                         />
                     ),
-                    description: formatAddress(to, 6, 4),
+                    description: (
+                        <HashText
+                            text={to}
+                            prefixLength={6}
+                            suffixLength={4}
+                            size="xxs"
+                        />
+                    ),
                 }}
                 size="s"
                 actionIconName="double_arrow"

@@ -11,8 +11,8 @@ import {
     assetShape,
 } from '~ui/config/propTypes';
 import formatNumber from '~ui/utils/formatNumber';
-import formatAddress from '~ui/utils/formatAddress';
 import SummaryLink from '~ui/components/SummaryLink';
+import HashText from '~/ui/components/HashText';
 import styles from './link.scss';
 
 const typeIconMapping = {
@@ -63,9 +63,10 @@ const TransactionHistoryLink = ({
                     </Block>
                 </FlexBox>
                 <Block right="m">
-                    <Text
-                        className="text-code"
-                        text={`(${formatAddress(address, 6, 4)})`}
+                    <HashText
+                        text={address}
+                        prefixLength={6}
+                        suffixLength={4}
                         size="xxs"
                         color="white-light"
                     />
