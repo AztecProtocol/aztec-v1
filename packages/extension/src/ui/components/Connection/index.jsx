@@ -7,7 +7,6 @@ import {
     Icon,
     Text,
 } from '@aztec/guacamole-ui';
-import ProfileIcon from '~ui/components/ProfileIcon';
 import ProfileIconGroup from '~ui/components/ProfileIconGroup';
 import {
     avatarSizesMap,
@@ -31,21 +30,32 @@ const Connection = ({
         title: fromTitle,
         description: fromDesc,
         profile: fromProfile,
+        profileGroup: fromProfileGroup,
         tooltip: fromTooltip,
+        moreItems: fromMoreItems,
     } = from;
     const {
         title: toTitle,
         description: toDesc,
         profile: toProfile,
+        profileGroup: toProfileGroup,
         tooltip: toTooltip,
         moreItems,
     } = to;
-    const toIcons = [
-        {
-            profile: toProfile,
-            tooltip: toTooltip,
-        },
-    ];
+    const fromIcons = fromProfileGroup
+        || [
+            {
+                profile: fromProfile,
+                tooltip: fromTooltip,
+            },
+        ];
+    const toIcons = toProfileGroup
+        || [
+            {
+                profile: toProfile,
+                tooltip: toTooltip,
+            },
+        ];
 
     return (
         <div
@@ -55,54 +65,59 @@ const Connection = ({
                 styles[`size-${size}`],
             )}
         >
-            <FlexBox valign="center">
+            <FlexBox
+                align="center"
+                valign="center"
+            >
                 <Block
-                    className={styles.colLeft}
-                    right="s"
+                    className={styles.contentLeft}
                 >
                     {fromTitle && (
-                        <Text
-                            size="xs"
-                            color="label"
+                        <Block
+                            className={styles.colLeft}
+                            right="s"
                         >
-                            {fromTitle}
-                        </Text>
+                            <Text
+                                size="xs"
+                                color="label"
+                            >
+                                {fromTitle}
+                            </Text>
+                        </Block>
                     )}
-                </Block>
-                <FlexBox
-                    align="center"
-                    valign="center"
-                >
-                    <ProfileIcon
-                        {...fromProfile}
-                        src={fromProfile.icon}
-                        fromTooltip={fromTooltip}
+                    <ProfileIconGroup
                         theme={theme}
                         size={size}
+                        icons={fromIcons}
+                        moreItems={fromMoreItems}
                     />
-                    <FlexBox valign="center">
-                        <Block padding="xs">
-                            <Icon
-                                name="more_horiz"
-                                color="grey-lighter"
-                                size="xs"
-                            />
-                        </Block>
-                        <Block padding="xs">
-                            <Icon
-                                name={actionIconName}
-                                color={actionIconColor}
-                                size={size}
-                            />
-                        </Block>
-                        <Block padding="xs">
-                            <Icon
-                                name="more_horiz"
-                                color="grey-lighter"
-                                size="xs"
-                            />
-                        </Block>
-                    </FlexBox>
+                </Block>
+                <FlexBox valign="center">
+                    <Block padding="xs">
+                        <Icon
+                            name="more_horiz"
+                            color="grey-lighter"
+                            size="xs"
+                        />
+                    </Block>
+                    <Block padding="xs">
+                        <Icon
+                            name={actionIconName}
+                            color={actionIconColor}
+                            size={size}
+                        />
+                    </Block>
+                    <Block padding="xs">
+                        <Icon
+                            name="more_horiz"
+                            color="grey-lighter"
+                            size="xs"
+                        />
+                    </Block>
+                </FlexBox>
+                <Block
+                    className={styles.contentRight}
+                >
                     <ProfileIconGroup
                         className={styles.iconGroupRight}
                         theme={theme}
@@ -110,18 +125,18 @@ const Connection = ({
                         icons={toIcons}
                         moreItems={moreItems}
                     />
-                </FlexBox>
-                <Block
-                    className={styles.colRight}
-                    left="s"
-                >
                     {toTitle && (
-                        <Text
-                            size="xs"
-                            color="label"
+                        <Block
+                            className={styles.colRight}
+                            left="s"
                         >
-                            {toTitle}
-                        </Text>
+                            <Text
+                                size="xs"
+                                color="label"
+                            >
+                                {toTitle}
+                            </Text>
+                        </Block>
                     )}
                 </Block>
             </FlexBox>
@@ -155,45 +170,40 @@ const Connection = ({
     );
 };
 
+const connectionItemShape = PropTypes.shape({
+    profile: profileShape,
+    profileGroup: PropTypes.arrayOf(PropTypes.shape({
+        profile: profileShape,
+        tooltip: PropTypes.oneOfType([
+            PropTypes.element,
+            PropTypes.string,
+        ]),
+    })),
+    tooltip: PropTypes.oneOfType([
+        PropTypes.element,
+        PropTypes.string,
+    ]),
+    title: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.node,
+    ]),
+    description: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.node,
+    ]),
+    moreItems: PropTypes.arrayOf(PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.element,
+    ])),
+});
+
 Connection.propTypes = {
     className: PropTypes.string,
     theme: themeType,
     actionIconName: PropTypes.string,
     actionIconColor: PropTypes.string,
-    from: PropTypes.shape({
-        profile: profileShape.isRequired,
-        tooltip: PropTypes.oneOfType([
-            PropTypes.element,
-            PropTypes.string,
-        ]),
-        title: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.node,
-        ]),
-        description: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.node,
-        ]),
-    }).isRequired,
-    to: PropTypes.shape({
-        profile: profileShape.isRequired,
-        tooltip: PropTypes.oneOfType([
-            PropTypes.element,
-            PropTypes.string,
-        ]),
-        title: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.node,
-        ]),
-        description: PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.node,
-        ]),
-        moreItems: PropTypes.arrayOf(PropTypes.oneOfType([
-            PropTypes.string,
-            PropTypes.element,
-        ])),
-    }).isRequired,
+    from: connectionItemShape.isRequired,
+    to: connectionItemShape.isRequired,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
 };
 

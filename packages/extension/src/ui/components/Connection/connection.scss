@@ -25,9 +25,11 @@ $dot-dot-dot-spacing: (map-get($icon-size-map, 'xs') * 2)
 }
 
 .colLeft, .contentLeft {
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .colRight, .contentRight {
-  text-align: left;
+  display: flex;
+  justify-content: flex-start;
 }
