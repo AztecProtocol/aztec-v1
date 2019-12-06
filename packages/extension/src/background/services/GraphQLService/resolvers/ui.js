@@ -1,10 +1,6 @@
-import AuthService from '~background/services/AuthService';
 import {
     get,
 } from '~utils/storage';
-import {
-    ensureAccount,
-} from '../decorators';
 import userModel from '~database/models/user';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
@@ -49,28 +45,6 @@ const uiResolvers = {
             });
             return noteResponse.note;
         },
-    },
-    Mutation: {
-        registerExtension: async (_, args) => ({
-            account: await AuthService.registerExtension(args),
-        }),
-        registerAddress: ensureAccount(async (_, args) => ({
-            account: await AuthService.registerAddress({
-                address: args.address,
-                linkedPublicKey: args.linkedPublicKey,
-                spendingPublicKey: args.spendingPublicKey,
-                blockNumber: args.blockNumber,
-            }),
-        })),
-        login: ensureAccount(async (_, args) => ({
-            session: await AuthService.login(args),
-        })),
-        registerDomain: ensureAccount(async (_, args) => {
-            await AuthService.registerDomain(args.domain);
-            return {
-                success: true,
-            };
-        }),
     },
 };
 
