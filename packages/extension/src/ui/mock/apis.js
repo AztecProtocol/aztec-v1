@@ -51,7 +51,13 @@ export default mergeApis(realApis, {
         getExtensionAccount: address => ({
             address,
             linkedPublicKey: 'linked_public_key',
+            spendingPublicKey: 'spending_public_key',
         }),
+        batchGetExtensionAccount: addressArr => addressArr.map((address => ({
+            address,
+            linkedPublicKey: 'linked_public_key',
+            spendingPublicKey: 'spending_public_key',
+        }))),
     },
     asset: {
         getAssets: async () => assets,

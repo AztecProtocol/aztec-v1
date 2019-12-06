@@ -58,7 +58,7 @@ const CreateNoteFromBalance = ({
 
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
-        const accounts = await Promise.all(userAccess.map(apis.account.getExtensionAccount));
+        const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
         const sender = isGSNAvailable ? proxyContract : currentAddress;
         const amount = parseInputAmount(inputAmount);
         const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
@@ -88,6 +88,7 @@ const CreateNoteFromBalance = ({
             publicOwner: currentAddress,
             numberOfInputNotes,
             numberOfOutputNotes,
+            userAccessAccounts,
             gsnConfig,
         });
 
@@ -98,8 +99,7 @@ const CreateNoteFromBalance = ({
             amount,
             numberOfInputNotes,
             numberOfOutputNotes,
-            userAccess,
-            accounts,
+            userAccessAccounts,
             proof,
             inputNotes,
             outputNotes,
