@@ -23,9 +23,7 @@ export default async function verifyWithdrawRequest({
         return senderError;
     }
 
-    const invalidAddressError = await validateAccounts({
-        addresses: [to],
-    });
+    const invalidAddressError = await validateAccounts([to]);
     if (invalidAddressError) {
         return invalidAddressError;
     }

@@ -26,9 +26,7 @@ export default async function verifyTransferRequest({
     }
 
     const addresses = transactions.map(({ to }) => to);
-    const invalidAddressError = await validateAccounts({
-        addresses,
-    });
+    const invalidAddressError = await validateAccounts(addresses);
     if (invalidAddressError) {
         return invalidAddressError;
     }
