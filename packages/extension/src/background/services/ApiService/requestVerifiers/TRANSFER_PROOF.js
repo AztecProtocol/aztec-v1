@@ -1,10 +1,8 @@
 import ensureInputNotes from '../utils/ensureInputNotes';
-import validateExtensionAccount from '../utils/validateExtensionAccount';
 import validateAccounts from '../utils/validateAccounts';
 
 export default async function verifyTransferRequest({
     assetAddress,
-    sender,
     transactions,
     numberOfInputNotes,
 }) {
@@ -18,11 +16,6 @@ export default async function verifyTransferRequest({
     });
     if (noteError) {
         return noteError;
-    }
-
-    const senderError = await validateExtensionAccount(sender);
-    if (senderError) {
-        return senderError;
     }
 
     const addresses = transactions.map(({ to }) => to);

@@ -48,23 +48,31 @@ const CreateNoteFromBalance = ({
     gsnConfig,
 }) => {
     const {
+        address: currentAddress,
+    } = currentAccount;
+    const {
         isGSNAvailable,
+        proxyContract,
     } = gsnConfig;
     const steps = createNoteFromBalanceSteps[isGSNAvailable ? 'gsn' : 'metamask'];
 
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const accounts = await Promise.all(userAccess.map(apis.account.getExtensionAccount));
-        const owner = currentAccount.address;
-        const sender = currentAccount.address;
+        const sender = isGSNAvailable ? proxyContract : currentAddress;
         const amount = parseInputAmount(inputAmount);
-
         const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
             ? customNumberOfInputNotes
             : await settings('NUMBER_OF_INPUT_NOTES');
         const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
             ? customNumberOfOutputNotes
             : await settings('NUMBER_OF_OUTPUT_NOTES');
+        const transactions = [
+            {
+                amount,
+                to: currentAddress,
+            },
+        ];
 
         const {
             proof,
@@ -73,9 +81,11 @@ const CreateNoteFromBalance = ({
             remainderNote,
         } = await apis.proof.createNoteFromBalance({
             assetAddress,
+            currentAddress,
             sender,
             amount,
-            owner,
+            transactions,
+            publicOwner: currentAddress,
             numberOfInputNotes,
             numberOfOutputNotes,
             gsnConfig,
@@ -86,7 +96,6 @@ const CreateNoteFromBalance = ({
             asset,
             sender,
             amount,
-            owner,
             numberOfInputNotes,
             numberOfOutputNotes,
             userAccess,
@@ -95,7 +104,6 @@ const CreateNoteFromBalance = ({
             inputNotes,
             outputNotes,
             remainderNote,
-            gsnConfig,
         };
     };
 

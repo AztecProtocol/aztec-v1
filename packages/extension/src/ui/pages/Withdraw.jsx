@@ -14,18 +14,23 @@ import { withdrawSteps } from '~ui/config/steps';
 
 const Withdraw = ({
     initialStep,
+    currentAccount,
     assetAddress,
     amount,
-    sender,
     to,
     proof,
     numberOfInputNotes,
     gsnConfig,
 }) => {
     const {
+        address: currentAddress,
+    } = currentAccount;
+    const {
         isGSNAvailable,
+        proxyContract,
     } = gsnConfig;
     const steps = isGSNAvailable ? withdrawSteps.gsn : withdrawSteps.metamask;
+    const sender = isGSNAvailable ? proxyContract : currentAddress;
 
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
@@ -33,12 +38,12 @@ const Withdraw = ({
         return {
             assetAddress,
             asset,
+            currentAddress,
             amount: parseInputAmount(amount),
+            publicOwner: to,
             sender,
-            to,
             proof,
             numberOfInputNotes,
-            gsnConfig,
         };
     };
 
@@ -53,9 +58,11 @@ const Withdraw = ({
 
 Withdraw.propTypes = {
     initialStep: PropTypes.number,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    }).isRequired,
     assetAddress: PropTypes.string.isRequired,
     amount: inputAmountType.isRequired,
-    sender: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
     proof: PropTypes.shape({
         inputNotes: PropTypes.array.isRequired,

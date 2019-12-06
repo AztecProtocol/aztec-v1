@@ -161,8 +161,8 @@ export default class Asset {
      *
      * - amount (Int!):                    The note value to withdraw.
      * - options (Object)
-     *       sender (Address):             The proof sender.
      *       to (Address):                 The linked token owner.
+     *                                     Will use current address if undefined.
      *       numberOfInputNotes (Int):     Number of notes to be destroyed.
      *                                     Will use default value in setting if undefined.
      *
@@ -171,7 +171,6 @@ export default class Asset {
      * - amount (Int)
      */
     withdraw = async (amount, {
-        sender = '',
         to,
         numberOfInputNotes,
     } = {}) => {
@@ -185,7 +184,6 @@ export default class Asset {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
                 amount,
-                sender: sender || address,
                 to: to || address,
                 numberOfInputNotes,
             },
@@ -201,7 +199,6 @@ export default class Asset {
     *       to (Address!):                The output note owner.
     *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
     * - options (Object)
-    *       sender (Address):             The proof sender.
     *       numberOfInputNotes (Int):     Number of notes to be destroyed.
     *                                     Will use default value in setting if undefined.
     *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
@@ -213,26 +210,18 @@ export default class Asset {
     * - amount (Int)
     */
     send = async (transactions, {
-        sender = '',
         numberOfInputNotes,
         numberOfOutputNotes,
-    } = {}) => {
-        const {
-            address,
-        } = Web3Service.account;
-
-        return ConnectionService.query(
-            'constructProof',
-            {
-                proofType: 'TRANSFER_PROOF',
-                assetAddress: this.address,
-                transactions,
-                sender: sender || address,
-                numberOfInputNotes,
-                numberOfOutputNotes,
-            },
-        );
-    };
+    } = {}) => ConnectionService.query(
+        'constructProof',
+        {
+            proofType: 'TRANSFER_PROOF',
+            assetAddress: this.address,
+            transactions,
+            numberOfInputNotes,
+            numberOfOutputNotes,
+        },
+    );
 
     /**
      *
@@ -329,7 +318,7 @@ export default class Asset {
     *                                     Will use default value in setting if undefined.
     *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
     *                                     Unless numberOfOutputNotes is defined in that transaction.
-    *                                     Will use default value in setting if undefined.
+    *                                     Default value is 1.
     *
     * @returns ([notes!])
     * - note (Object)

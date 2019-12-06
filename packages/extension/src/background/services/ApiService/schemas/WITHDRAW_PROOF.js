@@ -5,7 +5,6 @@ import inputAmountType from './types/inputAmount';
 export default makeSchema({
     assetAddress: addressType.isRequired,
     amount: inputAmountType.isRequired,
-    sender: addressType.isRequired,
     to: addressType.isRequired,
     numberOfInputNotes: {
         type: 'integer',
