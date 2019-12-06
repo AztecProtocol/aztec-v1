@@ -2,8 +2,8 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~utils/filterStream';
+import userPermissionQuery from '~/background/services/GraphQLService/Queries/userPermissionQuery';
 import query from '../utils/query';
-import UserPermissionQuery from '../queries/UserPermissionQuery';
 
 const registerExtensionUi = async (request, connection) => {
     const {
@@ -25,12 +25,13 @@ const registerExtensionUi = async (request, connection) => {
 const registerExtension = async (request, connection) => {
     let {
         userPermission: { account = {} },
-    } = await query(request, UserPermissionQuery) || {};
+    } = await query(request, userPermissionQuery(`
+        linkedPublicKey
+        blockNumber
+    `)) || {};
 
     let error;
-    if (!account
-        || (!account.blockNumber && !account.registeredAt)
-    ) {
+    if (!account || !account.blockNumber) {
         ({
             data: {
                 error,
@@ -39,8 +40,11 @@ const registerExtension = async (request, connection) => {
         } = await registerExtensionUi(request, connection));
 
         if (account.linkedPublicKey) {
-            // call validateUserPermission again to start EventService and NoteService
-            await query(request, UserPermissionQuery);
+            // query again to start EventService and NoteService
+            await query(request, userPermissionQuery(`
+                linkedPublicKey
+                blockNumber
+            `));
         }
     }
 

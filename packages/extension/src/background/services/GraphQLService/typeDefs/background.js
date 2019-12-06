@@ -76,7 +76,7 @@ const backgroundTypes = gql`
             domain: String!
         ): NotesApiResponse
         fetchNotesFromBalance(
-            assetId: ID!
+            assetAddress: String!
             equalTo: Int,
             greaterThan: Int,
             lessThan: Int,
