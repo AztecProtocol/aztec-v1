@@ -22,37 +22,13 @@ const uiTypes = gql`
         ): User
         asset(
             id: ID!
-        ): Asset 
-        account( 
+        ): Asset
+        account(
             address: String!
-        ): UserAccountApiResponse 
+        ): UserAccountApiResponse
         note(
             id: ID!
         ): Note
-    }
-    extend type Mutation {
-        login(
-            password: String!
-            domain: String!
-            address: String!
-        ): SessionApiResponse
-        registerExtension(
-            password: String!
-            salt: String!
-            domain: String!
-            address: String!
-            seedPhrase: String!
-        ): UserAccountApiResponse
-        registerAddress(
-            address: String!
-            linkedPublicKey: String!
-            spendingPublicKey: String!
-            blockNumber: BigInt
-        ): UserAccountApiResponse
-        registerDomain(
-            domain: String!
-            currentAddress: String!
-        ): ValidationApiResponse
     }
 `;
 
