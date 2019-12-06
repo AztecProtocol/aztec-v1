@@ -1,11 +1,9 @@
 import ensureInputNotes from '../utils/ensureInputNotes';
-import validateExtensionAccount from '../utils/validateExtensionAccount';
 import validateAccounts from '../utils/validateAccounts';
 
 export default async function verifyWithdrawRequest({
     assetAddress,
     amount,
-    sender,
     to,
     numberOfInputNotes,
 }) {
@@ -16,11 +14,6 @@ export default async function verifyWithdrawRequest({
     });
     if (noteError) {
         return noteError;
-    }
-
-    const senderError = await validateExtensionAccount(sender);
-    if (senderError) {
-        return senderError;
     }
 
     const invalidAddressError = await validateAccounts([to]);

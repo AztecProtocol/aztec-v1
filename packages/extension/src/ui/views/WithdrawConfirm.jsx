@@ -22,8 +22,8 @@ const WithdrawConfirm = ({
         name,
         decimals,
     },
-    sender,
-    to,
+    currentAddress,
+    publicOwner,
     amount,
 }) => (
     <PopupContent
@@ -63,7 +63,7 @@ const WithdrawConfirm = ({
                             <ListItem
                                 content={(
                                     <HashText
-                                        text={sender}
+                                        text={currentAddress}
                                         prefixLength={6}
                                         suffixLength={4}
                                     />
@@ -89,13 +89,13 @@ const WithdrawConfirm = ({
                     to={{
                         profile: {
                             type: 'user',
-                            address: to,
+                            address: publicOwner,
                         },
                         tooltip: (
                             <ListItem
                                 content={(
                                     <HashText
-                                        text={to}
+                                        text={publicOwner}
                                         prefixLength={6}
                                         suffixLength={4}
                                     />
@@ -111,7 +111,7 @@ const WithdrawConfirm = ({
                         ),
                         description: (
                             <HashText
-                                text={to}
+                                text={publicOwner}
                                 prefixLength={6}
                                 suffixLength={4}
                                 size="xxs"
@@ -135,9 +135,9 @@ const WithdrawConfirm = ({
 
 WithdrawConfirm.propTypes = {
     asset: assetShape.isRequired,
-    sender: PropTypes.string.isRequired,
-    to: PropTypes.string.isRequired,
+    currentAddress: PropTypes.string.isRequired,
     amount: PropTypes.number.isRequired,
+    publicOwner: PropTypes.string.isRequired,
 };
 
 export default WithdrawConfirm;

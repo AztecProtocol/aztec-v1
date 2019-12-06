@@ -2,19 +2,19 @@ import createNoteFromBalance from './createNoteFromBalance';
 
 export default function withdraw({
     assetAddress,
+    currentAddress,
     amount,
     sender,
-    to,
+    publicOwner,
     numberOfInputNotes,
-    gsnConfig,
 }) {
     return createNoteFromBalance({
         assetAddress,
+        currentAddress,
         amount,
         sender,
-        publicOwner: to,
+        publicOwner,
         numberOfInputNotes,
         numberOfOutputNotes: 0,
-        gsnConfig,
     });
 }

@@ -80,7 +80,6 @@ export default {
     },
     withdraw: {
         assetAddress: assets[0].address,
-        sender: addresses[0],
         amount: randomInt(1, 100),
         to: randomAddress(),
     },
@@ -91,7 +90,6 @@ export default {
     },
     send: {
         assetAddress: assets[0].address,
-        sender: addresses[0],
         transactions: sendTransactions,
     },
     'send.sign': {

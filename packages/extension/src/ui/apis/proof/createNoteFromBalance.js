@@ -27,17 +27,16 @@ import {
 
 export default async function createNoteFromBalance({
     assetAddress,
+    currentAddress,
     sender,
     amount,
-    owner, // will be ignore if transaction is not empty
     transactions,
     publicOwner,
     // userAccess,
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
-    gsnConfig,
 }) {
-    const inputNotesOwner = await getExtensionAccount(sender);
+    const inputNotesOwner = await getExtensionAccount(currentAddress);
     let inputAmount = amount;
 
     const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
@@ -47,25 +46,22 @@ export default async function createNoteFromBalance({
         ? customNumberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
 
-    let outputNotesOwnerAddress;
-    const outputNotesOwnerMapping = {};
+    const outputNotesOwnerMapping = {
+        [currentAddress]: inputNotesOwner,
+    };
     if (transactions && transactions.length) {
-        await asyncForEach(transactions, async ({ to }) => {
-            if (outputNotesOwnerMapping[to]) return;
-            const account = await getExtensionAccount(to);
-            outputNotesOwnerMapping[to] = account;
-        });
-
         inputAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
         if (amount && inputAmount !== amount) {
             errorLog(`Input amount (${amount}) does not match total transactions (${inputAmount}).`);
         }
-    } else if (numberOfOutputNotes > 0) {
-        outputNotesOwnerAddress = owner || publicOwner || inputNotesOwner.address;
-        const outputNotesOwner = outputNotesOwnerAddress === inputNotesOwner.address
-            ? inputNotesOwner
-            : await getExtensionAccount(outputNotesOwnerAddress);
-        outputNotesOwnerMapping[outputNotesOwnerAddress] = outputNotesOwner;
+
+        const newAddresses = transactions
+            .map(({ to }) => to)
+            .filter(addr => addr !== currentAddress)
+            .filter((addr, idx, arr) => arr.indexOf(addr) === idx);
+        await Promise.all(newAddresses.map(async (addr) => {
+            outputNotesOwnerMapping[addr] = await getExtensionAccount(addr);
+        }));
     }
 
     const {
@@ -75,7 +71,7 @@ export default async function createNoteFromBalance({
         data: {
             assetId: assetAddress,
             amount: inputAmount,
-            owner: inputNotesOwner.address,
+            owner: currentAddress,
             numberOfNotes: numberOfInputNotes,
         },
     });
@@ -103,7 +99,7 @@ export default async function createNoteFromBalance({
             }) => {
                 const note = await fromViewingKey(
                     decryptedViewingKey,
-                    inputNotesOwner.address,
+                    currentAddress,
                 );
                 const customData = metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2);
                 note.setMetaData(`0x${customData}`);
@@ -155,21 +151,6 @@ export default async function createNoteFromBalance({
             );
             outputNotes.push(...newNotes);
         });
-    } else if (numberOfOutputNotes > 0) {
-        const values = randomSumArray(
-            amount,
-            numberOfOutputNotes,
-        );
-        outputValues.push(...values);
-
-        const notesOwner = outputNotesOwnerMapping[outputNotesOwnerAddress];
-        const newNotes = await createNotes(
-            values,
-            notesOwner.spendingPublicKey,
-            notesOwner.address,
-            notesOwner.linkedPublicKey,
-        );
-        outputNotes.push(...newNotes);
     }
 
     const {
@@ -180,18 +161,13 @@ export default async function createNoteFromBalance({
         inputValues,
         outputValues,
     );
-    const {
-        isGSNAvailable,
-        proxyContract,
-    } = gsnConfig;
-    const actualSender = isGSNAvailable ? proxyContract : inputNotesOwner.address;
 
     const proof = new JoinSplitProof(
         inputNotes,
         outputNotes,
-        actualSender,
+        sender,
         publicValue,
-        publicOwner || inputNotesOwner.address,
+        publicOwner,
     );
 
     return {
@@ -199,8 +175,5 @@ export default async function createNoteFromBalance({
         inputNotes,
         outputNotes,
         remainderNote,
-        publicValue,
-        sender: actualSender,
-        owner: publicOwner || inputNotesOwner.address,
     };
 }

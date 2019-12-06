@@ -14,8 +14,8 @@ import { sendSteps } from '~ui/config/steps';
 
 const Send = ({
     initialStep,
+    currentAccount,
     assetAddress,
-    sender,
     transactions,
     proof,
     numberOfInputNotes,
@@ -23,9 +23,15 @@ const Send = ({
     gsnConfig,
 }) => {
     const {
+        address: currentAddress,
+    } = currentAccount;
+    const {
         isGSNAvailable,
+        proxyContract,
     } = gsnConfig;
     const steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
+    const sender = isGSNAvailable ? proxyContract : currentAddress;
+
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
@@ -33,6 +39,7 @@ const Send = ({
 
         return {
             assetAddress,
+            currentAddress,
             asset,
             sender,
             transactions: parsedTransactions,
@@ -40,7 +47,6 @@ const Send = ({
             numberOfInputNotes,
             numberOfOutputNotes,
             amount,
-            gsnConfig,
         };
     };
 
@@ -55,8 +61,10 @@ const Send = ({
 
 Send.propTypes = {
     initialStep: PropTypes.number,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    }).isRequired,
     assetAddress: PropTypes.string.isRequired,
-    sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     proof: PropTypes.shape({
         inputNotes: PropTypes.array.isRequired,
