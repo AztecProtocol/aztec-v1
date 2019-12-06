@@ -2,17 +2,16 @@ const Sequelize = require('sequelize');
 const {
     getConfig,
 } = require('../config');
+const models = require('../models');
 
 
-class Connection {
+class DBFactory {
     constructor() {
-        this.networkId = null;
-        this.sequelize = null;
+        this.dbs = {};
     }
 
-    init({
-        networkId,
-    }) {
+    ensureConnection(networkId) {
+        if (this.dbs[networkId]) return;
         const {
             username,
             password,
@@ -24,7 +23,7 @@ class Connection {
             networkId,
         });
 
-        this.sequelize = new Sequelize(
+        const connection = new Sequelize(
             database,
             username,
             password,
@@ -34,13 +33,13 @@ class Connection {
                 dialect,
             },
         );
+
+        this.dbs[networkId] = models(connection);
     }
 
-    getConnection() {
-        if (!this.sequelize) {
-            throw new Error(`DB connection error for networkId: ${this.networkId}`);
-        }
-        return this.sequelize;
+    getDB(networkId) {
+        this.ensureConnection(networkId);
+        return this.dbs[networkId];
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -69,4 +68,4 @@ class Connection {
     }
 }
 
-module.exports = new Connection();
+module.exports = new DBFactory();

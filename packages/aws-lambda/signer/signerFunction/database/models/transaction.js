@@ -1,9 +1,3 @@
-const Sequelize = require('sequelize');
-const connection = require('../helpers/connection');
-const {
-    Dapps,
-    Transactions,
-} = require('./types');
 const {
     TRANSACTION_TYPE,
     TRANSACTION_STATUS,
@@ -12,18 +6,14 @@ const {
 } = require('../../config/constants');
 
 
-const {
-    STRING,
-    INTEGER,
-    ENUM,
-    Deferrable: {
-        INITIALLY_IMMEDIATE,
-    },
-} = Sequelize;
+module.exports = (sequelize, DataTypes) => {
+    const {
+        STRING,
+        INTEGER,
+        ENUM,
+    } = DataTypes;
 
-
-module.exports = () => {
-    Transactions.init({
+    const Transactions = sequelize.define('Transactions', {
         signatureHash: {
             type: STRING(SHA3_LENGTH),
             allowNull: true,
@@ -36,9 +26,8 @@ module.exports = () => {
             type: INTEGER,
             allowNull: false,
             references: {
-                model: Dapps,
+                model: 'Dapps',
                 key: 'id',
-                deferrable: INITIALLY_IMMEDIATE,
             },
         },
         value: {
@@ -72,9 +61,9 @@ module.exports = () => {
             type: INTEGER,
             allowNull: false,
         },
-    }, {
-        sequelize: connection.getConnection(),
-        modelName: 'Transactions',
-        timestamps: true,
-    });
+    }, {})
+    Transactions.associate = function (models) {
+      // associations can be defined here
+    }
+    return Transactions
 };

@@ -115,7 +115,7 @@ class Web3Service {
                 return this.useContract(contractName, address);
             },
         };
-    }
+    };
 }
 
-module.exports = new Web3Service();
+module.exports = Web3Service;

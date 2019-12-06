@@ -1,8 +1,6 @@
 const {
-    types: {
-        Dapps,
-    },
-} = require('../../database/models');
+    dbFactory,
+} = require('../../database');
 const {
     log,
     errorLog,
@@ -12,8 +10,13 @@ const {
 module.exports = async ({
     origin,
     apiKey,
+    networkId,
 }) => {
     log(`ORIGIN: ${origin}`);
+    const {
+        Dapps,
+    } = dbFactory.getDB(networkId);
+
     if(!origin) {
         return false;
     }

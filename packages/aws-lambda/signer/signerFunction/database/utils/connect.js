@@ -1,12 +1,11 @@
-const connection = require('../helpers/connection');
 const {
     log,
     errorLog,
 } = require('../../utils/log');
 
-module.exports = async () => {
+module.exports = async (sequalize) => {
     try {
-        await connection.getConnection().authenticate();
+        await sequalize.authenticate();
         log('Connection has been established successfully.');
         return true;
     } catch (e) {

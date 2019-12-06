@@ -1,7 +1,5 @@
 const {
     USER_TYPE,
-    SHA3_LENGTH,
-    ETH_ADDRESS_LENGTH,
     EMAIL_ADDRESS_LEGNTH,
     PASSWORD_HASH_LEGNTH,
 } = require('../../config/constants');

@@ -1,8 +1,8 @@
-const web3Service = require('../services/Web3Service');
 const {
     AZTECAccountRegistryGSNConfig,
-} = require('../config/contracts');
+} = require('../../../config/contracts');
 
-module.exports = () => {
+
+module.exports = (web3Service) => {
     web3Service.registerInterface(AZTECAccountRegistryGSNConfig.config);
 };

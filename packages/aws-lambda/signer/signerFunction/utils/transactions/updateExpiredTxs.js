@@ -1,9 +1,7 @@
 const Sequelize = require('sequelize');
 const {
-    types: {
-        Transactions,
-    },
-} = require('../../database/models');
+    dbFactory,
+} = require('../../database');
 const {
     TRANSACTION_STATUS,
 } = require('../../config/constants');
@@ -13,7 +11,13 @@ const {
 } = Sequelize;
 
 
-module.exports = async () => {
+module.exports = async ({
+    networkId,
+}) => {
+    const {
+        Transactions,
+    } = dbFactory.getDB(networkId);
+
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 

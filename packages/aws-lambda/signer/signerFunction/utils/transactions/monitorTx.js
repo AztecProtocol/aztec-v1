@@ -1,8 +1,6 @@
 const {
-    types: {
-        Transactions,
-    },
-} = require('../../database/models');
+    dbFactory,
+} = require('../../database');
 const signatureHash = require('../signatureHash');
 const {
     TRANSACTION_STATUS,
@@ -15,8 +13,15 @@ module.exports = async ({
     signature,
     from,
     nonce,
+    networkId,
 }) => {
-    const hash = signatureHash(signature);
+    const {
+        Transactions,
+    } = dbFactory.getDB(networkId);
+    const hash = signatureHash({
+        signature,
+        networkId,
+    });
     const status = TRANSACTION_STATUS.PENDING;
     const type = TRANSACTION_TYPE.SPENDING;
     const value = -1;

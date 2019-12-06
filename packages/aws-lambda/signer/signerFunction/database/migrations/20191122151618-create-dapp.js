@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
     up: (queryInterface, DataTypes) => {
         const {

@@ -10,23 +10,7 @@ const {
 const {
     errorLog,
 } = require('./utils/log');
-const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
-
-
-const initializeDB = ({
-    networkId,
-}) => {
-    dbConnection.init({
-        networkId,
-    });
-    const {
-        models: {
-            init: initModels,
-        },
-    } = db;
-    initModels();
-};
 
 
 exports.migrationHandler = async (event) => {
@@ -46,10 +30,6 @@ exports.migrationHandler = async (event) => {
         await createDatabases();
 
         for(let i = 0; i < networkIds.length; i += 1) {
-            const networkId = networkIds[i];
-            initializeDB({
-                networkId,
-            });
             await connect();
             await migrate(command);
             await close();

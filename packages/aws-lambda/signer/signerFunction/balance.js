@@ -1,107 +1,20 @@
 const {
-    trustedAccount,
-} = require('./utils/signer');
-const {
     OK_200,
     NOT_FOUND_404,
     BAD_400,
 } = require('./helpers/responses');
 const {
     validateRequestData,
-    registerContracts,
-    refreshPendingTxs,
-    validateNetworkId,
-    getNetworkConfig,
+    isAuthorizationRequired,
+    hasFreeTransactions,
 } = require('./helpers');
 const {
     getParameters,
 } = require('./utils/event');
-const web3Service = require('./services/Web3Service');
 const {
     errorLog,
 } = require('./utils/log');
-const dbConnection = require('./database/helpers/connection');
-const db = require('./database');
-const {
-    balance,
-    getDappInfo,
-} = require('./utils/dapp');
 
-
-const initializeDB = ({
-    networkId,
-}) => {
-    dbConnection.init({
-        networkId,
-    });
-    const {
-        models: {
-            init: initModels,
-        },
-    } = db;
-    initModels();
-};
-
-const initializeWeb3Service = ({
-    networkId,
-}) => {
-    const account = trustedAccount(networkId);
-    const network = getNetworkConfig(networkId);
-    web3Service.init({
-        providerURL: network.infuraProviderUrl,
-        account,
-    });
-    registerContracts();
-};
-
-const initialize = ({
-    networkId,
-    authorizationRequired,
-}) => {
-    if(authorizationRequired) {
-        initializeDB({
-            networkId,
-        });
-    }
-    initializeWeb3Service({
-        networkId,
-    });
-};
-
-const authorizedHasFreeTransactions = async ({
-    networkId,
-    apiKey,
-}) => {
-    const {
-        id: dappId,
-    } = await getDappInfo({
-        apiKey,
-    });
-
-    await refreshPendingTxs({
-        dappId,
-        networkId,
-    });
-    const countFreeTransactions = await balance({
-        dappId,
-    });
-
-    return {
-        error: null,
-        result: {
-            hasFreeTransactions: countFreeTransactions > 0,
-        },
-    }
-};
-
-const unauthorizedHasFreeTransactions = async () => {
-    return {
-        error: null,
-        result: {
-            hasFreeTransactions: true,
-        },
-    }
-}
 
 const responseOptions = (origin) => ({
     headers: {
@@ -119,7 +32,7 @@ const responseOptions = (origin) => ({
  *
  * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
- * 
+ *
  */
 exports.balanceHandler = async (event) => {
     if (event.httpMethod !== 'GET') {
@@ -135,21 +48,9 @@ exports.balanceHandler = async (event) => {
         },
     } = getParameters(event) || {};
 
+    const authorizationRequired = isAuthorizationRequired(networkId);
+
     try {
-        const {
-            isValid,
-            authorizationRequired,
-            error: networkError,
-        } = validateNetworkId(networkId);
-        if (!isValid) {
-            return networkError;
-        }
-
-        initialize({
-            networkId,
-            authorizationRequired,
-        });
-
         const {
             error: validationError,
         } = await validateRequestData({
@@ -173,21 +74,16 @@ exports.balanceHandler = async (event) => {
             return validationError;
         }
 
-        let resp;
-        if (authorizationRequired) {
-            resp = await authorizedHasFreeTransactions({
-                networkId,
-                apiKey,
-            });
-        } else {
-            resp = await unauthorizedHasFreeTransactions();
-        }
         const {
-            error: freeTransactionsError,
+            error: approvalError,
             result,
-        } = resp;
-        if (freeTransactionsError) {
-            return freeTransactionsError;
+        } = await hasFreeTransactions({
+            networkId,
+            apiKey,
+            authorizationRequired,
+        });
+        if (approvalError) {
+            return approvalError;
         }
         const options = responseOptions(origin);
         return OK_200(result, options);

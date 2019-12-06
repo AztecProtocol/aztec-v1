@@ -1,14 +1,11 @@
 const {
-    connection,
-} = require('../helpers');
-const {
     log,
     errorLog,
 } = require('../../utils/log');
 
-module.exports = async () => {
+module.exports = async (sequalize) => {
     try {
-        await connection.getConnection().close()
+        await sequalize.close()
         log('Connection has been closed successfully.');
         return true;
     } catch (e) {

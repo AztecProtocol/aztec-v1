@@ -1,18 +1,10 @@
-const Sequelize = require('sequelize');
-const {
-    connection,
-} = require('../helpers');
-const {
-    Dapps,
-} = require('./types');
+module.exports = (sequelize, DataTypes) => {
+    const {
+        STRING,
+        BOOLEAN,
+    } = DataTypes;
 
-const {
-    STRING,
-    BOOLEAN,
-} = Sequelize;
-
-module.exports = () => {
-    Dapps.init({
+    const Dapps = sequelize.define('Dapps', {
         apiKey: {
             type: STRING,
             allowNull: false,
@@ -26,9 +18,9 @@ module.exports = () => {
             type: STRING,
             allowNull: false,
         },
-    }, {
-        sequelize: connection.getConnection(),
-        modelName: 'Dapps',
-        timestamps: true,
-    });
+    }, {})
+    Dapps.associate = function (models) {
+      // associations can be defined here
+    }
+    return Dapps
 };

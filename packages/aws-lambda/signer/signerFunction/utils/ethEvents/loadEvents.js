@@ -1,4 +1,4 @@
-const web3Service = require('../../services/Web3Service');
+const web3Factory = require('../../services/Web3Service/helpers/web3Factory');
 const {
     AZTECAccountRegistryGSNConfig,
 } = require('../../config/contracts');
@@ -28,6 +28,7 @@ module.exports = async ({
         networks,
     } = AZTECAccountRegistryGSNConfig;
 
+    const web3Service = web3Factory.getWeb3Service(networkId);
     const events = await web3Service
         .useContract(AZTECAccountRegistryGSNContract)
         .at(networks[networkId])

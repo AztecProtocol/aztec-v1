@@ -1,8 +1,8 @@
-const connection = require('./connection');
+const dbFactory = require('./dbFactory');
 const createDatabases = require('./createDatabases');
 
 
 module.exports = {
-    connection,
+    dbFactory,
     createDatabases,
 };

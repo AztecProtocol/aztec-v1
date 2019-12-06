@@ -1,24 +1,18 @@
-const Sequelize = require('sequelize');
-const {
-    connection,
-} = require('../helpers');
-const {
-    Users,
-} = require('./types');
 const {
     EMAIL_ADDRESS_LEGNTH,
     PASSWORD_HASH_LEGNTH,
     USER_TYPE,
 } = require('../../config/constants');
 
-const {
-    STRING,
-    BOOLEAN,
-    ENUM,
-} = Sequelize;
 
-module.exports = () => {
-    Users.init({
+module.exports = (sequelize, DataTypes) => {
+    const {
+        STRING,
+        BOOLEAN,
+        ENUM,
+    } = DataTypes;
+
+    const Users = sequelize.define('Users', {
         email: {
             type: STRING(EMAIL_ADDRESS_LEGNTH),
             allowNull: false,
@@ -40,9 +34,9 @@ module.exports = () => {
             type: BOOLEAN,
             allowNull: false,
         },
-    }, {
-        sequelize: connection.getConnection(),
-        modelName: 'Users',
-        timestamps: true,
-    });
+    }, {});
+    Users.associate = (models) => {
+        // associations can be defined here
+    };
+    return Users;
 };

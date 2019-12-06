@@ -1,8 +1,6 @@
 const {
-    types: {
-        Transactions,
-    },
-} = require('../../database/models');
+    dbFactory,
+} = require('../../database');
 const {
     TRANSACTION_STATUS,
     TRANSACTION_TYPE,
@@ -11,7 +9,11 @@ const {
 
 module.exports = async ({
     dappId,
+    networkId,
 }) => {
+    const {
+        Transactions,
+    } = dbFactory.getDB(networkId);
     return Transactions.findAll({
         attributes: ['signatureHash'],
         where: {

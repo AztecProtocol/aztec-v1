@@ -1,7 +1,7 @@
 const {
     NETWORKS,
-} = require('../config/constants');
-const isGanacheNetwork = require('./isGanacheNetwork');
+} = require('../../../config/constants');
+const isGanacheNetwork = require('../../../helpers/isGanacheNetwork');
 
 
 module.exports = (networkId)=> {

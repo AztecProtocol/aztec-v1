@@ -1,6 +1,4 @@
-const {
-    isGanacheNetwork,
-} = require('../../helpers');
+const isGanacheNetwork = require('../../helpers/isGanacheNetwork');
 
 
 module.exports = (networkId) => {

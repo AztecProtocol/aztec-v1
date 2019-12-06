@@ -1,14 +1,12 @@
 const {
     loadEvents,
-} = require('../utils/ethEvents');
-const {
-    updateExpiredTxs,
-    updateMultipleTxs,
-    pendingTxs,
-} = require('../utils/transactions')
+} = require('../ethEvents');
+const updateExpiredTxs = require('./updateExpiredTxs')
+const updateMultipleTxs = require('./updateMultipleTxs')
+const pendingTxs = require('./pendingTxs')
 const {
     TRANSACTION_STATUS,
-} = require('../config/constants');
+} = require('../../config/constants');
 
 
 module.exports = async ({
@@ -16,6 +14,7 @@ module.exports = async ({
     networkId,
 }) => {
     const pending = await pendingTxs({
+        networkId,
         dappId,
     });
     if (!pending.length) return;
@@ -41,7 +40,10 @@ module.exports = async ({
             actualCharge: tx.actualCharge,
             status: TRANSACTION_STATUS.OK,
         }));
-        await updateMultipleTxs(updateTxs);
+        await updateMultipleTxs({
+            updateTxs,
+            networkId,
+        });
     }
 
     /**
@@ -53,11 +55,16 @@ module.exports = async ({
             actualCharge: tx.actualCharge,
             status: TRANSACTION_STATUS.FAILED,
         }));
-        await updateMultipleTxs(updateTxs);
+        await updateMultipleTxs({
+            updateTxs,
+            networkId,
+        });
     }
 
     /**
      * Update pending txs to Expired status
      */
-    await updateExpiredTxs();
+    await updateExpiredTxs({
+        networkId,
+    });
 };
