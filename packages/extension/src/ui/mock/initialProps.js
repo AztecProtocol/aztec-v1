@@ -71,8 +71,6 @@ export default {
         goNext: dummyFunc,
     },
     deposit: {
-        from: addresses[0],
-        sender: addresses[1],
         assetAddress: assets[0].address,
         transactions: [depositTransactions[0]],
     },

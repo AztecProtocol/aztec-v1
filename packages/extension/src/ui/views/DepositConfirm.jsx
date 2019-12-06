@@ -20,7 +20,7 @@ import Separator from '~ui/components/Separator';
 
 const DepositConfirm = ({
     asset,
-    from: fromAddress,
+    publicOwner,
     transactions,
     amount: totalAmount,
 }) => (
@@ -42,11 +42,11 @@ const DepositConfirm = ({
                             <ListItem
                                 profile={{
                                     type: 'user',
-                                    address: fromAddress,
+                                    address: publicOwner,
                                 }}
                                 content={(
                                     <HashText
-                                        text={fromAddress}
+                                        text={publicOwner}
                                         prefixLength={12}
                                         suffixLength={4}
                                         size="s"
@@ -143,7 +143,7 @@ const DepositConfirm = ({
 
 DepositConfirm.propTypes = {
     asset: assetShape.isRequired,
-    from: PropTypes.string.isRequired,
+    publicOwner: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
     amount: PropTypes.number.isRequired,
 };

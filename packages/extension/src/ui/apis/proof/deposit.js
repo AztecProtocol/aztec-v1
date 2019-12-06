@@ -8,7 +8,6 @@ import {
 import settings from '~background/utils/settings';
 import ApiError from '~/helpers/ApiError';
 import {
-    getNoteOwnerAccount,
     getExtensionAccount,
 } from '~ui/apis/account';
 
@@ -18,34 +17,28 @@ const {
 } = aztec;
 
 export default async function deposit({
-    owner,
     transactions,
     publicOwner,
-    numberOfOutputNotes,
     sender,
+    numberOfOutputNotes,
 }) {
-    const notesOwner = await getNoteOwnerAccount(owner);
-    if (!notesOwner) {
-        throw new ApiError('account.not.linked', {
-            address: owner,
-        });
-    }
-
-    const {
-        spendingPublicKey,
-    } = notesOwner;
-
     const numberOfNotes = numberOfOutputNotes > 0
         ? numberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
+
     const outputTransactionNotes = await Promise.all(
         transactions.map(async ({
             amount,
             to,
+            numberOfOutputNotes: txNumberOfOutputNotes,
         }) => {
-            const noteValues = randomSumArray(amount, numberOfNotes);
+            const noteValues = randomSumArray(
+                amount,
+                txNumberOfOutputNotes || numberOfNotes,
+            );
             const {
                 linkedPublicKey,
+                spendingPublicKey,
             } = await getExtensionAccount(to) || {};
             if (!linkedPublicKey) {
                 throw new ApiError('account.not.linked', {
@@ -55,7 +48,6 @@ export default async function deposit({
 
             const notes = await createNotes(
                 noteValues,
-                // TODO this needs to change to the actual spending public key
                 spendingPublicKey,
                 to,
                 linkedPublicKey,
@@ -90,7 +82,7 @@ export default async function deposit({
     return {
         proof,
         signatures: '0x',
-        notes: outputNotes,
-        notesOwner,
+        inputNotes,
+        outputNotes,
     };
 }
