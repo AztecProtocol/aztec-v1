@@ -10,19 +10,7 @@ import {
 import { depositSteps } from '~ui/config/steps';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
-import returnAndClose from '~ui/helpers/returnAndClose';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-
-const handleOnStep = (step) => {
-    const newProps = {};
-    switch (step) {
-        case 1:
-            break;
-        default:
-    }
-
-    return newProps;
-};
 
 const Deposit = ({
     initialStep,
@@ -62,8 +50,6 @@ const Deposit = ({
             initialStep={initialStep}
             steps={steps}
             fetchInitialData={fetchInitialData}
-            onExit={returnAndClose}
-            onStep={handleOnStep}
         />
     );
 };
