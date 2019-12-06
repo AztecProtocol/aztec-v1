@@ -3,14 +3,12 @@ import gql from 'graphql-tag';
 export default function accountsQuery(requestedFields) {
     return gql`
         query accounts(
-            $addressArrStr: [String!]!
+            $where: Account_filter!
             $domain: String!
             $currentAddress: String!
         ) {
             accounts(
-                where: {
-                    address_in: $addressArrStr
-                }
+                where: $where
                 domain: $domain
                 currentAddress: $currentAddress
             ) {

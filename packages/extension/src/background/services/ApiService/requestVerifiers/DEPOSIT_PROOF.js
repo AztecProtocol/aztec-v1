@@ -71,9 +71,7 @@ export default async function verifyDepositRequest({
     }
 
     const addresses = transactions.map(({ to }) => to);
-    const invalidAddressError = await validateAccounts({
-        addresses,
-    });
+    const invalidAddressError = await validateAccounts(addresses);
     if (invalidAddressError) {
         return invalidAddressError;
     }
