@@ -200,6 +200,8 @@ async function send() {
 }
 
 async function createNoteFromBalance() {
+  createStatus.clear();
+
   let numberOfInputNotes = document.getElementById('create-input-number').value.trim();
   numberOfInputNotes = numberOfInputNotes === ''
     ? undefined
@@ -209,10 +211,13 @@ async function createNoteFromBalance() {
     ? undefined
     : parseInt(numberOfOutputNotes);
   const valueInput = document.getElementById('create-amount');
-  const owner = document.getElementById('create-owner').value.trim();
   const value = parseInt(valueInput.value.trim());
-
-  createStatus.clear();
+  const userAccess = [];
+  for (let i = 0; i < 10; i += 1) {
+    const elem = document.getElementById(`create-access-${i}`);
+    if (!elem) break;
+    userAccess.push(elem.value);
+  }
 
   const account = window.aztec.web3.account();
 
@@ -419,12 +424,11 @@ document.getElementById('app').innerHTML = `
           size="2"
           value="2"
         /><br/>
-        <label>New note owner</label>
+        <label>Share note access with</label>
         <input
-          id="create-owner"
+          id="create-access-0"
           type="text"
           size="42"
-          value="${accountAddress}"
         /><br/>
         <button onclick="createNoteFromBalance()">Submit</button><br/>
         <br/>

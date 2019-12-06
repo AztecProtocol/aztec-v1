@@ -32,7 +32,7 @@ export default async function createNoteFromBalance({
     amount,
     transactions,
     publicOwner,
-    // userAccess,
+    userAccessAccounts,
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
 }) {
@@ -144,13 +144,28 @@ export default async function createNoteFromBalance({
                 transactionAmount,
                 count || numberOfOutputNotes,
             );
-            const notesOwner = accountMapping[to];
+            const {
+                linkedPublicKey,
+                spendingPublicKey,
+            } = accountMapping[to];
             outputValues.push(...values);
+            const ownerAccess = {
+                address: to,
+                linkedPublicKey,
+            };
+            const userAccess = !userAccessAccounts
+                ? ownerAccess
+                : [
+                    ...userAccessAccounts,
+                    ownerAccess,
+                ].filter((access, i, arr) => i === arr.findIndex(({
+                    address,
+                }) => address === access.address));
             const newNotes = await createNotes(
                 values,
-                notesOwner.spendingPublicKey,
-                notesOwner.address,
-                notesOwner.linkedPublicKey,
+                spendingPublicKey,
+                to,
+                userAccess,
             );
             outputNotes.push(...newNotes);
         });

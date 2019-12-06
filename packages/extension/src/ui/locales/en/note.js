@@ -17,6 +17,9 @@ export default {
             submit: 'Grant',
             explain: 'This will allow the address to see the value of this note and construct proofs using this note. It will not be able to spend this note without your approval via MetaMask.',
         },
+        share: {
+            _: 'Share with',
+        },
         invalidAccounts: 'Error: All accounts must have registered the AZTEC extension',
     },
     sign: {
@@ -31,9 +34,12 @@ export default {
             title: 'Create new note from asset %{asset}',
             description: 'This proof will create %{newNoteText} from %{oldNoteText}.',
             submit: 'Create Proof',
-            explain: "Existing notes will be destroyed to create the new notes. This will allow the new note's owner to see its value and construct proofs using this note.",
+            explain: 'The existing notes will be destroyed to create the new notes. You are still the owner of the new notes.',
             remainder: {
                 description: 'The note total is greater than the required amount, the difference will be credited to your balance:',
+            },
+            share: {
+                explain: 'The above addresses can see the value of the new notes. They will not be able to spend the notes without your approval.',
             },
         },
     },

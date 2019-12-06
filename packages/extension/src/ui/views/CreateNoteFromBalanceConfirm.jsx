@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -20,6 +19,7 @@ import formatNumber from '~ui/utils/formatNumber';
 import PopupContent from '~ui/components/PopupContent';
 import Connection from '~ui/components/Connection';
 import ListItem from '~ui/components/ListItem';
+import Separator from '~/ui/components/Separator';
 import HashText from '~/ui/components/HashText';
 
 const CreateNoteFromBalanceConfirm = ({
@@ -33,6 +33,7 @@ const CreateNoteFromBalanceConfirm = ({
     inputNotes,
     outputNotes,
     remainderNote,
+    userAccessAccounts,
 }) => {
     const visibleNotes = 2;
     const totalInputAmount = inputNotes.reduce((sum, note) => sum + valueOf(note), 0);
@@ -190,49 +191,91 @@ const CreateNoteFromBalanceConfirm = ({
                     actionIconName="double_arrow"
                 />
             </Block>
-            {!!remainderNote && (
-                <Block padding="l">
-                    <Block
-                        padding="l"
-                        background="grey-lightest"
-                        borderRadius="s"
-                    >
-                        <Block bottom="m">
-                            <Text
-                                text={i18n.t('note.create.fromBalance.remainder.description')}
+            <Block padding="0 xl l">
+                {!!remainderNote && (
+                    <Block padding="l 0">
+                        <Block
+                            padding="l"
+                            background="grey-lightest"
+                            borderRadius="s"
+                        >
+                            <Block bottom="m">
+                                <Text
+                                    text={i18n.t('note.create.fromBalance.remainder.description')}
+                                />
+                            </Block>
+                            <ListItem
+                                profile={{
+                                    type: 'note',
+                                    noteHash: remainderNote.noteHash,
+                                }}
+                                content={(
+                                    <HashText
+                                        text={remainderNote.noteHash}
+                                        prefixLength={12}
+                                        suffixLength={6}
+                                        size="xs"
+                                        color="label"
+                                    />
+                                )}
+                                size="xs"
+                                footnote={(
+                                    <Text
+                                        text={`+${formatNumber(valueOf(remainderNote), decimals)}`}
+                                        color="green"
+                                    />
+                                )}
                             />
                         </Block>
-                        <ListItem
-                            profile={{
-                                type: 'note',
-                                noteHash: remainderNote.noteHash,
-                            }}
-                            content={(
-                                <HashText
-                                    text={remainderNote.noteHash}
-                                    prefixLength={12}
-                                    suffixLength={6}
-                                    size="xs"
-                                    color="label"
-                                />
-                            )}
-                            size="xs"
-                            footnote={(
-                                <Text
-                                    text={`+${formatNumber(valueOf(remainderNote), decimals)}`}
-                                    color="green"
-                                />
-                            )}
-                        />
                     </Block>
+                )}
+                <Block padding="l 0">
+                    <Text
+                        text={i18n.t('note.create.fromBalance.explain')}
+                        size="xs"
+                        color="label"
+                    />
                 </Block>
-            )}
-            <Block padding="l">
-                <Text
-                    text={i18n.t('note.create.fromBalance.explain')}
-                    size="xs"
-                    color="label"
-                />
+                {userAccessAccounts.length > 0 && (
+                    <Block padding="l 0">
+                        <Separator
+                            theme="white"
+                            title={i18n.t('note.access.share')}
+                        />
+                        <Block padding="m 0">
+                            {userAccessAccounts.map(({
+                                address,
+                            }, i) => (
+                                <Block
+                                    key={+i}
+                                    padding="s 0"
+                                >
+                                    <ListItem
+                                        profile={{
+                                            type: 'user',
+                                            address,
+                                        }}
+                                        content={(
+                                            <HashText
+                                                text={address}
+                                                prefixLength={18}
+                                                suffixLength={8}
+                                            />
+                                        )}
+                                        size="xxs"
+                                    />
+                                </Block>
+                            ))}
+                        </Block>
+                        <Block padding="m 0">
+                            <Text
+                                text={i18n.t('note.create.fromBalance.share.explain')}
+                                size="xs"
+                                color="label"
+                            />
+                        </Block>
+                    </Block>
+                )}
             </Block>
         </PopupContent>
     );
@@ -246,12 +289,16 @@ CreateNoteFromBalanceConfirm.propTypes = {
     inputNotes: PropTypes.arrayOf(rawNoteShape).isRequired,
     outputNotes: PropTypes.arrayOf(rawNoteShape).isRequired,
     remainderNote: rawNoteShape,
+    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    })),
 };
 
 CreateNoteFromBalanceConfirm.defaultProps = {
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
     remainderNote: null,
+    userAccessAccounts: [],
 };
 
 export default CreateNoteFromBalanceConfirm;

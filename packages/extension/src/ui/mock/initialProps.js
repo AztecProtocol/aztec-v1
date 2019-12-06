@@ -105,6 +105,7 @@ export default {
         assetAddress: assets[0].address,
         amount: randomInt(1, 100),
         numberOfOutputNotes: 1,
+        userAccess: addresses.slice(1, 3),
     },
     mint: {
         asset: assets[0],
