@@ -59,10 +59,13 @@ export default async function deposit({
         }),
     );
 
-    const { outputNotes, outputNoteValues } = outputTransactionNotes.reduce(
+    const {
+        notes: outputNotes,
+        values: outputNoteValues,
+    } = outputTransactionNotes.reduce(
         ({ notes, values }, obj) => ({
-            outputNotes: notes.concat(obj.notes),
-            outputNoteValues: values.concat(obj.noteValues),
+            notes: notes.concat(obj.notes),
+            values: values.concat(obj.noteValues),
         }), { notes: [], values: [] },
     );
 
