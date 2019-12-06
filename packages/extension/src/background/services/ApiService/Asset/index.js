@@ -1,4 +1,10 @@
+import assetQuery from '~/background/services/GraphQLService/Queries/assetQuery';
 import query from '../utils/query';
-import AssetQuery from '../queries/AssetQuery';
 
-export default async request => query(request, AssetQuery);
+export default async request => query(request, assetQuery(`
+    address
+    linkedTokenAddress
+    scalingFactor
+    canAdjustSupply
+    canConvert
+`));

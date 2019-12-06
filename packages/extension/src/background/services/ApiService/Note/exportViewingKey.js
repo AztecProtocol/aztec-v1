@@ -1,4 +1,9 @@
+import noteQuery from '~/background/services/GraphQLService/Queries/noteQuery';
 import query from '../utils/query';
-import NoteWithViewingQuery from '../queries/NoteWithViewingQuery';
 
-export default async request => query(request, NoteWithViewingQuery);
+export default async request => query(request, noteQuery(`
+    decryptedViewingKey
+    owner {
+        address
+    }
+`));

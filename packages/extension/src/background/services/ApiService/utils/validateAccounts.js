@@ -1,4 +1,4 @@
-import AccountsQuery from '../queries/AccountsQuery';
+import accountsQuery from '~/background/services/GraphQLService/Queries/accountsQuery';
 import query from './query';
 
 export default async function validateAccounts({
@@ -15,7 +15,10 @@ export default async function validateAccounts({
 
     const {
         accounts: response,
-    } = await query(request, AccountsQuery);
+    } = await query(request, accountsQuery(`
+        address
+        linkedPublicKey
+    `));
 
     return response.error ? response : null;
 }
