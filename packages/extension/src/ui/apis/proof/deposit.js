@@ -6,9 +6,8 @@ import {
     createNotes,
 } from '~utils/note';
 import settings from '~background/utils/settings';
-import ApiError from '~/helpers/ApiError';
 import {
-    getExtensionAccount,
+    batchGetExtensionAccount,
 } from '~ui/apis/account';
 
 const {
@@ -26,12 +25,15 @@ export default async function deposit({
         ? numberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
 
+    const addresses = transactions.map(({ to }) => to);
+    const accounts = await batchGetExtensionAccount(addresses);
+
     const outputTransactionNotes = await Promise.all(
         transactions.map(async ({
             amount,
             to,
             numberOfOutputNotes: txNumberOfOutputNotes,
-        }) => {
+        }, i) => {
             const noteValues = randomSumArray(
                 amount,
                 txNumberOfOutputNotes || numberOfNotes,
@@ -39,12 +41,7 @@ export default async function deposit({
             const {
                 linkedPublicKey,
                 spendingPublicKey,
-            } = await getExtensionAccount(to) || {};
-            if (!linkedPublicKey) {
-                throw new ApiError('account.not.linked', {
-                    address: to,
-                });
-            }
+            } = accounts[i] || {};
 
             const notes = await createNotes(
                 noteValues,
@@ -52,6 +49,7 @@ export default async function deposit({
                 to,
                 linkedPublicKey,
             );
+
             return {
                 notes,
                 noteValues,
