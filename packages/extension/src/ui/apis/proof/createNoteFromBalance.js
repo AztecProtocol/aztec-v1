@@ -22,7 +22,7 @@ import {
 } from '~ui/config/settings';
 import ConnectionService from '~ui/services/ConnectionService';
 import {
-    getExtensionAccount,
+    batchGetExtensionAccount,
 } from '~ui/apis/account';
 
 export default async function createNoteFromBalance({
@@ -36,33 +36,21 @@ export default async function createNoteFromBalance({
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
 }) {
-    const inputNotesOwner = await getExtensionAccount(currentAddress);
     let inputAmount = amount;
-
-    const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-        ? customNumberOfInputNotes
-        : await settings('NUMBER_OF_INPUT_NOTES');
-    const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-        ? customNumberOfOutputNotes
-        : await settings('NUMBER_OF_OUTPUT_NOTES');
-
-    const outputNotesOwnerMapping = {
-        [currentAddress]: inputNotesOwner,
-    };
     if (transactions && transactions.length) {
         inputAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
         if (amount && inputAmount !== amount) {
             errorLog(`Input amount (${amount}) does not match total transactions (${inputAmount}).`);
         }
-
-        const newAddresses = transactions
-            .map(({ to }) => to)
-            .filter(addr => addr !== currentAddress)
-            .filter((addr, idx, arr) => arr.indexOf(addr) === idx);
-        await Promise.all(newAddresses.map(async (addr) => {
-            outputNotesOwnerMapping[addr] = await getExtensionAccount(addr);
-        }));
     }
+
+    const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
+        ? customNumberOfInputNotes
+        : await settings('NUMBER_OF_INPUT_NOTES');
+
+    const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
+        ? customNumberOfOutputNotes
+        : await settings('NUMBER_OF_OUTPUT_NOTES');
 
     const {
         pickNotesFromBalance,
@@ -112,18 +100,33 @@ export default async function createNoteFromBalance({
         });
     }
 
-    const outputValues = [];
-    const outputNotes = [];
     const inputValues = notes.map(({ value }) => value);
     const sum = notes.reduce((accum, { value }) => accum + value, 0);
     const extraAmount = sum - inputAmount;
+
+    const addresses = (transactions || []).map(({ to }) => to);
+    if (extraAmount > 0) {
+        addresses.push(currentAddress);
+    }
+    const accountMapping = {};
+    const accounts = await batchGetExtensionAccount(addresses);
+    accounts.forEach((account) => {
+        accountMapping[account.address] = account;
+    });
+
+    const outputValues = [];
+    const outputNotes = [];
     let remainderNote;
     if (extraAmount > 0) {
+        const {
+            spendingPublicKey,
+            linkedPublicKey,
+        } = accountMapping[currentAddress];
         remainderNote = await createNote(
             extraAmount,
-            inputNotesOwner.spendingPublicKey,
-            inputNotesOwner.address,
-            inputNotesOwner.linkedPublicKey,
+            spendingPublicKey,
+            currentAddress,
+            linkedPublicKey,
         );
         outputValues.push(extraAmount);
         outputNotes.push(remainderNote);
@@ -141,7 +144,7 @@ export default async function createNoteFromBalance({
                 transactionAmount,
                 count || numberOfOutputNotes,
             );
-            const notesOwner = outputNotesOwnerMapping[to];
+            const notesOwner = accountMapping[to];
             outputValues.push(...values);
             const newNotes = await createNotes(
                 values,
