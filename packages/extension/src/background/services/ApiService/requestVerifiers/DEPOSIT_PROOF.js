@@ -3,15 +3,18 @@ import {
     argsError,
 } from '~/utils/error';
 import Asset from '~/background/database/models/asset';
-import validateExtensionAccount from '../utils/validateExtensionAccount';
 import validateAccounts from '../utils/validateAccounts';
 
 export default async function verifyDepositRequest({
     assetAddress,
     transactions,
-    from,
 }) {
-    const { networkId } = Web3Service;
+    const {
+        networkId,
+        account: {
+            address: currentAddress,
+        },
+    } = Web3Service;
     const {
         linkedTokenAddress,
         scalingFactor: scalingFactorStr,
@@ -35,7 +38,7 @@ export default async function verifyDepositRequest({
         .at(linkedTokenAddress)
         .method('allowance')
         .call(
-            from,
+            currentAddress,
             aceAddress,
         );
     allowance = parseInt(allowance, 10);
@@ -53,7 +56,7 @@ export default async function verifyDepositRequest({
         .at(linkedTokenAddress)
         .method('balanceOf')
         .call(
-            from,
+            currentAddress,
         );
     balance = parseInt(balance, 10);
 
@@ -63,11 +66,6 @@ export default async function verifyDepositRequest({
             depositAmount,
             notesValue,
         });
-    }
-
-    const ownerError = await validateExtensionAccount(from);
-    if (ownerError) {
-        return ownerError;
     }
 
     const addresses = transactions.map(({ to }) => to);

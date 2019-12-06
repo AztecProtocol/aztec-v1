@@ -135,8 +135,6 @@ export default class Asset {
      *       to (Address!):                The output note owner.
      *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
      * - options (Object)
-     *       from (Address):               The linked token owner.
-     *       sender (Address):             The proof sender.
      *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
      *                                     Unless numberOfOutputNotes is defined in that transaction.
      *                                     Will use default value in setting if undefined.
@@ -146,26 +144,16 @@ export default class Asset {
      * - amount (Int)
      */
     deposit = async (transactions, {
-        from = '',
-        sender = '',
         numberOfOutputNotes,
-    } = {}) => {
-        const {
-            address,
-        } = Web3Service.account;
-
-        return ConnectionService.query(
-            'constructProof',
-            {
-                proofType: 'DEPOSIT_PROOF',
-                assetAddress: this.address,
-                transactions,
-                from: from || address,
-                sender: sender || address,
-                numberOfOutputNotes,
-            },
-        );
-    };
+    } = {}) => ConnectionService.query(
+        'constructProof',
+        {
+            proofType: 'DEPOSIT_PROOF',
+            assetAddress: this.address,
+            transactions,
+            numberOfOutputNotes,
+        },
+    );
 
     /**
      *

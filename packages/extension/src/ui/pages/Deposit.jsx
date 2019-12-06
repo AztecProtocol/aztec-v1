@@ -26,8 +26,7 @@ const handleOnStep = (step) => {
 
 const Deposit = ({
     initialStep,
-    from,
-    sender,
+    currentAccount,
     assetAddress,
     transactions,
     numberOfOutputNotes,
@@ -37,8 +36,10 @@ const Deposit = ({
         isGSNAvailable,
         proxyContract,
     } = gsnConfig;
+    const {
+        address: currentAddress,
+    } = currentAccount;
     const steps = isGSNAvailable ? depositSteps.gsn : depositSteps.metamask;
-    const actualSender = isGSNAvailable ? proxyContract : sender;
 
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
@@ -48,11 +49,9 @@ const Deposit = ({
         return {
             assetAddress,
             asset,
-            from,
-            owner: from,
-            publicOwner: from,
-            sender: actualSender,
             transactions: parsedTransactions,
+            publicOwner: currentAddress,
+            sender: isGSNAvailable ? proxyContract : currentAddress,
             amount,
             numberOfOutputNotes,
         };
@@ -71,8 +70,9 @@ const Deposit = ({
 
 Deposit.propTypes = {
     initialStep: PropTypes.number,
-    from: PropTypes.string.isRequired,
-    sender: PropTypes.string.isRequired,
+    currentAccount: PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    }).isRequired,
     assetAddress: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     numberOfOutputNotes: PropTypes.number,

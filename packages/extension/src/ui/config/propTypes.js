@@ -84,6 +84,7 @@ export const inputAmountType = PropTypes.number;
 export const inputTransactionShape = PropTypes.shape({
     amount: inputAmountType.isRequired,
     to: PropTypes.string.isRequired,
+    numberOfOutputNotes: PropTypes.number,
 });
 
 export const transactionShape = PropTypes.shape({

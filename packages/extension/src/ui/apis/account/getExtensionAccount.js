@@ -16,6 +16,7 @@ export default async function getExtensionAccount(address) {
         return {
             address,
             linkedPublicKey: '',
+            spendingPublicKey: '',
         };
     }
 
