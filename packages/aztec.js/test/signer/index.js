@@ -243,9 +243,62 @@ describe('Signer', () => {
             );
 
             // eth-sig-util is the MetaMask signing package
-            const metaMaskSignature = ethSigUtil.signTypedData(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
+            const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
                 data: metaMaskTypedData,
             });
+            expect(aztecSignature).to.equal(metaMaskSignature);
+        });
+
+        it('signNotesForBatchConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
+            const aztecAccount = secp256k1.generateAccount();
+            const spender = randomHex(20);
+            const spenderApprovals = [true, true];
+            const verifyingContract = randomHex(20);
+            const testNoteValue = 10;
+            const testNoteA = await note.create(aztecAccount.publicKey, testNoteValue);
+            const testNoteB = await note.create(aztecAccount.publicKey, testNoteValue);
+
+            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
+
+            const metaMaskTypedData = {
+                domain: {
+                    name: 'ZK_ASSET',
+                    version: '1',
+                    verifyingContract,
+                },
+                types: {
+                    MultipleNoteSignature: [
+                        { name: 'noteHashes', type: 'bytes32[]' },
+                        { name: 'spender', type: 'address' },
+                        { name: 'spenderApprovals', type: 'bool[]' },
+                    ],
+                    EIP712Domain: [
+                        { name: 'name', type: 'string' },
+                        { name: 'version', type: 'string' },
+                        { name: 'verifyingContract', type: 'address' },
+                    ],
+                },
+                primaryType: 'MultipleNoteSignature',
+                message: {
+                    noteHashes,
+                    spender,
+                    spenderApprovals,
+                },
+            };
+
+            const aztecSignature = signer.signNotesForBatchConfidentialApprove(
+                verifyingContract,
+                noteHashes,
+                spender,
+                spenderApprovals,
+                aztecAccount.privateKey,
+            );
+
+            // eth-sig-util is the MetaMask signing package
+            const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
+                data: metaMaskTypedData,
+            });
+
             expect(aztecSignature).to.equal(metaMaskSignature);
         });
     });

@@ -42,7 +42,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             "bool spenderApproval",
         ")"
     ));
-    
+
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
         "JoinSplitSignature(",
             "uint24 proof,",
@@ -165,7 +165,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     /**
      * @dev Note owner can approve a third party address, such as a smart contract,
      * to spend multiple notes on their behalf. This allows a batch approval of notes
-     * to be performed, rather than individually for each note via confidentialApprove(). 
+     * to be performed, rather than individually for each note via confidentialApprove().
      *
      * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
      * @param _spender - address being approved to spend the notes
@@ -185,6 +185,12 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         require(signatureLog[signatureHash] != true, "signature has already been used");
         signatureLog[signatureHash] = true;
 
+        bytes32 _hashStruct = keccak256(abi.encode(
+            MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
+            keccak256(abi.encodePacked(_noteHashes)),
+            _spender,
+            keccak256(abi.encodePacked(_spenderApprovals))
+        ));
 
         bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712_DOMAIN_TYPEHASH,
@@ -245,8 +251,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
     /**
     * @dev Extract the appropriate ECDSA signature from an array of signatures,
-    * 
-    * @param _signatures - array of ECDSA signatures over all inputNotes 
+    *
+    * @param _signatures - array of ECDSA signatures over all inputNotes
     * @param _i - index used to determine which signature element is desired
     */
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
@@ -258,13 +264,13 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         assembly {
             // memory map of signatures
             // 0x00 - 0x20 : length of signature array
-            // 0x20 - 0x40 : first sig, v 
-            // 0x40 - 0x60 : first sig, r 
+            // 0x20 - 0x40 : first sig, v
+            // 0x40 - 0x60 : first sig, r
             // 0x60 - 0x80 : first sig, s
             // 0x80 - 0xa0 : second sig, v
             // and so on...
             // Length of a signature = 0x60
-            
+
             v := mload(add(add(_signatures, 0x20), mul(_i, 0x60)))
             r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
             s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
@@ -445,8 +451,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
                 noteAccess[addressID] = block.timestamp;
             }
         }
-    }   
-   
+    }
+
 
     /**
     * @dev Emit events for all input notes, which represent notes being destroyed

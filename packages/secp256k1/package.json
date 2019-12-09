@@ -47,11 +47,12 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
-    "build:prod": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "build:dev": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "build": "./build.sh",
+    "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-    "watch": "yarn build --watch"
+    "watch": "yarn build:dev --watch"
   }
 }
