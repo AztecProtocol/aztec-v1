@@ -4,7 +4,8 @@
  *
  * @module sign.signer
  */
-
+const ethAbi = require('ethereumjs-abi');
+const ethUtil = require('ethereumjs-util');
 const AbiCoder = require('web3-eth-abi');
 const { keccak256 } = require('web3-utils');
 
@@ -34,10 +35,29 @@ signer.encodeMessageData = function encodeMessageData(types, primaryType, messag
             return `${acc}${sliceKeccak256(message[name])}`;
         }
         if (type.includes('[')) {
-            return `${acc}${sliceKeccak256(AbiCoder.encodeParameter(type, message[name]))}`;
+            const arrayRawEncoding = signer.encodeArray(type, message[name]);
+            return `${acc}${arrayRawEncoding}`;
         }
         return `${acc}${AbiCoder.encodeParameters([type], [message[name]]).slice(2)}`;
     }, sliceKeccak256(signer.encodeStruct(primaryType, types)));
+};
+
+/**
+ * Encode an array, according to the method used by MetaMask. Code adapted from MetaMask's
+ * encodeData() method in the eth-sig-util module - https://github.com/MetaMask/eth-sig-util/blob/master/index.js
+ *
+ * @method encodeArray
+ * @param {String} type - type of the data structure to be encoded
+ * @param {Array} data - array data to be encoded
+ */
+signer.encodeArray = function encodeArray(type, data) {
+    const arrayElementAtomicType = type.slice(0, type.lastIndexOf('['));
+    const typeValuePairs = data.map((item) => [arrayElementAtomicType, item]);
+
+    const arrayElementTypes = typeValuePairs.map(([individualType]) => individualType);
+    const arrayValueTypes = typeValuePairs.map(([, value]) => value);
+
+    return ethUtil.sha3(ethAbi.rawEncode(arrayElementTypes, arrayValueTypes)).toString('hex');
 };
 
 /**

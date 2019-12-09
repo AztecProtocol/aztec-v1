@@ -19,6 +19,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.16.0",
+    "eth-sig-util": "^2.5.2",
     "mocha": "^6.0.2",
     "shx": "^0.3.2"
   },
