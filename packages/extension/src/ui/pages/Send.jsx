@@ -7,6 +7,7 @@ import {
 import {
     emptyIntValue,
 } from '~ui/config/settings';
+import apis from '~uiModules/apis';
 import makeAsset from '~ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
@@ -20,6 +21,7 @@ const Send = ({
     proof,
     numberOfInputNotes,
     numberOfOutputNotes,
+    userAccess,
     gsnConfig,
 }) => {
     const {
@@ -36,6 +38,7 @@ const Send = ({
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
 
         return {
             assetAddress,
@@ -46,6 +49,7 @@ const Send = ({
             proof,
             numberOfInputNotes,
             numberOfOutputNotes,
+            userAccessAccounts,
             amount,
         };
     };
@@ -71,6 +75,7 @@ Send.propTypes = {
     }),
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
+    userAccess: PropTypes.arrayOf(PropTypes.string),
     gsnConfig: gsnConfigShape.isRequired,
 };
 
@@ -79,6 +84,7 @@ Send.defaultProps = {
     proof: null,
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
+    userAccess: [],
 };
 
 export default Send;

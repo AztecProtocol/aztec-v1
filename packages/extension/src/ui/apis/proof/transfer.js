@@ -7,6 +7,7 @@ export default async function transfer({
     transactions,
     numberOfInputNotes,
     numberOfOutputNotes,
+    userAccessAccounts,
 }) {
     return createNoteFromBalance({
         assetAddress,
@@ -16,5 +17,6 @@ export default async function transfer({
         publicOwner: currentAddress,
         numberOfInputNotes,
         numberOfOutputNotes,
+        userAccessAccounts,
     });
 }
