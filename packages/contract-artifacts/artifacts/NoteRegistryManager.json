@@ -624,5 +624,5 @@
         "version": "0.5.7+commit.6da8b019.Emscripten.clang"
     },
     "deployedBytecode": "0x",
-    "schemaVersion": "3.0.9"
+    "schemaVersion": "3.0.19"
 }
