@@ -36,6 +36,11 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         proofs[ace.latestEpoch()] = 17;
     }
 
+    /**
+    * @dev Set which proofs this asset is able to listen to and validate
+    * @param _epoch  epoch number to which the proof belongs
+    * @param _proofs proofs for which the asset will listen to
+    */
     function setProofs(
         uint8 _epoch,
         uint256 _proofs
@@ -61,15 +66,32 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         super.confidentialTransfer(_proofId, _proofData, _signatures);
     }
 
+    /**
+    * @dev Executes a value transfer mediated by smart contracts. The method is supplied with
+    * transfer instructions represented by a bytes _proofOutput argument that was outputted
+    * from a proof verification contract.
+    *
+    * @param _proofId - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
+    * transfer instructions for the ACE
+    */
     function confidentialTransferFrom(uint24 _proofId, bytes memory _proofOutput) public {
         bool result = supportsProof(_proofId);
         require(result == true, "expected proof to be supported");
         super.confidentialTransferFrom(_proofId, _proofOutput);
     }
 
-    // @dev Return whether the proof is supported or not by this asset. Note that we have
-    //      to subtract 1 from the proof id because the original representation is uint8,
-    //      but here that id is considered to be an exponent
+    /**
+    * @dev Return whether the proof is supported or not by this asset. Note that we have
+    *     to subtract 1 from the proof id because the original representation is uint8,
+    *     but here that id is considered to be an exponent
+    *
+    * @param _proof - unique identifier specifying the proof to be checked as to whether it is
+    *                 supported by the asset
+    * @return boolean defining whether the asset supports the proof specified by _proof input
+    */
     function supportsProof(uint24 _proof) public view returns (bool) {
         (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
         require(category == uint8(ProofCategory.BALANCED), "this asset only supports balanced proofs");
@@ -77,6 +99,11 @@ contract ZkAssetOwnableBase is ZkAssetBase, Ownable {
         return bit == 1;
     }
 
+    /**
+    * @dev Upgrade the note registry of this asset, by pointing it to a new factory
+    *
+    * @param _factoryId - the ID of the factory which will supply the upgraded behaviour contracts
+    */
     function upgradeRegistryVersion(uint24 _factoryId) public onlyOwner {
         ace.upgradeNoteRegistry(_factoryId);
     }

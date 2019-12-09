@@ -32,9 +32,10 @@ const Swap = require('../artifacts/Swap');
 const SwapABIEncoder = require('../artifacts/SwapABIEncoder');
 const SwapInterface = require('../artifacts/SwapInterface');
 const ZkAsset = require('../artifacts/ZkAsset');
+const ZkAssetAdjustable = require('../artifacts/ZkAssetAdjustable');
 const ZkAssetBase = require('../artifacts/ZkAssetBase');
 const ZkAssetBurnable = require('../artifacts/ZkAssetBurnable');
-const ZkAssetBurnableBase = requie('../artifacts/ZkAssetBurnableBase');
+const ZkAssetBurnableBase = require('../artifacts/ZkAssetBurnableBase');
 const ZkAssetDetailed = require('../artifacts/ZkAssetDetailed');
 const ZkAssetMintable = require('../artifacts/ZkAssetMintable');
 const ZkAssetMintableBase = require('../artifacts/ZkAssetMintableBase');
@@ -75,6 +76,7 @@ module.exports = {
     SwapABIEncoder,
     SwapInterface,
     ZkAsset,
+    ZkAssetAdjustable,
     ZkAssetBase,
     ZkAssetBurnable,
     ZkAssetBurnableBase,

@@ -143,6 +143,32 @@
             "constant": false,
             "inputs": [
                 {
+                    "name": "_noteHashes",
+                    "type": "bytes32[]"
+                },
+                {
+                    "name": "_spender",
+                    "type": "address"
+                },
+                {
+                    "name": "_spenderApprovals",
+                    "type": "bool[]"
+                },
+                {
+                    "name": "_batchSignature",
+                    "type": "bytes"
+                }
+            ],
+            "name": "batchConfidentialApprove",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
                     "name": "_noteHash",
                     "type": "bytes32"
                 },
@@ -151,7 +177,7 @@
                     "type": "address"
                 },
                 {
-                    "name": "_status",
+                    "name": "_spenderApproval",
                     "type": "bool"
                 },
                 {
@@ -187,6 +213,10 @@
             "constant": false,
             "inputs": [
                 {
+                    "name": "_proofId",
+                    "type": "uint24"
+                },
+                {
                     "name": "_proofData",
                     "type": "bytes"
                 },
@@ -200,6 +230,65 @@
             "payable": false,
             "stateMutability": "nonpayable",
             "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_signatures",
+                    "type": "bytes"
+                }
+            ],
+            "name": "confidentialTransfer",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "metaData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "addressPos",
+                    "type": "uint256"
+                }
+            ],
+            "name": "extractAddress",
+            "outputs": [
+                {
+                    "name": "desiredAddress",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "name": "metaData",
+                    "type": "bytes"
+                }
+            ],
+            "name": "updateNoteMetaData",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
         }
     ],
     "bytecode": "0x",
@@ -208,5 +297,5 @@
         "version": "0.5.7+commit.6da8b019.Emscripten.clang"
     },
     "deployedBytecode": "0x",
-    "schemaVersion": "3.0.9"
+    "schemaVersion": "3.0.19"
 }

@@ -184,9 +184,9 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         bytes32 _hashStruct = keccak256(abi.encode(
             MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
-            keccak256(abi.encode(_noteHashes)),
+            keccak256(abi.encodePacked(_noteHashes)),
             _spender,
-            keccak256(abi.encode(_spenderApprovals))
+            keccak256(abi.encodePacked(_spenderApprovals))
         ));
 
         bytes32 msgHash = hashEIP712Message(_hashStruct);

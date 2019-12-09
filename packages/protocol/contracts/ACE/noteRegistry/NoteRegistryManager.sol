@@ -75,10 +75,17 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     mapping(bytes32 => bool) public validatedProofs;
 
+    /**
+    * @dev Increment the default registry epoch
+    */
     function incrementDefaultRegistryEpoch() public onlyOwner {
         defaultRegistryEpoch = defaultRegistryEpoch + 1;
     }
 
+    /**
+    * @dev Set the default crypto system to be used
+    * @param _defaultCryptoSystem - default crypto system identifier
+    */
     function setDefaultCryptoSystem(uint8 _defaultCryptoSystem) public onlyOwner {
         defaultCryptoSystem = _defaultCryptoSystem;
     }

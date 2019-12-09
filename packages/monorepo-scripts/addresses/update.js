@@ -22,6 +22,7 @@ const deployedContracts = [
     'PublicRange',
     'Swap',
     'ZkAsset',
+    'ZkAssetAdjustable',
 ];
 
 const rinkebyAddresses = {};

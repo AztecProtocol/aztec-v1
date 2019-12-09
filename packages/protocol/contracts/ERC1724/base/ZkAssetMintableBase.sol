@@ -19,6 +19,7 @@ import "./ZkAssetOwnableBase.sol";
 **/
 contract ZkAssetMintableBase is ZkAssetOwnableBase {
     event UpdateTotalMinted(bytes32 noteHash, bytes metaData);
+    
     /**
     * @dev Executes a confidential minting procedure, dependent on the provided proofData
     * being succesfully validated by the zero-knowledge validator
