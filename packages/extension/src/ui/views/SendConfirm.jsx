@@ -17,12 +17,14 @@ import ListRow from '~ui/components/ListRow';
 import ListItem from '~ui/components/ListItem';
 import Separator from '~ui/components/Separator';
 import HashText from '~/ui/components/HashText';
+import ShareNoteAccessConfirm from '~/ui/components/ShareNoteAccessConfirm';
 
 const SendConfirm = ({
     asset,
     sender,
     transactions,
     amount: totalAmount,
+    userAccessAccounts,
 }) => (
     <PopupContent
         title={(
@@ -152,6 +154,11 @@ const SendConfirm = ({
                     </Block>
                 ))}
             </Block>
+            {userAccessAccounts.length > 0 && (
+                <ShareNoteAccessConfirm
+                    userAccessAccounts={userAccessAccounts}
+                />
+            )}
             <Block padding="m 0">
                 <Text
                     text={i18n.t('send.confirm.explain')}
@@ -168,6 +175,13 @@ SendConfirm.propTypes = {
     sender: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
     amount: PropTypes.number.isRequired,
+    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    })),
+};
+
+SendConfirm.defaultProps = {
+    userAccessAccounts: [],
 };
 
 export default SendConfirm;
