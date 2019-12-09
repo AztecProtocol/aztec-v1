@@ -8,6 +8,8 @@ const triggerGrantNoteAccessUi = async (query, connection) => {
         requestId,
     } = query;
 
+    // TODO - return if input addresses have always had access
+
     connection.UiActionSubject.next({
         ...query,
         type: 'ui.note.grantAccess',
@@ -20,8 +22,17 @@ const triggerGrantNoteAccessUi = async (query, connection) => {
         requestId,
         connection.MessageSubject.asObservable(),
     ) || {};
+    const {
+        success,
+        error,
+    } = data || {};
 
-    return data;
+    return {
+        result: {
+            success: !!success,
+        },
+        error,
+    };
 };
 
 export default triggerGrantNoteAccessUi;

@@ -7,5 +7,9 @@ export default makeSchema({
     addresses: {
         type: 'array',
         each: addressType,
+        size: {
+            gte: 1,
+        },
+        required: true,
     },
 });
