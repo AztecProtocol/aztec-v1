@@ -1,6 +1,6 @@
 import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
 import ACE from '~contracts/ACE.json';
-import IZkAsset from '~contracts/ZkAssetBase.json'; // TODO - use IZkAsset.json one it has updateNoteMetaData in it
+import IZkAsset from '~contracts/IZkAsset.json';
 import IERC20 from '~contracts/ERC20Mintable.json';
 
 export default {
