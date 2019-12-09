@@ -8,6 +8,7 @@ import validateAccounts from '../utils/validateAccounts';
 export default async function verifyDepositRequest({
     assetAddress,
     transactions,
+    userAccess,
 }) {
     const {
         networkId,
@@ -69,6 +70,13 @@ export default async function verifyDepositRequest({
     }
 
     const addresses = transactions.map(({ to }) => to);
+    if (userAccess && userAccess.length > 0) {
+        userAccess.forEach((address) => {
+            if (addresses.indexOf(address) < 0) {
+                addresses.push(address);
+            }
+        });
+    }
     const invalidAddressError = await validateAccounts(addresses);
     if (invalidAddressError) {
         return invalidAddressError;

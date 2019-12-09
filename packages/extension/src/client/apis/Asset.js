@@ -138,6 +138,7 @@ export default class Asset {
      *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
      *                                     Unless numberOfOutputNotes is defined in that transaction.
      *                                     Will use default value in setting if undefined.
+     *       userAccess ([Address!]):      The addresses that are able to see the real note value.
      *
      * @returns (Object)
      * - success (Boolean)
@@ -145,6 +146,7 @@ export default class Asset {
      */
     deposit = async (transactions, {
         numberOfOutputNotes,
+        userAccess = [],
     } = {}) => ConnectionService.query(
         'constructProof',
         {
@@ -152,6 +154,7 @@ export default class Asset {
             assetAddress: this.address,
             transactions,
             numberOfOutputNotes,
+            userAccess,
         },
     );
 
