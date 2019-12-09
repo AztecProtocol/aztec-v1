@@ -20,6 +20,7 @@ export default async function deposit({
     publicOwner,
     sender,
     numberOfOutputNotes,
+    userAccessAccounts,
 }) {
     const numberOfNotes = numberOfOutputNotes > 0
         ? numberOfOutputNotes
@@ -42,12 +43,24 @@ export default async function deposit({
                 linkedPublicKey,
                 spendingPublicKey,
             } = accounts[i] || {};
+            const ownerAccess = {
+                address: to,
+                linkedPublicKey,
+            };
+            const userAccess = !userAccessAccounts
+                ? ownerAccess
+                : [
+                    ...userAccessAccounts,
+                    ownerAccess,
+                ].filter((access, idx, arr) => idx === arr.findIndex(({
+                    address,
+                }) => address === access.address));
 
             const notes = await createNotes(
                 noteValues,
                 spendingPublicKey,
                 to,
-                linkedPublicKey,
+                userAccess,
             );
 
             return {

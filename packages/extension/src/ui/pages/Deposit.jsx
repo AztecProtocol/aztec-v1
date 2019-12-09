@@ -8,6 +8,7 @@ import {
     gsnConfigShape,
 } from '~ui/config/propTypes';
 import { depositSteps } from '~ui/config/steps';
+import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
 import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
@@ -18,6 +19,7 @@ const Deposit = ({
     assetAddress,
     transactions,
     numberOfOutputNotes,
+    userAccess,
     gsnConfig,
 }) => {
     const {
@@ -33,6 +35,7 @@ const Deposit = ({
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
 
         return {
             assetAddress,
@@ -42,6 +45,7 @@ const Deposit = ({
             sender: isGSNAvailable ? proxyContract : currentAddress,
             amount,
             numberOfOutputNotes,
+            userAccessAccounts,
         };
     };
 
@@ -62,12 +66,14 @@ Deposit.propTypes = {
     assetAddress: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     numberOfOutputNotes: PropTypes.number,
+    userAccess: PropTypes.arrayOf(PropTypes.string),
     gsnConfig: gsnConfigShape.isRequired,
 };
 
 Deposit.defaultProps = {
     initialStep: 0,
     numberOfOutputNotes: emptyIntValue,
+    userAccess: [],
 };
 
 export default Deposit;

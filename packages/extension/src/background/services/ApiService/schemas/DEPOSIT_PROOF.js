@@ -11,4 +11,8 @@ export default makeSchema({
             gte: 1,
         },
     },
+    userAccess: {
+        type: 'array',
+        each: addressType,
+    },
 });
