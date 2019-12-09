@@ -19,6 +19,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.16.0",
+    "eth-sig-util": "^2.5.2",
     "mocha": "^6.0.2",
     "shx": "^0.3.2"
   },
@@ -45,11 +46,12 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
-    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
-    "build:prod": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "build:dev": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
+    "build": "./build.sh",
+    "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-    "watch": "yarn build --watch"
+    "watch": "yarn build:dev --watch"
   }
 }
