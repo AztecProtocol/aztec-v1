@@ -160,7 +160,8 @@ contract('NoteRegistryManager', (accounts) => {
             const canConvert = true;
 
             await ace
-                .methods['createNoteRegistry(address,uint256,bool,bool,uint24)'](erc20.address, scalingFactor, canAdjustSupply, canConvert, factoryId201911,
+                .methods['createNoteRegistry(address,uint256,bool,bool,uint24)']
+                (erc20.address, scalingFactor, canAdjustSupply, canConvert, factoryId201911,
                     { from: zkAssetOwner }
                 );
             const existingProxy = await ace.registries(zkAssetOwner);
