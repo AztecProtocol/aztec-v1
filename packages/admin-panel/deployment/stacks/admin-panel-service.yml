@@ -1,0 +1,198 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Admin Panel Container on ecs cluster
+
+
+Parameters:
+
+  ServiceName:
+    Type: String
+    Default: gsn-admin-panel
+    Description: A name for the service
+  ImageUrl:
+    Type: String
+    Description: The url of a docker image that contains the application process that
+                 will handle the traffic for this service
+  ImageVersion:
+    Type: String
+    Default: latest
+    Description: The version of a docker image
+  ContainerPort:
+    Type: Number
+    Default: 8080
+    Description: What port number the application inside the docker container is binding to
+  ContainerCpu:
+    Type: Number
+    Default: 256
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 512
+    Description: How much memory in megabytes to give the container
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+  ExecutionRoleStackName:
+    Type: String
+    Default: ecs-iam
+    Description: The stack that created iam
+  Path:
+    Type: String
+    Default: "*"
+    Description: A path on the public load balancer that this service
+                  should be connected to. Use * to send all load balancer
+                  traffic to this service.
+  DBUser:
+    Type: String
+    Description: DB username
+  DBPassword:
+    Type: String
+    Description: DB password
+  DBPrefix:
+    Type: String
+    Default: ecs-iam
+    Description: The stack that created iam
+  DBHost:
+    Type: String
+    Description: DB Host
+  DBPort:
+    Type: Number
+    Default: 5432
+    Description: port for database
+  CookiesPassword:
+    Type: String
+    Description: A secrete str
+
+
+Resources:
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Ref 'ServiceName'
+      Cpu: !Ref 'ContainerCpu'
+      Memory: !Ref 'ContainerMemory'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn:
+        Fn::ImportValue:
+          !Join [ ':', [ !Ref 'ExecutionRoleStackName', 'ECSTaskExecutionRole' ] ]
+      ContainerDefinitions:
+        - Name: !Ref 'ServiceName'
+          Image: !Join ['', [!Ref 'ImageUrl', ':', !Ref 'ImageVersion']]
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          Environment:
+            - Name: PORT
+              Value: !Ref 'ContainerPort'
+            - Name: DB_USER
+              Value: !Ref 'DBUser'
+            - Name: DB_PASSWORD
+              Value: !Ref 'DBPassword'
+            - Name: DB_DATABASE_PREFIX
+              Value: !Ref 'DBPrefix'
+            - Name: DB_HOST
+              Value: !Ref 'DBHost'
+            - Name: DB_PORT
+              Value: !Ref 'DBPort'
+            - Name: COOKIES_PASSWORD
+              Value: !Ref 'CookiesPassword'
+          PortMappings:
+            - ContainerPort: !Ref 'ContainerPort'
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: 'aztec'
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: 'gsn-admin-panel'
+
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: ListenerRule
+    Properties:
+      ServiceName: !Ref 'ServiceName'
+      TaskDefinition: !Ref 'TaskDefinition'
+      Cluster: !ImportValue 'ECSCluster'
+      LaunchType: FARGATE
+      DesiredCount: !Ref 'DesiredCount'
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 70
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !ImportValue 'ECSSubnet1'
+            - !ImportValue 'ECSSubnet2'
+          SecurityGroups:
+            - !ImportValue 'ECSContainerSecurityGroup'
+      LoadBalancers:
+        - ContainerName: gsn-admin-panel
+          ContainerPort: !Ref 'ContainerPort'
+          TargetGroupArn: !Ref 'TargetGroup'
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Ref 'ServiceName'
+      VpcId: !ImportValue ECSVPC
+      Port: 80
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckEnabled: True
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /rinkeby/admin/
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: !Ref 'ContainerPort'
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 10
+      UnhealthyThresholdCount: 5
+      TargetType: ip
+
+  ListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !ImportValue 'ECSLoadBalancerListener'
+      Priority: 2
+      Conditions:
+        - Field: path-pattern
+          Values: [!Ref 'Path']
+      Actions:
+        - TargetGroupArn: !Ref 'TargetGroup'
+          Type: forward
+
+
+Outputs:
+
+  URLAdminMain:
+    Description: Admin Panel URL
+    Value: !Join ['', ['http://', !ImportValue 'ECSDomainName', '/mainnet/']]
+    Export:
+      Name: 'MainNetworkAdminPanelURL'
+
+  URLAdminRopsten:
+    Description: Admin Panel URL
+    Value: !Join ['', ['http://', !ImportValue 'ECSDomainName', '/ropsten/']]
+    Export:
+      Name: 'RopstenAdminPanelURL'
+
+  URLAdminRinkeby:
+    Description: Admin Panel URL
+    Value: !Join ['', ['http://', !ImportValue 'ECSDomainName', '/rinkeby/']]
+    Export:
+      Name: 'RinkebyAdminPanelURL'
+
+  URLAdminGoerli:
+    Description: Admin Panel URL
+    Value: !Join ['', ['http://', !ImportValue 'ECSDomainName', '/goerli/']]
+    Export:
+      Name: 'GoerliAdminPanelURL'
+
+  URLAdminKovan:
+    Description: Admin Panel URL
+    Value: !Join ['', ['http://', !ImportValue 'ECSDomainName', '/kovan/']]
+    Export:
+      Name: 'KovanAdminPanelURL'

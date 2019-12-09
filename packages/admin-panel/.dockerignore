@@ -6,3 +6,6 @@ Dockerfile
 README.md
 .gitignore
 .env
+.env.development
+.env.stage
+.env.production

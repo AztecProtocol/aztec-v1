@@ -8,7 +8,8 @@ services:
     image: nodejs
     container_name: admin-panel
     restart: unless-stopped
-    env_file: .env
+    env_file: 
+      - .env
     environment:
       - PORT=8080
       - DB_USER=$DB_USER

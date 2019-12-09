@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Container cluster on ECS, loadbalancer, security groups and cloudwatch
+
+Resources:
+  
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: 'aztec-gsn'
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ecs-services
+      Subnets:
+        - !ImportValue 'ECSSubnet1'
+        - !ImportValue 'ECSSubnet2'
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DefaultTargetGroup
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for loadbalancer to services on ECS
+      VpcId: !ImportValue 'ECSVPC'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+
+  DefaultTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: default
+      VpcId: !ImportValue 'ECSVPC'
+      Protocol: 'HTTP'
+      Port: '80'  
+
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: 'aztec'
+      RetentionInDays: 1
+
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup      
+    Properties:
+     VpcId: !ImportValue 'ECSVPC'
+     GroupDescription: for ecs containers
+     SecurityGroupIngress:
+       - SourceSecurityGroupId: !Ref 'LoadBalancerSecurityGroup'
+         IpProtocol: -1
+
+
+Outputs:
+  
+  Cluster:
+    Value: !Ref ECSCluster
+    Export:
+      Name: 'ECSCluster'
+
+  ECSLoadBalancerListener:
+    Description: listener port 80
+    Value: !Ref LoadBalancerListener
+    Export:
+      Name: 'ECSLoadBalancerListener'
+
+  ECSContainerSecurityGroup:
+    Description: container security group
+    Value: !Ref ContainerSecurityGroup
+    Export:
+      Name: 'ECSContainerSecurityGroup'
+
+  ECSLoadBalancerDNS:
+    Description: Domain name for the loadbalancer
+    Value: !GetAtt LoadBalancer.DNSName
+    Export:
+      Name: 'ECSDomainName'

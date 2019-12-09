@@ -28,7 +28,12 @@
     "node": ">=8.3"
   },
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "release:image": "scripts/release.sh",
+    "create:vpc": "scripts/create-vpc.sh",
+    "create:iam": "scripts/create-iam.sh",
+    "create:ecs-cluster": "scripts/create-ecs-cluster.sh",
+    "create:admin-service": "scripts/create-admin-service.sh"
   },
   "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
   "keywords": [

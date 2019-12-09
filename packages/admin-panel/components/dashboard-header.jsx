@@ -22,7 +22,7 @@ const Header = (props) => {
         <Column width={6}>
           <h1>Welcome to AZTEC</h1>
           <p>It is gsn admin panel</p>
-          <p>You can control Dapps, Users and their ApiKeys and Transactions, make Refund etc.</p>
+          <p>You can control Dapps, Users, their ApiKeys and Transactions, make Refund etc.</p>
         </Column>
         <Column width={6} style={{ marginBottom: '-120px'}}>
           <div style={{ marginRight: '-29px' }}>
