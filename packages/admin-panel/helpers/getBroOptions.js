@@ -38,6 +38,12 @@ module.exports = (db, networkConfig) => {
                         actualCharge: {
                             isVisible: { list: false, filter: true, show: true, edit: true },
                         },
+                        status: {
+                            isVisible: { list: true, filter: false, show: true, edit: true },
+                        },
+                        type: {
+                            isVisible: { list: true, filter: false, show: true, edit: true },
+                        },
                     },
                 },
             },
@@ -80,6 +86,9 @@ module.exports = (db, networkConfig) => {
                             isVisible: {
                                 list: false, edit: true, filter: false, show: false,
                             },
+                        },
+                        role: {
+                            isVisible: { list: true, filter: false, show: true, edit: true },
                         },
                     },
                     actions: {

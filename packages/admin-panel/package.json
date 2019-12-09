@@ -29,7 +29,7 @@
   },
   "scripts": {
     "dev": "nodemon app.js",
-    "release:image": "scripts/release.sh",
+    "release:image": "scripts/release-image.sh",
     "create:vpc": "scripts/create-vpc.sh",
     "create:iam": "scripts/create-iam.sh",
     "create:ecs-cluster": "scripts/create-ecs-cluster.sh",
