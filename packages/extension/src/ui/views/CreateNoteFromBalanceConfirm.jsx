@@ -19,8 +19,8 @@ import formatNumber from '~ui/utils/formatNumber';
 import PopupContent from '~ui/components/PopupContent';
 import Connection from '~ui/components/Connection';
 import ListItem from '~ui/components/ListItem';
-import Separator from '~/ui/components/Separator';
 import HashText from '~/ui/components/HashText';
+import ShareNoteAccessConfirm from '~/ui/components/ShareNoteAccessConfirm';
 
 const CreateNoteFromBalanceConfirm = ({
     asset: {
@@ -237,44 +237,9 @@ const CreateNoteFromBalanceConfirm = ({
                     />
                 </Block>
                 {userAccessAccounts.length > 0 && (
-                    <Block padding="l 0">
-                        <Separator
-                            theme="white"
-                            title={i18n.t('note.access.share')}
-                        />
-                        <Block padding="m 0">
-                            {userAccessAccounts.map(({
-                                address,
-                            }, i) => (
-                                <Block
-                                    key={+i}
-                                    padding="s 0"
-                                >
-                                    <ListItem
-                                        profile={{
-                                            type: 'user',
-                                            address,
-                                        }}
-                                        content={(
-                                            <HashText
-                                                text={address}
-                                                prefixLength={18}
-                                                suffixLength={8}
-                                            />
-                                        )}
-                                        size="xxs"
-                                    />
-                                </Block>
-                            ))}
-                        </Block>
-                        <Block padding="m 0">
-                            <Text
-                                text={i18n.t('note.create.fromBalance.share.explain')}
-                                size="xs"
-                                color="label"
-                            />
-                        </Block>
-                    </Block>
+                    <ShareNoteAccessConfirm
+                        userAccessAccounts={userAccessAccounts}
+                    />
                 )}
             </Block>
         </PopupContent>
