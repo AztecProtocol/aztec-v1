@@ -80,19 +80,22 @@ export default class Note {
      *
      * @returns (Bool!)
      */
-
     async grantAccess(addresses) {
         const addressList = typeof addresses === 'string'
             ? [addresses]
             : addresses;
 
-        const { permission } = await ConnectionService.query(
+        const {
+            success,
+        } = await ConnectionService.query(
             'grantNoteAccess',
             {
                 id: this.id,
                 addresses: addressList,
             },
         ) || {};
+
+        return success || false;
     }
 
     /**
