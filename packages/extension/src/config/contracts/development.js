@@ -11,7 +11,9 @@ export default {
         },
         config: AZTECAccountRegistryGSNContract,
         networks: {
-            4: '0xC13dE0b75fF8C1DBa6CeB65f9bC28cB43AA6c2a1',
+            // 4: '0x101a74Cc8544160037B4Ff43839f4EB24698b10B',
+            4: '0xbB38820fC41C7CECa0B7352617269a946926F2CE',
+            3: '0x4eb8f9e84e371d9A7Be5b8d6F32044eD9D9498c5',
         },
     },
     AZTECAccountRegistryGSN: {
@@ -21,7 +23,9 @@ export default {
         },
         config: AZTECAccountRegistryGSNContract,
         networks: {
-            4: '0xC13dE0b75fF8C1DBa6CeB65f9bC28cB43AA6c2a1',
+            // 4: '0x101a74Cc8544160037B4Ff43839f4EB24698b10B',
+            4: '0xbB38820fC41C7CECa0B7352617269a946926F2CE',
+            3: '0x4eb8f9e84e371d9A7Be5b8d6F32044eD9D9498c5',
         },
     },
     ACE: {
@@ -31,7 +35,8 @@ export default {
         },
         config: ACE,
         networks: {
-            4: '0x9be0e65c568FDDA547AD9879e565d3d48C43408E',
+            4: '0xFDd232eE75268D7Bc300ABFf960e45be78E1f245',
+            3: '0x59Bb9FEF8dA35054886F0461248392F847010F3a',
         },
     },
     ZkAsset: {
