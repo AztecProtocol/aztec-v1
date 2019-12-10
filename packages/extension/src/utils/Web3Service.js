@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import cloneDeep from 'lodash/cloneDeep';
 import {
     log,
     warnLog,
@@ -262,6 +261,7 @@ class Web3Service {
         contractAddress,
         fromAddress,
         args,
+        web3 = this.web3,
     }) => {
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
@@ -332,10 +332,8 @@ class Web3Service {
             };
             const methodSend = method(...methodArgs).send(options);
             methodSend.once('transactionHash', (receipt) => {
-                log(`receipt: ${JSON.stringify(receipt)}`);
-
                 const interval = setInterval(() => {
-                    this.web3.eth.getTransactionReceipt(receipt, (
+                    web3.eth.getTransactionReceipt(receipt, (
                         error,
                         transactionReceipt,
                     ) => {
@@ -388,15 +386,27 @@ class Web3Service {
                     }),
                     useGSN: (gsnConfig) => {
                         if (!gsnConfig) {
-                            log('Cannot use gsn as "gsnConfig" was not defined');
+                            errorLog('Cannot use gsn as "gsnConfig" was not defined');
+                            return {};
                         }
-                        const gsnContract = cloneDeep(contract);
-                        gsnContract.setProvider(gsnConfig.gsnProvider);
+
+                        const {
+                            gsnProvider,
+                            signingInfo,
+                        } = gsnConfig;
+                        const web3 = new Web3(gsnProvider);
+                        const gsnContract = new web3.eth.Contract(
+                            this.abis[contractName],
+                            contractAddress || this.getAddress(contractName),
+                        );
+                        gsnContract.setProvider(gsnProvider);
+
                         return {
                             send: async (...args) => this.triggerMethod('send', {
                                 method: gsnContract.methods[methodName],
-                                fromAddress: gsnConfig.signingInfo.address,
+                                fromAddress: signingInfo.address,
                                 args,
+                                web3,
                             }),
                         };
                     },
