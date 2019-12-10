@@ -60,6 +60,12 @@ export default {
                 gte: 'Target note value should be greater than or equal to its comparison note value.',
             },
         },
+        utilityNote: {
+            wrong: {
+                type: 'Utility note is not a valid AZTEC note',
+                value: 'Utility note has incorrect value.',
+            },
+        },
     },
     api: {
         mint: {

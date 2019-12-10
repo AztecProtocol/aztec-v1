@@ -2,7 +2,7 @@ import {
     fromViewingKey,
 } from '~utils/note';
 import ConnectionService from '~/client/services/ConnectionService';
-import proofFactory from './noteProofFactory';
+import provePrivateRange from '~/client/apis/privateRange/prove';
 
 const dataProperties = [
     'noteHash',
@@ -19,7 +19,7 @@ export default class Note {
     }
 
     isValid() {
-        return !!this.noteHash;
+        return !!this.noteHash && this.value !== null;
     }
 
     async init() {
@@ -102,25 +102,26 @@ export default class Note {
      *
      * Equal
      *
-     * - note (Note! or aztec.Note!)
-     * - options
-     *       sender (Address):          The proof sender.
+     * - note (Note!|aztec.Note!)
+     * - options (Object)
+     *       sender (Address):                  The proof sender.
+     *                                          Will use current address if empty
+     *       utilityNote (Note|aztec.Note)
      *
-     * @returns (Bool!)
+     * @returns (PrivateRangeProof)
      */
     async equal(note, {
-        sender,
+        sender = '',
+        utilityNote = null,
     } = {}) {
         const originalNote = await this.export();
-        return proofFactory(
-            'privateRange',
-            {
-                type: 'eq',
-                originalNote,
-                comparisonNote: note,
-                sender,
-            },
-        );
+        return provePrivateRange({
+            type: 'eq',
+            originalNote,
+            comparisonNote: note,
+            utilityNote,
+            sender,
+        });
     }
 
     /**
@@ -128,23 +129,24 @@ export default class Note {
      * GreaterThan
      *
      * - note (Note! or aztec.Note!)
-     * - options
-     *       sender (Address):          The proof sender.
+     * - options (Object)
+     *       sender (Address):                  The proof sender.
+     *                                          Will use current address if empty
+     *       utilityNote (Note|aztec.Note)
      *
-     * @returns (Bool!)
+     * @returns (PrivateRangeProof)
      */
     async greaterThan(note, {
-        sender,
+        sender = '',
+        utilityNote = null,
     } = {}) {
         const originalNote = await this.export();
-        return proofFactory(
-            'privateRange',
-            {
-                originalNote,
-                comparisonNote: note,
-                sender,
-            },
-        );
+        return provePrivateRange({
+            originalNote,
+            comparisonNote: note,
+            utilityNote,
+            sender,
+        });
     }
 
     /**
@@ -153,22 +155,23 @@ export default class Note {
      *
      * - note (Note! or aztec.Note!)
      * - options
-     *       sender (Address):          The proof sender.
+     *       sender (Address):                  The proof sender.
+     *                                          Will use current address if empty
+     *       utilityNote (Note|aztec.Note)
      *
-     * @returns (Bool!)
+     * @returns (PrivateRangeProof)
      */
     async lessThan(note, {
-        sender,
+        sender = '',
+        utilityNote = null,
     } = {}) {
         const comparisonNote = await this.export();
-        return proofFactory(
-            'privateRange',
-            {
-                originalNote: note,
-                comparisonNote,
-                sender,
-            },
-        );
+        return provePrivateRange({
+            originalNote: note,
+            comparisonNote,
+            utilityNote,
+            sender,
+        });
     }
 
     /**
@@ -177,23 +180,24 @@ export default class Note {
      *
      * - note (Note! or aztec.Note!)
      * - options
-     *       sender (Address):          The proof sender.
+     *       sender (Address):                  The proof sender.
+     *                                          Will use current address if empty
+     *       utilityNote (Note|aztec.Note)
      *
-     * @returns (Bool!)
+     * @returns (PrivateRangeProof)
      */
     async greaterThanOrEqualTo(note, {
-        sender,
+        sender = '',
+        utilityNote = null,
     } = {}) {
         const originalNote = await this.export();
-        return proofFactory(
-            'privateRange',
-            {
-                type: 'gte',
-                originalNote,
-                comparisonNote: note,
-                sender,
-            },
-        );
+        return provePrivateRange({
+            type: 'gte',
+            originalNote,
+            comparisonNote: note,
+            utilityNote,
+            sender,
+        });
     }
 
     /**
@@ -202,22 +206,23 @@ export default class Note {
      *
      * - note (Note! or aztec.Note!)
      * - options
-     *       sender (Address):          The proof sender.
+     *       sender (Address):                  The proof sender.
+     *                                          Will use current address if empty
+     *       utilityNote (Note|aztec.Note)
      *
-     * @returns (Bool!)
+     * @returns (PrivateRangeProof)
      */
     async lessThanOrEqualTo(note, {
-        sender,
+        sender = '',
+        utilityNote = null,
     } = {}) {
         const comparisonNote = await this.export();
-        return proofFactory(
-            'privateRange',
-            {
-                type: 'gte',
-                originalNote: note,
-                comparisonNote,
-                sender,
-            },
-        );
+        return provePrivateRange({
+            type: 'gte',
+            originalNote: note,
+            comparisonNote,
+            utilityNote,
+            sender,
+        });
     }
 }
