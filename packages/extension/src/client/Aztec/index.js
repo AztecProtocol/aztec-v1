@@ -25,6 +25,7 @@ class Aztec {
         if (autoRefreshOnProfileChange) {
             Web3Service.bindProfileChange(async () => this.refreshSession(
                 {
+                    apiKey,
                     providerUrl,
                     contractAddresses,
                 },
@@ -59,6 +60,7 @@ class Aztec {
 
         if (autoRefreshOnProfileChange) {
             Web3Service.bindProfileChange(async () => this.refreshSession({
+                apiKey,
                 providerUrl,
                 contractAddresses,
             }));

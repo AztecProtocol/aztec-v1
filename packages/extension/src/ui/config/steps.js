@@ -425,3 +425,73 @@ export const registerSteps = {
         },
     ],
 };
+
+export const linkAccountSteps = {
+    gsn: [
+        {
+            titleKey: 'register.linkAccount.title',
+            tasks: [
+                {
+                    name: 'get',
+                    run: apis.auth.getAccountKeys,
+                },
+                {
+                    name: 'link',
+                    type: 'sign',
+                    run: apis.auth.linkAccountToMetaMask,
+                },
+            ],
+            content: LinkAccount,
+            submitTextKey: 'register.linkAccount.submit',
+        },
+        {
+            titleKey: 'register.confirm.title',
+            content: RegisterConfirm,
+            submitTextKey: 'register.confirm.submit',
+            tasks: [
+                {
+                    name: 'authorise',
+                    run: apis.auth.sendGSNRegisterTx,
+                },
+                {
+                    name: 'register_address',
+                    run: apis.auth.registerAddress,
+                },
+            ],
+        },
+
+    ],
+    metamask: [
+        {
+            titleKey: 'register.linkAccount.title',
+            tasks: [
+                {
+                    name: 'get',
+                    run: apis.auth.getAccountKeys,
+                },
+                {
+                    name: 'link',
+                    type: 'sign',
+                    run: apis.auth.linkAccountToMetaMask,
+                },
+            ],
+            content: LinkAccount,
+            submitTextKey: 'register.linkAccount.submit',
+        },
+        {
+            titleKey: 'register.confirm.title',
+            content: RegisterConfirm,
+            submitTextKey: 'register.confirm.submit',
+            tasks: [
+                {
+                    name: 'authorise',
+                    run: apis.auth.sendRegisterAddress,
+                },
+                {
+                    name: 'register_address',
+                    run: apis.auth.registerAddress,
+                },
+            ],
+        },
+    ],
+};
