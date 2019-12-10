@@ -1,5 +1,6 @@
 import registerExtension from './RegisterExtension';
 import registerDomain from './RegisterDomain';
+import account from './Account';
 import prove from './Prove';
 import asset from './Asset';
 import assetBalance from './Asset/getBalance';
@@ -13,6 +14,7 @@ import validateRequest from './middlewares/validateRequest';
 const apis = {
     registerExtension,
     registerDomain,
+    account,
     asset,
     assetBalance,
     fetchNotesFromBalance,
