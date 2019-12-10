@@ -4,7 +4,9 @@ export default async function toAztecNote(note) {
     if (note instanceof aztec.note.Note) {
         return note;
     }
-    if ('export' in note) {
+    if ('export' in note
+        && note.isValid()
+    ) {
         return note.export();
     }
 
