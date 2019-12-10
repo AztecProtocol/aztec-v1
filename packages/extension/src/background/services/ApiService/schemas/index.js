@@ -13,6 +13,7 @@ import CREATE_NOTE_FROM_BALANCE_PROOF from './CREATE_NOTE_FROM_BALANCE_PROOF';
 export default {
     registerExtension: emptySchema,
     registerDomain: emptySchema,
+    account: emptySchema,
     asset,
     assetBalance,
     fetchNotesFromBalance,
