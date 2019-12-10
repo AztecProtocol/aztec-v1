@@ -25,7 +25,7 @@ const sendTransaction = async (query, connection) => {
         const signingInfo = await retrieveSigningInfo(address);
         const providerUrl = getProviderUrl(Web3Service.networkId);
         const gsnProvider = new GSNProvider(providerUrl, {
-            pollInterval: 15 * 1000,
+            pollInterval: 1 * 1000,
             signKey: signingInfo.privateKey,
             approveFunction: approveFunction(query, connection),
         });
@@ -37,6 +37,7 @@ const sendTransaction = async (query, connection) => {
                 gsnProvider,
             })
             .send(...params);
+
         return {
             ...query,
             data: {

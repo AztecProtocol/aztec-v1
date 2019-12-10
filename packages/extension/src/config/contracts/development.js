@@ -12,7 +12,7 @@ export default {
         config: AZTECAccountRegistryGSNContract,
         networks: {
             // 4: '0x101a74Cc8544160037B4Ff43839f4EB24698b10B',
-            4: '0xbB38820fC41C7CECa0B7352617269a946926F2CE',
+            4: '0x01642306d1E929c62781e406F53eE49aEA57cC9e',
             3: '0x4eb8f9e84e371d9A7Be5b8d6F32044eD9D9498c5',
         },
     },
@@ -24,7 +24,7 @@ export default {
         config: AZTECAccountRegistryGSNContract,
         networks: {
             // 4: '0x101a74Cc8544160037B4Ff43839f4EB24698b10B',
-            4: '0xbB38820fC41C7CECa0B7352617269a946926F2CE',
+            4: '0x01642306d1E929c62781e406F53eE49aEA57cC9e',
             3: '0x4eb8f9e84e371d9A7Be5b8d6F32044eD9D9498c5',
         },
     },

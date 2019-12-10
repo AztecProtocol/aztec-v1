@@ -1,12 +1,16 @@
 import AuthService from '~background/services/AuthService';
 import createPwDerivedKey from './createPwDerivedKey';
 import createKeyStore from './createKeyStore';
+import clearDB from '~background/database/utils/clearDb';
 
 export default async function restoreAccount({
     address,
     seedPhrase,
     password,
 }) {
+    clearDB({
+        clearAllNetworks: true,
+    });
     const {
         pwDerivedKey,
     } = await createPwDerivedKey({
