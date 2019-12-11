@@ -19,8 +19,8 @@ export default function generateApis() {
     });
 
     return {
-        asset: assetFactory,
-        note: noteFactory,
+        zkAsset: assetFactory,
+        zkNote: noteFactory,
         web3,
     };
 }

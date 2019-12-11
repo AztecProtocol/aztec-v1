@@ -62,7 +62,7 @@ async function refreshAssetBalances() {
 }
 
 async function initAsset() {
-  asset = await window.aztec.asset(zkAssetAddress);
+  asset = await window.aztec.zkAsset(zkAssetAddress);
   const apisElem = document.getElementById('asset-apis');
   if (!asset.isValid()) {
     apisElem.innerHTML = 'This asset is not valid.';

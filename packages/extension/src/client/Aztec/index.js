@@ -6,8 +6,8 @@ class Aztec {
     constructor() {
         // TODO - assign mock modules that show warnings when calling apis before enabled
         this.web3 = null;
-        this.asset = {};
-        this.note = {};
+        this.zkAsset = null;
+        this.zkNote = null;
     }
 
     enable = async (
@@ -55,6 +55,10 @@ class Aztec {
 
         const apis = ApiPermissionService.generateApis();
         Object.keys(apis).forEach((name) => {
+            if (this[name]) {
+                warnLog(`Api '${name}' is already in Aztec.`);
+                return;
+            }
             this[name] = apis[name];
         });
 
@@ -75,8 +79,8 @@ class Aztec {
 
     async disable() {
         this.web3 = null;
-        this.asset = {};
-        this.note = {};
+        this.zkAsset = null;
+        this.zkNote = null;
         await ConnectionService.disconnect();
     }
 
