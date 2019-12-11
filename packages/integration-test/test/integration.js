@@ -131,7 +131,7 @@ contract('Integration', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it('should verify a public range range proof', async () => {
+        it('should verify a public range proof', async () => {
             const originalNote = await note.create(aztecAccount.publicKey, 50);
             const utilityNote = await note.create(aztecAccount.publicKey, 40);
             const publicComparison = 10;
@@ -197,7 +197,7 @@ contract('Integration', (accounts) => {
 
             const balancePreTransfer = await erc20.balanceOf(publicOwner);
             const transferAmountBN = new BN(depositPublicValue);
-            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(setup.scalingFactor));
+            const expectedBalancePostTransfer = balancePreTransfer.sub(transferAmountBN.mul(setup.config.scalingFactor));
 
             await ace.publicApprove(zkAsset.address, proof.hash, depositPublicValue, { from: publicOwner });
 
@@ -232,7 +232,7 @@ contract('Integration', (accounts) => {
             const withdrawPublicValue = 100;
 
             const withdrawAmountBN = new BN(withdrawPublicValue);
-            const expectedBalancePostWithdraw = balancePostDeposit.add(withdrawAmountBN.mul(setup.scalingFactor));
+            const expectedBalancePostWithdraw = balancePostDeposit.add(withdrawAmountBN.mul(setup.config.scalingFactor));
 
             const withdrawProof = new JoinSplitProof(
                 withdrawInputNotes,
@@ -253,7 +253,7 @@ contract('Integration', (accounts) => {
 
     describe('Adjust supply', async () => {
         before(function checkIfConfigured() {
-            if (!setup.runAdjustSupplyTests) {
+            if (!setup.config.runAdjustSupplyTests) {
                 console.log('Tests not configured');
                 this.skip();
             }
@@ -365,7 +365,7 @@ contract('Integration', (accounts) => {
 
     describe('Upgradeability', async () => {
         before(function checkIfConfigured() {
-            if (!setup.runUpgradeTest) {
+            if (!setup.config.runUpgradeTest) {
                 console.log('Tests not configured');
                 this.skip();
             }
