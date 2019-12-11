@@ -116,6 +116,12 @@ class ConnectionService {
         type,
         data,
     }) => {
+        if (!this.port) {
+            return {
+                data: {},
+            };
+        }
+
         const requestId = randomId();
         this.port.postMessage({
             type,
@@ -147,6 +153,11 @@ class ConnectionService {
 
         const dataKey = Object.keys(data)
             .find(key => !!data[key]);
+
+        if (dataKey === undefined) {
+            return null;
+        }
+
         if (data[dataKey].error) {
             throw new ApiError(data);
         }

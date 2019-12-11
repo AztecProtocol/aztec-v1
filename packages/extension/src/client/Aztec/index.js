@@ -22,8 +22,8 @@ class Aztec {
         });
     }
 
-    enable = async (
-        {
+    enable = async (options = {}, callback = null) => new Promise(async (resolve) => {
+        const {
             apiKey = '',
             providerUrl = '',
             contractAddresses = {
@@ -31,18 +31,18 @@ class Aztec {
                 AZTECAccountRegistry: '',
             },
             autoRefreshOnProfileChange = true,
-        } = {},
-        callback = null,
-    ) => new Promise(async (resolve, reject) => {
+        } = options;
+        let networkSwitchedDuringStart = false;
+
         if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange(async () => this.refreshSession(
-                {
-                    apiKey,
-                    providerUrl,
-                    contractAddresses,
-                },
-                resolve,
-            ));
+            Web3Service.bindProfileChange(async () => {
+                networkSwitchedDuringStart = true;
+                const success = await this.refreshSession(options, resolve);
+
+                if (callback) {
+                    callback(success);
+                }
+            });
         }
 
         const networkConfig = await ConnectionService.openConnection({
@@ -62,7 +62,19 @@ class Aztec {
 
             await ApiPermissionService.ensurePermission();
         } catch (error) {
-            reject(error);
+            if (!networkSwitchedDuringStart) {
+                resolve(false);
+
+                if (callback) {
+                    callback(false);
+                }
+            }
+            return;
+        }
+
+        if (networkSwitchedDuringStart) {
+            // resolve has been pass to another enable() and should be triggered there
+            return;
         }
 
         const apis = ApiPermissionService.generateApis();
@@ -75,18 +87,14 @@ class Aztec {
         });
 
         if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange(async () => this.refreshSession({
-                apiKey,
-                providerUrl,
-                contractAddresses,
-            }));
+            Web3Service.bindProfileChange(async () => this.refreshSession(options));
         }
 
         if (callback) {
-            callback();
+            callback(true);
         }
 
-        resolve();
+        resolve(true);
     });
 
     async disable() {
@@ -98,7 +106,7 @@ class Aztec {
 
     refreshSession = async (config, cb) => {
         await this.disable();
-        await this.enable(config, cb);
+        return this.enable(config, cb);
     }
 }
 
