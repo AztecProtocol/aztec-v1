@@ -1,3 +1,7 @@
+import aztec from 'aztec.js';
+import {
+    warnLog,
+} from '~/utils/log';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiPermissionService from '~/client/services/ApiPermissionService';
@@ -8,6 +12,14 @@ class Aztec {
         this.web3 = null;
         this.zkAsset = null;
         this.zkNote = null;
+
+        Object.keys(aztec).forEach((name) => {
+            if (this[name]) {
+                warnLog(`Api '${name}' is already in Aztec.`);
+                return;
+            }
+            this[name] = aztec[name];
+        });
     }
 
     enable = async (
