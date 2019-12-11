@@ -35,15 +35,11 @@ class Setup {
             const opts = { from: sender };
 
             this.accounts = accounts;
-            this.contractsToDeploy = this.config.contractsToDeploy;
             this.delegatedAddress = delegatedAddress;
             this.opts = opts;
             this.provider = web3.currentProvider;
             this.publicOwner = publicOwner;
-            this.runAdjustSupplyTests = this.config.runAdjustSupplyTests;
-            this.runUpgradeTest = this.config.runUpgradeTest;
             this.sender = sender;
-            this.scalingFactor = this.config.scalingFactor;
 
             this.networkId = networkIDs[capitaliseFirstChar(this.NETWORK)];
             this.contractAddresses = this.getAddresses();
@@ -67,7 +63,7 @@ class Setup {
      */
     async fundPublicOwnerAccount() {
         const { ACE: ace, ERC20Mintable: erc20 } = await this.allContractObjects;
-        const tokensToBeTransferred = this.config.numTestTokens.mul(this.scalingFactor);
+        const tokensToBeTransferred = this.config.numTestTokens.mul(this.config.scalingFactor);
 
         // mint tokens
         const publicOwnerBalance = await erc20.balanceOf(this.publicOwner);
@@ -103,7 +99,7 @@ class Setup {
      * first index being the name of the contract and the second element the promise representing the truffle contract
      */
     getContractPromises() {
-        return this.contractsToDeploy.map((nameOfContract) => [nameOfContract, this.getContractPromise(nameOfContract)]);
+        return this.config.contractsToDeploy.map((nameOfContract) => [nameOfContract, this.getContractPromise(nameOfContract)]);
     }
 
     /**
@@ -129,7 +125,7 @@ class Setup {
         }
 
         const truffleRepresentation = this.getTruffleContractRepresentation(extractedContractArtifact);
-        return truffleRepresentation.at(extractedContractAddress); // this is going to return a promise
+        return async () => truffleRepresentation.at(extractedContractAddress);
     }
 
     /**
@@ -151,7 +147,10 @@ class Setup {
      */
     async getContracts() {
         const allContractObjects = (await Promise.all(
-            this.contractPromises.map(async (currentContractPromise) => Promise.all(currentContractPromise)),
+            this.contractPromises.map(async (currentContractPromise) => [
+                currentContractPromise[0],
+                await currentContractPromise[1](),
+            ]),
         )).reduce((accumulator, currentContractArray) => {
             const [contractName, truffleContract] = currentContractArray;
             accumulator[contractName] = truffleContract;
@@ -231,11 +230,7 @@ class Setup {
             scalingFactor: ERC20_SCALING_FACTOR,
         };
 
-        if (config) {
-            this.config = config;
-        } else {
-            this.config = defaultConfig;
-        }
+        this.config = Object.assign({}, defaultConfig, config);
     }
 }
 
