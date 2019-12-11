@@ -17,6 +17,7 @@ import ThemeContext from '~ui/views/handlers/ThemeContext';
 import Loading from '~ui/views/Loading';
 import routes from '~uiModules/config/routes';
 import actions from '~ui/config/actions';
+import getAuthRoute from '~/ui/utils/getAuthRoute';
 import getGsnConfig from '~utils/getGSNConfig';
 import './styles/guacamole.css';
 import './styles/ui.scss';
@@ -120,20 +121,15 @@ class App extends PureComponent {
                 linkedPublicKey: localLinkedPublicKey,
                 validSession,
             } = await apis.account.getLocalAccount() || {};
+            route = getAuthRoute({
+                onChainLinkedPublicKey,
+                localLinkedPublicKey,
+                validSession,
+                localAddress,
+                currentAddress,
+            });
 
-            if (onChainLinkedPublicKey) {
-                if (localAddress === currentAddress
-                    && localLinkedPublicKey === onChainLinkedPublicKey && !validSession
-                ) {
-                    route = 'account.login';
-                } else if (!validSession) {
-                    route = 'account.restore';
-                }
-            } else if (validSession
-                && localLinkedPublicKey
-                && localAddress !== currentAddress
-            ) {
-                route = 'register.address';
+            if (route === 'register.address') {
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
             }
         }
