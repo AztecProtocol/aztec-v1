@@ -34,17 +34,13 @@ const addressesStr = addresses
 const viewingKeysStr = viewingKeys.join('');
 
 const numberOfNewAccounts = 2;
-const newAddressBytes = [
-    randomHex(20),
-    randomHex(20),
-];
+const newAddressBytes = [randomHex(20), randomHex(20)];
 const newViewingKeyBytes = [];
 for (let i = 0; i < numberOfNewAccounts; i += 1) {
     newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cf${i}`));
 }
 
 const fixedOffset = METADATA_AZTEC_DATA_LENGTH + DYNAMIC_VAR_CONFIG_LENGTH * 3;
-
 
 describe('metadata toString', () => {
     it('generate a metadata string from data object', () => {
@@ -245,7 +241,7 @@ describe('addAccess util', () => {
             address: newAddressBytes[0],
             viewingKey: newViewingKeyBytes[0],
         });
-        
+
         const expectedStr = toString({
             addresses: [...addressBytes, newAddressBytes[0]].map(toChecksumAddress),
             viewingKeys: [...viewingKeyBytes, newViewingKeyBytes[0]],

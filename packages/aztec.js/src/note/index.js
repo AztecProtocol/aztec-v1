@@ -27,7 +27,7 @@ class Note {
      *
      * @param {string} publicKey hex-formatted public key
      * @param {string} viewingKey hex-formatted viewing key
-     * @param {Object} access mapping between an Ethereum address and the linked publickey
+     * @param {Array} access mapping between an Ethereum address and the linked publickey
      * @param {string} owner Ethereum address of note owner
      * @param {Object} setupPoint trusted setup point
      */
@@ -199,14 +199,14 @@ class Note {
     /**
      * Grant an Ethereum address access to the viewing key of a note
      *
-     * @param {Object} access mapping between an Ethereum address and the linked publickey
+     * @param {Array} access mapping between an Ethereum address and the linked publickey
      * @returns {string} customData - customMetaData which will grant the specified Ethereum address(s)
      * access to a note
      */
     grantViewAccess(access) {
         const noteViewKey = this.getView();
-        const metaData = generateAccessMetaData(access, noteViewKey, this.owner);
-        this.setMetaData(`0x${metaData}`);
+        const metaData = generateAccessMetaData(access, noteViewKey);
+        this.setMetaData(metaData);
     }
 
     /**
@@ -238,7 +238,7 @@ note.utils = noteUtils;
  * @param {string} publicKey hex-string formatted recipient public key
  * @param {number} value value of the note
  * @param {string} noteOwner owner of the note if different from the public key
- * @param {Object} access mapping between Ethereum addresses being granted view access of a note
+ * @param {Array} access mapping between Ethereum addresses being granted view access of a note
  * and a linkedPublicKey
  * @returns {Promise} promise that resolves to created note instance
  */
@@ -251,14 +251,6 @@ note.create = async (publicKey, value, access, noteOwner) => {
     const viewingKey = `0x${a}${k}${ephemeral}`;
     const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(publicKey);
     const setupPoint = await setup.fetchPoint(value);
-
-    if (!noteOwner && process.env.NODE_ENV === 'production') {
-        warnLog(`Owner address is empty in note.create().
-            Use address recovered from publicKey: ${owner}.
-            This is usually different than the actual address of the owner of publicKey.
-        `);
-    }
-
     return new Note(null, viewingKey, access, owner, setupPoint);
 };
 
