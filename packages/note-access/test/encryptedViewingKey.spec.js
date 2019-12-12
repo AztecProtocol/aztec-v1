@@ -1,6 +1,6 @@
+import { randomHex } from 'web3-utils';
 import { userAccount } from './helpers/testUsers';
 import { REAL_VIEWING_KEY_LENGTH, VIEWING_KEY_LENGTH } from '../src/config/constants';
-import { randomId } from '../src/random';
 import encryptedViewingKey, { fromHexString } from '../src/encryptedViewingKey';
 import lengthConfig from '../src/encryptedViewingKey/lengthConfig';
 
@@ -15,12 +15,12 @@ describe('encryptedViewingKey', () => {
         warnings = [];
     });
 
-    const realViewingKey = `0x${randomId(REAL_VIEWING_KEY_LENGTH)}`;
+    const realViewingKey = randomHex(REAL_VIEWING_KEY_LENGTH / 2);
 
     it('encrypt real viewing key and return an EncryptedMessage object', () => {
         const encrypted = encryptedViewingKey(publicKey, realViewingKey);
         expect(Object.keys(encrypted).sort()).toEqual(['decrypt', 'export', 'toHexString']);
-
+ 
         const viewingKeyData = encrypted.export();
         expect(Object.keys(viewingKeyData).sort()).toEqual(['ciphertext', 'ephemPublicKey', 'nonce']);
         Object.keys(viewingKeyData).forEach((key) => {

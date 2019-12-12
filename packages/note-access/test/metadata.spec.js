@@ -1,4 +1,4 @@
-import { toChecksumAddress } from 'web3-utils';
+import * as Web3Utils from 'web3-utils';
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
@@ -8,6 +8,8 @@ import {
 } from '../src/config/constants';
 import metadata, { toString, addAccess } from '../src/metadata';
 
+const { randomHex, toChecksumAddress } = Web3Utils;
+
 const base16 = (num) => num.toString(16);
 const padVar = (val, padWith = '0') => `${base16(val)}`.padStart(DYNAMIC_VAR_CONFIG_LENGTH, padWith);
 const padOffset = (offset) => padVar(offset / 2);
@@ -15,15 +17,12 @@ const padValues = (val, valLen) => `${padVar(valLen ? val.length / valLen : 0)}$
 
 const appData = ''.padEnd(80, 'd');
 const appDataByte = `0x${appData}`;
-const addresses = [];
-const addressBytes = [];
+const addresses = [randomHex(20), randomHex(20), randomHex(20)];
+const addressBytes = addresses;
 const viewingKeys = [];
 const viewingKeyBytes = [];
 const numberOfAccounts = 3;
 for (let i = 0; i < numberOfAccounts; i += 1) {
-    const address = ''.padEnd(ADDRESS_LENGTH, `ad${i}`);
-    addresses.push(address);
-    addressBytes.push(`0x${address}`);
     const viewingKey = ''.padEnd(VIEWING_KEY_LENGTH, `c${i}`);
     viewingKeys.push(viewingKey);
     viewingKeyBytes.push(`0x${viewingKey}`);
@@ -35,14 +34,17 @@ const addressesStr = addresses
 const viewingKeysStr = viewingKeys.join('');
 
 const numberOfNewAccounts = 2;
-const newAddressBytes = [];
+const newAddressBytes = [
+    randomHex(20),
+    randomHex(20),
+];
 const newViewingKeyBytes = [];
 for (let i = 0; i < numberOfNewAccounts; i += 1) {
-    newAddressBytes.push('0x'.padEnd(ADDRESS_LENGTH + 2, `adf${i}`));
     newViewingKeyBytes.push('0x'.padEnd(VIEWING_KEY_LENGTH + 2, `cf${i}`));
 }
 
 const fixedOffset = METADATA_AZTEC_DATA_LENGTH + DYNAMIC_VAR_CONFIG_LENGTH * 3;
+
 
 describe('metadata toString', () => {
     it('generate a metadata string from data object', () => {
@@ -243,7 +245,7 @@ describe('addAccess util', () => {
             address: newAddressBytes[0],
             viewingKey: newViewingKeyBytes[0],
         });
-
+        
         const expectedStr = toString({
             addresses: [...addressBytes, newAddressBytes[0]].map(toChecksumAddress),
             viewingKeys: [...viewingKeyBytes, newViewingKeyBytes[0]],
@@ -306,7 +308,6 @@ describe('addAccess util', () => {
         const viewingKeyStr = padValues(viewingKeys[0].padStart(MIN_BYTES_VAR_LENGTH, '0'), VIEWING_KEY_LENGTH);
         const expectedStr = [
             '0x',
-            ''.padStart(METADATA_AZTEC_DATA_LENGTH, '0'),
             padOffset(fixedOffset),
             padOffset(fixedOffset + addressStr.length),
             padOffset(fixedOffset + addressStr.length + viewingKeyStr.length),
