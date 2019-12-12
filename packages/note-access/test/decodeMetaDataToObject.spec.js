@@ -1,15 +1,7 @@
-import {
-    padLeft,
-    toHex,
-} from 'web3-utils';
-import {
-    MIN_BYTES_VAR_LENGTH,
-} from '../src/config/constants';
+import { MIN_BYTES_VAR_LENGTH } from '../src/config/constants';
 import decodeMetaDataToObject from '../src/utils/decodeMetaDataToObject';
 import ensureMinVarSize from '../src/utils/ensureMinVarSize';
 import to32ByteOffset from '../src/utils/to32ByteOffset';
-
-
 
 describe('decodeMetaDataToObject', () => {
     const config = [
@@ -42,13 +34,8 @@ describe('decodeMetaDataToObject', () => {
         ].join('');
 
         expect(decodeMetaDataToObject(inputStr, config)).toEqual({
-            food: [
-                '0xhamburgers',
-            ],
-            fruit: [
-                '0xapples',
-                '0xbanana',
-            ],
+            food: ['0xhamburgers'],
+            fruit: ['0xapples', '0xbanana'],
             forest: '0xewjklewjlewjkjfoerejeoree',
         });
     });
@@ -60,7 +47,7 @@ describe('decodeMetaDataToObject', () => {
             '0x',
             ensureMinVarSize(to32ByteOffset(3 * MIN_BYTES_VAR_LENGTH)),
             ensureMinVarSize(to32ByteOffset(5 * MIN_BYTES_VAR_LENGTH)),
-            ensureMinVarSize(to32ByteOffset((6 * MIN_BYTES_VAR_LENGTH) + (2 * longDataLength))),
+            ensureMinVarSize(to32ByteOffset(6 * MIN_BYTES_VAR_LENGTH + 2 * longDataLength)),
             ensureMinVarSize(1),
             ensureMinVarSize('hamburgers'),
             ensureMinVarSize(2),
@@ -69,7 +56,7 @@ describe('decodeMetaDataToObject', () => {
             ensureMinVarSize(1),
             ensureMinVarSize('deerrabbitbirdsnakebear'),
         ].join('');
-    
+
         const configWithLongData = [
             {
                 name: 'food',
@@ -84,17 +71,10 @@ describe('decodeMetaDataToObject', () => {
             },
         ];
 
-
-
         expect(decodeMetaDataToObject(inputStr, configWithLongData)).toEqual({
-                food: [
-                    '0xhamburgers',
-                ],
-                fruit: [
-                    `0x${'apples'.repeat(longDataLength / 6)}`,
-                    `0x${'banana'.repeat(longDataLength / 6)}`,
-                ],
-                forest: '0xdeerrabbitbirdsnakebear',
+            food: ['0xhamburgers'],
+            fruit: [`0x${'apples'.repeat(longDataLength / 6)}`, `0x${'banana'.repeat(longDataLength / 6)}`],
+            forest: '0xdeerrabbitbirdsnakebear',
         });
     });
 
@@ -113,12 +93,9 @@ describe('decodeMetaDataToObject', () => {
         ].join('');
 
         expect(decodeMetaDataToObject(inputStr, config)).toEqual({
-                food: [],
-                fruit: [
-                    '0xapples',
-                    '0xbanana',
-                ],
-                forest: '0xewjklewjlewjkjfoerejeoree',
+            food: [],
+            fruit: ['0xapples', '0xbanana'],
+            forest: '0xewjklewjlewjkjfoerejeoree',
         });
     });
 });

@@ -1,6 +1,6 @@
+import { errorLog } from '@aztec/dev-utils';
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
-import { errorLog } from '@aztec/dev-utils';
 
 export default function decryptMessage(privateKey, encryptedData) {
     if (typeof encryptedData === 'string') {

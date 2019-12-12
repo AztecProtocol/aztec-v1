@@ -1,6 +1,4 @@
-import {
-    MIN_BYTES_VAR_LENGTH,
-} from '../src/config/constants';
+import { MIN_BYTES_VAR_LENGTH } from '../src/config/constants';
 import ensureMinVarSize from '../src/utils/ensureMinVarSize';
 import to32ByteOffset from '../src/utils/to32ByteOffset';
 import encodeMetaDataToString from '../src/utils/encodeMetaDataToString';
@@ -22,13 +20,8 @@ describe('encodeMetaDataToString', () => {
 
     it('take a string and a config and return a formatted object', () => {
         const inputObj = {
-            food: [
-                '0xhamburgers',
-            ],
-            fruit: [
-                '0xapple',
-                '0xbanana',
-            ],
+            food: ['0xhamburgers'],
+            fruit: ['0xapple', '0xbanana'],
             forest: '0xdeerrabbitbirdsnakebear',
         };
 
@@ -66,13 +59,8 @@ describe('encodeMetaDataToString', () => {
         ];
 
         const inputObj = {
-            food: [
-                '0xhamburgers',
-            ],
-            fruit: [
-                `0x${'apple'.repeat(longDataLength / 5)}`,
-                `0x${'banana'.repeat(longDataLength / 6)}`,
-            ],
+            food: ['0xhamburgers'],
+            fruit: [`0x${'apple'.repeat(longDataLength / 5)}`, `0x${'banana'.repeat(longDataLength / 6)}`],
             forest: '0xdeerrabbitbirdsnakebear',
         };
 
@@ -80,7 +68,7 @@ describe('encodeMetaDataToString', () => {
             '0x',
             ensureMinVarSize(to32ByteOffset(3 * MIN_BYTES_VAR_LENGTH)),
             ensureMinVarSize(to32ByteOffset(5 * MIN_BYTES_VAR_LENGTH)),
-            ensureMinVarSize(to32ByteOffset((6 * MIN_BYTES_VAR_LENGTH) + (2 * longDataLength))),
+            ensureMinVarSize(to32ByteOffset(6 * MIN_BYTES_VAR_LENGTH + 2 * longDataLength)),
             ensureMinVarSize(1),
             ensureMinVarSize('hamburgers'),
             ensureMinVarSize(2),
@@ -96,18 +84,12 @@ describe('encodeMetaDataToString', () => {
     it('process empty data properly', () => {
         const inputObjWithEmptyArray = {
             food: [],
-            fruit: [
-                '0xapple',
-                '0xbanana',
-            ],
+            fruit: ['0xapple', '0xbanana'],
             forest: '',
         };
 
         const inputObjWithUndefinedData = {
-            fruit: [
-                '0xapple',
-                '0xbanana',
-            ],
+            fruit: ['0xapple', '0xbanana'],
         };
 
         const expectedStr = [
@@ -138,13 +120,8 @@ describe('encodeMetaDataToString', () => {
 
     it('take a 3rd parameter as startOffset', () => {
         const inputObj = {
-            food: [
-                '0xhamburgers',
-            ],
-            fruit: [
-                '0xapple',
-                '0xbanana',
-            ],
+            food: ['0xhamburgers'],
+            fruit: ['0xapple', '0xbanana'],
             forest: '0xdeerrabbitbirdsnakebear',
         };
 
@@ -152,9 +129,9 @@ describe('encodeMetaDataToString', () => {
 
         const expectedStr = [
             '0x',
-            ensureMinVarSize(to32ByteOffset(startOffset + (3 * MIN_BYTES_VAR_LENGTH))),
-            ensureMinVarSize(to32ByteOffset(startOffset + (5 * MIN_BYTES_VAR_LENGTH))),
-            ensureMinVarSize(to32ByteOffset(startOffset + (8 * MIN_BYTES_VAR_LENGTH))),
+            ensureMinVarSize(to32ByteOffset(startOffset + 3 * MIN_BYTES_VAR_LENGTH)),
+            ensureMinVarSize(to32ByteOffset(startOffset + 5 * MIN_BYTES_VAR_LENGTH)),
+            ensureMinVarSize(to32ByteOffset(startOffset + 8 * MIN_BYTES_VAR_LENGTH)),
             ensureMinVarSize(1),
             ensureMinVarSize('hamburgers'),
             ensureMinVarSize(2),
@@ -172,7 +149,7 @@ describe('encodeMetaDataToString', () => {
             {
                 name: 'food',
                 length: 10,
-                _toString: str => str.toUpperCase(),
+                _toString: (str) => str.toUpperCase(),
             },
             {
                 name: 'fruit',
@@ -184,13 +161,8 @@ describe('encodeMetaDataToString', () => {
         ];
 
         const inputObj = {
-            food: [
-                '0xhamburgers',
-            ],
-            fruit: [
-                '0xapple',
-                '0xbanana',
-            ],
+            food: ['0xhamburgers'],
+            fruit: ['0xapple', '0xbanana'],
             forest: '0xdeerrabbitbirdsnakebear',
         };
         const expectedStr = [

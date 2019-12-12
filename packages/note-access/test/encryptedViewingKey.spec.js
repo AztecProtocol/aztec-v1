@@ -20,7 +20,7 @@ describe('encryptedViewingKey', () => {
     it('encrypt real viewing key and return an EncryptedMessage object', () => {
         const encrypted = encryptedViewingKey(publicKey, realViewingKey);
         expect(Object.keys(encrypted).sort()).toEqual(['decrypt', 'export', 'toHexString']);
- 
+
         const viewingKeyData = encrypted.export();
         expect(Object.keys(viewingKeyData).sort()).toEqual(['ciphertext', 'ephemPublicKey', 'nonce']);
         Object.keys(viewingKeyData).forEach((key) => {
@@ -38,7 +38,7 @@ describe('encryptedViewingKey', () => {
     });
 
     it('return null if input viewing key has wrong size', () => {
-        const wrongViewingKey = `0x${randomId(REAL_VIEWING_KEY_LENGTH - 2)}`;
+        const wrongViewingKey = `0x${randomHex(REAL_VIEWING_KEY_LENGTH - 2)}`;
         const viewingKey = encryptedViewingKey(publicKey, wrongViewingKey);
         expect(viewingKey).toBe(null);
         expect(warnings.length).toBe(1);

@@ -1,9 +1,5 @@
 import { toChecksumAddress } from 'web3-utils';
-import {
-    METADATA_AZTEC_DATA_LENGTH,
-    ADDRESS_LENGTH,
-    VIEWING_KEY_LENGTH,
-} from './constants';
+import { METADATA_AZTEC_DATA_LENGTH, ADDRESS_LENGTH, VIEWING_KEY_LENGTH } from './constants';
 
 export const START_OFFSET = METADATA_AZTEC_DATA_LENGTH;
 

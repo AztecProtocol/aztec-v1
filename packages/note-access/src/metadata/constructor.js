@@ -1,6 +1,4 @@
-import metadataConfig, {
-    START_OFFSET
-} from '../config/noteMetaData';
+import metadataConfig, { START_OFFSET } from '../config/noteMetaData';
 import decodeMetaDataToObject from '../utils/decodeMetaDataToObject';
 import _addAccess from './_addAccess';
 import _getAccess from './_getAccess';

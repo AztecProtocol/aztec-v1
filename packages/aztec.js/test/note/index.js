@@ -161,20 +161,6 @@ describe('Note', () => {
             const allowedAccess2 = metadataObj.getAccess(userAccount2.address);
             expect(allowedAccess2.viewingKey.length).to.equal(VIEWING_KEY_LENGTH + 2);
         });
-
-        // it.only('warn if owner is empty', async () => {
-        //     const warnings = [];
-        //     const warnStub = sinon.stub(console, 'warn').callsFake(msg => warnings.push(msg));
-
-        //     const testNote = await note.create(userAccount.spendingPublicKey, 10);
-        //     console.log({ warnings });
-
-        //     expect(testNote.owner).not.equal(userAccount.address);
-        //     expect(warnings.length).to.equal(1);
-        //     expect(warnings[0]).toMatch(/owner address/i);
-
-        //     warnStub.restore();
-        // });
     });
 
     describe('Failure states', async () => {
