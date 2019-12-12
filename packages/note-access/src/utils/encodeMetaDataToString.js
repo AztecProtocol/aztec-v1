@@ -1,46 +1,49 @@
 import {
-    padLeft,
-    toHex,
-} from 'web3-utils';
-import {
     MIN_BYTES_VAR_LENGTH,
 } from '../config/constants';
-
-const ensureMinVarSize = str => padLeft(
-    str.match(/^0x/i) ? str.slice(2) : str,
-    MIN_BYTES_VAR_LENGTH
-);
+import ensureMinVarSize from './ensureMinVarSize';
+import to32ByteOffset from './to32ByteOffset';
 
 export default function encodeMetaDataToString(metaDataObj, config, startOffset = 0) {
     const variableOffsets = [];
     const variableData = [];
 
     let dynamicVarsOffset = startOffset + (config.length * MIN_BYTES_VAR_LENGTH);
+    let accumNumberOfDynamicData = 0;
     config.forEach(({
         name,
         length,
         _toString,
     }) => {
         const dynamicData = metaDataObj[name];
-        const numberOfDynamicData = length === undefined
-            ? (dynamicData && 1) || 0
-            : dynamicData.length;
-        variableOffsets.push(ensureMinVarSize(`${toHex(dynamicVarsOffset / 2).slice(2)}`));
-        const transform = _toString
-            ? data => ensureMinVarSize(_toString(data))
-            : ensureMinVarSize;
-        if (Array.isArray(dynamicData)) {
-            dynamicData.forEach((data) => {
-                variableData.push(transform(data));
-            });
-        } else if (dynamicData) {
-            variableData.push(transform(dynamicData));
+        const isDynamicArray = length !== undefined;
+        const numberOfDynamicData = isDynamicArray
+            ? (dynamicData && dynamicData.length) || 0
+            : (dynamicData && 1) || 0;
+        accumNumberOfDynamicData += numberOfDynamicData;
+
+        variableOffsets.push(to32ByteOffset(dynamicVarsOffset));
+
+        variableData.push(ensureMinVarSize(numberOfDynamicData));
+
+        if (dynamicData) {
+            const transformData = _toString
+                ? data => ensureMinVarSize(_toString(data))
+                : ensureMinVarSize;
+            if (isDynamicArray) {
+                dynamicData.forEach((data) => {
+                    variableData.push(transformData(data));
+                });
+            } else {
+                variableData.push(transformData(dynamicData));
+            }
         }
-        dynamicVarsOffset += variableData.slice(-numberOfDynamicData)
+
+        dynamicVarsOffset += variableData.slice(-(numberOfDynamicData + 1))
             .reduce((accum, data) => accum + data.length, 0);
     });
 
-    if (!variableData.length) {
+    if (!accumNumberOfDynamicData) {
         return '';
     }
 
