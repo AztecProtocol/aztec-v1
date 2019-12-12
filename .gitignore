@@ -48,4 +48,5 @@ packages/aws-lambda/.aws/
 packages/aws-lambda/.aws-sam/
 packages/aws-lambda/signer/template.yaml
 packages/aws-lambda/signer/packaged_dev.yaml
+packages/aws-lambda/signer/packaged_stage.yaml
 packages/aws-lambda/signer/packaged_prod.yaml

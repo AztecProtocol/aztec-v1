@@ -23,9 +23,9 @@
   },
   "scripts": {
     "test": "mocha tests/unit/",
-    "build:dev": "cd .. && sam build -t template.yaml",
-    "package:dev": "cd .. && sam package --template-file template.yaml --output-template-file packaged_dev.yaml",
-    "deploy:dev": "cd .. && aws cloudformation deploy --template-file packaged_dev.yaml --stack-name aztec-lambda"
+    "build:stage": "cd .. && sam build -t template.yaml",
+    "package:stage": "cd .. && sam package --template-file template.yaml --output-template-file packaged_stage.yaml",
+    "deploy:stage": "cd .. && aws cloudformation deploy --template-file packaged_stage.yaml --stack-name aztec-lambda"
   },
   "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
   "keywords": [

@@ -8,54 +8,89 @@ Globals:
     Timeout: 60
     Environment:
       Variables:
-        API_KEY_REQUIRED: False
-        SIGNER_ADDRESS: "0x4544..."
-        SIGNER_PRIVATE_KEY: "0x346..."
-        WEB3_PROVIDER_URL: "https://rinkeby.infu..."
+        API_KEY_REQUIRED: True
+        SIGNER_ADDRESS: "0x0..."
+        SIGNER_PRIVATE_KEY: "0x0..."
+        SIGNER_GANACHE_ADDRESS: "0x0..."
+        SIGNER_GANACHE_PRIVATE_KEY: "0x0..."
+        INFURA_PROJECT_KEY: "infuraApiKeyHere"
+        DB_HOST: ""
+        DB_PORT: "5432"
+        DB_DATABASE_PREFIX: ""
+        DB_USER: ""
+        DB_PASSWORD: ""
+        MAIN_AZTECAccountRegistryGSN: ""
+        ROPSTEN_AZTECAccountRegistryGSN: ""
         RINKEBY_AZTECAccountRegistryGSN: ""
+        GOERLI_AZTECAccountRegistryGSN: ""
+        KOVAN_AZTECAccountRegistryGSN: ""
   Api:
     Cors:
-      AllowMethods: '''OPTIONS,POST'''
+      AllowMethods: '''OPTIONS,POST,GET'''
       AllowHeaders: '''Content-Type'''
       AllowOrigin: '''*'''
 
 Resources:
-  SignDataFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  SignTxFunction:
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./signerFunction
-      Handler: app.lambdaHandler
+      Handler: app.signTxHandler
       Runtime: nodejs10.x
-      FunctionName: sign-data
+      FunctionName: sign-tx
       Role: arn:aws:iam::HERE-SOME-ID:role/HERE-YOUR-ROLE
       Events:
-        SignData:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        SignTx:
+          Type: Api
           Properties:
-            Path: /sign-data
+            Path: /{networkId}/{apiKey}
             Method: post
+  HasFreeTransactionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./signerFunction
+      Handler: balance.balanceHandler
+      Runtime: nodejs10.x
+      FunctionName: has-free-txs
+      Role: arn:aws:iam::HERE-SOME-ID:role/HERE-YOUR-ROLE
+      Events:
+        SignTx:
+          Type: Api
+          Properties:
+            Path: /{networkId}/{apiKey}
+            Method: get
   MigrateDBFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./signerFunction
-      Handler: app.migrationHandler
+      Handler: migrate.migrationHandler
       Runtime: nodejs10.x
       FunctionName: migrate-db
       Role: arn:aws:iam::HERE-SOME-ID:role/HERE-YOUR-ROLE
+      # SecurityGroupIds: 
+      #   - String
+      # SubnetIds: 
+      #   - String
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  SignDataApi:
-    Description: "API Gateway endpoint URL for SignData function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/sign-data/s"
-  SignDataFunction:
-    Description: "SignData Lambda Function ARN"
-    Value: !GetAtt SignDataFunction.Arn
+  SignTxApi:
+    Description: "API Gateway endpoint URL for SignTx function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/{networkId}/{apiKey}/"
+  SignTxFunction:
+    Description: "SignTx Lambda Function ARN"
+    Value: !GetAtt SignTxFunction.Arn
+  SignTxFunctionIamRole:
+    Description: "Implicit IAM Role created for SignTx function"
+    Value: !GetAtt SignTxFunction.Arn
+  HasFreeTransactionsApi:
+    Description: "API Gateway endpoint URL for HasFreeTransactions function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/{networkId}/{apiKey}/"
+  HasFreeTransactionsFunction:
+    Description: "SignTx Lambda Function ARN"
+    Value: !GetAtt HasFreeTransactionsFunction.Arn
   MigrateDBFunction:
     Description: "MigrateDB Lambda Function ARN"
     Value: !GetAtt MigrateDBFunction.Arn
-  # SignDataFunctionIamRole:
-  #   Description: "Implicit IAM Role created for SignData function"
-  #   Value: !GetAtt SignDataFunctionRole.Arn
