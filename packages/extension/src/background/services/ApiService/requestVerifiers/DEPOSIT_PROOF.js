@@ -32,26 +32,6 @@ export default async function verifyDepositRequest({
 
     const depositAmount = notesValue * scalingFactor;
 
-    const aceAddress = Web3Service.getAddress('ACE');
-
-    let allowance = await Web3Service
-        .useContract('ERC20')
-        .at(linkedTokenAddress)
-        .method('allowance')
-        .call(
-            currentAddress,
-            aceAddress,
-        );
-    allowance = parseInt(allowance, 10);
-
-    if (depositAmount > allowance) {
-        return argsError('erc20.deposit.allowance.notEnough', {
-            allowance,
-            depositAmount,
-            notesValue,
-        });
-    }
-
     let balance = await Web3Service
         .useContract('ERC20')
         .at(linkedTokenAddress)
@@ -61,7 +41,7 @@ export default async function verifyDepositRequest({
         );
     balance = parseInt(balance, 10);
 
-    if (balance < allowance) {
+    if (balance < depositAmount) {
         return argsError('erc20.deposit.balance.notEnough', {
             balance,
             depositAmount,

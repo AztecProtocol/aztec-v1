@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Web3Service from '~/helpers/Web3Service';
 import {
     emptyIntValue,
 } from '~/ui/config/settings';
@@ -36,8 +37,23 @@ const Deposit = ({
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
         const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
+        const allowanceSpender = Web3Service.getAddress('ACE');
+        const allowance = await Web3Service
+            .useContract('ERC20')
+            .at(asset.linkedTokenAddress)
+            .method('allowance')
+            .call(
+                currentAddress,
+                allowanceSpender,
+            );
+        const approvedERC20Allowance = parseInt(allowance, 10);
+        let newSteps;
+        if (approvedERC20Allowance >= amount) {
+            newSteps = steps.filter(({ name }) => name !== 'approveERC20');
+        }
 
         return {
+            steps: newSteps,
             assetAddress,
             asset,
             transactions: parsedTransactions,
@@ -46,6 +62,7 @@ const Deposit = ({
             amount,
             numberOfOutputNotes,
             userAccessAccounts,
+            allowanceSpender,
         };
     };
 
