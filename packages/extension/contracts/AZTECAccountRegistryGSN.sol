@@ -1,33 +1,24 @@
 pragma solidity >=0.5.0 <0.6.0;
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
-import "@aztec/protocol/contracts/libs/NoteUtils.sol";
 import "@aztec/protocol/contracts/interfaces/IZkAsset.sol";
-import "@aztec/protocol/contracts/interfaces/IERC20.sol";
-import "@aztec/protocol/contracts/interfaces/IAZTEC.sol";
-import "@aztec/protocol/contracts/ACE/ACE.sol" as ACEModule;
 import "./AZTECAccountRegistry.sol";
+import "./TransactionRelayer.sol";
 import "./GSNRecipientTimestampSignature.sol";
-
 
 /**
  * @title AZTECAccountRegistryGSN implementation
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract AZTECAccountRegistryGSN is IAZTEC, AZTECAccountRegistry, GSNRecipient, GSNRecipientTimestampSignature {
-    using NoteUtils for bytes;
-    ACEModule.ACE ace;
-    uint24 public constant JOIN_SPLIT_PROOF = 65793;
-    
+contract AZTECAccountRegistryGSN is AZTECAccountRegistry, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
     constructor(
         address _ace,
         address _trustedAddress
-    ) public {
+    ) public TransactionRelayer(_ace) {
         GSNRecipient.initialize();
         GSNRecipientTimestampSignature.initialize(_trustedAddress);
-        ace = ACEModule.ACE(_ace);
     }
 
     function confidentialTransferFrom(address _registryOwner,
