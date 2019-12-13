@@ -3,8 +3,6 @@ import BackupKeys from '~ui/views/BackupKeys';
 import CreatePassword from '~ui/views/CreatePassword';
 import LinkAccount from '~ui/views/LinkAccount';
 import RegisterConfirm from '~ui/views/RegisterConfirm';
-import DepositConfirm from '~ui/views/DepositConfirm';
-import DepositApprove from '~ui/views/DepositApprove';
 import TransactionSend from '~ui/views/TransactionSend';
 import WithdrawConfirm from '~ui/views/WithdrawConfirm';
 import SignNotes from '~ui/views/SignNotes';
@@ -171,87 +169,6 @@ export const withdrawSteps = {
             ],
         },
     ],
-};
-
-export const depositSteps = {
-    gsn: [
-        {
-            titleKey: 'deposit.confirm.title',
-            tasks: [
-                {
-                    name: 'proof',
-                    run: apis.proof.deposit,
-                },
-            ],
-            content: DepositConfirm,
-            submitTextKey: 'deposit.confirm.submit',
-        },
-        {
-            titleKey: 'deposit.approve.title',
-            tasks: [
-                {
-                    type: 'sign',
-                    name: 'approve',
-                    run: apis.ace.publicApprove,
-                },
-            ],
-            content: DepositApprove,
-            submitTextKey: 'deposit.approve.submit',
-        },
-        {
-            titleKey: 'deposit.send.title',
-            tasks: [
-                {
-                    name: 'send',
-                    run: apis.asset.confidentialTransferFrom,
-                },
-            ],
-            content: TransactionSend,
-            submitTextKey: 'deposit.send.submit',
-        },
-
-    ],
-    metamask: [
-
-        {
-            titleKey: 'deposit.confirm.title',
-            tasks: [
-                {
-                    name: 'proof',
-                    run: apis.proof.deposit,
-                },
-            ],
-            content: DepositConfirm,
-            submitTextKey: 'deposit.confirm.submit',
-        },
-        {
-            titleKey: 'deposit.approve.title',
-            tasks: [
-                {
-                    type: 'sign',
-                    name: 'approve',
-                    run: apis.ace.publicApprove,
-                },
-            ],
-            content: DepositApprove,
-            submitTextKey: 'deposit.approve.submit',
-        },
-        {
-            titleKey: 'deposit.send.title',
-            tasks: [
-                {
-                    name: 'send',
-                    run: apis.asset.confidentialTransfer,
-                },
-            ],
-            content: TransactionSend,
-            contentProps: {
-                descriptionKey: 'deposit.send.explain',
-            },
-            submitTextKey: 'deposit.send.submit',
-        },
-    ],
-
 };
 
 export const registerSteps = {
