@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import {
     get,
 } from '~/utils/storage';
@@ -11,8 +12,10 @@ export default async function getAssets() {
     return rawAssets.map(({
         registryAddress,
         linkedTokenAddress,
+        scalingFactor,
     }) => ({
         address: registryAddress,
         linkedTokenAddress,
+        scalingFactor: new BN(scalingFactor),
     }));
 }
