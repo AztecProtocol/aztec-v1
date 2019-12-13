@@ -82,7 +82,7 @@ const NoteAccessConfirm = ({
                         />
                         <ListRow
                             title={i18n.t('note.value')}
-                            content={formatNumber(value, asset.decimals)}
+                            content={formatNumber(value)}
                             color="primary"
                         />
                     </Block>

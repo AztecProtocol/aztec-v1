@@ -36,7 +36,7 @@ const SendConfirm = ({
                 />
                 <Block padding="0 s" inline>
                     <Text
-                        text={formatNumber(totalAmount, asset.decimals)}
+                        text={formatNumber(totalAmount)}
                         size="xl"
                         weight="bold"
                     />
@@ -108,7 +108,7 @@ const SendConfirm = ({
                     />
                     <ListRow
                         title={i18n.t('deposit.amount.total')}
-                        content={formatNumber(totalAmount, asset.decimals)}
+                        content={formatNumber(totalAmount)}
                         size="xs"
                         contentSize="s"
                         color="green"
@@ -146,7 +146,7 @@ const SendConfirm = ({
                             footnote={(
                                 <Text
                                     className="text-code"
-                                    text={`+${formatNumber(amount, asset.decimals)}`}
+                                    text={`+${formatNumber(amount)}`}
                                     color="green"
                                 />
                             )}

@@ -86,7 +86,7 @@ const DepositConfirm = ({
                     />
                     <ListRow
                         title={i18n.t('deposit.amount.total')}
-                        content={formatNumber(totalAmount, asset.decimals)}
+                        content={formatNumber(totalAmount)}
                         size="xs"
                         contentSize="s"
                         color="green"
@@ -125,7 +125,7 @@ const DepositConfirm = ({
                                 footnote={(
                                     <Text
                                         className="text-code"
-                                        text={`+${formatNumber(amount, asset.decimals)}`}
+                                        text={`+${formatNumber(amount)}`}
                                         color="green"
                                     />
                                 )}

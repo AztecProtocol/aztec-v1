@@ -25,7 +25,6 @@ import ShareNoteAccessConfirm from '~/ui/components/ShareNoteAccessConfirm';
 const CreateNoteFromBalanceConfirm = ({
     asset: {
         address: assetAddress,
-        decimals,
     },
     amount,
     numberOfInputNotes,
@@ -52,7 +51,7 @@ const CreateNoteFromBalanceConfirm = ({
                 size="xxs"
                 footnote={(
                     <Text
-                        text={`-${formatNumber(valueOf(note), decimals)}`}
+                        text={`-${formatNumber(valueOf(note))}`}
                         color="red"
                     />
                 )}
@@ -79,7 +78,7 @@ const CreateNoteFromBalanceConfirm = ({
                 size="xxs"
                 footnote={(
                     <Text
-                        text={`+${formatNumber(valueOf(note), decimals)}`}
+                        text={`+${formatNumber(valueOf(note))}`}
                         color="green"
                     />
                 )}
@@ -138,7 +137,7 @@ const CreateNoteFromBalanceConfirm = ({
                                     size="xxs"
                                     footnote={(
                                         <Text
-                                            text={`-${formatNumber(valueOf(note), decimals)}`}
+                                            text={`-${formatNumber(valueOf(note))}`}
                                             color="red"
                                         />
                                     )}
@@ -147,7 +146,7 @@ const CreateNoteFromBalanceConfirm = ({
                         })),
                         description: (
                             <Text
-                                text={`-${formatNumber(totalInputAmount, decimals)}`}
+                                text={`-${formatNumber(totalInputAmount)}`}
                                 color="red"
                             />
                         ),
@@ -172,7 +171,7 @@ const CreateNoteFromBalanceConfirm = ({
                                     size="xxs"
                                     footnote={(
                                         <Text
-                                            text={`+${formatNumber(valueOf(note), decimals)}`}
+                                            text={`+${formatNumber(valueOf(note))}`}
                                             color="green"
                                         />
                                     )}
@@ -181,7 +180,7 @@ const CreateNoteFromBalanceConfirm = ({
                         })),
                         description: (
                             <Text
-                                text={`+${formatNumber(amount, decimals)}`}
+                                text={`+${formatNumber(amount)}`}
                                 color="green"
                             />
                         ),
@@ -221,7 +220,7 @@ const CreateNoteFromBalanceConfirm = ({
                                 size="xs"
                                 footnote={(
                                     <Text
-                                        text={`+${formatNumber(valueOf(remainderNote), decimals)}`}
+                                        text={`+${formatNumber(valueOf(remainderNote))}`}
                                         color="green"
                                     />
                                 )}

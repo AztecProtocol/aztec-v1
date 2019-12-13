@@ -14,7 +14,6 @@ const AssetSummaryLink = ({
     address,
     linkedTokenAddress,
     name,
-    decimals,
     balance,
     onClick,
 }) => (
@@ -47,7 +46,7 @@ const AssetSummaryLink = ({
                 margin="none"
             >
                 <Text
-                    text={formatNumber(balance, decimals)}
+                    text={formatNumber(balance)}
                 />
             </Col>
         </Row>
@@ -59,7 +58,6 @@ AssetSummaryLink.propTypes = {
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
     name: PropTypes.string,
-    decimals: PropTypes.number.isRequired,
     balance: PropTypes.number.isRequired,
     onClick: PropTypes.func,
 };

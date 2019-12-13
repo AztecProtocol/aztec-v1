@@ -17,7 +17,6 @@ const AssetSummary = ({
     linkedTokenAddress,
     icon,
     name,
-    decimals,
     balance,
 }) => (
     <Block
@@ -41,7 +40,7 @@ const AssetSummary = ({
         </Block>
         <Block padding="m 0">
             <Text
-                text={formatNumber(balance, decimals)}
+                text={formatNumber(balance)}
                 size="l"
                 weight="semibold"
             />
@@ -77,7 +76,6 @@ AssetSummary.propTypes = {
     linkedTokenAddress: PropTypes.string.isRequired,
     icon: PropTypes.string,
     name: PropTypes.string,
-    decimals: PropTypes.number.isRequired,
     balance: PropTypes.number.isRequired,
 };
 
