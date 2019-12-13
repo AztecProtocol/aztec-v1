@@ -23,7 +23,7 @@ const stepApproveERC20 = {
         {
             type: 'sign',
             name: 'approve',
-            run: apis.asset.approveERC20,
+            run: apis.asset.approveERC20Allowance,
         },
     ],
     content: ERC20AllowanceApprove,
