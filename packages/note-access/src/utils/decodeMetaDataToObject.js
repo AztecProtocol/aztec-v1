@@ -2,6 +2,17 @@ import { MIN_BYTES_VAR_LENGTH } from '../config/constants';
 
 const stripPrependedZeroes = (str) => str.replace(/^0{1,}/, '');
 
+/**
+ * Decode metaData from string format - the format as it is stored on a note - into
+ * an object, according to a passed config.
+ *
+ * @method decodeMetaDataToObject
+ * @param {String} metaDataStr - metaData of an AZTEC note, as a hexadecimal string
+ * @param {Array} config - defines the schema of the object to which the metaData will be decoded
+ * @param {Number} startOffset - JavaScript number representing the length of any prepended metaData which is
+ * not encoded in this note-access package, for example the ephemeralKey associated data
+ * @returns {Object} metaDataObj - metaData in object form
+ */
 export default function decodeMetaDataToObject(metaDataStr, config, startOffset = 0) {
     const formattedMetaDataStr = metaDataStr.startsWith('0x') ? metaDataStr.slice(2) : metaDataStr;
     const offsetOfDynamicDataMapping = [];
