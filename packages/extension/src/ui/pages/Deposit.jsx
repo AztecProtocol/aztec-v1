@@ -7,7 +7,7 @@ import {
     inputTransactionShape,
     gsnConfigShape,
 } from '~ui/config/propTypes';
-import { depositSteps } from '~ui/config/steps';
+import depositSteps from '~/ui/steps/deposit';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
@@ -29,7 +29,7 @@ const Deposit = ({
     const {
         address: currentAddress,
     } = currentAccount;
-    const steps = isGSNAvailable ? depositSteps.gsn : depositSteps.metamask;
+    const steps = depositSteps[isGSNAvailable ? 'gsn' : 'metamask'];
 
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
