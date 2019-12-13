@@ -13,6 +13,18 @@ const handleAction = async (action, params) => {
     const { address } = Web3Service.account;
 
     switch (action) {
+        case 'metamask.send': {
+            const {
+                contract,
+                method,
+                data,
+            } = params;
+            response = await Web3Service
+                .useContract(contract)
+                .method(method)
+                .send(...data);
+            break;
+        }
         case 'gsn.sign.transaction': {
             const {
                 apiKey,

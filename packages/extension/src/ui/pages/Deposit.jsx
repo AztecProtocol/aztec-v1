@@ -38,7 +38,7 @@ const Deposit = ({
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
         const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
-        const allowanceSpender = Web3Service.getAddress('ACE');
+        const allowanceSpender = Web3Service.getAddress(isGSNAvailable ? 'ACE' : 'AZTECAccountRegistry');
         const allowance = await Web3Service
             .useContract('ERC20')
             .at(asset.linkedTokenAddress)
@@ -59,8 +59,8 @@ const Deposit = ({
             assetAddress,
             asset,
             transactions: parsedTransactions,
-            publicOwner: currentAddress,
-            sender: isGSNAvailable ? proxyContract : currentAddress,
+            publicOwner: isGSNAvailable ? currentAddress : allowanceSpender,
+            sender: isGSNAvailable ? proxyContract : allowanceSpender,
             amount,
             numberOfOutputNotes,
             userAccessAccounts,

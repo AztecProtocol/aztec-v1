@@ -6,6 +6,7 @@ import approveERC20Allowance from './approveERC20Allowance';
 import confidentialTransferFrom from './confidentialTransferFrom';
 import confidentialTransfer from './confidentialTransfer';
 import updateNoteMetadata from './updateNoteMetadata';
+import deposit from './deposit';
 
 export const getPastTransactions = () => [];
 
@@ -18,4 +19,5 @@ export {
     confidentialTransferFrom,
     confidentialTransfer,
     updateNoteMetadata,
+    deposit,
 };

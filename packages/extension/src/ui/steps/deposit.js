@@ -51,7 +51,7 @@ const stepSend = {
     tasks: [
         {
             name: 'send',
-            run: apis.asset.confidentialTransfer,
+            run: apis.asset.deposit,
         },
     ],
     content: TransactionSend,
@@ -83,7 +83,6 @@ export default {
     metamask: [
         stepConfirm,
         stepApproveERC20,
-        stepApprove,
         stepSend,
     ],
 };
