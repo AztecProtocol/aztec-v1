@@ -27,7 +27,7 @@ const DepositApprove = ({
                 />
                 <Block padding="0 s" inline>
                     <Text
-                        text={formatNumber(totalAmount, asset.decimals)}
+                        text={formatNumber(totalAmount)}
                         size="xl"
                         weight="bold"
                     />

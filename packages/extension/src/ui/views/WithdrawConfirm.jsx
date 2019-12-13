@@ -20,7 +20,6 @@ const WithdrawConfirm = ({
         address: assetAddress,
         linkedTokenAddress,
         name,
-        decimals,
     },
     currentAddress,
     publicOwner,
@@ -36,7 +35,7 @@ const WithdrawConfirm = ({
                 />
                 <Block padding="0 s" inline>
                     <Text
-                        text={formatNumber(amount, decimals)}
+                        text={formatNumber(amount)}
                         size="xl"
                         weight="bold"
                     />
@@ -71,7 +70,7 @@ const WithdrawConfirm = ({
                                 size="xxs"
                                 footnote={(
                                     <Text
-                                        text={`-${formatNumber(amount, decimals)}`}
+                                        text={`-${formatNumber(amount)}`}
                                         color="red"
                                     />
                                 )}
@@ -103,7 +102,7 @@ const WithdrawConfirm = ({
                                 size="xxs"
                                 footnote={(
                                     <Text
-                                        text={`+${formatNumber(amount, decimals)}`}
+                                        text={`+${formatNumber(amount)}`}
                                         color="green"
                                     />
                                 )}

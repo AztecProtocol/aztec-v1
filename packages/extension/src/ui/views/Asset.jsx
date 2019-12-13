@@ -15,7 +15,6 @@ const Asset = ({
     address,
     linkedTokenAddress,
     name,
-    decimals,
     balance,
     pastTransactions,
     isLoadingTransactions,
@@ -28,7 +27,6 @@ const Asset = ({
                 address={address}
                 linkedTokenAddress={linkedTokenAddress}
                 name={name}
-                decimals={decimals}
                 balance={balance}
             />
         </Block>
@@ -43,7 +41,6 @@ Asset.propTypes = {
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
     name: PropTypes.string,
-    decimals: PropTypes.number.isRequired,
     balance: PropTypes.number,
     pastTransactions: PropTypes.arrayOf(PropTypes.shape({
         type: PropTypes.string.isRequired,

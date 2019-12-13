@@ -58,7 +58,7 @@ const TransactionHistoryLink = ({
                     />
                     <Block padding="0 m">
                         <Text
-                            text={formatNumber(value, asset.decimals)}
+                            text={formatNumber(value)}
                         />
                     </Block>
                 </FlexBox>
