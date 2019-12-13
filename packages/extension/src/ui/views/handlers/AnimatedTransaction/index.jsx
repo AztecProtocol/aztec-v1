@@ -24,6 +24,7 @@ class AnimatedTransaction extends PureComponent {
     constructor(props) {
         super(props);
         const {
+            steps,
             initialStep,
             initialTask,
             initialData,
@@ -36,6 +37,7 @@ class AnimatedTransaction extends PureComponent {
         }
 
         this.state = {
+            steps,
             step: initialStep,
             currentTask: initialTask,
             data: initialData,
@@ -139,9 +141,13 @@ class AnimatedTransaction extends PureComponent {
         } = this.props;
         if (!fetchInitialData) return;
 
-        const newData = await fetchInitialData();
+        const {
+            steps,
+            ...newData
+        } = await fetchInitialData();
 
         const {
+            steps: initialSteps,
             step,
             history: prevHistory,
         } = this.state;
@@ -153,6 +159,7 @@ class AnimatedTransaction extends PureComponent {
         history[step] = data;
 
         this.setState({
+            steps: steps || initialSteps,
             data,
             history,
             pendingInitialFetch: false,
@@ -161,10 +168,10 @@ class AnimatedTransaction extends PureComponent {
 
     async validateSubmitData() {
         const {
-            steps,
             onSubmit,
         } = this.props;
         const {
+            steps,
             step,
             data: prevData,
         } = this.state;
@@ -223,10 +230,10 @@ class AnimatedTransaction extends PureComponent {
 
     async handleGoNext(accumData) {
         const {
-            steps,
             onGoNext,
         } = this.props;
         const {
+            steps,
             step,
         } = this.state;
         const {
@@ -277,10 +284,10 @@ class AnimatedTransaction extends PureComponent {
 
     async runTask(accumData = null) {
         const {
-            steps,
             runTask,
         } = this.props;
         const {
+            steps,
             step,
             currentTask: prevTask,
             data: prevData,
@@ -341,12 +348,12 @@ class AnimatedTransaction extends PureComponent {
 
     goToStep(step, accumData) {
         const {
+            steps,
             step: prevStep,
             history: prevHistory,
         } = this.state;
         const {
             onGoStep,
-            steps,
         } = this.props;
 
         if (step < 0) {
@@ -387,8 +394,6 @@ class AnimatedTransaction extends PureComponent {
     renderHeader() {
         const {
             steps,
-        } = this.props;
-        const {
             step,
         } = this.state;
         const {
@@ -443,8 +448,6 @@ class AnimatedTransaction extends PureComponent {
     renderFooter = () => {
         const {
             steps,
-        } = this.props;
-        const {
             step,
             currentTask,
             loading,
@@ -484,8 +487,6 @@ class AnimatedTransaction extends PureComponent {
     renderContent() {
         const {
             steps,
-        } = this.props;
-        const {
             step,
             data,
             childError,
@@ -569,7 +570,7 @@ AnimatedTransaction.propTypes = {
         cancelTextKey: PropTypes.string,
         submitText: PropTypes.string,
         submitTextKey: PropTypes.string,
-    })).isRequired,
+    })),
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
     initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
@@ -584,6 +585,7 @@ AnimatedTransaction.propTypes = {
 };
 
 AnimatedTransaction.defaultProps = {
+    steps: [],
     initialStep: 0,
     initialTask: -1,
     initialData: {},
