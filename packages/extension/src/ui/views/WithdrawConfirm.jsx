@@ -42,7 +42,7 @@ const WithdrawConfirm = ({
                     />
                 </Block>
                 <Text
-                    text={name || i18n.t('asset.erc20.token')}
+                    text={name || i18n.t('erc20.token')}
                     size="xl"
                     weight="light"
                 />

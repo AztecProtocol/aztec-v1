@@ -3,6 +3,7 @@ import general from './general';
 import transaction from './transaction';
 import account from './account';
 import asset from './asset';
+import erc20 from './erc20';
 import register from './register';
 import domain from './domain';
 import note from './note';
@@ -19,6 +20,7 @@ export default merge(
         transaction,
         account,
         asset,
+        erc20,
         register,
         domain,
         note,
