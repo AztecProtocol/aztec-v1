@@ -1,6 +1,6 @@
 const bn128 = require('@aztec/bn128');
 const {
-    constants: { AZTEC_JS_METADATA_PREFIX_LENGTH, VIEWING_KEY_LENGTH  },
+    constants: { AZTEC_JS_METADATA_PREFIX_LENGTH, VIEWING_KEY_LENGTH },
     metadata: metaDataConstructor,
 } = require('@aztec/note-access');
 const secp256k1 = require('@aztec/secp256k1');
