@@ -9,6 +9,12 @@ export default {
         submit: 'Approve',
         amount: 'Deposit',
         explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
+        erc20: {
+            title: 'Approve Allowance',
+            amount: 'Approve AZTEC to spend %{amount} ERC20 tokens',
+            submit: 'Approve',
+            explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
+        },
     },
     send: {
         title: 'Send Transaction',

@@ -1,4 +1,5 @@
 import DepositConfirm from '~ui/views/DepositConfirm';
+import ERC20AllowanceApprove from '~/ui/views/ERC20AllowanceApprove';
 import DepositApprove from '~ui/views/DepositApprove';
 import TransactionSend from '~ui/views/TransactionSend';
 import apis from '~uiModules/apis';
@@ -13,6 +14,23 @@ const stepConfirm = {
     ],
     content: DepositConfirm,
     submitTextKey: 'deposit.confirm.submit',
+};
+
+const stepApproveERC20 = {
+    name: 'approveERC20',
+    titleKey: 'deposit.approve.erc20.title',
+    tasks: [
+        {
+            type: 'sign',
+            name: 'approve',
+            run: apis.asset.approveERC20,
+        },
+    ],
+    content: ERC20AllowanceApprove,
+    contentProps: {
+        titleKey: 'deposit.approve.erc20.amount',
+    },
+    submitTextKey: 'deposit.approve.erc20.submit',
 };
 
 const stepApprove = {
@@ -58,11 +76,13 @@ const stepSendViaGSN = {
 export default {
     gsn: [
         stepConfirm,
+        stepApproveERC20,
         stepApprove,
         stepSendViaGSN,
     ],
     metamask: [
         stepConfirm,
+        stepApproveERC20,
         stepApprove,
         stepSend,
     ],
