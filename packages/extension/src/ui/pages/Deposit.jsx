@@ -66,6 +66,7 @@ const Deposit = ({
             userAccessAccounts,
             requestedAllowance,
             allowanceSpender,
+            spenderName: 'AZTEC',
         };
     };
 

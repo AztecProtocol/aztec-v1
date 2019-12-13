@@ -28,7 +28,7 @@ const stepApproveERC20 = {
     ],
     content: ERC20AllowanceApprove,
     contentProps: {
-        titleKey: 'deposit.approve.erc20.amount',
+        explainKey: 'deposit.approve.erc20.explain',
     },
     submitTextKey: 'deposit.approve.erc20.submit',
 };
