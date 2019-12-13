@@ -4,13 +4,13 @@ import { encryptMessage } from '../crypto';
 import decrypt from './decrypt';
 
 export default function constructor(publicKey, realViewingKey) {
-    const realVkHash = realViewingKey.replace(/^0x/, '');
-    if (realVkHash.length !== REAL_VIEWING_KEY_LENGTH) {
+    const formattedViewingKey = realViewingKey.replace(/^0x/, '');
+    if (formattedViewingKey.length !== REAL_VIEWING_KEY_LENGTH) {
         warnLog('Wrong viewing key size.');
         return null;
     }
 
-    const encrypted = encryptMessage(publicKey, realVkHash);
+    const encrypted = encryptMessage(publicKey, formattedViewingKey);
     encrypted.decrypt = (privateKey) => decrypt(privateKey, encrypted);
 
     return encrypted;

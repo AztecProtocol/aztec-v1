@@ -1,5 +1,4 @@
 const bn128 = require('@aztec/bn128');
-const { warnLog } = require('@aztec/dev-utils');
 const { generateAccessMetaData } = require('@aztec/note-access');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
