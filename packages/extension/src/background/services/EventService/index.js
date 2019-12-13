@@ -80,7 +80,7 @@ class EventService {
 
         const config = this.autosyncConfig.get(networkId) || {};
         if (config.status === AUTOSYNC_STATUS.STARTED) {
-            const fromAssets = await this.syncedAssets(networkId);
+            const fromAssets = await this.syncedAssets({ networkId });
             this.syncNotes({
                 address,
                 networkId,
