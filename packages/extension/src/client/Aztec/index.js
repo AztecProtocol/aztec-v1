@@ -22,7 +22,7 @@ class Aztec {
         });
     }
 
-    enable = async (options = {}, callback = null) => new Promise(async (resolve) => {
+    enable = async (options = {}, callback = null) => new Promise(async (resolve, reject) => {
         const {
             apiKey = '',
             providerUrl = '',
@@ -37,11 +37,16 @@ class Aztec {
         if (autoRefreshOnProfileChange) {
             Web3Service.bindProfileChange(async () => {
                 networkSwitchedDuringStart = true;
-                const success = await this.refreshSession(options, resolve);
-
-                if (callback) {
-                    callback(success);
-                }
+                await this.refreshSession(options, (success, error) => {
+                    if (callback) {
+                        callback(!!error, error);
+                    }
+                    if (error && !callback) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
             });
         }
 
@@ -50,6 +55,14 @@ class Aztec {
             providerUrl,
             contractAddresses,
         });
+
+        if (networkSwitchedDuringStart) {
+            // this statement is true if:
+            //   - user allows metamask to access current page
+            //   - user switches address
+            // while opening connection
+            return;
+        }
 
         try {
             const {
@@ -63,10 +76,11 @@ class Aztec {
             await ApiPermissionService.ensurePermission();
         } catch (error) {
             if (!networkSwitchedDuringStart) {
-                resolve(false);
-
                 if (callback) {
-                    callback(false);
+                    callback(false, error);
+                    resolve();
+                } else {
+                    reject(error);
                 }
             }
             return;
@@ -91,10 +105,10 @@ class Aztec {
         }
 
         if (callback) {
-            callback(true);
+            callback(true, null);
         }
 
-        resolve(true);
+        resolve();
     });
 
     async disable() {
