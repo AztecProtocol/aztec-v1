@@ -13,7 +13,10 @@ export default {
         timeout: 'The request timed out because the user did not respond to the notification.',
     },
     user: {
-        denied: 'User denied transactions.',
+        denied: {
+            _: 'User denied transactions.',
+            auth: 'User denied account authorization.',
+        },
     },
     account: {
         not: {

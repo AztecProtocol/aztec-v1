@@ -5,6 +5,9 @@ import {
     uiCloseEvent,
 } from '~/config/event';
 import urls from '~/config/urls';
+import {
+    permissionError,
+} from '~/utils/error';
 import Connection from '../utils/connection';
 import setupNetworkConfig from './setupNetworkConfig';
 
@@ -27,7 +30,16 @@ export default function acceptConnection() {
             } = event.data;
 
             if (clientProfile) {
-                networkConfig = await setupNetworkConfig(clientProfile);
+                try {
+                    networkConfig = await setupNetworkConfig(clientProfile);
+                } catch (e) {
+                    const error = e.code === 4001
+                        ? permissionError('user.denied.auth')
+                        : e;
+                    networkConfig = {
+                        error,
+                    };
+                }
             } else if (event.origin !== uiSourceOrigin) {
                 return;
             }
