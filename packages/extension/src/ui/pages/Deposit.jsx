@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import BN from 'bn.js';
 import Web3Service from '~/helpers/Web3Service';
 import {
     emptyIntValue,
@@ -46,9 +47,10 @@ const Deposit = ({
                 currentAddress,
                 allowanceSpender,
             );
-        const approvedERC20Allowance = parseInt(allowance, 10);
+        const approvedERC20Allowance = new BN(allowance);
+        const requestedAllowance = asset.scalingFactor.mul(new BN(amount));
         let newSteps;
-        if (approvedERC20Allowance >= amount) {
+        if (approvedERC20Allowance.gte(requestedAllowance)) {
             newSteps = steps.filter(({ name }) => name !== 'approveERC20');
         }
 
@@ -62,6 +64,7 @@ const Deposit = ({
             amount,
             numberOfOutputNotes,
             userAccessAccounts,
+            requestedAllowance,
             allowanceSpender,
         };
     };

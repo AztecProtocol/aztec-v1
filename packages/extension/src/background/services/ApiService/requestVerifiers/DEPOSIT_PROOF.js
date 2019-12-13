@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import Web3Service from '~/helpers/Web3Service';
 import {
     argsError,
@@ -24,13 +25,12 @@ export default async function verifyDepositRequest({
         { registryOwner: assetAddress },
     );
 
-    // TODO - shoule be big number
-    const scalingFactor = parseInt(scalingFactorStr, 10);
+    const scalingFactor = new BN(scalingFactorStr);
 
     const notesValue = transactions
         .reduce((sum, { amount }) => sum + amount, 0);
 
-    const depositAmount = notesValue * scalingFactor;
+    const erc20Amount = scalingFactor.mul(new BN(notesValue));
 
     let balance = await Web3Service
         .useContract('ERC20')
@@ -39,13 +39,13 @@ export default async function verifyDepositRequest({
         .call(
             currentAddress,
         );
-    balance = parseInt(balance, 10);
+    balance = new BN(balance);
 
-    if (balance < depositAmount) {
+    if (balance.lt(erc20Amount)) {
         return argsError('erc20.deposit.balance.notEnough', {
-            balance,
-            depositAmount,
-            notesValue,
+            balance: balance.toString(),
+            erc20Amount: erc20Amount.toString(),
+            amount: notesValue,
         });
     }
 

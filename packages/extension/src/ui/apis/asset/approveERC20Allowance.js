@@ -2,7 +2,7 @@ import Web3Service from '~/helpers/Web3Service';
 
 export default async function approveERC20Allowance({
     asset,
-    amount,
+    requestedAllowance,
     allowanceSpender,
 }) {
     const {
@@ -17,14 +17,14 @@ export default async function approveERC20Allowance({
             .method('approve')
             .send(
                 allowanceSpender,
-                amount,
+                requestedAllowance.toString(),
             );
     } catch (e) {
         error = e;
     }
 
     return {
-        approvedERC20Allowance: error ? 0 : amount,
+        approvedERC20Allowance: error ? 0 : requestedAllowance,
         error,
     };
 }
