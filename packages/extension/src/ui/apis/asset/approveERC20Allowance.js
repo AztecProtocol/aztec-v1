@@ -1,6 +1,6 @@
 import Web3Service from '~/helpers/Web3Service';
 
-export default async function approveERC20({
+export default async function approveERC20Allowance({
     asset,
     amount,
     allowanceSpender,
