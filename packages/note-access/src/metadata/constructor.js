@@ -1,57 +1,21 @@
-import { toChecksumAddress } from 'web3-utils';
-import config from '../config/metadata';
-import { DYNAMIC_VAR_CONFIG_LENGTH, MIN_BYTES_VAR_LENGTH } from '../config/constants';
+import metadataConfig, { START_OFFSET } from '../config/noteMetaData';
+import decodeMetaDataToObject from '../utils/decodeMetaDataToObject';
 import _addAccess from './_addAccess';
 import _getAccess from './_getAccess';
 import toString from './toString';
 
-export default function constructor(metadataStr) {
-    const metadata = {};
-    let start = metadataStr.startsWith('0x') ? 2 : 0;
-
-    const lenVars = config.reduce((accum, { startAt }) => {
-        if (!startAt) {
-            return accum;
-        }
-        return [...accum, startAt];
-    }, []);
-
-    config.forEach(({ name, length, startAt }) => {
-        const isDynamic = !!startAt;
-        const isLenVar = lenVars.indexOf(name) >= 0;
-
-        let numberOfVars = 1;
-        if (isDynamic) {
-            numberOfVars = parseInt(metadataStr.substr(start, DYNAMIC_VAR_CONFIG_LENGTH), 10);
-            start += DYNAMIC_VAR_CONFIG_LENGTH;
-        }
-
-        const arr = [];
-        for (let i = 0; i < numberOfVars; i += 1) {
-            let segLen;
-            if (isLenVar) {
-                segLen = length;
-            } else {
-                segLen = length !== undefined ? Math.max(length, MIN_BYTES_VAR_LENGTH) : metadataStr.length - start;
-            }
-            let val = metadataStr.substr(start, segLen);
-            if (isLenVar) {
-                val = parseInt(val, 16);
-            } else if (length) {
-                val = val.slice(segLen - (length || 0));
-            }
-            if (name === 'addresses') {
-                arr.push(toChecksumAddress(val));
-            } else {
-                arr.push(val ? `0x${val}` : '');
-            }
-            start += segLen;
-        }
-
-        const isArrayValue = isDynamic && length !== undefined;
-
-        metadata[name] = isArrayValue ? arr : arr[0] || '';
-    });
+/**
+ * Construct a metaData object, with key methods to manipulate the metaData such as by adding
+ * view key access for a third party and converting the metaData object to a string
+ *
+ * @method constructor
+ * @param {String} metaDataStr - metaData in string form, the form as it is stored on
+ * the AZTEC note
+ * @returns {Object} metaData object together with associated method for commonly performed
+ * actions
+ */
+export default function constructor(metaDataStr) {
+    const metadata = decodeMetaDataToObject(metaDataStr, metadataConfig, START_OFFSET);
 
     const { addresses, viewingKeys } = metadata;
 

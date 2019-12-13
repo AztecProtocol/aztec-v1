@@ -1,38 +1,20 @@
 const bn128 = require('@aztec/bn128');
 const {
-    AZTEC_JS_METADATA_PREFIX_LENGTH,
+    constants: { AZTEC_JS_METADATA_PREFIX_LENGTH, VIEWING_KEY_LENGTH },
     metadata: metaDataConstructor,
-    METADATA_AZTEC_DATA_LENGTH,
-    VIEWING_KEY_LENGTH,
 } = require('@aztec/note-access');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { expect } = require('chai');
 const crypto = require('crypto');
-const sinon = require('sinon');
 const web3Utils = require('web3-utils');
 
+const { userAccount, userAccount2 } = require('../helpers/note');
 const note = require('../../src/note');
 
 const { padLeft, toHex, randomHex } = web3Utils;
 
-const userAccount = {
-    address: '0xfB95acC8D3870da3C646Ae8c3C621916De8DF42d',
-    linkedPublicKey: '0xa61d17b0dd3095664d264628a6b947721314b6999aa6a73d3c7698f041f78a4d',
-    linkedPrivateKey: 'e1ec35b90155a633ac75d0508e537a7e00fd908a5295365054001a44b4a0560c',
-    spendingPublicKey: '0x0290e0354caa04c73920339f979cfc932dd3d52ba8210fec34571bb6422930c396',
-};
-
-const userAccount2 = {
-    address: '0x61EeAd169ec67b24abee7B81Ca750b6dCA3a9CCd',
-    linkedPublicKey: '0x058d55269a83b5ea379931ac58bc3def375eab12e527708111545af46f5f9b5c',
-    linkedPrivateKey: '6a30cc7b28b037b47378522a1a370c2394b0dd2d70c6abbe5ac66c8a1d84db21',
-    spendingPublicKey: '0x02090a6b89b0588626f26babc87f2dc1e2c815b8248754bed93d837f7071411605',
-};
-
 describe('Note', () => {
-    const metadataLenDiff = METADATA_AZTEC_DATA_LENGTH - AZTEC_JS_METADATA_PREFIX_LENGTH;
-
     describe('Success states', async () => {
         it('should create well formed notes using the fromPublic and fromViewKey methods', async () => {
             const aBn = new BN(crypto.randomBytes(32), 16).umod(bn128.groupModulus);
@@ -127,14 +109,16 @@ describe('Note', () => {
         });
 
         it('should add note access when creating note', async () => {
-            const access = {
-                address: userAccount.address,
-                linkedPublicKey: userAccount.linkedPublicKey,
-            };
+            const access = [
+                {
+                    address: userAccount.address,
+                    linkedPublicKey: userAccount.linkedPublicKey,
+                },
+            ];
 
             const testNote = await note.create(userAccount.spendingPublicKey, 10, access);
             const metadataStr = testNote.exportMetaData();
-            const metadataObj = metaDataConstructor(metadataStr.padStart(metadataStr.length + metadataLenDiff, '0'));
+            const metadataObj = metaDataConstructor(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
             const allowedAccess = metadataObj.getAccess(userAccount.address);
             expect(Object.keys(allowedAccess)).to.deep.equal(['address', 'viewingKey']);
             expect(allowedAccess.address).to.equal(userAccount.address);
@@ -155,26 +139,12 @@ describe('Note', () => {
             const testNote = await note.create(userAccount.spendingPublicKey, 10, access);
 
             const metadataStr = testNote.exportMetaData();
-            const metadataObj = metaDataConstructor(metadataStr.padStart(metadataStr.length + metadataLenDiff, '0'));
+            const metadataObj = metaDataConstructor(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
             const allowedAccess = metadataObj.getAccess(userAccount.address);
             expect(allowedAccess.viewingKey.length).to.equal(VIEWING_KEY_LENGTH + 2);
             const allowedAccess2 = metadataObj.getAccess(userAccount2.address);
             expect(allowedAccess2.viewingKey.length).to.equal(VIEWING_KEY_LENGTH + 2);
         });
-
-        // it.only('warn if owner is empty', async () => {
-        //     const warnings = [];
-        //     const warnStub = sinon.stub(console, 'warn').callsFake(msg => warnings.push(msg));
-
-        //     const testNote = await note.create(userAccount.spendingPublicKey, 10);
-        //     console.log({ warnings });
-
-        //     expect(testNote.owner).not.equal(userAccount.address);
-        //     expect(warnings.length).to.equal(1);
-        //     expect(warnings[0]).toMatch(/owner address/i);
-
-        //     warnStub.restore();
-        // });
     });
 
     describe('Failure states', async () => {

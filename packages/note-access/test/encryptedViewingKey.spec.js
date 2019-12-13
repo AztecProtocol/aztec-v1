@@ -1,6 +1,6 @@
+import { randomHex } from 'web3-utils';
 import { userAccount } from './helpers/testUsers';
 import { REAL_VIEWING_KEY_LENGTH, VIEWING_KEY_LENGTH } from '../src/config/constants';
-import { randomId } from '../src/random';
 import encryptedViewingKey, { fromHexString } from '../src/encryptedViewingKey';
 import lengthConfig from '../src/encryptedViewingKey/lengthConfig';
 
@@ -15,7 +15,7 @@ describe('encryptedViewingKey', () => {
         warnings = [];
     });
 
-    const realViewingKey = `0x${randomId(REAL_VIEWING_KEY_LENGTH)}`;
+    const realViewingKey = randomHex(REAL_VIEWING_KEY_LENGTH / 2);
 
     it('encrypt real viewing key and return an EncryptedMessage object', () => {
         const encrypted = encryptedViewingKey(publicKey, realViewingKey);
@@ -38,7 +38,7 @@ describe('encryptedViewingKey', () => {
     });
 
     it('return null if input viewing key has wrong size', () => {
-        const wrongViewingKey = `0x${randomId(REAL_VIEWING_KEY_LENGTH - 2)}`;
+        const wrongViewingKey = `0x${randomHex(REAL_VIEWING_KEY_LENGTH - 2)}`;
         const viewingKey = encryptedViewingKey(publicKey, wrongViewingKey);
         expect(viewingKey).toBe(null);
         expect(warnings.length).toBe(1);
