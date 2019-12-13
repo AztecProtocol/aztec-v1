@@ -1,4 +1,7 @@
+import BN from 'bn.js';
 import PropTypes from 'prop-types';
+
+export const bigNumberType = PropTypes.instanceOf(BN);
 
 export const themeType = PropTypes.oneOf([
     'primary',
@@ -20,6 +23,7 @@ export const siteShape = PropTypes.shape({
 export const assetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,
     linkedTokenAddress: PropTypes.string.isRequired,
+    scalingFactor: bigNumberType.isRequired,
     name: PropTypes.string,
     icon: PropTypes.string,
     symbol: PropTypes.string,

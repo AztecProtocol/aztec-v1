@@ -1,5 +1,5 @@
 import {
-    getLinkedTokenAddress,
+    getAsset,
 } from '~/ui/apis/asset';
 import makeToken from '~/ui/utils/makeToken';
 
@@ -8,20 +8,17 @@ export default async function makeAsset(asset) {
         return null;
     }
 
-    let address;
-    let linkedTokenAddress;
+    let assetObj = asset;
 
     if (typeof asset === 'string') {
-        address = asset;
-    } else {
-        ({
-            address,
-            linkedTokenAddress,
-        } = asset);
+        assetObj = await getAsset(asset);
     }
 
+    const {
+        linkedTokenAddress,
+    } = assetObj || {};
     if (!linkedTokenAddress) {
-        linkedTokenAddress = await getLinkedTokenAddress(address);
+        return null;
     }
 
     const {
@@ -32,8 +29,7 @@ export default async function makeAsset(asset) {
     } = makeToken(linkedTokenAddress);
 
     return {
-        address,
-        linkedTokenAddress,
+        ...assetObj,
         name,
         icon,
         symbol,

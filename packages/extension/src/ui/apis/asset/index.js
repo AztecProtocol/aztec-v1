@@ -1,3 +1,4 @@
+import getAsset from './getAsset';
 import getAssets from './getAssets';
 import getDomainAssets from './getDomainAssets';
 import getLinkedTokenAddress from './getLinkedTokenAddress';
@@ -9,6 +10,7 @@ import updateNoteMetadata from './updateNoteMetadata';
 export const getPastTransactions = () => [];
 
 export {
+    getAsset,
     getAssets,
     getDomainAssets,
     getLinkedTokenAddress,

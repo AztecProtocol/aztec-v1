@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import BN from 'bn.js';
 import {
     Block,
     Text,
@@ -7,6 +8,7 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
+    bigNumberType,
 } from '~/ui/config/propTypes';
 import formatNumber from '~/ui/utils/formatNumber';
 import i18n from '~ui/helpers/i18n';
@@ -18,6 +20,7 @@ const ERC20AllowanceApprove = ({
     titleKey,
     asset,
     amount,
+    requestedAllowance,
 }) => (
     <PopupContent
         title={(
@@ -26,7 +29,7 @@ const ERC20AllowanceApprove = ({
                     amount: (
                         <Text
                             key="amount"
-                            text={formatNumber(amount, asset.decimals)}
+                            text={formatNumber(requestedAllowance, asset.decimals)}
                             size="xl"
                             weight="bold"
                         />
@@ -58,6 +61,7 @@ ERC20AllowanceApprove.propTypes = {
     titleKey: PropTypes.string,
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
+    requestedAllowance: bigNumberType.isRequired,
 };
 
 ERC20AllowanceApprove.defaultProps = {

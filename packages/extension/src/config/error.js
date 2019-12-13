@@ -58,11 +58,8 @@ export default {
     },
     erc20: {
         deposit: {
-            allowance: {
-                notEnough: 'ERC20 allowance (%{allowance}) is not enough to make a deposit of %{depositAmount}.',
-            },
             balance: {
-                notEnough: 'ERC20 balance (%{balance}) is not enough to make a deposit of %{depositAmount}.',
+                notEnough: 'ERC20 balance (%{balance}) is not enough to make a deposit of %{erc20Amount}.',
             },
         },
     },
