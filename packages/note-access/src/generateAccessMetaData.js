@@ -3,10 +3,9 @@ import encryptedViewingKey from './encryptedViewingKey';
 
 /**
  * @method generateAccessMetaData - grant an Ethereum address view access to a note
- * @param {Object} access - mapping between an Ethereum address and the linked public key. The specified address
+ * @param {Array} access - mapping between an Ethereum address and the linked public key. The specified address
  * is being granted access to the note
- * @param {} noteViewKey - viewing key of the note
- * @param {string} owner - Ethereum address that owns the note
+ * @param {String} noteViewKey - viewing key of the note
  */
 export default function generateAccessMetaData(access, noteViewKey) {
     const noteAccess = access.map(({ address, linkedPublicKey }) => {
