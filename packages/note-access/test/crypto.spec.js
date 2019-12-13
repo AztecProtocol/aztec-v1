@@ -1,7 +1,6 @@
+import { randomHex } from 'web3-utils';
 import { userAccount } from './helpers/testUsers';
-import { randomId } from '../src/random';
-import { encryptMessage, batchEncrypt, decryptMessage, batchDecrypt, fromHexString } from '../src/crypto';
-import nacl from '../src/crypto/nacl';
+import { encryptMessage, decryptMessage, fromHexString } from '../src/crypto';
 import lengthConfig from '../src/crypto/lengthConfig';
 
 const { linkedPublicKey: publicKey, linkedPrivateKey: privateKey } = userAccount;
@@ -51,26 +50,6 @@ describe('decryptMessage', () => {
     });
 });
 
-describe('batchDecrypt', () => {
-    it('decrypt multiple EncryptedMessage objects', () => {
-        const fromSecretKeySpy = jest.spyOn(nacl.box.keyPair, 'fromSecretKey');
-        const messages = ['my secret', 'my second secret', 'my last secret'];
-        const encryptedData = messages.map((message) => encryptMessage(publicKey, message));
-        const recovered = batchDecrypt(privateKey, encryptedData);
-        expect(recovered).toEqual(messages);
-        expect(fromSecretKeySpy).toHaveBeenCalledTimes(1);
-    });
-});
-
-describe('batchEncrypt', () => {
-    it('encrypt multiple messages at the same time', () => {
-        const messages = ['my secret', 'my second secret', 'my last secret'];
-        const encryptedData = batchEncrypt(publicKey, messages);
-        const recovered = batchDecrypt(privateKey, encryptedData);
-        expect(recovered).toEqual(messages);
-    });
-});
-
 describe('fromHexString', () => {
     it('generate an EncryptedMessage object from string', () => {
         const message = 'my secret';
@@ -86,11 +65,11 @@ describe('fromHexString', () => {
 
         const minLen = Object.values(lengthConfig).reduce((accum, len) => accum + len, 0);
 
-        const encrypted = fromHexString(randomId(minLen));
+        const encrypted = fromHexString(randomHex(minLen / 2));
         expect(encrypted.decrypt(privateKey)).toBe('');
         expect(warnSpy).not.toHaveBeenCalled();
 
-        const invalid = fromHexString(randomId(minLen - 1));
+        const invalid = fromHexString(randomHex((minLen - 2) / 2));
         expect(invalid).toBe(null);
         expect(warnSpy).toHaveBeenCalledTimes(1);
 
