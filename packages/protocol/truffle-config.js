@@ -52,8 +52,13 @@ const coverageSubproviderConfig = {
     ignoreFilesGlobs: ['**/Migrations.sol', '**/node_modules/**', '**/interfaces/**', '**/test/**'],
 };
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
-const defaultFromAddress = getFirstAddress();
 const engine = new ProviderEngine();
+
+let defaultFromAddress;
+const testModes = ['profile', 'coverage', 'trace'];
+if (testModes.includes(process.env.MODE)) {
+    defaultFromAddress = getFirstAddress();
+}
 
 switch (process.env.MODE) {
     case 'profile':
