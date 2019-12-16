@@ -142,16 +142,19 @@ class Setup {
     /**
      * @method getContracts - generate and get the JavaScript objects representing contracts deployed at a specific address,
      * for use in testing
-     * @returns {Object} Truffle contracts, representing the contract deployed at a specific address. The keys are the contract names,
+     * @returns {Object} Truffle contracts, representing the contract deployed at a specific address. The keys are the
+     * contract names,
      * the values are the Truffle contract at a particular address
      */
     async getContracts() {
-        const allContractObjects = (await Promise.all(
-            this.contractPromises.map(async (currentContractPromise) => [
-                currentContractPromise[0],
-                await currentContractPromise[1](),
-            ]),
-        )).reduce((accumulator, currentContractArray) => {
+        const allContractObjects = (
+            await Promise.all(
+                this.contractPromises.map(async (currentContractPromise) => [
+                    currentContractPromise[0],
+                    await currentContractPromise[1](),
+                ]),
+            )
+        ).reduce((accumulator, currentContractArray) => {
             const [contractName, truffleContract] = currentContractArray;
             accumulator[contractName] = truffleContract;
             return { ...accumulator };
