@@ -1,4 +1,4 @@
-import config, { START_OFFSET } from '../config/metaData';
+import config, { START_OFFSET } from '../config/metadata';
 import encodeMetaDataToString from '../utils/encodeMetaDataToString';
 
 export default function toString(metaDataObj) {
