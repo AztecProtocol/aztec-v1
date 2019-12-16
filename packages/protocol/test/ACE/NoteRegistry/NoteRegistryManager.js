@@ -23,7 +23,6 @@ const TestFactory = artifacts.require('./test/TestFactory');
 const Factory201911 = artifacts.require('./noteRegistry/epochs/201911/base/FactoryBase201911');
 const Factory201912 = artifacts.require('./noteRegistry/epochs/201912/base/FactoryBase201912');
 
-
 const { JOIN_SPLIT_PROOF } = proofs;
 
 contract('NoteRegistryManager', (accounts) => {
@@ -159,11 +158,14 @@ contract('NoteRegistryManager', (accounts) => {
             const canAdjustSupply = false;
             const canConvert = true;
 
-            await ace
-                .methods['createNoteRegistry(address,uint256,bool,bool,uint24)']
-                (erc20.address, scalingFactor, canAdjustSupply, canConvert, factoryId201911,
-                    { from: zkAssetOwner }
-                );
+            await ace.methods['createNoteRegistry(address,uint256,bool,bool,uint24)'](
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                factoryId201911,
+                { from: zkAssetOwner },
+            );
             const existingProxy = await ace.registries(zkAssetOwner);
 
             const upgradeReceipt = await ace.upgradeNoteRegistry(factoryId201912, { from: zkAssetOwner });

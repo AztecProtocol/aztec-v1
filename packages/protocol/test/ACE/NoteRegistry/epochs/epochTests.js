@@ -42,7 +42,7 @@ function fetchAllBehaviourData(dirPath) {
             behaviourPath,
         };
 
-        inherritedBehaviours.forEach(inherritedBehaviour => {
+        inherritedBehaviours.forEach((inherritedBehaviour) => {
             if (behaviours[inherritedBehaviour]) {
                 behaviours[inherritedBehaviour].next.push(contractName);
             } else {
@@ -94,9 +94,11 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
         const dirPath = path.join(__dirname, '../../../..', 'contracts', 'ACE', 'noteRegistry', 'epochs');
 
         inherritanceObj = fetchAllBehaviourData(dirPath);
-        const orderedEpochSet = new Set(Object.values(inherritanceObj)
-            .map(o => o.epochInt)
-            .sort());
+        const orderedEpochSet = new Set(
+            Object.values(inherritanceObj)
+                .map((o) => o.epochInt)
+                .sort(),
+        );
 
         orderedEpochs = Array.from(orderedEpochSet);
     });
@@ -121,7 +123,7 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
                 const epochIndex = orderedEpochs.indexOf(epochInt);
                 if (next.length === 0) return;
                 if (epochIndex !== 0) {
-                    const parent = previous.find(c => inherritanceObj[c].epochInt === orderedEpochs[epochIndex - 1]);
+                    const parent = previous.find((c) => inherritanceObj[c].epochInt === orderedEpochs[epochIndex - 1]);
                     expect(parent).to.not.equal(undefined);
                 }
 

@@ -164,5 +164,8 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
     */
     function deleteNote(bytes32 _noteHash, address _noteOwner) internal;
 
+    /**
+        * @dev Public function used during slow release phase to manually enable an asset.
+    */
     function makeAvailable() public;
 }

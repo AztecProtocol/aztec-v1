@@ -40,7 +40,6 @@ contract('NoteRegistry', (accounts) => {
         ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: aceOwner });
         ace.setProof(MINT_PROOF, JoinSplitFluidValidator.address, { from: aceOwner });
 
-
         const baseFactory = await BaseFactory.new(ace.address);
         const adjustableFactory = await AdjustableFactory.new(ace.address);
 
@@ -56,7 +55,7 @@ contract('NoteRegistry', (accounts) => {
         const depositOutputNotes = await getNotesForAccount(aztecAccount, depositNoteValues);
         depositProof = new JoinSplitProof([], depositOutputNotes, owner, depositPublicValue, owner);
         const zeroMintCounterNote = await note.createZeroValueNote();
-        const newMintCounterNote = await note.create(aztecAccount.publicKey, depositPublicValue * -1)
+        const newMintCounterNote = await note.create(aztecAccount.publicKey, depositPublicValue * -1);
         mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, depositOutputNotes, owner);
     });
 
@@ -86,7 +85,7 @@ contract('NoteRegistry', (accounts) => {
         it('should not change flag state', async () => {
             const opts = { from: owner };
             const { receipt } = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
-            const log = receipt.logs.find(l => l.event === 'CreateNoteRegistry');
+            const log = receipt.logs.find((l) => l.event === 'CreateNoteRegistry');
             const { registryAddress } = log.args;
             const registry = await BehaviourContract201912.at(registryAddress);
             const flagPreTrigger = await registry.isAvailableDuringSlowRelease();
