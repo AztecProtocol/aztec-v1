@@ -301,6 +301,7 @@ contract('Integration', (accounts) => {
     });
 
     describe('Delegate note control', async () => {
+        // eslint-disable-next-line max-len
         it('should delegate note spending control using a confidentialApprove() and allow a confidentialTransferFrom()', async () => {
             // Call confidentialApprove() on two notes to approve the zkAsset to spend on user's behalf
             const depositInputNotes = [];

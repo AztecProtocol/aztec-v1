@@ -1,4 +1,5 @@
 const bn128 = require('@aztec/bn128');
+const { generateAccessMetaData } = require('@aztec/note-access');
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const { padLeft, toHex } = require('web3-utils');
@@ -7,7 +8,12 @@ const { noteCoder } = require('../encoder');
 const setup = require('../setup');
 const noteUtils = require('./utils');
 
-const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
+const {
+    constants: { ZERO_VALUE_NOTE_VIEWING_KEY },
+    createSharedSecret,
+    getSharedSecret,
+    getNoteHash,
+} = noteUtils;
 
 /**
  * @class
@@ -20,18 +26,24 @@ class Note {
      *
      * @param {string} publicKey hex-formatted public key
      * @param {string} viewingKey hex-formatted viewing key
+     * @param {Array} access mapping between an Ethereum address and the linked publickey
      * @param {string} owner Ethereum address of note owner
      * @param {Object} setupPoint trusted setup point
      */
-    constructor(publicKey, viewingKey, owner = '0x', setupPoint) {
+    constructor(publicKey, viewingKey, access, owner = '0x', setupPoint) {
         if (publicKey && viewingKey) {
             throw new Error('expected one of publicKey or viewingKey, not both');
         }
+
         /**
          * Ethereum address of note's owner
          * @member {string}
          */
         this.owner = owner;
+
+        /**
+         * Access object, specifying Ethereum address to be granted note access
+         */
         if (publicKey) {
             if (typeof publicKey !== 'string') {
                 throw new Error(`expected key type ${typeof publicKey} to be of type string`);
@@ -89,6 +101,11 @@ class Note {
          * @member {string}
          */
         this.noteHash = getNoteHash(this.gamma, this.sigma);
+
+        // Grant view access to the addresses specified in access
+        if (access) {
+            this.grantViewAccess(access);
+        }
     }
 
     /**
@@ -179,13 +196,25 @@ class Note {
     }
 
     /**
+     * Grant an Ethereum address access to the viewing key of a note
+     *
+     * @param {Array} access mapping between an Ethereum address and the linked publickey
+     * @returns {string} customData - customMetaData which will grant the specified Ethereum address(s)
+     * access to a note
+     */
+    grantViewAccess(access) {
+        const noteViewKey = this.getView();
+        const metaData = generateAccessMetaData(access, noteViewKey);
+        this.setMetaData(metaData);
+    }
+
+    /**
      * Appends custom metadata onto the metaData property of the note - i.e.e appends it onto end of the ephemeral key.
      * Also encodes it according to the schema for one note
      *
      * @param {String} customData
      * @returns {String} this.metaData - note metadata with the custom data appended
      *
-     * Doing this with a fixed customData so far: 0x177 in length - length of one IES encrypted viewing key
      */
     setMetaData(customData) {
         this.metaData = this.metaData + padLeft(customData, 64).slice(2);
@@ -207,19 +236,21 @@ note.utils = noteUtils;
  * @method fromValue
  * @param {string} publicKey hex-string formatted recipient public key
  * @param {number} value value of the note
- * @param {string} owner owner of the not if different from the public key
+ * @param {string} noteOwner owner of the note if different from the public key
+ * @param {Array} access mapping between Ethereum addresses being granted view access of a note
+ * and a linkedPublicKey
  * @returns {Promise} promise that resolves to created note instance
  */
 
-note.create = async (spendingPublicKey, value, noteOwner) => {
-    const sharedSecret = createSharedSecret(spendingPublicKey);
+note.create = async (publicKey, value, access, noteOwner) => {
+    const sharedSecret = createSharedSecret(publicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
     const k = padLeft(toHex(value).slice(2), 8);
     const ephemeral = padLeft(sharedSecret.ephemeralKey.slice(2), 66);
     const viewingKey = `0x${a}${k}${ephemeral}`;
-    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(spendingPublicKey);
+    const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(publicKey);
     const setupPoint = await setup.fetchPoint(value);
-    return new Note(null, viewingKey, owner, setupPoint);
+    return new Note(null, viewingKey, access, owner, setupPoint);
 };
 
 /**
@@ -229,7 +260,7 @@ note.create = async (spendingPublicKey, value, noteOwner) => {
  * @method createZeroValueNote
  * @returns {Promise} promise that resolves to created note instance
  */
-note.createZeroValueNote = () => note.fromViewKey(noteUtils.constants.ZERO_VALUE_NOTE_VIEWING_KEY);
+note.createZeroValueNote = () => note.fromViewKey(ZERO_VALUE_NOTE_VIEWING_KEY);
 
 /**
  * Create Note instance from a public key and a spending key
@@ -299,7 +330,7 @@ note.fromPublicKey = (publicKey) => {
 note.fromViewKey = async (viewingKey) => {
     const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
     const setupPoint = await setup.fetchPoint(k.toNumber());
-    const newNote = new Note(null, viewingKey, undefined, setupPoint);
+    const newNote = new Note(null, viewingKey, null, undefined, setupPoint);
     return newNote;
 };
 

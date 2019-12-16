@@ -353,6 +353,7 @@ contract('ZkAssetOwnable', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
+        // eslint-disable-next-line max-len
         it('should seletively approve and revoke spending control of multiple notes, using batchConfidentialApprove()', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const testNoteA = await note.create(publicKey, 10);
