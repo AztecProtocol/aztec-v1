@@ -1,0 +1,41 @@
+{
+  "name": "@aztec/integration-test",
+  "version": "0.0.0",
+  "description": "Setup and run a series of integration tests for the AZTEC protocol smart contracts",
+  "main": "index.js",
+  "scripts": {
+    "lint": "yarn lint:js",
+    "lint:js": "eslint --ignore-path ../../.eslintignore .",
+    "test:testNets": "scripts/test.sh",
+    "test:ropsten": "truffle test ./test/integration.js --network ropsten",
+    "test:rinkeby": "truffle test ./test/integration.js --network rinkeby"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+  },
+  "keywords": [
+    "integration",
+    "aztec",
+    "ethereum",
+    "test"
+  ],
+  "private": true,
+  "author": "AZTEC",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/AztecProtocol/AZTEC/issues"
+  },
+  "homepage": "https://github.com/AztecProtocol/AZTEC#readme",
+  "devDependencies": {
+    "@aztec/bn128": "0.0.0-semantically-released",
+    "@aztec/contract-addresses": "0.0.0-semantically-released",
+    "@aztec/contract-artifacts": "0.0.0-semantically-released",
+    "@aztec/dev-utils": "0.0.0-semantically-released",
+    "@aztec/secp256k1": "0.0.0-semantically-released",
+    "@truffle/contract": "^4.1.0",
+    "aztec.js": "0.0.0-semantically-released",
+    "bn.js": "^5.0.0",
+    "truffle": "^5.1.0"
+  }
+}

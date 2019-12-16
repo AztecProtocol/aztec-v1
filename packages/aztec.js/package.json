@@ -17,6 +17,7 @@
     "bn.js": "^4.11.8",
     "cross-fetch": "^3.0.2",
     "enumify": "^1.0.4",
+    "eth-sig-util": "^2.5.0",
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
     "web3-utils": "1.2.1"
@@ -36,7 +37,6 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-loader": "^3.0.0",
     "eslint-plugin-import": "^2.16.0",
-    "eth-sig-util": "^2.3.0",
     "jsdoc": "^3.5.5",
     "mocha": "^6.0.2",
     "nyc": "^14.1.1",
@@ -71,6 +71,7 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
+    "build:dev": "webpack --config ./webpack.dev.js",
     "build": "PROD=false ./build.sh",
     "build:docs": "jsdoc --configure ./.jsdoc.json",
     "build:prod": "PROD=true ./build.sh",
@@ -79,6 +80,6 @@
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "publish:docs": "yarn build:docs && push-dir --allow-unclean --dir ./docs --branch gh-pages --remote docs --cleanup",
     "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-    "watch": "yarn build --watch"
+    "watch": "yarn build:dev --watch"
   }
 }

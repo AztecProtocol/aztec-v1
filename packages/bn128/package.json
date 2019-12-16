@@ -49,11 +49,12 @@
     "url": "git+https://github.com/AztecProtocol/AZTEC.git"
   },
   "scripts": {
+    "build:dev": "webpack --config ./webpack.dev.js",
     "build": "PROD=false ./build.sh",
     "build:prod": "PROD=true ./build.sh",
     "clean": "shx rm -rf ./dist || true",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-    "watch": "yarn build --watch"
+    "watch": "yarn build:dev --watch"
   }
 }
