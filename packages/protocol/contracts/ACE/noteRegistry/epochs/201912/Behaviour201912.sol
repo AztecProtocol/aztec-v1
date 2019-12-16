@@ -14,7 +14,7 @@ import "../201911/Behaviour201911.sol";
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract Behaviour201912 is Behaviour201911 {
-    // redifining to always pass
+    // redefining to always pass
     modifier onlyIfAvailable() {
         _;
     }

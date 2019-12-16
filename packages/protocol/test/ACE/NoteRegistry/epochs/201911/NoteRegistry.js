@@ -44,7 +44,6 @@ contract('NoteRegistry', (accounts) => {
         ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: aceOwner });
         ace.setProof(MINT_PROOF, JoinSplitFluidValidator.address, { from: aceOwner });
 
-
         const baseFactory = await BaseFactory.new(ace.address);
         const adjustableFactory = await AdjustableFactory.new(ace.address);
 
@@ -60,7 +59,7 @@ contract('NoteRegistry', (accounts) => {
         const depositOutputNotes = await getNotesForAccount(aztecAccount, depositNoteValues);
         depositProof = new JoinSplitProof([], depositOutputNotes, owner, depositPublicValue, owner);
         const zeroMintCounterNote = await note.createZeroValueNote();
-        const newMintCounterNote = await note.create(aztecAccount.publicKey, depositPublicValue * -1)
+        const newMintCounterNote = await note.create(aztecAccount.publicKey, depositPublicValue * -1);
         mintProof = new MintProof(zeroMintCounterNote, newMintCounterNote, depositOutputNotes, owner);
     });
 
@@ -92,7 +91,7 @@ contract('NoteRegistry', (accounts) => {
         it('should allow setting flag if owner', async () => {
             const opts = { from: owner };
             const { receipt } = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
-            const log = receipt.logs.find(l => l.event === 'CreateNoteRegistry');
+            const log = receipt.logs.find((l) => l.event === 'CreateNoteRegistry');
             const { registryAddress } = log.args;
             const registry = await BehaviourContract201911.at(registryAddress);
             const flagPreTrigger = await registry.isAvailableDuringSlowRelease();
@@ -119,8 +118,10 @@ contract('NoteRegistry', (accounts) => {
 
             await ace.publicApprove(aceOwner, depositProof.hash, Math.abs(depositPublicValue), { from: owner });
             await ace.validateProof(JOIN_SPLIT_PROOF, owner, data, { from: owner });
-            await truffleAssert.reverts(ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, owner),
-                "AZTEC is in burn-in period, and this asset is not available");
+            await truffleAssert.reverts(
+                ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, owner),
+                'AZTEC is in burn-in period, and this asset is not available',
+            );
         });
 
         it('should not allow minting if flag is not set and before timestamp', async () => {
@@ -128,14 +129,16 @@ contract('NoteRegistry', (accounts) => {
             const canAdjust = true;
             await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjust, canConvert, opts);
 
-            await truffleAssert.reverts(ace.mint(MINT_PROOF, mintProof.encodeABI(), owner, { from: owner }),
-                "AZTEC is in burn-in period, and this asset is not available");
+            await truffleAssert.reverts(
+                ace.mint(MINT_PROOF, mintProof.encodeABI(), owner, { from: owner }),
+                'AZTEC is in burn-in period, and this asset is not available',
+            );
         });
 
         it('should not allow setting flag if not owner', async () => {
             const opts = { from: owner };
             const { receipt } = await ace.createNoteRegistry(erc20.address, scalingFactor, canAdjustSupply, canConvert, opts);
-            const log = receipt.logs.find(l => l.event === 'CreateNoteRegistry');
+            const log = receipt.logs.find((l) => l.event === 'CreateNoteRegistry');
             const { registryAddress } = log.args;
             const registry = await BehaviourContract201911.at(registryAddress);
             await truffleAssert.reverts(registry.makeAvailable(opts));
