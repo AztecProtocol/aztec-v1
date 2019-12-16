@@ -17,6 +17,7 @@
         "@openzeppelin/contracts-ethereum-package": "^2.4.0",
         "@openzeppelin/gsn-helpers": "^0.2.1",
         "@openzeppelin/gsn-provider": "^0.1.9",
+        "@openzeppelin/test-environment": "^0.1.1",
         "@trust/webcrypto": "^0.9.2",
         "apollo-cache-inmemory": "^1.6.2",
         "apollo-client": "^2.6.2",

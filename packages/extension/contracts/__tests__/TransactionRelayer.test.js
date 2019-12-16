@@ -1,18 +1,23 @@
-/* global artifacts, contract */
-const aztec = require('aztec.js');
-const secp256k1 = require('@aztec/secp256k1');
+import aztec from 'aztec.js';
+import secp256k1 from '@aztec/secp256k1';
+import {
+    accounts,
+    contract,
+} from '@openzeppelin/test-environment';
+import deployACE from './helpers/deployACE';
 
-const ACE = artifacts.require('@aztec/protocol/contracts/ACE/ACE.sol');
-const ERC20Mintable = artifacts.require('@aztec/protocol/contracts/ERC20/ERC20Mintable.sol');
-const ZkAsset = artifacts.require('@aztec/protocol/contracts/ERC1724/ZkAssetOwnable.sol');
-const TransactionRelayer = artifacts.require('./TransactionRelayer.sol');
+const ERC20Mintable = contract.fromArtifact('ERC20Mintable');
+const ZkAsset = contract.fromArtifact('ZkAssetOwnable');
+const TransactionRelayer = contract.fromArtifact('TransactionRelayer');
+
+jest.setTimeout(60000);
 
 const {
     JoinSplitProof,
     ProofUtils,
 } = aztec;
 
-contract('TransactionRelayer', (accounts) => {
+describe('TransactionRelayer', () => {
     const [
         senderAddress,
         userAddress,
@@ -54,19 +59,21 @@ contract('TransactionRelayer', (accounts) => {
     const expectERC20BalanceOf = address => ({
         toBe: async (value) => {
             const balance = await erc20.balanceOf(address);
-            expect(balance.toNumber()).to.equal(value);
+            expect(balance.toNumber()).toBe(value);
         },
     });
 
-    beforeEach(async () => {
-        ace = await ACE.deployed();
+    beforeAll(async () => {
+        ace = await deployACE();
+    });
 
+    beforeEach(async () => {
         erc20 = await ERC20Mintable.new({ from: senderAddress });
         await erc20.mint(userAddress, initialAmount, { from: senderAddress });
         await erc20.mint(stranger.address, initialAmount, { from: senderAddress });
 
         zkAsset = await ZkAsset.new(
-            ACE.address,
+            ace.address,
             erc20.address,
             1,
             {
@@ -74,7 +81,7 @@ contract('TransactionRelayer', (accounts) => {
             },
         );
 
-        relayer = await TransactionRelayer.new(ACE.address, { from: senderAddress });
+        relayer = await TransactionRelayer.new(ace.address, { from: senderAddress });
     });
 
     it('deposit to ZkAsset on user\'s behalf', async () => {
@@ -102,7 +109,7 @@ contract('TransactionRelayer', (accounts) => {
         await expectERC20BalanceOf(userAddress).toBe(initialAmount);
         await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
         await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ACE.address).toBe(0);
+        await expectERC20BalanceOf(ace.address).toBe(0);
 
         const proofData = depositProof.encodeABI(zkAsset.address);
         const proofHash = depositProof.hash;
@@ -117,15 +124,15 @@ contract('TransactionRelayer', (accounts) => {
         await expectERC20BalanceOf(userAddress).toBe(initialAmount - depositAmount);
         await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
         await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ACE.address).toBe(depositAmount);
+        await expectERC20BalanceOf(ace.address).toBe(depositAmount);
 
         const [note] = outputNotes;
         const {
             status,
             noteOwner,
         } = await ace.getNote(zkAsset.address, note.noteHash);
-        expect(status.toNumber()).to.equal(1);
-        expect(noteOwner).to.equal(stranger.address);
+        expect(status.toNumber()).toBe(1);
+        expect(noteOwner).toBe(stranger.address);
     });
 
     it('will not affect user\'s balance if proof is invalid', async () => {
@@ -186,7 +193,7 @@ contract('TransactionRelayer', (accounts) => {
         await expectERC20BalanceOf(userAddress).toBe(initialAmount);
         await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
         await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ACE.address).toBe(0);
+        await expectERC20BalanceOf(ace.address).toBe(0);
 
         const correctProofHash = depositProof.hash;
         const correctProofData = depositProof.encodeABI(zkAsset.address);
@@ -228,7 +235,7 @@ contract('TransactionRelayer', (accounts) => {
                 } catch (e) {
                     error = e;
                 }
-                expect(error).not.to.equal(null);
+                expect(error).not.toBe(null);
             });
             return transactions.concat(moreTransactions);
         }, []);
@@ -238,7 +245,7 @@ contract('TransactionRelayer', (accounts) => {
         await expectERC20BalanceOf(userAddress).toBe(initialAmount);
         await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
         await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ACE.address).toBe(0);
+        await expectERC20BalanceOf(ace.address).toBe(0);
 
         const [note] = outputNotes;
         let noNoteError = null;
@@ -247,6 +254,6 @@ contract('TransactionRelayer', (accounts) => {
         } catch (e) {
             noNoteError = e;
         }
-        expect(noNoteError).not.to.equal(null);
+        expect(noNoteError).not.toBe(null);
     });
 });
