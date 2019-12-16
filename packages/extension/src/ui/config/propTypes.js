@@ -30,6 +30,15 @@ export const assetShape = PropTypes.shape({
     decimals: PropTypes.number,
 });
 
+export const simpleAssetShape = PropTypes.shape({
+    address: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    icon: PropTypes.string,
+    symbol: PropTypes.string,
+    decimals: PropTypes.number,
+});
+
 export const profileType = PropTypes.oneOf([
     '',
     'token',

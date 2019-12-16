@@ -6,7 +6,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
-    assetShape,
+    simpleAssetShape,
     errorShape,
 } from '~ui/config/propTypes';
 import i18n from '~ui/helpers/i18n';
@@ -155,8 +155,8 @@ const DomainPermissionTransaction = ({
 };
 
 DomainPermissionTransaction.propTypes = {
-    assets: PropTypes.arrayOf(assetShape),
-    assetPlaceholders: PropTypes.arrayOf(assetShape),
+    assets: PropTypes.arrayOf(simpleAssetShape),
+    assetPlaceholders: PropTypes.arrayOf(simpleAssetShape),
     error: errorShape,
     visibleAssets: PropTypes.number,
 };
