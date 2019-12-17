@@ -33,17 +33,17 @@ describe('createBulkAssets', () => {
 
     it('should insert two unique Assets with right fields', async () => {
         // given
-        const assetsBefore = await Asset.query().toArray();
+        const assetsBefore = await Asset.query({ networkId: 0 }).toArray();
         expect(assetsBefore.length).toEqual(0);
 
         // action
-        await createBulkAssets(rawAssets);
+        await createBulkAssets(rawAssets, 0);
 
         // expected
-        const assetsAfter = await Asset.query().toArray();
+        const assetsAfter = await Asset.query({ networkId: 0 }).toArray();
 
         expect(assetsAfter.length).toEqual(rawAssets.length);
-        expect(assetsAfter[0]).toMatchObject(rawAssets[0]);
-        expect(assetsAfter[1]).toMatchObject(rawAssets[1]);
+        expect(assetsAfter)
+            .toMatchObject([...rawAssets].sort((a, b) => a.registryAddress - b.registryAddress));
     });
 });
