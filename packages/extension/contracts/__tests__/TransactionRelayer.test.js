@@ -8,9 +8,9 @@ import deployACE from './helpers/deployACE';
 
 const ERC20Mintable = contract.fromArtifact('ERC20Mintable');
 const ZkAsset = contract.fromArtifact('ZkAssetOwnable');
-const TransactionRelayer = contract.fromArtifact('TransactionRelayer');
+const TransactionRelayer = contract.fromArtifact('TransactionRelayerMock');
 
-jest.setTimeout(60000);
+jest.setTimeout(600000);
 
 const {
     JoinSplitProof,
@@ -21,6 +21,7 @@ describe('TransactionRelayer', () => {
     const [
         senderAddress,
         userAddress,
+        anotherUserAddress,
     ] = accounts;
     const stranger = secp256k1.generateAccount();
     const initialAmount = 100;
@@ -29,17 +30,20 @@ describe('TransactionRelayer', () => {
     let zkAsset;
     let relayer;
 
-    const generateOutputNotes = async (values, ownerPublicKey = stranger.publicKey) => Promise.all(
+    const generateOutputNotes = async (values, owner = stranger) => Promise.all(
         values.map(async value => aztec.note.create(
-            ownerPublicKey,
+            owner.publicKey,
             value,
+            owner.address,
         )),
     );
 
-    const generateDepositProofData = async (ownerPublicKey = stranger.publicKey) => {
+    const generateDepositProofData = async ({
+        outputNoteValues = [20, 30],
+        owner = stranger.publicKey,
+    } = {}) => {
         const inputNotes = [];
-        const outputNoteValues = [20, 30];
-        const outputNotes = await generateOutputNotes(outputNoteValues, ownerPublicKey);
+        const outputNotes = await generateOutputNotes(outputNoteValues, owner);
 
         const publicValue = ProofUtils.getPublicValue(
             [],
@@ -56,20 +60,16 @@ describe('TransactionRelayer', () => {
         };
     };
 
-    const expectERC20BalanceOf = address => ({
-        toBe: async (value) => {
-            const balance = await erc20.balanceOf(address);
-            expect(balance.toNumber()).toBe(value);
-        },
-    });
-
     beforeAll(async () => {
-        ace = await deployACE();
+        ace = await deployACE({
+            from: senderAddress,
+        });
     });
 
     beforeEach(async () => {
         erc20 = await ERC20Mintable.new({ from: senderAddress });
         await erc20.mint(userAddress, initialAmount, { from: senderAddress });
+        await erc20.mint(anotherUserAddress, initialAmount, { from: senderAddress });
         await erc20.mint(stranger.address, initialAmount, { from: senderAddress });
 
         zkAsset = await ZkAsset.new(
@@ -90,7 +90,12 @@ describe('TransactionRelayer', () => {
             outputNotes,
             publicValue,
             depositAmount,
-        } = await generateDepositProofData();
+        } = await generateDepositProofData({
+            owner: {
+                address: userAddress,
+                publicKey: stranger.publicKey,
+            },
+        });
 
         const depositProof = new JoinSplitProof(
             inputNotes,
@@ -106,25 +111,32 @@ describe('TransactionRelayer', () => {
             { from: userAddress },
         );
 
-        await expectERC20BalanceOf(userAddress).toBe(initialAmount);
-        await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
-        await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ace.address).toBe(0);
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: anotherUserAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
 
         const proofData = depositProof.encodeABI(zkAsset.address);
         const proofHash = depositProof.hash;
         await relayer.deposit(
             zkAsset.address,
+            userAddress,
             proofHash,
             proofData,
             depositAmount,
             { from: userAddress },
         );
 
-        await expectERC20BalanceOf(userAddress).toBe(initialAmount - depositAmount);
-        await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
-        await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ace.address).toBe(depositAmount);
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount - depositAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(depositAmount);
 
         const [note] = outputNotes;
         const {
@@ -132,7 +144,70 @@ describe('TransactionRelayer', () => {
             noteOwner,
         } = await ace.getNote(zkAsset.address, note.noteHash);
         expect(status.toNumber()).toBe(1);
-        expect(noteOwner).toBe(stranger.address);
+        expect(noteOwner).toBe(userAddress);
+    });
+
+    it("can not deposit from other user's account", async () => {
+        const {
+            inputNotes,
+            outputNotes,
+            publicValue,
+            depositAmount,
+        } = await generateDepositProofData({
+            owner: {
+                address: userAddress,
+                publicKey: stranger.publicKey,
+            },
+        });
+
+        const depositProof = new JoinSplitProof(
+            inputNotes,
+            outputNotes,
+            relayer.address,
+            publicValue,
+            relayer.address,
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: userAddress },
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: anotherUserAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
+
+        const proofData = depositProof.encodeABI(zkAsset.address);
+        const proofHash = depositProof.hash;
+
+        let error;
+        try {
+            await relayer.deposit(
+                zkAsset.address,
+                anotherUserAddress,
+                proofHash,
+                proofData,
+                depositAmount,
+                { from: userAddress },
+            );
+        } catch (e) {
+            error = e;
+        }
+
+        expect(error.toString()).toMatch(/Cannot deposit note to other account/);
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
     });
 
     it('will not affect user\'s balance if proof is invalid', async () => {
@@ -141,7 +216,12 @@ describe('TransactionRelayer', () => {
             outputNotes,
             publicValue,
             depositAmount,
-        } = await generateDepositProofData();
+        } = await generateDepositProofData({
+            owner: {
+                address: userAddress,
+                publicKey: stranger.publicKey,
+            },
+        });
 
         const depositProof = new JoinSplitProof(
             inputNotes,
@@ -190,10 +270,9 @@ describe('TransactionRelayer', () => {
             { from: userAddress },
         );
 
-        await expectERC20BalanceOf(userAddress).toBe(initialAmount);
-        await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
-        await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ace.address).toBe(0);
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
 
         const correctProofHash = depositProof.hash;
         const correctProofData = depositProof.encodeABI(zkAsset.address);
@@ -242,10 +321,9 @@ describe('TransactionRelayer', () => {
 
         await Promise.all(failedTransactions);
 
-        await expectERC20BalanceOf(userAddress).toBe(initialAmount);
-        await expectERC20BalanceOf(stranger.address).toBe(initialAmount);
-        await expectERC20BalanceOf(relayer.address).toBe(0);
-        await expectERC20BalanceOf(ace.address).toBe(0);
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
 
         const [note] = outputNotes;
         let noNoteError = null;
