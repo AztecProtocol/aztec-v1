@@ -31,14 +31,25 @@ const Deposit = ({
     const {
         address: currentAddress,
     } = currentAccount;
-    const steps = depositSteps[isGSNAvailable ? 'gsn' : 'metamask'];
-
     const fetchInitialData = async () => {
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
         const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
-        const allowanceSpender = Web3Service.getAddress(isGSNAvailable ? 'ACE' : 'AZTECAccountRegistry');
+
+        let allowanceSpender = Web3Service.getAddress('AZTECAccountRegistry');
+        let publicOwner = allowanceSpender;
+        let sender = publicOwner;
+        let steps = depositSteps[isGSNAvailable ? 'gsn' : 'metamask'];
+        if (isGSNAvailable
+            && parsedTransactions.some(({ to }) => to !== currentAddress)
+        ) {
+            allowanceSpender = Web3Service.getAddress('ACE');
+            publicOwner = currentAddress;
+            sender = proxyContract;
+            steps = depositSteps.gsnTransfer;
+        }
+
         const allowance = await Web3Service
             .useContract('ERC20')
             .at(asset.linkedTokenAddress)
@@ -49,31 +60,31 @@ const Deposit = ({
             );
         const approvedERC20Allowance = new BN(allowance);
         const requestedAllowance = asset.scalingFactor.mul(new BN(amount));
-        let newSteps;
         if (approvedERC20Allowance.gte(requestedAllowance)) {
-            newSteps = steps.filter(({ name }) => name !== 'approveERC20');
+            steps = steps.filter(({ name }) => name !== 'approveERC20');
         }
 
         return {
-            steps: newSteps,
+            steps,
+            currentAccount,
             assetAddress,
             asset,
             transactions: parsedTransactions,
-            publicOwner: isGSNAvailable ? currentAddress : allowanceSpender,
-            sender: isGSNAvailable ? proxyContract : allowanceSpender,
+            publicOwner,
+            sender,
             amount,
             numberOfOutputNotes,
             userAccessAccounts,
             requestedAllowance,
             allowanceSpender,
             spenderName: 'AZTEC',
+            isGSNAvailable,
         };
     };
 
     return (
         <AnimatedTransaction
             initialStep={initialStep}
-            steps={steps}
             fetchInitialData={fetchInitialData}
         />
     );
