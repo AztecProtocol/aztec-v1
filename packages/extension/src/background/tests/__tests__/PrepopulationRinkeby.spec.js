@@ -7,7 +7,7 @@ import ERC20Mintable from '~contracts/ERC20Mintable';
 import ZkAssetOwnable from '~contracts/ZkAssetOwnable';
 import ACE from '~contracts/ACE';
 
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~helpers/Web3Service';
 import { fetchNotes } from '../../services/EventService/utils/note';
 import {
     createBulkAssets,

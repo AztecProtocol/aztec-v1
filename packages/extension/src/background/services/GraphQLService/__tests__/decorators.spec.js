@@ -10,7 +10,6 @@ import {
     ensureAccount,
     ensureDomainPermission,
 } from '../decorators';
-import configureFactory from '~utis/NetworkService/__tests__/helpers/configureFactory';
 
 jest.mock('~utils/storage');
 
@@ -66,10 +65,6 @@ describe('ensureKeyvault', () => {
 });
 
 describe('ensureAccount', () => {
-    beforeAll(() => {
-        configureFactory();
-    });
-
     it('callback will be called if both extension and user are registered', async () => {
         await AuthService.registerExtension(registrationData);
         await AuthService.registerAddress(registeredUserInfo);
