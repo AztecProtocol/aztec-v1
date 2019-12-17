@@ -1,12 +1,12 @@
 # ignored directories
 node_modules/*
-/contracts/*
 /test/*
 /migrations/*
 /build/*
 /demo/*
 
 # ignored file types
+**/*.sol
 **/*.json
 **/*.css
 **/*.scss
