@@ -4,7 +4,6 @@ import {
 } from '~config/contracts';
 import groupBy from '~utils/groupBy';
 import { NOTE_STATUS } from '~config/constants';
-import metadata from '~utils/metadata';
 
 const decode = (inputs, rawLog) => {
     const [,
@@ -78,10 +77,10 @@ export default function decodeNoteLogs(eventsTopics, rawLogs) {
 
     const destroyNotes = (groupedRawLogs[destroyNoteTopic] || [])
         .map(log => noteLog(decodeLog(log).destroyNote()))
-        .map((note) => {
-            delete note.metadata;
-            return note;
-        });
+        .map(({
+            metadata,
+            ...note
+        }) => note);
 
     const lastBlockNumber = () => [
         createNotes[createNotes.length - 1],

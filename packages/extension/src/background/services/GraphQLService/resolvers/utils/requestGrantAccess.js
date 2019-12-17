@@ -144,9 +144,9 @@ export default async function requestGrantAccess(args, ctx) {
         const {
             publicKey,
         } = sharedAccounts.find(a => a.address === addr);
-        const viewingKey = encryptMessage(publicKey, userViewingKey);
+        const encryptedViewingKey = encryptMessage(publicKey, userViewingKey);
         newAddresses.push(addr);
-        newViewingKeys.push(viewingKey.toString());
+        newViewingKeys.push(encryptedViewingKey.toString());
     });
     const newMetadataStr = toString({
         aztecData,

@@ -31,10 +31,7 @@ const handleAction = async (action, params) => {
                 networkId,
                 ...data
             } = params;
-
-
-            const response = await window.fetch(`${SIGNING_PROVIDER}/Stage/${parseInt(networkId)}/${apiKey}`, {
-
+            const result = await window.fetch(`${SIGNING_PROVIDER}/Stage/${networkId}/${apiKey}`, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 mode: 'cors', // no-cors, *cors, same-origin
                 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -49,9 +46,10 @@ const handleAction = async (action, params) => {
                 data: {
                     approvalData,
                 },
-            } = await response.json();
+            } = await result.json();
 
-            return { approvalData };
+            response = { approvalData };
+            break;
         }
         case 'metamask.register.extension': {
             const eip712Data = registerExtension(params);

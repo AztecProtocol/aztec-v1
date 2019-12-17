@@ -27,7 +27,6 @@ import Note from '~background/database/models/note';
 import Account from '~background/database/models/account';
 import Asset from '~background/database/models/asset';
 
-
 const notesSyncManager = networkId => NotesSyncManagerFactory.create(networkId);
 const notesWatcher = networkId => NotesWatcherFactory.create(networkId);
 const assetsSyncManager = networkId => AssetsSyncManagerFactory.create(networkId);
@@ -89,10 +88,12 @@ class EventService {
         }
     }
 
-    removeAccountFromSyncing = async ({
-        address,
-        networkId,
-    }) => {
+    removeAccountFromSyncing = async (
+    // {
+    //   address,
+    //   networkId,
+    // },
+    ) => {
         warnLog('TODO: Not implemented yet');
     }
 
@@ -295,11 +296,14 @@ class EventService {
             }
         };
 
-        const onProggressChangePulling = ({
-            blocks,
-            assets,
-            lastSyncedBlock,
-        }) => {
+        const onProggressChangePulling = (
+            // {
+            //     blocks,
+            //     assets,
+            //     lastSyncedBlock,
+            // },
+        ) => {
+            warnLog('TODO: Not implemented yet');
             // log(`Proggress changed (${lastSyncedBlock} from ${blocks} blocks) for pulling for assets: ${JSON.stringify(assets)}`);
         };
 
