@@ -4,7 +4,6 @@ import {
 import Account from '~background/database/models/account';
 import clearDB from '~background/database/utils/clearDB';
 
-
 describe('createAccount', () => {
     const rawAccount = {
         address: '0x12345678',
@@ -18,14 +17,14 @@ describe('createAccount', () => {
 
     it('should insert new account with right fields', async () => {
         // given
-        const acccountsBefore = await Account.query().toArray();
+        const acccountsBefore = await Account.query({ networkId: 0 }).toArray();
         expect(acccountsBefore.length).toEqual(0);
 
         // action
-        await createAccount(rawAccount);
+        await createAccount(rawAccount, 0);
 
         // expected
-        const accountsAfter = await Account.query().toArray();
+        const accountsAfter = await Account.query({ networkId: 0 }).toArray();
         const accountExpected = {
             ...rawAccount,
         };

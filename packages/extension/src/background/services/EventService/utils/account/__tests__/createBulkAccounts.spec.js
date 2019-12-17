@@ -25,14 +25,14 @@ describe('createBulkAccount', () => {
 
     it('should insert two unique Account with right fields', async () => {
         // given
-        const accountsBefore = await Account.query().toArray();
+        const accountsBefore = await Account.query({ networkId: 0 }).toArray();
         expect(accountsBefore.length).toEqual(0);
 
         // action
-        await createBulkAccounts(rawAccounts);
+        await createBulkAccounts(rawAccounts, 0);
 
         // expected
-        const accountsAfter = await Account.query().toArray();
+        const accountsAfter = await Account.query({ networkId: 0 }).toArray();
 
         expect(accountsAfter.length).toEqual(rawAccounts.length);
         expect(accountsAfter[0]).toMatchObject(rawAccounts[0]);
