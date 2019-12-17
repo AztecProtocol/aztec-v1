@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction/index';
-
+import {
+    gsnConfigShape,
+} from '~/ui/config/propTypes';
+import {
+    getNetworkName,
+} from '~/utils/network';
+import Web3Service from '~/helpers/Web3Service';
+import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
 import { registerSteps } from '~ui/config/steps';
-
 
 const Register = ({
     initialStep,
@@ -21,9 +26,12 @@ const Register = ({
     };
     const {
         isGSNAvailable,
-        proxyContract,
     } = gsnConfig;
-    const steps = isGSNAvailable ? registerSteps.gsn : registerSteps.metamask;
+    // register via gsn will not work if there is no linkedPublicKey on chain when using ganache
+    const steps = isGSNAvailable
+        && (getNetworkName(Web3Service.networkId) !== 'ganache' || linkedPublicKey)
+        ? registerSteps.gsn
+        : registerSteps.metamask;
 
     return (
         <AnimatedTransaction
@@ -41,6 +49,7 @@ Register.propTypes = {
     }).isRequired,
     linkedPublicKey: PropTypes.string,
     seedPhrase: PropTypes.string,
+    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Register.defaultProps = {

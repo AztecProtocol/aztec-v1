@@ -96,6 +96,8 @@ class App extends PureComponent {
 
         const {
             type,
+        } = action;
+        let {
             data: actionData,
         } = action;
         const {
@@ -132,6 +134,11 @@ class App extends PureComponent {
             if (route === 'register.address') {
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
             }
+
+            actionData = {
+                ...actionData,
+                linkedPublicKey: onChainLinkedPublicKey,
+            };
         }
         if (!this.isCurrentPage(route)) {
             this.setState(
