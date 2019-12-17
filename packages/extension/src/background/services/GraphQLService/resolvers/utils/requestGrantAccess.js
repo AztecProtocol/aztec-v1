@@ -10,6 +10,7 @@ import {
 import {
     argsError,
 } from '~utils/error';
+import Web3Service from '~/helpers/Web3Service';
 import EventService from '~background/services/EventService';
 
 const packExistingAccesses = usersAddresses => usersAddresses.map(rawAddress => ({
@@ -45,8 +46,8 @@ export default async function requestGrantAccess(args, ctx) {
     const {
         address: userAddress,
         // TODO: remove default value, when it will be passed here.
-        networkId = 0,
     } = ctx;
+    const { networkId } = Web3Service;
     const addressList = [];
     for (let i = 0; i < address.length; i += ADDRESS_LENGTH) {
         addressList.push(address.substr(i, ADDRESS_LENGTH));

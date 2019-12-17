@@ -1,12 +1,12 @@
+import Web3Service from '~/helpers/Web3Service';
 import Asset from '~/background/database/models/asset';
 import fetchAssetOnChain from './fetchAssetOnChain';
 
 export default async function fetchAsset({
     address,
-    networkId,
 }) {
     let asset = await Asset.get(
-        { networkId },
+        { networkId: Web3Service.networkId },
         { registryOwner: address },
     );
     let error = null;

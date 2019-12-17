@@ -1,5 +1,6 @@
 import Asset from '~background/database/models/asset';
 import EventService from '~background/services/EventService';
+import Web3Service from '~/helpers/Web3Service';
 import {
     errorLog,
 } from '~utils/log';
@@ -28,12 +29,15 @@ const packNote = (note, asset, noteAccess) => ({
 export default async function syncLatestNoteOnChain({
     noteId: noteHash,
     account,
-    networkId,
 }) {
     if (!account) {
         errorLog("'account' cannot be empty");
         return [];
     }
+
+    const {
+        networkId,
+    } = Web3Service;
 
     const {
         note: onChainNote,

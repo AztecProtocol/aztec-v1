@@ -3,7 +3,7 @@ import {
 } from '~utils/error';
 import fetchAztecAccount from './fetchAztecAccount';
 
-export default async function getAccounts(args, ctx = {}) {
+export default async function getAccounts(args) {
     const {
         where: {
             address_in: addresses,
@@ -12,13 +12,8 @@ export default async function getAccounts(args, ctx = {}) {
         },
     } = args;
 
-    const {
-        networkId,
-    } = ctx;
-
     let accounts = await Promise.all(addresses.map(address => fetchAztecAccount({
         address,
-        networkId,
     })));
 
     accounts = accounts

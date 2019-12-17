@@ -7,6 +7,7 @@ import {
 import mergeResolvers from './utils/mergeResolvers';
 import syncUserInfo from './utils/syncUserInfo';
 import getAccounts from './utils/getAccounts';
+import Web3Service from '~/helpers/Web3Service';
 import NoteService from '~background/services/NoteService';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
@@ -22,9 +23,8 @@ const backgroundResolvers = {
                 id: (args.id || args.currentAddress),
             }),
         })),
-        asset: ensureDomainPermission(async (_, args, ctx) => fetchAsset({
+        asset: ensureDomainPermission(async (_, args) => fetchAsset({
             address: args.id || args.address,
-            networkId: ctx.networkId,
         })),
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
@@ -37,7 +37,7 @@ const backgroundResolvers = {
         })),
         fetchNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
             notes: await NoteService.fetch(
-                ctx.networkId,
+                Web3Service.networkId,
                 ctx.user.address,
                 args.assetAddress,
                 {
@@ -48,9 +48,8 @@ const backgroundResolvers = {
                 },
             ),
         })),
-        account: ensureDomainPermission(async (_, args, ctx) => fetchAztecAccount({
+        account: ensureDomainPermission(async (_, args) => fetchAztecAccount({
             address: args.currentAddress,
-            networkId: ctx.networkId,
         })),
         accounts: ensureDomainPermission(async (_, args, ctx) => ({
             accounts: await getAccounts(args, ctx),
