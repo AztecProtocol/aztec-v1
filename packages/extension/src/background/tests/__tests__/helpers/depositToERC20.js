@@ -1,7 +1,7 @@
 import {
     log,
 } from '~utils/log';
-import Web3Service from '~helpers/NetworkService';
+import Web3Service from '~helpers/Web3Service';
 
 export default async function depositToERC20({
     amount,

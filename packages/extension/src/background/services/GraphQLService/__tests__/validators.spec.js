@@ -13,7 +13,6 @@ import {
     validateAccount,
     validateDomain,
 } from '../validators';
-import configureFactory from '~helpers/NetworkService/__tests__/helpers/configureFactory';
 
 jest.mock('~utils/storage');
 
@@ -157,10 +156,6 @@ describe('validateAccount', () => {
         requiredArgs,
         accumContext,
     );
-
-    beforeAll(() => {
-        configureFactory();
-    });
 
     beforeEach(async () => {
         updateSessionSpy.mockClear();
