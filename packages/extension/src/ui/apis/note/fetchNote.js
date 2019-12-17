@@ -1,7 +1,7 @@
-import apollo from '~ui/apis/helpers/apollo';
+import apollo from '~/ui/apis/helpers/apollo';
 import {
     getCurrentUser,
-} from '~ui/apis/auth';
+} from '~/ui/apis/auth';
 
 export default async function fetchNote(noteHash) {
     const currentUser = await getCurrentUser();

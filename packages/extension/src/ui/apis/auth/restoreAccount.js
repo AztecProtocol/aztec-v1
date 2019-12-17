@@ -1,7 +1,7 @@
-import AuthService from '~background/services/AuthService';
+import AuthService from '~/background/services/AuthService';
 import createPwDerivedKey from './createPwDerivedKey';
 import createKeyStore from './createKeyStore';
-import clearDB from '~background/database/utils/clearDB';
+import clearDB from '~/background/database/utils/clearDB';
 
 export default async function restoreAccount({
     address,

@@ -11,7 +11,7 @@ import {
 } from '~/ui/config/propTypes';
 import i18n from '~/ui/helpers/i18n';
 import ConnectionService from '~uiModules/services/ConnectionService';
-import Button from '~ui/components/Button';
+import Button from '~/ui/components/Button';
 import styles from './footer.scss';
 
 const Footer = ({

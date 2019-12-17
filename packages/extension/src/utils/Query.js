@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 

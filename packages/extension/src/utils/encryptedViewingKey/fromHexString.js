@@ -1,10 +1,10 @@
 import {
     VIEWING_KEY_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import {
     warnLog,
-} from '~utils/log';
-import recoverFromHexString from '~utils/crypto/fromHexString';
+} from '~/utils/log';
+import recoverFromHexString from '~/utils/crypto/fromHexString';
 import decrypt from './decrypt';
 
 export default function fromHexString(str) {

@@ -1,17 +1,17 @@
 import {
     ADDRESS_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import metadata, {
     toString,
-} from '~utils/metadata';
+} from '~/utils/metadata';
 import {
     encryptMessage,
-} from '~utils/crypto';
+} from '~/utils/crypto';
 import {
     argsError,
-} from '~utils/error';
+} from '~/utils/error';
 import Web3Service from '~/helpers/Web3Service';
-import EventService from '~background/services/EventService';
+import EventService from '~/background/services/EventService';
 
 const packExistingAccesses = usersAddresses => usersAddresses.map(rawAddress => ({
     account: {

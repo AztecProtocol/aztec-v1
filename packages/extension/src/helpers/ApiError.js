@@ -1,7 +1,7 @@
 import merge from 'lodash/merge';
-import I18n from '~utils/I18n';
-import makeError from '~utils/error/makeError';
-import defaultErrorConfig from '~config/error';
+import I18n from '~/utils/I18n';
+import makeError from '~/utils/error/makeError';
+import defaultErrorConfig from '~/config/error';
 
 let errorHandler;
 let prevConfig = null;

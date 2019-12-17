@@ -1,13 +1,13 @@
 import dataKey, {
     getPrefix,
-} from '~utils/dataKey';
+} from '~/utils/dataKey';
 import {
     get as storageGet,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     errorLog,
-} from '~utils/log';
-import asyncForEach from '~utils/asyncForEach';
+} from '~/utils/log';
+import asyncForEach from '~/utils/asyncForEach';
 
 const normalLoop = async (get, cb, where) => {
     const data = await get();

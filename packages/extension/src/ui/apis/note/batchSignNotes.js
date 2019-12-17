@@ -1,4 +1,4 @@
-import ConnectionService from '~ui/services/ConnectionService';
+import ConnectionService from '~/ui/services/ConnectionService';
 
 export default async function signNotes({
     inputNotes,

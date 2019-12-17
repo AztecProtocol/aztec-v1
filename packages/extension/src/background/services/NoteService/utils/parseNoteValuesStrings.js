@@ -1,6 +1,6 @@
 import {
     getPrefix,
-} from '~utils/dataKey';
+} from '~/utils/dataKey';
 
 export default function parseNoteValuesStrings(noteValuesStrArr) {
     const keyPrefix = getPrefix('note');

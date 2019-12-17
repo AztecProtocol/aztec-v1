@@ -8,8 +8,8 @@ import {
     TextInput,
     Icon,
 } from '@aztec/guacamole-ui';
-import ProfileIcon from '~ui/components/ProfileIcon';
-import colorSchemes from '~ui/components/ProfileIcon/config/colorSchemes';
+import ProfileIcon from '~/ui/components/ProfileIcon';
+import colorSchemes from '~/ui/components/ProfileIcon/config/colorSchemes';
 
 const DemoAddress = ({ type }) => { // eslint-disable-line react/prop-types
     const [demoAddress, updateDemoAddress] = useState('');

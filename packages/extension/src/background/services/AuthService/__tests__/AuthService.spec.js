@@ -1,9 +1,9 @@
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import {
     KeyStore,
-} from '~utils/keyvault';
-import userModel from '~database/models/user';
-import domainModel from '~database/models/domain';
+} from '~/utils/keyvault';
+import userModel from '~/database/models/user';
+import domainModel from '~/database/models/domain';
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import {
     userAccount,
@@ -13,7 +13,7 @@ import {
 } from '~testHelpers/testUsers';
 import AuthService from '..';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

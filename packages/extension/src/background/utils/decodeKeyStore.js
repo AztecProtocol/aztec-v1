@@ -1,9 +1,9 @@
 import {
     permissionError,
-} from '~utils/error';
+} from '~/utils/error';
 import {
     KeyStore,
-} from '~utils/keyvault';
+} from '~/utils/keyvault';
 
 export default function decodeKeyStore(keyStore, pwDerivedKey) {
     if (keyStore instanceof KeyStore) {

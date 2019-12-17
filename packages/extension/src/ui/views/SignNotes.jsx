@@ -4,10 +4,10 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import Ticket from '~ui/components/Ticket';
-import ListItem from '~ui/components/ListItem';
-import i18n from '~ui/helpers/i18n';
-import PopupContent from '~ui/components/PopupContent';
+import Ticket from '~/ui/components/Ticket';
+import ListItem from '~/ui/components/ListItem';
+import i18n from '~/ui/helpers/i18n';
+import PopupContent from '~/ui/components/PopupContent';
 import HashText from '~/ui/components/HashText';
 
 const SignNotes = ({

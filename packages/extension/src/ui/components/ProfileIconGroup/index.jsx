@@ -4,8 +4,8 @@ import classnames from 'classnames';
 import {
     themeType,
     profileShape,
-} from '~ui/config/propTypes';
-import ProfileIcon from '~ui/components/ProfileIcon';
+} from '~/ui/config/propTypes';
+import ProfileIcon from '~/ui/components/ProfileIcon';
 import MoreItems from './MoreItems';
 import styles from './profiles.scss';
 

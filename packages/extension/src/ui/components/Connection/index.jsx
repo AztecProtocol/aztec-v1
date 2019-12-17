@@ -7,14 +7,14 @@ import {
     Icon,
     Text,
 } from '@aztec/guacamole-ui';
-import ProfileIconGroup from '~ui/components/ProfileIconGroup';
+import ProfileIconGroup from '~/ui/components/ProfileIconGroup';
 import {
     avatarSizesMap,
-} from '~ui/styles/guacamole-vars';
+} from '~/ui/styles/guacamole-vars';
 import {
     themeType,
     profileShape,
-} from '~ui/config/propTypes';
+} from '~/ui/config/propTypes';
 import styles from './connection.scss';
 
 const Connection = ({

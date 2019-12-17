@@ -2,10 +2,10 @@ import aztec from 'aztec.js';
 import {
     createNote,
     valueOf,
-} from '~utils/note';
+} from '~/utils/note';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
-import ApiError from '~client/utils/ApiError';
+import ApiError from '~/client/utils/ApiError';
 import toAztecNote from '../utils/toAztecNote';
 
 const {

@@ -1,9 +1,9 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 import {
     decryptMessage,
-} from '~utils/crypto';
+} from '~/utils/crypto';
 import lengthConfig from './lengthConfig';
 
 export default function decrypt(privateKey, encrypted) {

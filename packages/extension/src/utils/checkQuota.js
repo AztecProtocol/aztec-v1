@@ -1,7 +1,7 @@
 import { get } from '~/utils/storage';
 import {
     SIGNING_PROVIDER,
-} from '~config/constants';
+} from '~/config/constants';
 
 export default async () => {
     const apiKey = await get('apiKey');

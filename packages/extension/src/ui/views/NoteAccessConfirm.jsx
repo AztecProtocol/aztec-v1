@@ -6,14 +6,14 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
-} from '~ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
-import formatNumber from '~ui/utils/formatNumber';
-import PopupContent from '~ui/components/PopupContent';
-import Ticket from '~ui/components/Ticket';
-import ListRow from '~ui/components/ListRow';
-import ListItem from '~ui/components/ListItem';
-import Separator from '~ui/components/Separator';
+} from '~/ui/config/propTypes';
+import i18n from '~/ui/helpers/i18n';
+import formatNumber from '~/ui/utils/formatNumber';
+import PopupContent from '~/ui/components/PopupContent';
+import Ticket from '~/ui/components/Ticket';
+import ListRow from '~/ui/components/ListRow';
+import ListItem from '~/ui/components/ListItem';
+import Separator from '~/ui/components/Separator';
 import HashText from '~/ui/components/HashText';
 
 const NoteAccessConfirm = ({

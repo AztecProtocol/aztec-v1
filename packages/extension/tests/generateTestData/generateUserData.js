@@ -5,7 +5,7 @@ import secp256k1 from '@aztec/secp256k1';
 import {
     KeyStore,
     utils as keyvaultUtils,
-} from '~utils/keyvault';
+} from '~/utils/keyvault';
 import randomId from '../utils/randomId';
 import prettyPrint from '../utils/prettyPrint';
 

@@ -1,5 +1,5 @@
-import createKeyStore from '~ui/apis/auth/createKeyStore';
-import createPwDerivedKey from '~ui/apis/auth/createPwDerivedKey';
+import createKeyStore from '~/ui/apis/auth/createKeyStore';
+import createPwDerivedKey from '~/ui/apis/auth/createPwDerivedKey';
 
 export default async function generateLinkedPublicKey({
     seedPhrase,

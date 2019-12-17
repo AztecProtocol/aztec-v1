@@ -1,10 +1,10 @@
 import {
     set,
-} from '~utils/storage';
-import dataKey from '~utils/dataKey';
+} from '~/utils/storage';
+import dataKey from '~/utils/dataKey';
 import {
     encryptMessage,
-} from '~utils/crypto';
+} from '~/utils/crypto';
 
 export default async function saveUserAssetNotes(
     userAddress,

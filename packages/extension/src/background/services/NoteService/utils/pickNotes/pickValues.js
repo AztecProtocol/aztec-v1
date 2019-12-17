@@ -1,6 +1,6 @@
 import {
     randomInts,
-} from '~utils/random';
+} from '~/utils/random';
 
 export default function pickValues(sortedValues, count, start, end) {
     const selectedIndexes = randomInts(count, start, end);

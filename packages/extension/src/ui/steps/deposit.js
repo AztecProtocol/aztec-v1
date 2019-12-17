@@ -1,7 +1,7 @@
-import DepositConfirm from '~ui/views/DepositConfirm';
+import DepositConfirm from '~/ui/views/DepositConfirm';
 import ERC20AllowanceApprove from '~/ui/views/ERC20AllowanceApprove';
-import DepositApprove from '~ui/views/DepositApprove';
-import TransactionSend from '~ui/views/TransactionSend';
+import DepositApprove from '~/ui/views/DepositApprove';
+import TransactionSend from '~/ui/views/TransactionSend';
 import apis from '~uiModules/apis';
 
 const stepConfirm = {

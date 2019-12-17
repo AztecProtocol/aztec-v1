@@ -9,12 +9,12 @@ import {
     avatarSizesMap,
     fontSizeKeys,
     textColorNames,
-} from '~ui/styles/guacamole-vars';
+} from '~/ui/styles/guacamole-vars';
 import {
     themeType,
     profileShape,
-} from '~ui/config/propTypes';
-import ProfileIcon from '~ui/components/ProfileIcon';
+} from '~/ui/config/propTypes';
+import ProfileIcon from '~/ui/components/ProfileIcon';
 
 const spacingMapping = {
     xxs: 's',

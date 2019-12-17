@@ -1,6 +1,6 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 import EncryptedMessage from './EncryptedMessage';
 import lengthConfig from './lengthConfig';
 

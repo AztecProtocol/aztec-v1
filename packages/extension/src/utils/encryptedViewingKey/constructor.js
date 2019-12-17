@@ -1,12 +1,12 @@
 import {
     REAL_VIEWING_KEY_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 import {
     encryptMessage,
-} from '~utils/crypto';
+} from '~/utils/crypto';
 import decrypt from './decrypt';
 
 export default function constructor(publicKey, realViewingKey) {

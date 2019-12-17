@@ -1,6 +1,6 @@
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default function errorAction(message) {
     errorLog(message);

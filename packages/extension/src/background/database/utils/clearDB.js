@@ -4,7 +4,7 @@ import {
 } from '..';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const performClearDB = (networkId) => {
     getDB(networkId).tables.forEach(table => table.clear());

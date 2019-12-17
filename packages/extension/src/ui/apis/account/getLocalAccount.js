@@ -1,7 +1,7 @@
-import AuthService from '~background/services/AuthService';
+import AuthService from '~/background/services/AuthService';
 import {
     getSession,
-} from '~ui/apis/auth';
+} from '~/ui/apis/auth';
 
 export default async function getLocalAccount() {
     const keyStore = await AuthService.getKeyStore();

@@ -1,6 +1,6 @@
 import {
     set,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     getContract,
 } from '~/utils/network';

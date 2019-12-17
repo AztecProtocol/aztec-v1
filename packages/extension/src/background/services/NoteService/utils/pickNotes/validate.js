@@ -1,6 +1,6 @@
 import {
     argsError,
-} from '~utils/error';
+} from '~/utils/error';
 import arraySum from './arraySum';
 
 export default function validate({

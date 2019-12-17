@@ -4,8 +4,8 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import PopupContent from '~ui/components/PopupContent';
-import Logo from '~ui/components/Logo';
+import PopupContent from '~/ui/components/PopupContent';
+import Logo from '~/ui/components/Logo';
 
 const Home = () => (
     <PopupContent>

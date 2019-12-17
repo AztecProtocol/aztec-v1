@@ -1,5 +1,5 @@
 import * as JsPDF from 'jspdf';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 
 const backup = async ({
     seedPhrase,

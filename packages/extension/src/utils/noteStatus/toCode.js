@@ -1,7 +1,7 @@
-import noteStatus from '~config/noteStatus';
+import noteStatus from '~/config/noteStatus';
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default function toCode(status) {
     if (!(status in noteStatus)) {

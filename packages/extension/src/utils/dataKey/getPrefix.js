@@ -1,4 +1,4 @@
-import dataKeyConfig from '~config/dataKey';
+import dataKeyConfig from '~/config/dataKey';
 
 export default function getPrefix(type, config = dataKeyConfig) {
     const pattern = (config && config[type])

@@ -1,6 +1,6 @@
 import {
     fromViewingKey,
-} from '~utils/note';
+} from '~/utils/note';
 import ConnectionService from '~/client/services/ConnectionService';
 import provePrivateRange from '~/client/apis/privateRange/prove';
 

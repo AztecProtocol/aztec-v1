@@ -1,4 +1,4 @@
-import LRU from '~utils/caches/LRU';
+import LRU from '~/utils/caches/LRU';
 
 describe('LRU', () => {
     let cache;

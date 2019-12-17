@@ -9,15 +9,15 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import {
     closeWindowDelay,
-} from '~ui/config/settings';
+} from '~/ui/config/settings';
 import closeWindow from '~/ui/utils/closeWindow';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import returnAndClose from '~uiModules/helpers/returnAndClose';
-import Footer from '~ui/components/Footer';
-import Loading from '~ui/views/Loading';
+import Footer from '~/ui/components/Footer';
+import Loading from '~/ui/views/Loading';
 import AnimatedContent from './AnimatedContent';
 
 class AnimatedTransaction extends PureComponent {

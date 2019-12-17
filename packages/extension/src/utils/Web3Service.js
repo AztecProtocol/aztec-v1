@@ -3,7 +3,7 @@ import {
     log,
     warnLog,
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 class Web3Service {
     constructor() {

@@ -10,12 +10,12 @@ import {
 } from '~/ui/config/propTypes';
 import {
     emptyIntValue,
-} from '~ui/config/settings';
+} from '~/ui/config/settings';
 import parseInputAmount from '~/ui/utils/parseInputAmount';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import returnAndClose from '~/ui/helpers/returnAndClose';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 
 const handleClose = (accumData) => {

@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     gsnConfigShape,
-} from '~ui/config/propTypes';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import { linkAccountSteps } from '~ui/config/steps';
+} from '~/ui/config/propTypes';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import { linkAccountSteps } from '~/ui/config/steps';
 
 const RegisterAddress = ({
     currentAccount,

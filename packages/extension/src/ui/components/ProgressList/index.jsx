@@ -5,7 +5,7 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import {
     errorShape,
 } from '~/ui/config/propTypes';

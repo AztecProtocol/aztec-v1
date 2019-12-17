@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import NoteAccessConfirm from '~ui/views/NoteAccessConfirm';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import NoteAccessConfirm from '~/ui/views/NoteAccessConfirm';
 
 const steps = [
     {

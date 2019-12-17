@@ -1,9 +1,9 @@
-import noteModel from '~database/models/note';
-import assetModel from '~database/models/asset';
+import noteModel from '~/database/models/note';
+import assetModel from '~/database/models/asset';
 import {
     permissionError,
-} from '~utils/error';
-import AuthService from '~background/services/AuthService';
+} from '~/utils/error';
+import AuthService from '~/background/services/AuthService';
 
 export default async function validateDomainAccess(_, args, ctx, info) {
     const {

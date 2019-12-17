@@ -1,6 +1,6 @@
 import {
     randomInts,
-} from '~utils/random';
+} from '~/utils/random';
 
 export default function pickKeysByValues(noteValues, values) {
     const keys = [];

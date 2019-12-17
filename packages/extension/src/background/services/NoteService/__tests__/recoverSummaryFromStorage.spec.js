@@ -5,8 +5,8 @@ import {
 import {
     randomId,
     randomInt,
-} from '~utils/random';
-import * as storage from '~utils/storage';
+} from '~/utils/random';
+import * as storage from '~/utils/storage';
 import saveToStorage from '../utils/saveToStorage';
 import recoverSummaryFromStorage from '../utils/recoverSummaryFromStorage';
 import {
@@ -15,7 +15,7 @@ import {
     priority,
 } from './testData';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

@@ -5,18 +5,18 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import {
     assetShape,
     transactionShape,
 } from '~/ui/config/propTypes';
-import formatNumber from '~ui/utils/formatNumber';
-import PopupContent from '~ui/components/PopupContent';
-import Ticket from '~ui/components/Ticket';
-import ListRow from '~ui/components/ListRow';
-import ListItem from '~ui/components/ListItem';
+import formatNumber from '~/ui/utils/formatNumber';
+import PopupContent from '~/ui/components/PopupContent';
+import Ticket from '~/ui/components/Ticket';
+import ListRow from '~/ui/components/ListRow';
+import ListItem from '~/ui/components/ListItem';
 import HashText from '~/ui/components/HashText';
-import Separator from '~ui/components/Separator';
+import Separator from '~/ui/components/Separator';
 import ShareNoteAccessConfirm from '~/ui/components/ShareNoteAccessConfirm';
 
 const DepositConfirm = ({

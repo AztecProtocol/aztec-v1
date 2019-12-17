@@ -1,11 +1,11 @@
 import {
     utils,
 } from 'web3';
-import config from '~config/metadata';
+import config from '~/config/metadata';
 import {
     DYNAMIC_VAR_CONFIG_LENGTH,
     MIN_BYTES_VAR_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import _addAccess from './_addAccess';
 import _getAccess from './_getAccess';
 import toString from './toString';

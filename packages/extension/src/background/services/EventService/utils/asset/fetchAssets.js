@@ -1,7 +1,7 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
-} from '~config/contractEvents';
+} from '~/config/contractEvents';
 
 export default async function fetchAssets({
     fromBlock = 'earliest',

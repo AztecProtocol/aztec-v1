@@ -1,6 +1,6 @@
 import {
     unknownError,
-} from '~utils/error';
+} from '~/utils/error';
 import errorResponse from '../errorResponse';
 import pipe from '../pipe';
 

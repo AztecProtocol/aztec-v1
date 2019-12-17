@@ -3,7 +3,7 @@ import EthCrypto from 'eth-crypto';
 import Web3Service from '~/client/services/Web3Service';
 import {
     SIGNING_PROVIDER,
-} from '~config/constants';
+} from '~/config/constants';
 import registerExtension from './registerExtension';
 import signNote from './signNote';
 import batchSignNotes from './batchSignNotes';

@@ -1,10 +1,10 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
-} from '~config/contracts';
+} from '~/config/contracts';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import decodeNoteLogs from './helpers/decodeNoteLogs';
 
 const subscribe = async ({

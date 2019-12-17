@@ -1,8 +1,8 @@
 import {
     permissionError,
-} from '~utils/error';
+} from '~/utils/error';
 import urls from '~/config/urls';
-import AuthService from '~background/services/AuthService';
+import AuthService from '~/background/services/AuthService';
 
 const {
     origin: uiSourceOrigin,

@@ -1,9 +1,9 @@
-import Asset from '~background/database/models/asset';
-import EventService from '~background/services/EventService';
+import Asset from '~/background/database/models/asset';
+import EventService from '~/background/services/EventService';
 import Web3Service from '~/helpers/Web3Service';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const packNote = (note, asset) => ({
     ...note,

@@ -1,6 +1,6 @@
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import nacl from './nacl';
 import toUint8Array from './toUint8Array';
 import toHexString from './toHexString';

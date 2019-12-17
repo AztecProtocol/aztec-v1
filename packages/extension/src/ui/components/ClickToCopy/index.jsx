@@ -6,8 +6,8 @@ import copyToClipboard from 'copy-to-clipboard';
 import {
     Clickable,
 } from '@aztec/guacamole-ui';
-import Hint from '~ui/components/Hint';
-import i18n from '~ui/helpers/i18n';
+import Hint from '~/ui/components/Hint';
+import i18n from '~/ui/helpers/i18n';
 import styles from './copy.scss';
 
 class ClickToCopy extends PureComponent {

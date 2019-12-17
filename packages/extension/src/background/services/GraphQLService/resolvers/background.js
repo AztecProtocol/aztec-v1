@@ -1,5 +1,5 @@
-import ClientSubscriptionService from '~background/services/ClientSubscriptionService';
-import userModel from '~database/models/user';
+import ClientSubscriptionService from '~/background/services/ClientSubscriptionService';
+import userModel from '~/database/models/user';
 import {
     ensureKeyvault, // TODO rename this also checks session
     ensureDomainPermission,
@@ -8,7 +8,7 @@ import mergeResolvers from './utils/mergeResolvers';
 import syncUserInfo from './utils/syncUserInfo';
 import getAccounts from './utils/getAccounts';
 import Web3Service from '~/helpers/Web3Service';
-import NoteService from '~background/services/NoteService';
+import NoteService from '~/background/services/NoteService';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
 import requestGrantAccess from './utils/requestGrantAccess';

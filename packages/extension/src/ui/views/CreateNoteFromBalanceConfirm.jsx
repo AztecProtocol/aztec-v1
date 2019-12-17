@@ -14,11 +14,11 @@ import {
     assetShape,
     rawNoteShape,
 } from '~/ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
-import formatNumber from '~ui/utils/formatNumber';
-import PopupContent from '~ui/components/PopupContent';
-import Connection from '~ui/components/Connection';
-import ListItem from '~ui/components/ListItem';
+import i18n from '~/ui/helpers/i18n';
+import formatNumber from '~/ui/utils/formatNumber';
+import PopupContent from '~/ui/components/PopupContent';
+import Connection from '~/ui/components/Connection';
+import ListItem from '~/ui/components/ListItem';
 import HashText from '~/ui/components/HashText';
 import ShareNoteAccessConfirm from '~/ui/components/ShareNoteAccessConfirm';
 

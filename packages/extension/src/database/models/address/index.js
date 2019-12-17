@@ -1,5 +1,5 @@
-import dataKey from '~config/dataKey';
-import Model from '~database/helpers/Model';
+import dataKey from '~/config/dataKey';
+import Model from '~/database/helpers/Model';
 
 /**
  * This model is for storing addresses in key value pair

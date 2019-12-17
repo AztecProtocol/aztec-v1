@@ -2,8 +2,8 @@ import React, {
     PureComponent,
 } from 'react';
 import PropTypes from 'prop-types';
-import Assets from '~ui/views/Assets';
-import Asset from '~ui/views/Asset';
+import Assets from '~/ui/views/Assets';
+import Asset from '~/ui/views/Asset';
 import apis from '~uiModules/apis';
 
 class Account extends PureComponent {

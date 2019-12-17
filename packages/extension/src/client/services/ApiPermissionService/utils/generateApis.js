@@ -1,6 +1,6 @@
 import Web3Service from '~/client/services/Web3Service';
-import assetFactory from '~client/apis/assetFactory';
-import noteFactory from '~client/apis/noteFactory';
+import assetFactory from '~/client/apis/assetFactory';
+import noteFactory from '~/client/apis/noteFactory';
 
 const availableWeb3Apis = [
     'useContract',

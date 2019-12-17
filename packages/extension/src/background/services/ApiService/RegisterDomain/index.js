@@ -1,7 +1,7 @@
 import {
     uiReturnEvent,
 } from '~/config/event';
-import filterStream from '~utils/filterStream';
+import filterStream from '~/utils/filterStream';
 import AuthService from '~/background/services/AuthService';
 
 const registerDomainUi = async (query, connection) => {

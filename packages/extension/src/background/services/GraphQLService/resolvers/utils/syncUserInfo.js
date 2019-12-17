@@ -1,13 +1,13 @@
 import {
     permissionError,
-} from '~utils/error';
+} from '~/utils/error';
 import Web3Service from '~/helpers/Web3Service';
-import AuthService from '~background/services/AuthService';
-import NoteService from '~background/services/NoteService';
-import EventService from '~background/services/EventService';
-import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
-import decodeKeyStore from '~background/utils/decodeKeyStore';
-import decodePrivateKey from '~background/utils/decodePrivateKey';
+import AuthService from '~/background/services/AuthService';
+import NoteService from '~/background/services/NoteService';
+import EventService from '~/background/services/EventService';
+import decodeLinkedPublicKey from '~/background/utils/decodeLinkedPublicKey';
+import decodeKeyStore from '~/background/utils/decodeKeyStore';
+import decodePrivateKey from '~/background/utils/decodePrivateKey';
 
 export default async function syncUserInfo(args, ctx) {
     const {

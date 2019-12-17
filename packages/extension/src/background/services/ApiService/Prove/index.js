@@ -1,7 +1,7 @@
 import {
     uiReturnEvent,
 } from '~/config/event';
-import filterStream from '~utils/filterStream';
+import filterStream from '~/utils/filterStream';
 import responseDataKeys from './responseDataKeys';
 
 export default async function triggerProofUi(query, connection) {

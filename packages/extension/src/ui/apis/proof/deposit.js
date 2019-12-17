@@ -1,14 +1,14 @@
 import aztec from 'aztec.js';
 import {
     randomSumArray,
-} from '~utils/random';
+} from '~/utils/random';
 import {
     createNotes,
-} from '~utils/note';
-import settings from '~background/utils/settings';
+} from '~/utils/note';
+import settings from '~/background/utils/settings';
 import {
     batchGetExtensionAccount,
-} from '~ui/apis/account';
+} from '~/ui/apis/account';
 
 const {
     JoinSplitProof,

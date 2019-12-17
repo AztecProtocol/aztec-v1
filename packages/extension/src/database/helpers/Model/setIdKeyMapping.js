@@ -2,9 +2,9 @@ import {
     get,
     set,
     lock,
-} from '~utils/storage';
-import dataKey from '~utils/dataKey';
-import errorAction from '~database/utils/errorAction';
+} from '~/utils/storage';
+import dataKey from '~/utils/dataKey';
+import errorAction from '~/database/utils/errorAction';
 
 export default async function setIdKeyMapping(
     data,

@@ -1,11 +1,11 @@
 import aztec from 'aztec.js';
 import {
     METADATA_AZTEC_DATA_LENGTH,
-} from '~config/constants';
-import encryptedViewingKey from '~utils/encryptedViewingKey';
+} from '~/config/constants';
+import encryptedViewingKey from '~/utils/encryptedViewingKey';
 import {
     addAccess,
-} from '~utils/metadata';
+} from '~/utils/metadata';
 
 export default async function createNote(value, publicKey, owner, access) {
     const note = await aztec.note.create(publicKey, value, owner);

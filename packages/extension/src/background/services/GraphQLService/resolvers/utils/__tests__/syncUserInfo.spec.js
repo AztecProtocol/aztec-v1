@@ -1,16 +1,16 @@
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
-import * as storage from '~utils/storage';
-import AuthService from '~background/services/AuthService';
-import EventService from '~background/services/EventService';
-import NoteService from '~background/services/NoteService';
-import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
+import * as storage from '~/utils/storage';
+import AuthService from '~/background/services/AuthService';
+import EventService from '~/background/services/EventService';
+import NoteService from '~/background/services/NoteService';
+import decodeLinkedPublicKey from '~/background/utils/decodeLinkedPublicKey';
 import syncUserInfo from '../syncUserInfo';
 import storyOf, {
     registeredUserInfo,
 } from './helpers/stories';
 
-jest.mock('~background/utils/decodeLinkedPublicKey');
-jest.mock('~utils/storage');
+jest.mock('~/background/utils/decodeLinkedPublicKey');
+jest.mock('~/utils/storage');
 
 const {
     address: userAddress,

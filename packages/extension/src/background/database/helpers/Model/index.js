@@ -3,7 +3,7 @@ import {
 } from '../..';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 // add
 import add from './add';

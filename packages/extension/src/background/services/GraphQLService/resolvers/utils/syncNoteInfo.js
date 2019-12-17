@@ -1,16 +1,16 @@
-import decodePrivateKey from '~background/utils/decodePrivateKey';
+import decodePrivateKey from '~/background/utils/decodePrivateKey';
 import {
     fromHexString,
-} from '~utils/encryptedViewingKey';
-import metadata from '~utils/metadata';
+} from '~/utils/encryptedViewingKey';
+import metadata from '~/utils/metadata';
 import {
     valueFromViewingKey,
-} from '~utils/note';
+} from '~/utils/note';
 import {
     argsError,
-} from '~utils/error';
+} from '~/utils/error';
 import Web3Service from '~/helpers/Web3Service';
-import Note from '~background/database/models/note';
+import Note from '~/background/database/models/note';
 import syncLatestNoteOnChain from './syncLatestNoteOnChain';
 
 export default async function syncNoteInfo(args, ctx) {

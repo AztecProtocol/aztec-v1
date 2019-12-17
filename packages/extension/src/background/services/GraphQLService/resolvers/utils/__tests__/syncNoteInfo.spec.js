@@ -3,10 +3,10 @@ import {
     userAccount,
     userAccount2,
 } from '~testHelpers/testUsers';
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import {
     randomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import {
     toString as toMetadataString,
 } from '~/utils/metadata';
@@ -15,7 +15,7 @@ import * as syncLatestNoteOnChain from '../syncLatestNoteOnChain';
 import syncNoteInfo from '../syncNoteInfo';
 import storyOf from './helpers/stories';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

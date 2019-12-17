@@ -1,8 +1,8 @@
-import filterStream from '~utils/filterStream';
+import filterStream from '~/utils/filterStream';
 import {
     actionRequestEvent,
     actionResponseEvent,
-} from '~config/event';
+} from '~/config/event';
 
 const triggerClientAction = async (query, connection) => {
     const {

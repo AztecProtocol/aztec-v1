@@ -9,8 +9,8 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     profileShape,
-} from '~ui/config/propTypes';
-import ProfileIcon from '~ui/components/ProfileIcon';
+} from '~/ui/config/propTypes';
+import ProfileIcon from '~/ui/components/ProfileIcon';
 import styles from './link.scss';
 
 const SummaryLink = ({

@@ -1,6 +1,6 @@
-import NoteService from '~background/services/NoteService';
+import NoteService from '~/background/services/NoteService';
 import Web3Service from '~/helpers/Web3Service';
-import settings from '~background/utils/settings';
+import settings from '~/background/utils/settings';
 
 export default async function pickNotesFromBalance(args, ctx) {
     const {

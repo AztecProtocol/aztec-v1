@@ -20,8 +20,8 @@ import {
     uiCloseEvent,
     sendActionEvent,
     sendQueryEvent,
-} from '~config/event';
-import urls from '~config/urls';
+} from '~/config/event';
+import urls from '~/config/urls';
 import Iframe from '~/utils/Iframe';
 import {
     warnLog,

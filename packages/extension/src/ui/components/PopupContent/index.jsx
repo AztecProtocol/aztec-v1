@@ -12,7 +12,7 @@ import {
 import {
     errorShape,
 } from '~/ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import styles from './content.scss';
 
 const spacingH = 'xl';

@@ -11,9 +11,9 @@ import {
     bigNumberType,
 } from '~/ui/config/propTypes';
 import formatNumber from '~/ui/utils/formatNumber';
-import i18n from '~ui/helpers/i18n';
-import approveGlyph from '~ui/images/approve.svg';
-import PopupContent from '~ui/components/PopupContent';
+import i18n from '~/ui/helpers/i18n';
+import approveGlyph from '~/ui/images/approve.svg';
+import PopupContent from '~/ui/components/PopupContent';
 
 const ERC20AllowanceApprove = ({
     title,

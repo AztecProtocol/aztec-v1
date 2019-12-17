@@ -1,7 +1,7 @@
 import {
     randomId,
     randomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import {
     seedPhrase,
     linkedPublicKey,

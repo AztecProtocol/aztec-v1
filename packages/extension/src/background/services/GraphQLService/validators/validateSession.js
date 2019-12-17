@@ -1,7 +1,7 @@
 import {
     permissionError,
-} from '~utils/error';
-import AuthService from '~background/services/AuthService';
+} from '~/utils/error';
+import AuthService from '~/background/services/AuthService';
 
 const isDaysAgo = (day, numberOfDays) => day < Date.now() - (numberOfDays * 60 * 60 * 24 * 1000);
 

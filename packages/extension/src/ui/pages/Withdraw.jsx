@@ -9,8 +9,8 @@ import {
 } from '~/ui/config/settings';
 import parseInputAmount from '~/ui/utils/parseInputAmount';
 import makeAsset from '~/ui/utils/makeAsset';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import { withdrawSteps } from '~ui/config/steps';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import { withdrawSteps } from '~/ui/config/steps';
 
 const Withdraw = ({
     initialStep,

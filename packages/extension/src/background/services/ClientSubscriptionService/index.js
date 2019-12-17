@@ -1,6 +1,6 @@
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import manager from './helpers/SubscriptionManager';
 
 export default {

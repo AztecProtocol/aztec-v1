@@ -4,15 +4,15 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import formatNumber from '~ui/utils/formatNumber';
+import i18n from '~/ui/helpers/i18n';
+import formatNumber from '~/ui/utils/formatNumber';
 import {
     assetShape,
 } from '~/ui/config/propTypes';
-import PopupContent from '~ui/components/PopupContent';
-import Connection from '~ui/components/Connection';
-import ListItem from '~ui/components/ListItem';
-import Ticket from '~ui/components/Ticket';
+import PopupContent from '~/ui/components/PopupContent';
+import Connection from '~/ui/components/Connection';
+import ListItem from '~/ui/components/ListItem';
+import Ticket from '~/ui/components/Ticket';
 import HashText from '~/ui/components/HashText';
 
 const WithdrawConfirm = ({

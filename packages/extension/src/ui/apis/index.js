@@ -1,7 +1,7 @@
 import {
     randomInt,
-} from '~utils/random';
-import sleep from '~utils/sleep';
+} from '~/utils/random';
+import sleep from '~/utils/sleep';
 import * as account from './account';
 import * as ace from './ace';
 import * as asset from './asset';

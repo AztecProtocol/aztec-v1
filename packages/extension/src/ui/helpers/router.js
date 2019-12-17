@@ -1,6 +1,6 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const isFullUrl = url => url.match(/^(http(s)?|mailto):/);
 

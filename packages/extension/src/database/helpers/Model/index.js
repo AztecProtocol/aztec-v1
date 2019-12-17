@@ -1,8 +1,8 @@
 import {
     errorLog,
-} from '~utils/log';
-import transformDataForDb from '~database/utils/transformDataForDb';
-import transformToDbData from '~database/utils/transformToDbData';
+} from '~/utils/log';
+import transformDataForDb from '~/database/utils/transformDataForDb';
+import transformToDbData from '~/database/utils/transformToDbData';
 import get from './get';
 import set from './set';
 import update from './update';

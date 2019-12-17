@@ -2,7 +2,7 @@ import nacl from './nacl';
 import toUint8Array from './toUint8Array';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default function batchDecrypt(privateKey, encryptedDataArr) {
     const privateKeyHash = privateKey.replace(/^0x/, '');

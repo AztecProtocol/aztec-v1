@@ -1,5 +1,5 @@
-import metadata from '~utils/metadata';
-import AuthService from '~background/services/AuthService';
+import metadata from '~/utils/metadata';
+import AuthService from '~/background/services/AuthService';
 import decryptViewingKey from './decryptViewingKey';
 
 export default async function getDecryptedViewingKeyFromMetadata(metadataStr) {

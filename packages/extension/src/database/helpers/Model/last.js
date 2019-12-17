@@ -1,12 +1,12 @@
 import dataKey, {
     getPrefix,
-} from '~utils/dataKey';
+} from '~/utils/dataKey';
 import {
     get as storageGet,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const meetConditions = (entry, conditions) => Object.keys(conditions)
     .every(field => entry[field] === conditions[field]);

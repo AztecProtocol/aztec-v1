@@ -1,8 +1,8 @@
-import userModel from '~database/models/user';
+import userModel from '~/database/models/user';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
 import mergeResolvers from './utils/mergeResolvers';
-import ConnectionService from '~ui/services/ConnectionService';
+import ConnectionService from '~/ui/services/ConnectionService';
 import Web3Service from '~/helpers/Web3Service';
 import base from './base';
 

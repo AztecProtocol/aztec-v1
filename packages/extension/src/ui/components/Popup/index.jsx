@@ -10,7 +10,7 @@ import {
 import {
     siteShape,
 } from '~/ui/config/propTypes';
-import ThemeContext from '~ui/views/handlers/ThemeContext';
+import ThemeContext from '~/ui/views/handlers/ThemeContext';
 import Header from './Header';
 import styles from './popup.scss';
 

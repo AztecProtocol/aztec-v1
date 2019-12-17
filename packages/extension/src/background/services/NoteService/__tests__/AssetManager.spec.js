@@ -1,14 +1,14 @@
 import {
     userAccount,
 } from '~testHelpers/testUsers';
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import {
     randomId,
     randomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import {
     PriorityQueue,
-} from '~utils/dataStructures';
+} from '~/utils/dataStructures';
 import saveToStorage from '../utils/saveToStorage';
 import AssetManager from '../helpers/AssetManager';
 import Asset from '../helpers/Asset';
@@ -18,7 +18,7 @@ import {
     assetNotes,
 } from './testData';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 const networkId = randomInt();
 const owner = userAccount;

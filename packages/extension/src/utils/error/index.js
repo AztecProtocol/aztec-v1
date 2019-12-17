@@ -1,7 +1,7 @@
 import errorConfig, {
     errorTypes,
-} from '~config/error';
-import I18n from '~utils/I18n';
+} from '~/config/error';
+import I18n from '~/utils/I18n';
 import makeError from './makeError';
 
 const errorI18n = new I18n();

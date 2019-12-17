@@ -7,7 +7,7 @@ import {
 import {
     warnLog,
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const WATCHER_STATUS = {
     NOT_STARTED: 'NOT_STARTED',

@@ -2,9 +2,9 @@ import 'fake-indexeddb/auto';
 import {
     randomId,
     randomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import fetchNotesFromIndexedDB from '../utils/fetchNotesFromIndexedDB';
-import Note from '~background/database/models/note';
+import Note from '~/background/database/models/note';
 
 const networkId = randomId();
 const ownerAddress = randomId();

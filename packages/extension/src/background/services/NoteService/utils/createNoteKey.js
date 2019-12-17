@@ -2,8 +2,8 @@ import {
     get,
     set,
     lock,
-} from '~utils/storage';
-import dataKey from '~utils/dataKey';
+} from '~/utils/storage';
+import dataKey from '~/utils/dataKey';
 
 const counterKey = '_countNote';
 

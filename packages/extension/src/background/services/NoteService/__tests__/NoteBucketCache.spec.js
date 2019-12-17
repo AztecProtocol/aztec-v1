@@ -1,4 +1,4 @@
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import NoteBucketCache from '../helpers/NoteBucketCache';
 import sizeOfNoteValues from '../utils/sizeOfNoteValues';
 import {
@@ -7,7 +7,7 @@ import {
     priority,
 } from './testData';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

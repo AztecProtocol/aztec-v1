@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
     avatarSizesMap,
-} from '~ui/styles/guacamole-vars';
+} from '~/ui/styles/guacamole-vars';
 import {
     makeRand,
     makeRandomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import defaultColorScheme from './config/colorScheme';
 import defaultShapeGenerator from './utils/shapeGenerator';
 import styles from './svg.scss';

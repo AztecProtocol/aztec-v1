@@ -7,7 +7,7 @@ import {
     METADATA_AZTEC_DATA_LENGTH,
     MIN_BYTES_VAR_LENGTH,
     DYNAMIC_VAR_CONFIG_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import metadata, {
     toString,
     addAccess,

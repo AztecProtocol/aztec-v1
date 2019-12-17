@@ -1,4 +1,4 @@
-import Model from '~database/helpers/Model';
+import Model from '~/database/helpers/Model';
 
 export default Model({
     name: 'action',

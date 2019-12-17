@@ -1,8 +1,8 @@
 import { get } from '~/utils/storage';
-import ClientActionService from '~background/services/ClientActionService';
+import ClientActionService from '~/background/services/ClientActionService';
 import {
     actionRequestEvent,
-} from '~config/event';
+} from '~/config/event';
 
 
 export default (query, connection) => async ({

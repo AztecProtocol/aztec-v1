@@ -12,8 +12,8 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     themeType,
-} from '~ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
+} from '~/ui/config/propTypes';
+import i18n from '~/ui/helpers/i18n';
 import styles from './popup.scss';
 
 class InplacePopup extends PureComponent {

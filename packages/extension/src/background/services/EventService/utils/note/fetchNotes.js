@@ -1,7 +1,7 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
-} from '~config/contracts';
+} from '~/config/contracts';
 import decodeNoteLogs from './helpers/decodeNoteLogs';
 
 export default async function fetchNotes({

@@ -5,19 +5,19 @@ import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
     METADATA_AZTEC_DATA_LENGTH,
-} from '~config/constants';
-import * as storage from '~utils/storage';
+} from '~/config/constants';
+import * as storage from '~/utils/storage';
 import {
     toString,
-} from '~utils/metadata';
+} from '~/utils/metadata';
 import {
     randomId,
-} from '~utils/random';
+} from '~/utils/random';
 import getDecryptedViewingKeyFromMetadata from '../getDecryptedViewingKeyFromMetadata';
 import decryptViewingKey from '../decryptViewingKey';
 import storyOf from './helpers/stories';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 jest.mock('../decryptViewingKey');
 
 beforeEach(() => {
