@@ -175,6 +175,7 @@ describe('validateAccount', () => {
         registeredUserInfo = {
             address: userAccount.address,
             linkedPublicKey,
+            spendingPublicKey: 'spending_public_key',
             blockNumber: Date.now(),
         };
 
@@ -198,8 +199,7 @@ describe('validateAccount', () => {
         expect(updateSessionSpy).toHaveBeenCalled();
 
         const session = await AuthService.getSession();
-        expect(response).toEqual({
-            keyStore: decodedKeyStore,
+        expect(response).toMatchObject({
             session,
             user: registeredUserInfo,
         });

@@ -2,9 +2,10 @@ import {
     userAccount,
     registrationData,
 } from '~testHelpers/testUsers';
-import * as storage from '~utils/storage';
-import AuthService from '~background/services/AuthService';
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
+import * as storage from '~/utils/storage';
+import AuthService from '~/background/services/AuthService';
+import * as decodeKeyStore from '~/background/utils/decodeKeyStore';
 import {
     ensureKeyvault,
     ensureAccount,
@@ -23,6 +24,7 @@ const requiredArgs = {
 const registeredUserInfo = {
     address: userAccount.address,
     linkedPublicKey: userAccount.linkedPublicKey,
+    spendingPublicKey: 'spending_public_key',
     blockNumber: Date.now(),
 };
 
@@ -40,6 +42,7 @@ const useDecorator = async (
 ) => decorator(cb)(null, args);
 
 const expectContextToEqual = ctx => expect(callback.mock.calls[0][2]).toEqual(ctx);
+const expectContextToContain = ctx => expect(callback.mock.calls[0][2]).toMatchObject(ctx);
 
 describe('ensureKeyvault', () => {
     it('callback will be called if extension is registered', async () => {
@@ -66,6 +69,8 @@ describe('ensureKeyvault', () => {
 
 describe('ensureAccount', () => {
     it('callback will be called if both extension and user are registered', async () => {
+        const decodeKeyStoreSpy = jest.spyOn(decodeKeyStore, 'default');
+
         await AuthService.registerExtension(registrationData);
         await AuthService.registerAddress(registeredUserInfo);
 
@@ -75,11 +80,11 @@ describe('ensureAccount', () => {
 
         const keyStore = await AuthService.getKeyStore();
         const session = await AuthService.getSession();
-        expectContextToEqual({
-            keyStore,
+        expectContextToContain({
             session,
             user: registeredUserInfo,
         });
+        expect(decodeKeyStoreSpy).toHaveBeenCalledWith(keyStore, session.pwDerivedKey);
     });
 
     it('fail if both extension and user are not registered', async () => {
@@ -115,11 +120,9 @@ describe('ensureDomainPermission', () => {
 
         expect(callback).toHaveBeenCalledTimes(1);
 
-        const keyStore = await AuthService.getKeyStore();
         const session = await AuthService.getSession();
         const domain = await AuthService.getRegisteredDomain(domainName);
-        expectContextToEqual({
-            keyStore,
+        expectContextToContain({
             session,
             user: registeredUserInfo,
             domain,

@@ -2,13 +2,16 @@ import notes from '~testHelpers/testNotes';
 import {
     userAccount,
     userAccount2,
-} from '~testHelpers~testHelpers/testUsers';
+} from '~testHelpers/testUsers';
 import * as storage from '~utils/storage';
 import {
     randomInt,
 } from '~utils/random';
-import SyncService from '~background/services/SyncService';
-import noteModel from '~database/models/note';
+import {
+    toString as toMetadataString,
+} from '~/utils/metadata';
+import noteModel from '~/background/database/models/note';
+import * as syncLatestNoteOnChain from '../syncLatestNoteOnChain';
 import syncNoteInfo from '../syncNoteInfo';
 import storyOf from './helpers/stories';
 
@@ -19,85 +22,108 @@ beforeEach(() => {
 });
 
 describe('syncNoteInfo', () => {
+    let testNote;
     let noteValue;
     let noteData;
 
-    const syncNoteSpy = jest.spyOn(SyncService, 'syncNote')
+    const noteModelSpy = jest.spyOn(noteModel, 'get')
+        .mockImplementation(() => noteData);
+
+    const syncNoteSpy = jest.spyOn(syncLatestNoteOnChain, 'default')
         .mockImplementation(() => noteData);
 
     beforeAll(async () => {
+        testNote = notes[randomInt(0, notes.length - 1)];
         const {
             hash,
             viewingKey,
             value,
-        } = notes[randomInt(0, notes.length - 1)];
+        } = testNote;
+        const metadata = toMetadataString({
+            addresses: [userAccount.address],
+            viewingKeys: [viewingKey],
+        });
         noteValue = value;
         noteData = {
-            hash,
-            viewingKey,
-            owner: userAccount.address,
+            noteHash: hash,
+            metadata,
+            owner: userAccount,
         };
     });
 
     beforeEach(() => {
         syncNoteSpy.mockClear();
+        noteModelSpy.mockClear();
     });
 
-    it('return existing note info in storage', async () => {
-        await noteModel.set(noteData);
+    afterAll(() => {
+        syncNoteSpy.restore();
+        noteModelSpy.restore();
+    });
 
+    it('return existing note info in note model', async () => {
         const response = await storyOf('ensureDomainPermission', syncNoteInfo, {
-            id: noteData.hash,
+            id: noteData.noteHash,
         });
 
-        const note = await noteModel.get({
-            id: noteData.hash,
-        });
         expect(response).toEqual({
-            ...note,
+            ...noteData,
             value: noteValue,
         });
 
+        expect(noteModelSpy).toHaveBeenCalledTimes(1);
         expect(syncNoteSpy).not.toHaveBeenCalled();
     });
 
     it('return null if id is empty in args', async () => {
-        await noteModel.set(noteData);
-
         const response = await storyOf('ensureDomainPermission', syncNoteInfo, {
             id: '',
         });
         expect(response).toEqual(null);
-
+        expect(noteModelSpy).not.toHaveBeenCalled();
         expect(syncNoteSpy).not.toHaveBeenCalled();
     });
 
     it('get note on chain if not found in storage', async () => {
+        noteModelSpy.mockImplementationOnce(() => null);
+
         const response = await storyOf('ensureDomainPermission', syncNoteInfo, {
-            id: noteData.hash,
+            id: noteData.noteHash,
         });
+
         expect(response).toEqual({
             ...noteData,
             value: noteValue,
         });
 
+        expect(noteModelSpy).toHaveBeenCalledTimes(1);
         expect(syncNoteSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('re-fetch a note from blockchain if the note in storage belongs to other account', async () => {
-        await noteModel.set({
-            ...noteData,
-            owner: userAccount2.address,
+    it('return a note with undefined value if the user does not have access', async () => {
+        const {
+            viewingKey,
+        } = testNote;
+        const metadata = toMetadataString({
+            addresses: [userAccount2.address],
+            viewingKeys: [viewingKey],
         });
+        noteModelSpy.mockImplementationOnce(() => ({
+            ...noteData,
+            metadata,
+        }));
 
         const response = await storyOf('ensureDomainPermission', syncNoteInfo, {
-            id: noteData.hash,
-        });
-        expect(response).toEqual({
-            ...noteData,
-            value: noteValue,
+            id: noteData.noteHash,
         });
 
-        expect(syncNoteSpy).toHaveBeenCalledTimes(1);
+        expect(response).toEqual({
+            ...noteData,
+            metadata,
+            value: undefined,
+        });
+
+        expect(noteModelSpy).toHaveBeenCalledTimes(1);
+        expect(syncNoteSpy).not.toHaveBeenCalled();
     });
 });
