@@ -7,6 +7,8 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
+    "@openzeppelin/contracts-ethereum-package": "^2.4.0",
+    "@openzeppelin/upgrades": "^2.6.0",
     "openzeppelin-solidity": "2.3.0"
   },
   "devDependencies": {
