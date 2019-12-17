@@ -1,7 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 import "@aztec/protocol/contracts/interfaces/IZkAsset.sol";
-import "./AZTECAccountRegistry.sol";
 import "./TransactionRelayer.sol";
 import "./GSNRecipientTimestampSignature.sol";
 
@@ -10,7 +9,7 @@ import "./GSNRecipientTimestampSignature.sol";
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract AZTECAccountRegistryGSN is AZTECAccountRegistry, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
+contract AZTECAccountRegistryGSN is GSNRecipient, GSNRecipientTimestampSignature, TransactionRelayer {
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
     constructor(
