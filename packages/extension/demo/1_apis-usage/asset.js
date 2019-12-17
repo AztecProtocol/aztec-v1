@@ -228,7 +228,7 @@ async function createNoteFromBalance() {
     await asset.createNoteFromBalance(
       value,
       {
-        owner,
+        userAccess,
         numberOfInputNotes,
         numberOfOutputNotes,
       },
