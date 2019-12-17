@@ -46,6 +46,21 @@ const stepApprove = {
     submitTextKey: 'deposit.approve.submit',
 };
 
+const stepTransferViaGSN = {
+    titleKey: 'deposit.send.title',
+    tasks: [
+        {
+            name: 'send',
+            run: apis.asset.confidentialTransferFrom,
+        },
+    ],
+    content: TransactionSend,
+    contentProps: {
+        descriptionKey: 'deposit.send.explain',
+    },
+    submitTextKey: 'deposit.send.submit',
+};
+
 const stepSend = {
     titleKey: 'deposit.send.title',
     tasks: [
@@ -66,7 +81,7 @@ const stepSendViaGSN = {
     tasks: [
         {
             name: 'send',
-            run: apis.asset.confidentialTransferFrom,
+            run: apis.asset.deposit,
         },
     ],
     content: TransactionSend,
@@ -77,8 +92,13 @@ export default {
     gsn: [
         stepConfirm,
         stepApproveERC20,
-        stepApprove,
         stepSendViaGSN,
+    ],
+    gsnTransfer: [
+        stepConfirm,
+        stepApproveERC20,
+        stepApprove,
+        stepTransferViaGSN,
     ],
     metamask: [
         stepConfirm,
