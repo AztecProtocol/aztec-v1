@@ -5,24 +5,14 @@ import {
     errorLog,
 } from '~utils/log';
 
-const packNote = (note, asset, noteAccess) => ({
-    account: {
-        address: noteAccess.address,
+const packNote = (note, asset) => ({
+    ...note,
+    asset: {
+        ...asset,
+        address: asset.registryOwner,
     },
-    viewingKey: noteAccess.viewingKey,
-    note: {
-        hash: note.noteHash,
-        asset: {
-            address: asset.registryOwner,
-            linkedTokenAddress: asset.linkedTokenAddress,
-            scalingFactor: asset.scalingFactor,
-            canAdjustSupply: asset.canAdjustSupply,
-            canConvert: asset.canConvert,
-        },
-        owner: {
-            address: note.owner,
-        },
-        status: note.status,
+    owner: {
+        address: note.owner,
     },
 });
 
@@ -46,24 +36,11 @@ export default async function syncLatestNoteOnChain({
         networkId,
     });
 
-    let noteAccesses = [];
-    if (onChainNote) {
-        const asset = await Asset.get({ networkId }, { registryOwner: onChainNote.asset });
-        const {
-            access,
-        } = onChainNote;
-
-        noteAccesses = Object.keys(access).map(address => packNote(onChainNote, asset, {
-            address,
-            viewingKey: access[address],
-        }));
+    if (!onChainNote) {
+        return null;
     }
 
-    return noteAccesses.map(({
-        note,
-        ...rest
-    }) => ({
-        ...rest,
-        ...note,
-    }));
+    const asset = await Asset.get({ networkId }, { registryOwner: onChainNote.asset });
+
+    return packNote(onChainNote, asset);
 }

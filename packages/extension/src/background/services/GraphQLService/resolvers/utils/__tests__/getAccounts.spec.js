@@ -1,6 +1,9 @@
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
+import {
+    randomId,
+} from '~/utils/random';
 import * as storage from '~utils/storage';
-// import GraphNodeService from '~background/services/GraphNodeService';
+import * as fetchAztecAccount from '../fetchAztecAccount';
 import getAccounts from '../getAccounts';
 import storyOf from './helpers/stories';
 
@@ -11,22 +14,20 @@ beforeEach(() => {
 });
 
 describe('getAccounts', () => {
-    const numberOfAccounts = 2;
-    const accounts = [];
-    const addresses = [];
-    for (let i = 0; i < numberOfAccounts; i += 1) {
-        const address = `address_${i}`;
-        addresses.push(address);
-        accounts.push({
-            id: `account_id_${i}`,
-            address,
-            linkedPublicKey: `linked_public_key_${i}`,
-        });
-    }
+    const addresses = [
+        `0x${randomId(40)}`,
+        `0x${randomId(40)}`,
+    ];
 
-    const querySpy = jest.spyOn(GraphNodeService, 'query')
-        .mockImplementation(() => ({
-            accounts,
+    const querySpy = jest.spyOn(fetchAztecAccount, 'default')
+        .mockImplementation(({
+            address,
+        }) => ({
+            account: {
+                address,
+                linkedPublicKey: `linked_public_key_${address}`,
+                spendingPublicKey: `spending_public_key_${address}`,
+            },
         }));
 
     beforeEach(() => {
@@ -44,38 +45,17 @@ describe('getAccounts', () => {
             },
         });
 
-        expect(response).toEqual(accounts);
+        expect(response).toEqual(addresses.map(address => ({
+            id: address,
+            address,
+            linkedPublicKey: `linked_public_key_${address}`,
+            spendingPublicKey: `spending_public_key_${address}`,
+        })));
     });
 
     it('throw an error if at least one account is not found on chain', async () => {
-        const errorResponse = await expectErrorResponse(async () => storyOf(
-            'ensureDomainPermission',
-            getAccounts,
-            {
-                where: {
-                    address_in: [
-                        ...addresses,
-                        'stranger_address',
-                    ],
-                },
-            },
-        )).toBe('account.not.linked');
-
-        expect(errorResponse).toMatchObject({
-            invalidAccounts: ['stranger_address'],
-        });
-    });
-
-    it('throw an error if at least one account has no linkedPublicKey on chain', async () => {
         querySpy.mockImplementationOnce(() => ({
-            accounts: [
-                ...accounts,
-                {
-                    id: 'stranger',
-                    address: 'stranger_address',
-                    linkedPublicKey: '',
-                },
-            ],
+            account: null,
         }));
 
         const errorResponse = await expectErrorResponse(async () => storyOf(
@@ -83,16 +63,37 @@ describe('getAccounts', () => {
             getAccounts,
             {
                 where: {
-                    address_in: [
-                        ...addresses,
-                        'stranger_address',
-                    ],
+                    address_in: addresses,
                 },
             },
         )).toBe('account.not.linked');
 
         expect(errorResponse).toMatchObject({
-            invalidAccounts: ['stranger_address'],
+            addresses: [addresses[0]],
+        });
+    });
+
+    it('throw an error if at least one account has no linkedPublicKey on chain', async () => {
+        querySpy.mockImplementationOnce(address => ({
+            account: ({
+                address,
+                linkedPublicKey: '',
+                spendingPublicKey: '',
+            }),
+        }));
+
+        const errorResponse = await expectErrorResponse(async () => storyOf(
+            'ensureDomainPermission',
+            getAccounts,
+            {
+                where: {
+                    address_in: addresses,
+                },
+            },
+        )).toBe('account.not.linked');
+
+        expect(errorResponse).toMatchObject({
+            addresses: [addresses[0]],
         });
     });
 });

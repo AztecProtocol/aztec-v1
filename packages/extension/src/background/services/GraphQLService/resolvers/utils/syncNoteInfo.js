@@ -31,11 +31,10 @@ export default async function syncNoteInfo(args, ctx) {
 
     let note = await Note.get({ networkId }, noteId);
     if (!note) {
-        [note] = await syncLatestNoteOnChain({
+        note = await syncLatestNoteOnChain({
             account: userAddress,
             noteId,
-            networkId,
-        }) || [];
+        });
     }
 
     if (!note) {

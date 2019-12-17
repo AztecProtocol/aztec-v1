@@ -2,7 +2,6 @@ import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import * as storage from '~utils/storage';
 import AuthService from '~background/services/AuthService';
 import EventService from '~background/services/EventService';
-import SyncService from '~background/services/SyncService';
 import NoteService from '~background/services/NoteService';
 import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
 import syncUserInfo from '../syncUserInfo';
@@ -23,13 +22,13 @@ const fetchAccountSpy = jest.spyOn(EventService, 'fetchAztecAccount')
         account: registeredUserInfo,
     }));
 
-const syncNotesSpy = jest.spyOn(EventService, 'syncNotes')
+const syncAccountSpy = jest.spyOn(EventService, 'addAccountToSync')
     .mockImplementation(() => {});
 
-const syncAccountSpy = jest.spyOn(SyncService, 'syncAccount')
+const syncNotesSpy = jest.spyOn(EventService, 'startAutoSync')
     .mockImplementation(() => {});
 
-const syncUserNoteSpy = jest.spyOn(NoteService, 'initWithUser')
+const decryptNoteSpy = jest.spyOn(NoteService, 'initWithUser')
     .mockImplementation(() => {});
 
 const registerAddressSpy = jest.spyOn(AuthService, 'registerAddress');
@@ -37,17 +36,17 @@ const registerAddressSpy = jest.spyOn(AuthService, 'registerAddress');
 beforeEach(() => {
     storage.reset();
     fetchAccountSpy.mockClear();
-    syncNotesSpy.mockClear();
     syncAccountSpy.mockClear();
-    syncUserNoteSpy.mockClear();
+    syncNotesSpy.mockClear();
+    decryptNoteSpy.mockClear();
     registerAddressSpy.mockClear();
     decodeLinkedPublicKey.mockImplementation(() => linkedPublicKey);
 });
 
 const expectStartSyncing = (called = 1) => {
-    expect(syncNotesSpy).toHaveBeenCalledTimes(called);
     expect(syncAccountSpy).toHaveBeenCalledTimes(called);
-    expect(syncUserNoteSpy).toHaveBeenCalledTimes(called);
+    expect(syncNotesSpy).toHaveBeenCalledTimes(called);
+    expect(decryptNoteSpy).toHaveBeenCalledTimes(called);
 };
 
 describe('syncUserInfo', () => {
