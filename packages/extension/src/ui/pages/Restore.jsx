@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import RestoreFromSeedPhrase from '~ui/views/RestoreFromSeedPhrase';
-import CreatePassword from '~ui/views/CreatePassword';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import RestoreFromSeedPhrase from '~/ui/views/RestoreFromSeedPhrase';
+import CreatePassword from '~/ui/views/CreatePassword';
 
 const steps = [
     {

@@ -2,10 +2,10 @@ import {
     get,
     set,
     lock,
-} from '~utils/storage';
-import errorAction from '~database/utils/errorAction';
-import transformDataForDb from '~database/utils/transformDataForDb';
-import transformDataFromDb from '~database/utils/transformDataFromDb';
+} from '~/utils/storage';
+import errorAction from '~/database/utils/errorAction';
+import transformDataForDb from '~/database/utils/transformDataForDb';
+import transformDataFromDb from '~/database/utils/transformDataFromDb';
 
 export default async function setData(
     data,

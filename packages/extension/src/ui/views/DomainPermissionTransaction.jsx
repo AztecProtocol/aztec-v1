@@ -8,12 +8,12 @@ import {
 import {
     simpleAssetShape,
     errorShape,
-} from '~ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
-import PopupContent from '~ui/components/PopupContent';
-import ListItem from '~ui/components/ListItem';
+} from '~/ui/config/propTypes';
+import i18n from '~/ui/helpers/i18n';
+import PopupContent from '~/ui/components/PopupContent';
+import ListItem from '~/ui/components/ListItem';
 import HashText from '~/ui/components/HashText';
-import ProfileIconGroup from '~ui/components/ProfileIconGroup';
+import ProfileIconGroup from '~/ui/components/ProfileIconGroup';
 
 const DomainPermissionTransaction = ({
     assets: realAssets,

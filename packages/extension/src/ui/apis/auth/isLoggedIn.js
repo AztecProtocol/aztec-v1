@@ -1,5 +1,5 @@
-import AuthService from '~background/services/AuthService';
-import ensureAccount from '~background/services/GraphQLService/decorators/ensureAccount';
+import AuthService from '~/background/services/AuthService';
+import ensureAccount from '~/background/services/GraphQLService/decorators/ensureAccount';
 
 export default async function isLoggedIn() {
     try {

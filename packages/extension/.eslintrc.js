@@ -13,15 +13,7 @@ module.exports = {
         'import/resolver': {
             alias: {
                 map: [
-                    ['~config', path.resolve(__dirname, './src/config')],
-                    ['~utils', path.resolve(__dirname, './src/utils')],
-                    ['~database', path.resolve(__dirname, './src/database')],
-                    ['~background', path.resolve(__dirname, './src/background')],
-                    ['~content', path.resolve(__dirname, './src/content')],
-                    ['~client', path.resolve(__dirname, './src/client')],
-                    ['~ui', path.resolve(__dirname, './src/ui')],
                     ['~uiModules', path.resolve(__dirname, './src/ui')],
-                    ['~helpers', path.resolve(__dirname, './src/helpers')],
                     ['~testHelpers', path.resolve(__dirname, './tests/helpers')],
                     ['~', path.resolve(__dirname, './src')],
                 ],

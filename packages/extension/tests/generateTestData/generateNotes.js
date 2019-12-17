@@ -3,12 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import {
     randomInts,
-} from '~utils/random';
-import encryptedViewingKey from '~utils/encryptedViewingKey';
+} from '~/utils/random';
+import encryptedViewingKey from '~/utils/encryptedViewingKey';
 import {
     createNotes,
     valueOf,
-} from '~utils/note';
+} from '~/utils/note';
 import prettyPrint from '../utils/prettyPrint';
 
 export default async function generateNotes(userAccount, numberOfNotes = 100) {

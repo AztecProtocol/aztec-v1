@@ -2,11 +2,11 @@ import {
     get,
     set,
     lock,
-} from '~utils/storage';
-import dataKey from '~utils/dataKey';
-import errorAction from '~database/utils/errorAction';
-import transformDataFromDb from '~database/utils/transformDataFromDb';
-import transformDataForDb from '~database/utils/transformDataForDb';
+} from '~/utils/storage';
+import dataKey from '~/utils/dataKey';
+import errorAction from '~/database/utils/errorAction';
+import transformDataFromDb from '~/database/utils/transformDataFromDb';
+import transformDataForDb from '~/database/utils/transformDataForDb';
 
 export default async function update(data) {
     const {

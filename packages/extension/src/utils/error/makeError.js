@@ -1,6 +1,6 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default function makeError(type, errorI18n) {
     return (key, data) => {

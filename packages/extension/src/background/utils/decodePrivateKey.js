@@ -1,6 +1,6 @@
 import {
     utils as keyvaultUtils,
-} from '~utils/keyvault';
+} from '~/utils/keyvault';
 import decodeKeyStore from './decodeKeyStore';
 
 export default function decodePrivateKey(keyStore, pwDerivedKey) {

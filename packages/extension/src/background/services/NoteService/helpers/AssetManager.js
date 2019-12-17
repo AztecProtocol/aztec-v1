@@ -1,6 +1,6 @@
 import {
     PriorityQueue,
-} from '~utils/dataStructures';
+} from '~/utils/dataStructures';
 import {
     defaultMaxAssets,
     defaultMaxNotes,

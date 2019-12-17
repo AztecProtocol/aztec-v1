@@ -1,9 +1,9 @@
 import abi from 'web3-eth-abi';
 import {
     ZkAsset,
-} from '~config/contracts';
-import groupBy from '~utils/groupBy';
-import { NOTE_STATUS } from '~config/constants';
+} from '~/config/contracts';
+import groupBy from '~/utils/groupBy';
+import { NOTE_STATUS } from '~/config/constants';
 
 const decode = (inputs, rawLog) => {
     const [,

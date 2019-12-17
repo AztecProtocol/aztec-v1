@@ -6,12 +6,12 @@ import {
 } from '~/ui/config/propTypes';
 import {
     emptyIntValue,
-} from '~ui/config/settings';
+} from '~/ui/config/settings';
 import apis from '~uiModules/apis';
-import makeAsset from '~ui/utils/makeAsset';
+import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import { sendSteps } from '~ui/config/steps';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import { sendSteps } from '~/ui/config/steps';
 
 const Send = ({
     initialStep,

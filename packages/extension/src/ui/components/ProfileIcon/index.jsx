@@ -9,12 +9,12 @@ import {
 import {
     themeType,
     profileType,
-} from '~ui/config/propTypes';
+} from '~/ui/config/propTypes';
 import {
     avatarSizesMap,
-} from '~ui/styles/guacamole-vars';
-import ProfileSvg from '~ui/components/ProfileSvg';
-import AztecSvg from '~ui/components/AztecSvg';
+} from '~/ui/styles/guacamole-vars';
+import ProfileSvg from '~/ui/components/ProfileSvg';
+import AztecSvg from '~/ui/components/AztecSvg';
 import colorSchemes from './config/colorSchemes';
 import shapeGenerators from './config/shapeGenerators';
 import styles from './icon.scss';

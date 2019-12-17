@@ -1,7 +1,7 @@
-import asyncForEach from '~utils/asyncForEach';
+import asyncForEach from '~/utils/asyncForEach';
 import {
     unknownError,
-} from '~utils/error';
+} from '~/utils/error';
 import errorResponse from './errorResponse';
 
 /*

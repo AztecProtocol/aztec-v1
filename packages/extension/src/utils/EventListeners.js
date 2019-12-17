@@ -1,6 +1,6 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default class EventListeners {
     constructor(eventNames) {

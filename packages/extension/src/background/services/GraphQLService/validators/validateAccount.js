@@ -1,8 +1,8 @@
 import {
     permissionError,
-} from '~utils/error';
-import AuthService from '~background/services/AuthService';
-import decodeKeyStore from '~background/utils/decodeKeyStore';
+} from '~/utils/error';
+import AuthService from '~/background/services/AuthService';
+import decodeKeyStore from '~/background/utils/decodeKeyStore';
 
 export default async function validateAccount(_, args, ctx) {
     const {

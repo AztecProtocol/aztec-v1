@@ -6,12 +6,12 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     avatarSizesMap,
-} from '~ui/styles/guacamole-vars';
+} from '~/ui/styles/guacamole-vars';
 import {
     themeType,
-} from '~ui/config/propTypes';
-import aztecGlyph from '~ui/images/logo.svg';
-import aztecWhiteGlyph from '~ui/images/logo-white.svg';
+} from '~/ui/config/propTypes';
+import aztecGlyph from '~/ui/images/logo.svg';
+import aztecWhiteGlyph from '~/ui/images/logo-white.svg';
 import styles from './svg.scss';
 
 const AztecSvg = ({

@@ -1,4 +1,4 @@
-import Account from '~background/database/models/account';
+import Account from '~/background/database/models/account';
 
 
 export default async function createBulkAssets(accounts, networkId) {

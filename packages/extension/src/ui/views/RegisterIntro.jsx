@@ -3,9 +3,9 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import router from '~ui/helpers/router';
-import PopupContent from '~ui/components/PopupContent';
+import i18n from '~/ui/helpers/i18n';
+import router from '~/ui/helpers/router';
+import PopupContent from '~/ui/components/PopupContent';
 
 const RegisterIntro = () => {
     const descriptionNodes = [];

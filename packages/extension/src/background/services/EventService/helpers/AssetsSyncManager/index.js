@@ -2,7 +2,7 @@ import {
     log,
     warnLog,
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import Web3Service from '~/helpers/Web3Service';
 import {
     createBulkAssets,

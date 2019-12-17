@@ -1,6 +1,6 @@
-import mergeActions from '~database/utils/mergeActions';
-import errorAction from '~database/utils/errorAction';
-import dataKey from '~utils/dataKey';
+import mergeActions from '~/database/utils/mergeActions';
+import errorAction from '~/database/utils/errorAction';
+import dataKey from '~/utils/dataKey';
 import setIdKeyMapping from './setIdKeyMapping';
 import setData from './setData';
 

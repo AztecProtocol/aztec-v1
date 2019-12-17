@@ -7,8 +7,8 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import PopupContent from '~ui/components/PopupContent';
-import Logo from '~ui/components/Logo';
+import PopupContent from '~/ui/components/PopupContent';
+import Logo from '~/ui/components/Logo';
 
 class Loading extends PureComponent {
     componentDidMount() {

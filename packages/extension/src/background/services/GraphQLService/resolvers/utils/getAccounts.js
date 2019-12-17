@@ -1,6 +1,6 @@
 import {
     argsError,
-} from '~utils/error';
+} from '~/utils/error';
 import fetchAztecAccount from './fetchAztecAccount';
 
 export default async function getAccounts(args) {

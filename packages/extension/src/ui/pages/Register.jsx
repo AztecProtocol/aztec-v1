@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import {
     gsnConfigShape,
 } from '~/ui/config/propTypes';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
-import { registerSteps } from '~ui/config/steps';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import { registerSteps } from '~/ui/config/steps';
 
 const Register = ({
     initialStep,

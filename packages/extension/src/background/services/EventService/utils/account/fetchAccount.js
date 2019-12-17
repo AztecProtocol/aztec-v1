@@ -1,7 +1,7 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     AZTECAccountRegistry,
-} from '~config/contractEvents';
+} from '~/config/contractEvents';
 
 export default async function fetchAccount({
     address,

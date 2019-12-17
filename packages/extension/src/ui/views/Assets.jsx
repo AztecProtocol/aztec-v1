@@ -6,14 +6,14 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import {
     assetShape,
 } from '~/ui/config/propTypes';
-import PopupContent from '~ui/components/PopupContent';
-import AssetSummaryLink from '~ui/components/AssetSummaryLink';
-import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
-import InplacePopup from '~ui/components/InplacePopup';
+import PopupContent from '~/ui/components/PopupContent';
+import AssetSummaryLink from '~/ui/components/AssetSummaryLink';
+import TransactionHistorySummary from '~/ui/components/TransactionHistorySummary';
+import InplacePopup from '~/ui/components/InplacePopup';
 
 const Assets = ({
     assets,

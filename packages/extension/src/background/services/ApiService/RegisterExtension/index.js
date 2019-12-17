@@ -1,7 +1,7 @@
 import {
     uiReturnEvent,
 } from '~/config/event';
-import filterStream from '~utils/filterStream';
+import filterStream from '~/utils/filterStream';
 import userPermissionQuery from '~/background/services/GraphQLService/Queries/userPermissionQuery';
 import query from '../utils/query';
 

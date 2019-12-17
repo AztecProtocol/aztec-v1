@@ -1,5 +1,5 @@
 import ConnectionService from '~uiModules/services/ConnectionService';
-import closeWindow from '~ui/utils/closeWindow';
+import closeWindow from '~/ui/utils/closeWindow';
 import {
     closeWindowDelay,
 } from '~/ui/config/settings';

@@ -5,7 +5,7 @@ import {
     Text,
     ProgressBar,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import evaluatePassword from './utils/evaluatePassword';
 
 const levelStyles = [

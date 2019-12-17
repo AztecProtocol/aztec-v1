@@ -6,7 +6,7 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     themeType,
-} from '~ui/config/propTypes';
+} from '~/ui/config/propTypes';
 import styles from './separator.scss';
 
 const Separator = ({

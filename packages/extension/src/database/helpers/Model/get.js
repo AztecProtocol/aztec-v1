@@ -1,9 +1,9 @@
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import {
     warnLog,
     errorLog,
-} from '~utils/log';
-import transformDataFromDb from '~database/utils/transformDataFromDb';
+} from '~/utils/log';
+import transformDataFromDb from '~/database/utils/transformDataFromDb';
 
 export default async function get(params = {}) {
     let {

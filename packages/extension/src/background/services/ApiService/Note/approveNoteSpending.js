@@ -1,7 +1,7 @@
 import {
     uiReturnEvent,
 } from '~/config/event';
-import filterStream from '~utils/filterStream';
+import filterStream from '~/utils/filterStream';
 
 const triggerApproveNoteSpending = async (query, connection) => {
     const {

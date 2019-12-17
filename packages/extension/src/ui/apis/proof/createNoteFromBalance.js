@@ -1,29 +1,29 @@
 import aztec from 'aztec.js';
 import {
     METADATA_AZTEC_DATA_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import {
     createNote,
     createNotes,
     fromViewingKey,
-} from '~utils/note';
+} from '~/utils/note';
 import {
     randomSumArray,
-} from '~utils/random';
-import asyncMap from '~utils/asyncMap';
-import asyncForEach from '~utils/asyncForEach';
+} from '~/utils/random';
+import asyncMap from '~/utils/asyncMap';
+import asyncForEach from '~/utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
-import settings from '~background/utils/settings';
+import settings from '~/background/utils/settings';
 import {
     emptyIntValue,
-} from '~ui/config/settings';
-import ConnectionService from '~ui/services/ConnectionService';
+} from '~/ui/config/settings';
+import ConnectionService from '~/ui/services/ConnectionService';
 import {
     batchGetExtensionAccount,
-} from '~ui/apis/account';
+} from '~/ui/apis/account';
 
 export default async function createNoteFromBalance({
     assetAddress,

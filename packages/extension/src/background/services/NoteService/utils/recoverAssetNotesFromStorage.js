@@ -1,11 +1,11 @@
 import {
     get,
-} from '~utils/storage';
-import dataKey from '~utils/dataKey';
+} from '~/utils/storage';
+import dataKey from '~/utils/dataKey';
 import {
     batchDecrypt,
     fromHexString,
-} from '~utils/crypto';
+} from '~/utils/crypto';
 import parseNoteValuesStrings from './parseNoteValuesStrings';
 
 export default async function recoverAssetNotesFromStorage(

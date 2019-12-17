@@ -1,7 +1,7 @@
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
-import ContractError from '~client/utils/ContractError';
-import ApiError from '~client/utils/ApiError';
+import ContractError from '~/client/utils/ContractError';
+import ApiError from '~/client/utils/ApiError';
 
 const dataProperties = [
     'address',

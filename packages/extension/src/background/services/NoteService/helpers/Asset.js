@@ -1,25 +1,25 @@
 import cloneDeep from 'lodash/cloneDeep';
 import {
     get,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     warnLog,
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import EventListeners from '~/utils/EventListeners';
 import {
     PriorityQueue,
-} from '~utils/dataStructures';
-import metadata from '~utils/metadata';
+} from '~/utils/dataStructures';
+import metadata from '~/utils/metadata';
 import {
     fromHexString,
-} from '~utils/encryptedViewingKey';
+} from '~/utils/encryptedViewingKey';
 import {
     valueFromViewingKey,
-} from '~utils/note';
+} from '~/utils/note';
 import {
     isDestroyed,
-} from '~utils/noteStatus';
+} from '~/utils/noteStatus';
 import noteModel from '~/background/database/models/note';
 import {
     defaultMaxProcesses,

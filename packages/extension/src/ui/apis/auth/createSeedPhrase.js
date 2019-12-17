@@ -1,6 +1,6 @@
 import {
     KeyStore,
-} from '~utils/keyvault';
+} from '~/utils/keyvault';
 
 export default function createSeedPhrase() {
     return {

@@ -7,18 +7,18 @@ import {
     withRouter,
 } from 'react-router-dom';
 import Route from '~uiModules/components/Route';
-import ConnectionService from '~ui/services/ConnectionService';
+import ConnectionService from '~/ui/services/ConnectionService';
 import Web3Service from '~/helpers/Web3Service';
 import apis from '~uiModules/apis';
-import i18n from '~ui/helpers/i18n';
-import router from '~ui/helpers/router';
-import getPathsFromRouteConfig from '~ui/utils/getPathsFromRouteConfig';
-import ThemeContext from '~ui/views/handlers/ThemeContext';
-import Loading from '~ui/views/Loading';
+import i18n from '~/ui/helpers/i18n';
+import router from '~/ui/helpers/router';
+import getPathsFromRouteConfig from '~/ui/utils/getPathsFromRouteConfig';
+import ThemeContext from '~/ui/views/handlers/ThemeContext';
+import Loading from '~/ui/views/Loading';
 import routes from '~uiModules/config/routes';
-import actions from '~ui/config/actions';
+import actions from '~/ui/config/actions';
 import getAuthRoute from '~/ui/utils/getAuthRoute';
-import getGsnConfig from '~utils/getGSNConfig';
+import getGsnConfig from '~/utils/getGSNConfig';
 import './styles/guacamole.css';
 import './styles/ui.scss';
 

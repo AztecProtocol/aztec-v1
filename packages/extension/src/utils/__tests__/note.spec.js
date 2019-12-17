@@ -6,11 +6,11 @@ import {
     METADATA_AZTEC_DATA_LENGTH,
     AZTEC_JS_METADATA_PREFIX_LENGTH,
     VIEWING_KEY_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import {
     randomInt,
-} from '~utils/random';
-import metadata from '~utils/metadata';
+} from '~/utils/random';
+import metadata from '~/utils/metadata';
 import {
     createNote,
     valueOf,

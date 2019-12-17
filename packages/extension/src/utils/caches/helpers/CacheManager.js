@@ -1,6 +1,6 @@
 import {
     PriorityQueue,
-} from '~utils/dataStructures';
+} from '~/utils/dataStructures';
 import EventListeners from '~/utils/EventListeners';
 
 const defaultCapacity = 2 ** 10;

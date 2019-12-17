@@ -1,10 +1,10 @@
 import secp256k1 from '@aztec/secp256k1';
-import AuthService from '~background/services/AuthService';
-import decodePrivateKey from '~background/utils/decodePrivateKey';
+import AuthService from '~/background/services/AuthService';
+import decodePrivateKey from '~/background/utils/decodePrivateKey';
 import {
     errorLog,
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default async function retrieveSigningInfo(ownerAddress) {
     const keyStore = await AuthService.getKeyStore();

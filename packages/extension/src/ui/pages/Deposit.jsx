@@ -8,12 +8,12 @@ import {
 import {
     inputTransactionShape,
     gsnConfigShape,
-} from '~ui/config/propTypes';
+} from '~/ui/config/propTypes';
 import depositSteps from '~/ui/steps/deposit';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
-import AnimatedTransaction from '~ui/views/handlers/AnimatedTransaction';
+import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
 
 const Deposit = ({
     initialStep,

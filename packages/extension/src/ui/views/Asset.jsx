@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import {
     Block,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import {
     assetShape,
 } from '~/ui/config/propTypes';
-import PopupContent from '~ui/components/PopupContent';
-import AssetSummary from '~ui/components/AssetSummary';
-import TransactionHistorySummary from '~ui/components/TransactionHistorySummary';
+import PopupContent from '~/ui/components/PopupContent';
+import AssetSummary from '~/ui/components/AssetSummary';
+import TransactionHistorySummary from '~/ui/components/TransactionHistorySummary';
 
 const Asset = ({
     address,

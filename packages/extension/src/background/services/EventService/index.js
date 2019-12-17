@@ -2,13 +2,13 @@ import {
     log,
     warnLog,
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 import NotesSyncManagerFactory from './helpers/NotesSyncManager/factory';
 import NotesWatcherFactory from './helpers/NotesWatcher/factory';
 import AssetsSyncManagerFactory from './helpers/AssetsSyncManager/factory';
 import {
     START_EVENTS_SYNCING_BLOCK,
-} from '~config/constants';
+} from '~/config/constants';
 import {
     get,
 } from '~/utils/storage';
@@ -23,9 +23,9 @@ import {
 import {
     fetchNotes,
 } from './utils/note';
-import Note from '~background/database/models/note';
-import Account from '~background/database/models/account';
-import Asset from '~background/database/models/asset';
+import Note from '~/background/database/models/note';
+import Account from '~/background/database/models/account';
+import Asset from '~/background/database/models/asset';
 
 const notesSyncManager = networkId => NotesSyncManagerFactory.create(networkId);
 const notesWatcher = networkId => NotesWatcherFactory.create(networkId);

@@ -5,9 +5,9 @@ import {
     Text,
     SVG,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import sendGlyph from '~ui/images/send.svg';
-import PopupContent from '~ui/components/PopupContent';
+import i18n from '~/ui/helpers/i18n';
+import sendGlyph from '~/ui/images/send.svg';
+import PopupContent from '~/ui/components/PopupContent';
 
 const TransactionSend = ({
     description,

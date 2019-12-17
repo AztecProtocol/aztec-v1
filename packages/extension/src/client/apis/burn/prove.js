@@ -3,12 +3,12 @@ import {
     createNote,
     fromViewingKey,
     valueOf,
-} from '~utils/note';
-import asyncMap from '~utils/asyncMap';
+} from '~/utils/note';
+import asyncMap from '~/utils/asyncMap';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
-import ContractError from '~client/utils/ContractError';
-import ApiError from '~client/utils/ApiError';
+import ContractError from '~/client/utils/ContractError';
+import ApiError from '~/client/utils/ApiError';
 // import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
 

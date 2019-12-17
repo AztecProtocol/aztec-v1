@@ -3,8 +3,8 @@ import {
     registrationData,
     pwDerivedKey,
 } from '~testHelpers/testUsers';
-import AuthService from '~background/services/AuthService';
-import decodeKeyStore from '~background/utils/decodeKeyStore';
+import AuthService from '~/background/services/AuthService';
+import decodeKeyStore from '~/background/utils/decodeKeyStore';
 
 export const domainName = 'aztecprotocol.com';
 

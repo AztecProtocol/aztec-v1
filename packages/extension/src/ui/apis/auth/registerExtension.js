@@ -1,4 +1,4 @@
-import AuthService from '~background/services/AuthService';
+import AuthService from '~/background/services/AuthService';
 
 export default async function registerExtension({
     keyStore,

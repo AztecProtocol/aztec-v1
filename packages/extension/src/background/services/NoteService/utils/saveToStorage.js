@@ -2,11 +2,11 @@ import {
     get,
     set,
     lock,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     batchEncrypt,
-} from '~utils/crypto';
-import dataKey from '~utils/dataKey';
+} from '~/utils/crypto';
+import dataKey from '~/utils/dataKey';
 import saveAssetNotesToStorage from './saveAssetNotesToStorage';
 
 export default async function saveToStorage(

@@ -1,7 +1,7 @@
 import {
     permissionError,
-} from '~utils/error';
-import AuthService from '~background/services/AuthService';
+} from '~/utils/error';
+import AuthService from '~/background/services/AuthService';
 
 export default async function validateExtension(_, args) {
     const keyStore = await AuthService.getKeyStore();

@@ -5,12 +5,12 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
+import i18n from '~/ui/helpers/i18n';
 import {
     assetShape,
-} from '~ui/config/propTypes';
-import TransactionHistoryLink from '~ui/components/TransactionHistoryLink';
-import Separator from '~ui/components/Separator';
+} from '~/ui/config/propTypes';
+import TransactionHistoryLink from '~/ui/components/TransactionHistoryLink';
+import Separator from '~/ui/components/Separator';
 import styles from './history.scss';
 
 const TransactionHistorySummary = ({

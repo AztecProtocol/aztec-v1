@@ -11,8 +11,8 @@ import {
 } from 'rxjs';
 import {
     randomId,
-} from '~utils/random';
-import filterStream from '~utils/filterStream';
+} from '~/utils/random';
+import filterStream from '~/utils/filterStream';
 import {
     connectionRequestEvent,
     connectionApprovedEvent,
@@ -23,9 +23,9 @@ import {
     actionResponseEvent,
     uiOpenEvent,
     uiCloseEvent,
-} from '~config/event';
+} from '~/config/event';
 import MetaMaskService from '~/client/services/MetaMaskService';
-import ApiError from '~client/utils/ApiError';
+import ApiError from '~/client/utils/ApiError';
 import getSiteData from '~/client/utils/getSiteData';
 import backgroundFrame from './backgroundFrame';
 

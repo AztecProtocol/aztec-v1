@@ -1,6 +1,6 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default function formatStrPattern(pattern, data) {
     if (!pattern) {

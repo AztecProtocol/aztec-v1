@@ -4,7 +4,7 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import PopupContent from '~ui/components/PopupContent';
+import PopupContent from '~/ui/components/PopupContent';
 
 const BackupKeys = ({
     seedPhrase,

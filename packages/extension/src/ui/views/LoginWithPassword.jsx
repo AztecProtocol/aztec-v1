@@ -10,9 +10,9 @@ import {
 import {
     errorShape,
 } from '~/ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
-import PopupContent from '~ui/components/PopupContent';
-import ProfileIcon from '~ui/components/ProfileIcon';
+import i18n from '~/ui/helpers/i18n';
+import PopupContent from '~/ui/components/PopupContent';
+import ProfileIcon from '~/ui/components/ProfileIcon';
 import HashText from '~/ui/components/HashText';
 
 const inputIconMapping = {

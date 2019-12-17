@@ -1,9 +1,9 @@
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 import {
     get,
-} from '~utils/storage';
+} from '~/utils/storage';
 
 export default async function keyOf(params = {}) {
     const {

@@ -6,10 +6,10 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import formatNumber from '~ui/utils/formatNumber';
-import ProfileIcon from '~ui/components/ProfileIcon';
-import Button from '~ui/components/Button';
+import i18n from '~/ui/helpers/i18n';
+import formatNumber from '~/ui/utils/formatNumber';
+import ProfileIcon from '~/ui/components/ProfileIcon';
+import Button from '~/ui/components/Button';
 
 const AssetSummary = ({
     className,

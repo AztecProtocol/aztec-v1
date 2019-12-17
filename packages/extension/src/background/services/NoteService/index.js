@@ -1,10 +1,10 @@
 import {
     argsError,
-} from '~utils/error';
+} from '~/utils/error';
 import {
     get,
-} from '~utils/storage';
-import Note from '~background/database/models/note';
+} from '~/utils/storage';
+import Note from '~/background/database/models/note';
 import ApiSessionManager from './helpers/ApiSessionManager';
 import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';

@@ -1,8 +1,8 @@
 import {
     randomInt,
-} from '~utils/random';
-import sleep from '~utils/sleep';
-import realApis from '~ui/apis';
+} from '~/utils/random';
+import sleep from '~/utils/sleep';
+import realApis from '~/ui/apis';
 import {
     emptyIntValue,
 } from '~/ui/config/settings';

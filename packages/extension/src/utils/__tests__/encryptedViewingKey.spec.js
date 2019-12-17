@@ -4,10 +4,10 @@ import {
 import {
     REAL_VIEWING_KEY_LENGTH,
     VIEWING_KEY_LENGTH,
-} from '~config/constants';
+} from '~/config/constants';
 import {
     randomId,
-} from '~utils/random';
+} from '~/utils/random';
 import encryptedViewingKey, {
     fromHexString,
 } from '../encryptedViewingKey';

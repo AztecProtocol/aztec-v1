@@ -1,7 +1,7 @@
 import Model from '../Model';
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 let errors = [];
 

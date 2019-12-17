@@ -1,11 +1,11 @@
 import {
     get,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     batchDecrypt,
     fromHexString,
-} from '~utils/crypto';
-import dataKey from '~utils/dataKey';
+} from '~/utils/crypto';
+import dataKey from '~/utils/dataKey';
 
 export default async function recoverSummaryFromStorage(
     networkId,

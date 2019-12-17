@@ -2,10 +2,10 @@ import {
     userAccount,
     registrationData,
 } from '~testHelpers/testUsers';
-import * as storage from '~utils/storage';
-import AuthService from '~background/services/AuthService';
-import decodeKeyStore from '~background/utils/decodeKeyStore';
-import decodeLinkedPublicKey from '~background/utils/decodeLinkedPublicKey';
+import * as storage from '~/utils/storage';
+import AuthService from '~/background/services/AuthService';
+import decodeKeyStore from '~/background/utils/decodeKeyStore';
+import decodeLinkedPublicKey from '~/background/utils/decodeLinkedPublicKey';
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import {
     validateExtension,
@@ -14,7 +14,7 @@ import {
     validateDomain,
 } from '../validators';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

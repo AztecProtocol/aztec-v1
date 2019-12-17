@@ -1,7 +1,7 @@
 import apis from '~uiModules/apis';
 import CreateNoteFromBalanceConfirm from '~/ui/views/CreateNoteFromBalanceConfirm';
 import SignNotes from '~/ui/views/SignNotes';
-import TransactionSend from '~ui/views/TransactionSend';
+import TransactionSend from '~/ui/views/TransactionSend';
 
 const stepProve = {
     titleKey: 'note.create.fromBalance',

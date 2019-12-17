@@ -9,9 +9,9 @@ import {
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
-} from '~ui/config/propTypes';
-import formatNumber from '~ui/utils/formatNumber';
-import SummaryLink from '~ui/components/SummaryLink';
+} from '~/ui/config/propTypes';
+import formatNumber from '~/ui/utils/formatNumber';
+import SummaryLink from '~/ui/components/SummaryLink';
 import HashText from '~/ui/components/HashText';
 import styles from './link.scss';
 

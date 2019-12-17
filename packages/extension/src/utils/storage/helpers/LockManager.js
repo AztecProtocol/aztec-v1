@@ -1,4 +1,4 @@
-import asyncForEach from '~utils/asyncForEach';
+import asyncForEach from '~/utils/asyncForEach';
 
 class LockManager {
     constructor() {

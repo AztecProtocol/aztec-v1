@@ -4,8 +4,8 @@ import {
     sendQueryEvent,
     uiReturnEvent,
     uiCloseEvent,
-} from '~config/event';
-import AuthService from '~background/services/AuthService';
+} from '~/config/event';
+import AuthService from '~/background/services/AuthService';
 import ConnectionManager from './helpers/ConnectionManager';
 
 const manager = new ConnectionManager();

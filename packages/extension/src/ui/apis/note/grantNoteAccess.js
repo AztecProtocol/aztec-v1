@@ -1,5 +1,5 @@
-import encryptedViewingKey from '~utils/encryptedViewingKey';
-import metaData from '~utils/metadata';
+import encryptedViewingKey from '~/utils/encryptedViewingKey';
+import metaData from '~/utils/metadata';
 
 export default async function grantNoteAccess({
     note: {

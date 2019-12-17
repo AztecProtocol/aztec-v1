@@ -2,12 +2,12 @@ import expectErrorResponse from '~testHelpers/expectErrorResponse';
 import {
     randomId,
 } from '~/utils/random';
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import * as fetchAztecAccount from '../fetchAztecAccount';
 import getAccounts from '../getAccounts';
 import storyOf from './helpers/stories';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

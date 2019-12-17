@@ -1,8 +1,8 @@
 import {
     createAccount,
 } from '..';
-import Account from '~background/database/models/account';
-import clearDB from '~background/database/utils/clearDB';
+import Account from '~/background/database/models/account';
+import clearDB from '~/background/database/utils/clearDB';
 
 describe('createAccount', () => {
     const rawAccount = {

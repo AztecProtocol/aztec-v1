@@ -10,9 +10,9 @@ import {
 import {
     errorShape,
 } from '~/ui/config/propTypes';
-import i18n from '~ui/helpers/i18n';
-import PopupContent from '~ui/components/PopupContent';
-import PasswordMeter from '~ui/components/PasswordMeter';
+import i18n from '~/ui/helpers/i18n';
+import PopupContent from '~/ui/components/PopupContent';
+import PasswordMeter from '~/ui/components/PasswordMeter';
 
 const inputIconMapping = {
     show: {

@@ -5,11 +5,11 @@ import {
     Text,
     SVG,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import linkGlyph from '~ui/images/link.svg';
-import ListItem from '~ui/components/ListItem';
+import i18n from '~/ui/helpers/i18n';
+import linkGlyph from '~/ui/images/link.svg';
+import ListItem from '~/ui/components/ListItem';
 import HashText from '~/ui/components/HashText';
-import PopupContent from '~ui/components/PopupContent';
+import PopupContent from '~/ui/components/PopupContent';
 
 const LinkAccount = ({
     linkedPublicKey,

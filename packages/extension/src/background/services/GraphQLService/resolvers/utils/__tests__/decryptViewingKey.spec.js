@@ -4,13 +4,13 @@ import {
 import notes from '~testHelpers/testNotes';
 import {
     randomInt,
-} from '~utils/random';
-import * as storage from '~utils/storage';
-import AuthService from '~background/services/AuthService';
+} from '~/utils/random';
+import * as storage from '~/utils/storage';
+import AuthService from '~/background/services/AuthService';
 import decryptViewingKey from '../decryptViewingKey';
 import storyOf from './helpers/stories';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

@@ -3,7 +3,7 @@ import {
 } from '~testHelpers/testUsers';
 import {
     randomId,
-} from '~utils/random';
+} from '~/utils/random';
 import {
     encryptMessage,
     batchEncrypt,

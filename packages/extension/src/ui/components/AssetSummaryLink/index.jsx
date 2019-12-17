@@ -6,8 +6,8 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
-import formatNumber from '~ui/utils/formatNumber';
-import SummaryLink from '~ui/components/SummaryLink';
+import formatNumber from '~/ui/utils/formatNumber';
+import SummaryLink from '~/ui/components/SummaryLink';
 
 const AssetSummaryLink = ({
     className,

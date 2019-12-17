@@ -1,6 +1,6 @@
 import {
     argsError,
-} from '~utils/error';
+} from '~/utils/error';
 import query from './query';
 
 export default async function validateExtensionAccount(accountAddress) {

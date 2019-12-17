@@ -5,10 +5,10 @@ import {
     Text,
     SVG,
 } from '@aztec/guacamole-ui';
-import i18n from '~ui/helpers/i18n';
-import sendGlyph from '~ui/images/send.svg';
-import ListItem from '~ui/components/ListItem';
-import PopupContent from '~ui/components/PopupContent';
+import i18n from '~/ui/helpers/i18n';
+import sendGlyph from '~/ui/images/send.svg';
+import ListItem from '~/ui/components/ListItem';
+import PopupContent from '~/ui/components/PopupContent';
 import HashText from '~/ui/components/HashText';
 
 const RegisterConfirm = ({

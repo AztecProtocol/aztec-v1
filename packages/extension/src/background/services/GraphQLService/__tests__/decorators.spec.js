@@ -12,7 +12,7 @@ import {
     ensureDomainPermission,
 } from '../decorators';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 const domainName = 'whatever.com';
 

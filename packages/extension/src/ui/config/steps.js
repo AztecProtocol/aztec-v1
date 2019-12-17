@@ -1,12 +1,12 @@
-import RegisterIntro from '~ui/views/RegisterIntro';
-import BackupKeys from '~ui/views/BackupKeys';
-import CreatePassword from '~ui/views/CreatePassword';
-import LinkAccount from '~ui/views/LinkAccount';
-import RegisterConfirm from '~ui/views/RegisterConfirm';
-import TransactionSend from '~ui/views/TransactionSend';
-import WithdrawConfirm from '~ui/views/WithdrawConfirm';
-import SignNotes from '~ui/views/SignNotes';
-import SendConfirm from '~ui/views/SendConfirm';
+import RegisterIntro from '~/ui/views/RegisterIntro';
+import BackupKeys from '~/ui/views/BackupKeys';
+import CreatePassword from '~/ui/views/CreatePassword';
+import LinkAccount from '~/ui/views/LinkAccount';
+import RegisterConfirm from '~/ui/views/RegisterConfirm';
+import TransactionSend from '~/ui/views/TransactionSend';
+import WithdrawConfirm from '~/ui/views/WithdrawConfirm';
+import SignNotes from '~/ui/views/SignNotes';
+import SendConfirm from '~/ui/views/SendConfirm';
 import apis from '~uiModules/apis';
 
 export const sendSteps = {

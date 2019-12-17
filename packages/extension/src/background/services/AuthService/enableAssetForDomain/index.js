@@ -1,7 +1,7 @@
 import {
     warnLog,
-} from '~utils/log';
-import domainModel from '~database/models/domain';
+} from '~/utils/log';
+import domainModel from '~/database/models/domain';
 
 export default async function enableAssetForDomain({
     domain,

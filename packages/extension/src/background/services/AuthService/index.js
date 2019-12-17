@@ -1,16 +1,16 @@
-import domainModel from '~database/models/domain';
-import userModel from '~database/models/user';
+import domainModel from '~/database/models/domain';
+import userModel from '~/database/models/user';
 import {
     get,
     set,
     remove,
-} from '~utils/storage';
+} from '~/utils/storage';
 import {
     KeyStore,
-} from '~utils/keyvault';
+} from '~/utils/keyvault';
 import {
     permissionError,
-} from '~utils/error';
+} from '~/utils/error';
 import enableAssetForDomain from './enableAssetForDomain';
 
 const AuthService = {

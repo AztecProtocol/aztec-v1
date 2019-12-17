@@ -3,9 +3,9 @@ import {
 } from '~testHelpers/testUsers';
 import {
     randomId,
-} from '~utils/random';
-import * as storage from '~utils/storage';
-import dataKey from '~utils/dataKey';
+} from '~/utils/random';
+import * as storage from '~/utils/storage';
+import dataKey from '~/utils/dataKey';
 import saveToStorage from '../utils/saveToStorage';
 import {
     assetSummary,
@@ -13,7 +13,7 @@ import {
     priority,
 } from './testData';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 beforeEach(() => {
     storage.reset();

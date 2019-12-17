@@ -1,11 +1,11 @@
 import gql from 'graphql-tag';
-import insertVariablesToGql from '~utils/insertVariablesToGql';
-import actionModel from '~database/models/action';
+import insertVariablesToGql from '~/utils/insertVariablesToGql';
+import actionModel from '~/database/models/action';
 import GraphQLService from '../services/GraphQLService';
 import getDomainFromUrl from '~/utils/getDomainFromUrl';
 import {
     errorToActionMap,
-} from '~config/action';
+} from '~/config/action';
 
 export const updateActionState = async (action) => {
     const timestamp = Date.now();

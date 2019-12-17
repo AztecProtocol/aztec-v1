@@ -5,9 +5,9 @@ import {
 import {
     randomId,
     randomInt,
-} from '~utils/random';
-import daiIcon from '~ui/images/tokens/dai.png';
-import usdcIcon from '~ui/images/tokens/usdc.png';
+} from '~/utils/random';
+import daiIcon from '~/ui/images/tokens/dai.png';
+import usdcIcon from '~/ui/images/tokens/usdc.png';
 import compoundLogo from './images/compound.png';
 
 export const generate = (count, generator) => {

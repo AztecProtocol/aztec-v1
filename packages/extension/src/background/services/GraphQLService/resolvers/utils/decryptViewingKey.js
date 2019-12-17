@@ -1,8 +1,8 @@
-import AuthService from '~background/services/AuthService';
+import AuthService from '~/background/services/AuthService';
 import {
     fromHexString,
-} from '~utils/encryptedViewingKey';
-import decodePrivateKey from '~background/utils/decodePrivateKey';
+} from '~/utils/encryptedViewingKey';
+import decodePrivateKey from '~/background/utils/decodePrivateKey';
 
 export default async function decryptViewingKey(viewingKey, ownerAddress) {
     const keyStore = await AuthService.getKeyStore();

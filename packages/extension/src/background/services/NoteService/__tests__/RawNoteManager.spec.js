@@ -4,7 +4,7 @@ import {
 import {
     randomId,
     randomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import RawNoteManager from '../helpers/RawNoteManager';
 
 const mockFetchNotesFromIndexedDB = jest.fn().mockImplementation(() => []);

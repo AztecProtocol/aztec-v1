@@ -1,10 +1,10 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
-} from '~config/contractEvents';
+} from '~/config/contractEvents';
 import {
     errorLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const converEvent = (event) => {
     const {

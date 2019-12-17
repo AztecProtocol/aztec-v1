@@ -1,4 +1,4 @@
-import ApiError from '~client/utils/ApiError';
+import ApiError from '~/client/utils/ApiError';
 
 const requiredContracts = [
     'ACE',

@@ -4,11 +4,11 @@ import {
 } from '~/config/event';
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 import {
     randomId,
-} from '~utils/random';
-import LRU from '~utils/caches/LRU';
+} from '~/utils/random';
+import LRU from '~/utils/caches/LRU';
 import Web3Service from '~/helpers/Web3Service';
 import listenToInitialAction from '../utils/listenToInitialAction';
 import listenToConnectionApproval from '../utils/listenToConnectionApproval';

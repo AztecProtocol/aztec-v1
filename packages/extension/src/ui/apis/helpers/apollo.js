@@ -3,8 +3,8 @@ import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { makeExecutableSchema } from 'graphql-tools';
 import gql from 'graphql-tag';
-import typeDefs from '~background/services/GraphQLService/typeDefs/ui';
-import resolvers from '~background/services/GraphQLService/resolvers/ui';
+import typeDefs from '~/background/services/GraphQLService/typeDefs/ui';
+import resolvers from '~/background/services/GraphQLService/resolvers/ui';
 
 const schema = makeExecutableSchema({
     typeDefs,

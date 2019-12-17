@@ -1,4 +1,4 @@
-import CacheManager from '~utils/caches/helpers/CacheManager';
+import CacheManager from '~/utils/caches/helpers/CacheManager';
 import {
     defaultMaxCallbacks,
 } from '../config';

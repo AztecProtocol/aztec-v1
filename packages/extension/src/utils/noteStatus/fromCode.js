@@ -1,7 +1,7 @@
-import noteStatus from '~config/noteStatus';
+import noteStatus from '~/config/noteStatus';
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 const codeStatusMapping = {};
 Object.keys(noteStatus).forEach((status) => {

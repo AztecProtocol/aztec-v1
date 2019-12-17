@@ -2,14 +2,14 @@ import {
     userAccount,
 } from '~testHelpers/testUsers';
 import testNotes from '~testHelpers/testNotes';
-import * as storage from '~utils/storage';
+import * as storage from '~/utils/storage';
 import {
     randomId,
     randomInt,
-} from '~utils/random';
+} from '~/utils/random';
 import {
     addAccess,
-} from '~utils/metadata';
+} from '~/utils/metadata';
 import {
     isDestroyed,
 } from '~/utils/noteStatus';
@@ -19,7 +19,7 @@ import Asset from '../helpers/Asset';
 import NoteBucketCache from '../helpers/NoteBucketCache';
 import RawNoteManager from '../helpers/RawNoteManager';
 
-jest.mock('~utils/storage');
+jest.mock('~/utils/storage');
 
 const assetId = randomId();
 const networkId = randomInt();

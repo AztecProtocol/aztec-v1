@@ -1,6 +1,6 @@
 import {
     actions,
-} from '~config/noteStatus';
+} from '~/config/noteStatus';
 
 const statusActionMapping = {};
 Object.keys(actions).forEach((action) => {

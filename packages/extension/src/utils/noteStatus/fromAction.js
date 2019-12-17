@@ -1,9 +1,9 @@
 import {
     actions,
-} from '~config/noteStatus';
+} from '~/config/noteStatus';
 import {
     warnLog,
-} from '~utils/log';
+} from '~/utils/log';
 
 export default function fromAction(action) {
     if (!(action in actions)) {

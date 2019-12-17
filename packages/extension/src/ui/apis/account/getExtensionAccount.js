@@ -1,4 +1,4 @@
-import apollo from '~ui/apis/helpers/apollo';
+import apollo from '~/ui/apis/helpers/apollo';
 
 export default async function getExtensionAccount(address) {
     const {
