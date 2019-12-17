@@ -4,7 +4,6 @@ import {
 import Web3Service from '~/helpers/Web3Service';
 import retrieveSigningInfo from '~utils/retrieveSigningInfo';
 import approveFunction from '~utils/approveGSNFunction';
-import getGsnConfig from '~utils/getGSNConfig';
 import { getProviderUrl } from '~utils/network';
 
 const sendTransaction = async (query, connection) => {
@@ -18,7 +17,6 @@ const sendTransaction = async (query, connection) => {
     } = query;
 
     try {
-        const gsnConfig = await getGsnConfig();
         const {
             address,
         } = Web3Service.account;

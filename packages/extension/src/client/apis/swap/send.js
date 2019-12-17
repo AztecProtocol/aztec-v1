@@ -1,16 +1,7 @@
-import aztec from 'aztec.js';
 import devUtils from '@aztec/dev-utils';
-import asyncForEach from '~utils/asyncForEach';
-import {
-    addAccess,
-} from '~utils/metadata';
-import encryptedViewingKey from '~utils/encryptedViewingKey';
 import Web3Service from '~/client/services/Web3Service';
 import ContractError from '~client/utils/ContractError';
 
-const {
-    outputCoder,
-} = aztec.encoder;
 const { SWAP_PROOF } = devUtils.proofs;
 
 export default async function sendSwap({
@@ -21,7 +12,6 @@ export default async function sendSwap({
     data: {
         inputNotesOwner,
         outputNotes,
-        outputNotesOwnerMapping,
     },
 }) {
     try {

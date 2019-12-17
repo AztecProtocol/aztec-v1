@@ -1,5 +1,3 @@
-import ACE from '../../build/contracts/ACE.json';
-
 // exluding 0x
 export const ADDRESS_LENGTH = 40;
 

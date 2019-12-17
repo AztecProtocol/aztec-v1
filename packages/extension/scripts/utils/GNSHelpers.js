@@ -1,4 +1,3 @@
-// const axios = require('axios');
 import http from 'http';
 import {
     utils,
@@ -24,24 +23,22 @@ export const defaultFromAccount = async (web3) => {
     }
 };
 
-export const isRelayReady = async (relayUrl) => {
-    return new Promise((resolve, reject) => {
-        http.get(`${relayUrl}/getaddr`, (resp) => {
-            let data = '';
-            resp.on('data', (chunk) => {
-                data += chunk;
-            });
-            resp.on('end', () => {
-                const isReady = (JSON.parse(data) || {}).Ready;
-                log(`Is GSN Relayer ready: ${isReady}`);
-                resolve(isReady);
-            });
-        }).on('error', (err) => {
-            errorLog(`Error: ${err.message}`);
-            reject(err);
+export const isRelayReady = async relayUrl => new Promise((resolve, reject) => {
+    http.get(`${relayUrl}/getaddr`, (resp) => {
+        let data = '';
+        resp.on('data', (chunk) => {
+            data += chunk;
         });
+        resp.on('end', () => {
+            const isReady = (JSON.parse(data) || {}).Ready;
+            log(`Is GSN Relayer ready: ${isReady}`);
+            resolve(isReady);
+        });
+    }).on('error', (err) => {
+        errorLog(`Error: ${err.message}`);
+        reject(err);
     });
-};
+});
 
 export const waitForRelay = async (relayUrl) => {
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));

@@ -1,5 +1,4 @@
 import aztec from 'aztec.js';
-import ApiError from '~client/utils/ApiError';
 
 export default async function proveSwap({
     swap: {
@@ -12,9 +11,6 @@ export default async function proveSwap({
 }) {
     const {
         SwapProof,
-        ProofUtils,
-        metaData,
-        note,
     } = aztec;
 
     // const taker = await validateAccount(takerBid.owner, true);
