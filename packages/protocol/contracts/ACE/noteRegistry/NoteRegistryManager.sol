@@ -9,7 +9,7 @@ import "../../libs/VersioningUtils.sol";
 import "../../interfaces/IERC20Mintable.sol";
 import "./interfaces/NoteRegistryBehaviour.sol";
 import "./interfaces/NoteRegistryFactory.sol";
-import "./proxies/AdminUpgradeabilityProxy.sol";
+import "../../Proxies/AdminUpgradeabilityProxy.sol";
 
 /**
  * @title NoteRegistryManager
