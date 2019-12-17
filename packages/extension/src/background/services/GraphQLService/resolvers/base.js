@@ -1,7 +1,4 @@
 import BigInt from 'apollo-type-bigint';
-import {
-    get,
-} from '~/utils/storage';
 import fetchAsset from './utils/fetchAsset';
 import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
 import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
@@ -11,12 +8,10 @@ const getAsset = async (parentAsset) => {
     if (typeof parentAsset !== 'string') {
         return parentAsset;
     }
-    const networkId = await get('networkId');
     const {
         asset,
     } = await fetchAsset({
         address: parentAsset,
-        networkId,
     });
     return asset;
 };

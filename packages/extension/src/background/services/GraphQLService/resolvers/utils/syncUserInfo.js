@@ -1,6 +1,7 @@
 import {
     permissionError,
 } from '~utils/error';
+import Web3Service from '~/helpers/Web3Service';
 import AuthService from '~background/services/AuthService';
 import NoteService from '~background/services/NoteService';
 import EventService from '~background/services/EventService';
@@ -17,8 +18,10 @@ export default async function syncUserInfo(args, ctx) {
         session: {
             pwDerivedKey,
         },
-        networkId,
     } = ctx;
+    const {
+        networkId,
+    } = Web3Service;
     const decodedKeyStore = decodeKeyStore(keyStore, pwDerivedKey);
     const linkedPublicKey = decodeLinkedPublicKey(decodedKeyStore, pwDerivedKey);
 
@@ -50,7 +53,6 @@ export default async function syncUserInfo(args, ctx) {
     const user = await AuthService.getRegisteredUser(userAddress);
     if (user) {
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-
         EventService.addAccountToSync({
             address: user.address,
             networkId,

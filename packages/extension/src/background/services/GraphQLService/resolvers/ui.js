@@ -1,6 +1,3 @@
-import {
-    get,
-} from '~utils/storage';
 import userModel from '~database/models/user';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
@@ -21,19 +18,16 @@ const uiResolvers = {
             id,
         }),
         asset: async (_, { id }) => {
-            const networkId = await get('networkId');
             const {
                 asset,
             } = await fetchAsset({
                 address: id,
-                networkId,
             });
             return asset;
         },
-        account: async (_, { address }) => {
-            const networkId = await get('networkId');
-            return fetchAztecAccount({ address, networkId });
-        },
+        account: async (_, { address }) => fetchAztecAccount({
+            address,
+        }),
         note: async (_, args) => {
             const {
                 note: noteResponse,

@@ -1,13 +1,13 @@
+import Web3Service from '~/helpers/Web3Service';
 import Account from '~/background/database/models/account';
 import fetchAztecAccountOnChain from './fetchAztecAccountOnChain';
 
 export default async function fetchAztecAccount({
     address,
-    networkId,
 }) {
     let account = await Account.get(
         {
-            networkId,
+            networkId: Web3Service.networkId,
         },
         address,
     );

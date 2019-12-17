@@ -9,6 +9,7 @@ import {
 import {
     argsError,
 } from '~utils/error';
+import Web3Service from '~/helpers/Web3Service';
 import Note from '~background/database/models/note';
 import syncLatestNoteOnChain from './syncLatestNoteOnChain';
 
@@ -23,8 +24,10 @@ export default async function syncNoteInfo(args, ctx) {
 
     const {
         user: { address: userAddress },
-        networkId = 0,
     } = ctx;
+    const {
+        networkId,
+    } = Web3Service;
 
     let note = await Note.get({ networkId }, noteId);
     if (!note) {

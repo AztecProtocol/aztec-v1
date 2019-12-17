@@ -2,7 +2,6 @@ import {
     permissionError,
 } from '~utils/error';
 import AuthService from '~background/services/AuthService';
-import Web3Service from '~/helpers/Web3Service';
 
 const isDaysAgo = (day, numberOfDays) => day < Date.now() - (numberOfDays * 60 * 60 * 24 * 1000);
 
@@ -33,6 +32,5 @@ export default async function validateSession(_, args) {
 
     return {
         session,
-        networkId: Web3Service.networkId,
     };
 }

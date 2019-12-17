@@ -1,4 +1,5 @@
 import NoteService from '~background/services/NoteService';
+import Web3Service from '~/helpers/Web3Service';
 import settings from '~background/utils/settings';
 
 export default async function pickNotesFromBalance(args, ctx) {
@@ -10,11 +11,10 @@ export default async function pickNotesFromBalance(args, ctx) {
     } = args;
     const {
         address: userAddress,
-        networkId,
     } = ctx;
 
     return NoteService.pick(
-        networkId,
+        Web3Service.networkId,
         owner || userAddress,
         assetId,
         amount,
