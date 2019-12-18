@@ -14,25 +14,28 @@ const { hexToNumberString, padLeft } = require('web3-utils');
 
 // @aztec/bn128
 
-const hXHex = '0x10f7463e3bdb09c66bcc67cbd978bb8a2fd8883782d177aefc6d155391b1d1b8';
-const hYHex = '0x12c4f960e11ba5bf0184d3433a98127e90a6fdb2d1f12cdb369a5d3870866627';
+const hXHex = '0x00164b60d0fa1eab5d56d9653aed9dc7f7473acbe61df67134c705638441c4b9';
+const hYHex = '0x2bb1b9b55ffdcf2d7254dfb9be2cb4e908611b4adeb4b838f0442fce79416cf0';
 
 bn128.H_X = new BN(hexToNumberString(hXHex), 10);
 bn128.H_Y = new BN(hexToNumberString(hYHex), 10);
 
 bn128.h = bn128.curve.point(bn128.H_X, bn128.H_Y);
 bn128.t2 = [
-    '0x01cf7cc93bfbf7b2c5f04a3bc9cb8b72bbcf2defcabdceb09860c493bdf1588d',
-    '0x08d554bf59102bbb961ba81107ec71785ef9ce6638e5332b6c1a58b87447d181',
-    '0x204e5d81d86c561f9344ad5f122a625f259996b065b80cbbe74a9ad97b6d7cc2',
-    '0x02cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc',
+    '0x0118c4d5b837bcc2bc89b5b398b5974e9f5944073b32078b7e231fec938883b0',
+    '0x260e01b251f6f1c7e7ff4e580791dee8ea51d87a358e038b4efe30fac09383c1',
+    '0x22febda3c0c0632a56475b4214e5615e11e6dd3f96e6cea2854a87d4dacc5e55',
+    '0x04fc6369f7110fe3d25156c1bb9a72859cf2a04641f99ba4ee413c80da6a5fe4',
 ];
 bn128.CRS = [padLeft(`0x${bn128.H_X.toString(16)}`, 64), padLeft(`0x${bn128.H_Y.toString(16)}`, 64), ...bn128.t2];
 
 // @aztec/dev-utils
-devUtils.constants.K_MAX_TEST = 14336;
-devUtils.constants.SIGNATURES_PER_FILE = 1024;
-devUtils.constants.ZERO_VALUE_NOTE_HASH = '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c';
+devUtils.constants.K_MAX_TEST = 15000;
+devUtils.constants.K_MAX = 15000;
+devUtils.constants.SIGNATURES_PER_FILE = 1000;
+
+// this following constant needs updating
+devUtils.constants.ZERO_VALUE_NOTE_HASH = '0x26d21f105b054b61e8d9680855c3af0633bd7c140b87de95f0ac218046fc71db';
 
 module.exports = {
     CRS: bn128.CRS,
