@@ -76,6 +76,7 @@ bn128.t2 = [
     '0x02cb2a424885c9e412b94c40905b359e3043275cd29f5b557f008cd0a3e0c0dc',
 ];
 bn128.CRS = [`0x${bn128.H_X.toString(16)}`, `0x${bn128.H_Y.toString(16)}`, ...bn128.t2];
+console.log(bn128.CRS);
 
 /**
  * Compress a bn128 point into 256 bits.

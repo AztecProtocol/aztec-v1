@@ -123,15 +123,14 @@ class App extends PureComponent {
 
             if (onChainLinkedPublicKey) {
                 if (localAddress === currentAddress
-                    && localLinkedPublicKey === onChainLinkedPublicKey && !validSession
+                    && localLinkedPublicKey === onChainLinkedPublicKey
                 ) {
                     route = 'account.login';
-                } else if (!validSession) {
+                } else {
                     route = 'account.restore';
                 }
             } else if (validSession
                 && localLinkedPublicKey
-                && localAddress !== currentAddress
             ) {
                 route = 'register.address';
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
