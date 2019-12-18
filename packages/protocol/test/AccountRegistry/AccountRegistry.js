@@ -1,42 +1,29 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
-
-const truffleAssert = require('truffle-assertions');
-const nacl = require('tweetnacl');
-nacl.util = require('tweetnacl-util');
-
+const { signer } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
 const typedData = require('@aztec/typed-data');
+const truffleAssert = require('truffle-assertions');
+const nacl = require('tweetnacl');
+nacl.util = require('tweetnacl-util');
 const { keccak256 } = require('web3-utils');
 
-// ### Artifacts
 const AccountRegistry = artifacts.require('./AccountRegistryBehaviour');
-const { EIP712_DOMAIN } = devUtils.constants.eip712;
 
-const signatureSchema = {
-    types: {
-        AZTECAccount: [{ name: 'account', type: 'address' }, { name: 'linkedPublicKey', type: 'bytes' }],
-        EIP712Domain: EIP712_DOMAIN,
-    },
-    primaryType: 'AZTECAccount',
-};
+const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
 contract('AccountRegistry', (accounts) => {
     describe('Success States', () => {
         let registryContract;
-        let domain;
 
         beforeEach(async () => {
             registryContract = await AccountRegistry.new({ from: accounts[0] });
-            domain = {
-                name: 'AccountRegistry',
-                version: '2',
-                verifyingContract: registryContract.address,
-            };
         });
 
         it('be able to register the extension with a valid signature', async () => {
             const { privateKey, address } = secp256k1.generateAccount();
+
+            const domain = signer.generateAccountRegistryDomainParams(registryContract.address);
             const message = {
                 account: address,
                 linkedPublicKey: keccak256('0x01'),
@@ -44,7 +31,7 @@ contract('AccountRegistry', (accounts) => {
 
             const encodedTypedData = typedData.encodeTypedData({
                 domain,
-                ...signatureSchema,
+                ...ACCOUNT_REGISTRY_SIGNATURE,
                 message,
             });
 
@@ -68,26 +55,22 @@ contract('AccountRegistry', (accounts) => {
 
     describe('Failure States', () => {
         let registryContract;
-        let domain;
 
         beforeEach(async () => {
             registryContract = await AccountRegistry.new({ from: accounts[0] });
-            domain = {
-                name: 'AccountRegistry',
-                version: '2',
-                verifyingContract: registryContract.address,
-            };
         });
 
         it('should fail to register the extension if the signature does not match the account', async () => {
             const { privateKey, address } = secp256k1.generateAccount();
+
+            const domain = signer.generateAccountRegistryDomainParams(registryContract.address);
             const message = {
                 account: address,
                 linkedPublicKey: keccak256('0x01'),
             };
             const encodedTypedData = typedData.encodeTypedData({
                 domain,
-                ...signatureSchema,
+                ...ACCOUNT_REGISTRY_SIGNATURE,
                 message,
             });
 

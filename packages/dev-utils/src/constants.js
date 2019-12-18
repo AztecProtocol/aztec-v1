@@ -97,6 +97,10 @@ constants.eip712 = {
         name: 'AZTEC_CRYPTOGRAPHY_ENGINE',
         version: '1',
     },
+    ACCOUNT_REGISTRY_DOMAIN_PARAMS: {
+        name: 'AccountRegistry',
+        version: '2',
+    },
     AZTEC_RINKEBY_DOMAIN_PARAMS: {
         name: 'AZTEC_RINKEBY_DOMAIN',
         version: '1',
@@ -109,6 +113,16 @@ constants.eip712 = {
     },
     EIP712_DOMAIN,
     EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
+    ACCOUNT_REGISTRY_SIGNATURE: {
+        types: {
+            AZTECAccount: [
+                { name: 'account', type: 'address' },
+                { name: 'linkedPublicKey', type: 'bytes' },
+            ],
+            EIP712Domain: EIP712_DOMAIN,
+        },
+        primaryType: 'AZTECAccount',
+    },
     JOIN_SPLIT_SIGNATURE: {
         types: {
             JoinSplitSignature: [

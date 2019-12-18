@@ -27,6 +27,19 @@ signer.generateACEDomainParams = (verifyingContract, domain = constants.eip712.A
 };
 
 /**
+ * Generate EIP712 domain parameters for AccountRegistryBehaviour.sol
+ * @param {string} verifyingContract - address of target contract
+ * @returns {Object} EIP712 domain type object
+ */
+signer.generateAccountRegistryDomainParams = (verifyingContract, domain = constants.eip712.ACCOUNT_REGISTRY_DOMAIN_PARAMS) => {
+    return {
+        name: domain.name,
+        version: domain.version,
+        verifyingContract,
+    }
+};
+
+/**
  * Generate EIP712 domain parameters for ZkAsset.sol
  * @method generateZKAssetDomainParams
  * @param {string} verifyingContract address of target contract
