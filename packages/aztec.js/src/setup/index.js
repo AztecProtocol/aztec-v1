@@ -1,11 +1,4 @@
 /**
- * Read in points from the trusted setup points database.
- * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
- *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
- *   We will be launching our multiparty computation trusted setup protocol shortly, where multiple entities
- *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
- *   If you wish to participate please let us know at hello@aztecprotocol.com
- *
  * @module setup
  */
 
@@ -17,7 +10,6 @@ const fetch = require('cross-fetch');
 const setup = {
     POINTS_DB_URL: 'https://aztec-ignition.s3-eu-west-2.amazonaws.com/MAIN%20IGNITION/range_proofs/',
 };
-
 
 /**
  * Decompress a 256-bit representation of a bn128 G1 element.
@@ -80,7 +72,7 @@ setup.fetchPoint = async (inputValue) => {
     const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
 
     try {
-        const pointURL = `${setup.POINTS_DB_URL}data${(fileNum - 1) * constants.SIGNATURES_PER_FILE}.dat`
+        const pointURL = `${setup.POINTS_DB_URL}data${(fileNum - 1) * constants.SIGNATURES_PER_FILE}.dat`;
         const res = await fetch(pointURL);
         if (res.status === 404) {
             throw new Error('point not found');

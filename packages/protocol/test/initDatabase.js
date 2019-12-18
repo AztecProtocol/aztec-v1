@@ -2,8 +2,7 @@
  * @module initDatabase
  *
  * @dev This initialises the local trusted setup database, used for testing purposes.
- * It contains 14,000 points - representing ~1.4% of the original in house trusted
- * setup.
+ * It contains 16,000 points
  */
 const { setup } = require('aztec.js');
 const { constants } = require('@aztec/dev-utils');
