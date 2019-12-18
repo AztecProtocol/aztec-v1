@@ -2,7 +2,9 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
+import "./interfaces/IAccountRegistryBehaviour.sol";
 import "../Proxies/AdminUpgradeabilityProxy.sol";
+import "../Proxies/BaseAdminUpgradeabilityProxy.sol";
 import "../interfaces/ProxyAdmin.sol";
 
 /**
@@ -14,7 +16,10 @@ import "../interfaces/ProxyAdmin.sol";
  */
 contract AccountRegistryManager is Ownable {
 
-    address public deployedProxy;
+    IAccountRegistryBehaviour public behaviour;
+    address public accountRegistry;
+    address public proxy;
+
     event CreateProxy(address proxyAddress, address proxyAdmin);
     event UpgradeAccountRegistry(address proxyAddress, address newBehaviourAddress);
 
@@ -27,26 +32,39 @@ contract AccountRegistryManager is Ownable {
 
         bytes memory emptyDataToSkipInitialisation = bytes('');
         address admin = address(this);
-        address proxy = address(new AdminUpgradeabilityProxy(
+
+        address proxyAddress = address(new AdminUpgradeabilityProxy(
             initialBehaviourAddress,
             admin,
             emptyDataToSkipInitialisation
         ));
-        deployedProxy = proxy;
+    
+        proxy = proxyAddress;
+        behaviour = IAccountRegistryBehaviour(proxyAddress);
+        accountRegistry = initialBehaviourAddress;
 
-        emit CreateProxy(proxy, admin);
+        emit CreateProxy(proxyAddress, admin);
     }
     
+
+    /**
+     * @dev Get the current behaviour contract address
+     */
+    function getImplementation(address payable _proxyAddress) public returns (address implementation) {
+        implementation = BaseAdminUpgradeabilityProxy(_proxyAddress).implementation();
+    }
+
     /**
      * @dev Upgrade the account registry to a new behaviour implementation
-     *
-     */
+    */
     function upgradeAccountRegistry(address proxyAddress, address newBehaviourAddress) public onlyOwner {
         require(newBehaviourAddress != address(0x0), 'new behaviour address can not be 0x0');
         require(proxyAddress != address(0x0), 'proxyAddress can not be 0x0');
         require(ProxyAdmin(proxyAddress).admin() == address(this), 'this is not the admin of the proxy');
 
         ProxyAdmin(proxyAddress).upgradeTo(newBehaviourAddress);
+        
+        accountRegistry = newBehaviourAddress;
         emit UpgradeAccountRegistry(proxyAddress, newBehaviourAddress);
     }
 }
