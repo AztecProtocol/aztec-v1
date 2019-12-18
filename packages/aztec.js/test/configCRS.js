@@ -30,8 +30,7 @@ bn128.t2 = [
 bn128.CRS = [padLeft(`0x${bn128.H_X.toString(16)}`, 64), padLeft(`0x${bn128.H_Y.toString(16)}`, 64), ...bn128.t2];
 
 // @aztec/dev-utils
-devUtils.constants.K_MAX_TEST = 15000;
-devUtils.constants.K_MAX = 15000;
+devUtils.constants.K_MAX_TEST = 16000;
 devUtils.constants.SIGNATURES_PER_FILE = 1000;
 devUtils.constants.ZERO_VALUE_NOTE_HASH = '0x26d21f105b054b61e8d9680855c3af0633bd7c140b87de95f0ac218046fc71db';
 

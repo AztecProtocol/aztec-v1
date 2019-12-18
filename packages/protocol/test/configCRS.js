@@ -30,8 +30,7 @@ bn128.t2 = [
 bn128.CRS = [padLeft(`0x${bn128.H_X.toString(16)}`, 64), padLeft(`0x${bn128.H_Y.toString(16)}`, 64), ...bn128.t2];
 
 // @aztec/dev-utils
-devUtils.constants.K_MAX_TEST = 15000;
-devUtils.constants.K_MAX = 15000;
+devUtils.constants.K_MAX_TEST = 16000;
 devUtils.constants.SIGNATURES_PER_FILE = 1000;
 
 // this following constant needs updating
