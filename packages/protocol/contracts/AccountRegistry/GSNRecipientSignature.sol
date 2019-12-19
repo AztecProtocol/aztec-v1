@@ -4,6 +4,7 @@ import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
 
+import "../libs/Modifiers.sol";
 
 /**
  * @dev A xref:ROOT:gsn-strategies.adoc#gsn-strategies[GSN strategy] that allows relayed 
@@ -12,7 +13,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.so
  * off-chain. Note that nothing is charged to the user in this scheme. Thus, the server should make
  * sure to account for this in their economic and threat model.
  */
-contract GSNRecipientSignature is Initializable, GSNRecipient {
+contract GSNRecipientSignature is Initializable, GSNRecipient, Modifiers {
     using ECDSA for bytes32;
 
     uint256 constant private RELAYED_CALL_REJECTED = 11;
@@ -26,8 +27,7 @@ contract GSNRecipientSignature is Initializable, GSNRecipient {
     /**
      * @dev Sets the trusted signer that is going to be producing signatures to approve relayed calls.
      */
-    function initialize(address trustedSigner) public initializer {
-        require(trustedSigner != address(0), "GSNRecipientSignature: trusted signer is the zero address");
+    function initialize(address trustedSigner) public initializer checkZeroAddress(trustedSigner) {
         _trustedSigner = trustedSigner;
 
         GSNRecipient.initialize();

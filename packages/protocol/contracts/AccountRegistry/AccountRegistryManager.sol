@@ -7,6 +7,7 @@ import "./interfaces/IAccountRegistryBehaviour.sol";
 import "../Proxies/AdminUpgradeabilityProxy.sol";
 import "../Proxies/BaseAdminUpgradeabilityProxy.sol";
 import "../interfaces/ProxyAdmin.sol";
+import "../libs/Modifiers.sol";
 
 /**
  * @title AccountRegistryManager
@@ -16,7 +17,7 @@ import "../interfaces/ProxyAdmin.sol";
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  */
-contract AccountRegistryManager is Ownable {
+contract AccountRegistryManager is Ownable, Modifiers {
     using SafeMath for uint256;
 
     IAccountRegistryBehaviour public behaviour;
@@ -30,18 +31,20 @@ contract AccountRegistryManager is Ownable {
 
     /**
      * @dev Deploy the proxy contract. This stores all state for the AccountRegistry contract system
+     * @param initialBehaviourAddress - address of the behaviour contract to be linked to be initialised
+     * when the proxy is deployed 
+     * @param aceAddress - address of ACE
+     * @param trustedAddress - address that is being trusted to produce signatures approving relayed calls
      */
     function deployProxy(
         address initialBehaviourAddress,
-        address _aceAddress,
-        address _trustedAddress
-    ) public onlyOwner {
-        require(initialBehaviourAddress != address(0x0), 'behaviour address can not be 0x0');
-
+        address aceAddress,
+        address trustedAddress
+    ) public onlyOwner checkZeroAddress(initialBehaviourAddress) {
         bytes memory initialiseData = abi.encodeWithSignature(
             "initialize(address,address)",
-            _aceAddress,
-            _trustedAddress
+            aceAddress,
+            trustedAddress
         );
         address admin = address(this);
 
@@ -62,9 +65,11 @@ contract AccountRegistryManager is Ownable {
 
     /**
      * @dev Get the current behaviour contract address
+     * @param proxyAddress - address of the relevant proxy
+     * @return implementation - address of the behaviour contract
      */
-    function getImplementation(address payable _proxyAddress) public returns (address implementation) {
-        implementation = BaseAdminUpgradeabilityProxy(_proxyAddress).implementation();
+    function getImplementation(address payable proxyAddress) public returns (address implementation) {
+        implementation = BaseAdminUpgradeabilityProxy(proxyAddress).implementation();
     }
 
     /**
@@ -77,10 +82,13 @@ contract AccountRegistryManager is Ownable {
 
     /**
      * @dev Upgrade the account registry to a new behaviour implementation
+     * @param proxyAddress - address of the proxy contract
+     * @param newBehaviourAddress - address of the behaviour contract to be upgraded to
     */
-    function upgradeAccountRegistry(address proxyAddress, address newBehaviourAddress) public onlyOwner {
-        require(newBehaviourAddress != address(0x0), 'new behaviour address can not be 0x0');
-        require(proxyAddress != address(0x0), 'proxyAddress can not be 0x0');
+    function upgradeAccountRegistry(
+        address proxyAddress,
+        address newBehaviourAddress
+    ) public onlyOwner checkZeroAddress(newBehaviourAddress) checkZeroAddress(proxyAddress)  {
         require(ProxyAdmin(proxyAddress).admin() == address(this), 'this is not the admin of the proxy');
         
         uint256 newBehaviourEpoch = IAccountRegistryBehaviour(newBehaviourAddress).epoch();
