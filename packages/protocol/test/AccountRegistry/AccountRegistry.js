@@ -8,7 +8,7 @@ const nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 const { keccak256 } = require('web3-utils');
 
-const AccountRegistry = artifacts.require('./BehaviourBase');
+const AccountRegistry = artifacts.require('./AccountRegistry/epochs/1/Behaviour1');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 

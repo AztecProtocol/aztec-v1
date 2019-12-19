@@ -3,13 +3,15 @@ pragma solidity >=0.5.0 <0.6.0;
 import "../../AccountRegistry/epochs/1/Behaviour1.sol";
 
 /**
-  * @title TestBehaviour
+  * @title TestBehaviourEpoch
   * @author AZTEC
-  * @dev Deploys a TestBehaviour
+  * @dev Deploys a TestBehaviourEpoch. This deliberately has an incorrect epoch number - 1, rather than the 
+  * correct value of 2. This is done to assist testing of the account registry versioning system.
+  *
   * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract TestBehaviour is Behaviour1 {
-    uint256 public epoch = 2;
+contract TestBehaviourEpoch is Behaviour1 {
+    uint256 public epoch = 0;
 
     function newFeature() pure public returns (string memory result) {
         result = 'newFeature';
