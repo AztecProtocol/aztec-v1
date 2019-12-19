@@ -19,7 +19,7 @@ contract('Account registry manager', async (accounts) => {
     const opts = { from: owner };
 
     const aceAddress = randomHex(20);
-    const trustedAddress = randomHex(20);
+    const trustedGSNSignerAddress = randomHex(20);
 
     describe('Success states', async () => {
         describe('Initialisation', async () => {
@@ -38,7 +38,7 @@ contract('Account registry manager', async (accounts) => {
 
             it('should deploy the Proxy contract', async () => {
                 const initialBehaviourAddress = behaviour.address;
-                const { receipt } = await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, opts);
+                const { receipt } = await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress, opts);
 
                 const setProxyAddress = await manager.proxy.call();
                 const event = receipt.logs.find((l) => l.event === 'CreateProxy');
@@ -48,7 +48,7 @@ contract('Account registry manager', async (accounts) => {
 
             it('should set Proxy admin as Manager contract on deploy', async () => {
                 const initialBehaviourAddress = behaviour.address;
-                const { receipt } = await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress);
+                const { receipt } = await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress);
                 const managerAddress = manager.address;
                 const event = receipt.logs.find((l) => l.event === 'CreateProxy');
                 expect(event.args.proxyAdmin).to.equal(managerAddress);
@@ -59,7 +59,7 @@ contract('Account registry manager', async (accounts) => {
                 expect(preDeployEpoch.toString()).to.equal('0');
 
                 const initialBehaviourAddress = behaviour.address;
-                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress);
+                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress);
 
                 const postDeployEpoch = await manager.latestEpoch();
                 expect(postDeployEpoch.toString()).to.equal('1');
@@ -75,7 +75,7 @@ contract('Account registry manager', async (accounts) => {
                 manager = await AccountRegistryManager.new(opts);
 
                 const initialBehaviourAddress = behaviour.address;
-                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, opts);
+                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress, opts);
             });
 
             it('should successfully register account mapping', async () => {
@@ -191,7 +191,7 @@ contract('Account registry manager', async (accounts) => {
             it('should not deploy proxy if not owner', async () => {
                 const initialBehaviourAddress = behaviour.address;
                 await truffleAssert.reverts(
-                    manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, { from: fakeOwner }),
+                    manager.deployProxy(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress, { from: fakeOwner }),
                     'Ownable: caller is not the owner',
                 );
             });
@@ -206,7 +206,7 @@ contract('Account registry manager', async (accounts) => {
                 manager = await AccountRegistryManager.new(opts);
 
                 const initialBehaviourAddress = behaviour.address;
-                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, opts);
+                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress, opts);
             });
 
             it('should not perform upgrade if not owner', async () => {
@@ -225,7 +225,7 @@ contract('Account registry manager', async (accounts) => {
 
                 await truffleAssert.reverts(
                     manager.upgradeAccountRegistry(preUpgradeProxy, testBehaviourEpoch.address),
-                    'expected new registry to be of epoch equal or greater than existing registry',
+                    'expected new registry to be of epoch greater than existing registry',
                 );
             });
         });

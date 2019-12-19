@@ -34,23 +34,24 @@ contract AccountRegistryManager is Ownable, Modifiers {
      * @param initialBehaviourAddress - address of the behaviour contract to be linked to be initialised
      * when the proxy is deployed 
      * @param aceAddress - address of ACE
-     * @param trustedAddress - address that is being trusted to produce signatures approving relayed calls
+     * @param trustedGSNSignerAddress - address that is being trusted to produce signatures to approve 
+     * relayed GSN calls
      */
     function deployProxy(
         address initialBehaviourAddress,
         address aceAddress,
-        address trustedAddress
+        address trustedGSNSignerAddress
     ) public onlyOwner checkZeroAddress(initialBehaviourAddress) {
         bytes memory initialiseData = abi.encodeWithSignature(
             "initialize(address,address)",
             aceAddress,
-            trustedAddress
+            trustedGSNSignerAddress
         );
-        address admin = address(this);
+        address adminAddress = address(this);
 
         address proxyAddress = address(new AdminUpgradeabilityProxy(
             initialBehaviourAddress,
-            admin,
+            adminAddress,
             initialiseData 
         ));
     
@@ -59,7 +60,7 @@ contract AccountRegistryManager is Ownable, Modifiers {
         accountRegistry = initialBehaviourAddress;
 
         incrementLatestEpoch();
-        emit CreateProxy(proxyAddress, admin);
+        emit CreateProxy(proxyAddress, adminAddress);
     }
     
 
@@ -93,14 +94,14 @@ contract AccountRegistryManager is Ownable, Modifiers {
         
         uint256 newBehaviourEpoch = IAccountRegistryBehaviour(newBehaviourAddress).epoch();
         require(
-            newBehaviourEpoch >= latestEpoch, 
-            'expected new registry to be of epoch equal or greater than existing registry'
+            newBehaviourEpoch > latestEpoch, 
+            'expected new registry to be of epoch greater than existing registry'
         );
 
         ProxyAdmin(proxyAddress).upgradeTo(newBehaviourAddress);
-        incrementLatestEpoch();
         
         accountRegistry = newBehaviourAddress;
+        incrementLatestEpoch();
         emit UpgradeAccountRegistry(proxyAddress, newBehaviourAddress);
     }
 }
