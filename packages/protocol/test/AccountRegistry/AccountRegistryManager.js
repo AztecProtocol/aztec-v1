@@ -8,11 +8,9 @@ const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
 const Behaviour1 = artifacts.require('./AccountRegistry/epochs/1/Behaviour1');
-const Behaviour2 = artifacts.require('./AccountRegistry/epochs/2/Behaviour2');
 
 const TestBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
 const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
-const TestBehaviourFunds = artifacts.require('./test/AccountRegistry/TestBehaviourFunds');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
