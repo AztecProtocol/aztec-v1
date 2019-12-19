@@ -27,16 +27,20 @@ contract AccountRegistryManager is Ownable {
      * @dev Deploy the proxy contract. This stores all state for the AccountRegistry contract system
      *
      */
-    function deployProxy(address initialBehaviourAddress) public onlyOwner {
+    function deployProxy(address initialBehaviourAddress, address _ace, address _trustedAddress) public onlyOwner {
         require(initialBehaviourAddress != address(0x0), 'behaviour address can not be 0x0');
 
-        bytes memory emptyDataToSkipInitialisation = bytes('');
+        bytes memory initialiseData = abi.encodeWithSignature(
+            "initialize(address,address)",
+            _ace,
+            _trustedAddress
+        );
         address admin = address(this);
 
         address proxyAddress = address(new AdminUpgradeabilityProxy(
             initialBehaviourAddress,
             admin,
-            emptyDataToSkipInitialisation
+            initialiseData 
         ));
     
         proxy = proxyAddress;
@@ -57,11 +61,11 @@ contract AccountRegistryManager is Ownable {
     /**
      * @dev Upgrade the account registry to a new behaviour implementation
     */
-    function upgradeAccountRegistry(address proxyAddress, address newBehaviourAddress) public onlyOwner {
+    function upgradeAccountRegistry(address proxyAddress, address newBehaviourAddress, address _ace, address _trustedAddress) public onlyOwner {
         require(newBehaviourAddress != address(0x0), 'new behaviour address can not be 0x0');
         require(proxyAddress != address(0x0), 'proxyAddress can not be 0x0');
         require(ProxyAdmin(proxyAddress).admin() == address(this), 'this is not the admin of the proxy');
-
+        
         ProxyAdmin(proxyAddress).upgradeTo(newBehaviourAddress);
         
         accountRegistry = newBehaviourAddress;

@@ -1,22 +1,23 @@
 pragma solidity >=0.5.0 <0.6.0;
+
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../interfaces/IZkAsset.sol";
-import "./AccountRegistryBehaviour.sol";
+import "./base/BehaviourBase.sol";
 import "./TransactionRelayer.sol";
 import "./GSNRecipientTimestampSignature.sol";
 
 /**
- * @title AZTECAccountRegistryGSN implementation
+ * @title AccountRegistryBehaviourGSN implementation
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract AccountRegistryBehaviourGSN is AccountRegistryBehaviour, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
+contract BehaviourGSN is BehaviourBase, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
+
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
-    constructor(
-        address _ace,
-        address _trustedAddress
-    ) public TransactionRelayer(_ace) {
+    function initialize(address _ace, address _trustedAddress) public {
+        TransactionRelayer.initialize(_ace);
         GSNRecipient.initialize();
         GSNRecipientTimestampSignature.initialize(_trustedAddress);
     }

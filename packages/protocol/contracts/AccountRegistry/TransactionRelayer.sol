@@ -1,18 +1,18 @@
 pragma solidity >=0.5.0 <0.6.0;
+
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../interfaces/IAZTEC.sol";
 import "../ACE/ACE.sol" as ACEModule;
 import "../libs/NoteUtils.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IZkAsset.sol";
 
-contract TransactionRelayer is IAZTEC {
+contract TransactionRelayer is IAZTEC, Initializable {
     using NoteUtils for bytes;
 
     ACEModule.ACE ace;
 
-    constructor(
-        address _ace
-    ) public {
+    function initialize(address _ace) public initializer {
         ace = ACEModule.ACE(_ace);
     }
 
