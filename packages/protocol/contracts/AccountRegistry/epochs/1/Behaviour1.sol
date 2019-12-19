@@ -24,10 +24,10 @@ contract Behaviour1 is BehaviourBase1, TransactionRelayer, GSNRecipient, GSNReci
     /**
     * @dev Initialize the contract and set up it's state. An initialize function rather than a constructor
     * is used to make this compatible with the upgradeability pattern
-    * @param aceAddress - address of the AZTEC Cryptography Engine
-    * @param trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
+    * @param _aceAddress - address of the AZTEC Cryptography Engine
+    * @param _trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
     */
-    function initialize(address _aceAddress, address _trustedGSNSignerAddress) public {
+    function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
         TransactionRelayer.initialize(_aceAddress);
         GSNRecipient.initialize();
         GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
