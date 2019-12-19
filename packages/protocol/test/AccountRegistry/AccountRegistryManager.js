@@ -7,8 +7,9 @@ const truffleAssert = require('truffle-assertions');
 const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
-const Behaviour = artifacts.require('./AccountRegistry/AccountRegistryBehaviour');
-const BehaviourGSN = artifacts.require('./AccountRegistry/AccountRegistryBehaviourGSN');
+const Behaviour1 = artifacts.require('./AccountRegistry/epochs/1/Behaviour1');
+const NewBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
+const IncorrectEpochBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
@@ -16,13 +17,16 @@ contract('Account registry manager', async (accounts) => {
     const owner = accounts[0];
     const opts = { from: owner };
 
+    const aceAddress = randomHex(20);
+    const trustedAddress = randomHex(20);
+
     describe('Success states', async () => {
         describe('Initialisation', async () => {
             let behaviour;
             let manager;
 
             beforeEach(async () => {
-                behaviour = await Behaviour.new(opts);
+                behaviour = await Behaviour1.new();
                 manager = await AccountRegistryManager.new(opts);
             });
 
@@ -33,7 +37,7 @@ contract('Account registry manager', async (accounts) => {
 
             it('should deploy the Proxy contract', async () => {
                 const initialBehaviourAddress = behaviour.address;
-                const { receipt } = await manager.deployProxy(initialBehaviourAddress, opts);
+                const { receipt } = await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, opts);
 
                 const setProxyAddress = await manager.proxy.call();
                 const event = receipt.logs.find((l) => l.event === 'CreateProxy');
@@ -43,10 +47,21 @@ contract('Account registry manager', async (accounts) => {
 
             it('should set Proxy admin as Manager contract on deploy', async () => {
                 const initialBehaviourAddress = behaviour.address;
-                const { receipt } = await manager.deployProxy(initialBehaviourAddress);
+                const { receipt } = await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress);
                 const managerAddress = manager.address;
                 const event = receipt.logs.find((l) => l.event === 'CreateProxy');
                 expect(event.args.proxyAdmin).to.equal(managerAddress);
+            });
+
+            it('should update epoch number on proxy deploy', async () => {
+                const preDeployEpoch = await manager.latestEpoch();
+                expect(preDeployEpoch.toString()).to.equal('0');
+
+                const initialBehaviourAddress = behaviour.address;
+                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress);
+
+                const postDeployEpoch = await manager.latestEpoch();
+                expect(postDeployEpoch.toString()).to.equal('1');
             });
         });
 
@@ -55,11 +70,11 @@ contract('Account registry manager', async (accounts) => {
             let manager;
 
             beforeEach(async () => {
-                behaviour = await Behaviour.new(opts);
+                behaviour = await Behaviour1.new();
                 manager = await AccountRegistryManager.new(opts);
 
                 const initialBehaviourAddress = behaviour.address;
-                await manager.deployProxy(initialBehaviourAddress);
+                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, opts);
             });
 
             it('should successfully register account mapping', async () => {
@@ -87,34 +102,30 @@ contract('Account registry manager', async (accounts) => {
                 const v = signature[0].slice(-2);
                 const sig = r + s + v;
 
-                await behaviour.registerAZTECExtension(
-                    address,
-                    linkedPublicKey,
-                    spendingPublicKey,
-                    sig,
-                );
+                await behaviour.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
 
                 const storedLinkedPublicKey = await behaviour.accountMapping.call(address);
-                expect(storedLinkedPublicKey).to.equal(linkedPublicKey)
+                expect(storedLinkedPublicKey).to.equal(linkedPublicKey);
             });
 
             it('should upgrade to a new Account Registry behaviour contract', async () => {
-                const newBehaviour = await BehaviourGSN.new(randomHex(20), randomHex(20), opts);
-
+                const newBehaviour = await NewBehaviour.new();
                 const existingProxy = await manager.proxy.call();
+
                 await manager.upgradeAccountRegistry(existingProxy, newBehaviour.address);
 
-                // upgrade should not change the proxy
                 const postUpgradeProxy = await manager.proxy.call();
                 expect(postUpgradeProxy).to.equal(existingProxy);
 
-                // should have upgraded to new behaviour
                 const newBehaviourAddress = await manager.getImplementation.call(existingProxy);
                 const expectedNewBehaviourAddress = newBehaviour.address;
                 expect(newBehaviourAddress).to.equal(expectedNewBehaviourAddress);
+
+                const isNewFeatureImplemented = 'newFeature()' in newBehaviour.methods;
+                expect(isNewFeatureImplemented).to.equal(true);
             });
 
-            it.only('should keep state after upgrade', async () => {
+            it('should keep state after upgrade', async () => {
                 // register an account with the extension, which will be put in storage under accountMapping
                 const { privateKey, address } = secp256k1.generateAccount();
                 const linkedPublicKey = keccak256('0x01');
@@ -139,20 +150,27 @@ contract('Account registry manager', async (accounts) => {
                 const v = signature[0].slice(-2);
                 const sig = r + s + v;
 
-                await behaviour.registerAZTECExtension(
-                    address,
-                    linkedPublicKey,
-                    spendingPublicKey,
-                    sig,
-                );
+                await behaviour.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
 
                 // perform upgrade, and confirm that registered linkedPublicKey is still present in storage
-                const newBehaviour = await BehaviourGSN.new(randomHex(20), randomHex(20), opts);
+                const newBehaviour = await NewBehaviour.new();
                 const preUpgradeProxy = await manager.proxy.call();
                 await manager.upgradeAccountRegistry(preUpgradeProxy, newBehaviour.address);
 
                 const storedLinkedPublicKey = await behaviour.accountMapping.call(address);
                 expect(storedLinkedPublicKey).to.equal(linkedPublicKey);
+            });
+
+            it('should update latestEpoch number during upgrade', async () => {
+                const preUpgradeEpoch = await manager.latestEpoch();
+                expect(preUpgradeEpoch.toString()).to.equal('1');
+
+                const newBehaviour = await NewBehaviour.new();
+                const preUpgradeProxy = await manager.proxy.call();
+                await manager.upgradeAccountRegistry(preUpgradeProxy, newBehaviour.address);
+
+                const postUpgradeEpoch = await manager.latestEpoch();
+                expect(postUpgradeEpoch.toString()).to.equal('2');
             });
         });
     });
@@ -165,14 +183,14 @@ contract('Account registry manager', async (accounts) => {
             let manager;
 
             beforeEach(async () => {
-                behaviour = await Behaviour.new(opts);
+                behaviour = await Behaviour1.new();
                 manager = await AccountRegistryManager.new(opts);
             });
 
             it('should not deploy proxy if not owner', async () => {
                 const initialBehaviourAddress = behaviour.address;
                 await truffleAssert.reverts(
-                    manager.deployProxy(initialBehaviourAddress, { from: fakeOwner }),
+                    manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, { from: fakeOwner }),
                     'Ownable: caller is not the owner',
                 );
             });
@@ -183,20 +201,30 @@ contract('Account registry manager', async (accounts) => {
             let manager;
 
             beforeEach(async () => {
-                behaviour = await Behaviour.new(opts);
+                behaviour = await Behaviour1.new();
                 manager = await AccountRegistryManager.new(opts);
 
                 const initialBehaviourAddress = behaviour.address;
-                await manager.deployProxy(initialBehaviourAddress);
+                await manager.deployProxy(initialBehaviourAddress, aceAddress, trustedAddress, opts);
             });
 
             it('should not perform upgrade if not owner', async () => {
-                const newBehaviour = await BehaviourGSN.new(randomHex(20), randomHex(20), opts);
+                const newBehaviour = await NewBehaviour.new();
                 const preUpgradeProxy = await manager.proxy.call();
 
                 await truffleAssert.reverts(
                     manager.upgradeAccountRegistry(preUpgradeProxy, newBehaviour.address, { from: fakeOwner }),
                     'Ownable: caller is not the owner',
+                );
+            });
+
+            it('should not upgrade to a behaviour with a lower epoch than manager latest epoch', async () => {
+                const incorrectEpochBehaviour = await IncorrectEpochBehaviour.new();
+                const preUpgradeProxy = await manager.proxy.call();
+
+                await truffleAssert.reverts(
+                    await manager.upgradeAccountRegistry(preUpgradeProxy, incorrectEpochBehaviour.address),
+                    'expected new registry to be of epoch equal or greater than existing registry',
                 );
             });
         });

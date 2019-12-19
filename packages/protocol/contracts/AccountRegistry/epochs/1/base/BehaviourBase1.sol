@@ -1,8 +1,8 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../libs/LibEIP712.sol";
+import "../../../../libs/LibEIP712.sol";
 
-contract BehaviourBase is LibEIP712 {
+contract BehaviourBase1 is LibEIP712 {
     event RegisterExtension(
         address indexed account,
         bytes linkedPublicKey,
