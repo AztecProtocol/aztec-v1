@@ -1,4 +1,4 @@
-/* global artifacts, expect, contract, beforeEach, web3, it:true */
+/* global artifacts, expect, contract, beforeEach, it:true */
 const { signer } = require('aztec.js');
 const devUtils = require('@aztec/dev-utils');
 const secp256k1 = require('@aztec/secp256k1');
@@ -8,8 +8,11 @@ const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
 const Behaviour1 = artifacts.require('./AccountRegistry/epochs/1/Behaviour1');
-const NewBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
-const IncorrectEpochBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
+const Behaviour2 = artifacts.require('./AccountRegistry/epochs/2/Behaviour2');
+
+const TestBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
+const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
+const TestBehaviourFunds = artifacts.require('./test/AccountRegistry/TestBehaviourFunds');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
@@ -109,19 +112,19 @@ contract('Account registry manager', async (accounts) => {
             });
 
             it('should upgrade to a new Account Registry behaviour contract', async () => {
-                const newBehaviour = await NewBehaviour.new();
+                const testBehaviour = await TestBehaviour.new();
                 const existingProxy = await manager.proxy.call();
 
-                await manager.upgradeAccountRegistry(existingProxy, newBehaviour.address);
+                await manager.upgradeAccountRegistry(existingProxy, testBehaviour.address);
 
                 const postUpgradeProxy = await manager.proxy.call();
                 expect(postUpgradeProxy).to.equal(existingProxy);
 
                 const newBehaviourAddress = await manager.getImplementation.call(existingProxy);
-                const expectedNewBehaviourAddress = newBehaviour.address;
+                const expectedNewBehaviourAddress = testBehaviour.address;
                 expect(newBehaviourAddress).to.equal(expectedNewBehaviourAddress);
 
-                const isNewFeatureImplemented = 'newFeature()' in newBehaviour.methods;
+                const isNewFeatureImplemented = 'newFeature()' in testBehaviour.methods;
                 expect(isNewFeatureImplemented).to.equal(true);
             });
 
@@ -153,9 +156,9 @@ contract('Account registry manager', async (accounts) => {
                 await behaviour.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
 
                 // perform upgrade, and confirm that registered linkedPublicKey is still present in storage
-                const newBehaviour = await NewBehaviour.new();
+                const testBehaviour = await TestBehaviour.new();
                 const preUpgradeProxy = await manager.proxy.call();
-                await manager.upgradeAccountRegistry(preUpgradeProxy, newBehaviour.address);
+                await manager.upgradeAccountRegistry(preUpgradeProxy, testBehaviour.address);
 
                 const storedLinkedPublicKey = await behaviour.accountMapping.call(address);
                 expect(storedLinkedPublicKey).to.equal(linkedPublicKey);
@@ -165,9 +168,9 @@ contract('Account registry manager', async (accounts) => {
                 const preUpgradeEpoch = await manager.latestEpoch();
                 expect(preUpgradeEpoch.toString()).to.equal('1');
 
-                const newBehaviour = await NewBehaviour.new();
+                const testBehaviour = await TestBehaviour.new();
                 const preUpgradeProxy = await manager.proxy.call();
-                await manager.upgradeAccountRegistry(preUpgradeProxy, newBehaviour.address);
+                await manager.upgradeAccountRegistry(preUpgradeProxy, testBehaviour.address);
 
                 const postUpgradeEpoch = await manager.latestEpoch();
                 expect(postUpgradeEpoch.toString()).to.equal('2');
@@ -209,21 +212,21 @@ contract('Account registry manager', async (accounts) => {
             });
 
             it('should not perform upgrade if not owner', async () => {
-                const newBehaviour = await NewBehaviour.new();
+                const testBehaviour = await TestBehaviour.new();
                 const preUpgradeProxy = await manager.proxy.call();
 
                 await truffleAssert.reverts(
-                    manager.upgradeAccountRegistry(preUpgradeProxy, newBehaviour.address, { from: fakeOwner }),
+                    manager.upgradeAccountRegistry(preUpgradeProxy, testBehaviour.address, { from: fakeOwner }),
                     'Ownable: caller is not the owner',
                 );
             });
 
             it('should not upgrade to a behaviour with a lower epoch than manager latest epoch', async () => {
-                const incorrectEpochBehaviour = await IncorrectEpochBehaviour.new();
+                const testBehaviourEpoch = await TestBehaviourEpoch.new();
                 const preUpgradeProxy = await manager.proxy.call();
 
                 await truffleAssert.reverts(
-                    await manager.upgradeAccountRegistry(preUpgradeProxy, incorrectEpochBehaviour.address),
+                    manager.upgradeAccountRegistry(preUpgradeProxy, testBehaviourEpoch.address),
                     'expected new registry to be of epoch equal or greater than existing registry',
                 );
             });

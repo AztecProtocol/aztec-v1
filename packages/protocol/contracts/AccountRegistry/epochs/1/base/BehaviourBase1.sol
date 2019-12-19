@@ -35,8 +35,8 @@ contract BehaviourBase1 is LibEIP712 {
 
 
     /**
-        * @dev function to validate the user is either the sender or has submitted an EIP712 signature from the account they
-        * are registering in the AZTEC extension.
+    * @dev function to validate the user is either the sender or has submitted an EIP712 signature from the 
+    * account they are registering in the AZTEC extension.
     **/
     function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32){
         bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(

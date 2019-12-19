@@ -36,7 +36,7 @@ signer.generateAccountRegistryDomainParams = (verifyingContract, domain = consta
         name: domain.name,
         version: domain.version,
         verifyingContract,
-    }
+    };
 };
 
 /**
