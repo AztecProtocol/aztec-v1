@@ -4,7 +4,7 @@ import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../interfaces/IAZTEC.sol";
 import "../ACE/ACE.sol" as ACEModule;
 import "../libs/NoteUtils.sol";
-import "../interfaces/IERC20.sol";
+import "../interfaces/IERC20Mintable.sol";
 import "../interfaces/IZkAsset.sol";
 
 contract TransactionRelayer is IAZTEC, Initializable {
@@ -23,7 +23,7 @@ contract TransactionRelayer is IAZTEC, Initializable {
         uint256 _value
     ) public {
         (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
-        IERC20 linkedToken = IERC20(linkedTokenAddress);
+        IERC20Mintable linkedToken = IERC20Mintable(linkedTokenAddress);
 
         linkedToken.transferFrom(
             msg.sender,
