@@ -1,8 +1,8 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../libs/LibEIP712.sol";
+import "../../libs/LibEIP712.sol";
 
-contract AccountRegistryBehaviour is LibEIP712 {
+contract BehaviourBase is LibEIP712 {
     event RegisterExtension(
         address indexed account,
         bytes linkedPublicKey,
@@ -41,7 +41,7 @@ contract AccountRegistryBehaviour is LibEIP712 {
     function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32){
         bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
             EIP712_DOMAIN_TYPEHASH,
-            keccak256("AZTECAccountRegistry"),
+            keccak256("AccountRegistry"),
             keccak256("2"),
             address(this)
         ));
