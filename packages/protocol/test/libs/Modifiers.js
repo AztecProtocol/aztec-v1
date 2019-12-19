@@ -13,10 +13,7 @@ contract('Modifiers', async () => {
 
     it('should revert when 0x0 address passed', async () => {
         const zeroAddress = '0x0000000000000000000000000000000000000000';
-        await truffleAssert.reverts(
-            modifier.testCheckZeroAddress(zeroAddress),
-            'address can not be 0x0',
-        );
+        await truffleAssert.reverts(modifier.testCheckZeroAddress(zeroAddress), 'address can not be 0x0');
     });
 
     it('should not revert when a non-0x0 address passed', async () => {
