@@ -345,6 +345,15 @@
             "payable": false,
             "stateMutability": "view",
             "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "makeAvailable",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
         }
     ],
     "bytecode": "0x",
