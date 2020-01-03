@@ -48,6 +48,7 @@
     "build": "./build.sh",
     "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
-    "lint": "eslint --ignore-path ../../.eslintignore ."
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "watch": "yarn build:dev --watch"
   }
 }
