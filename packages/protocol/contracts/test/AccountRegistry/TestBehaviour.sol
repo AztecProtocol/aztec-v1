@@ -11,8 +11,7 @@ import "../../AccountRegistry/epochs/1/Behaviour1.sol";
 contract TestBehaviour is Behaviour1 {
     uint256 public epoch = 2;
 
-    function newFeature() pure public returns (string memory result) {
-        result = 'newFeature';
-        return result;
+    function newFeature() pure public returns (bool) {
+        return true;
     }
 }

@@ -1,6 +1,5 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-
 contract IAccountRegistryBehaviour {
     uint256 public epoch;
 
@@ -16,13 +15,6 @@ contract IAccountRegistryBehaviour {
         bytes calldata _signature
     ) external;
 
-
-    event RegisterExtension(
-        address indexed account,
-        bytes linkedPublicKey,
-        bytes spendingPublicKey 
-    );
-
     event LogAddress(
         address account
     );
@@ -33,5 +25,11 @@ contract IAccountRegistryBehaviour {
 
     event LogBytes(
         bytes32 sig
+    );
+
+    event RegisterExtension(
+        address indexed account,
+        bytes linkedPublicKey,
+        bytes spendingPublicKey 
     );
 }
