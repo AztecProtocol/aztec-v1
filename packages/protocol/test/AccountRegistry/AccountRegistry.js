@@ -8,7 +8,7 @@ const nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 const { keccak256 } = require('web3-utils');
 
-const AccountRegistry = artifacts.require('./AccountRegistry/epochs/1/Behaviour1');
+const AccountRegistry = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
@@ -21,11 +21,8 @@ contract('AccountRegistry', (accounts) => {
         });
 
         it('should initialise the register', async () => {
-            // const aceAddress = ;
-            // const trustedGSNSignerAddress = ;
             const { receipt } = await registryContract.initialize();
             expect(receipt.status).to.equal(true);
-
         });
 
         it('should be able to register the extension with a valid signature', async () => {

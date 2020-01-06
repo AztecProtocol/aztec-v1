@@ -3,7 +3,7 @@ pragma solidity >=0.5.0 <0.6.0;
 import "../../../../libs/LibEIP712.sol";
 import "../../../interfaces/IAccountRegistryBehaviour.sol";
 
-contract BehaviourBase1 is IAccountRegistryBehaviour, LibEIP712 {
+contract BehaviourBase20200106 is IAccountRegistryBehaviour, LibEIP712 {
     event Addresses(address accountAddress, address signerAddress);
 
     mapping(address => bytes) public accountMapping;
