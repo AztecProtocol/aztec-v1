@@ -20,7 +20,15 @@ contract('AccountRegistry', (accounts) => {
             registryContract = await AccountRegistry.new({ from: accounts[0] });
         });
 
-        it('be able to register the extension with a valid signature', async () => {
+        it('should initialise the register', async () => {
+            // const aceAddress = ;
+            // const trustedGSNSignerAddress = ;
+            const { receipt } = await registryContract.initialize();
+            expect(receipt.status).to.equal(true);
+
+        });
+
+        it('should be able to register the extension with a valid signature', async () => {
             const { privateKey, address } = secp256k1.generateAccount();
 
             const domain = signer.generateAccountRegistryDomainParams(registryContract.address);
