@@ -37,7 +37,7 @@ contract AccountRegistryManager is Ownable, Modifiers {
      * @param trustedGSNSignerAddress - address that is being trusted to produce signatures to approve 
      * relayed GSN calls
      */
-    function deployProxy(
+    constructor(
         address initialBehaviourAddress,
         address aceAddress,
         address trustedGSNSignerAddress
@@ -54,15 +54,12 @@ contract AccountRegistryManager is Ownable, Modifiers {
             adminAddress,
             initialiseData 
         ));
-    
-        proxy = proxyAddress;
-        behaviour = IAccountRegistryBehaviour(proxyAddress);
-        accountRegistry = initialBehaviourAddress;
 
-        incrementLatestEpoch();
-        emit CreateProxy(proxyAddress, adminAddress);
-    }
+        proxy = proxyAddress;
     
+        incrementLatestEpoch();
+        emit CreateProxy(proxy, adminAddress);
+    }
 
     /**
      * @dev Get the current behaviour contract address
@@ -87,7 +84,6 @@ contract AccountRegistryManager is Ownable, Modifiers {
      * @param newBehaviourAddress - address of the behaviour contract to be upgraded to
     */
     function upgradeAccountRegistry(
-        address proxyAddress,
         address newBehaviourAddress
     ) public onlyOwner checkZeroAddress(newBehaviourAddress) checkZeroAddress(proxyAddress)  {
         require(ProxyAdmin(proxyAddress).admin() == address(this), 'this is not the admin of the proxy');
