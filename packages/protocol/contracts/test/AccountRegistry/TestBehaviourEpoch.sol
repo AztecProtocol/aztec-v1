@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../AccountRegistry/epochs/1/Behaviour1.sol";
+import "../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
 
 /**
   * @title TestBehaviourEpoch
@@ -10,7 +10,7 @@ import "../../AccountRegistry/epochs/1/Behaviour1.sol";
   *
   * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
-contract TestBehaviourEpoch is Behaviour1 {
+contract TestBehaviourEpoch is Behaviour20200106 {
     uint256 public epoch = 0;
 
     function newFeature() pure public returns (string memory result) {

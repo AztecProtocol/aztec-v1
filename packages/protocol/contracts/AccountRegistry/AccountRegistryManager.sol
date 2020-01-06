@@ -26,7 +26,7 @@ contract AccountRegistryManager is Ownable, Modifiers {
     uint256 public latestEpoch;
 
     event CreateProxy(address indexed proxyAddress, address indexed proxyAdmin);
-    event IncrementLatestEpoch(uint256 newLatestEpoch);
+    event UpdateLatestEpoch(uint256 newLatestEpoch);
     event UpgradeAccountRegistry(address indexed proxyAddress, address indexed newBehaviourAddress);
 
     /**
@@ -55,7 +55,8 @@ contract AccountRegistryManager is Ownable, Modifiers {
             initialiseData 
         ));
 
-        latestEpoch = 1;
+        uint256 initialEpoch = 1;
+        updateLatestEpoch(initialEpoch);
     
         emit CreateProxy(proxyAddress, adminAddress);
     }
@@ -69,11 +70,11 @@ contract AccountRegistryManager is Ownable, Modifiers {
     }
 
     /**
-     * @dev Increment the `latestEpoch` storage variable.
+     * @dev Update the `latestEpoch` storage variable.
      */
-    function incrementLatestEpoch() internal {
-        latestEpoch = latestEpoch.add(1);
-        emit IncrementLatestEpoch(latestEpoch);
+    function updateLatestEpoch(uint256 newEpochNum) internal {
+        latestEpoch = newEpochNum;
+        emit UpdateLatestEpoch(latestEpoch);
     }
 
     /**
@@ -94,7 +95,7 @@ contract AccountRegistryManager is Ownable, Modifiers {
         ProxyAdmin(proxyAddress).upgradeTo(newBehaviourAddress);
         
         accountRegistry = newBehaviourAddress;
-        incrementLatestEpoch();
+        updateLatestEpoch(newBehaviourEpoch);
         emit UpgradeAccountRegistry(proxyAddress, newBehaviourAddress);
     }
 }

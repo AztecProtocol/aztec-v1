@@ -4,7 +4,7 @@ const truffleAssert = require('truffle-assertions');
 const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
-const Behaviour1 = artifacts.require('./AccountRegistry/epochs/1/Behaviour1');
+const Behaviour20200106 = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
 
 const TestBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
 const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
@@ -23,7 +23,7 @@ contract('Account registry manager', async (accounts) => {
             let initialBehaviourAddress;
 
             beforeEach(async () => {
-                behaviour = await Behaviour1.new();
+                behaviour = await Behaviour20200106.new();
                 initialBehaviourAddress = behaviour.address;
             });
 
@@ -72,7 +72,7 @@ contract('Account registry manager', async (accounts) => {
             let manager;
 
             beforeEach(async () => {
-                behaviour = await Behaviour1.new();
+                behaviour = await Behaviour20200106.new();
 
                 const initialBehaviourAddress = behaviour.address;
                 manager = await AccountRegistryManager.new(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress, opts);
@@ -83,7 +83,7 @@ contract('Account registry manager', async (accounts) => {
                 const proxyAddress = await manager.proxyAddress.call();
                 const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
-                const proxyContract = await Behaviour1.at(proxyAddress);
+                const proxyContract = await Behaviour20200106.at(proxyAddress);
                 await proxyContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
                 const storedLinkedPublicKey = await proxyContract.accountMapping.call(address);
                 expect(storedLinkedPublicKey).to.equal(linkedPublicKey);
@@ -112,7 +112,7 @@ contract('Account registry manager', async (accounts) => {
                 const proxyAddress = await manager.proxyAddress.call();
                 const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
-                let proxyContract = await Behaviour1.at(proxyAddress);
+                let proxyContract = await Behaviour20200106.at(proxyAddress);
                 await proxyContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
 
                 // perform upgrade, and confirm that registered linkedPublicKey is still present in storage
@@ -145,7 +145,7 @@ contract('Account registry manager', async (accounts) => {
             let manager;
 
             beforeEach(async () => {
-                behaviour = await Behaviour1.new();
+                behaviour = await Behaviour20200106.new();
                 const initialBehaviourAddress = behaviour.address;
 
                 manager = await AccountRegistryManager.new(initialBehaviourAddress, aceAddress, trustedGSNSignerAddress, opts);

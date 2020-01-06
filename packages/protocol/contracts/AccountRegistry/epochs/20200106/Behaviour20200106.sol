@@ -3,21 +3,21 @@ pragma solidity >=0.5.0 <0.6.0;
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../../../interfaces/IZkAsset.sol";
-import "./base/BehaviourBase1.sol";
+import "./base/BehaviourBase20200106.sol";
 import "../../TransactionRelayer.sol";
 import "../../GSNRecipientTimestampSignature.sol";
 
 /**
- * @title Behaviour1 implementation
+ * @title Behaviour20200106 implementation
  * @author AZTEC
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract Behaviour1 is BehaviourBase1, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
+contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
 
     /**
     * @dev epoch number, used for version control in upgradeability
     */
-    uint256 public epoch = 1;
+    uint256 public epoch = 20200106;
 
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
