@@ -10,12 +10,15 @@ import "../../GSNRecipientTimestampSignature.sol";
 /**
  * @title Behaviour20200106 implementation
  * @author AZTEC
+ * Note the behaviour contract version naming convention is based on the date on which the contract
+ * was created, in the format: YYYYMMDD
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
 contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
 
     /**
-    * @dev epoch number, used for version control in upgradeability
+    * @dev epoch number, used for version control in upgradeability. The naming convention is based on the 
+    * date on which the contract was created, in the format: YYYYMMDD
     */
     uint256 public epoch = 20200106;
 

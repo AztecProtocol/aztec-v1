@@ -27,7 +27,7 @@ contract GSNRecipientTimestampSignature is Initializable, GSNRecipient {
     /**
      * @dev Sets the trusted signer that is going to be producing signatures to approve relayed calls.
      */
-    function initialize(address trustedSigner) public initializer {
+    function initialize(address trustedSigner) internal initializer {
         require(trustedSigner != address(0), "GSNRecipientSignature: trusted signer is the zero address");
         _trustedSigner = trustedSigner;
 

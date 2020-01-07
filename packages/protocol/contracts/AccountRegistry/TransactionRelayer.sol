@@ -6,13 +6,14 @@ import "../ACE/ACE.sol" as ACEModule;
 import "../libs/NoteUtils.sol";
 import "../interfaces/IERC20Mintable.sol";
 import "../interfaces/IZkAsset.sol";
+import "../libs/Modifiers.sol";
 
-contract TransactionRelayer is IAZTEC, Initializable {
+contract TransactionRelayer is IAZTEC, Initializable, Modifiers {
     using NoteUtils for bytes;
 
     ACEModule.ACE ace;
 
-    function initialize(address _ace) public initializer {
+    function initialize(address _ace) internal initializer checkZeroAddress(_ace) {
         ace = ACEModule.ACE(_ace);
     }
 
