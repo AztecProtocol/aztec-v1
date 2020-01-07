@@ -39,11 +39,12 @@ contract BehaviourBase20200106 is IAccountRegistryBehaviour, LibEIP712 {
     }
 
     /**
-     * @dev Registers a specific public key pair to an ethereum address if a valid signature is provided or the
+     * @dev Registers a linkedPublicKey to an Ethereum address, if a valid signature is provided or the
      * sender is the ethereum address in question
-     * @param _account - address to which a public key is being registered
-     * @param _linkedPublicKey - the public key the sender wishes to link to the _account
-     * @param _signature - an EIP712 compatible signature of the account & public key 
+     * @param _account - address to which the linkedPublicKey is being registered
+     * @param _linkedPublicKey - an additional public key which the sender wishes to link to the _account
+     * @param _spendingPublicKey - the Ethereum public key associated with the Ethereum address 
+     * @param _signature - an EIP712 compatible signature of the account & linkedPublicKey
      */
     function registerAZTECExtension(
         address _account,

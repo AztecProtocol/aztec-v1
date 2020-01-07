@@ -5,7 +5,6 @@ const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
 const Behaviour20200106 = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
-
 const TestBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
 const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
 const createSignature = require('../helpers/AccountRegistryManager');
@@ -55,7 +54,7 @@ contract('Account registry manager', async (accounts) => {
                 expect(parseInt(logs[0].topics[2], 16)).to.equal(parseInt(proxyAdmin, 16));
             });
 
-            it('should initialise epoch number on proxy', async () => {
+            it('should set epoch number on proxy', async () => {
                 const manager = await AccountRegistryManager.new(
                     initialBehaviourAddress,
                     aceAddress,
@@ -64,6 +63,41 @@ contract('Account registry manager', async (accounts) => {
                 );
                 const postDeployEpoch = await manager.latestEpoch();
                 expect(postDeployEpoch.toString()).to.equal('1');
+            });
+
+            it('should initialise TransactionRelayer and GSN related contracts', async () => {
+                /**
+                 * 3 contracts are initialised when the behaviour contract is initialised:
+                 * 1) TransactionRelayer
+                 * 2) GSNRecipientSignature
+                 * 3) GSNRecipientTimestampSignature
+                 *
+                 * The TransactionRelayer initialisation can not be easily detected - the initialised variable is
+                 * internal and no event is emitted.
+                 *
+                 * The GSNRecipientSignature initialisation can be detected - it inherits from GSNRecipient,
+                 * which emits a RelayHubChanged(address,address) event.
+                 *
+                 * The GSNRecipientTimestampSignature initialisation can not be easily detected - the initialised
+                 * variable is internal and the same RelayHubChanged(address,address) event is emitted as in
+                 * GSNRecipientSignature
+                 */
+
+                const manager = await AccountRegistryManager.new(
+                    initialBehaviourAddress,
+                    aceAddress,
+                    trustedGSNSignerAddress,
+                    opts,
+                );
+
+                const proxyAddress = await manager.proxyAddress.call();
+                const relayHubTopic = keccak256('RelayHubChanged(address,address)');
+                const relayHubLogs = await web3.eth.getPastLogs({ address: proxyAddress.address, topics: [relayHubTopic] });
+
+                const oldRelayHub = '0x0000000000000000000000000000000000000000000000000000000000000000';
+                const newRelayHub = '0xD216153c06E857cD7f72665E0aF1d7D82172F494'; // hard-coded into the open-zeppelin contracts
+                expect(parseInt(relayHubLogs[0].topics[1], 16)).to.equal(parseInt(oldRelayHub, 16));
+                expect(parseInt(relayHubLogs[0].topics[2], 16)).to.equal(parseInt(newRelayHub, 16));
             });
         });
 

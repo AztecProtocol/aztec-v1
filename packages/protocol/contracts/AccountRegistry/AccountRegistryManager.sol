@@ -12,8 +12,8 @@ import "../libs/Modifiers.sol";
 /**
  * @title AccountRegistryManager
  * @author AZTEC
- * @dev Manager contract that manages the deployment of proxy contracts and upgrading
- * of account registries
+ * @dev Manager contract that manages the deployment of the proxy contract and upgrading the
+ * account registry implementation.
  *
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  */
@@ -30,7 +30,8 @@ contract AccountRegistryManager is Ownable, Modifiers {
     event UpgradeAccountRegistry(address indexed proxyAddress, address indexed newBehaviourAddress);
 
     /**
-     * @dev Deploy the proxy contract. This stores all state for the AccountRegistry contract system
+     * @dev Constructor which deploys the proxy contract. The proxy contract stores all state for the 
+     * AccountRegistry contract system
      * @param initialBehaviourAddress - address of the behaviour contract to be linked to be initialised
      * when the proxy is deployed 
      * @param aceAddress - address of ACE
@@ -71,6 +72,8 @@ contract AccountRegistryManager is Ownable, Modifiers {
 
     /**
      * @dev Update the `latestEpoch` storage variable.
+     * @param newEpochNum - epoch number with which to update the 
+     * latestEpoch
      */
     function updateLatestEpoch(uint256 newEpochNum) internal {
         latestEpoch = newEpochNum;

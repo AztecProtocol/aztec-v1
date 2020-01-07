@@ -27,7 +27,7 @@ contract GSNRecipientSignature is Initializable, GSNRecipient, Modifiers {
     /**
      * @dev Sets the trusted signer that is going to be producing signatures to approve relayed calls.
      */
-    function initialize(address trustedSigner) public initializer checkZeroAddress(trustedSigner) {
+    function initialize(address trustedSigner) internal initializer checkZeroAddress(trustedSigner) {
         _trustedSigner = trustedSigner;
 
         GSNRecipient.initialize();
