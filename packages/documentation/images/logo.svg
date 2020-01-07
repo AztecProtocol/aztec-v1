@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1364px" height="298px" viewBox="0 0 1364 298" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>Group 5</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="10.4317837%" y1="14.8317976%" x2="162.989961%" y2="87.5085594%" id="linearGradient-1">
+            <stop stop-color="#808DFF" offset="0%"></stop>
+            <stop stop-color="#9FC4FF" offset="100%"></stop>
+            <stop stop-color="#7174FF" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="10.4317837%" y1="14.8317976%" x2="121.235321%" y2="57.6842448%" id="linearGradient-2">
+            <stop stop-color="#5270FF" offset="0%"></stop>
+            <stop stop-color="#68A7FC" offset="100%"></stop>
+            <stop stop-color="#7174FF" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy-21" transform="translate(-238.000000, -479.000000)">
+            <g id="Group" transform="translate(231.000000, 472.000000)">
+                <g id="Group-5" transform="translate(0.000000, -0.000000)">
+                    <text id="AZTEC" font-family="GillSans-SemiBold, Gill Sans" font-size="264.2" font-weight="500" line-spacing="204.599982" letter-spacing="29.05009" fill="#20293E">
+                        <tspan x="382.599971" y="299.88873">AZTEC</tspan>
+                    </text>
+                    <path d="M63.5999985,46 L248.399982,46 C258.120193,46 265.999981,53.8797877 265.999981,63.5999985 L265.999981,248.399982 C265.999981,258.120193 258.120193,265.999981 248.399982,265.999981 L63.5999985,265.999981 C53.8797877,265.999981 46,258.120193 46,248.399982 L46,63.5999985 C46,53.8797877 53.8797877,46 63.5999985,46 Z M96.5999956,78.9999971 C86.8797849,78.9999971 78.9999971,86.8797849 78.9999971,96.5999956 L78.9999971,215.399985 C78.9999971,225.120196 86.8797849,232.999984 96.5999956,232.999984 L215.399985,232.999984 C225.120196,232.999984 232.999984,225.120196 232.999984,215.399985 L232.999984,96.5999956 C232.999984,86.8797849 225.120196,78.9999971 215.399985,78.9999971 L96.5999956,78.9999971 Z" id="Combined-Shape" fill="url(#linearGradient-1)" transform="translate(155.999990, 155.999990) rotate(-315.000000) translate(-155.999990, -155.999990) "></path>
+                    <rect id="Combined-Shape" fill="url(#linearGradient-2)" opacity="0.491024926" transform="translate(155.999990, 155.999990) rotate(-315.000000) translate(-155.999990, -155.999990) " x="111.999994" y="111.999994" width="87.9999924" height="87.9999924" rx="17.5999985"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

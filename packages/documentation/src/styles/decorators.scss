@@ -1,0 +1,45 @@
+:global(.lh0) {
+  line-height: 0 !important;
+}
+
+:global(.lh1) {
+  line-height: 1 !important;
+}
+
+:global(.flex-fixed) {
+  flex-shrink: 0;
+}
+
+:global(.flex-free-expand) {
+  flex: 1 1 auto;
+}
+
+@each $key in $device-breakpoint-keys {
+  $i: index($device-breakpoint-keys, $key);
+  $width: map-get($device-breakpoint-map, $key);
+
+  @media all and (min-width: $width) {
+    :global(.hide-gte-#{$key}) {
+      display: none !important;
+    }
+  }
+
+  @if $i != length($device-breakpoint-keys) {
+    $next-key: nth($device-breakpoint-keys, $i + 1);
+    @media all and (max-width: $width - 1) {
+      :global(.hide-lte-#{$next-key}) {
+        display: none !important;
+      }
+    }
+  }
+
+  @if $i == 1 {
+    :global(.hide-lte-#{$key}) {
+      display: none !important;
+    }
+  }
+}
+
+:global(.hide) {
+  display: none !important;
+}
