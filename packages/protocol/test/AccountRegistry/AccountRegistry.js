@@ -6,9 +6,10 @@ const typedData = require('@aztec/typed-data');
 const truffleAssert = require('truffle-assertions');
 const nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
-const { keccak256 } = require('web3-utils');
+const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistry = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
+const createSignature = require('../helpers/AccountRegistryManager');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
@@ -86,6 +87,29 @@ contract('AccountRegistry', (accounts) => {
             const dummyAddress = accounts[0];
             await truffleAssert.reverts(
                 registryContract.registerAZTECExtension(dummyAddress, keccak256('0x01'), keccak256('0x0'), sig),
+            );
+        });
+
+        it('should not be possible to use the same signature to register multiple accounts', async () => {
+            const { address, linkedPublicKey, spendingPublicKey, sig: legitimateSignature } = createSignature(
+                registryContract.address,
+            );
+            await registryContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, legitimateSignature);
+
+            const replaySignature = legitimateSignature;
+
+            const secondAddress = randomHex(20);
+            const secondLinkedPublicKey = keccak256('0x01');
+            const secondSpendingPublicKey = keccak256('0x0');
+
+            await truffleAssert.reverts(
+                registryContract.registerAZTECExtension(
+                    secondAddress,
+                    secondLinkedPublicKey,
+                    secondSpendingPublicKey,
+                    replaySignature,
+                ),
+                'signature has already been used',
             );
         });
     });

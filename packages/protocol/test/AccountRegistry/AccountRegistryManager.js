@@ -54,7 +54,7 @@ contract('Account registry manager', async (accounts) => {
                 expect(parseInt(logs[0].topics[2], 16)).to.equal(parseInt(proxyAdmin, 16));
             });
 
-            it('should set epoch number on proxy', async () => {
+            it('should set epoch number on manager', async () => {
                 const manager = await AccountRegistryManager.new(
                     initialBehaviourAddress,
                     aceAddress,
@@ -146,14 +146,13 @@ contract('Account registry manager', async (accounts) => {
                 const proxyAddress = await manager.proxyAddress.call();
                 const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
-                let proxyContract = await Behaviour20200106.at(proxyAddress);
+                const proxyContract = await Behaviour20200106.at(proxyAddress);
                 await proxyContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
 
                 // perform upgrade, and confirm that registered linkedPublicKey is still present in storage
                 const testBehaviour = await TestBehaviour.new();
                 await manager.upgradeAccountRegistry(testBehaviour.address);
 
-                proxyContract = await TestBehaviour.at(proxyAddress);
                 const storedLinkedPublicKey = await proxyContract.accountMapping.call(address);
                 expect(storedLinkedPublicKey).to.equal(linkedPublicKey);
             });
