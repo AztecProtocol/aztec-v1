@@ -34,19 +34,23 @@ contract AccountRegistryManager is Ownable, Modifiers {
      * AccountRegistry contract system
      * @param initialBehaviourAddress - address of the behaviour contract to be linked to be initialised
      * when the proxy is deployed 
-     * @param aceAddress - address of ACE
-     * @param trustedGSNSignerAddress - address that is being trusted to produce signatures to approve 
+     * - address of ACE
+     * - address that is being trusted to produce signatures to approve 
      * relayed GSN calls
      */
     constructor(
         address initialBehaviourAddress,
-        address aceAddress,
-        address trustedGSNSignerAddress
+        // address aceAddress,
+        // address trustedGSNSignerAddress
+        uint256 dummyA,
+        uint256 dummyB
     ) public checkZeroAddress(initialBehaviourAddress) {
         bytes memory initialiseData = abi.encodeWithSignature(
-            "initialize(address,address)",
-            aceAddress,
-            trustedGSNSignerAddress
+            "initialize(uint256,uint256)",
+            // aceAddress,
+            // trustedGSNSignerAddress
+            dummyA,
+            dummyB
         );
         address adminAddress = address(this);
 

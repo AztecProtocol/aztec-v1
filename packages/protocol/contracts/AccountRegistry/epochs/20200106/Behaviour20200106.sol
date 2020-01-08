@@ -7,6 +7,10 @@ import "./base/BehaviourBase20200106.sol";
 import "../../TransactionRelayer.sol";
 import "../../GSNRecipientTimestampSignature.sol";
 
+import "./DummyA.sol";
+import "./DummyB.sol";
+
+
 /**
  * @title Behaviour20200106 implementation
  * @author AZTEC
@@ -14,7 +18,7 @@ import "../../GSNRecipientTimestampSignature.sol";
  * was created, in the format: YYYYMMDD
  * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
+contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature, DummyA, DummyB {
 
     /**
     * @dev epoch number, used for version control in upgradeability. The naming convention is based on the 
@@ -24,16 +28,21 @@ contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNReci
 
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
-    /**
-    * @dev Initialize the contract and set up it's state. An initialize function rather than a constructor
-    * is used to make this compatible with the upgradeability pattern
-    * @param _aceAddress - address of the AZTEC Cryptography Engine
-    * @param _trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
-    */
-    function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
-        TransactionRelayer.initialize(_aceAddress);
-        GSNRecipient.initialize();
-        GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
+    // /**
+    // * @dev Initialize the contract and set up it's state. An initialize function rather than a constructor
+    // * is used to make this compatible with the upgradeability pattern
+    // * @param _aceAddress - address of the AZTEC Cryptography Engine
+    // * @param _trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
+    // */
+    // function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
+    //     TransactionRelayer.initialize(_aceAddress);
+    //     GSNRecipient.initialize();
+    //     GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
+    // }
+
+    function initialize(uint256 A, uint256 B) initializer public {
+        DummyA.initialize(A);
+        DummyB.initialize(B);
     }
 
     /**

@@ -1,5 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, web3, it:true */
-
+const BN = require('bn.js')
 const truffleAssert = require('truffle-assertions');
 const { keccak256, randomHex } = require('web3-utils');
 
@@ -98,6 +98,26 @@ contract('Account registry manager', async (accounts) => {
                 const newRelayHub = '0xD216153c06E857cD7f72665E0aF1d7D82172F494'; // hard-coded into the open-zeppelin contracts
                 expect(parseInt(relayHubLogs[0].topics[1], 16)).to.equal(parseInt(oldRelayHub, 16));
                 expect(parseInt(relayHubLogs[0].topics[2], 16)).to.equal(parseInt(newRelayHub, 16));
+            });
+
+            it.only('should set dummy state on initialised dummy contracts', async () => {
+                const stateA = 5;
+                const stateB = 10;
+
+                const manager = await AccountRegistryManager.new(
+                    initialBehaviourAddress,
+                    stateA,
+                    stateB,
+                    opts,
+                );
+                const proxyAddress = await manager.proxyAddress.call();
+                const proxyContract = await Behaviour20200106.at(proxyAddress);
+
+                const setAState = await proxyContract.stateA();
+                const setBState = await proxyContract.stateB();
+
+                expect(setAState.toString()).to.equal(stateA.toString());
+                expect(setBState.toString()).to.equal(stateB.toString());
             });
         });
 
