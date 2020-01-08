@@ -10,7 +10,7 @@ const {
 } = require('@aztec/dev-utils');
 
 // ### Artifacts
-const AdminUpgradeabilityProxy = artifacts.require('./noteRegistry/proxies/AdminUpgradeabilityProxy.sol');
+const AdminUpgradeabilityProxy = artifacts.require('./Proxies/AdminUpgradeabilityProxy.sol');
 const Behaviour = artifacts.require('./noteRegistry/epochs/201907/Behaviour201907.sol');
 const BehaviourWithConflictTest = artifacts.require('./test/BehaviourWithConflictTest.sol');
 
