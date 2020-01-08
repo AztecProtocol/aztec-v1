@@ -79,17 +79,16 @@
         "webpack-dev-server": "^3.8.0"
     },
     "scripts": {
-        "start:ganache": "babel-node scripts/run start",
-        "deploy:contracts": "babel-node scripts/run deployContracts",
         "build:dev": "webpack --config webpack-sdk.dev.js",
         "build:prod": "webpack --config webpack-sdk.prod.js",
         "copy": "babel-node scripts/run copy",
+        "deploy:contracts": "babel-node scripts/run deployContracts",
         "generate:styles": "guacamole generateStyles",
         "generate:testData": "babel-node ./tests/generateTestData",
         "lint": "eslint ./ --color",
+        "start:ganache": "babel-node scripts/run start",
         "start:ui": "babel-node ./src/ui/mock/devServer",
         "test": "jest ./src",
-        "test:client": "mocha --require @babel/polyfill --require @babel/register './client/**/*.spec.js'",
         "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
         "watch": "webpack --watch --config webpack-sdk.dev.js"
