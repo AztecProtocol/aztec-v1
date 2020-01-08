@@ -20,8 +20,6 @@ import "../libs/Modifiers.sol";
 contract AccountRegistryManager is Ownable, Modifiers {
     using SafeMath for uint256;
 
-    IAccountRegistryBehaviour public behaviour;
-    address public accountRegistry;
     address payable public proxyAddress;
     uint256 public latestEpoch;
 
@@ -97,7 +95,6 @@ contract AccountRegistryManager is Ownable, Modifiers {
 
         ProxyAdmin(proxyAddress).upgradeTo(newBehaviourAddress);
         
-        accountRegistry = newBehaviourAddress;
         updateLatestEpoch(newBehaviourEpoch);
         emit UpgradeAccountRegistry(proxyAddress, newBehaviourAddress);
     }
