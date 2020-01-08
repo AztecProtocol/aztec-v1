@@ -1,17 +1,22 @@
 import ConnectionService from '~/ui/services/ConnectionService';
 
-export default async function linkAccountToMetaMask(account) {
+export default async function linkAccountToMetaMask({
+    address,
+    linkedPublicKey,
+}) {
     const {
         publicKey: spendingPublicKey,
-        ...data
+        signature,
     } = await ConnectionService.post({
         action: 'metamask.register.extension',
-        data: account,
+        data: {
+            address,
+            linkedPublicKey,
+        },
     }) || {};
 
     return {
-        ...data,
-        ...account,
         spendingPublicKey,
+        signature,
     };
 }
