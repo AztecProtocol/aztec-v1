@@ -1,16 +1,16 @@
-const BurnProof = require('./burn');
-const DividendProof = require('./dividend');
-const JoinSplitProof = require('./joinSplit');
-const MintProof = require('./mint');
-const Proof = require('./base/epoch0/proof');
-const ProofType = require('./base/types');
-const ProofUtils = require('./base/epoch0/utils');
-const PrivateRangeProof = require('./privateRange');
-const proofHandler = require('./exportHandler');
-const PublicRangeProof = require('./publicRange');
-const SwapProof = require('./swap');
+import BurnProof from './burn';
+import DividendProof from './dividend';
+import JoinSplitProof from './joinSplit';
+import MintProof from './mint';
+import Proof from './base/epoch0/proof';
+import ProofType from './base/types';
+import ProofUtils from './base/epoch0/utils';
+import PrivateRangeProof from './privateRange';
+import * as proofHandler from './exportHandler';
+import PublicRangeProof from './publicRange';
+import SwapProof from './swap';
 
-module.exports = {
+export {
     BurnProof,
     DividendProof,
     JoinSplitProof,

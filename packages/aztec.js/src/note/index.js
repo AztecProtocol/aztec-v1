@@ -1,11 +1,10 @@
-const bn128 = require('@aztec/bn128');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { padLeft, toHex } = require('web3-utils');
-
-const { noteCoder } = require('../encoder');
-const setup = require('../setup');
-const noteUtils = require('./utils');
+import * as bn128 from '@aztec/bn128';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { padLeft, toHex } from 'web3-utils';
+import { noteCoder } from '../encoder';
+import setup from '../setup';
+import noteUtils from './utils';
 
 const { createSharedSecret, getSharedSecret, getNoteHash } = noteUtils;
 
@@ -310,4 +309,4 @@ note.fromViewKey = async (viewingKey) => {
  */
 note.Note = Note;
 
-module.exports = note;
+export default note;

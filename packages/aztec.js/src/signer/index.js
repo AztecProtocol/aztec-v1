@@ -5,10 +5,11 @@
  * @module signer
  */
 
-const { constants, proofs } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const typedData = require('@aztec/typed-data');
-const { randomHex, padRight } = require('web3-utils');
+import { constants, proofs } from '@aztec/dev-utils';
+
+import secp256k1 from '@aztec/secp256k1';
+import typedData from '@aztec/typed-data';
+import { randomHex, padRight } from 'web3-utils';
 
 const signer = {};
 
@@ -220,4 +221,4 @@ signer.signTypedData = (domain, schema, message, privateKey) => {
     };
 };
 
-module.exports = signer;
+export default signer;

@@ -1,10 +1,9 @@
-const { constants } = require('@aztec/dev-utils');
-const { expect } = require('chai');
-const crypto = require('crypto');
-const sinon = require('sinon');
-
-const BN = require('bn.js');
-const bn128 = require('../src');
+import { constants } from '@aztec/dev-utils';
+import { expect } from 'chai';
+import crypto from 'crypto';
+import sinon from 'sinon';
+import BN from 'bn.js';
+import * as bn128 from '../src';
 
 describe('bn128', () => {
     let kMaxStub;

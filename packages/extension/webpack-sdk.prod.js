@@ -7,7 +7,7 @@ const Dotenv = require('dotenv-webpack');
 module.exports = {
     mode: 'production',
     target: 'web',
-    devtool: 'source-map',
+    devtool: '',
     entry: {
         aztec: './src/index.js',
         background: './src/background',
@@ -30,6 +30,15 @@ module.exports = {
         minimize: true,
         usedExports: true,
         sideEffects: true,
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendors',
+                    chunks: 'all',
+                },
+            },
+        },
     },
     module: {
         rules: [

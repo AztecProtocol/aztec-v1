@@ -3,7 +3,7 @@ const common = require('./webpack.common.js');
 
 const config = {
     mode: 'production',
-    devtool: 'source-map',
+    devtool: '',
 };
 
 const nodeConfig = merge(common, {

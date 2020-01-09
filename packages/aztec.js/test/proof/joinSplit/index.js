@@ -1,15 +1,15 @@
 /* eslint-disable new-cap */
 /* eslint-disable prefer-destructuring */
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
+import * as bn128 from '@aztec/bn128';
 
-const { JoinSplitProof } = require('../../../src/proof');
-const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
-const ProofUtils = require('../../../src/proof/base/epoch0/utils');
-const { validateElement, validateScalar } = require('../../helpers/bn128');
+import { constants, errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import { JoinSplitProof } from '../../../src/proof';
+import { mockNoteSet, randomNoteValue } from '../../helpers/note';
+import ProofUtils from '../../../src/proof/base/epoch0/utils';
+import { validateElement, validateScalar } from '../../helpers/bn128';
 
 const { K_MAX } = constants;
 

@@ -1,11 +1,10 @@
-const bn128 = require('@aztec/bn128');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const crypto = require('crypto');
-const web3Utils = require('web3-utils');
-
-const note = require('../../src/note');
+import * as bn128 from '@aztec/bn128';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import crypto from 'crypto';
+import web3Utils from 'web3-utils';
+import note from '../../src/note';
 
 const { padLeft, toHex, randomHex } = web3Utils;
 

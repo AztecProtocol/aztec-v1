@@ -11,4 +11,4 @@ class HexString extends String {
     }
 }
 
-module.exports = HexString;
+export default HexString;

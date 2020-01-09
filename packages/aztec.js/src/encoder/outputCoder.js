@@ -3,10 +3,11 @@
  * @module outputCoder
  */
 
-const bn128 = require('@aztec/bn128');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { keccak256, padLeft } = require('web3-utils');
+import * as bn128 from '@aztec/bn128';
+
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { keccak256, padLeft } from 'web3-utils';
 
 const outputCoder = {};
 
@@ -357,4 +358,4 @@ outputCoder.hashProofOutput = (proofOutput) => {
     return keccak256(`0x${proofOutput.slice(0x40)}`);
 };
 
-module.exports = outputCoder;
+export default outputCoder;

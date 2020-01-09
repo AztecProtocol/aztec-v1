@@ -1,14 +1,14 @@
 /* eslint-disable new-cap */
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { randomHex } = require('web3-utils');
+import secp256k1 from '@aztec/secp256k1';
 
-const helpers = require('../../src/proof/exportHandler/helpers');
-const JoinSplitProof65793 = require('../../src/proof/proofs/BALANCED/epoch0/joinSplit');
-const { JoinSplitProof, proofHandler } = require('../../src/proof');
-const note = require('../../src/note');
-const ProofType = require('../../src/proof/base/types');
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { randomHex } from 'web3-utils';
+import helpers from '../../src/proof/exportHandler/helpers';
+import JoinSplitProof65793 from '../../src/proof/proofs/BALANCED/epoch0/joinSplit';
+import { JoinSplitProof, proofHandler } from '../../src/proof';
+import note from '../../src/note';
+import ProofType from '../../src/proof/base/types';
 
 const { publicKey } = secp256k1.generateAccount();
 

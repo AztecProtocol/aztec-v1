@@ -1,10 +1,9 @@
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { padLeft } = require('web3-utils');
-
-const { inputCoder } = require('../../src/encoder');
-const note = require('../../src/note');
-const HexString = require('../encoder/HexString');
+import secp256k1 from '@aztec/secp256k1';
+import { expect } from 'chai';
+import { padLeft } from 'web3-utils';
+import { inputCoder } from '../../src/encoder';
+import note from '../../src/note';
+import HexString from '../encoder/HexString';
 
 const { customMetaData } = note.utils;
 

@@ -1,15 +1,14 @@
-const bn128 = require('@aztec/bn128');
-const { errors } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { padLeft, randomHex } = require('web3-utils');
-
-const note = require('../../../src/note');
-const { PublicRangeProof } = require('../../../src/proof');
-const PublicRangeVerifier = require('../../../src/proof/proofs/UTILITY/epoch0/publicRange/verifier');
-const { Proof } = require('../../../src/proof');
+import * as bn128 from '@aztec/bn128';
+import { errors } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { padLeft, randomHex } from 'web3-utils';
+import note from '../../../src/note';
+import { PublicRangeProof } from '../../../src/proof';
+import PublicRangeVerifier from '../../../src/proof/proofs/UTILITY/epoch0/publicRange/verifier';
+import { Proof } from '../../../src/proof';
 
 describe('Public range proof verifier', () => {
     let originalNote = {};

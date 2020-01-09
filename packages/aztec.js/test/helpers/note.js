@@ -1,12 +1,11 @@
-const bn128 = require('@aztec/bn128');
-const { constants } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const crypto = require('crypto');
-const { padLeft, toHex } = require('web3-utils');
-
-const note = require('../../src/note');
-const ProofUtils = require('../../src/proof/base/epoch0/utils');
+import * as bn128 from '@aztec/bn128';
+import { constants } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import crypto from 'crypto';
+import { padLeft, toHex } from 'web3-utils';
+import note from '../../src/note';
+import ProofUtils from '../../src/proof/base/epoch0/utils';
 
 const mockLightNote = async (k) => {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
@@ -126,7 +125,7 @@ const balancedPublicValues = (nIn, nOut) => {
     return { kIn, kOut };
 };
 
-module.exports = {
+export {
     balancedPublicValues,
     mockLightNoteSet,
     mockNoteSet,

@@ -3,9 +3,10 @@
  * @module noteCoder
  */
 
-const bn128 = require('@aztec/bn128');
-const secp256k1 = require('@aztec/secp256k1');
-const { padLeft } = require('web3-utils');
+import * as bn128 from '@aztec/bn128';
+
+import secp256k1 from '@aztec/secp256k1';
+import { padLeft } from 'web3-utils';
 
 const noteCoder = {};
 
@@ -44,4 +45,4 @@ noteCoder.encodeNotePublicKey = ({ gamma, sigma, ephemeral }) => {
     return `0x${padLeft(gammaEnc, 66)}${padLeft(sigmaEnc, 66)}${padLeft(ephemeralEnc, 66)}`;
 };
 
-module.exports = noteCoder;
+export default noteCoder;
