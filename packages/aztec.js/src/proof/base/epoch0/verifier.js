@@ -1,8 +1,7 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-
-const ProofType = require('../types');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import ProofType from '../types';
 
 const { ZERO_BN } = constants;
 
@@ -99,4 +98,4 @@ class Verifier {
     }
 }
 
-module.exports = Verifier;
+export default Verifier;

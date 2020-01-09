@@ -1,9 +1,8 @@
-const bn128 = require('@aztec/bn128');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const { keccak256, padLeft } = require('web3-utils');
-
-const Keccak = require('../../src/keccak');
+import * as bn128 from '@aztec/bn128';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import { keccak256, padLeft } from 'web3-utils';
+import Keccak from '../../src/keccak';
 
 describe('Keccak', () => {
     it('should hash a set of points', () => {

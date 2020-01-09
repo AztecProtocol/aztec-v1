@@ -1,11 +1,10 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const { padLeft } = require('web3-utils');
-
-const Keccak = require('../../../keccak');
-const ProofType = require('../types');
-const ProofUtils = require('./utils');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import { padLeft } from 'web3-utils';
+import Keccak from '../../../keccak';
+import ProofType from '../types';
+import ProofUtils from './utils';
 
 const { AztecError } = errors;
 
@@ -175,4 +174,4 @@ class Proof {
     }
 }
 
-module.exports = Proof;
+export default Proof;

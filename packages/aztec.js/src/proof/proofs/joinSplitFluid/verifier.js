@@ -1,10 +1,8 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-
-const JoinSplitVerifier = require('../BALANCED/epoch0/joinSplit/verifier');
-
-const Keccak = require('../../../keccak');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import JoinSplitVerifier from '../BALANCED/epoch0/joinSplit/verifier';
+import Keccak from '../../../keccak';
 
 const { ZERO_BN } = constants;
 
@@ -83,4 +81,4 @@ class JoinSplitFluidVerifier extends JoinSplitVerifier {
     }
 }
 
-module.exports = JoinSplitFluidVerifier;
+export default JoinSplitFluidVerifier;

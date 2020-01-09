@@ -24,7 +24,8 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.16.0",
     "mocha": "^6.0.2",
-    "shx": "^0.3.2"
+    "shx": "^0.3.2",
+    "webpack-bundle-analyzer": "^3.6.0"
   },
   "engines": {
     "node": ">=8.3"
@@ -54,7 +55,7 @@
     "build:prod": "PROD=true ./build.sh",
     "clean": "shx rm -rf ./dist || true",
     "lint": "eslint --ignore-path ../../.eslintignore .",
-    "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+    "test": "NODE_ENV=TEST mocha --require @babel/polyfill --require @babel/register ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
     "watch": "yarn build:dev --watch"
   }
 }

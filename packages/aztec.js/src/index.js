@@ -1,11 +1,11 @@
-const encoder = require('./encoder');
-const keccak = require('./keccak');
-const note = require('./note');
-const proof = require('./proof');
-const setup = require('./setup');
-const signer = require('./signer');
+import encoder from './encoder';
+import keccak from './keccak';
+import note from './note';
+import proof from './proof';
+import setup from './setup';
+import signer from './signer';
 
-module.exports = {
+export default {
     encoder,
     keccak,
     note,

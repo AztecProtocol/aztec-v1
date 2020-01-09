@@ -6,13 +6,12 @@
  * setup.
  */
 
-const BN = require('bn.js');
-const path = require('path');
-const fs = require('fs');
+import BN from 'bn.js';
 
-const { constants } = require('@aztec/dev-utils');
-
-const setup = require('../src/setup');
+import path from 'path';
+import fs from 'fs';
+import { constants } from '@aztec/dev-utils';
+import setup from '../src/setup';
 
 const partialPath = path.posix.resolve(__dirname, 'localSetupDatabase');
 

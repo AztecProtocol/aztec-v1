@@ -1,16 +1,16 @@
 /* eslint-disable prefer-arrow-callback */
-const bn128 = require('@aztec/bn128');
-const { errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { padLeft, randomHex } = require('web3-utils');
+import * as bn128 from '@aztec/bn128';
 
-const { balancedPublicValues, mockNoteSet, randomNoteValue } = require('../../helpers/note');
-const { JoinSplitProof, Proof } = require('../../../src/proof');
-const JoinSplitVerifier = require('../../../src/proof/proofs/BALANCED/epoch0/joinSplit/verifier');
-const { mockZeroJoinSplitProof } = require('../../helpers/proof');
-const ProofUtils = require('../../../src/proof/base/epoch0/utils');
+import { errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { padLeft, randomHex } from 'web3-utils';
+import { balancedPublicValues, mockNoteSet, randomNoteValue } from '../../helpers/note';
+import { JoinSplitProof, Proof } from '../../../src/proof';
+import JoinSplitVerifier from '../../../src/proof/proofs/BALANCED/epoch0/joinSplit/verifier';
+import { mockZeroJoinSplitProof } from '../../helpers/proof';
+import ProofUtils from '../../../src/proof/base/epoch0/utils';
 
 describe('Join-Split Proof Verifier', () => {
     const sender = randomHex(20);

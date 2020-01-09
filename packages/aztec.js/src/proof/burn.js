@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
-const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
-const { BURN } = require('./base/types');
+import { getProof, setDefaultEpoch, helpers } from './exportHandler';
+
+import proofTypes from './base/types';
 
 /**
  * Export the BurnProof for a default epoch
@@ -10,7 +11,7 @@ const { BURN } = require('./base/types');
  * @returns A BurnProof construction for the default epoch
  */
 function BurnProof(...args) {
-    const Proof = getProof(BURN.name, this.epochNum);
+    const Proof = getProof(proofTypes.BURN.name, this.epochNum);
 
     return new Proof(...args);
 }
@@ -25,10 +26,10 @@ function BurnProof(...args) {
  * @returns A BurnProof construction for the given epoch number
  */
 BurnProof.epoch = function(epochNum, setAsDefault = false) {
-    helpers.validateEpochNum(BURN.name, epochNum);
+    helpers.validateEpochNum(proofTypes.BURN.name, epochNum);
 
     if (setAsDefault) {
-        setDefaultEpoch(BURN.name, epochNum);
+        setDefaultEpoch(proofTypes.BURN.name, epochNum);
     }
 
     return (...args) => {
@@ -36,4 +37,4 @@ BurnProof.epoch = function(epochNum, setAsDefault = false) {
     };
 };
 
-module.exports = BurnProof;
+export default BurnProof;

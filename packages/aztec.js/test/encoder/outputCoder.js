@@ -1,14 +1,12 @@
-const bn128 = require('@aztec/bn128');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const { padLeft } = require('web3-utils');
-
-const HexString = require('./HexString');
-const note = require('../../src/note');
-const outputCoder = require('../../src/encoder/outputCoder');
-
-const { randomNoteValue } = require('../helpers/note');
+import * as bn128 from '@aztec/bn128';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import { padLeft } from 'web3-utils';
+import HexString from './HexString';
+import note from '../../src/note';
+import outputCoder from '../../src/encoder/outputCoder';
+import { randomNoteValue } from '../helpers/note';
 
 const clean = (input) => {
     return input.replace(/^0+/, '');

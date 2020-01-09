@@ -1,5 +1,5 @@
-const bn128 = require('@aztec/bn128');
-const { isHexStrict, padLeft } = require('web3-utils');
+import * as bn128 from '@aztec/bn128';
+import { isHexStrict, padLeft } from 'web3-utils';
 
 class ProofUtils {
     /**
@@ -67,4 +67,4 @@ class ProofUtils {
     }
 }
 
-module.exports = ProofUtils;
+export default ProofUtils;

@@ -110,6 +110,7 @@
         "babel-eslint": "^10.0.2",
         "babel-loader": "^8.0.6",
         "babel-plugin-module-resolver": "^3.2.0",
+        "bundle-buddy-webpack-plugin": "^0.3.0",
         "chai": "^4.2.0",
         "css-loader": "^3.0.0",
         "eslint": "5.13.0",
@@ -124,6 +125,7 @@
         "mocha": "^6.1.4",
         "postcss-loader": "^3.0.0",
         "resolve-url-loader": "^3.1.0",
-        "sass-loader": "^8.0.0"
+        "sass-loader": "^8.0.0",
+        "webpack-bundle-analyzer": "^3.6.0"
     }
 }

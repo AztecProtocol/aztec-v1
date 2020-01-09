@@ -1,9 +1,8 @@
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
-
-const note = require('../../../src/note');
-const { SwapProof } = require('../../../src/proof');
+import secp256k1 from '@aztec/secp256k1';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import note from '../../../src/note';
+import { SwapProof } from '../../../src/proof';
 
 describe('Swap Proof', () => {
     let inputNotes = [];

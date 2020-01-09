@@ -1,4 +1,4 @@
-const { padLeft } = require('web3-utils');
+import { padLeft } from 'web3-utils';
 
 const inputCoder = {};
 
@@ -95,4 +95,4 @@ inputCoder.encodeProofData = (proofData) => {
     return data;
 };
 
-module.exports = inputCoder;
+export default inputCoder;

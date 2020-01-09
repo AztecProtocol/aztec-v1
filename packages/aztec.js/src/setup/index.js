@@ -9,10 +9,11 @@
  * @module setup
  */
 
-const bn128 = require('@aztec/bn128');
-const { constants } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const fetch = require('cross-fetch');
+import * as bn128 from '@aztec/bn128';
+
+import { constants } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import fetch from 'cross-fetch';
 
 const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
 
@@ -102,4 +103,4 @@ setup.fetchPoint = async (inputValue) => {
     }
 };
 
-module.exports = setup;
+export default setup;

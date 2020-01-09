@@ -1,9 +1,9 @@
-const bn128 = require('@aztec/bn128');
-const { constants } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const { expect } = require('chai');
+import * as bn128 from '@aztec/bn128';
+import { constants } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import { expect } from 'chai';
 
-const validateElement = (xHex, yHex) => {
+export function validateElement(xHex, yHex) {
     const x = new BN(xHex.slice(2), 16);
     const y = new BN(yHex.slice(2), 16);
     expect(x.gt(constants.ZERO_BN)).to.equal(true);
@@ -19,12 +19,10 @@ const validateElement = (xHex, yHex) => {
     expect(lhs.eq(rhs)).to.equal(true);
 };
 
-const validateScalar = (hex, canBeZero = false) => {
+export function validateScalar(hex, canBeZero = false) {
     const scalar = new BN(hex.slice(2), 16);
     expect(scalar.lt(bn128.curve.n)).to.equal(true);
     if (!canBeZero) {
         expect(scalar.gt(constants.ZERO_BN)).to.equal(true);
     }
 };
-
-module.exports = { validateElement, validateScalar };

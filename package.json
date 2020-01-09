@@ -50,7 +50,8 @@
     "script:update:addresses": "node ./packages/monorepo-scripts/addresses/update.js",
     "test": "yarn wsrun --package $PKG --serial -c test",
     "watch": "yarn wsrun --package $PKG --parallel -c watch",
-    "wsrun": "wsrun --exclude-missing --fast-exit"
+    "wsrun": "wsrun --exclude-missing --fast-exit",
+    "webpack-defaults": "webpack-defaults"
   },
   "workspaces": [
     "packages/*"

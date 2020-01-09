@@ -1,5 +1,5 @@
-const JoinSplitFluidVerifier = require('../../../joinSplitFluid/verifier');
+import JoinSplitFluidVerifier from '../../../joinSplitFluid/verifier';
 
 class BurnVerifier66305 extends JoinSplitFluidVerifier {}
 
-module.exports = BurnVerifier66305;
+export default BurnVerifier66305;

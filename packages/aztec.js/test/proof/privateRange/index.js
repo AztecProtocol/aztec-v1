@@ -1,11 +1,11 @@
 /* eslint-disable prefer-destructuring */
-const { errors } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
+import { errors } from '@aztec/dev-utils';
 
-const { PrivateRangeProof } = require('../../../src/proof');
-const note = require('../../../src/note');
+import secp256k1 from '@aztec/secp256k1';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import { PrivateRangeProof } from '../../../src/proof';
+import note from '../../../src/note';
 
 describe('Private range proof', () => {
     const { publicKey } = secp256k1.generateAccount();
