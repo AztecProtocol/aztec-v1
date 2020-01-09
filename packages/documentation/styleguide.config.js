@@ -1,17 +1,8 @@
 require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
-const {
-  defaultFontFamily,
-  fontSizeMap,
-} = require('./src/config/typography');
-const {
-  defaultTextColor,
-  defaultLabelColor,
-  defaultLinkColor,
-  defaultBorderColor,
-  colorMap,
-} = require('./src/config/colors');
+const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
+const { defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap } = require('./src/config/colors');
 
 module.exports = {
   title: 'AZTEC Docs',
@@ -86,10 +77,12 @@ module.exports = {
     SectionHeadingRenderer: path.join(__dirname, 'styleguide/components/SectionHeadingRenderer'),
     HeadingRenderer: path.join(__dirname, 'styleguide/components/HeadingRenderer'),
     ReactComponentRenderer: path.join(__dirname, 'styleguide/components/ReactComponentRenderer'),
-    PlaygroundRenderer: path.join(__dirname, 'styleguide/components/PlaygroundRenderer'),
+    // PlaygroundRenderer: path.join(__dirname, 'styleguide/components/PlaygroundRenderer'),
     ParaRenderer: path.join(__dirname, 'styleguide/components/ParaRenderer'),
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
+    Preview: path.join(__dirname, 'styleguide/components/Preview'),
+    // ReactExample: path.join(__dirname, 'styleguide/components/ReactExample'),
   },
   sections: [
     {
@@ -115,6 +108,10 @@ module.exports = {
       sectionDepth: 1,
       exampleMode: 'collapse',
       usageMode: 'collapse',
+    },
+    {
+      name: 'Testing',
+      components: ['src/components/TestButton'],
     },
     {
       name: 'Smart Contracts',
@@ -181,24 +178,22 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'window.aztec.enable',
-              content: 'src/config/custom.md',
-              exampleMode: 'hide',
+              name: 'enable()',
+              components: ['src/components/Demo/Enable.jsx'],
+              exampleMode: 'expand',
+              defaultExample: true,
             },
             {
-              name: 'window.aztec.zkAsset',
-              content: 'styleguide/categories/JavaScriptSDK/deposit.md',
-              exampleMode: 'hide',
+              name: 'zkAsset()',
+              content: 'styleguide/categories/JavaScriptSDK/zkAsset.md',
+              components: ['src/components/Demo/index.jsx'],
+              exampleMode: 'expand',
             },
             {
-              name: 'window.aztec.zkNote',
-              content: 'src/config/custom.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: 'window.aztec.proofs',
-              content: 'src/config/custom.md',
-              exampleMode: 'hide',
+              name: 'balance()',
+              content: 'styleguide/categories/JavaScriptSDK/balance.md',
+              components: ['src/components/Demo/index.jsx'],
+              exampleMode: 'expand',
             },
           ],
           sectionDepth: 1,
@@ -211,15 +206,13 @@ module.exports = {
     {
       name: 'Guides',
       content: 'styleguide/categories/Guides.md',
-      sections: [
-      ],
+      sections: [],
       sectionDepth: 1,
     },
     {
       name: 'Reference Specification',
       content: 'styleguide/categories/Referrence.md',
-      sections: [
-      ],
+      sections: [],
       sectionDepth: 1,
     },
   ],

@@ -10,14 +10,14 @@ import * as calendar from './calendar';
 import * as styleConstants from './styleConstants';
 
 export default {
-  ...buttons,
-  ...colors,
-  ...icons,
-  ...inputs,
-  ...layout,
-  ...listItem,
-  ...shapes,
-  ...typography,
-  ...calendar,
-  ...styleConstants,
+    ...buttons,
+    ...colors,
+    ...icons,
+    ...inputs,
+    ...layout,
+    ...listItem,
+    ...shapes,
+    ...typography,
+    ...calendar,
+    ...styleConstants,
 };

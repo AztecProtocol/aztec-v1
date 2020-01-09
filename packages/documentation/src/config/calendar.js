@@ -1,11 +1,5 @@
-import {
-  defaultSize,
-} from './styleConstants';
-import {
-  colorMap,
-  defaultTextColorName,
-  defaultLabelColorName,
-} from './colors';
+import { defaultSize } from './styleConstants';
+import { colorMap, defaultTextColorName, defaultLabelColorName } from './colors';
 
 /*
  * Commented attributes will use inhirited values

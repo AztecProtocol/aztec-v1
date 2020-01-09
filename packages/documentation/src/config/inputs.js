@@ -1,19 +1,17 @@
-import {
-  colorMap,
-} from './colors';
+import { colorMap } from './colors';
 
 export const inputSizeMap = {
-  xs: '24px',
-  s: '28px',
-  m: '32px',
-  l: '40px',
+    xs: '24px',
+    s: '28px',
+    m: '32px',
+    l: '40px',
 };
 
 export const inputFontSizeKeyMap = {
-  xs: 'xxs',
-  s: 'xxs',
-  m: 'xs',
-  l: 's',
+    xs: 'xxs',
+    s: 'xxs',
+    m: 'xs',
+    l: 's',
 };
 
 export const inputBorderWidth = '1px';
