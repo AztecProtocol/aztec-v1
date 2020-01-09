@@ -4,10 +4,10 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { randomHex } from 'web3-utils';
 import sinon from 'sinon';
-import { PrivateRangeProof } from '../../../src/proof';
+import { PrivateRangeProof , Proof } from '../../../src/proof';
 import PrivateRangeVerifier from '../../../src/proof/proofs/UTILITY/epoch0/privateRange/verifier';
 import note from '../../../src/note';
-import { Proof } from '../../../src/proof';
+
 
 describe('Private range proof Verifier', () => {
     const { publicKey } = secp256k1.generateAccount();
