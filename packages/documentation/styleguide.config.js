@@ -90,6 +90,7 @@ module.exports = {
     ParaRenderer: path.join(__dirname, 'styleguide/components/ParaRenderer'),
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
+    Preview: path.join(__dirname, 'styleguide/components/Preview'),
   },
   sections: [
     {
