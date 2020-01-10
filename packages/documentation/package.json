@@ -30,7 +30,7 @@
         "guacamole": "./bin/guacamole.js"
     },
     "dependencies": {
-        "@aztec/guacamole-ui": "1.1.0-beta3",
+        "@aztec/guacamole-ui": "^1.1.2",
         "@babel/core": "^7.4.0",
         "@babel/node": "^7.2.2",
         "@babel/plugin-proposal-class-properties": "^7.4.0",

@@ -1,0 +1,12 @@
+.textArea {
+  width: 100%;
+  outline: none !important;
+  textarea {
+
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none !important;
+    border: none !important;
+    resize: none !important; /*remove the resize handle on the bottom right*/
+  }
+}

@@ -1,8 +1,6 @@
 Deposit ERC20 tokens into an AZTEC ZkAsset:
 
-```jsx
-import Demo from '../../../src/components/Demo';
-
+```js
   async function initAztecSdk() {
     const r = await window.aztec.enable({
       apiKey: 'ethglobalstarterkit'
@@ -25,10 +23,16 @@ const loadSdk = async () => {
 
   await scriptLoaded;
 
-  const r = await initAztecSdk();
-  return r;
 
 }
 
-<Demo demoScript={loadSdk} text='Enable SDK'/>
+  async function initAztecSdk() {
+    const r = await window.aztec.enable({
+      apiKey: 'ethglobalstarterkit'
+    });
+    console.log(r);
+    return r;
+  };
+
+   initAztecSdk();
 ```

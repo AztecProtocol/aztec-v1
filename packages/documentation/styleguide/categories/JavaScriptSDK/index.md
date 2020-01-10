@@ -1,34 +1,24 @@
-Enable the AZTEC SDK:
-
-```jsx
-import Demo from '../../../src/components/Demo';
-
-  async function initAztecSdk() {
-    const r = await window.aztec.enable({
-      apiKey: 'ethglobalstarterkit'
-    });
-    console.log(r);
-    return r;
-  };
+```js
 
 const loadSdk = async () => {
 
-  
+
   let script = window.document.createElement('script');
   script.type = 'text/javascript';
   script.async = true;
-  script.src = 'http://localhost:5555/sdk/aztec.js';
+  script.src = 'https://sdk.aztecprotocol.com/aztec.js';
   const scriptLoaded = new Promise((resolve)=>{
-    script.onload = resolve;
-  });
+      script.onload = resolve;
+      });
   document.getElementsByTagName('head')[0].appendChild(script);
 
   await scriptLoaded;
 
-  const r = await initAztecSdk();
-  return r;
 
 }
 
-<Demo demoScript={loadSdk} text='Enable SDK'/>
+await loadSdk();
+await window.aztec.enable({
+  apiKey: 'ethglobalstarterkit'
+});
 ```
