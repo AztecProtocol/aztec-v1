@@ -1,17 +1,8 @@
 require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
-const {
-  defaultFontFamily,
-  fontSizeMap,
-} = require('./src/config/typography');
-const {
-  defaultTextColor,
-  defaultLabelColor,
-  defaultLinkColor,
-  defaultBorderColor,
-  colorMap,
-} = require('./src/config/colors');
+const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
+const { defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap } = require('./src/config/colors');
 
 module.exports = {
   title: 'AZTEC Docs',
@@ -28,6 +19,12 @@ module.exports = {
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/icon?family=Material+Icons',
+        },
+      ],
+      scripts: [
+        {
+          type: 'text/javascript',
+          src: 'https://sdk.aztecprotocol.com/aztec.js',
         },
       ],
     },
@@ -212,15 +209,13 @@ module.exports = {
     {
       name: 'Guides',
       content: 'styleguide/categories/Guides.md',
-      sections: [
-      ],
+      sections: [],
       sectionDepth: 1,
     },
     {
       name: 'Reference Specification',
       content: 'styleguide/categories/Referrence.md',
-      sections: [
-      ],
+      sections: [],
       sectionDepth: 1,
     },
   ],
