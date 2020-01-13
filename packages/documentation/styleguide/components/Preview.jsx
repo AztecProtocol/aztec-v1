@@ -1,119 +1,89 @@
-import React, {
-  Component,
-} from 'react';
+import React from 'react';
+import { Hook, Console, Decode } from 'console-feed';
+import { Block, FlexBox, Button, Text } from '@aztec/guacamole-ui';
+import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import PlaygroundError from 'react-styleguidist/lib/client/rsg-components/PlaygroundError';
-import ReactExample from 'react-styleguidist/lib/client/rsg-components/ReactExample';
-import Context from 'react-styleguidist/lib/client/rsg-components/Context';
-import PreviewComponent from './Preview/Preview';
+import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
+import styles from './preview.module.scss';
 
-const improveErrorMessage = message =>
-  message.replace(
-    'Check the render method of `StateHolder`.',
-    'Check the code of your example in a Markdown file or in the editor below.'
-  );
+import compileCode from '../utils/compileCode';
+import evalInContext from '../utils/evalInContext';
 
-export default class Preview extends Component {
+class Preview extends React.Component {
+  handleChange = debounce((code) => {
+    this.state = {
+      code,
+    };
+  }, 100);
+
   static propTypes = {
     code: PropTypes.string.isRequired,
-    evalInContext: PropTypes.func.isRequired,
+    compilerConfig: PropTypes.object.isRequired,
   };
 
-  static contextType = Context;
-
-  state = {
-    error: null,
-  };
+  constructor(props) {
+    super(props);
+    const { code } = this.props;
+    this.state = { code, logs: [] };
+  }
 
   componentDidMount() {
-    // Clear console after hot reload, do not clear on the first load
-    // to keep any warnings
-    if (this.context.codeRevision > 0) {
-      // eslint-disable-next-line no-console
-      console.clear();
-    }
-
-    this.executeCode();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.error !== nextState.error || this.props.code !== nextProps.code;
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.code !== prevProps.code) {
-      this.executeCode();
-    }
+    Hook(window.console, (log) => {
+      this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }));
+    });
   }
 
   componentWillUnmount() {
-    this.unmountPreview();
+    // Clear pending changes
+    this.handleChange.cancel();
   }
 
-  unmountPreview() {
-    if (this.mountNode) {
-      ReactDOM.unmountComponentAtNode(this.mountNode);
-    }
-  }
-
-  executeCode() {
-    this.setState({
-      error: null,
-    });
-
-    const {
-      code,
-    } = this.props;
-    if (!code) {
-      return;
-    }
-
-    const wrappedComponent = (
-      <ReactExample
-        code={`async () => { ${code}}`}
-        evalInContext={this.props.evalInContext}
-        onError={this.handleError}
-        compilerConfig={this.context.config.compilerConfig}
-      />
-    );
-
-    window.requestAnimationFrame(() => {
-      // this.unmountPreview();
+  compileCode = () => {
+    const { code } = this.state;
+    const { compilerConfig } = this.props;
+    const compiledCode = compileCode(code, compilerConfig, console.log);
+    const asyncCompiledCode = `(async () => {
       try {
-        ReactDOM.render(wrappedComponent, this.mountNode);
-      } catch (err) {
-        this.handleError(err);
+        ${compiledCode};
+      } catch(err) {
+        console.error(err);
       }
-    });
-  }
+      })()`;
 
-  handleError = (err) => {
-    this.unmountPreview();
-
-    this.setState({
-      error: improveErrorMessage(err.toString()),
-    });
-
-    console.error(err); // eslint-disable-line no-console
+    evalInContext(asyncCompiledCode);
   };
 
   render() {
-    const {
-      error,
-    } = this.state;
+    const { methodName } = this.props;
     return (
-      <>
-        <div data-testid="mountNode" ref={ref => (this.mountNode = ref)} />
-        {error && <PlaygroundError message={error} />}
-        <br />
-        <PreviewComponent
-          code={this.props.code}
-          methodName="window.aztec.enable()"
-          executeCode={this.executeCode}
-        />
-      </>
+      <Block background="white" borderRadius="xs" hasBorder>
+        <Block padding="s" hasBorderBottom>
+          <Text text={methodName} weight="bold" size="l" />
+        </Block>
+        <Block background="grey-lightest">
+          <FlexBox align="center" stretch expand>
+            <Editor code={this.state.code} className={styles.textArea} onChange={this.handleChange} />
+          </FlexBox>
+        </Block>
+        <Block
+          padding="s"
+          background="primary"
+          style={{
+            borderRadius: '0 0 3px 3px',
+          }}
+        >
+          <FlexBox align="flex-end" stretch expand>
+            <Button text="Run Code" onClick={this.compileCode} />
+          </FlexBox>
+        </Block>
+        <Console logs={this.state.logs} filter={['info', 'error']} variant="dark" />
+      </Block>
     );
   }
 }
 
+Preview.propTypes = {
+  code: PropTypes.string.isRequired,
+};
+
+export default Preview;
