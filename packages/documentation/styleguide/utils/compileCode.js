@@ -17,7 +17,7 @@ const wrapCodeInFragment = (code) => `<React.Fragment>${code}</React.Fragment>;`
 export default function compileCode(code, compilerConfig, onError) {
   try {
     const wrappedCode = startsWithJsx(code) ? wrapCodeInFragment(code) : code;
-    const compiledCode = compile(wrappedCode, compilerConfig);
+    const compiledCode = compile(wrappedCode, { ...compilerConfig, transforms: { asyncAwait: false } });
     return transpileImports(compiledCode);
   } catch (err) {
     if (onError) {
