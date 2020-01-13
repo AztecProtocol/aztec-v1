@@ -1,49 +1,36 @@
 import React from 'react';
-import { Block, FlexBox, Button, Text, Row, TextInput } from '@aztec/guacamole-ui';
+import { Hook, Console, Decode } from 'console-feed';
+import { Block, FlexBox, Button, Text } from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
-import Context from 'react-styleguidist/lib/client/rsg-components/Context';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import styles from './preview.module.scss';
 
 import compileCode from '../../utils/compileCode';
 import evalInContext from '../../utils/evalInContext';
-import splitExampleCode from '../../utils/splitExampleCode';
 
 class PreviewComponent extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+  handleChange = debounce((code) => {
+    this.state = {
+      code,
+    };
+  }, 100);
 
   static propTypes = {
     code: PropTypes.string.isRequired,
-    evalInContext: PropTypes.func.isRequired,
-    index: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    exampleMode: PropTypes.string.isRequired,
-    settings: PropTypes.object,
+    compilerConfig: PropTypes.object.isRequired,
   };
 
-  static defaultProps = {
-    settings: {},
-  };
+  constructor(props) {
+    super(props);
+    const { code } = this.props;
+    this.state = { code, logs: [] };
+  }
 
-  static contextType = Context;
-
-  state = {
-    code: this.props.code,
-    prevCode: this.props.code,
-  };
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { code } = nextProps;
-    if (prevState.prevCode !== code) {
-      return {
-        prevCode: code,
-        code,
-      };
-    }
-    return null;
+  componentDidMount() {
+    Hook(window.console, (log) => {
+      this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }));
+    });
   }
 
   componentWillUnmount() {
@@ -53,36 +40,21 @@ class PreviewComponent extends React.Component {
 
   compileCode = () => {
     const { code } = this.state;
-    const { compilerConfig, onError } = this.props;
+    const { compilerConfig } = this.props;
     const compiledCode = compileCode(code, compilerConfig, console.log);
-    console.log({ compiledCode });
-
-    const { head, example } = splitExampleCode(compiledCode);
-    console.log({ example });
-    console.log({ head });
-
-    const codeToRun = evalInContext(`
-    async () => {
-      var state = {}, initialState = {};
+    const asyncCompiledCode = `(async () => {
       try {
-         const result = ${example};
-         return result;
-      } catch (err) {
-        console.log(err)
+        ${compiledCode};
+      } catch(err) {
+        console.error(err);
       }
-    }`)();
-    console.log({ codeToRun });
+      })()`;
+
+    evalInContext(asyncCompiledCode);
   };
 
-
-  handleChange = debounce((code) => {
-    this.setState({
-      code,
-    });
-  }, 100);
-
   render() {
-    const { code, methodName } = this.props;
+    const { methodName } = this.props;
     return (
       <Block background="white" borderRadius="xs" hasBorder>
         <Block padding="s" hasBorderBottom>
@@ -104,6 +76,7 @@ class PreviewComponent extends React.Component {
             <Button text="Run Code" onClick={this.compileCode} />
           </FlexBox>
         </Block>
+        <Console logs={this.state.logs} filter={['info', 'error']} variant="dark" />
       </Block>
     );
   }
