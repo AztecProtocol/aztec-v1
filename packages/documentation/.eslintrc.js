@@ -74,15 +74,6 @@ module.exports = {
     'space-before-blocks': 'error',
     'array-bracket-spacing': ['error', 'never'],
     'object-curly-spacing': ['error', 'always'],
-    'object-curly-newline': [
-      'error',
-      {
-        ObjectExpression: { multiline: true, minProperties: 1 },
-        ObjectPattern: { multiline: true, minProperties: 1 },
-        ImportDeclaration: { multiline: true, minProperties: 1 },
-        ExportDeclaration: { multiline: true, minProperties: 1 }
-      }
-    ],
     'object-property-newline': 'error',
     'no-whitespace-before-property': 'error',
     'arrow-body-style': ['error', 'as-needed'],
@@ -108,6 +99,7 @@ module.exports = {
     'prefer-rest-params': 'error',
     'prefer-spread': 'error',
     'new-cap': 'error',
+    'no-console': 'off',
 
     // variables
     'no-var': 'error',
