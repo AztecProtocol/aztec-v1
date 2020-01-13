@@ -1,18 +1,11 @@
 {
-    "name": "@aztec/guacamole-ui",
-    "version": "1.1.1",
+    "name": "@aztec/documentation",
+    "version": "0.0.0",
     "main": "dist/index.js",
-    "license": "MIT",
-    "homepage": "https://ui.aztecprotocol.com",
     "repository": {
-        "type": "git",
-        "url": "https://github.com/AztecProtocol/guacamole-ui.git"
+        "type": "git"
     },
-    "bugs": {
-        "url": "https://github.com/AztecProtocol/guacamole-ui/issues"
-    },
-    "author": "AZTEC Protocol",
-    "description": "Customizable React UI Components",
+    "description": "AZTEC Protocol documentation based on React Styleguidist",
     "scripts": {
         "build": "yarn clean && yarn generate && BABEL_ENV=transpile yarn transpile && yarn copy && yarn styleguide:build",
         "bundle": "babel-node scripts/run bundle",
@@ -25,9 +18,6 @@
         "styleguide:build": "styleguidist build",
         "test": "jest ./src",
         "transpile": "BABEL_ENV=transpile babel src -x \".js\",\".jsx\" --ignore \"**/*.spec.js\",\"**/demo/**\" -d dist"
-    },
-    "bin": {
-        "guacamole": "./bin/guacamole.js"
     },
     "dependencies": {
         "@aztec/guacamole-ui": "^1.1.2",
@@ -42,6 +32,7 @@
         "babel-loader": "^8.0.5",
         "chalk": "^2.4.2",
         "classnames": "^2.2.6",
+        "console-feed": "^2.8.11",
         "css-loader": "^2.1.1",
         "del": "^4.0.0",
         "estree-walker": "^1.0.1",
