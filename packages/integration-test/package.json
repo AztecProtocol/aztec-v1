@@ -4,6 +4,7 @@
   "description": "Setup and run a series of integration tests for the AZTEC protocol smart contracts",
   "main": "index.js",
   "scripts": {
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh protocol || sh ../monorepo-scripts/ci/hasChanged.sh integration-test",
     "lint": "yarn lint:js",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "test:testNets": "scripts/test.sh",
