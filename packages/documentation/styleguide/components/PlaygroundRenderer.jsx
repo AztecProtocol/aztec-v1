@@ -45,8 +45,6 @@ export function PlaygroundRenderer({
   return (
     <div className={classes.root}>
       <div
-        className={classnames(classes.preview, className)}
-        {...props}
         data-preview={name}
       >
         {preview}

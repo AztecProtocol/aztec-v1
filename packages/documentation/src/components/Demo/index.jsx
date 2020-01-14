@@ -5,7 +5,6 @@ import React, {
 import {
   Button,
 } from '@aztec/guacamole-ui';
-import '@aztec/guacamole-ui/dist/styles/guacamole.css';
 import ReactJson from 'react-json-view';
 
 
