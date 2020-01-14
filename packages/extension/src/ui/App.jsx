@@ -157,6 +157,9 @@ class App extends PureComponent {
         const routeNodes = [];
         let defaultRoute;
         const {
+            mock,
+        } = this.props;
+        const {
             currentAccount,
             action,
             gsnConfig,
@@ -165,6 +168,7 @@ class App extends PureComponent {
         Object.keys(config).forEach((subName) => {
             const {
                 Component,
+                step,
                 path: subPath,
                 routes: childRoutes,
             } = config[subName];
@@ -184,7 +188,7 @@ class App extends PureComponent {
                 routeNodes.push(...childRouteNodes);
             }
 
-            if (Component) {
+            if (Component || (mock && step)) {
                 const routeNode = (
                     <Route
                         key={path}
