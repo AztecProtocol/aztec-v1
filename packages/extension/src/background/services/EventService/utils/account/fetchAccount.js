@@ -24,10 +24,21 @@ export default async function fetchAccount({
     };
 
     try {
-        const data = await Web3Service
+        // if we try to find `RegisterExtension` event with an address in the filter
+        // and there is no account on chain for that address
+        // it will break the next transaction sent via GSN
+        const onChainLinkedPublicKey = await Web3Service
             .useContract('AZTECAccountRegistry')
-            .events(eventName)
-            .where(options);
+            .method('accountMapping')
+            .call(address);
+
+        let data = [];
+        if (onChainLinkedPublicKey) {
+            data = await Web3Service
+                .useContract('AZTECAccountRegistry')
+                .events(eventName)
+                .where(options);
+        }
 
         const accounts = data.map(({
             blockNumber,
