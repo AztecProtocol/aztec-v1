@@ -1,11 +1,10 @@
-export default async function evalInContext(code) {
+export default async (code) => {
   // eslint-disable-next-line no-new-func
-  const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+  const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
   const func = new AsyncFunction(code);
-
   try {
-    await func();
+    return func();
   } catch (err) {
     console.log({ err });
   }
-}
+};
