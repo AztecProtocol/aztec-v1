@@ -18,10 +18,8 @@ jobs:
                 command: |
                   LAST_SUCCESSFUL_BUILD_URL="https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/tree/develop?filter=successful&limit=1"
                   LAST_SUCCESSFUL_COMMIT=`curl -Ss -u "$CIRCLE_TOKEN:" $LAST_SUCCESSFUL_BUILD_URL | jq -r '.[0]["vcs_revision"]'`
-                  CHANGED_MODULES=$(echo $(git diff --name-only 9a645f3af134e24be2194410212a0ea151ed817d | grep ^packages\/.*\/ || true) | tr " " "\n" | cut -d\/ -f2 | uniq | paste -sd\| -)
                   echo $LAST_SUCCESSFUL_COMMIT > /tmp/last-successful-commit
                   echo $CIRCLE_SHA1 > /tmp/current-commit
-                  echo $CHANGED_MODULES > /tmp/changed-modules
             - restore_cache:
                 keys:
                     - build-cache-{{ .Branch }}-{{ checksum "/tmp/last-successful-commit" }}
@@ -149,6 +147,7 @@ jobs:
             - run:
                 name: "Release Packages"
                 command: yarn script:publish
+
 workflows:
     version: 2
     main:

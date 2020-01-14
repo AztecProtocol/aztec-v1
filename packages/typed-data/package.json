@@ -47,10 +47,11 @@
   },
   "scripts": {
     "build:dev": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
-    "build": "./build.sh",
+    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
     "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore .",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh typed-data",
     "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
     "watch": "yarn build:dev --watch"
   }
