@@ -10,6 +10,7 @@ import Icons from '~/ui/views/playground/Icons';
 import depositSteps from '~/ui/steps/deposit';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 import {
+    registerSteps,
     withdrawSteps,
     sendSteps,
 } from '~/ui/config/steps';
@@ -28,23 +29,19 @@ export default {
         routes: {
             backup: {
                 path: 'backup',
-                Component: Register,
-                initialStep: 1,
+                step: registerSteps.gsn[1],
             },
             password: {
                 path: 'password',
-                Component: Register,
-                initialStep: 2,
+                step: registerSteps.gsn[2],
             },
             link: {
                 path: 'link-account',
-                Component: Register,
-                initialStep: 3,
+                step: registerSteps.gsn[3],
             },
             confirm: {
                 path: 'confirm',
-                Component: Register,
-                initialStep: 4,
+                step: registerSteps.gsn[4],
             },
             address: {
                 path: 'address',
