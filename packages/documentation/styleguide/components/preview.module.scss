@@ -6,11 +6,16 @@
   position: relative;
   textarea {
 
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none !important;
-    border: none !important;
-    resize: none !important; /*remove the resize handle on the bottom right*/
+  div:first-of-type {
+    width: 100%;
+    textarea {
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
+      resize: none !important; /*remove the resize handle on the bottom right*/
+    }
   }
 
   &:after {
