@@ -2,7 +2,6 @@ import Home from '~/ui/views/Home';
 import Register from '~/ui/pages/Register';
 import RegisterAddress from '~/ui/pages/RegisterAddress';
 import DomainPermission from '~/ui/pages/DomainPermission';
-import Account from '~/ui/pages/Account';
 import Restore from '~/ui/pages/Restore';
 import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
@@ -31,7 +30,6 @@ export default {
     },
     account: {
         path: 'account',
-        Component: Account,
         routes: {
             restore: {
                 path: 'restore',
