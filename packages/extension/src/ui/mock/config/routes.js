@@ -6,11 +6,13 @@ import DomainPermission from '~/ui/pages/DomainPermission';
 import Restore from '~/ui/pages/Restore';
 import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
-import Deposit from '~/ui/pages/Deposit';
-import Withdraw from '~/ui/pages/Withdraw';
-import Send from '~/ui/pages/Send';
-import CreateNoteFromBalance from '~/ui/pages/CreateNoteFromBalance';
 import Icons from '~/ui/views/playground/Icons';
+import depositSteps from '~/ui/steps/deposit';
+import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
+import {
+    withdrawSteps,
+    sendSteps,
+} from '~/ui/config/steps';
 
 export default {
     _: {
@@ -83,65 +85,63 @@ export default {
     },
     deposit: {
         path: 'deposit',
-        Component: Deposit,
+        step: depositSteps.gsn[0],
         routes: {
             approve: {
-                path: 'approve',
-                Component: Deposit,
-                initialStep: 1,
+                path: 'approve-erc20',
+                step: depositSteps.gsn[1],
+            },
+            publicApprove: {
+                path: 'approve-public',
+                step: depositSteps.gsnTransfer[2],
             },
             send: {
                 path: 'send',
-                Component: Deposit,
-                initialStep: 2,
+                step: depositSteps.gsn[2],
             },
         },
     },
     withdraw: {
         path: 'withdraw',
-        Component: Withdraw,
+        step: withdrawSteps.gsn[0],
         routes: {
             sign: {
                 path: 'sign',
-                Component: Withdraw,
-                initialStep: 1,
+                step: withdrawSteps.gsn[1],
             },
             send: {
                 path: 'send',
-                Component: Withdraw,
-                initialStep: 2,
+                step: withdrawSteps.gsn[2],
             },
         },
     },
     send: {
         path: 'send',
-        Component: Send,
+        step: sendSteps.gsn[0],
         routes: {
             sign: {
                 path: 'sign',
-                Component: Send,
+                step: sendSteps.gsn[1],
                 initialStep: 1,
             },
             send: {
                 path: 'send',
-                Component: Send,
+                step: sendSteps.gsn[2],
                 initialStep: 2,
             },
         },
     },
     createNote: {
         path: 'create-note',
-        Component: CreateNoteFromBalance,
+        step: createNoteFromBalanceSteps.gsn[0],
         routes: {
             sign: {
                 path: 'sign',
-                Component: CreateNoteFromBalance,
-                initialStep: 1,
+                step: createNoteFromBalanceSteps.gsn[1],
             },
             send: {
                 path: 'send',
-                Component: CreateNoteFromBalance,
-                initialStep: 2,
+                step: createNoteFromBalanceSteps.gsn[2],
             },
         },
     },
