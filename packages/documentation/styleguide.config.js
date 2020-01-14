@@ -1,8 +1,12 @@
+require('babel-polyfill');
+
 require('@babel/register');
 const path = require('path');
-const webpackConfig = require('./webpack.config').default;
+webpackConfig = require('./webpack.config').default;
 const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
-const { defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap } = require('./src/config/colors');
+const {
+  defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap,
+} = require('./src/config/colors');
 
 module.exports = {
   title: 'AZTEC Docs',
