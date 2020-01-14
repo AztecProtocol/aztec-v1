@@ -37,6 +37,7 @@ const DepositConfirm = ({
                     align="space-between"
                     valign="flex-start"
                     stretch
+                    nowrap
                 >
                     <ListRow
                         title={i18n.t('deposit.from')}
