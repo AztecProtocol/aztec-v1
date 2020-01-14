@@ -40,6 +40,7 @@ const webpackConfig = (env = 'development', {
       tls: 'empty',
     },
     entry: [
+      'babel-polyfill',
       path.resolve(__dirname, 'src/index.js'),
     ],
     target: 'web',
