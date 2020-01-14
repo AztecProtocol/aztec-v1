@@ -1,10 +1,9 @@
-@import '../../../src/styles/variables.scss';
+@import '../../src/styles/variables.scss';
 
 .textArea {
   width: 100%;
   outline: none !important;
   position: relative;
-  textarea {
 
   div:first-of-type {
     width: 100%;
@@ -32,7 +31,7 @@
 .codeRunning{
   pointer-events: none;
   &:after {
-    content: 'Running Example';
+    content: 'Running Example...';
     color: map-get($color-map, 'white');
     transition: all ease 0.3s;
     background: map-get($color-map, 'primary-lighter');

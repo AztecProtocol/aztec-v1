@@ -202,7 +202,7 @@ module.exports = {
                 },
                 {
                   name: 'zkAsset.deposit()',
-                  content: 'styleguide/categories/JavaScrip tSDK/APIMethods/zkAsset/deposit.md',
+                  content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset/deposit.md',
                   exampleMode: 'hide',
                 },
                 {
