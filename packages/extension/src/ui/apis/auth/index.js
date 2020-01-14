@@ -10,6 +10,7 @@ import linkAccountToMetaMask from './linkAccountToMetaMask';
 import sendRegisterAddress from './sendRegisterAddress';
 import sendGSNRegisterTx from './sendGSNRegisterTx';
 import registerAddress from './registerAddress';
+import registerAccountOnChain from './registerAccountOnChain';
 import restoreAccount from './restoreAccount';
 import getAccountKeys from './getAccountKeys';
 import approveDomain from './approveDomain';
@@ -29,6 +30,7 @@ export {
     generateLinkedPublicKey,
     sendRegisterAddress,
     registerAddress,
+    registerAccountOnChain,
     restoreAccount,
     getAccountKeys,
     approveDomain,

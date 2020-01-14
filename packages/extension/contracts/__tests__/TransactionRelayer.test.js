@@ -4,6 +4,7 @@ import {
     accounts,
     contract,
 } from '@openzeppelin/test-environment';
+import asyncForEach from '~/utils/asyncForEach';
 import deployACE from './helpers/deployACE';
 
 const ERC20Mintable = contract.fromArtifact('ERC20Mintable');
@@ -138,13 +139,78 @@ describe('TransactionRelayer', () => {
         expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
         expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(depositAmount);
 
-        const [note] = outputNotes;
+        asyncForEach(outputNotes, async (note) => {
+            const {
+                status,
+                noteOwner,
+            } = await ace.getNote(zkAsset.address, note.noteHash);
+            expect(status.toNumber()).toBe(1);
+            expect(noteOwner).toBe(userAddress);
+        });
+    });
+
+    it('allow to deposit notes belonging to another user', async () => {
         const {
-            status,
-            noteOwner,
-        } = await ace.getNote(zkAsset.address, note.noteHash);
-        expect(status.toNumber()).toBe(1);
-        expect(noteOwner).toBe(userAddress);
+            inputNotes,
+            outputNotes,
+            publicValue,
+            depositAmount,
+        } = await generateDepositProofData({
+            owner: {
+                address: anotherUserAddress,
+                publicKey: stranger.publicKey,
+            },
+        });
+
+        const depositProof = new JoinSplitProof(
+            inputNotes,
+            outputNotes,
+            relayer.address,
+            publicValue,
+            relayer.address,
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: userAddress },
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: anotherUserAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
+
+        const proofData = depositProof.encodeABI(zkAsset.address);
+        const proofHash = depositProof.hash;
+        await relayer.deposit(
+            zkAsset.address,
+            userAddress,
+            proofHash,
+            proofData,
+            depositAmount,
+            { from: userAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount - depositAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(depositAmount);
+
+        asyncForEach(outputNotes, async (note) => {
+            const {
+                status,
+                noteOwner,
+            } = await ace.getNote(zkAsset.address, note.noteHash);
+            expect(status.toNumber()).toBe(1);
+            expect(noteOwner).toBe(anotherUserAddress);
+        });
     });
 
     it("can not deposit from other user's account", async () => {
@@ -202,7 +268,7 @@ describe('TransactionRelayer', () => {
             error = e;
         }
 
-        expect(error.toString()).toMatch(/Cannot deposit note to other account/);
+        expect(error.toString()).toMatch(/Sender has no permission to deposit on owner's behalf/);
 
         expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
         expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
@@ -333,5 +399,156 @@ describe('TransactionRelayer', () => {
             noNoteError = e;
         }
         expect(noNoteError).not.toBe(null);
+    });
+
+    it("can send deposit using the owner's alias address", async () => {
+        const {
+            inputNotes,
+            outputNotes,
+            publicValue,
+            depositAmount,
+        } = await generateDepositProofData({
+            owner: {
+                address: userAddress,
+                publicKey: stranger.publicKey,
+            },
+        });
+
+        const depositProof = new JoinSplitProof(
+            inputNotes,
+            outputNotes,
+            relayer.address,
+            publicValue,
+            relayer.address,
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: userAddress },
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: anotherUserAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
+
+        const proofData = depositProof.encodeABI(zkAsset.address);
+        const proofHash = depositProof.hash;
+
+        const depositParams = [
+            zkAsset.address,
+            userAddress,
+            proofHash,
+            proofData,
+            depositAmount,
+        ];
+
+        let error;
+        try {
+            await relayer.deposit(
+                ...depositParams,
+                { from: anotherUserAddress },
+            );
+        } catch (e) {
+            error = e;
+        }
+
+        expect(error.toString()).toMatch(/Sender has no permission to deposit on owner's behalf/);
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+
+        await relayer.setAccountAliasMapping(userAddress, anotherUserAddress);
+
+        await relayer.deposit(
+            ...depositParams,
+            { from: anotherUserAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount - depositAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(depositAmount);
+
+        const [note] = outputNotes;
+        const {
+            status,
+            noteOwner,
+        } = await ace.getNote(zkAsset.address, note.noteHash);
+        expect(status.toNumber()).toBe(1);
+        expect(noteOwner).toBe(userAddress);
+    });
+
+    it("cannot deposit notes belonging to non-owner when sending the transaction using the owner's alias address", async () => {
+        const {
+            inputNotes,
+            outputNotes,
+            publicValue,
+            depositAmount,
+        } = await generateDepositProofData({
+            owner: {
+                address: anotherUserAddress,
+                publicKey: stranger.publicKey,
+            },
+        });
+
+        const depositProof = new JoinSplitProof(
+            inputNotes,
+            outputNotes,
+            relayer.address,
+            publicValue,
+            relayer.address,
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: userAddress },
+        );
+
+        await erc20.approve(
+            relayer.address,
+            depositAmount,
+            { from: anotherUserAddress },
+        );
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
+
+        const proofData = depositProof.encodeABI(zkAsset.address);
+        const proofHash = depositProof.hash;
+
+        const depositParams = [
+            zkAsset.address,
+            userAddress,
+            proofHash,
+            proofData,
+            depositAmount,
+        ];
+
+        await relayer.setAccountAliasMapping(userAddress, anotherUserAddress);
+
+        let error;
+        try {
+            await relayer.deposit(
+                ...depositParams,
+                { from: anotherUserAddress },
+            );
+        } catch (e) {
+            error = e;
+        }
+
+        expect(error.toString()).toMatch(/Cannot deposit note to other account if sender is not the same as owner/);
+        expect((await erc20.balanceOf(userAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).toBe(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).toBe(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).toBe(0);
     });
 });
