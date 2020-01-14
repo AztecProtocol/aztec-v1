@@ -24,6 +24,7 @@ const Register = ({
             initialData={{
                 ...currentAccount,
                 seedPhrase,
+                isGSNAvailable,
             }}
         />
     );

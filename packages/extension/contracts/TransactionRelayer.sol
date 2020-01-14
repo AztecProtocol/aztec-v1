@@ -18,12 +18,6 @@ contract TransactionRelayer is Context, IAZTEC, AZTECAccountRegistry {
         ace = ACEModule.ACE(_ace);
     }
 
-    event LogAddress(address addr);
-
-    function publicKeyToAddress(bytes memory publicKey) public pure returns (address) {
-        return address(uint160(uint256(keccak256(publicKey))));
-    }
-
     function deposit(
         address _registryOwner,
         address _owner,
@@ -38,8 +32,7 @@ contract TransactionRelayer is Context, IAZTEC, AZTECAccountRegistry {
         );
 
         if (_owner != _msgSender()) {
-            // address account = publicKeyToAddress(accountMapping[_owner]);
-            // require(account == _msgSender(), "Sender has no permission to deposit on owner's behalf.");
+            require(accountAliasMapping[_owner] == _msgSender(), "Sender has no permission to deposit on owner's behalf.");
 
             (,
             bytes memory proofOutputNotes,
