@@ -1,5 +1,6 @@
 import {
     warnLog,
+    warnLogProduction,
 } from '~/utils/log';
 
 export default class Iframe {
@@ -50,6 +51,16 @@ export default class Iframe {
 
         // clear previous unresolved init
         this.unbindAwaitFrameReady();
+
+        const elem = document.getElementById(this.id);
+        if (elem) {
+            if (this.frame) {
+                this.frame = null;
+                elem.remove();
+            } else {
+                warnLogProduction(`Element with id '${this.id}' is already in DOM. Please rename it to avoid unexpected result.`);
+            }
+        }
 
         return new Promise((resolve) => {
             this.onReadyCallback = resolve;
