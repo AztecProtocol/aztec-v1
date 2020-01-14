@@ -1,6 +1,15 @@
 import React from 'react';
-import { Hook, Console, Decode } from 'console-feed';
-import { Block, FlexBox, Button, Text } from '@aztec/guacamole-ui';
+import {
+  Hook,
+  Console,
+  Decode,
+} from 'console-feed';
+import {
+  Block,
+  FlexBox,
+  Button,
+  Text,
+} from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
@@ -38,33 +47,55 @@ class PreviewComponent extends React.Component {
     this.handleChange.cancel();
   }
 
-  compileCode = () => {
+  compileCode = async () => {
     const { code } = this.state;
     const { compilerConfig } = this.props;
     const compiledCode = compileCode(code, compilerConfig, console.log);
-    const asyncCompiledCode = `(async () => {
+    const asyncCompiledCode = `const code = async () => {
       try {
         ${compiledCode};
       } catch(err) {
         console.error(err);
       }
-      })()`;
+      }
 
-    evalInContext(asyncCompiledCode);
+      return code()`;
+    console.log('here');
+    this.setState({
+      isRunning: true,
+    });
+
+    const resp = await evalInContext(asyncCompiledCode);
+    this.setState({
+      isRunning: false,
+    });
   };
 
   render() {
     const { methodName } = this.props;
+    const { isRunning, logs } = this.state;
     return (
       <Block background="white" borderRadius="xs" hasBorder>
         <Block padding="s" hasBorderBottom>
-          <Text text={methodName} weight="bold" size="l" />
+          <Text text={methodName} size="m" />
         </Block>
         <Block background="grey-lightest">
-          <FlexBox stretch expand>
-            <Editor code={this.state.code} className={styles.textArea} onChange={this.handleChange} />
+          <FlexBox className={isRunning ? `${styles.textArea} ${styles.codeRunning}` : styles.textArea} stretch expand>
+            <Editor code={this.state.code} onChange={this.handleChange} />
           </FlexBox>
         </Block>
+        <Block
+          padding="s"
+          background="primary"
+          style={{
+            borderRadius:  logs.length ? '0 0 0px 0px': '0 0 3px 3px',
+          }}
+        >
+          <FlexBox align="flex-end" stretch expand>
+            <Button text="Run" onClick={this.compileCode} isLoading={isRunning} />
+          </FlexBox>
+        </Block>
+        {!!logs.length &&
         <Block
           padding="s"
           background="primary"
@@ -72,11 +103,21 @@ class PreviewComponent extends React.Component {
             borderRadius: '0 0 3px 3px',
           }}
         >
-          <FlexBox align="flex-end" stretch expand>
-            <Button text="Run Code" onClick={this.compileCode} />
-          </FlexBox>
-        </Block>
-        <Console logs={this.state.logs} filter={['info', 'error']} variant="dark" />
+          <Console logs={logs} filter={['info', 'error']} variant="dark" styles={{
+            LOG_BACKGROUND: 'transparent',
+            LOG_INFO_BACKGROUND: 'transparent',
+            LOG_RESULT_BACKGROUND: 'transparent',
+            LOG_WARN_BACKGROUND: 'transparent',
+            LOG_ERROR_BACKGROUND: 'transparent',
+            BASE_BACKGROUND_COLOR: 'transparent',
+            TABLE_TH_BACKGROUND_COLOR: 'transparent',
+            LOG_INFO_BORDER: 'none',
+            LOG_RESULT_BORDER: 'none',
+            LOG_ERROR_BORDER: 'none',
+            LOG_BORDER: 'none',
+          }} />
+      </Block>
+        }
       </Block>
     );
   }

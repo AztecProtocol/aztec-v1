@@ -1,6 +1,9 @@
+@import '../../../src/styles/variables.scss';
+
 .textArea {
   width: 100%;
   outline: none !important;
+  position: relative;
   textarea {
 
     -webkit-box-shadow: none;
@@ -8,5 +11,33 @@
     box-shadow: none !important;
     border: none !important;
     resize: none !important; /*remove the resize handle on the bottom right*/
+  }
+
+  &:after {
+    content: ' ';
+    transition: all ease 0.3s;
+    background: rgba(0,0,0,0.0);
+    position: absolute;
+    top: 0px;
+    left: 0x;
+    width: 100%;
+    height: 100%;
+  }
+}
+.codeRunning{
+  pointer-events: none;
+  &:after {
+    content: 'Running Example';
+    color: map-get($color-map, 'white');
+    transition: all ease 0.3s;
+    background: map-get($color-map, 'primary-lighter');
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0px;
+    left: 0x;
+    width: 100%;
+    height: 100%;
   }
 }
