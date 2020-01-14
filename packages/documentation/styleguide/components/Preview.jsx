@@ -11,9 +11,9 @@ import evalInContext from '../utils/evalInContext';
 
 class Preview extends React.Component {
   handleChange = debounce((code) => {
-    this.state = {
+    this.setState({
       code,
-    };
+    });
   }, 100);
 
   static propTypes = {
@@ -61,8 +61,8 @@ class Preview extends React.Component {
           <Text text={methodName} weight="bold" size="l" />
         </Block>
         <Block background="grey-lightest">
-          <FlexBox align="center" stretch expand>
-            <Editor code={this.state.code} className={styles.textArea} onChange={this.handleChange} />
+          <FlexBox align="center" className={styles.textArea} stretch expand>
+            <Editor code={this.props.code} onChange={this.handleChange} />
           </FlexBox>
         </Block>
         <Block
