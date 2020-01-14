@@ -18,7 +18,6 @@ const Send = ({
     currentAccount,
     assetAddress,
     transactions,
-    proof,
     numberOfInputNotes,
     numberOfOutputNotes,
     userAccess,
@@ -46,7 +45,6 @@ const Send = ({
             asset,
             sender,
             transactions: parsedTransactions,
-            proof,
             numberOfInputNotes,
             numberOfOutputNotes,
             userAccessAccounts,
@@ -70,9 +68,6 @@ Send.propTypes = {
     }).isRequired,
     assetAddress: PropTypes.string.isRequired,
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
-    proof: PropTypes.shape({
-        inputNotes: PropTypes.array.isRequired,
-    }),
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
     userAccess: PropTypes.arrayOf(PropTypes.string),
@@ -81,7 +76,6 @@ Send.propTypes = {
 
 Send.defaultProps = {
     initialStep: 0,
-    proof: null,
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
     userAccess: [],

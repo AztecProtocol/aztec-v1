@@ -31,16 +31,12 @@ export default {
     },
     'register.password': {},
     'register.link': {
-        currentAccount: {
-            address,
-            linkedPublicKey,
-        },
+        address,
+        linkedPublicKey: `0x${randomId(64)}`,
     },
     'register.confirm': {
-        currentAccount: {
-            address,
-            linkedPublicKey,
-        },
+        address,
+        linkedPublicKey: `0x${randomId(64)}`,
     },
     'register.address': {
         currentAccount: {

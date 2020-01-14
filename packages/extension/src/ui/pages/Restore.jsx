@@ -80,14 +80,12 @@ const steps = [
 const Restore = ({
     initialStep,
     currentAccount,
-    seedPhrase,
 }) => (
     <AnimatedTransaction
         initialStep={initialStep}
         steps={steps}
         initialData={{
             currentAccount,
-            seedPhrase,
             address: currentAccount.address,
         }}
     />
@@ -99,12 +97,10 @@ Restore.propTypes = {
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string,
     }).isRequired,
-    seedPhrase: PropTypes.string,
 };
 
 Restore.defaultProps = {
     initialStep: 0,
-    seedPhrase: '',
 };
 
 export default Restore;
