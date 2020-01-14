@@ -179,23 +179,6 @@ const handleAction = async (action, params) => {
                 );
             break;
         }
-        case 'metamask.aztec.registerAZTECExtension': {
-            const {
-                linkedPublicKey,
-                spendingPublicKey,
-                signature,
-            } = params;
-            await Web3Service
-                .useContract('AZTECAccountRegistry')
-                .method('registerAZTECExtension')
-                .send(
-                    address,
-                    linkedPublicKey,
-                    spendingPublicKey,
-                    signature,
-                );
-            break;
-        }
         default:
     }
 
