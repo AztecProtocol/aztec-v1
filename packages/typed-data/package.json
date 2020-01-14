@@ -51,7 +51,7 @@
     "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore .",
-    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh secp256k1",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh typed-data",
     "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
     "watch": "yarn build:dev --watch"
   }
