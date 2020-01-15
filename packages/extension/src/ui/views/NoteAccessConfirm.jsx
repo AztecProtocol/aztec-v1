@@ -18,12 +18,12 @@ import HashText from '~/ui/components/HashText';
 
 const NoteAccessConfirm = ({
     note,
+    asset,
     accounts,
 }) => {
     const {
         noteHash,
         value,
-        asset,
     } = note;
 
     const invalidAccounts = accounts.some(({ linkedPublicKey }) => !linkedPublicKey);
@@ -136,8 +136,8 @@ NoteAccessConfirm.propTypes = {
     note: PropTypes.shape({
         noteHash: PropTypes.string.isRequired,
         value: PropTypes.number.isRequired,
-        asset: assetShape.isRequired,
     }).isRequired,
+    asset: assetShape.isRequired,
     accounts: PropTypes.arrayOf(PropTypes.shape({
         address: PropTypes.string,
         linkedPublicKey: PropTypes.string,

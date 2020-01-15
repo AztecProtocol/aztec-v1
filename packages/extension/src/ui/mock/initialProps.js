@@ -3,6 +3,7 @@ import {
     randomId,
     randomInt,
 } from '~/utils/random';
+import makeAsset from '~uiModules/utils/makeAsset';
 import {
     seedPhrase,
     linkedPublicKey,
@@ -72,7 +73,7 @@ export default {
         goNext: dummyFunc,
     },
     deposit: {
-        asset: assets[0],
+        asset: makeAsset(assets[0]),
         publicOwner: randomAddress(),
         transactions: [depositTransactions[0]],
         amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
@@ -106,7 +107,7 @@ export default {
         },
     },
     send: {
-        asset: assets[0],
+        asset: makeAsset(assets[0]),
         sender: randomAddress(),
         transactions: sendTransactions,
         amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
