@@ -67,6 +67,7 @@
         "scrypt-async": "^2.0.1",
         "svg-sprite-loader": "^4.1.6",
         "terminal-kit": "^1.31.3",
+        "terser-webpack-plugin": "^2.3.2",
         "truffle-hdwallet-provider": "^1.0.17",
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
@@ -76,11 +77,12 @@
         "web3-utils": "1.2.1",
         "webpack": "4.41.2",
         "webpack-cli": "3.3.10",
-        "webpack-dev-server": "^3.8.0"
+        "webpack-dev-server": "^3.8.0",
+        "webpack-merge": "^4.2.2"
     },
     "scripts": {
-        "build:dev": "webpack --config webpack-sdk.dev.js",
-        "build:prod": "webpack --config webpack-sdk.prod.js",
+        "build:dev": "webpack --config webpack.dev.js",
+        "build:prod": "webpack --config webpack.prod.js",
         "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
         "generate:styles": "guacamole generateStyles",
@@ -91,7 +93,7 @@
         "test": "jest ./src",
         "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
-        "watch": "webpack --watch --config webpack-sdk.dev.js"
+        "watch": "webpack --watch --config webpack.dev.js"
     },
     "devDependencies": {
         "@babel/cli": "^7.2.3",
