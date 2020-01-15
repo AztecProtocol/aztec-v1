@@ -10,6 +10,7 @@ contract IAccountRegistryBehaviour {
 
     function registerAZTECExtension(
         address _account,
+        address _AZTECaddress,
         bytes calldata _linkedPublicKey,
         bytes calldata _spendingPublicKey,
         bytes calldata _signature
