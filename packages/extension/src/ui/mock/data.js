@@ -68,11 +68,8 @@ export const assets = [
         balance: 2832.21,
     },
     {
-        name: 'C Coin',
-        symbol: 'CC',
-        scalingFactor: new BN(1),
         address: randomAddress(),
-        linkedTokenAddress: randomAddress(),
+        linkedTokenAddress: '',
         balance: 0,
     },
     ...generate(5, () => ({

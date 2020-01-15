@@ -5,6 +5,9 @@ import {
 import {
     errorLog,
 } from '~/utils/log';
+import {
+    transformAssetFromBlock,
+} from '~/utils/transformData';
 
 const converEvent = (event) => {
     const {
@@ -19,7 +22,7 @@ const converEvent = (event) => {
         },
     } = event;
 
-    return {
+    return transformAssetFromBlock({
         blockNumber,
         registryOwner,
         registryAddress,
@@ -27,7 +30,7 @@ const converEvent = (event) => {
         linkedTokenAddress,
         canAdjustSupply,
         canConvert,
-    };
+    });
 };
 
 const subscribe = async ({

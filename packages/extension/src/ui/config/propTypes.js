@@ -22,7 +22,7 @@ export const siteShape = PropTypes.shape({
 
 export const assetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,
-    linkedTokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string,
     scalingFactor: bigNumberType.isRequired,
     name: PropTypes.string,
     icon: PropTypes.string,
@@ -32,7 +32,7 @@ export const assetShape = PropTypes.shape({
 
 export const simpleAssetShape = PropTypes.shape({
     address: PropTypes.string.isRequired,
-    linkedTokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string,
     name: PropTypes.string,
     icon: PropTypes.string,
     symbol: PropTypes.string,
@@ -52,7 +52,7 @@ export const profileType = PropTypes.oneOf([
 const assetProfileShape = PropTypes.shape({
     type: PropTypes.oneOf(['asset', 'token']),
     address: PropTypes.string.isRequired,
-    linkedTokenAddress: PropTypes.string.isRequired,
+    linkedTokenAddress: PropTypes.string,
     icon: PropTypes.string,
 });
 
