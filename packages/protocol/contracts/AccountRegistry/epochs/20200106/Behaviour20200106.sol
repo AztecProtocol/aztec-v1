@@ -4,7 +4,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol"
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../../../interfaces/IZkAsset.sol";
-import "../../../ACE/ACE.sol";
+import "../../../ACE/ACE.sol" as ACEModule;
 import "../../../libs/NoteUtils.sol";
 import "../../../interfaces/IAZTEC.sol";
 import "../../../interfaces/IERC20Mintable.sol";
@@ -27,7 +27,7 @@ contract Behaviour20200106 is BehaviourBase20200106, GSNRecipient, GSNRecipientT
     */
     uint256 public epoch = 20200106;
 
-    ACE ace;
+    ACEModule.ACE ace;
 
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
@@ -38,7 +38,7 @@ contract Behaviour20200106 is BehaviourBase20200106, GSNRecipient, GSNRecipientT
     * @param _trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
     */
     function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
-        ace = ACE(_aceAddress);
+        ace = ACEModule.ACE(_aceAddress);
         GSNRecipient.initialize();
         GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
     }

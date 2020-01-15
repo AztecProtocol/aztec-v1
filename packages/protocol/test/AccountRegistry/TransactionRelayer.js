@@ -1,17 +1,32 @@
 /* global artifacts, contract, expect */
 const aztec = require('aztec.js');
 const secp256k1 = require('@aztec/secp256k1');
+const bn128 = require('@aztec/bn128');
 const { randomHex } = require('web3-utils');
+const dotenv = require('dotenv');
+const hdkey = require('ethereumjs-wallet/hdkey');
+const bip39 = require('bip39');
+const { proofs } = require('@aztec/dev-utils');
+
+const { JOIN_SPLIT_PROOF } = proofs;
 
 const ACE = artifacts.require('./ACE');
+const JoinSplit = artifacts.require('./JoinSplit');
+const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 const ERC20Mintable = artifacts.require('ERC20Mintable');
 const ZkAsset = artifacts.require('ZkAssetOwnable');
 const TestAccountMapping = artifacts.require('./test/TestAccountMapping');
+const { generateFactoryId } = require('../helpers/Factory');
 
 const { JoinSplitProof, ProofUtils } = aztec;
 
+dotenv.config();
+const mnemonic = process.env.TEST_MNEMONIC;
+const seed = bip39.mnemonicToSeed(mnemonic);
+const hdwallet = hdkey.fromMasterSeed(seed);
+
 contract.only('TransactionRelayer', (accounts) => {
-    const [senderAddress, userAddress, anotherUserAddress] = accounts;
+    const [userAddress, anotherUserAddress, senderAddress] = accounts;
     const stranger = secp256k1.generateAccount();
     const initialAmount = 100;
     let ace;
@@ -19,12 +34,15 @@ contract.only('TransactionRelayer', (accounts) => {
     let zkAsset;
     let relayer;
 
-    const generateOutputNotes = async (values, owner = stranger) =>
-        Promise.all(values.map(async (value) => aztec.note.create(owner.publicKey, value)));
+    const noteOwnerWallet = hdwallet.derivePath("m/44'/60'/0'/0/0").getWallet();
+    const noteOwnerAccount = secp256k1.accountFromPrivateKey(noteOwnerWallet.getPrivateKeyString());
 
-    const generateDepositProofData = async ({ outputNoteValues = [20, 30], owner = stranger.publicKey } = {}) => {
+    const generateOutputNotes = async (values, publicKey) =>
+        Promise.all(values.map(async (value) => aztec.note.create(publicKey, value)));
+
+    const generateDepositProofData = async ({ outputNoteValues = [20, 30], publicKey = noteOwnerAccount.publicKey } = {}) => {
         const inputNotes = [];
-        const outputNotes = await generateOutputNotes(outputNoteValues, owner);
+        const outputNotes = await generateOutputNotes(outputNoteValues, publicKey);
 
         const publicValue = ProofUtils.getPublicValue([], outputNoteValues);
 
@@ -38,12 +56,23 @@ contract.only('TransactionRelayer', (accounts) => {
         };
     };
 
+    before(async () => {
+        expect(noteOwnerAccount.address).to.equal(userAddress);
+
+        // ace = await ACE.at(ACE.address);
+        ace = await ACE.new({ from: senderAddress });
+        await ace.setCommonReferenceString(bn128.CRS, { from: senderAddress });
+        const joinSplitValidator = await JoinSplit.new();
+        await ace.setProof(JOIN_SPLIT_PROOF, joinSplitValidator.address, { from: senderAddress });
+
+        const baseFactory = await BaseFactory.new(ace.address);
+        await ace.setFactory(generateFactoryId(1, 1, 1), baseFactory.address, { from: senderAddress });
+    });
+
     beforeEach(async () => {
-        ace = await ACE.deployed();
         erc20 = await ERC20Mintable.new({ from: senderAddress });
         await erc20.mint(userAddress, initialAmount, { from: senderAddress });
         await erc20.mint(anotherUserAddress, initialAmount, { from: senderAddress });
-        await erc20.mint(stranger.address, initialAmount, { from: senderAddress });
 
         zkAsset = await ZkAsset.new(ace.address, erc20.address, 1, {
             from: senderAddress,
@@ -53,18 +82,19 @@ contract.only('TransactionRelayer', (accounts) => {
         relayer = await TestAccountMapping.new(ace.address, trustedGSNSignerAddress);
     });
 
-    it('should deposit to ZkAsset on user behalf', async () => {
-        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
-        });
+    it.only('should deposit to ZkAsset on user behalf', async () => {
+        console.log('ace', ace.address);
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData();
 
         const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
+        console.log({
+            'relayer.address': relayer.address,
+            inputNotes,
+            outputNotes,
+            publicValue,
+        });
 
         await erc20.approve(relayer.address, depositAmount, { from: userAddress });
-
         await erc20.approve(relayer.address, depositAmount, { from: anotherUserAddress });
 
         expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount);
@@ -76,8 +106,41 @@ contract.only('TransactionRelayer', (accounts) => {
         const proofHash = depositProof.hash;
         await relayer.deposit(zkAsset.address, userAddress, proofHash, proofData, depositAmount, { from: userAddress });
 
-        expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount - depositAmount);
+        // expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount - depositAmount);
+        // expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).to.equal(initialAmount);
+        // expect((await erc20.balanceOf(relayer.address)).toNumber()).to.equal(0);
+        // expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(depositAmount);
+
+        // await Promise.all(
+        //     outputNotes.map(async (note) => {
+        //         const { status, noteOwner } = await ace.getNote(zkAsset.address, note.noteHash);
+        //         expect(status.toNumber()).to.equal(1);
+        //         expect(noteOwner).to.equal(userAddress);
+        //     }),
+        // );
+    });
+
+    it('should allow to deposit notes belonging to another user', async () => {
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData();
+
+        const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
+
+        await erc20.approve(relayer.address, depositAmount, { from: userAddress });
+        await erc20.approve(relayer.address, depositAmount, { from: anotherUserAddress });
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount);
         expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).to.equal(initialAmount);
+        expect((await erc20.balanceOf(relayer.address)).toNumber()).to.equal(0);
+        expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(0);
+
+        const proofData = depositProof.encodeABI(zkAsset.address);
+        const proofHash = depositProof.hash;
+        await relayer.deposit(zkAsset.address, anotherUserAddress, proofHash, proofData, depositAmount, {
+            from: anotherUserAddress,
+        });
+
+        expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount);
+        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).to.equal(initialAmount - depositAmount);
         expect((await erc20.balanceOf(relayer.address)).toNumber()).to.equal(0);
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(depositAmount);
 
@@ -90,56 +153,8 @@ contract.only('TransactionRelayer', (accounts) => {
         );
     });
 
-    it.only('should allow to deposit notes belonging to another user', async () => {
-        console.log('starting second test')
-        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData({
-            owner: {
-                address: anotherUserAddress,
-                publicKey: stranger.publicKey,
-            },
-        });
-
-        console.log('generated deposit proof data')
-
-        const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
-
-        await erc20.approve(relayer.address, depositAmount, { from: userAddress });
-
-        await erc20.approve(relayer.address, depositAmount, { from: anotherUserAddress });
-
-        expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount);
-        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).to.equal(initialAmount);
-        expect((await erc20.balanceOf(relayer.address)).toNumber()).to.equal(0);
-        expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(0);
-        console.log('done first set of expects')
-
-        const proofData = depositProof.encodeABI(zkAsset.address);
-        const proofHash = depositProof.hash;
-        await relayer.deposit(zkAsset.address, userAddress, proofHash, proofData, depositAmount, { from: userAddress });
-
-        expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount - depositAmount);
-        expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).to.equal(initialAmount);
-        expect((await erc20.balanceOf(relayer.address)).toNumber()).to.equal(0);
-        expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(depositAmount);
-        console.log('second set of expects')
-
-        await Promise.all(
-            outputNotes.map(async (note) => {
-                const { status, noteOwner } = await ace.getNote(zkAsset.address, note.noteHash);
-                expect(status.toNumber()).to.equal(1);
-                expect(noteOwner).to.equal(anotherUserAddress);
-            }),
-        );
-        console.log('note tests')
-    });
-
     it('should not deposit from other user account', async () => {
-        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
-        });
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData();
 
         const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
 
@@ -173,12 +188,7 @@ contract.only('TransactionRelayer', (accounts) => {
     });
 
     it('should not affect user balance if proof is invalid', async () => {
-        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
-        });
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData();
 
         const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
 
@@ -249,12 +259,7 @@ contract.only('TransactionRelayer', (accounts) => {
     });
 
     it('should send deposit using the owner alias address', async () => {
-        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
-        });
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData();
 
         const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
 
@@ -298,12 +303,7 @@ contract.only('TransactionRelayer', (accounts) => {
     });
 
     it('should deposit notes belonging to non-owner when sending the transaction using the owner alias address', async () => {
-        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData({
-            owner: {
-                address: anotherUserAddress,
-                publicKey: stranger.publicKey,
-            },
-        });
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofData();
 
         const depositProof = new JoinSplitProof(inputNotes, outputNotes, relayer.address, publicValue, relayer.address);
 
