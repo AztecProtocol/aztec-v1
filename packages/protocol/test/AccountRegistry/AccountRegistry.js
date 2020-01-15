@@ -50,6 +50,7 @@ contract('AccountRegistry', (accounts) => {
 
             const { receipt: registerExtensionReceipt } = await registryContract.registerAZTECExtension(
                 address,
+                randomHex(20),
                 keccak256('0x01'),
                 keccak256('0x0'),
                 sig,
@@ -86,7 +87,7 @@ contract('AccountRegistry', (accounts) => {
 
             const dummyAddress = accounts[0];
             await truffleAssert.reverts(
-                registryContract.registerAZTECExtension(dummyAddress, keccak256('0x01'), keccak256('0x0'), sig),
+                registryContract.registerAZTECExtension(dummyAddress, randomHex(20), keccak256('0x01'), keccak256('0x0'), sig),
             );
         });
 
@@ -94,7 +95,7 @@ contract('AccountRegistry', (accounts) => {
             const { address, linkedPublicKey, spendingPublicKey, sig: legitimateSignature } = createSignature(
                 registryContract.address,
             );
-            await registryContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, legitimateSignature);
+            await registryContract.registerAZTECExtension(address, randomHex(20), linkedPublicKey, spendingPublicKey, legitimateSignature);
 
             const replaySignature = legitimateSignature;
 
@@ -105,6 +106,7 @@ contract('AccountRegistry', (accounts) => {
             await truffleAssert.reverts(
                 registryContract.registerAZTECExtension(
                     secondAddress,
+                    randomHex(20),
                     secondLinkedPublicKey,
                     secondSpendingPublicKey,
                     replaySignature,
