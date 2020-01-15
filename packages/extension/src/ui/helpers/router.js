@@ -85,9 +85,7 @@ class Router {
         }
 
         if (!this.has(key)) {
-            if (process.env.NODE_ENV !== 'production') {
-                warnLog(`Missing url for key: "${key}"`);
-            }
+            warnLog(`Missing url for key: "${key}"`);
             return '/';
         }
 
