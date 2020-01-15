@@ -9,18 +9,21 @@ nacl.util = require('tweetnacl-util');
 const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistry = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
+
 const createSignature = require('../helpers/AccountRegistryManager');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
 contract('AccountRegistry', (accounts) => {
+    let registryContract;
+
+    beforeEach(async () => {
+        const trustedGSNSignerAddress = randomHex(20);
+        const aceAddress = randomHex(20);
+        registryContract = await AccountRegistry.new(aceAddress, trustedGSNSignerAddress, { from: accounts[0] });
+    });
+
     describe('Success States', () => {
-        let registryContract;
-
-        beforeEach(async () => {
-            registryContract = await AccountRegistry.new({ from: accounts[0] });
-        });
-
         it('should initialise the register', async () => {
             const { receipt } = await registryContract.initialize();
             expect(receipt.status).to.equal(true);
@@ -61,12 +64,6 @@ contract('AccountRegistry', (accounts) => {
     });
 
     describe('Failure States', () => {
-        let registryContract;
-
-        beforeEach(async () => {
-            registryContract = await AccountRegistry.new({ from: accounts[0] });
-        });
-
         it('should fail to register the extension if the signature does not match the account', async () => {
             const { privateKey, address } = secp256k1.generateAccount();
 
@@ -95,7 +92,13 @@ contract('AccountRegistry', (accounts) => {
             const { address, linkedPublicKey, spendingPublicKey, sig: legitimateSignature } = createSignature(
                 registryContract.address,
             );
-            await registryContract.registerAZTECExtension(address, randomHex(20), linkedPublicKey, spendingPublicKey, legitimateSignature);
+            await registryContract.registerAZTECExtension(
+                address,
+                randomHex(20),
+                linkedPublicKey,
+                spendingPublicKey,
+                legitimateSignature,
+            );
 
             const replaySignature = legitimateSignature;
 
