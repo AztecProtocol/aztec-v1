@@ -22,7 +22,10 @@ describe('Keccak', () => {
         keccak.appendPoint(bn128.curve.point(new BN(points[1][0], 16), new BN(points[1][1], 16)));
         const hash = keccak.keccak();
 
-        const expected = keccak256(points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'), 'hex').slice(2);
+        const expected = keccak256(
+            points.reduce((r, [a, b]) => `${r}${padLeft(a, 64)}${padLeft(b, 64)}`, '0x'),
+            'hex',
+        ).slice(2);
 
         expect(hash[0]).to.equal(expected);
         expect(
@@ -46,7 +49,10 @@ describe('Keccak', () => {
         });
         keccak.keccak();
 
-        const expected = keccak256(numbers.reduce((r, n) => `${r}${padLeft(n, 64)}`, '0x'), 'hex').slice(2);
+        const expected = keccak256(
+            numbers.reduce((r, n) => `${r}${padLeft(n, 64)}`, '0x'),
+            'hex',
+        ).slice(2);
         expect(keccak.data[0]).to.equal(expected);
     });
 });

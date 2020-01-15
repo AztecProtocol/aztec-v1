@@ -6,9 +6,10 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 import "../../interfaces/IAZTEC.sol";
 import "../../libs/VersioningUtils.sol";
+import "../../interfaces/IERC20Mintable.sol";
 import "./interfaces/NoteRegistryBehaviour.sol";
 import "./interfaces/NoteRegistryFactory.sol";
-import "./proxies/AdminUpgradeabilityProxy.sol";
+import "../../Proxies/AdminUpgradeabilityProxy.sol";
 
 /**
  * @title NoteRegistryManager
@@ -54,7 +55,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
     struct NoteRegistry {
         NoteRegistryBehaviour behaviour;
-        IERC20 linkedToken;
+        IERC20Mintable linkedToken;
         uint24 latestFactory;
         uint256 totalSupply;
         uint256 totalSupplemented;
@@ -261,7 +262,7 @@ contract NoteRegistryManager is IAZTEC, Ownable {
 
         registries[msg.sender] = NoteRegistry({
             behaviour: NoteRegistryBehaviour(proxy),
-            linkedToken: IERC20(_linkedTokenAddress),
+            linkedToken: IERC20Mintable(_linkedTokenAddress),
             latestFactory: _factoryId,
             totalSupply: 0,
             totalSupplemented: 0
@@ -485,5 +486,13 @@ contract NoteRegistryManager is IAZTEC, Ownable {
         assembly {
             version := or(mul(_first, 0x10000), or(mul(_second, 0x100), _third))
         }
+    }
+
+    /**
+    * @dev used for slow release, useless afterwards.
+    */
+    function makeAssetAvailable(address _registryOwner) public onlyOwner {
+        NoteRegistry memory registry = registries[_registryOwner];
+        registry.behaviour.makeAvailable();
     }
 }

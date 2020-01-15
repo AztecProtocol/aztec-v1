@@ -15,7 +15,7 @@ import "../Behaviour201907.sol";
 contract BehaviourAdjustable201907 is Behaviour201907 {
     constructor () Behaviour201907() public {}
 
-    function burn(bytes calldata _proofOutputs) external onlyOwner {
+    function burn(bytes memory _proofOutputs) public onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not burnable");
         // Dealing with notes representing totals
         (bytes memory oldTotal, // input notes
@@ -37,7 +37,7 @@ contract BehaviourAdjustable201907 is Behaviour201907 {
         updateInputNotes(burnedNotes);
     }
 
-    function mint(bytes calldata _proofOutputs) external onlyOwner {
+    function mint(bytes memory _proofOutputs) public onlyOwner {
         require(registry.canAdjustSupply == true, "this asset is not mintable");
         // Dealing with notes representing totals
         (bytes memory oldTotal, // input notes

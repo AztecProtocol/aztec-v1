@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../../ACE/noteRegistry/epochs/201907/base/FactoryBase201907.sol";
-import "../../ACE/noteRegistry/proxies/BaseAdminUpgradeabilityProxy.sol";
+import "../../Proxies/BaseAdminUpgradeabilityProxy.sol";
 
 /**
   * @title TestFactory

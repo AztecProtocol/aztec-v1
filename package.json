@@ -49,6 +49,7 @@
     "script:publish": "node ./packages/monorepo-scripts/publish/index.js",
     "script:update:addresses": "node ./packages/monorepo-scripts/addresses/update.js",
     "test": "yarn wsrun --package $PKG --serial -c test",
+    "test:integration": "cd ./packages/integration-test && yarn test:testNets",
     "watch": "yarn wsrun --package $PKG --parallel -c watch",
     "wsrun": "wsrun --exclude-missing --fast-exit",
     "webpack-defaults": "webpack-defaults"

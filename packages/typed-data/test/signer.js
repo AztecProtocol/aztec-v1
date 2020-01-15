@@ -18,7 +18,10 @@ describe('Signer', () => {
             types: {
                 ZZZ: [{ name: 'foo', type: 'uint' }],
                 AAA: [{ name: 'bar', type: 'bytes32' }],
-                Top: [{ name: 'zfoo', type: 'ZZZ' }, { name: 'aBar', type: 'AAA' }],
+                Top: [
+                    { name: 'zfoo', type: 'ZZZ' },
+                    { name: 'aBar', type: 'AAA' },
+                ],
             },
             primaryType: 'Top',
             message: {
@@ -33,7 +36,10 @@ describe('Signer', () => {
 
         arrayData = {
             types: {
-                Foo: [{ name: 'bytes32Array', type: 'bytes32[]' }, { name: 'boolArray', type: 'bool[]' }],
+                Foo: [
+                    { name: 'bytes32Array', type: 'bytes32[]' },
+                    { name: 'boolArray', type: 'bool[]' },
+                ],
             },
             primaryType: 'Foo',
             message: {
@@ -44,7 +50,10 @@ describe('Signer', () => {
 
         complex = {
             types: {
-                Inner: [{ name: 'quibbleRating', type: 'bytes32' }, { name: 'flimflamHierarchy', type: 'uint[4]' }],
+                Inner: [
+                    { name: 'quibbleRating', type: 'bytes32' },
+                    { name: 'flimflamHierarchy', type: 'uint[4]' },
+                ],
                 Outer: [
                     { name: 'marbleCredentials', type: 'Inner' },
                     { name: 'eloRating', type: 'uint256' },
@@ -69,7 +78,10 @@ describe('Signer', () => {
 
         dynamicData = {
             types: {
-                Bar: [{ name: 'dynamicBytes', type: 'bytes' }, { name: 'dynamicString', type: 'string' }],
+                Bar: [
+                    { name: 'dynamicBytes', type: 'bytes' },
+                    { name: 'dynamicString', type: 'string' },
+                ],
             },
             primaryType: 'Bar',
             message: {
@@ -172,8 +184,15 @@ describe('Reference Implementation', () => {
                 { name: 'version', type: 'string' },
                 { name: 'verifyingContract', type: 'address' },
             ],
-            Person: [{ name: 'name', type: 'string' }, { name: 'wallet', type: 'address' }],
-            Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person' }, { name: 'contents', type: 'string' }],
+            Person: [
+                { name: 'name', type: 'string' },
+                { name: 'wallet', type: 'address' },
+            ],
+            Mail: [
+                { name: 'from', type: 'Person' },
+                { name: 'to', type: 'Person' },
+                { name: 'contents', type: 'string' },
+            ],
         },
         primaryType: 'Mail',
         domain: {
@@ -201,7 +220,11 @@ describe('Reference Implementation', () => {
                 { name: 'version', type: 'string' },
                 { name: 'verifyingContract', type: 'address' },
             ],
-            Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person' }, { name: 'contents', type: 'string' }],
+            Mail: [
+                { name: 'from', type: 'Person' },
+                { name: 'to', type: 'Person' },
+                { name: 'contents', type: 'string' },
+            ],
             Squirrel: [
                 { name: 'name', type: 'string' },
                 { name: 'topSpeed', type: 'uint256' },

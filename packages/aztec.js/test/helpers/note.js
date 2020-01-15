@@ -125,9 +125,31 @@ const balancedPublicValues = (nIn, nOut) => {
     return { kIn, kOut };
 };
 
+/**
+ * Dummy account used to test the granting of note view access
+ */
+const userAccount = {
+    address: '0xfB95acC8D3870da3C646Ae8c3C621916De8DF42d',
+    linkedPublicKey: '0xa61d17b0dd3095664d264628a6b947721314b6999aa6a73d3c7698f041f78a4d',
+    linkedPrivateKey: 'e1ec35b90155a633ac75d0508e537a7e00fd908a5295365054001a44b4a0560c',
+    spendingPublicKey: '0x0290e0354caa04c73920339f979cfc932dd3d52ba8210fec34571bb6422930c396',
+};
+
+/**
+ * Second dummy account used to test the granting of note view access
+ */
+const userAccount2 = {
+    address: '0x61EeAd169ec67b24abee7B81Ca750b6dCA3a9CCd',
+    linkedPublicKey: '0x058d55269a83b5ea379931ac58bc3def375eab12e527708111545af46f5f9b5c',
+    linkedPrivateKey: '6a30cc7b28b037b47378522a1a370c2394b0dd2d70c6abbe5ac66c8a1d84db21',
+    spendingPublicKey: '0x02090a6b89b0588626f26babc87f2dc1e2c815b8248754bed93d837f7071411605',
+};
+
 export {
     balancedPublicValues,
     mockLightNoteSet,
     mockNoteSet,
     randomNoteValue,
+    userAccount,
+    userAccount2,
 };

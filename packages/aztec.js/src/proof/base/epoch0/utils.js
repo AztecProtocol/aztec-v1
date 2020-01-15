@@ -29,7 +29,10 @@ class ProofUtils {
      * @returns {number} net value of the input notes and output notes
      */
     static getPublicValue(kIn, kOut) {
-        return kOut.reduce((acc, value) => acc - value, kIn.reduce((acc, value) => acc + value, 0));
+        return kOut.reduce(
+            (acc, value) => acc - value,
+            kIn.reduce((acc, value) => acc + value, 0),
+        );
     }
 
     /**

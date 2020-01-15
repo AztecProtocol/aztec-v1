@@ -4,7 +4,15 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import crypto from 'crypto';
 import web3Utils from 'web3-utils';
+import * as noteAccess from '@aztec/note-access';
+
 import note from '../../src/note';
+import { userAccount, userAccount2 } from '../helpers/note';
+
+const {
+    constants: { AZTEC_JS_METADATA_PREFIX_LENGTH, VIEWING_KEY_LENGTH },
+    metadata: metaDataConstructor,
+} = noteAccess;
 
 const { padLeft, toHex, randomHex } = web3Utils;
 
@@ -100,6 +108,44 @@ describe('Note', () => {
             expect(metaData.length).to.equal(expectedLength);
             expect(metaData.slice(64, 130)).to.equal(ephemeralKey.slice(2));
             expect(metaData.slice(130, 196)).to.equal(customData.slice(2));
+        });
+
+        it('should add note access when creating note', async () => {
+            const access = [
+                {
+                    address: userAccount.address,
+                    linkedPublicKey: userAccount.linkedPublicKey,
+                },
+            ];
+
+            const testNote = await note.create(userAccount.spendingPublicKey, 10, access);
+            const metadataStr = testNote.exportMetaData();
+            const metadataObj = metaDataConstructor(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
+            const allowedAccess = metadataObj.getAccess(userAccount.address);
+            expect(Object.keys(allowedAccess)).to.deep.equal(['address', 'viewingKey']);
+            expect(allowedAccess.address).to.equal(userAccount.address);
+            expect(allowedAccess.viewingKey.length).to.equal(VIEWING_KEY_LENGTH + 2);
+        });
+
+        it('allow to pass an array of access', async () => {
+            const access = [
+                {
+                    address: userAccount.address,
+                    linkedPublicKey: userAccount.linkedPublicKey,
+                },
+                {
+                    address: userAccount2.address,
+                    linkedPublicKey: userAccount2.linkedPublicKey,
+                },
+            ];
+            const testNote = await note.create(userAccount.spendingPublicKey, 10, access);
+
+            const metadataStr = testNote.exportMetaData();
+            const metadataObj = metaDataConstructor(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
+            const allowedAccess = metadataObj.getAccess(userAccount.address);
+            expect(allowedAccess.viewingKey.length).to.equal(VIEWING_KEY_LENGTH + 2);
+            const allowedAccess2 = metadataObj.getAccess(userAccount2.address);
+            expect(allowedAccess2.viewingKey.length).to.equal(VIEWING_KEY_LENGTH + 2);
         });
     });
 

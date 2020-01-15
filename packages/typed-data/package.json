@@ -7,7 +7,7 @@
     "url": "https://github.com/AztecProtocol/AZTEC/issues"
   },
   "dependencies": {
-    "web3-utils": "1.2.1"
+    "web3-utils": "1.2.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.3",

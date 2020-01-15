@@ -31,25 +31,28 @@ function fetchAllBehaviourData(dirPath) {
         const contract = fs.readFileSync(behaviourPath, 'utf-8');
         const regexMatch = contract.match(/contract (.*) is (.*) \{/);
         const contractName = regexMatch[1];
-        const inherritedBehaviour = regexMatch[2].split(',').find((c) => /[bB]ehaviour/.test(c));
+        const inherritedBehaviours = regexMatch[2].split(',').filter((c) => /[bB]ehaviour/.test(c));
 
         behaviours[contractName] = {
             next: [],
+            previous: inherritedBehaviours,
             ...behaviours[contractName],
             epochInt: parseInt(epoch, 10),
             contractName,
-            inherritedBehaviour,
             behaviourPath,
         };
 
-        if (behaviours[inherritedBehaviour]) {
-            behaviours[inherritedBehaviour].next.push(contractName);
-        } else {
-            behaviours[inherritedBehaviour] = {
-                next: [contractName],
-                epochInt: 0,
-            };
-        }
+        inherritedBehaviours.forEach((inherritedBehaviour) => {
+            if (behaviours[inherritedBehaviour]) {
+                behaviours[inherritedBehaviour].next.push(contractName);
+            } else {
+                behaviours[inherritedBehaviour] = {
+                    next: [contractName],
+                    epochInt: 0,
+                    previous: [],
+                };
+            }
+        });
         return behaviours;
     }, {});
 
@@ -85,11 +88,19 @@ async function assessProperInitialisation(obj, inherritanceObj, accounts) {
 
 contract('Verify inherritance of behaviour contracts', (accounts) => {
     let inherritanceObj;
+    let orderedEpochs;
 
     before(async () => {
         const dirPath = path.join(__dirname, '../../../..', 'contracts', 'ACE', 'noteRegistry', 'epochs');
 
         inherritanceObj = fetchAllBehaviourData(dirPath);
+        const orderedEpochSet = new Set(
+            Object.values(inherritanceObj)
+                .map((o) => o.epochInt)
+                .sort(),
+        );
+
+        orderedEpochs = Array.from(orderedEpochSet);
     });
 
     describe('Success States', async () => {
@@ -108,12 +119,15 @@ contract('Verify inherritance of behaviour contracts', (accounts) => {
              * This is to ensure that no new epoch does not contain variables declared in prior epochs.
              */
             function assessProperInherritance(obj) {
-                const { epochInt, next } = obj;
+                const { epochInt, previous, next } = obj;
+                const epochIndex = orderedEpochs.indexOf(epochInt);
                 if (next.length === 0) return;
-                const baseNextEpoch = next[0] ? inherritanceObj[next[0]].epochInt : 0;
-                expect(baseNextEpoch >= epochInt).to.equal(true);
+                if (epochIndex !== 0) {
+                    const parent = previous.find((c) => inherritanceObj[c].epochInt === orderedEpochs[epochIndex - 1]);
+                    expect(parent).to.not.equal(undefined);
+                }
+
                 next.forEach((c) => {
-                    expect(inherritanceObj[c].epochInt).to.equal(baseNextEpoch);
                     assessProperInherritance(inherritanceObj[c]);
                 });
             }
