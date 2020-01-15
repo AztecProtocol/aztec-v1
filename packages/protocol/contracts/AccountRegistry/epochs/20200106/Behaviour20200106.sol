@@ -1,26 +1,33 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../../../interfaces/IZkAsset.sol";
-import "./base/BehaviourBase20200106.sol";
-import "../../TransactionRelayer.sol";
+import "../../../ACE/ACE.sol";
+import "../../../libs/NoteUtils.sol";
+import "../../../interfaces/IAZTEC.sol";
+import "../../../interfaces/IERC20Mintable.sol";
 import "../../GSNRecipientTimestampSignature.sol";
+import "./base/BehaviourBase20200106.sol";
 
 /**
  * @title Behaviour20200106 implementation
  * @author AZTEC
  * Note the behaviour contract version naming convention is based on the date on which the contract
  * was created, in the format: YYYYMMDD
- * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+    * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
  **/
-contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNRecipient, GSNRecipientTimestampSignature {
+contract Behaviour20200106 is BehaviourBase20200106, GSNRecipient, GSNRecipientTimestampSignature, IAZTEC {
+    using NoteUtils for bytes;
 
     /**
     * @dev epoch number, used for version control in upgradeability. The naming convention is based on the 
     * date on which the contract was created, in the format: YYYYMMDD
     */
     uint256 public epoch = 20200106;
+
+    ACE ace;
 
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
@@ -31,7 +38,7 @@ contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNReci
     * @param _trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
     */
     function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
-        TransactionRelayer.initialize(_aceAddress);
+        ace = ACE(_aceAddress);
         GSNRecipient.initialize();
         GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
     }
@@ -63,6 +70,60 @@ contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNReci
             IZkAsset(_registryOwner).approveProof(JOIN_SPLIT_PROOF, proofOutputs, _spender, true, _proofSignature);
         }
         IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
+    }
+
+    /**
+    * @dev Deposit ERC20 tokens into zero-knowledge notes in a transaction mediated via the GSN. Called by a user
+    * @param _registryOwner - owner of the zkAsset
+    * @param _owner - owner of the ERC20s being deposited
+    * @param _proofHash - hash of the zero-knowledge deposit proof
+    * @param _proofData - cryptographic data associated with the zero-knowledge proof
+    * @param _value - number of ERC20s being deposited
+     */
+    function deposit(
+        address _registryOwner,
+        address _owner,
+        bytes32 _proofHash,
+        bytes memory _proofData,
+        uint256 _value
+    ) public {
+        bytes memory proofOutputs = ace.validateProof(
+            JOIN_SPLIT_PROOF,
+            address(this),
+            _proofData
+        );
+
+        if (_owner != _msgSender()) {
+            require(userToAZTECAccountMapping[_owner] == _msgSender(), "Sender has no permission to deposit on owner's behalf.");
+
+            (,
+            bytes memory proofOutputNotes,
+            ,
+            ) = proofOutputs.get(0).extractProofOutput();
+            uint256 numberOfNotes = proofOutputNotes.getLength();
+            for (uint256 i = 0; i < numberOfNotes; i += 1) {
+                (address owner,,) = proofOutputNotes.get(i).extractNote();
+                require(owner == _owner, "Cannot deposit note to other account if sender is not the same as owner.");
+            }
+        }
+
+        (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
+        IERC20Mintable linkedToken = IERC20Mintable(linkedTokenAddress);
+
+        linkedToken.transferFrom(
+            _owner,
+            address(this),
+            _value
+        );
+
+        linkedToken.approve(address(ace), _value);
+
+        ace.publicApprove(_registryOwner, _proofHash, _value);
+
+        IZkAsset(_registryOwner).confidentialTransferFrom(
+            JOIN_SPLIT_PROOF,
+            proofOutputs.get(0)
+        );
     }
 
     /**

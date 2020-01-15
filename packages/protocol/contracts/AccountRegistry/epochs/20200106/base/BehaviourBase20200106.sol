@@ -7,6 +7,7 @@ contract BehaviourBase20200106 is IAccountRegistryBehaviour, LibEIP712 {
     event Addresses(address accountAddress, address signerAddress);
 
     mapping(address => bytes) public accountMapping;
+    mapping(address => address) public userToAZTECAccountMapping;
     mapping(bytes32 => bool) public signatureLog;
 
     string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
@@ -48,6 +49,7 @@ contract BehaviourBase20200106 is IAccountRegistryBehaviour, LibEIP712 {
      */
     function registerAZTECExtension(
         address _account,
+        address _AZTECaddress,
         bytes memory _linkedPublicKey,
         bytes memory _spendingPublicKey,
         bytes memory _signature
@@ -64,6 +66,7 @@ contract BehaviourBase20200106 is IAccountRegistryBehaviour, LibEIP712 {
         );
         require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
+        userToAZTECAccountMapping[_account] = _AZTECaddress;
         
         emit Addresses(_account, signer);
         emit RegisterExtension(_account, _linkedPublicKey, _spendingPublicKey);
