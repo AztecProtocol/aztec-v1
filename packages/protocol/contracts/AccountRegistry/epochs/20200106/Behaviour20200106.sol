@@ -94,7 +94,10 @@ contract Behaviour20200106 is BehaviourBase20200106, GSNRecipient, GSNRecipientT
         );
 
         if (_owner != _msgSender()) {
-            require(userToAZTECAccountMapping[_owner] == _msgSender(), "Sender has no permission to deposit on owner's behalf.");
+            require(
+                userToAZTECAccountMapping[_owner] == _msgSender(),
+                "Sender has no permission to deposit on owner's behalf."
+            );
 
             (,
             bytes memory proofOutputNotes,
