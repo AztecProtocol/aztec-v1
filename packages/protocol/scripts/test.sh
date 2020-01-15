@@ -40,7 +40,7 @@ start_ganache() {
       export ENV_EXISTS=0
       cp ".env.example" ".env"
       echo "Temporarily copied .env.example to .env"
-    fi
+    fi  
     while read line; do
       if [[ $line == TEST_MNEMONIC=* ]]; then
         export "$line"
@@ -125,7 +125,7 @@ if [ "$MODE" = "profile" ]; then
 fi
 
 
-if [ $ENV_EXISTS -eq 0 ]; then
+if [ "$ENV_EXISTS" -eq 0 ]; then
   rm ".env"
   echo "Deleted added .env"
 fi

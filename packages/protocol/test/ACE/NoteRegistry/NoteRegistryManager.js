@@ -20,6 +20,8 @@ const Behaviour = artifacts.require('./noteRegistry/interfaces/NoteRegistryBehav
 const ERC20Mintable = artifacts.require('./ERC20Mintable');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const TestFactory = artifacts.require('./test/TestFactory');
+const Factory201911 = artifacts.require('./noteRegistry/epochs/201911/base/FactoryBase201911');
+const Factory201912 = artifacts.require('./noteRegistry/epochs/201912/base/FactoryBase201912');
 
 const { JOIN_SPLIT_PROOF } = proofs;
 
@@ -29,6 +31,8 @@ contract('NoteRegistryManager', (accounts) => {
     const aztecAccount = secp256k1.generateAccount();
 
     let factoryContract;
+    let factory201911;
+    let factory201912;
     let ace;
     let erc20;
 
@@ -37,6 +41,9 @@ contract('NoteRegistryManager', (accounts) => {
         await ace.setCommonReferenceString(bn128.CRS);
         ace.setProof(JOIN_SPLIT_PROOF, JoinSplitValidator.address, { from: owner });
         factoryContract = await TestFactory.new(ace.address);
+
+        factory201911 = await Factory201911.new(ace.address);
+        factory201912 = await Factory201912.new(ace.address);
         const epoch = 1;
         const cryptoSystem = 1;
         const assetType = 0b01; // (adjust, canConvert) in binary;
@@ -135,6 +142,69 @@ contract('NoteRegistryManager', (accounts) => {
             });
             expect(upgradeLogs.length).to.equal(1);
             expect(parseInt(upgradeLogs[0].topics[1], 16)).to.be.equal(parseInt(newBehaviourAddress, 16));
+        });
+
+        it('should be able to upgrade from 201911 to 201912', async () => {
+            const factoryId201911 = factoryHelpers.generateFactoryId(2, 1, 1);
+            const factoryId201912 = factoryHelpers.generateFactoryId(3, 1, 1);
+
+            await ace.setFactory(factoryId201911, factory201911.address, {
+                from: owner,
+            });
+            await ace.setFactory(factoryId201912, factory201912.address, {
+                from: owner,
+            });
+
+            const canAdjustSupply = false;
+            const canConvert = true;
+
+            await ace.methods['createNoteRegistry(address,uint256,bool,bool,uint24)'](
+                erc20.address,
+                scalingFactor,
+                canAdjustSupply,
+                canConvert,
+                factoryId201911,
+                { from: zkAssetOwner },
+            );
+            const existingProxy = await ace.registries(zkAssetOwner);
+
+            const upgradeReceipt = await ace.upgradeNoteRegistry(factoryId201912, { from: zkAssetOwner });
+            const { proxyAddress, newBehaviourAddress } = upgradeReceipt.logs.find((l) => l.event === 'UpgradeNoteRegistry').args;
+            expect(newBehaviourAddress).to.not.equal(existingProxy);
+            expect(proxyAddress).to.equal(existingProxy.behaviour);
+
+            const topic = web3.utils.keccak256('NoteRegistryDeployed(address)');
+            const logs = await new Promise((resolve) => {
+                web3.eth
+                    .getPastLogs({
+                        address: factory201912.address,
+                        topics: [topic],
+                    })
+                    .then(resolve);
+            });
+            expect(logs.length).to.equal(1);
+
+            const upgradeTopic = web3.utils.keccak256('Upgraded(address)');
+            const upgradeLogs = await new Promise((resolve) => {
+                web3.eth
+                    .getPastLogs({
+                        address: existingProxy.behaviour,
+                        topics: [upgradeTopic],
+                    })
+                    .then(resolve);
+            });
+            expect(upgradeLogs.length).to.equal(1);
+            expect(parseInt(upgradeLogs[0].topics[1], 16)).to.be.equal(parseInt(newBehaviourAddress, 16));
+
+            const depositValue = -10;
+            const depositOutputNotes = await getNotesForAccount(aztecAccount, [10]);
+            const depositProof = new JoinSplitProof([], depositOutputNotes, zkAssetOwner, depositValue, zkAssetOwner);
+            await ace.publicApprove(zkAssetOwner, depositProof.hash, Math.abs(depositValue), { from: zkAssetOwner });
+            const data = depositProof.encodeABI(JoinSplitValidator.address);
+            await ace.validateProof(JOIN_SPLIT_PROOF, zkAssetOwner, data, { from: zkAssetOwner });
+            await ace.updateNoteRegistry(JOIN_SPLIT_PROOF, depositProof.eth.output, zkAssetOwner, { from: zkAssetOwner });
+            const firstNote = await ace.getNote(zkAssetOwner, depositProof.outputNotes[0].noteHash);
+            expect(firstNote.status.toNumber()).to.equal(constants.statuses.NOTE_UNSPENT);
         });
 
         it('should upgrade to a new Note Registry behaviour contract', async () => {

@@ -10,6 +10,7 @@
   "dependencies": {
     "@aztec/bn128": "0.0.0-semantically-released",
     "@aztec/dev-utils": "0.0.0-semantically-released",
+    "@aztec/note-access": "0.0.0-semantically-released",
     "@aztec/secp256k1": "0.0.0-semantically-released",
     "@aztec/typed-data": "0.0.0-semantically-released",
     "@babel/runtime": "^7.5.5",
@@ -19,7 +20,7 @@
     "eth-sig-util": "^2.5.0",
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
-    "web3-utils": "1.2.1"
+    "web3-utils": "1.2.4"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
@@ -30,6 +31,7 @@
     "babel-loader": "^8.0.5",
     "braintree-jsdoc-template": "^3.3.0",
     "chai": "^4.2.0",
+    "electron": "^7.0.0",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.0.0",
