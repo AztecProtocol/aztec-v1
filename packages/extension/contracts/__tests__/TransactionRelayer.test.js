@@ -31,20 +31,29 @@ describe('TransactionRelayer', () => {
     let zkAsset;
     let relayer;
 
-    const generateOutputNotes = async (values, owner = stranger) => Promise.all(
+    const generateOutputNotes = async (
+        values,
+        publicKey = stranger.publicKey,
+        ownerAddress = stranger.address,
+    ) => Promise.all(
         values.map(async value => aztec.note.create(
-            owner.publicKey,
+            publicKey,
             value,
-            owner.address,
+            ownerAddress,
         )),
     );
 
     const generateDepositProofData = async ({
         outputNoteValues = [20, 30],
-        owner = stranger.publicKey,
+        publicKey = stranger.publicKey,
+        ownerAddress = stranger.address,
     } = {}) => {
         const inputNotes = [];
-        const outputNotes = await generateOutputNotes(outputNoteValues, owner);
+        const outputNotes = await generateOutputNotes(
+            outputNoteValues,
+            publicKey,
+            ownerAddress,
+        );
 
         const publicValue = ProofUtils.getPublicValue(
             [],
@@ -92,10 +101,7 @@ describe('TransactionRelayer', () => {
             publicValue,
             depositAmount,
         } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
+            ownerAddress: userAddress,
         });
 
         const depositProof = new JoinSplitProof(
@@ -156,10 +162,7 @@ describe('TransactionRelayer', () => {
             publicValue,
             depositAmount,
         } = await generateDepositProofData({
-            owner: {
-                address: anotherUserAddress,
-                publicKey: stranger.publicKey,
-            },
+            ownerAddress: anotherUserAddress,
         });
 
         const depositProof = new JoinSplitProof(
@@ -220,10 +223,7 @@ describe('TransactionRelayer', () => {
             publicValue,
             depositAmount,
         } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
+            ownerAddress: userAddress,
         });
 
         const depositProof = new JoinSplitProof(
@@ -283,10 +283,7 @@ describe('TransactionRelayer', () => {
             publicValue,
             depositAmount,
         } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
+            ownerAddress: userAddress,
         });
 
         const depositProof = new JoinSplitProof(
@@ -408,10 +405,7 @@ describe('TransactionRelayer', () => {
             publicValue,
             depositAmount,
         } = await generateDepositProofData({
-            owner: {
-                address: userAddress,
-                publicKey: stranger.publicKey,
-            },
+            ownerAddress: userAddress,
         });
 
         const depositProof = new JoinSplitProof(
@@ -491,10 +485,7 @@ describe('TransactionRelayer', () => {
             publicValue,
             depositAmount,
         } = await generateDepositProofData({
-            owner: {
-                address: anotherUserAddress,
-                publicKey: stranger.publicKey,
-            },
+            ownerAddress: anotherUserAddress,
         });
 
         const depositProof = new JoinSplitProof(
