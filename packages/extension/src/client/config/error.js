@@ -16,6 +16,7 @@ export default {
         confidentialTransferFrom: 'Failed to send zkAsset.confidentialTransferFrom',
         confidentialMint: 'Failed to send zkAsset.confidentialMint',
         confidentialBurn: 'Failed to send zkAsset.confidentialBurn',
+        private: "Cannot call '%{fn}' on private asset.",
     },
     note: {
         fromViewingKey: 'Failed to recover note from its viewing key.',

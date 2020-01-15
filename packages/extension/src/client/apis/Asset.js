@@ -53,6 +53,12 @@ export default class Asset {
     }
 
     async totalSupplyOfLinkedToken() {
+        if (!this.linkedTokenAddress) {
+            throw new ApiError('zkAsset.private', {
+                fn: 'totalSupplyOfLinkedToken',
+            });
+        }
+
         let totalSupply;
         try {
             totalSupply = await Web3Service
@@ -68,6 +74,12 @@ export default class Asset {
     }
 
     balanceOfLinkedToken = async (account) => {
+        if (!this.linkedTokenAddress) {
+            throw new ApiError('zkAsset.private', {
+                fn: 'balanceOfLinkedToken',
+            });
+        }
+
         let balance = 0;
         let accountAddress = account;
         if (!accountAddress) {
@@ -94,6 +106,12 @@ export default class Asset {
     };
 
     allowanceOfLinkedToken = async (owner = '', spender = '') => {
+        if (!this.linkedTokenAddress) {
+            throw new ApiError('zkAsset.private', {
+                fn: 'allowanceOfLinkedToken',
+            });
+        }
+
         let allowance = 0;
         let ownerAddress = owner;
         if (!ownerAddress) {
@@ -147,16 +165,24 @@ export default class Asset {
     deposit = async (transactions, {
         numberOfOutputNotes,
         userAccess = [],
-    } = {}) => ConnectionService.query(
-        'constructProof',
-        {
-            proofType: 'DEPOSIT_PROOF',
-            assetAddress: this.address,
-            transactions,
-            numberOfOutputNotes,
-            userAccess,
-        },
-    );
+    } = {}) => {
+        if (!this.linkedTokenAddress) {
+            throw new ApiError('zkAsset.private', {
+                fn: 'deposit',
+            });
+        }
+
+        return ConnectionService.query(
+            'constructProof',
+            {
+                proofType: 'DEPOSIT_PROOF',
+                assetAddress: this.address,
+                transactions,
+                numberOfOutputNotes,
+                userAccess,
+            },
+        );
+    };
 
     /**
      *
@@ -177,6 +203,12 @@ export default class Asset {
         to,
         numberOfInputNotes,
     } = {}) => {
+        if (!this.linkedTokenAddress) {
+            throw new ApiError('zkAsset.private', {
+                fn: 'withdraw',
+            });
+        }
+
         const {
             address,
         } = Web3Service.account;
