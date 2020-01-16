@@ -118,57 +118,53 @@ module.exports = {
       exampleMode: 'collapse',
       usageMode: 'collapse',
     },
-    {
-      name: 'Smart Contracts',
-      content: 'styleguide/categories/SmartContracts.md',
-      sections: [
-        {
-          name: 'ACE',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'Validators',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAsset',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAssetOwnable',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAssetMintable',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAssetBurnable',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-      ],
-      sectionDepth: 2,
-      exampleMode: 'collapse',
-      usageMode: 'collapse',
-      pagePerSection: true,
-    },
+    // {
+    //   name: 'Smart Contracts',
+    //   content: 'styleguide/categories/SmartContracts.md',
+    //   sections: [
+    //     {
+    //       name: 'ACE',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'Validators',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAsset',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAssetOwnable',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAssetMintable',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAssetBurnable',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //   ],
+    //   sectionDepth: 2,
+    //   exampleMode: 'collapse',
+    //   usageMode: 'collapse',
+    //   pagePerSection: true,
+    // },
     {
       name: 'JavaScript SDK',
       content: 'styleguide/categories/JavaScriptSDK/overview.md',
-      components: ['src/components/Demo/index.jsx'],
+      components: [],
       exampleMode: 'hide',
       pagePerSection: true,
       sections: [
-        {
-          name: 'Background',
-          content: 'styleguide/categories/JavaScriptSDK/background.md',
-        },
         {
           name: 'Getting Started & API Keys',
           content: 'styleguide/categories/JavaScriptSDK/gettingStarted.md',
