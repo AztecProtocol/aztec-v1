@@ -15,7 +15,7 @@ import {
     randomId,
     randomInt,
 } from '~/utils/random';
-import getDecryptedViewingKeyFromMetadata from '../getDecryptedViewingKeyFromMetadata';
+import getViewingKeyFromMetadata from '../getViewingKeyFromMetadata';
 import storyOf from './helpers/stories';
 
 jest.mock('~/utils/storage');
@@ -24,7 +24,7 @@ beforeEach(() => {
     storage.reset();
 });
 
-describe('getDecryptedViewingKeyFromMetadata', () => {
+describe('getViewingKeyFromMetadata', () => {
     const accessArr = [];
     const numberOfAccounts = 2;
     for (let i = 0; i < numberOfAccounts; i += 1) {
@@ -51,14 +51,14 @@ describe('getDecryptedViewingKeyFromMetadata', () => {
 
         await storyOf('ensureDomainPermission');
         const metadataStr = `0x${''.padEnd(METADATA_AZTEC_DATA_LENGTH, '0')}${metadataObj.toString().slice(2)}`;
-        const decrypted = await getDecryptedViewingKeyFromMetadata(metadataStr);
-        expect(decrypted).toBe(note.realViewingKey);
+        const decrypted = await getViewingKeyFromMetadata(metadataStr);
+        expect(decrypted).toBe(note.viewingKey);
     });
 
     it('return empty string if address is not in metadata', async () => {
         await storyOf('ensureDomainPermission');
         const metadataStr = `0x${''.padEnd(METADATA_AZTEC_DATA_LENGTH, '0')}${metadataObj.toString().slice(2)}`;
-        const decrypted = await getDecryptedViewingKeyFromMetadata(metadataStr);
+        const decrypted = await getViewingKeyFromMetadata(metadataStr);
         expect(decrypted).toBe('');
     });
 });
