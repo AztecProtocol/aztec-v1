@@ -33,6 +33,12 @@ describe('createNote', () => {
         expect(note.owner).toBe(ownerAddress);
     });
 
+    it('create an aztec note with custom owner', async () => {
+        const noteValue = randomInt(100);
+        const note = await createNote(noteValue, spendingPublicKey, userAccount2.address);
+        expect(note.owner).toBe(userAccount2.address);
+    });
+
     it('allow to add note access while creating note', async () => {
         const access = {
             address: userAccount.address,
