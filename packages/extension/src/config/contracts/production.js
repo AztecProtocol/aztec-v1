@@ -1,6 +1,6 @@
 import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
 import ACE from '~contracts/IAZTEC.json';
-import IERC20 from '~contracts/IERC20.json';
+import IERC20 from '~contracts/IERC20Mintable.json';
 import IZkAsset from '~contracts/IZkAsset.json';
 
 export default {

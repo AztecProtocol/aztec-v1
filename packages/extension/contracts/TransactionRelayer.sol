@@ -3,7 +3,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@aztec/protocol/contracts/interfaces/IAZTEC.sol";
 import "@aztec/protocol/contracts/ACE/ACE.sol" as ACEModule;
 import "@aztec/protocol/contracts/libs/NoteUtils.sol";
-import "@aztec/protocol/contracts/interfaces/IERC20.sol";
+import "@aztec/protocol/contracts/interfaces/IERC20Mintable.sol";
 import "@aztec/protocol/contracts/interfaces/IZkAsset.sol";
 import "./AZTECAccountRegistry.sol";
 
@@ -46,7 +46,7 @@ contract TransactionRelayer is Context, IAZTEC, AZTECAccountRegistry {
         }
 
         (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
-        IERC20 linkedToken = IERC20(linkedTokenAddress);
+        IERC20Mintable linkedToken = IERC20Mintable(linkedTokenAddress);
 
         linkedToken.transferFrom(
             _owner,
