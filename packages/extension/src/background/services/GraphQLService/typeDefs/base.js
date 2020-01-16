@@ -67,11 +67,6 @@ export default gql`
         success: Boolean
         error: Error
     }
-    type GrantNoteAccessPermission {
-        prevMetadata: String
-        metadata: String
-        asset: Asset
-    }
     input Account_filter {
         address: String
         address_in: [String!]

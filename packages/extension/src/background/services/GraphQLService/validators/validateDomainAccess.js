@@ -23,7 +23,6 @@ export default async function validateDomainAccess(_, args, ctx, info) {
         case 'note':
             noteId = args.id;
             break;
-        case 'grantNoteAccessPermission':
         case 'subscribe':
             ({ noteId } = args);
             break;

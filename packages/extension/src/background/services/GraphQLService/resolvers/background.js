@@ -11,7 +11,6 @@ import Web3Service from '~/helpers/Web3Service';
 import NoteService from '~/background/services/NoteService';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
-import requestGrantAccess from './utils/requestGrantAccess';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
 import syncNoteInfo from './utils/syncNoteInfo';
 import base from './base';
@@ -28,9 +27,6 @@ const backgroundResolvers = {
         })),
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
-        })),
-        grantNoteAccessPermission: ensureDomainPermission(async (_, args, ctx) => ({
-            permission: await requestGrantAccess(args, ctx),
         })),
         pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
             notes: await pickNotesFromBalance(args, ctx),
