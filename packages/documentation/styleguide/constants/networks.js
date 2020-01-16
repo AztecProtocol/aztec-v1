@@ -6,5 +6,6 @@ const networkNames = {
   5: 'Goerli',
   42: 'Kovan',
 };
+
 export default networkNames;
 
