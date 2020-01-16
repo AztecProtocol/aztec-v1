@@ -124,6 +124,14 @@ describe('metadata constructor', () => {
         });
     });
 
+    it('convert lowercase address to checksum address', () => {
+        expect(metadata(metadataStr.toLowerCase())).toMatchObject({
+            addresses: addressBytes.map(toChecksumAddress),
+            viewingKeys: viewingKeyBytes,
+            appData: appDataByte,
+        });
+    });
+
     it('allow zero length info', () => {
         const objWithNoAccess = {
             appData,

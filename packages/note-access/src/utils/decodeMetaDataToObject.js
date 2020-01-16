@@ -23,7 +23,7 @@ export default function decodeMetaDataToObject(metaDataStr, config, startOffset 
     });
 
     const metaDataObj = {};
-    config.forEach(({ name, length }, i) => {
+    config.forEach(({ name, length, _toString }, i) => {
         const data = [];
         const startOfDynamicData = offsetOfDynamicDataMapping[i];
         const endOfDynamicData =
@@ -40,7 +40,10 @@ export default function decodeMetaDataToObject(metaDataStr, config, startOffset 
 
         for (let j = 0; j < numberOfDynamicData; j += 1) {
             const dynamicData = dataStr.substr(lengthOfDynamicData * j + MIN_BYTES_VAR_LENGTH, lengthOfDynamicData);
-            const formattedData = length !== undefined ? dynamicData.slice(-length) : stripPrependedZeroes(dynamicData);
+            let formattedData = length !== undefined ? dynamicData.slice(-length) : stripPrependedZeroes(dynamicData);
+            if (_toString) {
+                formattedData = _toString(formattedData).replace(/^0x/, '');
+            }
             data.push(`0x${formattedData}`);
         }
         const isArrayData = length !== undefined;
