@@ -68,14 +68,14 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         *
         * @param _proofOutputs - the output of the burn validator
     */
-    function burn(bytes calldata _proofOutputs) external;
+    function burn(bytes memory _proofOutputs) public;
 
     /**
         * @dev Enacts the state modifications needed given a successfully validated mint proof
         *
         * @param _proofOutputs - the output of the mint validator
     */
-    function mint(bytes calldata _proofOutputs) external;
+    function mint(bytes memory _proofOutputs) public;
 
     /**
         * @dev Enacts the state modifications needed given the output of a successfully validated proof.
@@ -163,4 +163,9 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
         * @param _noteOwner - the address of the owner of the note
     */
     function deleteNote(bytes32 _noteHash, address _noteOwner) internal;
+
+    /**
+        * @dev Public function used during slow release phase to manually enable an asset.
+    */
+    function makeAvailable() public;
 }

@@ -43,9 +43,11 @@
   },
   "scripts": {
     "build:dev": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
-    "build": "./build.sh",
+    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
     "build:prod": "yarn build",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh contract-artifacts",
     "clean": "shx rm -rf ./lib",
-    "lint": "eslint --ignore-path ../../.eslintignore ."
+    "lint": "eslint --ignore-path ../../.eslintignore .",
+    "watch": "yarn build:dev --watch"
   }
 }
