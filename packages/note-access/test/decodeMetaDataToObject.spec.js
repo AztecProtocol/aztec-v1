@@ -98,4 +98,41 @@ describe('decodeMetaDataToObject', () => {
             forest: '0xewjklewjlewjkjfoerejeoree',
         });
     });
+
+    it('use custom _toString function in config to format data', () => {
+        const configWithToString = [
+            {
+                name: 'food',
+                length: 10,
+                _toString: (str) => str.toUpperCase(),
+            },
+            {
+                name: 'fruit',
+                length: 6,
+            },
+            {
+                name: 'forest',
+            },
+        ];
+
+        const inputStr = [
+            '0x',
+            ensureMinVarSize(to32ByteOffset(3 * MIN_BYTES_VAR_LENGTH)),
+            ensureMinVarSize(to32ByteOffset(5 * MIN_BYTES_VAR_LENGTH)),
+            ensureMinVarSize(to32ByteOffset(8 * MIN_BYTES_VAR_LENGTH)),
+            ensureMinVarSize(1),
+            ensureMinVarSize('hamburgers'),
+            ensureMinVarSize(2),
+            ensureMinVarSize('apples'),
+            ensureMinVarSize('banana'),
+            ensureMinVarSize(1),
+            ensureMinVarSize('deerrabbitbirdsnakebear'),
+        ].join('');
+
+        expect(decodeMetaDataToObject(inputStr, configWithToString)).toEqual({
+            food: ['0xHAMBURGERS'],
+            fruit: ['0xapples', '0xbanana'],
+            forest: '0xdeerrabbitbirdsnakebear',
+        });
+    });
 });
