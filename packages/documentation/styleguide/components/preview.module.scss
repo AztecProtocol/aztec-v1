@@ -4,7 +4,9 @@
   width: 100%;
   outline: none !important;
   position: relative;
-
+  pointer-events: all;
+  max-height: 300px;
+  overflow-y: scroll;
   div:first-of-type {
     width: 100%;
     textarea {
@@ -22,6 +24,7 @@
     transition: all ease 0.3s;
     background: rgba(0,0,0,0.0);
     position: absolute;
+    pointer-events: none;
     top: 0px;
     left: 0x;
     width: 100%;
@@ -31,17 +34,58 @@
 .codeRunning{
   pointer-events: none;
   &:after {
-    content: 'Running Example...';
+    content: 'Running...';
     color: map-get($color-map, 'white');
     transition: all ease 0.3s;
     background: map-get($color-map, 'primary-lighter');
+    font-weight: 400;
+    font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: absolute;
+    pointer-events: all;
     top: 0px;
     left: 0x;
     width: 100%;
     height: 100%;
+  }
+}
+.runCode {
+  border-radius: 0px 0px 3px 0px;
+  background: map-get($color-map, 'primary');
+  font-weight: 400;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.logs {
+  max-height: 100px;
+  height: 100px;
+  overflow-y: scroll;
+  padding: 10px;
+}
+
+.testEth {
+  font-weight: 400;
+  padding-top: 0px;
+  border-radius: 0px 0px 0px 0px;
+  padding-bottom: 0px;
+  background: map-get($color-map, 'white-lighter');
+  line-height: 20px;
+  &:hover {
+    background: map-get($color-map, 'white-lightest') !important;
+  }
+}
+
+.group {
+  display: flex;
+  &:last-child:not(:first-child) {
+    border-left: 1px solid map-get($color-map, 'white-lighter') !important;
+    border-right: 1px solid map-get($color-map, 'white-lighter') !important;
+  }
+  button {
+    border: none !important;
+    margin-right: 1px;
+    cursor: pointer;
   }
 }

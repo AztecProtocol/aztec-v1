@@ -1,11 +1,18 @@
 import React from 'react';
 import { Hook, Console, Decode } from 'console-feed';
-import { Block, FlexBox, Button, Text } from '@aztec/guacamole-ui';
+import Web3 from 'web3';
+import {
+  Block,
+  FlexBox,
+  Button,
+  Text,
+  Icon,
+  ButtonGroup,
+} from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import styles from './preview.module.scss';
-
 import compileCode from '../utils/compileCode';
 import evalInContext from '../utils/evalInContext';
 
@@ -27,10 +34,27 @@ class PreviewComponent extends React.Component {
     this.state = { code, logs: [] };
   }
 
+  state = {
+    ethBalance: 0,
+    accounts: [],
+  }
+
   componentDidMount() {
     Hook(window.console, (log) => {
       this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }));
     });
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accounts) => {
+        this.setState({ accounts });
+      });
+      window.ethereum.on('networkChanged', (network) => {
+        this.setState({ network });
+      });
+      const web3 = new Web3(window.ethereum);
+      const ethBalance = web3.eth.getBalance(ethereum.selectedAddress).then((ethBalance) => {
+        this.setState({ ethBalance: web3.utils.fromWei(ethBalance) });
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -43,16 +67,16 @@ class PreviewComponent extends React.Component {
     const { compilerConfig } = this.props;
     const compiledCode = compileCode(code, compilerConfig, console.log);
     const asyncCompiledCode = `const code = async () => {
-      try {
-        ${compiledCode};
-      } catch(err) {
-        console.error(err);
+        try {
+          ${compiledCode};
+        } catch(err) {
+          console.error(err);
+        }
       }
-      }
-
       return code()`;
     this.setState({
       isRunning: true,
+      logs: [],
     });
 
     await evalInContext(asyncCompiledCode);
@@ -66,32 +90,27 @@ class PreviewComponent extends React.Component {
     const { isRunning, logs } = this.state;
     return (
       <Block background="white" borderRadius="xs" hasBorder>
-        <Block padding="s" hasBorderBottom>
-          <Text text={methodName} size="m" />
-        </Block>
+        {methodName
+
+            && (
+              <Block padding="s" hasBorderBottom>
+                <Text text={methodName} size="m" />
+              </Block>
+            )
+        }
         <Block background="grey-lightest">
           <FlexBox className={isRunning ? `${styles.textArea} ${styles.codeRunning}` : styles.textArea} stretch expand>
             <Editor code={this.state.code} onChange={this.handleChange} />
           </FlexBox>
         </Block>
-        <Block
-          padding="s"
-          background="primary"
-          style={{
-            borderRadius: logs.length ? '0 0 0px 0px' : '0 0 3px 3px',
-          }}
-        >
-          <FlexBox align="flex-end" stretch expand>
-            <Button text="Run" onClick={this.compileCode} isLoading={isRunning} />
-          </FlexBox>
-        </Block>
         {!!logs.length && (
           <Block
-            padding="s"
-            background="primary"
+            padding="m s"
+            background="grey-darker"
             style={{
-              borderRadius: '0 0 3px 3px',
+              borderRadius: logs.length ? '0 0 0px 0px' : '0 0 3px 3px',
             }}
+            className={styles.logs}
           >
             <Console
               logs={logs}
@@ -113,6 +132,60 @@ class PreviewComponent extends React.Component {
             />
           </Block>
         )}
+        <Block
+          background="black"
+          style={{
+            borderRadius: '0 0 3px 3px',
+          }}
+        >
+          <FlexBox align="space-between" stretch expand>
+            <FlexBox align="flex-start">
+              <ButtonGroup className={styles.group}>
+                <Button
+                  text={`${this.state.ethBalance} ETH`}
+                  size="m"
+                  disabled
+                  className={styles.testEth}
+                />
+                <Button
+                  text="Faucet"
+                  size="m"
+                  onClick={this.getTestEth}
+                  rounded={false}
+                  className={styles.testEth}
+                  icon={
+                    <Icon name="local_gas_station" size="m" />
+                  }
+                />
+                <Button
+                  text="0 Test Dai"
+                  size="m"
+                  disabled
+                  className={styles.testEth}
+                />
+                <Button
+                  text="Faucet"
+                  size="m"
+                  onClick={this.getTestEth}
+                  rounded={false}
+                  className={styles.testEth}
+                />
+              </ButtonGroup>
+            </FlexBox>
+            <Button
+              text="Run Code"
+              size="m"
+              onClick={this.compileCode}
+              isLoading={isRunning}
+              rounded={false}
+              className={styles.runCode}
+              icon={
+
+                <Icon name="eject" size="m" rotate="90" />
+              }
+            />
+          </FlexBox>
+        </Block>
       </Block>
     );
   }
