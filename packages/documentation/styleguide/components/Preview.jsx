@@ -201,10 +201,12 @@ class PreviewComponent extends React.Component {
           </Block>
         )}
         <Block
-          background="black"
+          background="grey-darker"
           style={{
             borderRadius: '0 0 3px 3px',
           }}
+          hasBorderTop
+          borderColor="white-lighter"
         >
           <FlexBox align="space-between" stretch expand>
             <FlexBox align="flex-start">
