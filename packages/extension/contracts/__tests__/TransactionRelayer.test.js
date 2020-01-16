@@ -39,6 +39,7 @@ describe('TransactionRelayer', () => {
         values.map(async value => aztec.note.create(
             publicKey,
             value,
+            null,
             ownerAddress,
         )),
     );
