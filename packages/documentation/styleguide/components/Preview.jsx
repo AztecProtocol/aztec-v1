@@ -52,7 +52,7 @@ class PreviewComponent extends React.Component {
       });
       const web3 = new Web3(window.ethereum);
       const ethBalance = web3.eth.getBalance(ethereum.selectedAddress).then((ethBalance) => {
-        this.setState({ ethBalance: web3.utils.fromWei(ethBalance) });
+        this.setState({ ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2) });
       });
     }
   }
