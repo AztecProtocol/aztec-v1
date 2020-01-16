@@ -7,5 +7,5 @@ const result = await window.aztec.enable({ apiKey });
 const assetAddress = '0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a';
 const asset = await window.aztec.zkAsset(assetAddress);
 
-console.info({ asset });
+console.info(asset);
 ```
