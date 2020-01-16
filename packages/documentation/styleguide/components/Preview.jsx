@@ -12,6 +12,7 @@ import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
 import styles from './preview.module.scss';
 import compileCode from '../utils/compileCode';
+import getTestERC20 from '../utils/getTestERC20';
 import evalInContext from '../utils/evalInContext';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
@@ -37,11 +38,6 @@ class PreviewComponent extends React.Component {
     };
   }
 
-  state = {
-    logs: [],
-    code: '',
-    initialCode: '',
-  };
 
   handleChange = debounce((code) => {
     this.setState({ code });
@@ -52,15 +48,15 @@ class PreviewComponent extends React.Component {
     compilerConfig: PropTypes.object.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-    const { code } = this.props;
-    this.state = { code, logs: [] };
-  }
-
   state = {
     ethBalance: 0,
+    network: 0,
     accounts: [],
+    linkedTokenBalance: 0,
+    logs: [],
+    code: '',
+    initialCode: '',
+    zkAssetAddress: '0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a',
   };
 
   componentDidMount() {
@@ -73,30 +69,39 @@ class PreviewComponent extends React.Component {
         });
       }
     });
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        console.log({ accounts });
-        this.setState({ accounts });
-      });
-      window.ethereum.on('networkChanged', (network) => {
-        console.log(network);
-        this.setState({ network });
-      });
-      const web3 = new Web3(window.ethereum);
-      const ethBalance = web3.eth.getBalance(ethereum.selectedAddress).then((ethBalance) => {
-        this.setState({
-          ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
-          network: window.ethereum.networkVersion,
-          accounts: [ethereum.selectedAddress],
-        });
-      });
-    }
+    this.getWeb3Data();
   }
+
 
   componentWillUnmount() {
     // Clear pending changes
     this.handleChange.cancel();
     Unhook(window.console);
+  }
+
+  getWeb3Data = async () => {
+    if (window.ethereum) {
+      const web3 = new Web3(window.ethereum);
+
+      if (this.state.zkAssetAddress) {
+        await window.aztec.enable();
+        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
+        const linkedTokenBalance = await balanceOfLinkedToken();
+        this.setState({
+
+          linkedTokenAddress,
+          linkedTokenBalance,
+        });
+      }
+
+      const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
+
+      this.setState({
+        ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
+        network: window.ethereum.networkVersion,
+        accounts: [ethereum.selectedAddress],
+      });
+    }
   }
 
   compileCode = async () => {
@@ -119,10 +124,22 @@ class PreviewComponent extends React.Component {
     });
 
     await evalInContext(asyncCompiledCode);
+    await this.getWeb3Data();
     this.setState({
       isRunning: false,
     });
   };
+
+  getTestERC20 = async () => {
+    this.setState({
+      loadingTestTokens: true,
+    });
+
+    await getTestERC20('0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a');
+    this.setState({
+      loadingTestTokens: false,
+    });
+  }
 
   render() {
     const {
@@ -134,7 +151,7 @@ class PreviewComponent extends React.Component {
         <Block padding="xs m" hasBorderBottom>
           <FlexBox align="space-between">
             <FlexBox aling="flex-start">
-              <Text text="Ethereum Address:  " size="s" />
+              <Text text="Ethereum Address: " size="s" />
               <Text text={` ${accounts[0]}`} size="s" weight="normal" color="grey" />
             </FlexBox>
             <Text text={networkNames[network]} size="s" weight="normal" color="orange" />
@@ -210,7 +227,7 @@ class PreviewComponent extends React.Component {
                   }
                 />
                 <Button
-                  text="0 Test Dai"
+                  text={`${this.state.linkedTokenBalance} Linked ERC20`}
                   size="m"
                   disabled
                   className={styles.testEth}
@@ -219,8 +236,9 @@ class PreviewComponent extends React.Component {
                   text="Faucet"
                   size="m"
                   disabled={!isEnabled}
-                  onClick={this.getTestEth}
+                  onClick={this.getTestERC20}
                   rounded={false}
+                  isLoading={this.state.loadingTestTokens}
                   className={styles.testEth}
                 />
               </ButtonGroup>
