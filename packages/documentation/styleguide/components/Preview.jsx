@@ -1,14 +1,21 @@
 import React from 'react';
-import { Hook, Console, Decode, Unhook } from 'console-feed';
+import {
+  Hook, Console, Decode, Unhook,
+} from 'console-feed';
 import Web3 from 'web3';
-import { Block, FlexBox, Button, Text, Icon, ButtonGroup } from '@aztec/guacamole-ui';
+import {
+  Block, FlexBox, Button, Text, Icon, ButtonGroup,
+} from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
+import classnames from 'classnames';
 import styles from './preview.module.scss';
 import compileCode from '../utils/compileCode';
 import evalInContext from '../utils/evalInContext';
 import PERMITTED_LOGS from '../constants/logs';
+import networkNames from '../constants/networks';
+
 
 class PreviewComponent extends React.Component {
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -68,14 +75,20 @@ class PreviewComponent extends React.Component {
     });
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', (accounts) => {
+        console.log({ accounts });
         this.setState({ accounts });
       });
       window.ethereum.on('networkChanged', (network) => {
+        console.log(network);
         this.setState({ network });
       });
       const web3 = new Web3(window.ethereum);
       const ethBalance = web3.eth.getBalance(ethereum.selectedAddress).then((ethBalance) => {
-        this.setState({ ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2) });
+        this.setState({
+          ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
+          network: window.ethereum.networkVersion,
+          accounts: [ethereum.selectedAddress],
+        });
       });
     }
   }
@@ -87,7 +100,8 @@ class PreviewComponent extends React.Component {
   }
 
   compileCode = async () => {
-    const { code } = this.state;
+    const { code, network } = this.state;
+    if (network !== '4') return;
     const { compilerConfig } = this.props;
     const compiledCode = compileCode(code, compilerConfig, console.log);
     const asyncCompiledCode = `const code = async () => {
@@ -111,18 +125,33 @@ class PreviewComponent extends React.Component {
   };
 
   render() {
-    const { methodName } = this.props;
-    const { isRunning, logs } = this.state;
+    const {
+      isRunning, logs, network, accounts = [],
+    } = this.state;
+    const isEnabled = network === '4';
     return (
       <Block background="white" borderRadius="xs" hasBorder>
-        {methodName && (
-          <Block padding="s" hasBorderBottom>
-            <Text text={methodName} size="m" />
-          </Block>
-        )}
+        <Block padding="xs m" hasBorderBottom>
+          <FlexBox align="space-between">
+            <FlexBox aling="flex-start">
+              <Text text="Ethereum Address:  " size="s" />
+              <Text text={` ${accounts[0]}`} size="s" weight="normal" color="grey" />
+            </FlexBox>
+            <Text text={networkNames[network]} size="s" weight="normal" color="orange" />
+          </FlexBox>
+        </Block>
         <Block background="grey-lightest">
-          <FlexBox className={isRunning ? `${styles.textArea} ${styles.codeRunning}` : styles.textArea} stretch expand>
-            <Editor code={this.props.code} onChange={this.handleChange} />
+          <FlexBox
+            className={
+              classnames({
+                [styles.textArea]: true,
+                [styles.codeRunning]: isRunning,
+                [styles.rinkeby]: !isEnabled,
+              })}
+            stretch
+            expand
+          >
+            <Editor code={this.state.code} onChange={this.handleChange} />
           </FlexBox>
         </Block>
         {!!logs.length && (
@@ -163,17 +192,37 @@ class PreviewComponent extends React.Component {
           <FlexBox align="space-between" stretch expand>
             <FlexBox align="flex-start">
               <ButtonGroup className={styles.group}>
-                <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
+                <Button
+                  text={`${this.state.ethBalance} ETH`}
+                  size="m"
+                  disabled
+                  className={styles.testEth}
+                />
                 <Button
                   text="Faucet"
                   size="m"
                   onClick={this.getTestEth}
                   rounded={false}
+                  disabled={!isEnabled}
                   className={styles.testEth}
-                  icon={<Icon name="local_gas_station" size="m" />}
+                  icon={
+                    <Icon name="local_gas_station" size="m" />
+                  }
                 />
-                <Button text="0 Test Dai" size="m" disabled className={styles.testEth} />
-                <Button text="Faucet" size="m" onClick={this.getTestEth} rounded={false} className={styles.testEth} />
+                <Button
+                  text="0 Test Dai"
+                  size="m"
+                  disabled
+                  className={styles.testEth}
+                />
+                <Button
+                  text="Faucet"
+                  size="m"
+                  disabled={!isEnabled}
+                  onClick={this.getTestEth}
+                  rounded={false}
+                  className={styles.testEth}
+                />
               </ButtonGroup>
             </FlexBox>
             <Button
@@ -183,7 +232,10 @@ class PreviewComponent extends React.Component {
               isLoading={isRunning}
               rounded={false}
               className={styles.runCode}
-              icon={<Icon name="eject" size="m" rotate="90" />}
+              disabled={!isEnabled}
+              icon={
+                <Icon name="eject" size="m" rotate={90} />
+              }
             />
           </FlexBox>
         </Block>
@@ -194,7 +246,7 @@ class PreviewComponent extends React.Component {
 
 PreviewComponent.propTypes = {
   code: PropTypes.string,
-  methodName: PropTypes.string.isRequired,
+  methodName: PropTypes.string,
 };
 
 PreviewComponent.defaultProps = {
