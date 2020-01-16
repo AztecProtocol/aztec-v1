@@ -2,7 +2,7 @@ require('babel-polyfill');
 
 require('@babel/register');
 const path = require('path');
-webpackConfig = require('./webpack.config').default;
+const webpackConfig = require('./webpack.config').default;
 const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
 const {
   defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap,
@@ -166,58 +166,88 @@ module.exports = {
       pagePerSection: true,
       sections: [
         {
-          name: 'Getting Started & API Keys',
-          content: 'styleguide/categories/JavaScriptSDK/gettingStarted.md',
-        },
-        {
-          name: 'API Methods',
-          content: 'src/config/custom.md',
-          hasParent: true,
+          name: 'window',
+          content: 'styleguide/categories/JavaScriptSDK/Window/index.md',
+          exampleMode: 'hide',
           pagePerSection: true,
           sections: [
             {
               name: 'window.aztec.enable()',
-              content: 'styleguide/categories/JavaScriptSDK/APIMethods/enable.md',
+              content: 'styleguide/categories/JavaScriptSDK/Window/enable.md',
               exampleMode: 'hide',
             },
             {
               name: 'window.aztec.zkAsset()',
-              content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset.md',
+              content: 'styleguide/categories/JavaScriptSDK/Window/zkAsset.md',
               exampleMode: 'hide',
-              pagePerSection: true,
-              sections: [
-                {
-                  name: 'zkAsset.balance()',
-                  content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset/balance.md',
-                  exampleMode: 'hide',
-                },
-                {
-                  name: 'zkAsset.fetchNotesFromBalance()',
-                  content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset/fetchNotesFromBalance.md',
-                  exampleMode: 'hide',
-                },
-                {
-                  name: 'zkAsset.deposit()',
-                  content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset/deposit.md',
-                  exampleMode: 'hide',
-                },
-                {
-                  name: 'zkAsset.send()',
-                  content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset/send.md',
-                  exampleMode: 'hide',
-                },
-                {
-                  name: 'zkAsset.withdraw()',
-                  content: 'styleguide/categories/JavaScriptSDK/APIMethods/zkAsset/withdraw.md',
-                  exampleMode: 'hide',
-                },
-              ],
-              sectionDepth: 1,
-              usageMode: 'hide',
             },
           ],
           sectionDepth: 1,
+          usageMode: 'hide',
+        },
+        {
+          name: 'zkAsset',
+          content: 'styleguide/categories/JavaScriptSDK/ZkAsset/index.md',
           exampleMode: 'hide',
+          pagePerSection: true,
+          sections: [
+            {
+              name: 'zkAsset.balance()',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/balance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.fetchNotesFromBalance()',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/fetchNotesFromBalance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.deposit()',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.send()',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/send.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.withdraw()',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/withdraw.md',
+              exampleMode: 'hide',
+            },
+          ],
+          sectionDepth: 1,
+          usageMode: 'hide',
+        },
+        {
+          name: 'note',
+          content: 'styleguide/categories/JavaScriptSDK/Note/index.md',
+          exampleMode: 'hide',
+          pagePerSection: true,
+          sections: [
+            {
+              name: 'note.value()',
+              content: 'styleguide/categories/JavaScriptSDK/Note/value.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.grantNoteAccess()',
+              content: 'styleguide/categories/JavaScriptSDK/Note/grantNoteAccess.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.owner()',
+              content: 'styleguide/categories/JavaScriptSDK/Note/owner.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.hash()',
+              content: 'styleguide/categories/JavaScriptSDK/Note/hash.md',
+              exampleMode: 'hide',
+            },
+          ],
+          sectionDepth: 1,
           usageMode: 'hide',
         },
       ],

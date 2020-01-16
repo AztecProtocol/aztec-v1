@@ -1,26 +1,43 @@
 import React from 'react';
-import { Hook, Console, Decode } from 'console-feed';
+import { Hook, Console, Decode, Unhook } from 'console-feed';
 import Web3 from 'web3';
-import {
-  Block,
-  FlexBox,
-  Button,
-  Text,
-  Icon,
-  ButtonGroup,
-} from '@aztec/guacamole-ui';
+import { Block, FlexBox, Button, Text, Icon, ButtonGroup } from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import styles from './preview.module.scss';
 import compileCode from '../utils/compileCode';
 import evalInContext from '../utils/evalInContext';
+import PERMITTED_LOGS from '../constants/logs';
 
 class PreviewComponent extends React.Component {
-  handleChange = debounce((code) => {
-    this.state = {
-      code,
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { initialCode } = prevState;
+    let newCode;
+
+    if (initialCode !== nextProps.code) {
+      newCode = nextProps.code;
+      return {
+        ...prevState,
+        initialCode: newCode,
+        code: newCode,
+        logs: [],
+      };
+    }
+
+    return {
+      ...prevState,
     };
+  }
+
+  state = {
+    logs: [],
+    code: '',
+    initialCode: '',
+  };
+
+  handleChange = debounce((code) => {
+    this.setState({ code });
   }, 100);
 
   static propTypes = {
@@ -37,11 +54,17 @@ class PreviewComponent extends React.Component {
   state = {
     ethBalance: 0,
     accounts: [],
-  }
+  };
 
   componentDidMount() {
     Hook(window.console, (log) => {
-      this.setState(({ logs }) => ({ logs: [...logs, Decode(log)] }));
+      const decodedLog = Decode(log);
+
+      if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
+        this.setState({
+          logs: [...this.state.logs, decodedLog],
+        });
+      }
     });
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', (accounts) => {
@@ -60,6 +83,7 @@ class PreviewComponent extends React.Component {
   componentWillUnmount() {
     // Clear pending changes
     this.handleChange.cancel();
+    Unhook(window.console);
   }
 
   compileCode = async () => {
@@ -74,6 +98,7 @@ class PreviewComponent extends React.Component {
         }
       }
       return code()`;
+
     this.setState({
       isRunning: true,
       logs: [],
@@ -90,17 +115,14 @@ class PreviewComponent extends React.Component {
     const { isRunning, logs } = this.state;
     return (
       <Block background="white" borderRadius="xs" hasBorder>
-        {methodName
-
-            && (
-              <Block padding="s" hasBorderBottom>
-                <Text text={methodName} size="m" />
-              </Block>
-            )
-        }
+        {methodName && (
+          <Block padding="s" hasBorderBottom>
+            <Text text={methodName} size="m" />
+          </Block>
+        )}
         <Block background="grey-lightest">
           <FlexBox className={isRunning ? `${styles.textArea} ${styles.codeRunning}` : styles.textArea} stretch expand>
-            <Editor code={this.state.code} onChange={this.handleChange} />
+            <Editor code={this.props.code} onChange={this.handleChange} />
           </FlexBox>
         </Block>
         {!!logs.length && (
@@ -114,7 +136,7 @@ class PreviewComponent extends React.Component {
           >
             <Console
               logs={logs}
-              filter={['info', 'error']}
+              filter={PERMITTED_LOGS}
               variant="dark"
               styles={{
                 LOG_BACKGROUND: 'transparent',
@@ -141,35 +163,17 @@ class PreviewComponent extends React.Component {
           <FlexBox align="space-between" stretch expand>
             <FlexBox align="flex-start">
               <ButtonGroup className={styles.group}>
-                <Button
-                  text={`${this.state.ethBalance} ETH`}
-                  size="m"
-                  disabled
-                  className={styles.testEth}
-                />
+                <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
                 <Button
                   text="Faucet"
                   size="m"
                   onClick={this.getTestEth}
                   rounded={false}
                   className={styles.testEth}
-                  icon={
-                    <Icon name="local_gas_station" size="m" />
-                  }
+                  icon={<Icon name="local_gas_station" size="m" />}
                 />
-                <Button
-                  text="0 Test Dai"
-                  size="m"
-                  disabled
-                  className={styles.testEth}
-                />
-                <Button
-                  text="Faucet"
-                  size="m"
-                  onClick={this.getTestEth}
-                  rounded={false}
-                  className={styles.testEth}
-                />
+                <Button text="0 Test Dai" size="m" disabled className={styles.testEth} />
+                <Button text="Faucet" size="m" onClick={this.getTestEth} rounded={false} className={styles.testEth} />
               </ButtonGroup>
             </FlexBox>
             <Button
@@ -179,10 +183,7 @@ class PreviewComponent extends React.Component {
               isLoading={isRunning}
               rounded={false}
               className={styles.runCode}
-              icon={
-
-                <Icon name="eject" size="m" rotate="90" />
-              }
+              icon={<Icon name="eject" size="m" rotate="90" />}
             />
           </FlexBox>
         </Block>
@@ -192,8 +193,12 @@ class PreviewComponent extends React.Component {
 }
 
 PreviewComponent.propTypes = {
-  code: PropTypes.string.isRequired,
+  code: PropTypes.string,
   methodName: PropTypes.string.isRequired,
+};
+
+PreviewComponent.defaultProps = {
+  code: '',
 };
 
 export default PreviewComponent;
