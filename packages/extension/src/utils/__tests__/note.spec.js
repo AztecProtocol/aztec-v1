@@ -1,16 +1,17 @@
 import {
+    metadata,
+} from '@aztec/note-access';
+import {
     userAccount,
     userAccount2,
 } from '~testHelpers/testUsers';
 import {
-    METADATA_AZTEC_DATA_LENGTH,
     AZTEC_JS_METADATA_PREFIX_LENGTH,
     VIEWING_KEY_LENGTH,
 } from '~/config/constants';
 import {
     randomInt,
 } from '~/utils/random';
-import metadata from '~/utils/metadata';
 import {
     createNote,
     valueOf,
@@ -23,8 +24,6 @@ const {
 } = userAccount;
 
 describe('createNote', () => {
-    const metadataLenDiff = METADATA_AZTEC_DATA_LENGTH - AZTEC_JS_METADATA_PREFIX_LENGTH;
-
     it('create an aztec note with spendingPublicKey', async () => {
         const noteValue = randomInt(100);
         const note = await createNote(noteValue, spendingPublicKey, ownerAddress);
@@ -46,7 +45,7 @@ describe('createNote', () => {
         };
         const note = await createNote(10, spendingPublicKey, ownerAddress, access);
         const metadataStr = note.exportMetaData();
-        const metadataObj = metadata(metadataStr.padStart(metadataStr.length + metadataLenDiff, '0'));
+        const metadataObj = metadata(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
         const allowedAccess = metadataObj.getAccess(userAccount.address);
         expect(Object.keys(allowedAccess)).toEqual(['address', 'viewingKey']);
         expect(allowedAccess.address).toBe(userAccount.address);
@@ -67,7 +66,7 @@ describe('createNote', () => {
         expect(note.owner).toBe(userAccount2.address);
 
         const metadataStr = note.exportMetaData();
-        const metadataObj = metadata(metadataStr.padStart(metadataStr.length + metadataLenDiff, '0'));
+        const metadataObj = metadata(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
         const allowedAccess = metadataObj.getAccess(userAccount2.address);
         expect(Object.keys(allowedAccess)).toEqual(['address', 'viewingKey']);
         expect(allowedAccess.address).toBe(userAccount2.address);
@@ -93,7 +92,7 @@ describe('createNote', () => {
         );
 
         const metadataStr = note.exportMetaData();
-        const metadataObj = metadata(metadataStr.padStart(metadataStr.length + metadataLenDiff, '0'));
+        const metadataObj = metadata(metadataStr.slice(AZTEC_JS_METADATA_PREFIX_LENGTH));
         const allowedAccess = metadataObj.getAccess(userAccount.address);
         expect(allowedAccess.viewingKey.length).toBe(VIEWING_KEY_LENGTH + 2);
         const allowedAccess2 = metadataObj.getAccess(userAccount2.address);

@@ -11,6 +11,7 @@
         "@aztec/bn128": "0.0.0-semantically-released",
         "@aztec/dev-utils": "0.0.0-semantically-released",
         "@aztec/guacamole-ui": "1.1.2",
+        "@aztec/note-access": "0.0.0-semantically-released",
         "@aztec/protocol": "0.0.0-semantically-released",
         "@aztec/secp256k1": "^1.0.1",
         "@aztec/typed-data": "0.0.0-semantically-released",
