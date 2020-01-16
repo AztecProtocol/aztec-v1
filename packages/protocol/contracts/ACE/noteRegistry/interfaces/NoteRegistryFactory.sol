@@ -5,7 +5,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 import "../../../interfaces/IAZTEC.sol";
-import "./ProxyAdmin.sol";
+import "../../../interfaces/ProxyAdmin.sol";
 
 /**
  * @title NoteRegistryFactory

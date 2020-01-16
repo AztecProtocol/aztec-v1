@@ -51,9 +51,10 @@
   "scripts": {
     "build:dev": "webpack --config ./webpack.dev.js",
     "build": "PROD=false ./build.sh",
-    "build:prod": "PROD=true ./build.sh",
+    "build:prod": "webpack --config ./webpack.prod.js",
     "clean": "shx rm -rf ./dist || true",
     "lint": "eslint --ignore-path ../../.eslintignore .",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh bn128",
     "test": "NODE_ENV=TEST mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
     "watch": "yarn build:dev --watch"
   }

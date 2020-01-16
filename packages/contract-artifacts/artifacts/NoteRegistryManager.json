@@ -616,6 +616,20 @@
             "payable": false,
             "stateMutability": "view",
             "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_registryOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "makeAssetAvailable",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
         }
     ],
     "bytecode": "0x",

@@ -1,3 +1,5 @@
+/* eslint-disable func-names */
+/* eslint-disable object-shorthand */
 require('dotenv').config();
 const { CoverageSubprovider } = require('@0x/sol-coverage');
 const { ProfilerSubprovider } = require('@0x/sol-profiler');
@@ -50,20 +52,25 @@ const coverageSubproviderConfig = {
     ignoreFilesGlobs: ['**/Migrations.sol', '**/node_modules/**', '**/interfaces/**', '**/test/**'],
 };
 const artifactAdapter = new TruffleArtifactAdapter(projectRoot, compilerConfig.solcVersion);
-const defaultFromAddress = getFirstAddress();
-const provider = new ProviderEngine();
+const engine = new ProviderEngine();
+
+let defaultFromAddress;
+const testModes = ['profile', 'coverage', 'trace'];
+if (testModes.includes(process.env.MODE)) {
+    defaultFromAddress = getFirstAddress();
+}
 
 switch (process.env.MODE) {
     case 'profile':
         global.profilerSubprovider = new ProfilerSubprovider(artifactAdapter, defaultFromAddress, isVerbose);
-        provider.addProvider(global.profilerSubprovider);
+        engine.addProvider(global.profilerSubprovider);
         break;
     case 'coverage':
         global.coverageSubprovider = new CoverageSubprovider(artifactAdapter, defaultFromAddress, coverageSubproviderConfig);
-        provider.addProvider(global.coverageSubprovider);
+        engine.addProvider(global.coverageSubprovider);
         break;
     case 'trace':
-        provider.addProvider(new RevertTraceSubprovider(artifactAdapter, defaultFromAddress, isVerbose));
+        engine.addProvider(new RevertTraceSubprovider(artifactAdapter, defaultFromAddress, isVerbose));
         break;
     default:
         rinkebyProvider = createProvider('rinkeby');
@@ -74,20 +81,20 @@ switch (process.env.MODE) {
 
 let ganacheSubprovider = {};
 ganacheSubprovider = new GanacheSubprovider({ mnemonic: process.env.TEST_MNEMONIC });
-provider.addProvider(ganacheSubprovider);
+engine.addProvider(ganacheSubprovider);
 
-provider.start((err) => {
+engine.start((err) => {
     if (err !== undefined) {
         console.log(err);
         process.exit(1);
     }
 });
-
 /**
  * HACK: Truffle providers should have `send` function, while `ProviderEngine` creates providers with `sendAsync`,
  * but it can be easily fixed by assigning `sendAsync` to `send`.
  */
-provider.send = provider.sendAsync.bind(provider);
+engine.send = engine.sendAsync.bind(engine);
+engine.stop();
 
 module.exports = {
     compilers: {
@@ -116,7 +123,7 @@ module.exports = {
             port: 8545,
         },
         development: {
-            provider,
+            provider: engine,
             gas: 6500000,
             gasPrice: toHex(toWei('1', 'gwei')),
             network_id: '*', // eslint-disable-line camelcase
@@ -124,21 +131,21 @@ module.exports = {
         },
         mainnet: {
             provider: mainnetProvider,
-            gas: 6000000,
+            gas: 10e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
             skipDryRun: true,
         },
         rinkeby: {
             provider: rinkebyProvider,
-            gas: 6000000,
+            gas: 10e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
             skipDryRun: true,
         },
         ropsten: {
             provider: ropstenProvider,
-            gas: 6000000,
+            gas: 8e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
             skipDryRun: true,

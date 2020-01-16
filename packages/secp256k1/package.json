@@ -9,7 +9,7 @@
   "dependencies": {
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.1",
-    "web3-utils": "1.2.1"
+    "web3-utils": "1.2.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.3",
@@ -48,10 +48,11 @@
   },
   "scripts": {
     "build:dev": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
-    "build": "./build.sh",
+    "build": "yarn clean && babel --copy-files --out-dir ./lib --root-mode upward ./src",
     "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path ../../.eslintignore .",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh secp256k1",
     "test": "mocha ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
     "watch": "yarn build:dev --watch"
   }
