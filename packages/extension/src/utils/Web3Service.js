@@ -330,27 +330,28 @@ class Web3Service {
                 ...methodSetting,
                 gas: estimatedGas,
             };
-            const methodSend = method(...methodArgs).send(options);
-            methodSend.once('transactionHash', (receipt) => {
-                const interval = setInterval(() => {
-                    web3.eth.getTransactionReceipt(receipt, (
-                        error,
-                        transactionReceipt,
-                    ) => {
-                        if (transactionReceipt) {
-                            clearInterval(interval);
-                            resolve(transactionReceipt);
-                        } else if (error) {
-                            clearInterval(interval);
-                            reject(new Error(error));
-                        }
-                    });
-                }, 1000);
-            });
 
-            methodSend.on('error', (error) => {
-                reject(error);
-            });
+            method(...methodArgs)
+                .send(options)
+                .on('transactionHash', (receipt) => {
+                    const interval = setInterval(() => {
+                        web3.eth.getTransactionReceipt(receipt, (
+                            error,
+                            transactionReceipt,
+                        ) => {
+                            if (transactionReceipt) {
+                                clearInterval(interval);
+                                resolve(transactionReceipt);
+                            } else if (error) {
+                                clearInterval(interval);
+                                reject(new Error(error));
+                            }
+                        });
+                    }, 1000);
+                })
+                .on('error', (error) => {
+                    reject(error);
+                });
         });
     };
 
