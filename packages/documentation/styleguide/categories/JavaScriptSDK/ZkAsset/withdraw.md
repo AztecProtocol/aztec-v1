@@ -1,3 +1,11 @@
+Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens
+
+__Arguments__
+- {String} __to__: Ethereum address to the ERC20 tokens should be sent, upon withdrawal
+- {Number} __amount__: units of value being withdrawn. This will equal the number of ERC20 tokens the `to` address receives
+
+## Examples
+### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by user
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
@@ -9,12 +17,12 @@ const asset = await window.aztec.zkAsset(address);
 console.info({ asset });
 
 // Deposit funds into the ZkAsset
-const addressToDeposit = '0xD4CD0b1EF54E8E4D73f68b01b5ccc125b13E3d1e';
+const userAddress = '0xD4CD0b1EF54E8E4D73f68b01b5ccc125b13E3d1e';
 const depositAmount = 50;
 await asset.deposit(
   [
     {
-      addressToDeposit,
+      to: userAddress,
       amount: depositAmount,
     }
   ]
@@ -22,11 +30,44 @@ await asset.deposit(
 );
 
 // Withdraw funds, to a different address
-const addressToWithdraw = '0x67b4cd8fc283deb79d3b99da349dae745e5ca98a';
 const withdrawAmount = 10;
 await asset.withdraw([
   {
-    addressToWithdraw,
+    to: userAddress,
+    amount: withdrawAmount,
+  }
+], {})
+```
+
+### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by a third part
+```js
+// Enable the SDK
+const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
+await window.aztec.enable({ apiKey });
+
+// Fetch the zkAsset
+const address = '0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a';
+const asset = await window.aztec.zkAsset(address);
+
+// Deposit funds into the ZkAsset
+const userAddress = '0xD4CD0b1EF54E8E4D73f68b01b5ccc125b13E3d1e';
+const depositAmount = 50;
+await asset.deposit(
+  [
+    {
+      to: userAddress,
+      amount: depositAmount,
+    }
+  ]
+  {},
+);
+
+// Withdraw funds, to a different address
+const thirdPartyAddress = '0xc647637aeb0f2ac4d98037955091ff66f6d8a235';
+const withdrawAmount = 10;
+await asset.withdraw([
+  {
+    to: thirdPartyAddress,
     amount: withdrawAmount,
   }
 ], {})

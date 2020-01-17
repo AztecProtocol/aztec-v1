@@ -166,24 +166,14 @@ module.exports = {
       pagePerSection: true,
       sections: [
         {
+          name: 'Getting started',
+          content: 'styleguide/categories/JavaScriptSDK/gettingStarted.md',
+          exampleMode: 'hide',
+        },
+        {
           name: 'window',
           content: 'styleguide/categories/JavaScriptSDK/Window/index.md',
           exampleMode: 'hide',
-          pagePerSection: true,
-          sections: [
-            {
-              name: 'window.aztec.enable',
-              content: 'styleguide/categories/JavaScriptSDK/Window/enable.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: 'window.aztec.zkAsset',
-              content: 'styleguide/categories/JavaScriptSDK/Window/zkAsset.md',
-              exampleMode: 'hide',
-            },
-          ],
-          sectionDepth: 1,
-          usageMode: 'hide',
         },
         {
           name: 'zkAsset',
@@ -214,6 +204,11 @@ module.exports = {
             {
               name: 'zkAsset.withdraw',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/withdraw.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.refresh()',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/refresh.md',
               exampleMode: 'hide',
             },
           ],
