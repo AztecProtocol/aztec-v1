@@ -4,8 +4,8 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { padLeft } from 'web3-utils';
 import HexString from './HexString';
-import note from '../../src/note';
-import outputCoder from '../../src/encoder/outputCoder';
+import { create } from '../../src/note';
+import * as outputCoder from '../../src/encoder/outputCoder';
 import { randomNoteValue } from '../helpers/note';
 
 const clean = (input) => {
@@ -27,7 +27,7 @@ describe('Output Coder', () => {
             .map(() => secp256k1.generateAccount());
         notes = await Promise.all(
             accounts.map(({ publicKey }) => {
-                return note.create(publicKey, randomNoteValue());
+                return create(publicKey, randomNoteValue());
             }),
         );
         challenges = [

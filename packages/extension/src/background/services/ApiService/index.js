@@ -5,7 +5,7 @@ import prove from './Prove';
 import asset from './Asset';
 import assetBalance from './Asset/getBalance';
 import fetchNotesFromBalance from './Asset/fetchNotesFromBalance';
-import note from './Note';
+import * as note from './Note';
 import noteWithViewingKey from './Note/exportViewingKey';
 import grantNoteAccess from './Note/grantNoteAccess';
 import validateParameters from './middlewares/validateParameters';

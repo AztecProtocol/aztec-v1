@@ -2,7 +2,7 @@ import { errors } from '@aztec/dev-utils';
 import secp256k1 from '@aztec/secp256k1';
 import { expect } from 'chai';
 import { randomHex } from 'web3-utils';
-import note from '../../../src/note';
+import * as note from '../../../src/note';
 import { PublicRangeProof } from '../../../src/proof';
 
 describe('Public range proof', () => {

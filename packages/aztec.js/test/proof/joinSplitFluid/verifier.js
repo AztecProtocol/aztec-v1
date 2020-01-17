@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import { BurnProof, MintProof, Proof } from '../../../src/proof';
 import BurnVerifier from '../../../src/proof/proofs/BURN/epoch0/burn/verifier';
 import MintVerifier from '../../../src/proof/proofs/MINT/epoch0/mint/verifier';
-import note from '../../../src/note';
+import * as note from '../../../src/note';
 
 describe('Join-Split Fluid Proof Verifier', () => {
     const { publicKey } = secp256k1.generateAccount();

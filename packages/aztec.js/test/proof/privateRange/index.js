@@ -5,7 +5,7 @@ import secp256k1 from '@aztec/secp256k1';
 import { expect } from 'chai';
 import { randomHex } from 'web3-utils';
 import { PrivateRangeProof } from '../../../src/proof';
-import note from '../../../src/note';
+import * as note from '../../../src/note';
 
 describe('Private range proof', () => {
     const { publicKey } = secp256k1.generateAccount();

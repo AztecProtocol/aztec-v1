@@ -7,7 +7,7 @@ import { expect } from 'chai';
 import ethSigUtil from 'eth-sig-util';
 import * as ethUtil from 'ethereumjs-util';
 import { keccak256, padLeft, randomHex } from 'web3-utils';
-import note from '../../src/note';
+import * as note from '../../src/note';
 import signer from '../../src/signer';
 
 describe('Signer', () => {

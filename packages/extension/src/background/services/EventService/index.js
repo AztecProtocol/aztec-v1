@@ -23,7 +23,7 @@ import {
 import {
     fetchNotes,
 } from './utils/note';
-import Note from '~/background/database/models/note';
+import * as note from '~/background/database/models/note';
 import Account from '~/background/database/models/account';
 import Asset from '~/background/database/models/asset';
 

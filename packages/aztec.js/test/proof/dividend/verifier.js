@@ -7,7 +7,7 @@ import { padLeft, randomHex } from 'web3-utils';
 import sinon from 'sinon';
 import { DividendProof , Proof } from '../../../src/proof';
 import DividendVerifier from '../../../src/proof/proofs/UTILITY/epoch0/dividend/verifier';
-import note from '../../../src/note';
+import * as note from '../../../src/note';
 
 
 describe('Dividend Proof Verifier', () => {

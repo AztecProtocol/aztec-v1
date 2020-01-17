@@ -2,7 +2,7 @@ import emptySchema from './emptySchema';
 import asset from './asset';
 import assetBalance from './assetBalance';
 import fetchNotesFromBalance from './fetchNotesFromBalance';
-import note from './note';
+import * as note from './note';
 import noteWithViewingKey from './noteWithViewingKey';
 import grantNoteAccess from './grantNoteAccess';
 import DEPOSIT_PROOF from './DEPOSIT_PROOF';

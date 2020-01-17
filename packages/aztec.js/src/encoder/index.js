@@ -1,6 +1,6 @@
-import inputCoder from './inputCoder';
-import noteCoder from './noteCoder';
-import outputCoder from './outputCoder';
+import * as inputCoder from './inputCoder';
+import * as noteCoder from './noteCoder';
+import * as outputCoder from './outputCoder';
 
 export {
     inputCoder,

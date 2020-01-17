@@ -7,7 +7,7 @@ import { randomHex } from 'web3-utils';
 import helpers from '../../src/proof/exportHandler/helpers';
 import JoinSplitProof65793 from '../../src/proof/proofs/BALANCED/epoch0/joinSplit';
 import { JoinSplitProof, proofHandler } from '../../src/proof';
-import note from '../../src/note';
+import * as note from '../../src/note';
 import ProofType from '../../src/proof/base/types';
 
 const { publicKey } = secp256k1.generateAccount();

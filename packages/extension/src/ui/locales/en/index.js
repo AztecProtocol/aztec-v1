@@ -6,7 +6,7 @@ import asset from './asset';
 import erc20 from './erc20';
 import register from './register';
 import domain from './domain';
-import note from './note';
+import * as note from './note';
 import proof from './proof';
 import deposit from './deposit';
 import send from './send';

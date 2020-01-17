@@ -9,7 +9,7 @@ module.exports = {
     // This will require all files to use import/export
     // and enforce babel to parse the files using the ECMAScript Module grammar.
     // Under this mode, files are automatically strict and less likely to pollute global scope.
-    sourceType: 'module',
+    sourceType: 'unambiguous',
     presets: ['@babel/preset-env'],
     plugins: ['@babel/plugin-transform-runtime', '@babel/plugin-proposal-object-rest-spread'],
 };

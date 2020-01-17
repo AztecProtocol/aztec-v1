@@ -4,8 +4,10 @@
   "description": "AZTEC note access utilities",
   "scripts": {
     "build": "yarn clean && babel --copy-files --out-dir ./lib ./src",
+    "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path  ../../.eslintignore .",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh note-access",
     "test": "jest",
     "watch": "yarn build --watch"
   },
