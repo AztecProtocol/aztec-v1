@@ -19,7 +19,7 @@ const {
  * @classdesc Class for AZTEC zero-knowledge notes. Notes have public keys and viewing keys.
  *   The viewing key is required to use note in an AZTEC zero-knowledge proof
  */
-class Note {
+export class Note {
     /**
      * Initializes a new instance of Note from either a public key or a viewing key.
      *
@@ -221,18 +221,12 @@ class Note {
     }
 }
 
-/**
- * Helper module to create Notes from public keys and view keys
- *
- * @module note
- */
-const note = {};
-note.utils = noteUtils;
+export const utils = noteUtils;
 
 /**
  * Create a Note instance from a recipient public key and a desired value
  *
- * @method fromValue
+ * @method create
  * @param {string} publicKey hex-string formatted recipient public key
  * @param {number} value value of the note
  * @param {string} noteOwner owner of the note if different from the public key
@@ -241,7 +235,7 @@ note.utils = noteUtils;
  * @returns {Promise} promise that resolves to created note instance
  */
 
-note.create = async (publicKey, value, access, noteOwner) => {
+export async function create (publicKey, value, access, noteOwner) {
     const sharedSecret = createSharedSecret(publicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
     const k = padLeft(toHex(value).slice(2), 8);
@@ -253,13 +247,27 @@ note.create = async (publicKey, value, access, noteOwner) => {
 };
 
 /**
+ * Create Note instance from a viewing key
+ *
+ * @method fromViewKey
+ * @param {string} viewingKey the viewing key for the note
+ * @returns {Promise} promise that resolves to created note instance
+ */
+export async function fromViewKey (viewingKey) {
+    const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
+    const setupPoint = await setup.fetchPoint(k.toNumber());
+    const newNote = new Note(null, viewingKey, null, undefined, setupPoint);
+    return newNote;
+};
+
+/**
  * Create a zero value note with from a constant `a` to make the hash of the initial totalMinted note in
  * mintable assets a constant
  *
  * @method createZeroValueNote
  * @returns {Promise} promise that resolves to created note instance
  */
-note.createZeroValueNote = () => note.fromViewKey(ZERO_VALUE_NOTE_VIEWING_KEY);
+export const createZeroValueNote = () => fromViewKey(ZERO_VALUE_NOTE_VIEWING_KEY);
 
 /**
  * Create Note instance from a public key and a spending key
@@ -271,7 +279,7 @@ note.createZeroValueNote = () => note.fromViewKey(ZERO_VALUE_NOTE_VIEWING_KEY);
  * @param {string} spendingKey hex-string formatted spending key (can also be an Ethereum private key)
  * @returns {Promise} promise that resolves to created note instance
  */
-note.derive = async (publicKey, spendingKey) => {
+export async function derive(publicKey, spendingKey) {
     const newNote = new Note(publicKey);
     await newNote.derive(spendingKey);
     return newNote;
@@ -280,12 +288,11 @@ note.derive = async (publicKey, spendingKey) => {
 /**
  * Encode compressed metadata of an array of notes as a hex-string, with each entry occupying 33 bytes
  *
- * @method fromValue
- * @param {string} publicKey hex-string formatted recipient public key
- * @param {number} value value of the note
- * @returns {Note} created note instance
+ * @method encodeMetadata
+ * @param {Array} noteArray Array of notes to encode in metadata
+ * @returns {string} Metadata
  */
-note.encodeMetadata = (noteArray) => {
+export function encodeMetadata(noteArray) {
     return noteArray.reduce((acc, aztecNote) => {
         const ephemeral = aztecNote.exportEphemeralKey();
         return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
@@ -299,7 +306,7 @@ note.encodeMetadata = (noteArray) => {
  * @param {string} logNoteData the note data returned from an event log
  * @returns {Note} created note instance
  */
-note.fromEventLog = async (logNoteData, spendingKey = null) => {
+export async function fromEventLog (logNoteData, spendingKey = null) {
     const publicKey = noteCoder.decodeNoteFromEventLog(logNoteData);
     const newNote = new Note(publicKey, null);
     if (spendingKey) {
@@ -315,29 +322,6 @@ note.fromEventLog = async (logNoteData, spendingKey = null) => {
  * @param {string} publicKey the public key for the note
  * @returns {Note} created note instance
  */
-note.fromPublicKey = (publicKey) => {
+export function fromPublicKey(publicKey) {
     return new Note(publicKey, null);
 };
-
-/**
- * Create Note instance from a viewing key
- *
- * @method fromViewKey
- * @param {string} viewingKey the viewing key for the note
- * @returns {Promise} promise that resolves to created note instance
- */
-note.fromViewKey = async (viewingKey) => {
-    const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
-    const setupPoint = await setup.fetchPoint(k.toNumber());
-    const newNote = new Note(null, viewingKey, null, undefined, setupPoint);
-    return newNote;
-};
-
-/**
- * Export the Note class as part of the note module. We shouldn't really use this directly, but useful for testing purposes
- *
- * @memberof module:note
- */
-note.Note = Note;
-
-export default note;

@@ -1,15 +1,15 @@
-import encoder from './encoder';
+import * as encoder from './encoder';
 import keccak from './keccak';
-import note from './note';
-import proof from './proof';
+import * as note from './note';
 import setup from './setup';
 import signer from './signer';
 
-export default {
+export * from './proof';
+
+export {
     encoder,
     keccak,
     note,
-    ...proof,
     setup,
     signer,
 };

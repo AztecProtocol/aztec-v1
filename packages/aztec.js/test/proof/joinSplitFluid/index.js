@@ -5,7 +5,7 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { randomHex } from 'web3-utils';
 import { BurnProof, MintProof } from '../../../src/proof';
-import note from '../../../src/note';
+import * as note from '../../../src/note';
 import { validateElement, validateScalar } from '../../helpers/bn128';
 
 const { publicKey } = secp256k1.generateAccount();

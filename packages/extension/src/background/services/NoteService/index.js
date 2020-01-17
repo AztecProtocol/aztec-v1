@@ -4,7 +4,7 @@ import {
 import {
     get,
 } from '~/utils/storage';
-import Note from '~/background/database/models/note';
+import * as note from '~/background/database/models/note';
 import ApiSessionManager from './helpers/ApiSessionManager';
 import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';

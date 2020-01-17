@@ -1,7 +1,5 @@
 import { padLeft } from 'web3-utils';
 
-const inputCoder = {};
-
 /**
  * Encode input signatures into ABI compatible string array format
  *
@@ -13,7 +11,7 @@ const inputCoder = {};
  * @returns {Number} length - length of the inputOwners string, divided by 2 because hexadecimal
  * characters each represent 0.5 bytes
  */
-inputCoder.encodeInputSignatures = (inputSignatures) => {
+export function encodeInputSignatures(inputSignatures) {
     const { length } = inputSignatures;
     const signatureString = inputSignatures.map(([v, r, s]) => {
         return `${v.slice(2)}${r.slice(2)}${s.slice(2)}`;
@@ -29,7 +27,7 @@ inputCoder.encodeInputSignatures = (inputSignatures) => {
  * @param notes - array of notes with metadata as part of their schema
  * @returns {String} ABI encoded representation of the notes metaData
  */
-inputCoder.encodeMetaData = (notes) => {
+export function encodeMetaData(notes) {
     const exportedMetaData = notes.map((individualNote) => {
         return individualNote.exportMetaData();
     });
@@ -58,7 +56,7 @@ inputCoder.encodeMetaData = (notes) => {
  * @param {note[]} notes - array of AZTEC notes
  * @returns {string} notes - an array of AZTEC notes in a string array format
  */
-inputCoder.encodeNotes = (notes) => {
+export function encodeNotes(notes) {
     return notes.map((note) => padLeft(note.slice(2), 64)).join('');
 };
 
@@ -72,7 +70,7 @@ inputCoder.encodeNotes = (notes) => {
  * @returns {Number} length - length of the owners string, divided by 2 because hexadecimal
  * characters each represent 0.5 bytes
  */
-inputCoder.encodeOwners = (owners) => {
+export function encodeOwners(owners) {
     const { length } = owners;
     const ownerStrings = owners.map((o) => padLeft(o.slice(2), 64));
     return [padLeft(Number(length).toString(16), 64), ...ownerStrings].join('');
@@ -88,11 +86,9 @@ inputCoder.encodeOwners = (owners) => {
  * @returns {Number} length - length of the proofData, divided by 2 because hexadecimal
  * characters each represent 0.5 bytes
  */
-inputCoder.encodeProofData = (proofData) => {
+export function encodeProofData(proofData) {
     const { length } = proofData;
-    const noteString = proofData.map((notes) => inputCoder.encodeNotes(notes));
+    const noteString = proofData.map((notes) => encodeNotes(notes));
     const data = [padLeft(Number(length).toString(16), 64), ...noteString].join('');
     return data;
 };
-
-export default inputCoder;

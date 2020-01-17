@@ -51,11 +51,12 @@
   },
   "scripts": {
     "build:dev": "webpack --config ./webpack.dev.js",
-    "build": "PROD=false ./build.sh",
-    "build:prod": "PROD=true ./build.sh",
+    "build": "webpack --config ./webpack.dev.js",
+    "build:prod": "webpack --config ./webpack.prod.js",
     "clean": "shx rm -rf ./dist || true",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "test": "NODE_ENV=TEST mocha --require @babel/polyfill --require @babel/register ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh bn128",
     "watch": "yarn build:dev --watch"
   }
 }

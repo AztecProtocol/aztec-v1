@@ -72,14 +72,15 @@
   },
   "scripts": {
     "build:dev": "webpack --config ./webpack.dev.js",
-    "build": "PROD=false ./build.sh",
+    "build": "./node_modules/.bin/webpack --config ./webpack.dev.js;",
     "build:docs": "jsdoc --configure ./.jsdoc.json",
-    "build:prod": "PROD=true ./build.sh",
+    "build:prod": "./node_modules/.bin/webpack --config ./webpack.prod.js;",
     "clean": "shx rm -rf ./.nyc_output ./build ./coverage ./coverageEnv ./coverage.json ./dist ./docs || true",
     "coverage": "nyc mocha ./test --bail --trace-warnings --exit --colors --recursive --reporter spec",
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "publish:docs": "yarn build:docs && push-dir --allow-unclean --dir ./docs --branch gh-pages --remote docs --cleanup",
-    "test": "NODE_ENV=TEST mocha --require @babel/polyfill --require @babel/register ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+    "test": "NODE_ENV=TEST LOCAL_DATABASE_PATH=$(pwd)/test/localSetupDatabase/ mocha --require @babel/polyfill --require @babel/register ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh aztec.js",
     "watch": "yarn build:dev --watch"
   }
 }

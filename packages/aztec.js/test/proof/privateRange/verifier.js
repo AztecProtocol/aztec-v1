@@ -6,7 +6,7 @@ import { randomHex } from 'web3-utils';
 import sinon from 'sinon';
 import { PrivateRangeProof , Proof } from '../../../src/proof';
 import PrivateRangeVerifier from '../../../src/proof/proofs/UTILITY/epoch0/privateRange/verifier';
-import note from '../../../src/note';
+import * as note from '../../../src/note';
 
 
 describe('Private range proof Verifier', () => {

@@ -77,8 +77,9 @@
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "solhint --ignore-path ../../.solhintignore \"contracts/**/*.sol\"",
     "profile": "scripts/profile.sh",
-    "test": "scripts/test.sh",
-    "test:sol": "scripts/test.sh",
+    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh protocol",
+    "test": "NODE_ENV=TEST LOCAL_DATABASE_PATH=$(pwd)/test/localSetupDatabase/  scripts/test.sh",
+    "test:sol": "NODE_ENV=TEST LOCAL_DATABASE_PATH=$(pwd)/test/localSetupDatabase/ scripts/test.sh",
     "trace": "scripts/trace.sh",
     "test:gsn": "scripts/testGSN.sh"
   }

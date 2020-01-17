@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import web3Utils from 'web3-utils';
 import * as noteAccess from '@aztec/note-access';
 
-import note from '../../src/note';
+import * as note from '../../src/note';
 import { userAccount, userAccount2 } from '../helpers/note';
 
 const {
