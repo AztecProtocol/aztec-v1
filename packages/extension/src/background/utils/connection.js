@@ -30,11 +30,11 @@ import {
     permissionError,
 } from '~/utils/error';
 import getDomainFromUrl from '~/utils/getDomainFromUrl';
-import graphQueryMap from '../../ui/queries';
 import ApiService from '../services/ApiService';
 import ClientActionService from '../services/ClientActionService';
 import TransactionSendingService from '../services/TransactionSendingService';
 import GraphQLService from '../services/GraphQLService';
+import Queries from '../services/GraphQLService/Queries';
 
 class Connection {
     constructor() {
@@ -213,9 +213,13 @@ class Connection {
                     },
                 } = data;
                 return from((async () => {
+                    const {
+                        requestedFields,
+                        ...variables
+                    } = args;
                     const { data: response } = await GraphQLService.query({
-                        variables: args,
-                        query: graphQueryMap[query],
+                        variables,
+                        query: Queries[query](requestedFields),
                     });
                     return {
                         ...data,
