@@ -26,7 +26,9 @@ export default class EventListeners {
     }
 
     add = (eventName, cb) => {
-        if (!this.validateEventName(eventName, 'add')) return;
+        if (!this.validateEventName(eventName, 'add')
+            || this.isListening(eventName, cb)
+        ) return;
 
         this.eventListeners[eventName].push(cb);
     };
