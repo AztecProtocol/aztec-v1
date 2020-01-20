@@ -159,7 +159,7 @@ module.exports = {
     //   pagePerSection: true,
     // },
     {
-      name: 'JavaScript SDK',
+      name: 'SDK',
       content: 'styleguide/categories/JavaScriptSDK/overview.md',
       components: [],
       exampleMode: 'hide',
@@ -172,12 +172,12 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'window.aztec.enable()',
+              name: 'window.aztec.enable',
               content: 'styleguide/categories/JavaScriptSDK/Window/enable.md',
               exampleMode: 'hide',
             },
             {
-              name: 'window.aztec.zkAsset()',
+              name: 'window.aztec.zkAsset',
               content: 'styleguide/categories/JavaScriptSDK/Window/zkAsset.md',
               exampleMode: 'hide',
             },
@@ -192,27 +192,27 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'zkAsset.balance()',
+              name: 'zkAsset.balance',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/balance.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.fetchNotesFromBalance()',
+              name: 'zkAsset.fetchNotesFromBalance',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/fetchNotesFromBalance.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.deposit()',
+              name: 'zkAsset.deposit',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.send()',
+              name: 'zkAsset.send',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/send.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.withdraw()',
+              name: 'zkAsset.withdraw',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/withdraw.md',
               exampleMode: 'hide',
             },
@@ -227,22 +227,22 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'note.value()',
+              name: 'note.value',
               content: 'styleguide/categories/JavaScriptSDK/Note/value.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.grantNoteAccess()',
+              name: 'note.grantNoteAccess',
               content: 'styleguide/categories/JavaScriptSDK/Note/grantNoteAccess.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.owner()',
+              name: 'note.owner',
               content: 'styleguide/categories/JavaScriptSDK/Note/owner.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.hash()',
+              name: 'note.hash',
               content: 'styleguide/categories/JavaScriptSDK/Note/hash.md',
               exampleMode: 'hide',
             },
