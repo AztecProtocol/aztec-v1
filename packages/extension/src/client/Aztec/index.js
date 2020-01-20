@@ -77,7 +77,7 @@ class Aztec {
 
                 this.refreshSession(options, (success, error) => {
                     if (callback) {
-                        callback(!!error, error);
+                        callback(!error, error);
                     }
                     const shouldReject = !!error && !callback;
                     doResolved(shouldReject, error);
@@ -143,7 +143,15 @@ class Aztec {
         if (autoRefreshOnProfileChange) {
             Web3Service.bindProfileChange((changedType, newTypeValue) => {
                 this.eventListeners.notify('profileChanged', changedType, newTypeValue);
-                this.refreshSession(options);
+
+                this.refreshSession(options, (success, error) => {
+                    this.eventListeners.notify(
+                        'profileChanged',
+                        'aztecAccountChanged',
+                        success,
+                        error,
+                    );
+                });
             });
         }
 
