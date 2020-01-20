@@ -37,7 +37,19 @@ const uiResolvers = {
                     ...args,
                 },
             });
-            return noteResponse.note;
+
+            const {
+                note,
+            } = noteResponse || {};
+
+            if (!note) {
+                return null;
+            }
+
+            return {
+                ...note,
+                asset: note.asset.address,
+            };
         },
     },
 };
