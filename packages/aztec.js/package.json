@@ -80,7 +80,7 @@
     "lint": "eslint --ignore-path ../../.eslintignore .",
     "publish:docs": "yarn build:docs && push-dir --allow-unclean --dir ./docs --branch gh-pages --remote docs --cleanup",
     "test": "NODE_ENV=TEST LOCAL_DATABASE_PATH=$(pwd)/test/localSetupDatabase/ mocha --require @babel/polyfill --require @babel/register ./test --bail --colors --exit --recursive --reporter spec --timeout 0 --trace-warnings",
-    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh aztec.js",
+    "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh aztec.js",
     "watch": "yarn build:dev --watch"
   }
 }

@@ -86,7 +86,7 @@
         "build:prod": "webpack --config webpack.prod.js",
         "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
-        "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh extension",
+        "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh extension",
         "generate:styles": "guacamole generateStyles",
         "generate:testData": "babel-node ./tests/generateTestData",
         "lint": "eslint ./ --color",
