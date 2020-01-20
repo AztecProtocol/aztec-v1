@@ -1,4 +1,4 @@
-import aztec from 'aztec.js';
+import * as aztec from 'aztec.js';
 
 export default async function fromViewingKey(viewingKey, owner) {
     const note = await aztec.note.fromViewKey(viewingKey);

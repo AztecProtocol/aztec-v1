@@ -1,4 +1,10 @@
 import {
+    metadata,
+} from '@aztec/note-access';
+import {
+    METADATA_AZTEC_DATA_LENGTH,
+} from '~/config/constants';
+import {
     userAccount,
 } from '~testHelpers/testUsers';
 import testNotes from '~testHelpers/testNotes';
@@ -7,9 +13,6 @@ import {
     randomId,
     randomInt,
 } from '~/utils/random';
-import {
-    addAccess,
-} from '~/utils/metadata';
 import {
     isDestroyed,
 } from '~/utils/noteStatus';
@@ -33,14 +36,15 @@ const transformNote = ({
     viewingKey,
 }) => {
     const blockNumber = randomInt(1, 1000);
-    const metadataStr = addAccess('', {
+    const metadataObj = metadata('');
+    metadataObj.addAccess({
         address: userAccount.address,
         viewingKey,
     });
 
     return {
         noteHash: hash,
-        metadata: metadataStr,
+        metadata: `0x${''.padEnd(METADATA_AZTEC_DATA_LENGTH, '0')}${metadataObj.toString().slice(2)}`,
         assetId,
         blockNumber,
         status: 'CREATED',

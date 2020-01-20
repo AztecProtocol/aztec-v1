@@ -1,5 +1,5 @@
-const getParameters = require( './getParameters');
+const getParameters = require('./getParameters');
 
 module.exports = {
     getParameters,
-}
+};

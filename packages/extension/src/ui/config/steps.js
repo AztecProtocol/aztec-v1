@@ -247,7 +247,7 @@ export const registerSteps = {
             tasks: [
                 {
                     name: 'authorise',
-                    run: apis.auth.sendGSNRegisterTx,
+                    run: apis.auth.registerAccountOnChain,
                 },
                 {
                     name: 'register_address',
@@ -332,7 +332,7 @@ export const registerSteps = {
             tasks: [
                 {
                     name: 'authorise',
-                    run: apis.auth.sendRegisterAddress,
+                    run: apis.auth.registerAccountOnChain,
                 },
                 {
                     name: 'register_address',
@@ -368,7 +368,7 @@ export const linkAccountSteps = {
             tasks: [
                 {
                     name: 'authorise',
-                    run: apis.auth.sendGSNRegisterTx,
+                    run: apis.auth.registerAccountOnChain,
                 },
                 {
                     name: 'register_address',
@@ -402,7 +402,7 @@ export const linkAccountSteps = {
             tasks: [
                 {
                     name: 'authorise',
-                    run: apis.auth.sendRegisterAddress,
+                    run: apis.auth.registerAccountOnChain,
                 },
                 {
                     name: 'register_address',

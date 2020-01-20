@@ -1,8 +1,6 @@
 const Sequelize = require('sequelize');
 
-const {
-    Model,
-} = Sequelize;
+const { Model } = Sequelize;
 
 class Dapps extends Model {}
 class Transactions extends Model {}

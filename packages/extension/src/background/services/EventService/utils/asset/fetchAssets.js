@@ -2,6 +2,9 @@ import Web3Service from '~/helpers/Web3Service';
 import {
     ACE,
 } from '~/config/contractEvents';
+import {
+    transformAssetFromBlock,
+} from '~/utils/transformData';
 
 export default async function fetchAssets({
     fromBlock = 'earliest',
@@ -37,7 +40,7 @@ export default async function fetchAssets({
                 canAdjustSupply,
                 canConvert,
             },
-        }) => ({
+        }) => transformAssetFromBlock({
             blockNumber,
             registryOwner,
             registryAddress,

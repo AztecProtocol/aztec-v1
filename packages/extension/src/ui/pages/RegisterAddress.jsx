@@ -24,6 +24,7 @@ const RegisterAddress = ({
             initialData={{
                 ...initialData,
                 ...currentAccount,
+                isGSNAvailable,
             }}
         />
     );

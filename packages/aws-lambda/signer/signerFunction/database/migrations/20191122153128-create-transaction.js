@@ -1,19 +1,8 @@
-const {
-    TRANSACTION_TYPE,
-    TRANSACTION_STATUS,
-    SHA3_LENGTH,
-    ETH_ADDRESS_LENGTH,
-} = require('../../config/constants');
-
+const { TRANSACTION_TYPE, TRANSACTION_STATUS, SHA3_LENGTH, ETH_ADDRESS_LENGTH } = require('../../config/constants');
 
 module.exports = {
     up: (queryInterface, DataTypes) => {
-        const {
-            STRING,
-            INTEGER,
-            ENUM,
-            DATE,
-        } = DataTypes;
+        const { STRING, INTEGER, ENUM, DATE } = DataTypes;
 
         return queryInterface.createTable('Transactions', {
             id: {
@@ -50,11 +39,7 @@ module.exports = {
             type: {
                 type: ENUM,
                 allowNull: false,
-                values: [
-                    TRANSACTION_TYPE.SPENDING,
-                    TRANSACTION_TYPE.PURCHASE,
-                    TRANSACTION_TYPE.REFUND,
-                ],
+                values: [TRANSACTION_TYPE.SPENDING, TRANSACTION_TYPE.PURCHASE, TRANSACTION_TYPE.REFUND],
             },
             status: {
                 type: ENUM,

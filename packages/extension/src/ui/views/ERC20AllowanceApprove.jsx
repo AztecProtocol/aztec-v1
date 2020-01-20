@@ -48,7 +48,7 @@ const ERC20AllowanceApprove = ({
         description={description || i18n.t(
             descriptionKey || [
                 'erc20.allowance.approve.description',
-                requestedAllowance.eq(new BN(amount))
+                requestedAllowance.eq(new BN(amount)) && !asset.decimals
                     ? ''
                     : '.withNoteValue',
             ].join(''),

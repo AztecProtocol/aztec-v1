@@ -1,5 +1,11 @@
 import cloneDeep from 'lodash/cloneDeep';
 import {
+    metadata,
+} from '@aztec/note-access';
+import {
+    METADATA_AZTEC_DATA_LENGTH,
+} from '~/config/constants';
+import {
     get,
 } from '~/utils/storage';
 import {
@@ -10,7 +16,6 @@ import EventListeners from '~/utils/EventListeners';
 import {
     PriorityQueue,
 } from '~/utils/dataStructures';
-import metadata from '~/utils/metadata';
 import {
     fromHexString,
 } from '~/utils/encryptedViewingKey';
@@ -220,7 +225,7 @@ export default class Asset {
 
             let value;
             try {
-                const metadataObj = metadata(metadataStr);
+                const metadataObj = metadata(metadataStr.slice(2 + METADATA_AZTEC_DATA_LENGTH));
                 const {
                     viewingKey,
                 } = metadataObj.getAccess(address) || {};

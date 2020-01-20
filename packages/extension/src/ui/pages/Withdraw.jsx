@@ -18,7 +18,6 @@ const Withdraw = ({
     assetAddress,
     amount,
     to,
-    proof,
     numberOfInputNotes,
     gsnConfig,
 }) => {
@@ -42,7 +41,6 @@ const Withdraw = ({
             amount: parseInputAmount(amount),
             publicOwner: to,
             sender,
-            proof,
             numberOfInputNotes,
         };
     };
@@ -64,16 +62,12 @@ Withdraw.propTypes = {
     assetAddress: PropTypes.string.isRequired,
     amount: inputAmountType.isRequired,
     to: PropTypes.string.isRequired,
-    proof: PropTypes.shape({
-        inputNotes: PropTypes.array.isRequired,
-    }),
     numberOfInputNotes: PropTypes.number,
     gsnConfig: gsnConfigShape.isRequired,
 };
 
 Withdraw.defaultProps = {
     initialStep: 0,
-    proof: null,
     numberOfInputNotes: emptyIntValue,
 };
 

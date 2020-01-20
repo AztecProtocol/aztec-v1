@@ -1,52 +1,31 @@
+const { OK_200, BAD_400 } = require('./helpers/responses');
 const {
-    OK_200,
-    BAD_400,
-} = require('./helpers/responses');
-const {
-    networks: {
-        ids: networkIds,
-    },
+    networks: { ids: networkIds },
 } = require('./helpers');
-const {
-    errorLog,
-} = require('./utils/log');
+const { errorLog } = require('./utils/log');
 const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
 
-
-
-const initializeDB = ({
-    networkId,
-}) => {
+const initializeDB = ({ networkId }) => {
     dbConnection.init({
         networkId,
     });
     const {
-        models: {
-            init: initModels,
-        },
+        models: { init: initModels },
     } = db;
     initModels();
 };
 
-
 exports.migrationHandler = async (event) => {
-    const {
-        command = 'up',
-    } = event;
+    const { command = 'up' } = event;
 
-    const {
-        createDatabases,
-        migrate,
-        connect,
-        close,
-    } = db;
+    const { createDatabases, migrate, connect, close } = db;
 
     /* eslint-disable no-await-in-loop */
     try {
         await createDatabases();
 
-        for(let i = 0; i < networkIds.length; i += 1) {
+        for (let i = 0; i < networkIds.length; i += 1) {
             const networkId = networkIds[i];
             initializeDB({
                 networkId,

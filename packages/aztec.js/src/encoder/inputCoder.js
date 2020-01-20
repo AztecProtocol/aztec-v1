@@ -18,7 +18,7 @@ export function encodeInputSignatures(inputSignatures) {
     });
     const data = [padLeft(Number(length).toString(16), 64), ...signatureString].join('');
     return data;
-};
+}
 
 /**
  * Encode the metaData of multiple notes into ABI compatible string array format
@@ -47,7 +47,7 @@ export function encodeMetaData(notes) {
         ...exportedMetaData,
     ].join('');
     return data;
-};
+}
 
 /**
  * Encode an AZTEC note into ABI compatible string array format
@@ -58,7 +58,7 @@ export function encodeMetaData(notes) {
  */
 export function encodeNotes(notes) {
     return notes.map((note) => padLeft(note.slice(2), 64)).join('');
-};
+}
 
 /**
  * Encode outputOwners into ABI compatible string array format
@@ -74,7 +74,7 @@ export function encodeOwners(owners) {
     const { length } = owners;
     const ownerStrings = owners.map((o) => padLeft(o.slice(2), 64));
     return [padLeft(Number(length).toString(16), 64), ...ownerStrings].join('');
-};
+}
 
 /**
  * Encode proofData into ABI compatible string array format
@@ -91,4 +91,4 @@ export function encodeProofData(proofData) {
     const noteString = proofData.map((notes) => encodeNotes(notes));
     const data = [padLeft(Number(length).toString(16), 64), ...noteString].join('');
     return data;
-};
+}

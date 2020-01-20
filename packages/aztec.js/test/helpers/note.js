@@ -5,7 +5,6 @@ import BN from 'bn.js';
 import crypto from 'crypto';
 import { padLeft, toHex } from 'web3-utils';
 import * as note from '../../src/note';
-import ProofUtils from '../../src/proof/base/epoch0/utils';
 
 const mockLightNote = async (k) => {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
@@ -80,10 +79,10 @@ const mockNoteSet = async (kIn, kOut) => {
 
 function kMaxBoundValue(value) {
     if (process.env.NODE_ENV === 'TEST' || process.env.NODE_ENV === 'development') {
-        return (value > constants.K_MAX_TEST) ? constants.K_MAX_TEST : value;
+        return value > constants.K_MAX_TEST ? constants.K_MAX_TEST : value;
     }
 
-    return (value > constants.K_MAX) ? constants.K_MAX : value;
+    return value > constants.K_MAX ? constants.K_MAX : value;
 }
 
 /**
@@ -110,7 +109,7 @@ const noteSetOfValue = (numberOfNotes, totalValue) => {
     const notes = [];
     for (let i = 0; i < numberOfNotes; i += 1) {
         if (i === numberOfNotes - 1) {
-            notes[i] = totalValue - (averageValue * i);
+            notes[i] = totalValue - averageValue * i;
         } else {
             notes[i] = averageValue;
         }
@@ -125,7 +124,6 @@ const noteSetOfValue = (numberOfNotes, totalValue) => {
  * @param {number} nOut number of output notes
  */
 const balancedPublicValues = (nIn, nOut) => {
-
     const transactionAmount = randomNoteValue();
     const kIn = noteSetOfValue(nIn, transactionAmount);
     const kOut = noteSetOfValue(nOut, transactionAmount);
@@ -153,11 +151,4 @@ const userAccount2 = {
     spendingPublicKey: '0x02090a6b89b0588626f26babc87f2dc1e2c815b8248754bed93d837f7071411605',
 };
 
-export {
-    balancedPublicValues,
-    mockLightNoteSet,
-    mockNoteSet,
-    randomNoteValue,
-    userAccount,
-    userAccount2,
-};
+export { balancedPublicValues, mockLightNoteSet, mockNoteSet, randomNoteValue, userAccount, userAccount2 };

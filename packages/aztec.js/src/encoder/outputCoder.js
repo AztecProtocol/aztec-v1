@@ -41,7 +41,7 @@ export function decodeNote(note) {
         sigma,
         ephemeral,
     };
-};
+}
 
 /**
  * Decode an array of notes
@@ -59,7 +59,7 @@ export function decodeNotes(notes) {
             const noteOffset = parseInt(notes.slice(0x80 + i * 0x40, 0xc0 + i * 0x40), 16);
             return decodeNote(notes.slice(noteOffset * 2));
         });
-};
+}
 
 /**
  * Decode a bytes proofOutput string into it's constitutent objects
@@ -85,7 +85,7 @@ export function decodeProofOutput(proofOutput) {
         publicValue,
         challenge,
     };
-};
+}
 
 /**
  * Decode a bytes proofOutputs object into the constituent variables of each
@@ -108,7 +108,7 @@ export function decodeProofOutputs(proofOutputsHex) {
         });
 
     return result;
-};
+}
 
 /**
  * Encode an output note, according to the ABI encoding specification
@@ -145,7 +145,7 @@ export function encodeNote(note, encodeMetaData) {
     encoded[5] = padLeft(bn128.compress(note.gamma.x.fromRed(), note.gamma.y.fromRed()).toString(16), 64);
     encoded[6] = padLeft(bn128.compress(note.sigma.x.fromRed(), note.sigma.y.fromRed()).toString(16), 64);
     return encoded.join('');
-};
+}
 
 /**
  * Encode an array of notes according to the ABI specification. Able to encode both input and output
@@ -177,7 +177,7 @@ export function encodeNotes(notes, encodeMetaData) {
         ...encodedNotes,
     ];
     return encoded.join('');
-};
+}
 
 /**
  * Encode a proofOutput object according to the ABI specification
@@ -216,7 +216,7 @@ export function encodeProofOutput({ inputNotes, outputNotes, publicOwner, public
     encoded[7] = encodedOutputNotes;
 
     return encoded.join('');
-};
+}
 
 /**
  * Encode a proofOutputs object according to the ABI specification
@@ -242,7 +242,7 @@ export function encodeProofOutputs(proofOutputs) {
         ...encodedProofOutputs,
     ];
     return `0x${encoded.join('')}`.toLowerCase();
-};
+}
 
 /**
  * Extract the the input notes from a proof output
@@ -259,7 +259,7 @@ export function getInputNotes(proofOutput) {
         return inputNotes;
     }
     return padLeft('0x0', 64);
-};
+}
 
 /**
  * Extract the metadata from a notee
@@ -292,7 +292,7 @@ export function getMetadata(note) {
     }
 
     return metadata;
-};
+}
 
 /**
  * Extract the note from a bytes notes string
@@ -307,7 +307,7 @@ export function getNote(notes, i) {
     const length = 2 * parseInt(notes.slice(noteOffset, noteOffset + 0x40), 16);
     // Add 0x40 because the length itself has to be included
     return notes.slice(noteOffset, noteOffset + 0x40 + length);
-};
+}
 
 /**
  * Extract the the input notes from a proof output
@@ -324,7 +324,7 @@ export function getOutputNotes(proofOutput) {
         return inputNotes;
     }
     return padLeft('0x0', 64);
-};
+}
 
 /**
  * Decode a bytes proofOutputs object into the constituent variables of each
@@ -341,7 +341,7 @@ export function getProofOutput(proofOutputsHex, i) {
     const offset = parseInt(proofOutputs.slice(0x40 + 0x40 * i, 0x80 + 0x40 * i), 16);
     const length = parseInt(proofOutputs.slice(offset * 2 - 0x40, offset * 2), 16);
     return proofOutputs.slice(offset * 2 - 0x40, offset * 2 + length * 2);
-};
+}
 
 /**
  * Decode a bytes proofOutputs object into the constituent variables of each
@@ -353,4 +353,4 @@ export function getProofOutput(proofOutputsHex, i) {
  */
 export function hashProofOutput(proofOutput) {
     return keccak256(`0x${proofOutput.slice(0x40)}`);
-};
+}

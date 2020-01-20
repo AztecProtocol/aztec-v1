@@ -1,4 +1,4 @@
-import * as note from '~/background/database/models/note';
+import Note from '~/background/database/models/note';
 
 
 export default async function createNote(note, networkId) {

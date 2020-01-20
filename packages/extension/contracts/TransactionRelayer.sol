@@ -3,7 +3,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@aztec/protocol/contracts/interfaces/IAZTEC.sol";
 import "@aztec/protocol/contracts/ACE/ACE.sol" as ACEModule;
 import "@aztec/protocol/contracts/libs/NoteUtils.sol";
-import "@aztec/protocol/contracts/interfaces/IERC20.sol";
+import "@aztec/protocol/contracts/interfaces/IERC20Mintable.sol";
 import "@aztec/protocol/contracts/interfaces/IZkAsset.sol";
 import "./AZTECAccountRegistry.sol";
 
@@ -16,12 +16,6 @@ contract TransactionRelayer is Context, IAZTEC, AZTECAccountRegistry {
         address _ace
     ) public {
         ace = ACEModule.ACE(_ace);
-    }
-
-    event LogAddress(address addr);
-
-    function publicKeyToAddress(bytes memory publicKey) public pure returns (address) {
-        return address(uint160(uint256(keccak256(publicKey))));
     }
 
     function deposit(
@@ -38,8 +32,7 @@ contract TransactionRelayer is Context, IAZTEC, AZTECAccountRegistry {
         );
 
         if (_owner != _msgSender()) {
-            // address account = publicKeyToAddress(accountMapping[_owner]);
-            // require(account == _msgSender(), "Sender has no permission to deposit on owner's behalf.");
+            require(accountAliasMapping[_owner] == _msgSender(), "Sender has no permission to deposit on owner's behalf.");
 
             (,
             bytes memory proofOutputNotes,
@@ -53,7 +46,7 @@ contract TransactionRelayer is Context, IAZTEC, AZTECAccountRegistry {
         }
 
         (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
-        IERC20 linkedToken = IERC20(linkedTokenAddress);
+        IERC20Mintable linkedToken = IERC20Mintable(linkedTokenAddress);
 
         linkedToken.transferFrom(
             _owner,

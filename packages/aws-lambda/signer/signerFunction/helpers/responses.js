@@ -6,13 +6,7 @@ const baseResponse = {
     },
 };
 
-const successResponse = ({
-    statusCode = 200,
-    data = {},
-    options: {
-        headers = {},
-    } = {},
-}) => {
+const successResponse = ({ statusCode = 200, data = {}, options: { headers = {} } = {} }) => {
     const responseOptions = {
         ...baseResponse,
         headers: {
@@ -29,13 +23,7 @@ const successResponse = ({
     };
 };
 
-const badResponse = ({
-    statusCode = 400,
-    message = 'Bad request',
-    options: {
-        headers = {},
-    } = {},
-}) => {
+const badResponse = ({ statusCode = 400, message = 'Bad request', options: { headers = {} } = {} }) => {
     const responseOptions = {
         ...baseResponse,
         headers: {
@@ -54,26 +42,29 @@ const badResponse = ({
     };
 };
 
-const OK_200 = (data, options) => successResponse({
-    data,
-    options,
-});
+const OK_200 = (data, options) =>
+    successResponse({
+        data,
+        options,
+    });
 
-const BAD_400 = (message, options) => badResponse({
-    message,
-    options,
-});
+const BAD_400 = (message, options) =>
+    badResponse({
+        message,
+        options,
+    });
 
-const ACCESS_DENIED_401 = (message = 'Access Denied') => badResponse({
-    statusCode: 401,
-    message,
-});
+const ACCESS_DENIED_401 = (message = 'Access Denied') =>
+    badResponse({
+        statusCode: 401,
+        message,
+    });
 
-const NOT_FOUND_404 = (message = 'Not Found') => badResponse({
-    statusCode: 404,
-    message,
-});
-
+const NOT_FOUND_404 = (message = 'Not Found') =>
+    badResponse({
+        statusCode: 404,
+        message,
+    });
 
 module.exports = {
     OK_200,
