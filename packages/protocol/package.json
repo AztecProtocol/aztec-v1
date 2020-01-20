@@ -8,8 +8,12 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-ethereum-package": "^2.4.0",
+    "@openzeppelin/gsn-helpers": "^0.2.1",
+    "@openzeppelin/gsn-provider": "^0.1.9",
+    "@openzeppelin/network": "^0.2.10",
     "@openzeppelin/upgrades": "^2.6.0",
-    "openzeppelin-solidity": "2.3.0"
+    "axios": "^0.19.0",
+    "openzeppelin-solidity": "^2.4.0"
   },
   "devDependencies": {
     "@0x/sol-coverage": "^3.0.0",
@@ -73,9 +77,10 @@
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "solhint --ignore-path ../../.solhintignore \"contracts/**/*.sol\"",
     "profile": "scripts/profile.sh",
-    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh protocol",
-    "test": "scripts/test.sh",
-    "test:sol": "scripts/test.sh",
-    "trace": "scripts/trace.sh"
+    "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh protocol",
+    "test": "NODE_ENV=TEST LOCAL_DATABASE_PATH=$(pwd)/test/localSetupDatabase/  scripts/test.sh",
+    "test:sol": "NODE_ENV=TEST LOCAL_DATABASE_PATH=$(pwd)/test/localSetupDatabase/ scripts/test.sh",
+    "trace": "scripts/trace.sh",
+    "test:gsn": "scripts/testGSN.sh"
   }
 }

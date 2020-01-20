@@ -11,12 +11,24 @@ cleanup() {
   if [ -n "$ganache_pid" ] && ps -p $ganache_pid > /dev/null; then
     kill -9 $ganache_pid
   fi
+
+  if [ -n "$gsn_relay_server_pid" ] && ps -p $gsn_relay_server_pid > /dev/null; then
+    kill -9 $gsn_relay_server_pid
+  fi
 }
 
 ganache_port=8545
+ganache_url="http://localhost:8545"
+
+relayer_port=8090
+relayer_url="http://localhost:${relayer_port}"
 
 ganache_running() {
   nc -z localhost "$ganache_port"
+}
+
+relayer_running() {
+  nc -z localhost "$relayer_port"
 }
 
 start_ganache() {
@@ -51,12 +63,42 @@ start_ganache() {
   echo "Ganache launched!"
 }
 
+# setup_gsn_relay() {
+#   relay_hub_addr=$(npx oz-gsn deploy-relay-hub --ethereumNodeURL $ganache_url)
+#   echo "Launching GSN relay server to hub $relay_hub_addr"
+ 
+#   ./bin/gsn-relay -DevMode -RelayHubAddress $relay_hub_addr -EthereumNodeUrl $ganache_url -Url $relayer_url &> /dev/null &
+#   gsn_relay_server_pid=$!
+ 
+#   while ! relayer_running; do
+#   echo "GSN runnign..."
+#     sleep 0.1
+#   done
+#   echo "GSN relay server launched!"
+ 
+#   npx oz-gsn register-relayer --ethereumNodeURL $ganache_url --relayUrl $relayer_url
+# }
+
+setup_gsn_relay() {
+  gsn_relay_server_pid=$(npx oz-gsn run-relayer --ethereumNodeURL $ganache_url --port $relayer_port --detach --quiet)
+}
+
+
 if ganache_running; then
   echo "Using existing ganache instance"
 else
   echo "Starting our own ganache instance"
   start_ganache
 fi
+
+# if relayer_running; then
+#   echo "Using existing relayer instance"
+# else
+#   echo "Starting our own relayer instance"
+#   setup_gsn_relay
+# fi
+
+# setup_gsn_relay
 
 if [ "$SOLC_NIGHTLY" = true ]; then
   echo "Downloading solc nightly"

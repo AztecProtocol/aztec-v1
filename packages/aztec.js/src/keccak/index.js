@@ -1,6 +1,6 @@
-const bn128 = require('@aztec/bn128');
-const BN = require('bn.js');
-const { keccak256, padLeft } = require('web3-utils');
+import * as bn128 from '@aztec/bn128';
+import BN from 'bn.js';
+import { keccak256, padLeft } from 'web3-utils';
 
 /**
  * @class
@@ -63,4 +63,4 @@ class Keccak {
     }
 }
 
-module.exports = Keccak;
+export default Keccak;

@@ -1,16 +1,14 @@
-const mcl = require('./mcl/mcl');
+import mcl from './mcl/mcl';
 
-const decodePoint = {};
-
-decodePoint.serializePointForMcl = (point) => {
+export function serializePointForMcl(point) {
     const x = point.x.fromRed().toString(16);
     const y = point.y.fromRed().toString(16);
     // mcl serialized strings are formatted as a triplet of coordinates separated by spaces
     // format is 'z x y'
     return `1 ${x} ${y}`;
-};
+}
 
-decodePoint.decode = (gammaSerialized, gammaKSerialized, kMax) => {
+export function decode(gammaSerialized, gammaKSerialized, kMax) {
     return mcl.init(mcl.BN_SNARK1).then(() => {
         let accumulator = new mcl.G1();
         const gamma = new mcl.G1();
@@ -31,6 +29,4 @@ decodePoint.decode = (gammaSerialized, gammaKSerialized, kMax) => {
         }
         return k;
     });
-};
-
-module.exports = decodePoint;
+}

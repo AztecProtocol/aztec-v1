@@ -1,0 +1,35 @@
+@import '../../styles/variables';
+
+.wrapper {
+  width: 100%;
+}
+
+$dot-dot-dot-spacing: (map-get($icon-size-map, 'xs') * 2)
+  + (map-get($spacing-map, 'xs') * 6);
+
+@each $key, $size in $avatar-sizes-map {
+  .size-#{$key} {
+    $action-icon-width: map-get($icon-size-map, $key);
+    .colLeft, .colRight {
+      width: calc(50% - #{$size + ($action-icon-width + $dot-dot-dot-spacing) / 2});
+    }
+
+    .contentLeft, .contentRight {
+      width: calc(50% - #{($action-icon-width + $dot-dot-dot-spacing) / 2});
+    }
+  }
+}
+
+.iconGroupRight {
+  margin-left: -(map-get($spacing-map, 'xxs'));
+}
+
+.colLeft, .contentLeft {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.colRight, .contentRight {
+  display: flex;
+  justify-content: flex-start;
+}

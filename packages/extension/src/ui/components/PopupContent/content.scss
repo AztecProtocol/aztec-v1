@@ -1,0 +1,32 @@
+@import '../../styles/variables';
+
+$single-footer-height: map-get($line-height-map, 'xxs')
+  + map-get($spacing-map, 's') * 2;
+
+.wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.content {
+  overflow: auto;
+  height: 100%;
+}
+
+.singleFooter {
+  .content {
+    height: calc(100% - #{$single-footer-height});
+  }
+}
+
+.doubleFooter {
+  .content {
+    height: calc(100% - #{$single-footer-height * 2});
+  }
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}

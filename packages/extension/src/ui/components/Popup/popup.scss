@@ -1,0 +1,90 @@
+@import '../../styles/variables';
+@import '../../styles/functions';
+
+%popup {
+  width: 100%;
+  height: 100%;
+}
+
+@mixin popup-blocks($bg, $header-bg: null) {
+  @if $header-bg == null {
+    $header-bg: get-darken-color($bg, 10%);
+  }
+  .header {
+    background: map-get($color-map, 'white');
+  }
+  .content {
+    background: $bg;
+  }
+}
+
+.popup-light {
+  @extend %popup;
+  @include popup-blocks(map-get($color-map, 'white-lighter'));
+  color: $default-text-color;
+}
+
+.popup-dark {
+  @extend %popup;
+  @include popup-blocks(map-get($color-map, 'grey-dark'));
+  color: map-get($color-map, 'white');
+}
+
+.popup-vibrant {
+  @extend %popup;
+  @include popup-blocks($bg-gradient, $bg-gradient);
+  color: map-get($color-map, 'white');
+}
+
+.content {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  & + .content {
+    margin-top: 2px;
+  }
+}
+
+$radius: map-get($rounded-corner-map, 'm');
+
+.header {
+  border-radius: $radius $radius 0 0;
+}
+
+.content {
+  border-radius: 0 0 $radius $radius;
+
+  &.no-header {
+    border-radius: $radius;
+  }
+}
+
+$close-icon-size: map-get($icon-size-map, 'l');
+$site-icon-size: map-get($avatar-sizes-map, 'm');
+
+.site {
+  width: calc(100% - #{$close-icon-size + map-get($spacing-map, 's')});
+}
+
+.site-info {
+  width: calc(100% - #{$site-icon-size});
+}
+
+.site-icon {
+  width: $site-icon-size;
+  height: $site-icon-size;
+}
+
+.close-button {
+  width: $close-icon-size;
+  height: $close-icon-size;
+}

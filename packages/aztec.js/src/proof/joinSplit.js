@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
-const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
-const { JOIN_SPLIT } = require('./base/types');
+import { getProof, setDefaultEpoch, helpers } from './exportHandler';
+
+import proofTypes from './base/types';
 
 /**
  * Export the JoinSplitProof for a default epoch
@@ -10,7 +11,7 @@ const { JOIN_SPLIT } = require('./base/types');
  * @returns A JoinSplitProof construction for the default epoch
  */
 function JoinSplitProof(...args) {
-    const Proof = getProof(JOIN_SPLIT.name, this.epochNum);
+    const Proof = getProof(proofTypes.JOIN_SPLIT.name, this.epochNum);
 
     return new Proof(...args);
 }
@@ -25,10 +26,10 @@ function JoinSplitProof(...args) {
  * @returns A JoinSplitProof construction for the given epoch number
  */
 JoinSplitProof.epoch = function(epochNum, setAsDefault = false) {
-    helpers.validateEpochNum(JOIN_SPLIT.name, epochNum);
+    helpers.validateEpochNum(proofTypes.JOIN_SPLIT.name, epochNum);
 
     if (setAsDefault) {
-        setDefaultEpoch(JOIN_SPLIT.name, epochNum);
+        setDefaultEpoch(proofTypes.JOIN_SPLIT.name, epochNum);
     }
 
     return (...args) => {
@@ -36,4 +37,4 @@ JoinSplitProof.epoch = function(epochNum, setAsDefault = false) {
     };
 };
 
-module.exports = JoinSplitProof;
+export default JoinSplitProof;

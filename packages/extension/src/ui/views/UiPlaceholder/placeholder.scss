@@ -1,0 +1,8 @@
+@import '../../styles/variables';
+
+.footer {
+  position: absolute;
+  bottom: 0 - map-get($spacing-map, 'm');
+  left: 0;
+  transform: translateY(100%);
+}
