@@ -195,6 +195,8 @@ class Web3Service {
 
     async sendAsync(args) {
         return new Promise((resolve, reject) => {
+            // TODO - may be removed in the future
+            // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.sendasync(options%2C-callback)-(deprecated)
             this.web3.givenProvider.sendAsync(args, (err, result) => {
                 if (err) {
                     reject(err);
@@ -258,7 +260,6 @@ class Web3Service {
 
     triggerMethod = async (type, {
         method,
-        contractAddress,
         fromAddress,
         args,
         web3 = this.web3,
@@ -282,45 +283,6 @@ class Web3Service {
                 from: fromAddress,
                 gas: estimatedGas,
                 ...methodSetting,
-            });
-        }
-
-        if (type === 'sendSigned') {
-            if (!contractAddress) {
-                errorLog('contractAddress should be passed');
-                return null;
-            }
-
-            const encodedData = method(...methodArgs).encodeABI();
-            const tx = {
-                to: contractAddress,
-                data: encodedData,
-                gas: estimatedGas,
-                ...methodSetting,
-            };
-
-            const {
-                privateKey,
-            } = methodSetting || {};
-            const signedT = await this.web3.eth.accounts.signTransaction(tx, privateKey);
-
-            return new Promise(async (resolve, reject) => {
-                this.web3.eth.sendSignedTransaction(signedT.rawTransaction).on('receipt', ({ transactionHash }) => {
-                    const interval = setInterval(() => {
-                        this.web3.eth.getTransactionReceipt(transactionHash, (
-                            error,
-                            transactionReceipt,
-                        ) => {
-                            if (transactionReceipt) {
-                                clearInterval(interval);
-                                resolve(transactionReceipt);
-                            } else if (error) {
-                                clearInterval(interval);
-                                reject(new Error(error));
-                            }
-                        });
-                    }, 1000);
-                });
             });
         }
 
@@ -376,12 +338,6 @@ class Web3Service {
                     }),
                     send: async (...args) => this.triggerMethod('send', {
                         method,
-                        fromAddress: this.account.address,
-                        args,
-                    }),
-                    sendSigned: async (...args) => this.triggerMethod('sendSigned', {
-                        method,
-                        contractAddress: contractAddress || contract.address,
                         fromAddress: this.account.address,
                         args,
                     }),
