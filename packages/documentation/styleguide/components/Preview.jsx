@@ -11,8 +11,10 @@ import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
 import styles from './preview.module.scss';
+import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
 import getTestERC20 from '../utils/getTestERC20';
+import getTestEth from '../utils/getTestEth';
 import evalInContext from '../utils/evalInContext';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
@@ -84,7 +86,9 @@ class PreviewComponent extends React.Component {
       const web3 = new Web3(window.ethereum);
 
       if (this.state.zkAssetAddress) {
-        await window.aztec.enable();
+        await window.aztec.enable({
+          apiKey: '',
+        });
         const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
@@ -138,6 +142,17 @@ class PreviewComponent extends React.Component {
     await getTestERC20('0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a');
     this.setState({
       loadingTestTokens: false,
+    });
+  }
+
+  getTestEth = async () => {
+    this.setState({
+      loadingTestEth: true,
+    });
+
+    await getTestEth();
+    this.setState({
+      loadingTestEth: false,
     });
   }
 
@@ -218,24 +233,25 @@ class PreviewComponent extends React.Component {
                   className={styles.testEth}
                 />
                 <Button
-                  text="Faucet"
+                  text="Get ETH"
                   size="m"
-                  onClick={this.getTestEth}
+                  onClick={(isEnabled || this.state.ethBalance < 0.1) && this.getTestEth}
                   rounded={false}
-                  disabled={!isEnabled}
+                  disabled={!isEnabled || this.state.ethBalance > 0.1}
+                  isLoading={this.state.loadingTestEth}
                   className={styles.testEth}
                   icon={
                     <Icon name="local_gas_station" size="m" />
                   }
                 />
                 <Button
-                  text={`${this.state.linkedTokenBalance} Linked ERC20`}
+                  text={`${this.state.linkedTokenBalance} ERC20`}
                   size="m"
                   disabled
                   className={styles.testEth}
                 />
                 <Button
-                  text="Faucet"
+                  text="Get"
                   size="m"
                   disabled={!isEnabled}
                   onClick={this.getTestERC20}
@@ -246,7 +262,7 @@ class PreviewComponent extends React.Component {
               </ButtonGroup>
             </FlexBox>
             <Button
-              text="Run Code"
+              text="Run"
               size="m"
               onClick={this.compileCode}
               isLoading={isRunning}

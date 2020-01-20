@@ -1,5 +1,5 @@
 import Web3Service from './web3service';
-import IERC20 from '../contracts/ERC20Mintable.json';
+import IERC20 from '../../build/contracts/ERC20Mintable.json';
 
 const web3Service = new Web3Service();
 
