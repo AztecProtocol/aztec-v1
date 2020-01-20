@@ -34,9 +34,7 @@ class ClientWeb3Service extends Web3Service {
         if (!allowMultiple) {
             this.eventListeners.removeAll('profile');
         }
-        if (!this.eventListeners.isListening('profile', cb)) {
-            this.eventListeners.add('profile', cb);
-        }
+        this.eventListeners.add('profile', cb);
     }
 
     unbindProfileChange(cb) {

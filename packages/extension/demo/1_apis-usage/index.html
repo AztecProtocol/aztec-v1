@@ -61,9 +61,7 @@
       }
 
       async function initAztecSdk() {
-        if (!window.aztec.hasListener('profileChanged', handleProfileChanged)) {
-          window.aztec.addListener('profileChanged', handleProfileChanged);
-        }
+        window.aztec.addListener('profileChanged', handleProfileChanged);
 
         try {
           await window.aztec.enable({

@@ -33,10 +33,6 @@ class Aztec {
         this.eventListeners.remove(eventName, callback);
     }
 
-    hasListener(eventName, callback) {
-        return this.eventListeners.isListening(eventName, callback);
-    }
-
     enable = async (
         options = {},
         callback = null,
