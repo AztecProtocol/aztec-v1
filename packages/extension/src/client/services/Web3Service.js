@@ -15,17 +15,17 @@ class ClientWeb3Service extends Web3Service {
             // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
             window.ethereum.autoRefreshOnNetworkChange = false;
 
-            window.ethereum.on('accountsChanged', () => {
-                this.eventListeners.notify('profile');
+            window.ethereum.on('accountsChanged', (accounts) => {
+                this.eventListeners.notify('profile', 'accountsChanged', accounts);
             });
 
-            window.ethereum.on('chainChanged', () => {
-                this.eventListeners.notify('profile');
+            window.ethereum.on('chainChanged', (chainId) => {
+                this.eventListeners.notify('profile', 'chainChanged', chainId);
             });
 
             // TODO - shall be removed in the future with autoRefreshOnNetworkChange
-            window.ethereum.on('networkChanged', () => {
-                this.eventListeners.notify('profile');
+            window.ethereum.on('networkChanged', (networkId) => {
+                this.eventListeners.notify('profile', 'networkChanged', networkId);
             });
         }
     }

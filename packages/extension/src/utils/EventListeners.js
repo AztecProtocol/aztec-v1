@@ -47,9 +47,9 @@ export default class EventListeners {
         this.eventListeners[eventName] = [];
     };
 
-    notify = (eventName, params) => {
+    notify = (eventName, ...params) => {
         const listeners = this.eventListeners[eventName];
-        listeners.forEach(cb => cb(params));
+        listeners.forEach(cb => cb(...params));
     };
 
     isListening = (eventName, cb) => this.eventListeners[eventName]

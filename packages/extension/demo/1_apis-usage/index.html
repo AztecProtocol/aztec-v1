@@ -10,25 +10,32 @@
     <div id="app" style="margin: 32px 0;"></div>
     <script type="module" src="http://localhost:5555/sdk/aztec.js"></script>
     <script>
-      async function initAztecSdk() {
-        const statusElem = document.getElementById('sdk-status');
-        try {
-          await window.aztec.enable({
-            apiKey: 'ethglobalstarterkit'
-          });
-        } catch (error) {
-          console.error(error);
-          statusElem.innerHTML = `
-            <div>
-              Failed to load AZTEC SDK.<br/>
-              <button onclick="initAztecSdk()">Retry</button>
-            </div>
-          `;
-          return;
+      function handleReload() {
+        document.getElementById('sdk-status').innerHTML = 'Signing in to AZTEC account...';
+        document.getElementById('app').innerHTML = '';
+        const assetScript = document.getElementById('create-asset-script');
+        if (assetScript) {
+          assetScript.remove();
         }
+      }
 
+      function handleRetry() {
+        handleReload();
+        initAztecSdk();
+      }
+
+      function handleLoadError(error) {
+        document.getElementById('sdk-status').innerHTML = `
+          <div>
+            Failed to load AZTEC SDK.<br/>
+            <button onclick="handleRetry()">Retry</button>
+          </div>
+        `;
+      }
+
+      function handleLoadSuccess() {
         const account = window.aztec.web3.account();
-        statusElem.innerHTML = `
+        document.getElementById('sdk-status').innerHTML = `
           <div>
             AZTEC SDK loaded and enabled!<br/>
             User address: <strong>${account.address}</strong>
@@ -36,8 +43,35 @@
         `;
 
         const createAssetScript = document.createElement('script');
+        createAssetScript.id = 'create-asset-script';
         createAssetScript.src = './create-asset.js';
         document.body.appendChild(createAssetScript);
+      }
+
+      function handleProfileChanged(type, value, error) {
+        if (type === 'aztecAccountChanged') {
+          if (value) {
+            handleLoadSuccess();
+          } else {
+            handleLoadError(error);
+          }
+        } else {
+          handleReload();
+        }
+      }
+
+      async function initAztecSdk() {
+        if (!window.aztec.hasListener('profileChanged', handleProfileChanged)) {
+          window.aztec.addListener('profileChanged', handleProfileChanged);
+        }
+
+        try {
+          await window.aztec.enable({
+            apiKey: 'ethglobalstarterkit',
+          });
+        } catch (error) {
+          console.error('Failed to enable aztec', error);
+        }
       };
 
       if (window.aztec) {
