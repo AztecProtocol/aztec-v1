@@ -1,0 +1,106 @@
+@import '../../styles/variables';
+
+$dot-radius: map-get($spacing-map, 'm');
+$edge-height: $dot-radius * 3;
+$ticket-background: map-get($color-map, 'grey-lightest');
+$ticket-radius: map-get($rounded-corner-map, 's');
+$ticket-spacing-h: map-get($spacing-map, 'l');
+$ticket-spacing-v: map-get($spacing-map, 'l');
+$border-color: rgb(242, 242, 242);
+$ticket-shadow-color: rgba(0, 0, 0, 0.2);
+
+.ticket {
+  position: relative;
+  width: 100%;
+  text-align: left;
+}
+
+.edges {
+  position: relative;
+  padding: $ticket-spacing-v 0;
+
+  &:before, &:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: $ticket-spacing-v;
+    background: $ticket-background;
+    border-left: 1px solid $border-color;
+    border-right: 1px solid $border-color;
+  }
+
+  &:before {
+    top: 0;
+    border-radius: $ticket-radius $ticket-radius 0 0;
+  }
+
+  &:after {
+    bottom: 0;
+    border-radius: 0 0 $ticket-radius $ticket-radius;
+  }
+}
+
+.edge {
+  position: relative;
+  width: 100%;
+}
+
+.content {
+  position: absolute;
+  top: $ticket-spacing-v;
+  right: $dot-radius + $ticket-spacing-h;
+  bottom: $ticket-spacing-v;
+  left: $dot-radius + $ticket-spacing-h;
+}
+
+.header {
+  margin-bottom: $ticket-spacing-v;
+  padding-bottom: $ticket-spacing-v;
+  border-bottom: 1px dashed $default-border-color;
+}
+
+.footer {
+  margin-top: $ticket-spacing-v;
+  padding-top: $ticket-spacing-v;
+  border-top: 1px dashed $default-border-color;
+}
+
+.space {
+  height: ($edge-height - $dot-radius * 2) / 2;
+  background: $ticket-background;
+  border-left: 1px solid $border-color;
+  border-right: 1px solid $border-color;
+}
+
+.dot-line {
+  position: relative;
+  left: 0;
+  height: $dot-radius * 2;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(to right,
+    transparent $dot-radius,
+    $ticket-background $dot-radius,
+    $ticket-background calc(100% - #{$dot-radius}),
+    transparent calc(100% - #{$dot-radius}));
+}
+
+%spot {
+  position: absolute;
+  display: block;
+  width: $dot-radius * 2;
+  height: $dot-radius * 2;
+  border-radius: $dot-radius;
+  background: transparent;
+  box-shadow: 0 0 0 6px $ticket-background;
+}
+
+.spot-left {
+  @extend %spot;
+  left: -$dot-radius;
+}
+
+.spot-right {
+  @extend %spot;
+  right: -$dot-radius;
+}

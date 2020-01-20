@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 <0.6.0;
 /**
  * @title IZkAsset
  * @author AZTEC
- * @dev An interface defining the ZkAsset standard 
+ * @dev An interface defining the ZkAsset standard
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 
@@ -11,7 +11,7 @@ interface IZkAsset {
     /**
      * @dev Note owner can approve a third party address, such as a smart contract,
      * to spend multiple notes on their behalf. This allows a batch approval of notes
-     * to be performed, rather than individually for each note via confidentialApprove(). 
+     * to be performed, rather than individually for each note via confidentialApprove().
      *
      * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
      * @param _spender - address being approved to spend the notes
@@ -37,7 +37,7 @@ interface IZkAsset {
     * note, or if permission is being revoked. True if approved, false if not approved
     * @param _signature - ECDSA signature from the note owner that validates the
     * confidentialApprove() instruction
-    */ 
+    */
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
@@ -57,7 +57,7 @@ interface IZkAsset {
     * transfer instructions for the ACE
     */
     function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external;
-    
+
 
     /**
     * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
@@ -96,7 +96,7 @@ interface IZkAsset {
     function extractAddress(bytes calldata metaData, uint256 addressPos) external returns (address desiredAddress);
 
     /**
-    * @dev Update the metadata of a note that already exists in storage. 
+    * @dev Update the metadata of a note that already exists in storage.
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
@@ -119,6 +119,6 @@ interface IZkAsset {
     event ConvertTokens(address indexed owner, uint256 value);
 
     event RedeemTokens(address indexed owner, uint256 value);
-    
+
     event UpdateNoteMetaData(address indexed owner, bytes32 indexed noteHash, bytes metadata);
 }

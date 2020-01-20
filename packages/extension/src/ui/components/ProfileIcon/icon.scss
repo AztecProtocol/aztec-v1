@@ -1,0 +1,63 @@
+@import '../../styles/variables';
+@import '../../styles/functions';
+
+.type-asset {
+  position: relative;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    border: 1px solid map-get($color-map, 'primary');
+    opacity: 0.7;
+  }
+}
+
+.interactive {
+  position: relative;
+
+  &:hover {
+    .tooltip {
+      display: inline-block;
+    }
+  }
+}
+
+.type-note {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .aztec-icon {
+    position: absolute;
+    transform: scale(0.6);
+  }
+}
+
+.tooltip {
+  display: none;
+  position: absolute;
+  padding: map-get($spacing-map, 'xs') map-get($spacing-map, 's');
+  top: -(map-get($spacing-map, 's'));
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  white-space: nowrap;
+}
+
+.theme-white {
+  .tooltip {
+    background: rgba-to-rgb(map-get($color-map, 'grey-dark'));
+    color: map-get($color-map, 'white');
+  }
+}
+
+.theme-primary {
+  .tooltip {
+    background: rgba-to-rgb(map-get($color-map, 'white-light'));
+  }
+}

@@ -1,0 +1,24 @@
+@import './guacamole-vars';
+
+$popup-page-spacing: map-get($spacing-map, 's');
+$popup-width: 340px;
+$popup-height: 550px;
+
+$bg-gradient-primary: #808DFF;
+$overlay-color: rgba(179, 187, 211, 0.92);
+$bg-gradient-primary-light: #9FC4FF;
+$bg-gradient: linear-gradient(111deg, $bg-gradient-primary 0%, $bg-gradient-primary-light 100%);
+
+$default-font-family: 'Gill Sans', sans-serif;
+$code-font-family: Consolas, "Liberation Mono", Menlo, monospace;
+$code-font-size-map: (
+  'xxs': 10px,
+  'xs': 11px,
+  's': 13px,
+  'm': 15px,
+  'l': 19px,
+  'xl': 22px,
+  'xxl': 26px,
+);
+
+$tiny-text-size: 10px;

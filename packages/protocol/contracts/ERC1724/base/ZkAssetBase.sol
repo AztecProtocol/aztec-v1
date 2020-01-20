@@ -31,6 +31,9 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             "bool[] spenderApprovals",
         ")"
     ));
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
+
+    bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
 
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
@@ -39,7 +42,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             "bool spenderApproval",
         ")"
     ));
-    
+
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
         "JoinSplitSignature(",
             "uint24 proof,",
@@ -162,7 +165,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     /**
      * @dev Note owner can approve a third party address, such as a smart contract,
      * to spend multiple notes on their behalf. This allows a batch approval of notes
-     * to be performed, rather than individually for each note via confidentialApprove(). 
+     * to be performed, rather than individually for each note via confidentialApprove().
      *
      * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
      * @param _spender - address being approved to spend the notes
@@ -189,7 +192,21 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             keccak256(abi.encodePacked(_spenderApprovals))
         ));
 
-        bytes32 msgHash = hashEIP712Message(_hashStruct);
+        bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
+            EIP712_DOMAIN_TYPEHASH,
+            keccak256("ZK_ASSET"),
+            keccak256("1"),
+            address(this)
+        ));
+        bytes32 msgHash =  keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
+                keccak256(abi.encodePacked(_noteHashes)),
+                _spender,
+                keccak256(abi.encodePacked(_spenderApprovals))
+        ))));
         address signer = recoverSignature(
             msgHash,
             _batchSignature
@@ -234,8 +251,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
     /**
     * @dev Extract the appropriate ECDSA signature from an array of signatures,
-    * 
-    * @param _signatures - array of ECDSA signatures over all inputNotes 
+    *
+    * @param _signatures - array of ECDSA signatures over all inputNotes
     * @param _i - index used to determine which signature element is desired
     */
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
@@ -247,13 +264,13 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         assembly {
             // memory map of signatures
             // 0x00 - 0x20 : length of signature array
-            // 0x20 - 0x40 : first sig, v 
-            // 0x40 - 0x60 : first sig, r 
+            // 0x20 - 0x40 : first sig, v
+            // 0x40 - 0x60 : first sig, r
             // 0x60 - 0x80 : first sig, s
             // 0x80 - 0xa0 : second sig, v
             // and so on...
             // Length of a signature = 0x60
-            
+
             v := mload(add(add(_signatures, 0x20), mul(_i, 0x60)))
             r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
             s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
@@ -367,7 +384,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     }
 
     /**
-    * @dev Update the metadata of a note that already exists in storage. 
+    * @dev Update the metadata of a note that already exists in storage.
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
@@ -434,8 +451,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
                 noteAccess[addressID] = block.timestamp;
             }
         }
-    }   
-   
+    }
+
 
     /**
     * @dev Emit events for all input notes, which represent notes being destroyed

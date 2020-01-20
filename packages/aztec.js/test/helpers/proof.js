@@ -1,15 +1,14 @@
-const bn128 = require('@aztec/bn128');
-const BN = require('bn.js');
-const { keccak256, padLeft, randomHex } = require('web3-utils');
-
-const ProofType = require('../../src/proof/base/types');
+import * as bn128 from '@aztec/bn128';
+import BN from 'bn.js';
+import { keccak256, padLeft, randomHex } from 'web3-utils';
+import ProofType from '../../src/proof/base/types';
 
 // kBar, aBar, gamma.x, gamma., sigma.x, sigma.y
 const zeroNote = Array(6).fill('0'.repeat(64));
 // blindingFactor.x, blindingFactor.y
 const zeroBlindingFactors = Array(2).fill('0'.repeat(64));
 
-const mockZeroProof = () => {
+export function mockZeroProof() {
     const m = 1;
     const publicOwner = padLeft(randomHex(20), 64).slice(2);
     const sender = padLeft(randomHex(20), 64).slice(2);
@@ -22,9 +21,9 @@ const mockZeroProof = () => {
     zeroProof.sender = sender;
 
     return zeroProof;
-};
+}
 
-const mockZeroJoinSplitProof = () => {
+export function mockZeroJoinSplitProof() {
     const zeroProof = mockZeroProof();
     const publicValue = padLeft(Math.floor(Math.random() * 100).toString(), 64);
     const challengeArray = [
@@ -44,9 +43,9 @@ const mockZeroJoinSplitProof = () => {
     zeroProof.type = ProofType.JOIN_SPLIT.name;
 
     return zeroProof;
-};
+}
 
-const mockZeroSwapProof = () => {
+export function mockZeroSwapProof() {
     const zeroProof = mockZeroProof();
     const challengeArray = [zeroProof.sender, ...zeroNote.slice(2), ...zeroBlindingFactors];
     const challengeHash = keccak256(`0x${challengeArray.join('')}`);
@@ -57,10 +56,4 @@ const mockZeroSwapProof = () => {
     zeroProof.type = ProofType.SWAP.name;
 
     return zeroProof;
-};
-
-module.exports = {
-    mockZeroProof,
-    mockZeroJoinSplitProof,
-    mockZeroSwapProof,
-};
+}

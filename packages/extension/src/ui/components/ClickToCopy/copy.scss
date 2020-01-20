@@ -1,0 +1,17 @@
+.copy {
+  position: relative;
+
+  &:hover {
+    .hint {
+      display: block;
+    }
+  }
+}
+
+.hint {
+  position: absolute;
+  display: none;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(80%);
+}

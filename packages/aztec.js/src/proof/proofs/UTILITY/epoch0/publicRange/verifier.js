@@ -1,10 +1,10 @@
 /* eslint-disable prefer-destructuring */
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
+import * as bn128 from '@aztec/bn128';
 
-const Keccak = require('../../../../../keccak');
-const Verifier = require('../../../../base/epoch0/verifier');
+import { constants, errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import Keccak from '../../../../../keccak';
+import Verifier from '../../../../base/epoch0/verifier';
 
 const { ZERO_BN } = constants;
 
@@ -94,4 +94,4 @@ class PublicRangeVerifier66563 extends Verifier {
     }
 }
 
-module.exports = PublicRangeVerifier66563;
+export default PublicRangeVerifier66563;

@@ -1,0 +1,50 @@
+$animation-duration: 0.25s;
+
+.offset,
+.container {
+  position: relative;
+}
+
+.content {
+  position: relative;
+  overflow: auto;
+  transform: scale(1);
+  transition: transform $animation-duration ease-out;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateX(40%) translateY(-40%);
+}
+
+.button {
+  opacity: 1;
+  transition: opacity $animation-duration ease-out;
+
+  &.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.frame {
+    position: absolute;
+    width: 100%;
+    transform: scale(1.025);
+    opacity: 1;
+    transition: transform $animation-duration ease-out,
+      opacity $animation-duration ease-out;
+
+    &.hide {
+      opacity: 0;
+      transform: scale(1);
+    }
+}
+
+.expand {
+  .content {
+    transform: scale(1.025);
+  }
+}

@@ -1,14 +1,12 @@
-const { errors } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
-const sinon = require('sinon');
-
-const { PrivateRangeProof } = require('../../../src/proof');
-const PrivateRangeVerifier = require('../../../src/proof/proofs/UTILITY/epoch0/privateRange/verifier');
-const note = require('../../../src/note');
-const { Proof } = require('../../../src/proof');
+import { errors } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import sinon from 'sinon';
+import { PrivateRangeProof, Proof } from '../../../src/proof';
+import PrivateRangeVerifier from '../../../src/proof/proofs/UTILITY/epoch0/privateRange/verifier';
+import * as note from '../../../src/note';
 
 describe('Private range proof Verifier', () => {
     const { publicKey } = secp256k1.generateAccount();

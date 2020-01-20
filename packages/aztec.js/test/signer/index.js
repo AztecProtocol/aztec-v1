@@ -1,15 +1,14 @@
-const bn128 = require('@aztec/bn128');
-const { constants, proofs } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const typedData = require('@aztec/typed-data');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const ethSigUtil = require('eth-sig-util');
-const ethUtil = require('ethereumjs-util');
-const { keccak256, padLeft, randomHex } = require('web3-utils');
-
-const note = require('../../src/note');
-const signer = require('../../src/signer');
+import * as bn128 from '@aztec/bn128';
+import { constants, proofs } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import typedData from '@aztec/typed-data';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import ethSigUtil from 'eth-sig-util';
+import * as ethUtil from 'ethereumjs-util';
+import { keccak256, padLeft, randomHex } from 'web3-utils';
+import * as note from '../../src/note';
+import signer from '../../src/signer';
 
 describe('Signer', () => {
     let accounts;

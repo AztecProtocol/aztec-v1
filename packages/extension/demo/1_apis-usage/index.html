@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <title>AZTEC SDK demo page</title>
+    <link rel="shortcut icon" href="./icons/icon-48x48.png">
+  </head>
+  <body>
+    <div id="sdk-status">
+      Loading AZTEC SDK...
+    </div>
+    <div id="app" style="margin: 32px 0;"></div>
+    <script type="module" src="http://localhost:5555/sdk/aztec.js"></script>
+    <script>
+      async function initAztecSdk() {
+        const statusElem = document.getElementById('sdk-status');
+        try {
+          await window.aztec.enable({
+            apiKey: 'ethglobalstarterkit'
+          });
+        } catch (error) {
+          console.error(error);
+          statusElem.innerHTML = `
+            <div>
+              Failed to load AZTEC SDK.<br/>
+              <button onclick="initAztecSdk()">Retry</button>
+            </div>
+          `;
+          return;
+        }
+
+        const account = window.aztec.web3.account();
+        statusElem.innerHTML = `
+          <div>
+            AZTEC SDK loaded and enabled!<br/>
+            User address: <strong>${account.address}</strong>
+          </div>
+        `;
+
+        const createAssetScript = document.createElement('script');
+        createAssetScript.src = './create-asset.js';
+        document.body.appendChild(createAssetScript);
+      };
+
+      if (window.aztec) {
+        initAztecSdk();
+      } else {
+        window.aztecCallback = initAztecSdk;
+      }
+    </script>
+  </body>
+</html>
