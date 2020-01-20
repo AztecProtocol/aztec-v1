@@ -4,7 +4,7 @@ import {
     randomInt,
 } from '~/utils/random';
 import fetchNotesFromIndexedDB from '../utils/fetchNotesFromIndexedDB';
-import * as note from '~/background/database/models/note';
+import Note from '~/background/database/models/note';
 
 const networkId = randomId();
 const ownerAddress = randomId();

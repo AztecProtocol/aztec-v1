@@ -1,7 +1,9 @@
+import BN from 'bn.js';
 import {
     randomId,
     randomInt,
 } from '~/utils/random';
+import makeAsset from '~uiModules/utils/makeAsset';
 import {
     seedPhrase,
     linkedPublicKey,
@@ -31,11 +33,11 @@ export default {
     'register.password': {},
     'register.link': {
         address,
-        linkedPublicKey,
+        linkedPublicKey: `0x${randomId(64)}`,
     },
     'register.confirm': {
         address,
-        linkedPublicKey,
+        linkedPublicKey: `0x${randomId(64)}`,
     },
     'register.address': {
         currentAccount: {
@@ -71,17 +73,33 @@ export default {
         goNext: dummyFunc,
     },
     deposit: {
-        assetAddress: assets[0].address,
+        asset: makeAsset(assets[0]),
+        publicOwner: randomAddress(),
         transactions: [depositTransactions[0]],
-    },
-    'deposit.approve': {
-        asset: assets[0],
         amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+        userAccessAccounts: [
+            {
+                address: randomAddress(),
+            },
+        ],
     },
+    'deposit.approve': ({
+        asset,
+        amount,
+    }) => ({
+        requestedAllowance: asset.scalingFactor.mul(new BN(amount)),
+    }),
+    'deposit.publicApprove': ({
+        asset,
+        amount,
+    }) => ({
+        requestedAllowance: asset.scalingFactor.mul(new BN(amount)),
+    }),
     withdraw: {
-        assetAddress: assets[0].address,
+        asset: assets[0],
+        currentAddress: addresses[0],
         amount: randomInt(1, 100),
-        to: randomAddress(),
+        publicOwner: randomAddress(),
     },
     'withdraw.sign': {
         proof: {
@@ -89,8 +107,15 @@ export default {
         },
     },
     send: {
-        assetAddress: assets[0].address,
+        asset: makeAsset(assets[0]),
+        sender: randomAddress(),
         transactions: sendTransactions,
+        amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+        userAccessAccounts: [
+            {
+                address: randomAddress(),
+            },
+        ],
     },
     'send.sign': {
         proof: {
@@ -102,10 +127,22 @@ export default {
         addresses,
     },
     createNote: {
-        assetAddress: assets[0].address,
+        asset: assets[0],
         amount: randomInt(1, 100),
         numberOfOutputNotes: 1,
-        userAccess: addresses.slice(1, 3),
+        inputNotes: generate(1, randomRawNote),
+        outputNotes: generate(2, randomRawNote),
+        remainderNote: randomRawNote(),
+        userAccessAccounts: [
+            {
+                address: randomAddress(),
+            },
+        ],
+    },
+    'createNote.sign': {
+        proof: {
+            inputNotes: generate(5, randomRawNote),
+        },
     },
     mint: {
         asset: assets[0],

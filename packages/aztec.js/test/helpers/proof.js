@@ -21,7 +21,7 @@ export function mockZeroProof() {
     zeroProof.sender = sender;
 
     return zeroProof;
-};
+}
 
 export function mockZeroJoinSplitProof() {
     const zeroProof = mockZeroProof();
@@ -43,7 +43,7 @@ export function mockZeroJoinSplitProof() {
     zeroProof.type = ProofType.JOIN_SPLIT.name;
 
     return zeroProof;
-};
+}
 
 export function mockZeroSwapProof() {
     const zeroProof = mockZeroProof();
@@ -56,4 +56,4 @@ export function mockZeroSwapProof() {
     zeroProof.type = ProofType.SWAP.name;
 
     return zeroProof;
-};
+}

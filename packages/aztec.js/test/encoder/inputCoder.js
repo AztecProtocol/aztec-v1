@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { padLeft } from 'web3-utils';
 import { inputCoder } from '../../src/encoder';
 import * as note from '../../src/note';
-import HexString from "./HexString";
+import HexString from './HexString';
 
 const { customMetaData } = note.utils;
 

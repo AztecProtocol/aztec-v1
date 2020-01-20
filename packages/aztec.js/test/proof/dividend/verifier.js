@@ -5,10 +5,9 @@ import BN from 'bn.js';
 import { expect } from 'chai';
 import { padLeft, randomHex } from 'web3-utils';
 import sinon from 'sinon';
-import { DividendProof , Proof } from '../../../src/proof';
+import { DividendProof, Proof } from '../../../src/proof';
 import DividendVerifier from '../../../src/proof/proofs/UTILITY/epoch0/dividend/verifier';
 import * as note from '../../../src/note';
-
 
 describe('Dividend Proof Verifier', () => {
     let notionalNote = {};

@@ -30,9 +30,6 @@ export default {
     Asset: {
         balance: async ({ address }) => getAssetBalance(address),
     },
-    GrantNoteAccessPermission: {
-        asset: async ({ asset }) => getAsset(asset),
-    },
     Query: {},
     Mutation: {},
 };

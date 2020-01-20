@@ -235,7 +235,7 @@ export const utils = noteUtils;
  * @returns {Promise} promise that resolves to created note instance
  */
 
-export async function create (publicKey, value, access, noteOwner) {
+export async function create(publicKey, value, access, noteOwner) {
     const sharedSecret = createSharedSecret(publicKey);
     const a = padLeft(new BN(sharedSecret.encoded.slice(2), 16).umod(bn128.curve.n).toString(16), 64);
     const k = padLeft(toHex(value).slice(2), 8);
@@ -244,7 +244,7 @@ export async function create (publicKey, value, access, noteOwner) {
     const owner = noteOwner || secp256k1.ecdsa.accountFromPublicKey(publicKey);
     const setupPoint = await setup.fetchPoint(value);
     return new Note(null, viewingKey, access, owner, setupPoint);
-};
+}
 
 /**
  * Create Note instance from a viewing key
@@ -253,12 +253,12 @@ export async function create (publicKey, value, access, noteOwner) {
  * @param {string} viewingKey the viewing key for the note
  * @returns {Promise} promise that resolves to created note instance
  */
-export async function fromViewKey (viewingKey) {
+export async function fromViewKey(viewingKey) {
     const k = new BN(viewingKey.slice(66, 74), 16).toRed(bn128.groupReduction);
     const setupPoint = await setup.fetchPoint(k.toNumber());
     const newNote = new Note(null, viewingKey, null, undefined, setupPoint);
     return newNote;
-};
+}
 
 /**
  * Create a zero value note with from a constant `a` to make the hash of the initial totalMinted note in
@@ -283,7 +283,7 @@ export async function derive(publicKey, spendingKey) {
     const newNote = new Note(publicKey);
     await newNote.derive(spendingKey);
     return newNote;
-};
+}
 
 /**
  * Encode compressed metadata of an array of notes as a hex-string, with each entry occupying 33 bytes
@@ -297,7 +297,7 @@ export function encodeMetadata(noteArray) {
         const ephemeral = aztecNote.exportEphemeralKey();
         return `${acc}${padLeft(ephemeral.slice(2), 66)}`; // remove elliptic.js encoding byte, broadcast metadata is always compressed
     }, '0x');
-};
+}
 
 /**
  * Create Note instance from an event log and a spending key
@@ -306,14 +306,14 @@ export function encodeMetadata(noteArray) {
  * @param {string} logNoteData the note data returned from an event log
  * @returns {Note} created note instance
  */
-export async function fromEventLog (logNoteData, spendingKey = null) {
+export async function fromEventLog(logNoteData, spendingKey = null) {
     const publicKey = noteCoder.decodeNoteFromEventLog(logNoteData);
     const newNote = new Note(publicKey, null);
     if (spendingKey) {
         await newNote.derive(spendingKey);
     }
     return newNote;
-};
+}
 
 /**
  * Create Note instance from a Note public key
@@ -324,4 +324,4 @@ export async function fromEventLog (logNoteData, spendingKey = null) {
  */
 export function fromPublicKey(publicKey) {
     return new Note(publicKey, null);
-};
+}

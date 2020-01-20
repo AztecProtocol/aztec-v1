@@ -6,9 +6,8 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { padLeft, randomHex } from 'web3-utils';
 import * as note from '../../../src/note';
-import { PublicRangeProof , Proof } from '../../../src/proof';
+import { PublicRangeProof, Proof } from '../../../src/proof';
 import PublicRangeVerifier from '../../../src/proof/proofs/UTILITY/epoch0/publicRange/verifier';
-
 
 describe('Public range proof verifier', () => {
     let originalNote = {};

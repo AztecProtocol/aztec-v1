@@ -1,15 +1,18 @@
+import {
+    metadata as toMetadataObj,
+} from '@aztec/note-access';
 import notes from '~testHelpers/testNotes';
 import {
     userAccount,
     userAccount2,
 } from '~testHelpers/testUsers';
+import {
+    METADATA_AZTEC_DATA_LENGTH,
+} from '~/config/constants';
 import * as storage from '~/utils/storage';
 import {
     randomInt,
 } from '~/utils/random';
-import {
-    toString as toMetadataString,
-} from '~/utils/metadata';
 import noteModel from '~/background/database/models/note';
 import * as syncLatestNoteOnChain from '../syncLatestNoteOnChain';
 import syncNoteInfo from '../syncNoteInfo';
@@ -20,6 +23,12 @@ jest.mock('~/utils/storage');
 beforeEach(() => {
     storage.reset();
 });
+
+const generateMetadataStr = (access) => {
+    const metadataObj = toMetadataObj('');
+    metadataObj.addAccess(access);
+    return `0x${''.padEnd(METADATA_AZTEC_DATA_LENGTH, '0')}${metadataObj.toString().slice(2)}`;
+};
 
 describe('syncNoteInfo', () => {
     let testNote;
@@ -32,17 +41,18 @@ describe('syncNoteInfo', () => {
     const syncNoteSpy = jest.spyOn(syncLatestNoteOnChain, 'default')
         .mockImplementation(() => noteData);
 
-    beforeAll(async () => {
+    beforeAll(() => {
         testNote = notes[randomInt(0, notes.length - 1)];
         const {
             hash,
             viewingKey,
             value,
         } = testNote;
-        const metadata = toMetadataString({
-            addresses: [userAccount.address],
-            viewingKeys: [viewingKey],
+        const metadata = generateMetadataStr({
+            address: userAccount.address,
+            viewingKey,
         });
+
         noteValue = value;
         noteData = {
             noteHash: hash,
@@ -104,10 +114,11 @@ describe('syncNoteInfo', () => {
         const {
             viewingKey,
         } = testNote;
-        const metadata = toMetadataString({
-            addresses: [userAccount2.address],
-            viewingKeys: [viewingKey],
+        const metadata = generateMetadataStr.toString({
+            address: userAccount2.address,
+            viewingKey,
         });
+
         noteModelSpy.mockImplementationOnce(() => ({
             ...noteData,
             metadata,

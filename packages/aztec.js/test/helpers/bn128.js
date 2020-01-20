@@ -17,7 +17,7 @@ export function validateElement(xHex, yHex) {
         .umod(bn128.curve.p);
     const rhs = y.mul(y).umod(bn128.curve.p);
     expect(lhs.eq(rhs)).to.equal(true);
-};
+}
 
 export function validateScalar(hex, canBeZero = false) {
     const scalar = new BN(hex.slice(2), 16);
@@ -25,4 +25,4 @@ export function validateScalar(hex, canBeZero = false) {
     if (!canBeZero) {
         expect(scalar.gt(constants.ZERO_BN)).to.equal(true);
     }
-};
+}

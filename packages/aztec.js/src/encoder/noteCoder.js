@@ -21,7 +21,7 @@ export function encodeNotePublicKey({ gamma, sigma, ephemeral }) {
     const sigmaEnc = sigma.encode('hex', true);
     const ephemeralEnc = ephemeral.encode('hex', true);
     return `0x${padLeft(gammaEnc, 66)}${padLeft(sigmaEnc, 66)}${padLeft(ephemeralEnc, 66)}`;
-};
+}
 
 /**
  * Decode a note from it's event log
@@ -41,5 +41,4 @@ export function decodeNoteFromEventLog(parameter) {
     const sigma = bn128.decompressHex(sigmaCompressed);
     const ephemeral = secp256k1.decompressHex(ephemeralCompressed);
     return encodeNotePublicKey({ gamma, sigma, ephemeral });
-};
-
+}

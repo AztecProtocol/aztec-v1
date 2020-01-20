@@ -3,10 +3,7 @@ import * as catalogue from './catalogue';
 
 import helpers from './helpers';
 
-export {
-    catalogue,
-    helpers,
-};
+export { catalogue, helpers };
 
 /**
  * Export the default epoch version of an AZTEC proof construction method
@@ -20,7 +17,7 @@ export function getProof(proofSelector, epoch = undefined) {
     const proofEpoch = epoch || catalogue.defaultProofEpochNums[proofSelector];
     const Proof = catalogue.versions[proofSelector][proofEpoch];
     return Proof;
-};
+}
 
 /**
  * Set the default proof epoch for which proofs should be exported from
@@ -30,4 +27,4 @@ export function getProof(proofSelector, epoch = undefined) {
  */
 export function setDefaultEpoch(proofSelector, defaultEpochNum) {
     catalogue.defaultProofEpochNums[proofSelector] = defaultEpochNum;
-};
+}

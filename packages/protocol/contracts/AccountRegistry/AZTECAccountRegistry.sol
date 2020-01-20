@@ -31,14 +31,15 @@ contract AZTECAccountRegistry is LibEIP712 {
             keccak256("2"),
             address(this)
         ));
-            return keccak256(abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(
-                    SIGNATURE_TYPEHASH,
-                    _AZTECAccount.account,
-                    keccak256(bytes(_AZTECAccount.linkedPublicKey)
-            )))));
+
+        return keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                SIGNATURE_TYPEHASH,
+                _AZTECAccount.account,
+                keccak256(bytes(_AZTECAccount.linkedPublicKey)
+        )))));
     }
 
 
@@ -61,8 +62,8 @@ contract AZTECAccountRegistry is LibEIP712 {
     );
 
     /**
-        * @dev function to validate the user is either the sender or has submitted an EIP712 signature from the account they
-        * are registering in the AZTEC extension.
+        * @dev function to validate the user is either the sender or has submitted an EIP712 signature from
+        * the account they are registering in the AZTEC extension.
     **/
 
 

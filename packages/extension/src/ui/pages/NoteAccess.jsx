@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
+import makeAsset from '~/ui/utils/makeAsset';
 import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
 import NoteAccessConfirm from '~/ui/views/NoteAccessConfirm';
 
@@ -29,12 +30,16 @@ const NoteAccess = ({
 }) => {
     const fetchInitialData = async () => {
         const note = await apis.note.fetchNote(id);
+        const {
+            asset,
+        } = note;
         const accounts = await Promise.all(addresses.map(apis.account.getExtensionAccount));
 
         return {
             id,
             addresses,
             note,
+            asset: await makeAsset(asset),
             accounts,
         };
     };

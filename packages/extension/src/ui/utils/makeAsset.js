@@ -17,16 +17,15 @@ export default async function makeAsset(asset) {
     const {
         linkedTokenAddress,
     } = assetObj || {};
-    if (!linkedTokenAddress) {
-        return null;
-    }
 
     const {
         name,
         icon,
         symbol,
         decimals,
-    } = makeToken(linkedTokenAddress);
+    } = linkedTokenAddress
+        ? makeToken(linkedTokenAddress)
+        : {};
 
     return {
         ...assetObj,

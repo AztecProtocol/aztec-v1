@@ -6,7 +6,7 @@ import * as account from './account';
 import * as ace from './ace';
 import * as asset from './asset';
 import * as auth from './auth';
-import * as note from './note';
+import note from './note';
 import * as proof from './proof';
 
 export default {

@@ -1,6 +1,10 @@
 import {
+    metadata,
+} from '@aztec/note-access';
+import {
     userAccount,
 } from '~testHelpers/testUsers';
+import testNotes from '~testHelpers/testNotes';
 import {
     ADDRESS_LENGTH,
     VIEWING_KEY_LENGTH,
@@ -8,65 +12,53 @@ import {
 } from '~/config/constants';
 import * as storage from '~/utils/storage';
 import {
-    toString,
-} from '~/utils/metadata';
-import {
     randomId,
+    randomInt,
 } from '~/utils/random';
 import getDecryptedViewingKeyFromMetadata from '../getDecryptedViewingKeyFromMetadata';
-import decryptViewingKey from '../decryptViewingKey';
 import storyOf from './helpers/stories';
 
 jest.mock('~/utils/storage');
-jest.mock('../decryptViewingKey');
 
 beforeEach(() => {
     storage.reset();
 });
 
 describe('getDecryptedViewingKeyFromMetadata', () => {
-    const aztecData = randomId(METADATA_AZTEC_DATA_LENGTH);
-    const addresses = [];
-    const viewingKeys = [];
-    const numberOfAccounts = 3;
+    const accessArr = [];
+    const numberOfAccounts = 2;
     for (let i = 0; i < numberOfAccounts; i += 1) {
-        if (i === 0) {
-            addresses.push(userAccount.address);
-        } else {
-            addresses.push(`0x${randomId(ADDRESS_LENGTH)}`);
-        }
-        viewingKeys.push(`0x${randomId(VIEWING_KEY_LENGTH)}`);
+        accessArr.push({
+            address: `0x${randomId(ADDRESS_LENGTH)}`,
+            viewingKey: `0x${randomId(VIEWING_KEY_LENGTH)}`,
+        });
     }
-    const metadataStr = toString({
-        aztecData,
-        addresses,
-        viewingKeys,
-    });
 
-    const expectedViewingKey = viewingKeys[0];
+    let metadataObj;
 
-    const decryptMock = decryptViewingKey
-        .mockImplementation(() => expectedViewingKey);
-
-    afterAll(() => {
-        decryptMock.mockRestore();
+    beforeEach(() => {
+        metadataObj = metadata('');
+        accessArr.forEach(access => metadataObj.addAccess(access));
     });
 
     it('get viewingKey from metadata and decrypt it', async () => {
+        const note = testNotes[randomInt(testNotes.length - 1)];
+
+        metadataObj.addAccess({
+            address: userAccount.address,
+            viewingKey: note.viewingKey,
+        });
+
         await storyOf('ensureDomainPermission');
+        const metadataStr = `0x${''.padEnd(METADATA_AZTEC_DATA_LENGTH, '0')}${metadataObj.toString().slice(2)}`;
         const decrypted = await getDecryptedViewingKeyFromMetadata(metadataStr);
-        expect(decrypted).toBe(expectedViewingKey);
+        expect(decrypted).toBe(note.realViewingKey);
     });
 
     it('return empty string if address is not in metadata', async () => {
         await storyOf('ensureDomainPermission');
-
-        const invalidMetadataStr = toString({
-            aztecData,
-            addresses: addresses.slice(1),
-            viewingKeys: viewingKeys.slice(1),
-        });
-        const decrypted = await getDecryptedViewingKeyFromMetadata(invalidMetadataStr);
+        const metadataStr = `0x${''.padEnd(METADATA_AZTEC_DATA_LENGTH, '0')}${metadataObj.toString().slice(2)}`;
+        const decrypted = await getDecryptedViewingKeyFromMetadata(metadataStr);
         expect(decrypted).toBe('');
     });
 });

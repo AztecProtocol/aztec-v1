@@ -1,13 +1,8 @@
 const {
-    types: {
-        Transactions,
-    },
+    types: { Transactions },
 } = require('../../database/models');
 
-
-module.exports = async ({
-    dappId,
-}) => {
+module.exports = async ({ dappId }) => {
     const balance = await Transactions.sum('value', { where: { dappId } });
 
     // eslint-disable-next-line no-restricted-globals

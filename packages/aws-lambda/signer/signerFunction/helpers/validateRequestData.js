@@ -1,34 +1,13 @@
-const {
-    isValidData,
-} = require('../utils/data');
-const {
-    BAD_400,
-    ACCESS_DENIED_401,
-} = require('./responses');
-const {
-    getDappInfo,
-    isOriginBelongsToApiKeyValid,
-} = require('../utils/dapp')
+const { isValidData } = require('../utils/data');
+const { BAD_400, ACCESS_DENIED_401 } = require('./responses');
+const { getDappInfo, isOriginBelongsToApiKeyValid } = require('../utils/dapp');
 const validateNetworkId = require('./validateNetworkId');
 
-
 module.exports = async ({
-    apiKey: {
-        isRequired: isApiKeyRequired,
-        value: apiKeyValue,
-    } = {},
-    data: {
-        isRequired: isRequiredData,
-        value: dataValue,
-    } = {},
-    origin: {
-        isRequired: isRequiredOrigin,
-        value: originValue,
-    } = {},
-    networkId: {
-        isRequired: isRequiredNetworkId,
-        value: networkIdValue,
-    } = {},
+    apiKey: { isRequired: isApiKeyRequired, value: apiKeyValue } = {},
+    data: { isRequired: isRequiredData, value: dataValue } = {},
+    origin: { isRequired: isRequiredOrigin, value: originValue } = {},
+    networkId: { isRequired: isRequiredNetworkId, value: networkIdValue } = {},
 }) => {
     if (isApiKeyRequired && !apiKeyValue) {
         return {
@@ -38,15 +17,12 @@ module.exports = async ({
     }
 
     if (isRequiredNetworkId) {
-        const {
-            error,
-            isValid,
-        } = validateNetworkId(networkIdValue);
+        const { error, isValid } = validateNetworkId(networkIdValue);
         if (!isValid) {
             return {
                 error,
                 validatedData: null,
-            }
+            };
         }
     }
 
@@ -60,7 +36,9 @@ module.exports = async ({
     if (isRequiredData && !isValidData(dataValue)) {
         // eslint-disable-next-line max-len
         return {
-            error: BAD_400('"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to'),
+            error: BAD_400(
+                '"data" parameter is not valid. be a map with fields: relayerAddress, from, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayHubAddress, to',
+            ),
             validatedData: null,
         };
     }
@@ -96,4 +74,4 @@ module.exports = async ({
             origin: originValue,
         },
     };
-}
+};

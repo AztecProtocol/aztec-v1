@@ -1,8 +1,5 @@
 const connection = require('../helpers/connection');
-const {
-    log,
-    errorLog,
-} = require('../../utils/log');
+const { log, errorLog } = require('../../utils/log');
 
 module.exports = async () => {
     try {
@@ -12,5 +9,5 @@ module.exports = async () => {
     } catch (e) {
         errorLog('Unable to connect to the database:', e);
         return false;
-    };
+    }
 };

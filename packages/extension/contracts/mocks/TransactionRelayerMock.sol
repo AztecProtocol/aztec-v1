@@ -9,4 +9,8 @@ contract TransactionRelayerMock is TransactionRelayer {
     function setAccountMapping(address _address, bytes memory _linkedPublicKey) public {
         accountMapping[_address] = _linkedPublicKey;
     }
+
+    function setAccountAliasMapping(address _address, address _aliasAddress) public {
+        accountAliasMapping[_address] = _aliasAddress;
+    }
 }

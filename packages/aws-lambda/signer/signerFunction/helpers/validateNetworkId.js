@@ -1,12 +1,7 @@
-const {
-    BAD_400,
-} = require('./responses');
-const {
-    ids,
-} = require('./networks');
+const { BAD_400 } = require('./responses');
+const { ids } = require('./networks');
 const isTrue = require('./isTrue');
 const isGanacheNetwork = require('./isGanacheNetwork');
-
 
 module.exports = (networkId) => {
     if (!networkId) {

@@ -89,7 +89,7 @@ export function compress(x, y) {
         compressed = compressed.or(compressionMask);
     }
     return compressed;
-};
+}
 
 /**
  * Decompress a 256-bit representation of a bn128 G1 element.
@@ -121,7 +121,7 @@ export function decompress(compressed) {
         y = curve.p.sub(y);
     }
     return { x: x.fromRed(), y };
-};
+}
 
 /**
  * Decompress a 256-bit representation of a bn128 G1 element.
@@ -154,7 +154,7 @@ export function decompressHex(compressedHex) {
         y = curve.p.sub(y);
     }
     return curve.point(x.fromRed(), y);
-};
+}
 
 /**
  * Get a random BN in the bn128 curve group's reduction context
@@ -163,7 +163,7 @@ export function decompressHex(compressedHex) {
  */
 export function randomGroupScalar() {
     return new BN(randomHex(32), 16).toRed(groupReduction);
-};
+}
 
 // TODO: replace with optimized C++ implementation, this is way too slow
 /**
@@ -181,7 +181,7 @@ export function recoverMessage(gamma, gammaK) {
     const a = serializePointForMcl(gamma);
     const b = serializePointForMcl(gammaK);
     return decode(a, b, constants.K_MAX);
-};
+}
 
 /**
  * Get a random point on the curve
@@ -207,4 +207,4 @@ export function randomPoint() {
         return curve.point(x, y);
     };
     return recurse();
-};
+}

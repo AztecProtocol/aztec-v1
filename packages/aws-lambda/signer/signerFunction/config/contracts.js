@@ -14,4 +14,4 @@ const AZTECAccountRegistryGSNConfig = {
 
 module.exports = {
     AZTECAccountRegistryGSNConfig,
-}
+};

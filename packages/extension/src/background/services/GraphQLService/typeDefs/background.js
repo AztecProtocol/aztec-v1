@@ -22,11 +22,6 @@ const backgroundTypes = gql`
         error: Error
         action: Action
     }
-    type GrantAccessApiResponse {
-        permission: GrantNoteAccessPermission
-        error: Error
-        action: Action
-    }
     type UserAccountApiResponse {
         account: User
         error: Error
@@ -61,12 +56,6 @@ const backgroundTypes = gql`
             currentAddress: String!
             domain: String!
         ): NoteApiResponse
-        grantNoteAccessPermission(
-            noteId: ID!
-            address: String!
-            currentAddress: String!
-            domain: String!
-        ): GrantAccessApiResponse
         pickNotesFromBalance(
             assetId: ID!
             amount: Int!

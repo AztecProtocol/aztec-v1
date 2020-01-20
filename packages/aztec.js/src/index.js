@@ -6,10 +6,4 @@ import signer from './signer';
 
 export * from './proof';
 
-export {
-    encoder,
-    keccak,
-    note,
-    setup,
-    signer,
-};
+export { encoder, keccak, note, setup, signer };

@@ -1,10 +1,6 @@
 const Web3 = require('web3');
-const {
-    errorLog,
-    warnLog,
-} = require('../../utils/log');
+const { errorLog, warnLog } = require('../../utils/log');
 const fixSignature = require('./helpers/fixSignature');
-
 
 class Web3Service {
     constructor() {
@@ -13,10 +9,7 @@ class Web3Service {
         this.abis = null;
     }
 
-    async init({
-        providerURL,
-        account,
-    } = {}) {
+    async init({ providerURL, account } = {}) {
         if (!providerURL) {
             errorLog('providerURL cannot be empty.');
             return;
@@ -30,19 +23,10 @@ class Web3Service {
         }
     }
 
-    async signData(
-        solSha3Data,
-        account = this.account,
-    ) {
-        const {
-            privateKey,
-        } = account;
+    async signData(solSha3Data, account = this.account) {
+        const { privateKey } = account;
 
-        const {
-            message,
-            messageHash,
-            signature,
-        } = await this.web3.eth.accounts.sign(solSha3Data, privateKey);
+        const { message, messageHash, signature } = await this.web3.eth.accounts.sign(solSha3Data, privateKey);
 
         return {
             data: message,
@@ -59,12 +43,7 @@ class Web3Service {
         return this.web3.eth.abi.encodeParameters(types, values);
     }
 
-    registerInterface(
-        config,
-        {
-            name = '',
-        } = {},
-    ) {
+    registerInterface(config, { name = '' } = {}) {
         if (!this.web3) {
             return null;
         }
@@ -76,13 +55,8 @@ class Web3Service {
     }
 
     deployed(contractName, contractAddress) {
-        const contract = new this.web3.eth.Contract(
-            this.abis[contractName],
-            contractAddress,
-        );
-        const {
-            _address: address,
-        } = contract;
+        const contract = new this.web3.eth.Contract(this.abis[contractName], contractAddress);
+        const { _address: address } = contract;
         contract.address = address;
         return contract;
     }
@@ -95,14 +69,16 @@ class Web3Service {
                     throw new Error(`Cannot call events('${eventName}') of undefined.`);
                 }
                 return {
-                    where: async (options = { filter: {}, fromBlock: 1, toBlock: 'latest' }) => contract.getPastEvents(eventName, {
-                        filter: options.filter,
-                        fromBlock: options.fromBlock,
-                        toBlock: options.toBlock,
-                    }),
-                    all: async () => contract.getPastEvents('allEvents', {
-                        fromBlock: 0,
-                    }),
+                    where: async (options = { filter: {}, fromBlock: 1, toBlock: 'latest' }) =>
+                        contract.getPastEvents(eventName, {
+                            filter: options.filter,
+                            fromBlock: options.fromBlock,
+                            toBlock: options.toBlock,
+                        }),
+                    all: async () =>
+                        contract.getPastEvents('allEvents', {
+                            fromBlock: 0,
+                        }),
                 };
             },
             at: (address) => {

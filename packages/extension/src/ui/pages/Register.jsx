@@ -9,7 +9,6 @@ import { registerSteps } from '~/ui/config/steps';
 const Register = ({
     initialStep,
     currentAccount,
-    seedPhrase,
     gsnConfig,
 }) => {
     const {
@@ -23,7 +22,7 @@ const Register = ({
             initialStep={initialStep}
             initialData={{
                 ...currentAccount,
-                seedPhrase,
+                isGSNAvailable,
             }}
         />
     );
@@ -34,13 +33,11 @@ Register.propTypes = {
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
-    seedPhrase: PropTypes.string,
     gsnConfig: gsnConfigShape.isRequired,
 };
 
 Register.defaultProps = {
     initialStep: 0,
-    seedPhrase: '',
 };
 
 export default Register;
