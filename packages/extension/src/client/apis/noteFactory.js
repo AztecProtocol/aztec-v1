@@ -1,7 +1,7 @@
-import Note from './Note';
+import ZkNote from './ZkNote';
 
 export default async function noteFactory(noteId) {
-    const note = new Note({
+    const note = new ZkNote({
         id: noteId,
     });
     await note.init();
