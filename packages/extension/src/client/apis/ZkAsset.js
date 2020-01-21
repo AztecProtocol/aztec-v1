@@ -12,7 +12,7 @@ const dataProperties = [
     'canConvert',
 ];
 
-export default class Asset {
+export default class ZkAsset {
     constructor({
         id,
     } = {}) {

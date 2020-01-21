@@ -1,7 +1,7 @@
-import Asset from './Asset';
+import ZkAsset from './ZkAsset';
 
 export default async function assetFactory(assetId) {
-    const asset = new Asset({
+    const asset = new ZkAsset({
         id: assetId,
     });
     await asset.init();
