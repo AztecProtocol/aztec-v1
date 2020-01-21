@@ -4,9 +4,7 @@ require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
 const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
-const {
-  defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap,
-} = require('./src/config/colors');
+const { defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap } = require('./src/config/colors');
 
 module.exports = {
   title: 'AZTEC Docs',
@@ -86,12 +84,16 @@ module.exports = {
     ComponentsListRenderer: path.join(__dirname, 'styleguide/components/ComponentsListRenderer'),
     SectionHeadingRenderer: path.join(__dirname, 'styleguide/components/SectionHeadingRenderer'),
     HeadingRenderer: path.join(__dirname, 'styleguide/components/HeadingRenderer'),
+    ReactComponent: path.join(__dirname, 'styleguide/components/ReactComponent'),
     ReactComponentRenderer: path.join(__dirname, 'styleguide/components/ReactComponentRenderer'),
+    Playground: path.join(__dirname, 'styleguide/components/Playground'),
     PlaygroundRenderer: path.join(__dirname, 'styleguide/components/PlaygroundRenderer'),
+    PropsRenderer: path.join(__dirname, 'styleguide/components/PropsRenderer'),
     ParaRenderer: path.join(__dirname, 'styleguide/components/ParaRenderer'),
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
     Preview: path.join(__dirname, 'styleguide/components/Preview'),
+    MethodsRenderer: path.join(__dirname, 'styleguide/components/MethodsRenderer'),
   },
   sections: [
     {
@@ -179,7 +181,6 @@ module.exports = {
           name: 'zkAsset',
           content: 'styleguide/categories/JavaScriptSDK/ZkAsset/index.md',
           exampleMode: 'hide',
-          pagePerSection: true,
           sections: [
             {
               name: 'zkAsset.balance',
@@ -194,7 +195,10 @@ module.exports = {
             {
               name: 'zkAsset.deposit',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
+              // components: ['src/components/JavascriptSDK/ZkAsset/Deposit/index.jsx'],
               exampleMode: 'hide',
+              usageMode: 'expand',
+              pagePerSection: false,
             },
             {
               name: 'zkAsset.send',
@@ -207,7 +211,7 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.refresh()',
+              name: 'zkAsset.refresh',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/refresh.md',
               exampleMode: 'hide',
             },

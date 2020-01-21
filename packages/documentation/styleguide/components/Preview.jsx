@@ -1,15 +1,12 @@
 import React from 'react';
-import {
-  Hook, Console, Decode, Unhook,
-} from 'console-feed';
+import { Hook, Console, Decode, Unhook } from 'console-feed';
 import Web3 from 'web3';
-import {
-  Block, FlexBox, Button, Text, Icon, ButtonGroup,
-} from '@aztec/guacamole-ui';
+import { Block, FlexBox, Button, Text, Icon, ButtonGroup } from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
+
 import styles from './preview.module.scss';
 import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
@@ -18,7 +15,6 @@ import getTestEth from '../utils/getTestEth';
 import evalInContext from '../utils/evalInContext';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
-
 
 class PreviewComponent extends React.Component {
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -39,7 +35,6 @@ class PreviewComponent extends React.Component {
       ...prevState,
     };
   }
-
 
   handleChange = debounce((code) => {
     this.setState({ code });
@@ -74,7 +69,6 @@ class PreviewComponent extends React.Component {
     this.getWeb3Data();
   }
 
-
   componentWillUnmount() {
     // Clear pending changes
     this.handleChange.cancel();
@@ -92,7 +86,6 @@ class PreviewComponent extends React.Component {
         const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
-
           linkedTokenAddress,
           linkedTokenBalance,
         });
@@ -106,7 +99,7 @@ class PreviewComponent extends React.Component {
         accounts: [ethereum.selectedAddress],
       });
     }
-  }
+  };
 
   compileCode = async () => {
     const { code, network } = this.state;
@@ -143,7 +136,7 @@ class PreviewComponent extends React.Component {
     this.setState({
       loadingTestTokens: false,
     });
-  }
+  };
 
   getTestEth = async () => {
     this.setState({
@@ -157,9 +150,7 @@ class PreviewComponent extends React.Component {
   }
 
   render() {
-    const {
-      isRunning, logs, network, accounts = [],
-    } = this.state;
+    const { isRunning, logs, network, accounts = [] } = this.state;
     const isEnabled = network === '4';
     return (
       <Block background="white" borderRadius="xs" hasBorder>
@@ -174,12 +165,11 @@ class PreviewComponent extends React.Component {
         </Block>
         <Block background="grey-lightest">
           <FlexBox
-            className={
-              classnames({
-                [styles.textArea]: true,
-                [styles.codeRunning]: isRunning,
-                [styles.rinkeby]: !isEnabled,
-              })}
+            className={classnames({
+              [styles.textArea]: true,
+              [styles.codeRunning]: isRunning,
+              [styles.rinkeby]: !isEnabled,
+            })}
             stretch
             expand
           >
@@ -226,12 +216,7 @@ class PreviewComponent extends React.Component {
           <FlexBox align="space-between" stretch expand>
             <FlexBox align="flex-start">
               <ButtonGroup className={styles.group}>
-                <Button
-                  text={`${this.state.ethBalance} ETH`}
-                  size="m"
-                  disabled
-                  className={styles.testEth}
-                />
+                <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
                 <Button
                   text="Get ETH"
                   size="m"
@@ -250,6 +235,7 @@ class PreviewComponent extends React.Component {
                   disabled
                   className={styles.testEth}
                 />
+                <Button text={`${this.state.linkedTokenBalance} Linked ERC20`} size="m" disabled className={styles.testEth} />
                 <Button
                   text="Get"
                   size="m"
@@ -269,9 +255,7 @@ class PreviewComponent extends React.Component {
               rounded={false}
               className={styles.runCode}
               disabled={!isEnabled}
-              icon={
-                <Icon name="eject" size="m" rotate={90} />
-              }
+              icon={<Icon name="eject" size="m" rotate={90} />}
             />
           </FlexBox>
         </Block>

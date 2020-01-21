@@ -2,98 +2,67 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Pathline from 'react-styleguidist/lib/client/rsg-components/Pathline';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
-import {
-  spacingMap,
-} from '../../src/config/layout';
-import {
-  fontSizeMap,
-  fontWeightMap,
-} from '../../src/config/typography';
 
-const styles = () => ({
+const styles = ({ color, fontSize, space }) => ({
   root: {
-    paddingTop: spacingMap.s,
-    paddingBottom: spacingMap.xl,
+    marginBottom: space[6],
   },
-  heading: {
-    paddingBottom: spacingMap.xl,
+  header: {
+    marginBottom: space[3],
   },
-  pathline: {
-    paddingTop: spacingMap.s,
+  tabs: {
+    marginBottom: space[3],
   },
-  content: {
-    fontSize: fontSizeMap.s,
-    fontWeight: fontWeightMap.light,
-    lineHeight: 1.5,
+  tabButtons: {
+    marginBottom: space[1],
   },
-  'tab-buttons': {
-    padding: [[spacingMap.m, 0, spacingMap.xl]],
+  tabBody: {
+    overflowX: 'auto',
+    maxWidth: '100%',
+    WebkitOverflowScrolling: 'touch',
   },
-  'tab-body': {
-    paddingBottom: spacingMap.xxl,
+  docs: {
+    color: color.base,
+    fontSize: fontSize.text,
   },
 });
 
-export const ReactComponentRenderer = ({
-  classes,
-  name,
-  heading,
-  pathLine,
-  tabButtons,
-  tabBody,
-  description,
-  docs,
-  examples,
-}) => (
-  <div
-    id={`${name}-container`}
-    className={classes.root}
-  >
-    <div className={classes.heading}>
-      {heading}
-      {pathLine && (
-        <div className={classes.pathline}>
-          <Pathline>{pathLine}</Pathline>
+export function ReactComponentRenderer({ classes, name, heading, pathLine, description, docs, examples, tabButtons, tabBody }) {
+  return (
+    <div className={classes.root} data-testid={`${name}-container`}>
+      <header className={classes.header}>
+        {heading}
+        {pathLine && <Pathline>{pathLine}</Pathline>}
+      </header>
+      {(description || docs) && (
+        <div className={classes.docs}>
+          {description}
+          {docs}
         </div>
       )}
-    </div>
-    {tabButtons && (
-      <div className={classes['tab-buttons']}>
-        {tabButtons}
-      </div>
-    )}
-    {tabBody && (
-      <div className={classes['tab-body']}>
-        {tabBody}
-      </div>
-    )}
-    <div className={classes.content}>
-      {description}
-      {docs}
+      {tabButtons && (
+        <div className={classes.tabs}>
+          <div className={classes.tabButtons}>{tabButtons}</div>
+          <div className={classes.tabBody}>{tabBody}</div>
+        </div>
+      )}
       {examples}
     </div>
-  </div>
-);
+  );
+}
 
 ReactComponentRenderer.propTypes = {
   classes: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   heading: PropTypes.node.isRequired,
+  filepath: PropTypes.string,
   pathLine: PropTypes.string,
   tabButtons: PropTypes.node,
   tabBody: PropTypes.node,
   description: PropTypes.node,
   docs: PropTypes.node,
   examples: PropTypes.node,
-};
-
-ReactComponentRenderer.defaultProps = {
-  pathLine: '',
-  tabButtons: null,
-  tabBody: null,
-  description: null,
-  docs: null,
-  examples: null,
+  isolated: PropTypes.bool,
 };
 
 export default Styled(styles)(ReactComponentRenderer);

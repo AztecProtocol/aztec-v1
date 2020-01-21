@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 
-export const styles = ({
-  space,
-}) => ({
+export const styles = ({ space }) => ({
   root: {
     padding: [[space[3], 0, 64]],
   },
@@ -28,27 +26,12 @@ export const styles = ({
   tab: {}, // expose className to allow using it in 'styles' settings
 });
 
-export function PlaygroundRenderer({
-  classes,
-  name,
-  preview,
-  previewProps,
-  tabButtons,
-  tabBody,
-  toolbar,
-}) {
-  const {
-    className,
-    ...props
-  } = previewProps;
+export function PlaygroundRenderer({ classes, name, preview, previewProps, tabButtons, tabBody, toolbar }) {
+  const { className, ...props } = previewProps;
 
   return (
     <div className={classes.root}>
-      <div
-        data-preview={name}
-      >
-        {preview}
-      </div>
+      <div data-preview={name}>{preview}</div>
       <div className={classes.controls}>
         <div className={classes.tabs}>{tabButtons}</div>
         <div className={classes.toolbar}>{toolbar}</div>
