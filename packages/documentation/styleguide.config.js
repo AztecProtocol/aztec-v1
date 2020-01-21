@@ -1,8 +1,12 @@
+require('babel-polyfill');
+
 require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
 const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
-const { defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap } = require('./src/config/colors');
+const {
+  defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap,
+} = require('./src/config/colors');
 
 module.exports = {
   title: 'AZTEC Docs',
@@ -114,97 +118,140 @@ module.exports = {
       exampleMode: 'collapse',
       usageMode: 'collapse',
     },
+    // {
+    //   name: 'Smart Contracts',
+    //   content: 'styleguide/categories/SmartContracts.md',
+    //   sections: [
+    //     {
+    //       name: 'ACE',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'Validators',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAsset',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAssetOwnable',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAssetMintable',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //     {
+    //       name: 'ZkAssetBurnable',
+    //       content: 'src/config/custom.md',
+    //       exampleMode: 'hide',
+    //     },
+    //   ],
+    //   sectionDepth: 2,
+    //   exampleMode: 'collapse',
+    //   usageMode: 'collapse',
+    //   pagePerSection: true,
+    // },
     {
-      name: 'Smart Contracts',
-      content: 'styleguide/categories/SmartContracts.md',
+      name: 'SDK',
+      content: 'styleguide/categories/JavaScriptSDK/overview.md',
+      components: [],
+      exampleMode: 'hide',
+      pagePerSection: true,
       sections: [
         {
-          name: 'ACE',
-          content: 'src/config/custom.md',
+          name: 'window',
+          content: 'styleguide/categories/JavaScriptSDK/Window/index.md',
           exampleMode: 'hide',
-        },
-        {
-          name: 'Validators',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAsset',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAssetOwnable',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAssetMintable',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'ZkAssetBurnable',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-      ],
-      sectionDepth: 2,
-      exampleMode: 'collapse',
-      usageMode: 'collapse',
-      pagePerSection: true,
-    },
-    {
-      name: 'JavaScript SDK',
-      content: 'styleguide/categories/JavaScriptSDK/index.md',
-      pagePerSection: true,
-      components: ['src/components/Demo/index.jsx'],
-      sections: [
-        {
-          name: 'Background',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'Getting Started & API Keys',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'API Methods',
-          content: 'src/config/custom.md',
-          exampleMode: 'collapse',
-          usageMode: 'collapse',
-          hasParent: true,
           pagePerSection: true,
           sections: [
             {
               name: 'window.aztec.enable',
-              content: 'src/config/custom.md',
+              content: 'styleguide/categories/JavaScriptSDK/Window/enable.md',
               exampleMode: 'hide',
             },
             {
               name: 'window.aztec.zkAsset',
-              content: 'styleguide/categories/JavaScriptSDK/deposit.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: 'window.aztec.zkNote',
-              content: 'src/config/custom.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: 'window.aztec.proofs',
-              content: 'src/config/custom.md',
+              content: 'styleguide/categories/JavaScriptSDK/Window/zkAsset.md',
               exampleMode: 'hide',
             },
           ],
           sectionDepth: 1,
-          exampleMode: 'collapse',
-          usageMode: 'collapse',
+          usageMode: 'hide',
+        },
+        {
+          name: 'zkAsset',
+          content: 'styleguide/categories/JavaScriptSDK/ZkAsset/index.md',
+          exampleMode: 'hide',
+          pagePerSection: true,
+          sections: [
+            {
+              name: 'zkAsset.balance',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/balance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.fetchNotesFromBalance',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/fetchNotesFromBalance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.deposit',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.send',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/send.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.withdraw',
+              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/withdraw.md',
+              exampleMode: 'hide',
+            },
+          ],
+          sectionDepth: 1,
+          usageMode: 'hide',
+        },
+        {
+          name: 'note',
+          content: 'styleguide/categories/JavaScriptSDK/Note/index.md',
+          exampleMode: 'hide',
+          pagePerSection: true,
+          sections: [
+            {
+              name: 'note.value',
+              content: 'styleguide/categories/JavaScriptSDK/Note/value.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.grantNoteAccess',
+              content: 'styleguide/categories/JavaScriptSDK/Note/grantNoteAccess.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.owner',
+              content: 'styleguide/categories/JavaScriptSDK/Note/owner.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.hash',
+              content: 'styleguide/categories/JavaScriptSDK/Note/hash.md',
+              exampleMode: 'hide',
+            },
+          ],
+          sectionDepth: 1,
+          usageMode: 'hide',
         },
       ],
-      sectionDepth: 2,
+      sectionDepth: 3,
     },
     {
       name: 'Guides',

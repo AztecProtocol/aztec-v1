@@ -1,119 +1,292 @@
-import React, {
-  Component,
-} from 'react';
+import React from 'react';
+import {
+  Hook, Console, Decode, Unhook,
+} from 'console-feed';
+import Web3 from 'web3';
+import {
+  Block, FlexBox, Button, Text, Icon, ButtonGroup,
+} from '@aztec/guacamole-ui';
+import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import PlaygroundError from 'react-styleguidist/lib/client/rsg-components/PlaygroundError';
-import ReactExample from 'react-styleguidist/lib/client/rsg-components/ReactExample';
-import Context from 'react-styleguidist/lib/client/rsg-components/Context';
-import PreviewComponent from './Preview/Preview';
+import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
+import classnames from 'classnames';
+import styles from './preview.module.scss';
+import { AZTEC_API_KEY } from '../constants/keys';
+import compileCode from '../utils/compileCode';
+import getTestERC20 from '../utils/getTestERC20';
+import getTestEth from '../utils/getTestEth';
+import evalInContext from '../utils/evalInContext';
+import PERMITTED_LOGS from '../constants/logs';
+import networkNames from '../constants/networks';
 
-const improveErrorMessage = message =>
-  message.replace(
-    'Check the render method of `StateHolder`.',
-    'Check the code of your example in a Markdown file or in the editor below.'
-  );
 
-export default class Preview extends Component {
+class PreviewComponent extends React.Component {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { initialCode } = prevState;
+    let newCode;
+
+    if (initialCode !== nextProps.code) {
+      newCode = nextProps.code;
+      return {
+        ...prevState,
+        initialCode: newCode,
+        code: newCode,
+        logs: [],
+      };
+    }
+
+    return {
+      ...prevState,
+    };
+  }
+
+
+  handleChange = debounce((code) => {
+    this.setState({ code });
+  }, 100);
+
   static propTypes = {
     code: PropTypes.string.isRequired,
-    evalInContext: PropTypes.func.isRequired,
+    compilerConfig: PropTypes.object.isRequired,
   };
 
-  static contextType = Context;
-
   state = {
-    error: null,
+    ethBalance: 0,
+    network: 0,
+    accounts: [],
+    linkedTokenBalance: 0,
+    logs: [],
+    code: '',
+    initialCode: '',
+    zkAssetAddress: '0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a',
   };
 
   componentDidMount() {
-    // Clear console after hot reload, do not clear on the first load
-    // to keep any warnings
-    if (this.context.codeRevision > 0) {
-      // eslint-disable-next-line no-console
-      console.clear();
-    }
+    Hook(window.console, (log) => {
+      const decodedLog = Decode(log);
 
-    this.executeCode();
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.error !== nextState.error || this.props.code !== nextProps.code;
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.code !== prevProps.code) {
-      this.executeCode();
-    }
-  }
-
-  componentWillUnmount() {
-    this.unmountPreview();
-  }
-
-  unmountPreview() {
-    if (this.mountNode) {
-      ReactDOM.unmountComponentAtNode(this.mountNode);
-    }
-  }
-
-  executeCode() {
-    this.setState({
-      error: null,
-    });
-
-    const {
-      code,
-    } = this.props;
-    if (!code) {
-      return;
-    }
-
-    const wrappedComponent = (
-      <ReactExample
-        code={`async () => { ${code}}`}
-        evalInContext={this.props.evalInContext}
-        onError={this.handleError}
-        compilerConfig={this.context.config.compilerConfig}
-      />
-    );
-
-    window.requestAnimationFrame(() => {
-      // this.unmountPreview();
-      try {
-        ReactDOM.render(wrappedComponent, this.mountNode);
-      } catch (err) {
-        this.handleError(err);
+      if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
+        this.setState({
+          logs: [...this.state.logs, decodedLog],
+        });
       }
     });
+    this.getWeb3Data();
   }
 
-  handleError = (err) => {
-    this.unmountPreview();
+
+  componentWillUnmount() {
+    // Clear pending changes
+    this.handleChange.cancel();
+    Unhook(window.console);
+  }
+
+  getWeb3Data = async () => {
+    if (window.ethereum) {
+      const web3 = new Web3(window.ethereum);
+
+      if (this.state.zkAssetAddress) {
+        await window.aztec.enable({
+          apiKey: '',
+        });
+        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
+        const linkedTokenBalance = await balanceOfLinkedToken();
+        this.setState({
+
+          linkedTokenAddress,
+          linkedTokenBalance,
+        });
+      }
+
+      const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
+
+      this.setState({
+        ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
+        network: window.ethereum.networkVersion,
+        accounts: [ethereum.selectedAddress],
+      });
+    }
+  }
+
+  compileCode = async () => {
+    const { code, network } = this.state;
+    if (network !== '4') return;
+    const { compilerConfig } = this.props;
+    const compiledCode = compileCode(code, compilerConfig, console.log);
+    const asyncCompiledCode = `const code = async () => {
+        try {
+          ${compiledCode};
+        } catch(err) {
+          console.error(err);
+        }
+      }
+      return code()`;
 
     this.setState({
-      error: improveErrorMessage(err.toString()),
+      isRunning: true,
+      logs: [],
     });
 
-    console.error(err); // eslint-disable-line no-console
+    await evalInContext(asyncCompiledCode);
+    await this.getWeb3Data();
+    this.setState({
+      isRunning: false,
+    });
   };
+
+  getTestERC20 = async () => {
+    this.setState({
+      loadingTestTokens: true,
+    });
+
+    await getTestERC20('0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a');
+    this.setState({
+      loadingTestTokens: false,
+    });
+  }
+
+  getTestEth = async () => {
+    this.setState({
+      loadingTestEth: true,
+    });
+
+    await getTestEth();
+    this.setState({
+      loadingTestEth: false,
+    });
+  }
 
   render() {
     const {
-      error,
+      isRunning, logs, network, accounts = [],
     } = this.state;
+    const isEnabled = network === '4';
     return (
-      <>
-        <div data-testid="mountNode" ref={ref => (this.mountNode = ref)} />
-        {error && <PlaygroundError message={error} />}
-        <br />
-        <PreviewComponent
-          code={this.props.code}
-          methodName="window.aztec.enable()"
-          executeCode={this.executeCode}
-        />
-      </>
+      <Block background="white" borderRadius="xs" hasBorder>
+        <Block padding="xs m" hasBorderBottom>
+          <FlexBox align="space-between">
+            <FlexBox aling="flex-start">
+              <Text text="Ethereum Address: " size="s" />
+              <Text text={` ${accounts[0]}`} size="s" weight="normal" color="grey" />
+            </FlexBox>
+            <Text text={networkNames[network]} size="s" weight="normal" color="orange" />
+          </FlexBox>
+        </Block>
+        <Block background="grey-lightest">
+          <FlexBox
+            className={
+              classnames({
+                [styles.textArea]: true,
+                [styles.codeRunning]: isRunning,
+                [styles.rinkeby]: !isEnabled,
+              })}
+            stretch
+            expand
+          >
+            <Editor code={this.state.code} onChange={this.handleChange} />
+          </FlexBox>
+        </Block>
+        {!!logs.length && (
+          <Block
+            padding="m s"
+            background="grey-darker"
+            style={{
+              borderRadius: logs.length ? '0 0 0px 0px' : '0 0 3px 3px',
+            }}
+            className={styles.logs}
+          >
+            <Console
+              logs={logs}
+              filter={PERMITTED_LOGS}
+              variant="dark"
+              styles={{
+                LOG_BACKGROUND: 'transparent',
+                LOG_INFO_BACKGROUND: 'transparent',
+                LOG_RESULT_BACKGROUND: 'transparent',
+                LOG_WARN_BACKGROUND: 'transparent',
+                LOG_ERROR_BACKGROUND: 'transparent',
+                BASE_BACKGROUND_COLOR: 'transparent',
+                TABLE_TH_BACKGROUND_COLOR: 'transparent',
+                LOG_INFO_BORDER: 'none',
+                LOG_RESULT_BORDER: 'none',
+                LOG_ERROR_BORDER: 'none',
+                LOG_BORDER: 'none',
+              }}
+            />
+          </Block>
+        )}
+        <Block
+          background="grey-darker"
+          style={{
+            borderRadius: '0 0 3px 3px',
+          }}
+          hasBorderTop
+          borderColor="white-lighter"
+        >
+          <FlexBox align="space-between" stretch expand>
+            <FlexBox align="flex-start">
+              <ButtonGroup className={styles.group}>
+                <Button
+                  text={`${this.state.ethBalance} ETH`}
+                  size="m"
+                  disabled
+                  className={styles.testEth}
+                />
+                <Button
+                  text="Get ETH"
+                  size="m"
+                  onClick={(isEnabled || this.state.ethBalance < 0.1) && this.getTestEth}
+                  rounded={false}
+                  disabled={!isEnabled || this.state.ethBalance > 0.1}
+                  isLoading={this.state.loadingTestEth}
+                  className={styles.testEth}
+                  icon={
+                    <Icon name="local_gas_station" size="m" />
+                  }
+                />
+                <Button
+                  text={`${this.state.linkedTokenBalance} ERC20`}
+                  size="m"
+                  disabled
+                  className={styles.testEth}
+                />
+                <Button
+                  text="Get"
+                  size="m"
+                  disabled={!isEnabled}
+                  onClick={this.getTestERC20}
+                  rounded={false}
+                  isLoading={this.state.loadingTestTokens}
+                  className={styles.testEth}
+                />
+              </ButtonGroup>
+            </FlexBox>
+            <Button
+              text="Run"
+              size="m"
+              onClick={this.compileCode}
+              isLoading={isRunning}
+              rounded={false}
+              className={styles.runCode}
+              disabled={!isEnabled}
+              icon={
+                <Icon name="eject" size="m" rotate={90} />
+              }
+            />
+          </FlexBox>
+        </Block>
+      </Block>
     );
   }
 }
 
+PreviewComponent.propTypes = {
+  code: PropTypes.string,
+  methodName: PropTypes.string,
+};
+
+PreviewComponent.defaultProps = {
+  code: '',
+};
+
+export default PreviewComponent;

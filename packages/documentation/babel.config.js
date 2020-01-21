@@ -2,10 +2,19 @@ const path = require('path');
 
 module.exports = {
   presets: [
-    '@babel/preset-env',
+    ['@babel/preset-env', {
+      targets: {
+
+        browsers: ['last 2 versions'],
+      },
+    }],
     '@babel/preset-react',
+
   ],
   plugins: [
+    ['@babel/transform-runtime', {
+      regenerator: true,
+    }],
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-proposal-object-rest-spread',
     [
@@ -45,6 +54,9 @@ module.exports = {
             append: ['postcss-cssnext'],
           },
         ],
+        ['transform-runtime', {
+          regenerator: true,
+        }],
       ],
     },
   },
