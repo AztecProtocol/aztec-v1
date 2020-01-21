@@ -1,4 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
+import debounce from 'lodash/debounce';
 import {
     metadata,
 } from '@aztec/note-access';
@@ -26,6 +27,7 @@ import {
     isDestroyed,
 } from '~/utils/noteStatus';
 import noteModel from '~/background/database/models/note';
+import ClientSubscriptionService from '~/background/services/ClientSubscriptionService';
 import {
     defaultMaxProcesses,
     defaultNotesPerDecryptionBatch,
@@ -265,7 +267,7 @@ export default class Asset {
         }));
     }
 
-    async save() {
+    save = debounce(async () => {
         if (this.activeProcesses.size > 0
             || this.actionQueue.length > 0
         ) {
@@ -299,5 +301,11 @@ export default class Asset {
         if (summary.lastSynced === this.lastSynced) {
             this.modified = false;
         }
-    }
+
+        ClientSubscriptionService.notifySubscribers(
+            'ASSET_BALANCE',
+            this.id,
+            summary.balance,
+        );
+    });
 }

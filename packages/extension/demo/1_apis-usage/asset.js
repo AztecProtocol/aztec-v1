@@ -41,7 +41,7 @@
     };
   };
 
-  async function refreshBalance() {
+  async function initBalance() {
     const balance = await asset.balance();
     document.getElementById('asset-balance').innerHTML = `${balance}`;
   }
@@ -60,13 +60,17 @@
   }
 
   async function refreshAssetBalances() {
-    refreshBalance();
     refreshERC20Balance();
     refreshAllowance();
   }
 
+  function updateAssetBalance(balance) {
+    document.getElementById('asset-balance').innerHTML = `${balance}`;
+  }
+
   async function initAsset() {
     asset = await window.aztec.zkAsset(zkAssetAddress);
+    asset.subscribeToBalance(updateAssetBalance);
     const apisElem = document.getElementById('asset-apis');
     if (!asset.isValid()) {
       apisElem.innerHTML = 'This asset is not valid.';
@@ -79,6 +83,7 @@
       fetchStatus = makeStatusGenerator('fetch-status');
       createStatus = makeStatusGenerator('create-status');
       document.getElementById('linked-erc20-address').innerHTML = asset.linkedTokenAddress;
+      initBalance();
       refreshAssetBalances();
     }
     apisElem.style.display = 'block';
