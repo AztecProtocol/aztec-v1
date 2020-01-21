@@ -13,6 +13,9 @@ import {
     clientRequestEvent,
     clientResponseEvent,
     clientDisconnectEvent,
+    subscriptionRequestEvent,
+    subscriptionResponseEvent,
+    subscriptionRemoveEvent,
     actionRequestEvent,
     sendTransactionEvent,
     uiReadyEvent,
@@ -30,7 +33,9 @@ import {
     permissionError,
 } from '~/utils/error';
 import getDomainFromUrl from '~/utils/getDomainFromUrl';
+import Web3Service from '~/helpers/Web3Service';
 import ApiService from '../services/ApiService';
+import ClientSubscriptionService from '../services/ClientSubscriptionService';
 import ClientActionService from '../services/ClientActionService';
 import TransactionSendingService from '../services/TransactionSendingService';
 import GraphQLService from '../services/GraphQLService';
@@ -269,10 +274,112 @@ class Connection {
                 const {
                     clientId,
                 } = data;
+
+                ClientSubscriptionService.removeAllSubscriptions(clientId);
+
                 this.removeClient(clientId);
             }),
         ).subscribe();
+
+        this.message$.pipe(
+            filter(request => request.type === subscriptionRequestEvent),
+            mergeMap(request => from((async () => {
+                const {
+                    clientId,
+                    data: {
+                        type,
+                        id,
+                    },
+                    domain,
+                } = request;
+
+                const entityType = type.split('_')[0].toLowerCase();
+                const {
+                    data: entityData,
+                } = await GraphQLService.query({
+                    variables: {
+                        id,
+                        domain,
+                        currentAddress: Web3Service.account.address,
+                    },
+                    query: Queries[entityType]('id'),
+                }) || {};
+                const entity = (entityData || {})[entityType];
+
+                let granted = false;
+                if (entity && !entity.error) {
+                    granted = await ClientSubscriptionService.grantSubscription(
+                        {
+                            clientId,
+                            type,
+                            id,
+                        },
+                        this.notifyClientSubscribers,
+                    );
+                }
+
+                return {
+                    ...request,
+                    response: {
+                        granted,
+                    },
+                };
+            })())),
+            tap((data) => {
+                this.ClientResponseSubject.next({
+                    ...data,
+                    type: clientResponseEvent,
+                });
+            }),
+        ).subscribe();
+
+        this.message$.pipe(
+            filter(request => request.type === subscriptionRemoveEvent),
+            mergeMap(request => from((async () => {
+                const {
+                    clientId,
+                    data: {
+                        type,
+                        id,
+                    },
+                } = request;
+                const removed = await ClientSubscriptionService.removeSubscription({
+                    clientId,
+                    type,
+                    id,
+                });
+
+                return {
+                    ...request,
+                    response: {
+                        removed: !!removed,
+                    },
+                };
+            })())),
+            tap((data) => {
+                this.ClientResponseSubject.next({
+                    ...data,
+                    type: clientResponseEvent,
+                });
+            }),
+        ).subscribe();
     }
+
+    notifyClientSubscribers = (value, {
+        clientId,
+        type,
+        id,
+    }) => {
+        this.ClientResponseSubject.next({
+            type: subscriptionResponseEvent,
+            webClientId: clientId,
+            response: {
+                type,
+                id,
+                value,
+            },
+        });
+    };
 
     registerClient = ({
         port,
