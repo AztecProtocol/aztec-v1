@@ -5,7 +5,7 @@ import {
     KeyStore,
     utils,
 } from '../index';
-import fixtures from '../keystore';
+import fixtures from '../keystore.json';
 
 nacl.util = tweetNaclUtils;
 
