@@ -11,7 +11,6 @@ import apis from '~uiModules/apis';
 
 export const sendSteps = {
     gsn: [
-
         {
             titleKey: 'send.confirm.title',
             submitTextKey: 'send.confirm.submit',
@@ -88,7 +87,6 @@ export const sendSteps = {
                 },
             ],
         },
-
     ],
 };
 
@@ -130,7 +128,6 @@ export const withdrawSteps = {
         },
     ],
     metamask: [
-
         {
             titleKey: 'withdraw.confirm.title',
             submitTextKey: 'withdraw.confirm.submit',
@@ -257,7 +254,6 @@ export const registerSteps = {
         },
     ],
     metamask: [
-
         {
             titleKey: 'register.create.title',
             tasks: [

@@ -1,6 +1,6 @@
 import ConnectionService from '~/ui/services/ConnectionService';
 
-export default async function signNotes({
+export default async function batchSignNotes({
     inputNotes,
     sender,
     assetAddress,
