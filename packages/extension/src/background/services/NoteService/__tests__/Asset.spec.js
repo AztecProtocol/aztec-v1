@@ -18,9 +18,13 @@ import {
 } from '~/utils/noteStatus';
 import * as valueFromViewingKey from '~/utils/note/valueFromViewingKey';
 import noteModel from '~/background/database/models/note';
+import ClientSubscriptionService from '~/background/services/ClientSubscriptionService';
 import Asset from '../helpers/Asset';
 import NoteBucketCache from '../helpers/NoteBucketCache';
 import RawNoteManager from '../helpers/RawNoteManager';
+import * as saveToStorage from '../utils/saveToStorage';
+
+jest.useFakeTimers();
 
 jest.mock('~/utils/storage');
 
@@ -426,5 +430,82 @@ describe('managing asynchronous processes', () => {
             notesPerBatch: 2,
             maxProcesses: 1,
         });
+    });
+});
+
+describe('Asset.save', () => {
+    let getSnapshotSpy;
+    const saveToStorageSpy = jest.spyOn(saveToStorage, 'default')
+        .mockImplementation(jest.fn());
+    const notifySubscribersSpy = jest.spyOn(ClientSubscriptionService, 'notifySubscribers')
+        .mockImplementation(jest.fn());
+
+    beforeEach(() => {
+        getSnapshotSpy = jest.spyOn(asset, 'getSnapshot')
+            .mockImplementation(() => ({}));
+
+        saveToStorageSpy.mockReset();
+        notifySubscribersSpy.mockReset();
+    });
+
+    afterAll(() => {
+        getSnapshotSpy.mockRestore();
+        saveToStorageSpy.mockRestore();
+        notifySubscribersSpy.mockRestore();
+    });
+
+    it('save data to storage and notify client subscribers', async () => {
+        asset.save();
+
+        expect(getSnapshotSpy).toHaveBeenCalledTimes(0);
+        expect(saveToStorageSpy).toHaveBeenCalledTimes(0);
+        expect(notifySubscribersSpy).toHaveBeenCalledTimes(0);
+
+        await jest.runAllTimers();
+
+        expect(getSnapshotSpy).toHaveBeenCalledTimes(1);
+        expect(saveToStorageSpy).toHaveBeenCalledTimes(1);
+        expect(notifySubscribersSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('debounce calls to asset.save', async () => {
+        asset.save();
+        asset.save();
+
+        await jest.runOnlyPendingTimers();
+
+        expect(getSnapshotSpy).toHaveBeenCalledTimes(1);
+        expect(saveToStorageSpy).toHaveBeenCalledTimes(1);
+        expect(notifySubscribersSpy).toHaveBeenCalledTimes(1);
+
+        asset.save();
+        asset.save();
+        asset.save();
+
+        await jest.runOnlyPendingTimers();
+
+        expect(getSnapshotSpy).toHaveBeenCalledTimes(2);
+        expect(saveToStorageSpy).toHaveBeenCalledTimes(2);
+        expect(notifySubscribersSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('will not debounce calls to asset.save on different assets', async () => {
+        const anotherAssetId = randomId();
+        const anotherAsset = new Asset({
+            assetId: anotherAssetId,
+            networkId,
+            owner,
+            noteBucketCache,
+            rawNoteManager,
+        });
+
+        asset.save();
+        anotherAsset.save();
+
+        await jest.runOnlyPendingTimers();
+
+        expect(getSnapshotSpy).toHaveBeenCalledTimes(1);
+        expect(saveToStorageSpy).toHaveBeenCalledTimes(2);
+        expect(notifySubscribersSpy).toHaveBeenCalledTimes(2);
     });
 });
