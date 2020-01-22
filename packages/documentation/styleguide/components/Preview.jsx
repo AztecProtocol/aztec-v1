@@ -56,16 +56,40 @@ class Preview extends React.Component {
     zkAssetAddress: '0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a',
   };
 
-  componentDidMount() {
-    Hook(window.console, (log) => {
-      const decodedLog = Decode(log);
+  // eslint-disable-next-line react/sort-comp
+  generateIframeContent = () => {
+    const { code, network } = this.state;
+    const { compilerConfig } = this.props;
 
-      if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
-        this.setState({
-          logs: [...this.state.logs, decodedLog],
-        });
+    // all calls to window.aztec need to go to the parent window, as SDK not loaded in this iframe
+    const compiledCode = compileCode(code, compilerConfig, console.log).replace(/window.aztec/g, 'window.parent.aztec');
+
+    const asyncCompiledCode = `const code = async () => {
+      try {
+        ${compiledCode};
+      } catch(err) {
+        console.error(err);
       }
-    });
+    }
+  ;
+    code();`;
+
+    const iframeDoc = `
+        <html>
+            <head>
+            <script>
+            ${asyncCompiledCode};
+            </script>
+            </head>
+          <body>
+
+          </body>
+
+        </html>`;
+    return iframeDoc;
+  };
+
+  async componentDidMount() {
     this.getWeb3Data();
   }
 
@@ -101,9 +125,37 @@ class Preview extends React.Component {
     }
   };
 
+  compileCodeInIframe = async () => {
+    // setting the iframe to have the html page created in generateIframe()
+    this.iframeRef.srcdoc = this.generateIframeContent();
+    // at this point the code in the iframe is running
+    console.log('before awaited: ', this.iframeRef);
+
+    const iframeLoaded = new Promise((resolve) => {
+      this.iframeRef.onload = resolve;
+    });
+    await iframeLoaded;
+    console.log('after awaited: ', this.iframeRef);
+
+    Hook(this.iframeRef.contentWindow.console, (log) => {
+      const decodedLog = Decode(log);
+
+      if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
+        this.setState({
+          logs: [...this.state.logs, decodedLog],
+        });
+      }
+    });
+
+    // here we need to wait for a message before resolving;
+    // return new Promise((reso
+    //   lve) => {
+
+    // });
+  };
+
   compileCode = async () => {
     const { code, network } = this.state;
-    if (network !== '4') return;
     const { compilerConfig } = this.props;
     const compiledCode = compileCode(code, compilerConfig, console.log);
     const asyncCompiledCode = `const code = async () => {
@@ -147,43 +199,85 @@ class Preview extends React.Component {
     this.setState({
       loadingTestEth: false,
     });
-  }
+  };
+  runCode = async () => {
+    this.setState({
+      isRunning: true,
+      logs: [],
+    });
+    await this.compileCodeInIframe();
+  };
 
   render() {
     const { isRunning, logs, network, accounts = [] } = this.state;
     const isEnabled = network === '4';
+
     return (
-      <Block background="white" borderRadius="xs" hasBorder>
-        <Block padding="xs m" hasBorderBottom>
-          <FlexBox align="space-between">
-            <FlexBox aling="flex-start">
-              <Text text="Ethereum Address: " size="s" />
-              <Text text={` ${accounts[0]}`} size="s" weight="normal" color="grey" />
+      <>
+        <iframe
+          ref={(ref) => {
+            this.iframeRef = ref;
+          }}
+        />
+        <Block background="white" borderRadius="xs" hasBorder>
+          <Block padding="xs m" hasBorderBottom>
+            <FlexBox align="space-between">
+              <FlexBox aling="flex-start">
+                <Text text="Ethereum Address: " size="s" />
+                <Text text={` ${accounts[0]}`} size="s" weight="normal" color="grey" />
+              </FlexBox>
+              <Text text={networkNames[network]} size="s" weight="normal" color="orange" />
             </FlexBox>
-            <Text text={networkNames[network]} size="s" weight="normal" color="orange" />
-          </FlexBox>
-        </Block>
-        <Block background="grey-lightest">
-          <FlexBox
-            className={classnames({
-              [styles.textArea]: true,
-              [styles.codeRunning]: isRunning,
-              [styles.rinkeby]: !isEnabled,
-            })}
-            stretch
-            expand
-          >
-            <Editor code={this.state.code} onChange={this.handleChange} />
-          </FlexBox>
-        </Block>
-        {!!logs.length && (
+          </Block>
+          <Block background="grey-lightest">
+            <FlexBox
+              className={classnames({
+                [styles.textArea]: true,
+                [styles.codeRunning]: isRunning,
+                [styles.rinkeby]: !isEnabled,
+              })}
+              stretch
+              expand
+            >
+              <Editor code={this.state.code} onChange={this.handleChange} />
+            </FlexBox>
+          </Block>
+          {!!logs.length && (
+            <Block
+              padding="m s"
+              background="grey-darker"
+              style={{
+                borderRadius: logs.length ? '0 0 0px 0px' : '0 0 3px 3px',
+              }}
+              className={styles.logs}
+            >
+              <Console
+                logs={logs}
+                filter={PERMITTED_LOGS}
+                variant="dark"
+                styles={{
+                  LOG_BACKGROUND: 'transparent',
+                  LOG_INFO_BACKGROUND: 'transparent',
+                  LOG_RESULT_BACKGROUND: 'transparent',
+                  LOG_WARN_BACKGROUND: 'transparent',
+                  LOG_ERROR_BACKGROUND: 'transparent',
+                  BASE_BACKGROUND_COLOR: 'transparent',
+                  TABLE_TH_BACKGROUND_COLOR: 'transparent',
+                  LOG_INFO_BORDER: 'none',
+                  LOG_RESULT_BORDER: 'none',
+                  LOG_ERROR_BORDER: 'none',
+                  LOG_BORDER: 'none',
+                }}
+              />
+            </Block>
+          )}
           <Block
-            padding="m s"
             background="grey-darker"
             style={{
-              borderRadius: logs.length ? '0 0 0px 0px' : '0 0 3px 3px',
+              borderRadius: '0 0 3px 3px',
             }}
-            className={styles.logs}
+            hasBorderTop
+            borderColor="white-lighter"
           >
             <Console
               logs={logs}
@@ -204,62 +298,56 @@ class Preview extends React.Component {
               }}
             />
           </Block>
-        )}
-        <Block
-          background="grey-darker"
-          style={{
-            borderRadius: '0 0 3px 3px',
-          }}
-          hasBorderTop
-          borderColor="white-lighter"
-        >
-          <FlexBox align="space-between" stretch expand>
-            <FlexBox align="flex-start">
-              <ButtonGroup className={styles.group}>
-                <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
-                <Button
-                  text="Get ETH"
-                  size="m"
-                  onClick={(isEnabled || this.state.ethBalance < 0.1) && this.getTestEth}
-                  rounded={false}
-                  disabled={!isEnabled || this.state.ethBalance > 0.1}
-                  isLoading={this.state.loadingTestEth}
-                  className={styles.testEth}
-                  icon={
-                    <Icon name="local_gas_station" size="m" />
-                  }
-                />
-                <Button
-                  text={`${this.state.linkedTokenBalance} ERC20`}
-                  size="m"
-                  disabled
-                  className={styles.testEth}
-                />
-                <Button text={`${this.state.linkedTokenBalance} Linked ERC20`} size="m" disabled className={styles.testEth} />
-                <Button
-                  text="Get"
-                  size="m"
-                  disabled={!isEnabled}
-                  onClick={this.getTestERC20}
-                  rounded={false}
-                  isLoading={this.state.loadingTestTokens}
-                  className={styles.testEth}
-                />
-              </ButtonGroup>
+          )}
+          <Block
+            background="grey-darker"
+            style={{
+              borderRadius: '0 0 3px 3px',
+            }}
+            hasBorderTop
+            borderColor="white-lighter"
+          >
+            <FlexBox align="space-between" stretch expand>
+              <FlexBox align="flex-start">
+                <ButtonGroup className={styles.group}>
+                  <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
+                  <Button
+                    text="Get ETH"
+                    size="m"
+                    onClick={(isEnabled || this.state.ethBalance < 0.1) && this.getTestEth}
+                    rounded={false}
+                    disabled={!isEnabled || this.state.ethBalance > 0.1}
+                    isLoading={this.state.loadingTestEth}
+                    className={styles.testEth}
+                    icon={<Icon name="local_gas_station" size="m" />}
+                  />
+                  <Button text={`${this.state.linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
+                  <Button text={`${this.state.linkedTokenBalance} Linked ERC20`} size="m" disabled className={styles.testEth} />
+                  <Button
+                    text="Get"
+                    size="m"
+                    disabled={!isEnabled}
+                    onClick={this.getTestERC20}
+                    rounded={false}
+                    isLoading={this.state.loadingTestTokens}
+                    className={styles.testEth}
+                  />
+                </ButtonGroup>
+              </FlexBox>
+              <Button
+                text="Run Code"
+                size="m"
+                onClick={this.runCode}
+                isLoading={isRunning}
+                rounded={false}
+                className={styles.runCode}
+                disabled={!isEnabled}
+                icon={<Icon name="eject" size="m" rotate={90} />}
+              />
             </FlexBox>
-            <Button
-              text="Run"
-              size="m"
-              onClick={this.compileCode}
-              isLoading={isRunning}
-              rounded={false}
-              className={styles.runCode}
-              disabled={!isEnabled}
-              icon={<Icon name="eject" size="m" rotate={90} />}
-            />
-          </FlexBox>
+          </Block>
         </Block>
-      </Block>
+      </>
     );
   }
 }
