@@ -10,11 +10,15 @@ export default async function confidentialTransfer({
         success,
         error,
     } = await ConnectionService.post({
-        action: 'metamask.zkAsset.confidentialTransfer',
+        action: 'metamask.send',
         data: {
-            proofData,
-            assetAddress,
-            signatures,
+            contract: 'ZkAsset',
+            at: assetAddress,
+            method: 'confidentialTransfer',
+            data: [
+                proofData,
+                signatures,
+            ],
         },
     }) || {};
 

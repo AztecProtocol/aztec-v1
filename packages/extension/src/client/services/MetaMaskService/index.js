@@ -16,11 +16,15 @@ const handleAction = async (action, params) => {
         case 'metamask.send': {
             const {
                 contract,
+                at,
                 method,
                 data,
             } = params;
-            response = await Web3Service
-                .useContract(contract)
+            let contractObj = Web3Service.useContract(contract);
+            if (at) {
+                contractObj = contractObj.at(at);
+            }
+            response = await contractObj
                 .method(method)
                 .send(...data);
             break;
@@ -72,25 +76,6 @@ const handleAction = async (action, params) => {
                 signature: result,
                 publicKey: `0x${compressedPublicKey}`,
             };
-            break;
-        }
-        case 'metamask.ace.publicApprove': {
-            // we only need to do this if the proof sender is the user
-            // TODO the wallet contract or any contract will be responsible for this
-            const {
-                assetAddress,
-                amount,
-                proofHash,
-            } = params;
-
-            await Web3Service
-                .useContract('ACE')
-                .method('publicApprove')
-                .send(
-                    assetAddress,
-                    proofHash,
-                    amount,
-                );
             break;
         }
         case 'metamask.eip712.signNotes': {
@@ -145,38 +130,6 @@ const handleAction = async (action, params) => {
             response = {
                 signature: result,
             };
-            break;
-        }
-        case 'metamask.zkAsset.updateNoteMetadata': {
-            const {
-                noteHash,
-                assetAddress,
-                metadata,
-            } = params;
-            await Web3Service
-                .useContract('ZkAsset')
-                .at(assetAddress)
-                .method('updateNoteMetaData')
-                .send(
-                    noteHash,
-                    metadata,
-                );
-            break;
-        }
-        case 'metamask.zkAsset.confidentialTransfer': {
-            const {
-                assetAddress,
-                proofData,
-                signatures,
-            } = params;
-            await Web3Service
-                .useContract('ZkAsset')
-                .at(assetAddress)
-                .method('confidentialTransfer')
-                .send(
-                    proofData,
-                    signatures,
-                );
             break;
         }
         default:
