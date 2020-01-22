@@ -150,7 +150,7 @@ export const withdrawSteps = {
                 {
                     type: 'sign',
                     name: 'approve',
-                    run: apis.note.batchSignNotes,
+                    run: apis.note.signNotes,
                 },
             ],
         },
