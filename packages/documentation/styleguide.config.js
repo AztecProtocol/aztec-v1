@@ -93,7 +93,6 @@ module.exports = {
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
     Preview: path.join(__dirname, 'styleguide/components/Preview'),
-    MethodsRenderer: path.join(__dirname, 'styleguide/components/MethodsRenderer'),
   },
   sections: [
     {
@@ -164,7 +163,7 @@ module.exports = {
       name: 'SDK',
       content: 'styleguide/categories/JavaScriptSDK/overview.md',
       components: [],
-      exampleMode: 'hide',
+      exampleMode: 'shown',
       pagePerSection: true,
       sections: [
         {
@@ -180,7 +179,7 @@ module.exports = {
         {
           name: 'zkAsset',
           content: 'styleguide/categories/JavaScriptSDK/ZkAsset/index.md',
-          exampleMode: 'hide',
+          exampleMode: 'shown',
           sections: [
             {
               name: 'zkAsset.balance',
@@ -195,8 +194,7 @@ module.exports = {
             {
               name: 'zkAsset.deposit',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
-              // components: ['src/components/JavascriptSDK/ZkAsset/Deposit/index.jsx'],
-              exampleMode: 'hide',
+              exampleMode: 'shown',
               usageMode: 'expand',
               pagePerSection: false,
             },

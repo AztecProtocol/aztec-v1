@@ -49,29 +49,8 @@ export default class ReactComponent extends Component {
     }
     const showUsage = usageMode !== UsageModes.hide;
 
-    const methodDocs = {
-      name: 'deposit',
-      description: 'Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.',
-      returns: {},
-      params: [
-        {
-          name: 'to',
-          type: {},
-          description:
-            'Ethereum address to which the user is depositing the zero-knowledge funds. The address will become the owner of the notes',
-        },
-        {
-          name: 'amount',
-          type: {},
-          description: 'Number of public ERC20 tokens being converted into notes',
-        },
-      ],
-      tags: {},
-    };
-
     return (
       <div>
-        {/* <MethodsRenderer methods={methodDocs} /> */}
         <ReactComponentRenderer
           name={name}
           slug={slug}

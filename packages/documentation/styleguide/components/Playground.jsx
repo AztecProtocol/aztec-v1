@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import debounce from 'lodash/debounce';
-import Preview from 'react-styleguidist/lib/client/rsg-components/Preview';
 import Para from 'react-styleguidist/lib/client/rsg-components/Para';
 import Slot from 'react-styleguidist/lib/client/rsg-components/Slot';
-import PlaygroundRenderer from 'react-styleguidist/lib/client/rsg-components/Playground/PlaygroundRenderer';
 import Context from 'react-styleguidist/lib/client/rsg-components/Context';
+
+import Preview from './Preview';
+import PlaygroundRenderer from './PlaygroundRenderer';
 import { DisplayModes, ExampleModes } from '../consts';
+import MethodArgumentRenderer from './MethodArgumentRenderer';
+import MethodReturnRenderer from './MethodReturnRenderer';
 
 const EXAMPLE_TAB_CODE_EDITOR = 'rsg-code-editor';
 
@@ -71,6 +74,37 @@ class Playground extends Component {
     const isEditorHidden = settings.noeditor || isExampleHidden;
     const preview = <Preview code={code} evalInContext={evalInContext} />;
 
+    const methodArgs = (
+      <MethodArgumentRenderer
+        methods={[
+          {
+            argument: 'to',
+            type: 'String',
+            description: 'Ethereum address to which the user is depositing the zero-knowledge funds. The address will become the owner of the notes',
+            tags: {},
+          },
+          {
+            argument: 'amount',
+            type: 'Number',
+            description: 'Number of public ERC20 tokens being converted into notes',
+            tags: {},
+          },
+        ]}
+      />
+    );
+
+    const methodReturn = (
+      <MethodReturnRenderer methods={[
+        {
+          returnVariable: 'txReceipt',
+          type: 'Object',
+          description: 'Receipt of the executed transaction',
+          tags: {},
+        },
+      ]}
+      />
+    );
+
     return isEditorHidden ? (
       <Para>{preview}</Para>
     ) : (
@@ -79,6 +113,8 @@ class Playground extends Component {
         exampleIndex={index}
         padded={!!settings.padded}
         preview={preview}
+        methodArgs={methodArgs}
+        methodReturn={methodReturn}
         previewProps={settings.props || {}}
         tabButtons={<Slot name="exampleTabButtons" active={activeTab} props={{ onClick: this.handleTabChange }} />}
         tabBody={

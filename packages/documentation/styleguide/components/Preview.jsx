@@ -16,7 +16,7 @@ import evalInContext from '../utils/evalInContext';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
 
-class PreviewComponent extends React.Component {
+class Preview extends React.Component {
   static getDerivedStateFromProps(nextProps, prevState) {
     const { initialCode } = prevState;
     let newCode;
@@ -264,13 +264,13 @@ class PreviewComponent extends React.Component {
   }
 }
 
-PreviewComponent.propTypes = {
+Preview.propTypes = {
   code: PropTypes.string,
   methodName: PropTypes.string,
 };
 
-PreviewComponent.defaultProps = {
+Preview.defaultProps = {
   code: '',
 };
 
-export default PreviewComponent;
+export default Preview;
