@@ -8,6 +8,7 @@ export default async function batchSignNotes({
     const noteHashes = inputNotes.map(({ noteHash }) => noteHash) || [];
     const {
         signature,
+        error,
     } = await ConnectionService.post({
         action: 'metamask.eip712.batchSignNotes',
         data: {
@@ -16,6 +17,12 @@ export default async function batchSignNotes({
             sender,
         },
     });
+
+    if (error) {
+        return {
+            error,
+        };
+    }
 
     return {
         noteHashes,

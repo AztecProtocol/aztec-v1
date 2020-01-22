@@ -10,6 +10,7 @@ export default async function signNotes({
     const challenge = proof.challengeHex;
     const {
         signatures,
+        error,
     } = await ConnectionService.post({
         action: 'metamask.eip712.signNotes',
         data: {
@@ -19,6 +20,12 @@ export default async function signNotes({
             sender,
         },
     });
+
+    if (error) {
+        return {
+            error,
+        };
+    }
 
     return {
         signatures: signatures.reduce((accum, sig) => {
