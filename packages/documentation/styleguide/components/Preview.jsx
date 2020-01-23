@@ -6,7 +6,6 @@ import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
-
 import styles from './preview.module.scss';
 import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
@@ -20,7 +19,6 @@ class Preview extends React.Component {
   static getDerivedStateFromProps(nextProps, prevState) {
     const { initialCode } = prevState;
     let newCode;
-
     if (initialCode !== nextProps.code) {
       newCode = nextProps.code;
       return {
@@ -30,7 +28,6 @@ class Preview extends React.Component {
         logs: [],
       };
     }
-
     return {
       ...prevState,
     };
@@ -58,22 +55,20 @@ class Preview extends React.Component {
 
   // eslint-disable-next-line react/sort-comp
   generateIframeContent = () => {
-    const { code, network } = this.state;
+    const { code } = this.state;
     const { compilerConfig } = this.props;
-
     // all calls to window.aztec need to go to the parent window, as SDK not loaded in this iframe
     const compiledCode = compileCode(code, compilerConfig, console.log).replace(/window.aztec/g, 'window.parent.aztec');
-
     const asyncCompiledCode = `const code = async () => {
       try {
         ${compiledCode};
       } catch(err) {
         console.error(err);
       }
+      window.parent.postMessage('EXAMPLE_RAN');
     }
   ;
     code();`;
-
     const iframeDoc = `
         <html>
             <head>
@@ -82,9 +77,7 @@ class Preview extends React.Component {
             </script>
             </head>
           <body>
-
           </body>
-
         </html>`;
     return iframeDoc;
   };
@@ -102,7 +95,6 @@ class Preview extends React.Component {
   getWeb3Data = async () => {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum);
-
       if (this.state.zkAssetAddress) {
         await window.aztec.enable({
           apiKey: '',
@@ -114,9 +106,7 @@ class Preview extends React.Component {
           linkedTokenBalance,
         });
       }
-
       const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
-
       this.setState({
         ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
         network: window.ethereum.networkVersion,
@@ -126,56 +116,25 @@ class Preview extends React.Component {
   };
 
   compileCodeInIframe = async () => {
-    // setting the iframe to have the html page created in generateIframe()
     this.iframeRef.srcdoc = this.generateIframeContent();
-    // at this point the code in the iframe is running
-    console.log('before awaited: ', this.iframeRef);
-
     const iframeLoaded = new Promise((resolve) => {
       this.iframeRef.onload = resolve;
     });
     await iframeLoaded;
-    console.log('after awaited: ', this.iframeRef);
-
     Hook(this.iframeRef.contentWindow.console, (log) => {
       const decodedLog = Decode(log);
-
       if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
         this.setState({
           logs: [...this.state.logs, decodedLog],
         });
       }
     });
-
-    // here we need to wait for a message before resolving;
-    // return new Promise((reso
-    //   lve) => {
-
-    // });
-  };
-
-  compileCode = async () => {
-    const { code, network } = this.state;
-    const { compilerConfig } = this.props;
-    const compiledCode = compileCode(code, compilerConfig, console.log);
-    const asyncCompiledCode = `const code = async () => {
-        try {
-          ${compiledCode};
-        } catch(err) {
-          console.error(err);
+    return new Promise((resolve) => {
+      window.addEventListener('message', (event) => {
+        if (event.data === 'EXAMPLE_RAN') {
+          resolve(event);
         }
-      }
-      return code()`;
-
-    this.setState({
-      isRunning: true,
-      logs: [],
-    });
-
-    await evalInContext(asyncCompiledCode);
-    await this.getWeb3Data();
-    this.setState({
-      isRunning: false,
+      });
     });
   };
 
@@ -183,7 +142,6 @@ class Preview extends React.Component {
     this.setState({
       loadingTestTokens: true,
     });
-
     await getTestERC20('0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a');
     this.setState({
       loadingTestTokens: false,
@@ -206,12 +164,14 @@ class Preview extends React.Component {
       logs: [],
     });
     await this.compileCodeInIframe();
+    this.setState({
+      isRunning: false,
+    });
   };
 
   render() {
     const { isRunning, logs, network, accounts = [] } = this.state;
     const isEnabled = network === '4';
-
     return (
       <>
         <iframe
@@ -351,14 +311,11 @@ class Preview extends React.Component {
     );
   }
 }
-
 Preview.propTypes = {
   code: PropTypes.string,
   methodName: PropTypes.string,
 };
-
 Preview.defaultProps = {
   code: '',
 };
-
 export default Preview;
