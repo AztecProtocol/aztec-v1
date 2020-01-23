@@ -1,5 +1,5 @@
 {
-    "branch": "feat-sdk-ui",
+    "branch": "feat-build-pipeline",
     "plugins": [
         ["@semantic-release/commit-analyzer", {
               "preset": "angular",
@@ -14,7 +14,7 @@
                 "preset": "angular"
         }],
         ["@semantic-release/exec", {
-            "verifyConditionsCmd": "../monorepo-scripts/aws/aws-bundle-deploy.sh 1.0.0 develop 3 870668040000",
+            "publishCmd": "../monorepo-scripts/aws/aws-bundle-deploy.sh",
         }]
     ]
 }
