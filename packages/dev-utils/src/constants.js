@@ -40,7 +40,7 @@ const constants = {
      *  @type {number}
      *  @default 1024
      */
-    SIGNATURES_PER_FILE: 1024,
+    SIGNATURES_PER_FILE: 1000,
     /**
      * BN value equal to 0
      */
@@ -49,9 +49,9 @@ const constants = {
      * Hash of a dummy AZTEC note with k = 0 and a = 1
      * @constant ZERO_VALUE_NOTE_HASH
      * @type {string}
-     * @default 0xf4e5f833b89894c43804fdb171562eb9d2713b8d71777183712294f428c57775
+     * @default 0x26d21f105b054b61e8d9680855c3af0633bd7c140b87de95f0ac218046fc71db
      */
-    ZERO_VALUE_NOTE_HASH: '0xcbc417524e52b95c42a4c42d357938497e3d199eb9b4a0139c92551d4000bc3c',
+    ZERO_VALUE_NOTE_HASH: '0x26d21f105b054b61e8d9680855c3af0633bd7c140b87de95f0ac218046fc71db',
 };
 
 /**

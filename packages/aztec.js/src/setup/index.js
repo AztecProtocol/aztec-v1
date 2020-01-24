@@ -1,11 +1,4 @@
 /**
- * Read in points from the trusted setup points database.
- * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
- *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
- *   We will be launching our multiparty computation trusted setup protocol shortly, where multiple entities
- *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
- *   If you wish to participate please let us know at hello@aztecprotocol.com
- *
  * @module setup
  */
 
@@ -17,10 +10,8 @@ import fetch from 'cross-fetch';
 import path from 'path';
 import fs from 'fs';
 
-const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
-
 const setup = {
-    POINTS_DB_URL: 'https://ds8m7zxw3jpbz.cloudfront.net/data',
+    POINTS_DB_URL: 'https://dy3hqfmba2gtj.cloudfront.net/',
 };
 
 /**
@@ -81,12 +72,12 @@ function localFetch(inputValue, K_MAX = constants.K_MAX_TEST, databasePath) {
 
     return new Promise((resolve, reject) => {
         const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
-        const fileName = path.posix.resolve(databasePath, `data${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+        const fileName = path.posix.resolve(databasePath, `data${(fileNum - 1) * constants.SIGNATURES_PER_FILE}.dat`);
         fs.readFile(fileName, (err, data) => {
             if (err) {
                 return reject(err);
             }
-            // each file starts at 0 (0, 1024, 2048 etc)
+            // each file starts at 0 (0, 1000, 2000 etc)
             const min = (fileNum - 1) * constants.SIGNATURES_PER_FILE;
             const bytePosition = (value - min) * 32;
             // eslint-disable-next-line new-cap
@@ -104,14 +95,15 @@ async function remoteFetch(inputValue) {
     const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
 
     try {
-        const res = await fetch(`${setup.POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+        const pointURL = `${setup.POINTS_DB_URL}data${(fileNum - 1) * constants.SIGNATURES_PER_FILE}.dat`;
+        const res = await fetch(pointURL);
         if (res.status === 404) {
             throw new Error('point not found');
         }
         const data = await res.arrayBuffer();
         const pointString = Buffer.from(data);
 
-        // each file starts at 0 (0, 1024, 2048 etc)
+        // each file starts at 0 (0, 1000, 2000 etc)
         const min = (fileNum - 1) * constants.SIGNATURES_PER_FILE;
         const bytePosition = (value - min) * 32;
         // eslint-disable-next-line new-cap
