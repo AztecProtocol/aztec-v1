@@ -15,6 +15,11 @@
         }],
         ["@semantic-release/exec", {
             "publishCmd": "../monorepo-scripts/aws/aws-bundle-deploy.sh",
-        }]
+        }],
+        ["@semantic-release/npm"],
+        ["@semantic-release/git", {
+                "assets": false
+        }],
+        "@semantic-release/github"
     ]
 }
