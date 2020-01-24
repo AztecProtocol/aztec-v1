@@ -10,7 +10,7 @@ const ACE = artifacts.require('./ACE.sol');
 
 module.exports = (deployer, network) => {
     deployer.deploy(AccountRegistryBehaviour).then(async (contract) => {
-        if (network === 'development') {
+        if (network === 'development' && process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS) {
             const trustedGSNSignerAddress = process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS;
             await contract.initialize(ACE.address, trustedGSNSignerAddress);
 
@@ -20,7 +20,7 @@ module.exports = (deployer, network) => {
                 recipient: contract.address,
                 amount: toWei('1'),
             });
-        } else {
+        } else if (process.env.TRUSTED_GSN_SIGNER_ADDRESS) {
             const trustedGSNSignerAddress = process.env.TRUSTED_GSN_SIGNER_ADDRESS;
             await contract.initialize(ACE.address, trustedGSNSignerAddress);
         }

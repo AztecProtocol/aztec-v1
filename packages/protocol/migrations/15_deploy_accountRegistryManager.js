@@ -7,10 +7,12 @@ const AccountRegistryBehaviour = artifacts.require('./AccountRegistry/epochs/202
 const ACE = artifacts.require('./ACE.sol');
 
 module.exports = (deployer, network) => {
-    deployer.deploy(
-        AccountRegistryManager,
-        AccountRegistryBehaviour.address,
-        ACE.address,
-        network === 'development' ? process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS : process.env.TRUSTED_GSN_SIGNER_ADDRESS,
-    );
+    if (process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS || process.env.TRUSTED_GSN_SIGNER_ADDRESS) {
+        deployer.deploy(
+            AccountRegistryManager,
+            AccountRegistryBehaviour.address,
+            ACE.address,
+            network === 'development' ? process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS : process.env.TRUSTED_GSN_SIGNER_ADDRESS,
+        );
+    }
 };
