@@ -7,7 +7,7 @@ const {
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
-const { randomHex } = require('web3-utils');
+const { randomHex, keccak256 } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
 const { generateFactoryId } = require('../helpers/Factory');
@@ -295,7 +295,7 @@ contract('ZkAssetOwnable', (accounts) => {
             expect(loggedRevokedStatus).to.equal(false);
         });
 
-        it('should delegate spending control of multiple notes, using batchConfidentialApprove()', async () => {
+        it('should delegate spending control of multiple notes, using approveProof()', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const testNoteA = await note.create(publicKey, 10);
             const testNoteB = await note.create(publicKey, 40);
@@ -336,25 +336,23 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            const spenderApprovals = [true, true];
-            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
             const spender = zkAssetOwnableTest.address;
 
-            const batchSignature = signer.signNotesForBatchConfidentialApprove(
+            const proofSignature = signer.signApprovalForProof(
                 zkAssetOwnable.address,
-                noteHashes,
+                transferProof.eth.outputs,
                 spender,
-                spenderApprovals,
+                true,
                 privateKey,
             );
 
-            await zkAssetOwnableTest.callBatchConfidentialApprove(noteHashes, spender, spenderApprovals, batchSignature);
+            await zkAssetOwnableTest.callApproveProof(JOIN_SPLIT_PROOF, transferProof.eth.outputs, spender, true, proofSignature);
             const { receipt } = await zkAssetOwnableTest.callConfidentialTransferFrom(JOIN_SPLIT_PROOF, transferProof.eth.output);
             expect(receipt.status).to.equal(true);
         });
 
         // eslint-disable-next-line max-len
-        it('should seletively approve and revoke spending control of multiple notes, using batchConfidentialApprove()', async () => {
+        it('should seletively approve and revoke spending control of proof, using approveProof()', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const testNoteA = await note.create(publicKey, 10);
             const testNoteB = await note.create(publicKey, 40);
@@ -395,24 +393,32 @@ contract('ZkAssetOwnable', (accounts) => {
 
             await zkAssetOwnableTest.callValidateProof(JOIN_SPLIT_PROOF, transferData);
 
-            const spenderApprovals = [true, false];
-            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
             const spender = zkAssetOwnableTest.address;
 
-            const batchSignature = signer.signNotesForBatchConfidentialApprove(
+            const proofApprovalSignature = signer.signApprovalForProof(
                 zkAssetOwnable.address,
-                noteHashes,
+                transferProof.eth.outputs,
                 spender,
-                spenderApprovals,
+                true,
                 privateKey,
             );
 
-            await zkAssetOwnableTest.callBatchConfidentialApprove(noteHashes, spender, spenderApprovals, batchSignature);
+            await zkAssetOwnableTest.callApproveProof(JOIN_SPLIT_PROOF, transferProof.eth.outputs, spender, true, proofApprovalSignature);
 
-            const loggedApprovalStatusA = await zkAssetOwnable.confidentialApproved.call(testNoteA.noteHash, spender);
+            const loggedApprovalStatusA = await zkAssetOwnable.confidentialApproved.call(keccak256(transferProof.eth.output), spender);
             expect(loggedApprovalStatusA).to.equal(true);
 
-            const loggedApprovalStatusB = await zkAssetOwnable.confidentialApproved.call(testNoteB.noteHash, spender);
+            const proofRejectSignature = signer.signApprovalForProof(
+                zkAssetOwnable.address,
+                transferProof.eth.outputs,
+                spender,
+                false,
+                privateKey,
+            );
+
+            await zkAssetOwnableTest.callApproveProof(JOIN_SPLIT_PROOF, transferProof.eth.outputs, spender, false, proofRejectSignature);
+
+            const loggedApprovalStatusB = await zkAssetOwnable.confidentialApproved.call(keccak256(transferProof.eth.output), spender);
             expect(loggedApprovalStatusB).to.equal(false);
         });
     });
