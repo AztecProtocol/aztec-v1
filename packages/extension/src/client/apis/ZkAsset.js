@@ -2,6 +2,7 @@ import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
 import ApiError from '~/client/utils/ApiError';
+import SubscriptionManager from './SubscriptionManager';
 
 const dataProperties = [
     'address',
@@ -11,17 +12,11 @@ const dataProperties = [
     'canConvert',
 ];
 
-export default class Asset {
+export default class ZkAsset {
     constructor({
         id,
     } = {}) {
         this.id = id;
-        this.subscriptions = {
-            balance: {
-                receipt: null,
-                subscribers: new Set(),
-            },
-        };
     }
 
     isValid() {
@@ -41,6 +36,8 @@ export default class Asset {
                 this[key] = asset[key];
             });
         }
+
+        this.subscriptions = new SubscriptionManager();
     };
 
     async balance() {
@@ -143,6 +140,24 @@ export default class Asset {
 
         return allowance | 0; // eslint-disable-line no-bitwise
     };
+
+    subscribeToBalance = async (subscriber) => {
+        if (!this.isValid()) {
+            return false;
+        }
+
+        return this.subscriptions.add(
+            'ASSET_BALANCE',
+            this.id,
+            subscriber,
+        );
+    };
+
+    unsubscribeToBalance = async subscriber => this.subscriptions.remove(
+        'ASSET_BALANCE',
+        this.id,
+        subscriber,
+    );
 
     /**
      *

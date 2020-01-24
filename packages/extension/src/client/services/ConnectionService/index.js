@@ -14,8 +14,14 @@ import {
 } from '~/utils/random';
 import filterStream from '~/utils/filterStream';
 import {
+    errorLog,
+} from '~/utils/log';
+import {
     connectionRequestEvent,
     connectionApprovedEvent,
+    subscriptionRequestEvent,
+    subscriptionResponseEvent,
+    subscriptionRemoveEvent,
     clientRequestEvent,
     clientResponseEvent,
     clientDisconnectEvent,
@@ -32,9 +38,36 @@ import backgroundFrame from './backgroundFrame';
 class ConnectionService {
     constructor() {
         this.clientId = randomId();
+        this.setInitialVars();
+    }
+
+    setInitialVars() {
         this.port = null;
         this.MessageSubject = null;
         this.messages$ = null;
+        this.subscriptions = {
+            /*
+             * [type]: {
+             *     [id]: [Subscriber!],
+             * }
+             *
+             * - Subscriber: {
+             *       requestId,
+             *       callback,
+             *   }
+             */
+            ASSET_BALANCE: {},
+        };
+    }
+
+    async disconnect() {
+        if (!this.port) return;
+
+        await this.postToBackground({
+            type: clientDisconnectEvent,
+        });
+
+        this.setInitialVars();
     }
 
     async openConnection(clientProfile) {
@@ -64,15 +97,6 @@ class ConnectionService {
         return networkConfig;
     }
 
-    async disconnect() {
-        if (!this.port) return;
-
-        await this.postToBackground({
-            type: clientDisconnectEvent,
-        });
-        this.port = null;
-    }
-
     setupStreams = ({ ports }) => {
         this.MessageSubject = new Subject();
         this.messages$ = this.MessageSubject.asObservable();
@@ -82,15 +106,19 @@ class ConnectionService {
             const {
                 type,
             } = data;
-            if (type === uiOpenEvent) {
-                backgroundFrame.open();
-                return;
+            switch (type) {
+                case uiOpenEvent:
+                    backgroundFrame.open();
+                    break;
+                case uiCloseEvent:
+                    backgroundFrame.close();
+                    break;
+                case subscriptionResponseEvent:
+                    this.handleReceiveSubscription(data.response);
+                    break;
+                default:
+                    this.MessageSubject.next(data);
             }
-            if (type === uiCloseEvent) {
-                backgroundFrame.close();
-                return;
-            }
-            this.MessageSubject.next(data);
         };
 
         this.messages$.pipe(
@@ -112,10 +140,10 @@ class ConnectionService {
         ).subscribe();
     }
 
-    postToBackground = async ({
+    async postToBackground({
         type,
         data,
-    }) => {
+    }) {
         if (!this.port) {
             return {
                 data: {},
@@ -133,6 +161,94 @@ class ConnectionService {
         });
 
         return filterStream(clientResponseEvent, requestId, this.MessageSubject.asObservable());
+    }
+
+    async subscribe(requestId, type, id, callback) {
+        const subscriptions = this.subscriptions[type];
+        if (!subscriptions) {
+            errorLog(`Unavailable subscription type '${type}'.`);
+            return false;
+        }
+
+        if (!subscriptions[id]) {
+            const {
+                response: {
+                    granted,
+                } = {},
+            } = await this.postToBackground({
+                type: subscriptionRequestEvent,
+                data: {
+                    type,
+                    id,
+                },
+            });
+
+            if (!granted) {
+                return false;
+            }
+
+            subscriptions[id] = [];
+        } else if (subscriptions[id].some(s => s.requestId === requestId
+            && s.callback === callback)
+        ) {
+            return true;
+        }
+
+        subscriptions[id].push({
+            requestId,
+            callback,
+        });
+
+        return true;
+    }
+
+    async unsubscribe(requestId, type, id, callback) {
+        const prevSubscribers = this.subscriptions[type] && this.subscriptions[type][id];
+        if (!prevSubscribers) {
+            return null;
+        }
+
+        const removedSubscriber = prevSubscribers
+            .find(s => s.requestId === requestId && s.callback === callback);
+        if (!removedSubscriber) {
+            return null;
+        }
+
+        const restSubscribers = prevSubscribers
+            .filter(subscriber => subscriber !== removedSubscriber);
+
+        if (restSubscribers.length) {
+            this.subscriptions[type][id] = restSubscribers;
+        } else {
+            delete this.subscriptions[type][id];
+            await this.postToBackground({
+                type: subscriptionRemoveEvent,
+                data: {
+                    type,
+                    id,
+                },
+            });
+        }
+
+        return removedSubscriber.callback;
+    }
+
+    handleReceiveSubscription({
+        type,
+        id,
+        value,
+    }) {
+        this.subscriptions[type][id].forEach(({
+            callback,
+        }) => {
+            callback(
+                value,
+                {
+                    type,
+                    id,
+                },
+            );
+        });
     }
 
     async query(queryName, args = {}) {

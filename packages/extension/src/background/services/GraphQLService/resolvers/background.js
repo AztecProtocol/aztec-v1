@@ -7,11 +7,10 @@ import {
 import mergeResolvers from './utils/mergeResolvers';
 import syncUserInfo from './utils/syncUserInfo';
 import getAccounts from './utils/getAccounts';
-import Web3Service from '~/helpers/Web3Service';
-import NoteService from '~/background/services/NoteService';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
 import pickNotesFromBalance from './utils/pickNotesFromBalance';
+import fetchNotesFromBalance from './utils/fetchNotesFromBalance';
 import syncNoteInfo from './utils/syncNoteInfo';
 import base from './base';
 
@@ -28,21 +27,11 @@ const backgroundResolvers = {
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
         })),
-        pickNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
-            notes: await pickNotesFromBalance(args, ctx),
+        pickNotesFromBalance: ensureDomainPermission(async (_, args) => ({
+            notes: await pickNotesFromBalance(args),
         })),
-        fetchNotesFromBalance: ensureDomainPermission(async (_, args, ctx) => ({
-            notes: await NoteService.fetch(
-                Web3Service.networkId,
-                ctx.user.address,
-                args.assetAddress,
-                {
-                    equalTo: args.equalTo,
-                    greaterThan: args.greaterThan,
-                    lessThan: args.lessThan,
-                    numberOfNotes: args.numberOfNotes,
-                },
-            ),
+        fetchNotesFromBalance: ensureDomainPermission(async (_, args) => ({
+            notes: await fetchNotesFromBalance(args),
         })),
         account: ensureDomainPermission(async (_, args) => fetchAztecAccount({
             address: args.currentAddress,

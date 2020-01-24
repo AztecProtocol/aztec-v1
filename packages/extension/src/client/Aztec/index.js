@@ -2,6 +2,7 @@ import * as aztec from 'aztec.js';
 import {
     warnLog,
 } from '~/utils/log';
+import EventListeners from '~/utils/EventListeners';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiPermissionService from '~/client/services/ApiPermissionService';
@@ -13,6 +14,8 @@ class Aztec {
         this.zkAsset = null;
         this.zkNote = null;
 
+        this.eventListeners = new EventListeners(['profileChanged']);
+
         Object.keys(aztec).forEach((name) => {
             if (this[name]) {
                 warnLog(`Api '${name}' is already in Aztec.`);
@@ -22,7 +25,18 @@ class Aztec {
         });
     }
 
-    enable = async (options = {}, callback = null) => new Promise(async (resolve, reject) => {
+    addListener(eventName, callback) {
+        this.eventListeners.add(eventName, callback);
+    }
+
+    removeListener(eventName, callback) {
+        this.eventListeners.remove(eventName, callback);
+    }
+
+    enable = async (
+        options = {},
+        callback = null,
+    ) => new Promise(async (resolve, reject) => {
         const {
             apiKey = '',
             providerUrl = '',
@@ -34,18 +48,35 @@ class Aztec {
         } = options;
         let networkSwitchedDuringStart = false;
 
+        const doResolved = (shouldReject = false, error = null) => {
+            if (!networkSwitchedDuringStart) {
+                this.eventListeners.notify(
+                    'profileChanged',
+                    'aztecAccountChanged',
+                    !shouldReject && !error,
+                    error,
+                );
+            }
+
+            if (!shouldReject) {
+                resolve(!!error);
+            } else if (!callback) {
+                reject(error);
+            }
+        };
+
         if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange(async () => {
+            Web3Service.bindProfileChange((changedType, newTypeValue) => {
                 networkSwitchedDuringStart = true;
-                await this.refreshSession(options, (success, error) => {
+
+                this.eventListeners.notify('profileChanged', changedType, newTypeValue);
+
+                this.refreshSession(options, (success, error) => {
                     if (callback) {
-                        callback(!!error, error);
+                        callback(!error, error);
                     }
-                    if (error && !callback) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
+                    const shouldReject = !!error && !callback;
+                    doResolved(shouldReject, error);
                 });
             });
         }
@@ -84,10 +115,9 @@ class Aztec {
             if (!networkSwitchedDuringStart) {
                 if (callback) {
                     callback(false, error);
-                    resolve();
-                } else {
-                    reject(error);
                 }
+                const shouldReject = !callback;
+                doResolved(shouldReject, error);
             }
             return;
         }
@@ -107,14 +137,25 @@ class Aztec {
         });
 
         if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange(async () => this.refreshSession(options));
+            Web3Service.bindProfileChange((changedType, newTypeValue) => {
+                this.eventListeners.notify('profileChanged', changedType, newTypeValue);
+
+                this.refreshSession(options, (success, error) => {
+                    this.eventListeners.notify(
+                        'profileChanged',
+                        'aztecAccountChanged',
+                        success,
+                        error,
+                    );
+                });
+            });
         }
 
         if (callback) {
             callback(true, null);
         }
 
-        resolve();
+        doResolved();
     });
 
     async disable() {
@@ -124,9 +165,9 @@ class Aztec {
         await ConnectionService.disconnect();
     }
 
-    refreshSession = async (config, cb) => {
+    refreshSession = async (options, cb) => {
         await this.disable();
-        return this.enable(config, cb);
+        return this.enable(options, cb);
     }
 }
 

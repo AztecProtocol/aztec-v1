@@ -18,6 +18,17 @@ const stepSign = {
         {
             type: 'sign',
             name: 'approve',
+            run: apis.note.signNotes,
+        },
+    ],
+};
+
+const stepBatchSign = {
+    ...stepSign,
+    tasks: [
+        {
+            type: 'sign',
+            name: 'approve',
             run: apis.note.batchSignNotes,
         },
     ],
@@ -56,7 +67,7 @@ const stepSendViaGSN = {
 export default {
     gsn: [
         stepProve,
-        stepSign,
+        stepBatchSign,
         stepSendViaGSN,
     ],
     metamask: [

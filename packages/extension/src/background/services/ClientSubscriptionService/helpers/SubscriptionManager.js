@@ -1,21 +1,26 @@
-class SubscriptionManager {
+export default class SubscriptionManager {
     constructor() {
         this.subscriptions = {
             /*
-             * [subscriptionType]: {
-             *      [id]: Set(Subscriber!)
+             * [type]: {
+             *     [id]: {
+             *         prevValue: any
+             *         subscribers: [Subscriber!]
+             *     }
              * }
+             *
+             * - Subscriber: {
+             *       clientId,
+             *       callback,
+             *   }
              */
-            ASSET_BALANCE: {},
         };
+        this.reset();
+    }
 
-        this.validRequests = {
-            /*
-             * [requestId]: {
-             *      type: subscriptionType!
-             *      id
-             * }
-             */
+    reset() {
+        this.subscriptions = {
+            ASSET_BALANCE: {},
         };
     }
 
@@ -23,50 +28,82 @@ class SubscriptionManager {
         return !!this.subscriptions[type];
     }
 
-    isValidRequest(requestId) {
-        return !!this.validRequests[requestId];
+    getSubscription(type, id) {
+        return this.subscriptions[type][id];
     }
 
-    getSubscribers(type, id) {
-        return this.subscriptions[type][id] || [];
+    updateSubscriptionValue(type, id, value) {
+        this.subscriptions[type][id].prevValue = value;
     }
 
     grantSubscription({
-        requestId,
+        clientId,
         type,
         id,
+        callback,
+        allowDuplicates = false,
     }) {
-        this.validRequests[requestId] = {
-            type,
-            id,
-        };
-    }
-
-    addSubscriber(subscriber, requestId) {
-        const {
-            type,
-            id,
-        } = this.validRequests[requestId];
-
         if (!this.subscriptions[type][id]) {
-            this.subscriptions[type][id] = new Set();
+            this.subscriptions[type][id] = {
+                subscribers: [],
+            };
         }
 
-        this.subscriptions[type][id].add(subscriber);
+        const hasSubscribed = this.subscriptions[type][id]
+            .subscribers
+            .some(s => s.clientId === clientId
+                && !allowDuplicates
+                && s.callback === callback);
+        if (!hasSubscribed) {
+            this.subscriptions[type][id].subscribers.push({
+                clientId,
+                callback,
+            });
+        }
+
+        return true;
     }
 
-    removeSubscribers(subscriber, requestId) {
-        const {
-            type,
-            id,
-        } = this.validRequests[requestId];
-
-        if (this.subscriptions[type][id]) {
-            this.subscriptions[type][id].delete(subscriber);
+    removeSubscription({
+        clientId,
+        type,
+        id,
+        callback = null,
+    }) {
+        if (!this.subscriptions[type][id]
+            || !this.subscriptions[type][id]
+        ) {
+            return null;
         }
 
-        delete this.validRequests[requestId];
+        const prevSubscribers = this.subscriptions[type][id].subscribers;
+        const removedSubscribers = prevSubscribers
+            .filter(s => s.clientId === clientId
+                && (!callback || s.callback === callback));
+        if (!removedSubscribers.length) {
+            return null;
+        }
+
+        const restSubscribers = prevSubscribers
+            .filter(s => removedSubscribers.indexOf(s) < 0);
+        if (restSubscribers.length) {
+            this.subscriptions[type][id].subscribers = restSubscribers;
+        } else {
+            delete this.subscriptions[type][id];
+        }
+
+        return removedSubscribers;
+    }
+
+    removeAllSubscriptions(clientId) {
+        Object.keys(this.subscriptions).forEach((type) => {
+            Object.keys(this.subscriptions[type]).forEach((id) => {
+                this.removeSubscription({
+                    clientId,
+                    type,
+                    id,
+                });
+            });
+        });
     }
 }
-
-export default new SubscriptionManager();

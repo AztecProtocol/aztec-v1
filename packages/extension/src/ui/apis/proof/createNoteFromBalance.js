@@ -55,12 +55,19 @@ export default async function createNoteFromBalance({
     const {
         pickNotesFromBalance,
     } = await ConnectionService.query({
-        query: 'asset.pickNotesFromBalance',
+        query: 'pickNotesFromBalance',
         data: {
             assetId: assetAddress,
             amount: inputAmount,
             owner: currentAddress,
             numberOfNotes: numberOfInputNotes,
+            requestedFields: `
+                value
+                decryptedViewingKey
+                noteHash
+                metadata
+                status
+            `,
         },
     });
 
