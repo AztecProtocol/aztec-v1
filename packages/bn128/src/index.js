@@ -53,14 +53,14 @@ const hYHex = '0x2bb1b9b55ffdcf2d7254dfb9be2cb4e908611b4adeb4b838f0442fce79416cf
  *  @default
  *  7673901602397024137095011250362199966051872585513276903826533215767972925880
  */
-export const H_X = new BN(hexToNumberString(hXHex), 10);
+export const H_X = new BN(hXHex, 16);
 
 /** Y-Coordinate of AZTEC's second generator point 'h'. Created from odd-valued root of (H_X^{3} + 3)
  *  @type {BN}
  *  @default
  *  8489654445897228341090914135473290831551238522473825886865492707826370766375
  */
-export const H_Y = new BN(hexToNumberString(hYHex), 10);
+export const H_Y = new BN(hYHex, 16);
 
 export const h = curve.point(H_X, H_Y);
 

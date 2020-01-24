@@ -9,7 +9,7 @@ import { constants, proofs } from '@aztec/dev-utils';
 
 import secp256k1 from '@aztec/secp256k1';
 import typedData from '@aztec/typed-data';
-import { randomHex, padRight } from 'web3-utils';
+import { randomHex, padRight, keccak256 } from 'web3-utils';
 
 const signer = {};
 
@@ -87,31 +87,31 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
 };
 
 /**
- * Create an EIP712 ECDSA signature over an array of AZTEC notes, used to either grant or revoke delegation of note control
- * to a third party using the batchConfidentialApprove() of a ZkAsset.
+ * Create an EIP712 ECDSA signature over an AZTEC proof, used to either grant or revoke delegation of proof execution
+ * to a third party using the approveProof() method of a ZkAsset.
  *
  * ECSA signature is formatted as follows:
  * - `r` and `s` occupy 32 bytes
  * - `v` occupies 1 byte
  *
- * @method signMultipleNotesForBatchConfidentialApprove
+ * @method signApprovalForProof
  * @param {string} verifyingContract address of target contract
- * @param {string[]} noteHashes array of the keccak256 hashes of notes, for which approval is being granted or revoked
+ * @param {string} proofOutputs outputs of a proof
  * @param {string} spender address to which note control is being delegated
- * @param {bool} spenderApprovals array of booleans determining whether the spender is being granted or revoked approval
- * for each note
+ * @param {bool} approval boolean (true for approval, false for revocation)
  * @param {string} privateKey the private key of message signer
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
-signer.signNotesForBatchConfidentialApprove = (verifyingContract, noteHashes, spender, spenderApprovals, privateKey) => {
+signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approval, privateKey) => {
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
-    const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
-    const message = {
-        noteHashes,
-        spender,
-        spenderApprovals,
-    };
+    const schema = constants.eip712.PROOF_SIGNATURE;
+    const proofHash = keccak256(proofOutputs);
 
+    const message = {
+        proofHash,
+        spender,
+        approval,
+    };
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
     const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
     return signature;
@@ -221,6 +221,7 @@ signer.signTypedData = (domain, schema, message, privateKey) => {
         ...schema,
         message,
     });
+
     let unformattedSignature = secp256k1.ecdsa.signMessage(encodedTypedData, privateKey);
 
     const r = unformattedSignature[1].slice(2);

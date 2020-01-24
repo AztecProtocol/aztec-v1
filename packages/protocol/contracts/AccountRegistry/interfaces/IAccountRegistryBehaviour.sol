@@ -8,25 +8,41 @@ contract IAccountRegistryBehaviour {
         bytes linkedPublicKey;
     }
 
+    mapping(address => bytes) public accountMapping;
+    mapping(address => address) public userToAZTECAccountMapping;
+    mapping(bytes32 => bool) public signatureLog;
+
     function registerAZTECExtension(
         address _account,
+        address _AZTECaddress,
         bytes calldata _linkedPublicKey,
         bytes calldata _spendingPublicKey,
         bytes calldata _signature
     ) external;
 
-    event LogAddress(
-        address account
-    );
+    function initialize(address _aceAddress, address _trustedGSNSignerAddress) external;
 
-    event LogString(
-        string message
-    );
+    function confidentialTransferFrom(
+        address _registryOwner,
+        bytes calldata _proofData,
+        bytes32[] calldata _noteHashes,
+        address _spender,
+        bool[] calldata _spenderApprovals,
+        bytes calldata _batchSignature
+    ) external;
 
-    event LogBytes(
-        bytes32 sig
-    );
+    function deposit(
+        address _registryOwner,
+        address _owner,
+        bytes32 _proofHash,
+        bytes calldata _proofData,
+        uint256 _value
+    ) external;
 
+    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) external;
+
+    event Addresses(address accountAddress, address signerAddress);
+    
     event RegisterExtension(
         address indexed account,
         bytes linkedPublicKey,

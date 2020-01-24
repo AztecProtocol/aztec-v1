@@ -86,8 +86,8 @@ const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5
 // keccak256 hash of "JoinSplitSignature(uint24 proof,bytes32 noteHash,uint256 challenge,address sender)"
 const JOIN_SPLIT_SIGNATURE_TYPE_HASH = '0xf671f176821d4c6f81e66f9704cdf2c5c12d34bd23561179229c9fe7a9e85462';
 
-// keccak256 hash of "MultipleNoteSignature(bytes32[] noteHashes,address spender,bool[] spenderApprovals)"
-const MULTIPLE_NOTE_SIGNATURE_TYPE_HASH = '0x0aad58e28366c18fa0a3551d1215f4da4bd3c63c0376bb065dfd436f09e8d55a';
+// keccak256 hash of "ProofSignature(bytes32 proofHash,address spender,bool approval)"
+const PROOF_SIGNATURE_TYPE_HASH = '0x362143c749023e4b48ee5f2724d3d2bcbaea3c7eada19126ebd60fb7e2e72645';
 
 // keccak256 hash of "NoteSignature(bytes32 noteHash,address spender,bool spenderApproval)"
 const NOTE_SIGNATURE_TYPE_HASH = '0x18b99aa73a945da0bb8640ca1f178720091ea7d80be44da6ee02d9fd334623c2';
@@ -136,18 +136,18 @@ constants.eip712 = {
         primaryType: 'JoinSplitSignature',
     },
     JOIN_SPLIT_SIGNATURE_TYPE_HASH,
-    MULTIPLE_NOTE_SIGNATURE: {
+    PROOF_SIGNATURE: {
         types: {
-            MultipleNoteSignature: [
-                { name: 'noteHashes', type: 'bytes32[]' },
+            ProofSignature: [
+                { name: 'proofHash', type: 'bytes32' },
                 { name: 'spender', type: 'address' },
-                { name: 'spenderApprovals', type: 'bool[]' },
+                { name: 'approval', type: 'bool' },
             ],
             EIP712Domain: EIP712_DOMAIN,
         },
-        primaryType: 'MultipleNoteSignature',
+        primaryType: 'ProofSignature',
     },
-    MULTIPLE_NOTE_SIGNATURE_TYPE_HASH,
+    PROOF_SIGNATURE_TYPE_HASH,
     NOTE_SIGNATURE: {
         types: {
             NoteSignature: [
