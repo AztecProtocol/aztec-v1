@@ -87,6 +87,7 @@
     },
     "scripts": {
         "build:dev": "truffle compile && webpack --config webpack.dev.js",
+        "build": "yarn build:prod",
         "build:prod": "truffle compile && webpack --config webpack.prod.js",
         "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
