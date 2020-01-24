@@ -1,12 +1,16 @@
 {
-    "name": "extension",
+    "name": "@aztec/sdk",
     "sideEffects": [
         "**/*.css",
         "**/*.scss"
     ],
-    "version": "0.0.1",
+    "license": "LGPL-3.0",
+    "version": "0.2.3",
+    "author": "AZTEC",
+    "bugs": {
+        "url": "https://github.com/AztecProtocol/AZTEC/issues"
+    },
     "main": "index.js",
-    "license": "MIT",
     "dependencies": {
         "@aztec/bn128": "0.0.0-semantically-released",
         "@aztec/dev-utils": "0.0.0-semantically-released",
