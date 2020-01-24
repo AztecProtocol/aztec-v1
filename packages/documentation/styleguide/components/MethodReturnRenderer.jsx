@@ -14,7 +14,7 @@ export const columns = [
   {
     caption: 'Return variable',
     // eslint-disable-next-line react/prop-types
-    render: ({ returnVariable, tags = {} }) => <Name deprecated={!!tags.deprecated}>{`${returnVariable}`}</Name>,
+    render: ({ name, tags = {} }) => <Name deprecated={!!tags.deprecated}>{`${name}`}</Name>,
   },
   {
     caption: 'Type',

@@ -6,7 +6,7 @@ Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-k
 - {Number} __amount__: Number of public ERC20 tokens being converted into notes -->
 
 ## Examples
-<!-- ### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user
+### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
@@ -36,8 +36,7 @@ await asset.deposit(
 
 const userPostDepositBalance = preDepositBalance + depositAmount;
 console.info({ userPostDepositBalance });
-
-``` -->
+```
 
 ### Give a third party zero-knowledge notes worth 50 ERC20 tokens
 

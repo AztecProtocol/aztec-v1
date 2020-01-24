@@ -194,7 +194,6 @@ module.exports = {
             {
               name: 'zkAsset.deposit',
               content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
-              exampleMode: 'shown',
               usageMode: 'expand',
               pagePerSection: false,
             },

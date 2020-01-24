@@ -4,6 +4,8 @@ import debounce from 'lodash/debounce';
 import Para from 'react-styleguidist/lib/client/rsg-components/Para';
 import Slot from 'react-styleguidist/lib/client/rsg-components/Slot';
 import Context from 'react-styleguidist/lib/client/rsg-components/Context';
+import JsDoc from 'react-styleguidist/lib/client/rsg-components/JsDoc';
+import parse from 'comment-parser';
 
 import Preview from './Preview';
 import PlaygroundRenderer from './PlaygroundRenderer';
@@ -50,6 +52,11 @@ class Playground extends Component {
     return null;
   }
 
+  async componentDidMount() {
+    const { parsedArguments, parsedReturns } = await this.parseGitDocs();
+    this.setState({ parsedArguments, parsedReturns });
+  }
+
   componentWillUnmount() {
     // Clear pending changes
     this.handleChange.cancel();
@@ -66,69 +73,81 @@ class Playground extends Component {
     }));
   };
 
+  parseGitDocs = async () => {
+    const url = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/feat-sdk-ui/packages/extension/src/client/apis/ZkAsset.js';
+    const apiText = await fetch(url)
+      .then((response) => {
+        return response.text();
+      })
+      .catch((error) => console.log(error));
+
+    const parsedTags = parse(apiText.toString());
+
+    // pick out the tags relevant to the method in question.
+    // Need to add a @function tag to all the API
+    // method tags which matches the 'name'
+    // used in this react to document the method
+    // const { name } = this.props;
+    // const parsedTagsForMethod = parsedTags.filter((methodTag) => {
+    //   return methodTag.tags[0].function === name;
+    // }
+
+    const parsedArguments = parsedTags.filter((tag) => {
+      return tag.tags[0].tag !== 'returns';
+    });
+
+    const parsedReturns = parsedTags.filter((tag) => {
+      return tag.tags[0].tag === 'returns';
+    });
+    return { parsedArguments, parsedReturns };
+  };
+
   render() {
-    const { code, activeTab } = this.state;
+    const { code, activeTab, parsedArguments, parsedReturns } = this.state;
     const { evalInContext, index, name, settings, exampleMode } = this.props;
     const { displayMode } = this.context;
-    const isExampleHidden = exampleMode === ExampleModes.hide;
-    const isEditorHidden = settings.noeditor || isExampleHidden;
+    // const isExampleHidden = exampleMode === ExampleModes.hide;
+    // const isEditorHidden = settings.noeditor || isExampleHidden;
     const preview = <Preview code={code} evalInContext={evalInContext} />;
 
-    const methodArgs = (
-      <MethodArgumentRenderer
-        methods={[
-          {
-            argument: 'to',
-            type: 'String',
-            description: 'Ethereum address to which the user is depositing the zero-knowledge funds. The address will become the owner of the notes',
-            tags: {},
-          },
-          {
-            argument: 'amount',
-            type: 'Number',
-            description: 'Number of public ERC20 tokens being converted into notes',
-            tags: {},
-          },
-        ]}
-      />
-    );
+    let methodArgs;
+    let methodReturn;
+    if (parsedArguments && parsedReturns) {
+      methodArgs = <MethodArgumentRenderer methods={[...parsedArguments]} />;
+      methodReturn = <MethodReturnRenderer methods={[...parsedReturns]} />;
+    }
 
-    const methodReturn = (
-      <MethodReturnRenderer methods={[
-        {
-          returnVariable: 'txReceipt',
-          type: 'Object',
-          description: 'Receipt of the executed transaction',
-          tags: {},
-        },
-      ]}
-      />
+    return (
+      <div>
+        <PlaygroundRenderer
+          name={name}
+          exampleIndex={index}
+          padded={!!settings.padded}
+          preview={preview}
+          methodArgs={methodArgs}
+          methodReturn={methodReturn}
+          previewProps={settings.props || {}}
+          // tabButtons={<Slot name="exampleTabButtons" active={activeTab} props={{ onClick: this.handleTabChange }} />}
+          tabBody={
+            <Slot
+              name="exampleTabs"
+              active={activeTab}
+              onlyActive
+              // evalInContext passed through to support custom slots that eval code
+              props={{ code, onChange: this.handleChange, evalInContext }}
+            />
+          }
+          toolbar={
+            <Slot name="exampleToolbar" props={{ name, isolated: displayMode === DisplayModes.example, example: index }} />
+          }
+        />
+      </div>
     );
-
-    return isEditorHidden ? (
-      <Para>{preview}</Para>
-    ) : (
-      <PlaygroundRenderer
-        name={name}
-        exampleIndex={index}
-        padded={!!settings.padded}
-        preview={preview}
-        methodArgs={methodArgs}
-        methodReturn={methodReturn}
-        previewProps={settings.props || {}}
-        tabButtons={<Slot name="exampleTabButtons" active={activeTab} props={{ onClick: this.handleTabChange }} />}
-        tabBody={
-          <Slot
-            name="exampleTabs"
-            active={activeTab}
-            onlyActive
-            // evalInContext passed through to support custom slots that eval code
-            props={{ code, onChange: this.handleChange, evalInContext }}
-          />
-        }
-        toolbar={<Slot name="exampleToolbar" props={{ name, isolated: displayMode === DisplayModes.example, example: index }} />}
-      />
-    );
+    // this was at the top of the return
+    // isEditorHidden ? (
+    //   <Para>{preview}</Para>
+    // ) : (
+    // );
   }
 }
 

@@ -13,7 +13,7 @@ export const columns = [
   {
     caption: 'Arguments',
     // eslint-disable-next-line react/prop-types
-    render: ({ argument, tags = {} }) => <Name deprecated={!!tags.deprecated}>{`${argument}`}</Name>,
+    render: ({ name, tags = {} }) => <Name deprecated={!!tags.deprecated}>{`${name}`}</Name>,
   },
   {
     caption: 'Type',
