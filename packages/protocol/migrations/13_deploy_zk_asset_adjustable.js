@@ -20,5 +20,12 @@ module.exports = (deployer) => {
             const aceAddress = ACE.address;
             return deployer.deploy(ZkAssetAdjustable, aceAddress, erc20Address, ERC20_SCALING_FACTOR, 0, []);
         });
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };

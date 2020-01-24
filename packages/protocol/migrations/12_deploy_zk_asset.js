@@ -23,5 +23,12 @@ module.exports = (deployer, network) => {
             const aceAddress = ACE.address;
             return deployer.deploy(ZkAsset, aceAddress, erc20Address, ERC20_SCALING_FACTOR);
         });
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };

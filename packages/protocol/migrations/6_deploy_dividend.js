@@ -11,5 +11,12 @@ module.exports = (deployer) => {
     return deployer.deploy(Dividend).then(async ({ address: dividendAddress }) => {
         const ace = await ACE.at(ACE.address);
         await ace.setProof(proofs.DIVIDEND_PROOF, dividendAddress);
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };

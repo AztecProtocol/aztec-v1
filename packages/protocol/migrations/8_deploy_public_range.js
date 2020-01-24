@@ -11,5 +11,12 @@ module.exports = (deployer) => {
     return deployer.deploy(PublicRange).then(async ({ address: PublicRangeAddress }) => {
         const ace = await ACE.at(ACE.address);
         await ace.setProof(proofs.PUBLIC_RANGE_PROOF, PublicRangeAddress);
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };

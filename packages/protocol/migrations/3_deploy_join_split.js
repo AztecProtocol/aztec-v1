@@ -11,5 +11,12 @@ module.exports = (deployer) => {
     return deployer.deploy(JoinSplit).then(async ({ address: joinSplitAddress }) => {
         const ace = await ACE.at(ACE.address);
         await ace.setProof(proofs.JOIN_SPLIT_PROOF, joinSplitAddress);
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };

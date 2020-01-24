@@ -12,5 +12,12 @@ module.exports = (deployer) => {
         const ace = await ACE.at(ACE.address);
         await ace.setProof(proofs.MINT_PROOF, joinSplitFluidAddress);
         await ace.setProof(proofs.BURN_PROOF, joinSplitFluidAddress);
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };

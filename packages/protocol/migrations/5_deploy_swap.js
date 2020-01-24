@@ -11,5 +11,12 @@ module.exports = (deployer) => {
     return deployer.deploy(Swap).then(async ({ address: swapAddress }) => {
         const ace = await ACE.at(ACE.address);
         await ace.setProof(proofs.SWAP_PROOF, swapAddress);
-    });
+    }).then(
+        (contract) =>
+            new Promise((resolve) =>
+                setTimeout(() => {
+                    resolve(contract);
+                }, 2000),
+            ),
+    );;
 };
