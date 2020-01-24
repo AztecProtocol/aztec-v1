@@ -11,6 +11,6 @@ module.exports = (deployer, network) => {
         AccountRegistryManager,
         AccountRegistryBehaviour.address,
         ACE.address,
-        network === 'development' ? process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS: process.env.TRUSTED_GSN_SIGNER_ADDRESS,
+        network === 'development' ? process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS : process.env.TRUSTED_GSN_SIGNER_ADDRESS,
     );
 };
