@@ -1,55 +1,25 @@
-const {
-    approveData,
-    trustedAccount,
-} = require('./utils/signer');
-const {
-    OK_200,
-    NOT_FOUND_404,
-    BAD_400,
-    ACCESS_DENIED_401,
-} = require('./helpers/responses');
-const {
-    validateRequestData,
-    registerContracts,
-    refreshPendingTxs,
-    validateNetworkId,
-    getNetworkConfig,
-} = require('./helpers');
-const {
-    getParameters,
-} = require('./utils/event');
+const { approveData, trustedAccount } = require('./utils/signer');
+const { OK_200, NOT_FOUND_404, BAD_400, ACCESS_DENIED_401 } = require('./helpers/responses');
+const { validateRequestData, registerContracts, refreshPendingTxs, validateNetworkId, getNetworkConfig } = require('./helpers');
+const { getParameters } = require('./utils/event');
 const web3Service = require('./services/Web3Service');
-const {
-    monitorTx,
-} = require('./utils/transactions');
-const {
-    errorLog,
-} = require('./utils/log');
+const { monitorTx } = require('./utils/transactions');
+const { errorLog } = require('./utils/log');
 const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
-const {
-    balance,
-    getDappInfo,
-} = require('./utils/dapp');
+const { balance, getDappInfo } = require('./utils/dapp');
 
-
-const initializeDB = ({
-    networkId,
-}) => {
+const initializeDB = ({ networkId }) => {
     dbConnection.init({
         networkId,
     });
     const {
-        models: {
-            init: initModels,
-        },
+        models: { init: initModels },
     } = db;
     initModels();
 };
 
-const initializeWeb3Service = ({
-    networkId,
-}) => {
+const initializeWeb3Service = ({ networkId }) => {
     const account = trustedAccount(networkId);
     const network = getNetworkConfig(networkId);
     web3Service.init({
@@ -59,11 +29,8 @@ const initializeWeb3Service = ({
     registerContracts();
 };
 
-const initialize = ({
-    networkId,
-    authorizationRequired,
-}) => {
-    if(authorizationRequired) {
+const initialize = ({ networkId, authorizationRequired }) => {
+    if (authorizationRequired) {
         initializeDB({
             networkId,
         });
@@ -73,14 +40,8 @@ const initialize = ({
     });
 };
 
-const authorizedApprovalData = async ({
-    networkId,
-    apiKey,
-    data,
-}) => {
-    const {
-        id: dappId,
-    } = await getDappInfo({
+const authorizedApprovalData = async ({ networkId, apiKey, data }) => {
+    const { id: dappId } = await getDappInfo({
         apiKey,
     });
 
@@ -97,13 +58,11 @@ const authorizedApprovalData = async ({
                 title: "Not enough free transaction, please contact to the dapp's support",
             }),
             result: null,
-        }
+        };
     }
 
     const result = await approveData(data);
-    const {
-        signature,
-    } = result;
+    const { signature } = result;
 
     await monitorTx({
         ...data,
@@ -114,18 +73,16 @@ const authorizedApprovalData = async ({
     return {
         error: null,
         result,
-    }
+    };
 };
 
-const unauthorizedApprovalData = async ({
-    data,
-}) => {
+const unauthorizedApprovalData = async ({ data }) => {
     const result = await approveData(data);
     return {
         error: null,
         result,
-    }
-}
+    };
+};
 
 const responseOptions = (origin) => ({
     headers: {
@@ -138,36 +95,25 @@ const responseOptions = (origin) => ({
  * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
  * @param {Object} event - API Gateway Lambda Proxy Input Format
  *
- * Context doc: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html 
+ * Context doc: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
  * @param {Object} context
  *
  * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
- * 
+ *
  */
 exports.signTxHandler = async (event) => {
     if (event.httpMethod !== 'POST') {
         return NOT_FOUND_404();
     }
     const {
-        body: {
-            data,
-        },
-        path: {
-            apiKey,
-            networkId,
-        },
-        headers: {
-            origin,
-        },
+        body: { data },
+        path: { apiKey, networkId },
+        headers: { origin },
     } = getParameters(event) || {};
 
     try {
-        const {
-            isValid,
-            authorizationRequired,
-            error: networkError,
-        } = validateNetworkId(networkId);
+        const { isValid, authorizationRequired, error: networkError } = validateNetworkId(networkId);
         if (!isValid) {
             return networkError;
         }
@@ -177,9 +123,7 @@ exports.signTxHandler = async (event) => {
             authorizationRequired,
         });
 
-        const {
-            error: validationError,
-        } = await validateRequestData({
+        const { error: validationError } = await validateRequestData({
             apiKey: {
                 isRequired: authorizationRequired,
                 value: apiKey,
@@ -213,20 +157,16 @@ exports.signTxHandler = async (event) => {
                 data,
             });
         }
-        const {
-            error: approvalError,
-            result,
-        } = resp;
+        const { error: approvalError, result } = resp;
         if (approvalError) {
             return approvalError;
         }
         const options = responseOptions(origin);
         return OK_200(result, options);
-
     } catch (e) {
         errorLog(e);
         return BAD_400({
             message: e.message,
         });
-    };
+    }
 };

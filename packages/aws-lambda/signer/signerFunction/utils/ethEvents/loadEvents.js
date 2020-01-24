@@ -1,13 +1,7 @@
 const web3Service = require('../../services/Web3Service');
-const {
-    AZTECAccountRegistryGSNConfig,
-} = require('../../config/contracts');
+const { AZTECAccountRegistryGSNConfig } = require('../../config/contracts');
 
-
-module.exports = async ({
-    signaturesHashes,
-    networkId,
-}) => {
+module.exports = async ({ signaturesHashes, networkId }) => {
     const options = {
         // TODO: must optimize this
         fromBlock: 0,
@@ -22,9 +16,7 @@ module.exports = async ({
 
     const {
         name: AZTECAccountRegistryGSNContract,
-        events: {
-            GSNTransactionProcessed,
-        },
+        events: { GSNTransactionProcessed },
         networks,
     } = AZTECAccountRegistryGSNConfig;
 
@@ -34,19 +26,11 @@ module.exports = async ({
         .events(GSNTransactionProcessed)
         .where(options);
 
-    return events.map(({
-        blockNumber,
-        transactionHash,
-        returnValues: {
-            signatureHash,
-            success,
-            actualCharge,
-        },
-    }) => ({
+    return events.map(({ blockNumber, transactionHash, returnValues: { signatureHash, success, actualCharge } }) => ({
         blockNumber,
         signatureHash,
         transactionHash,
         success,
         actualCharge,
     }));
-}
+};

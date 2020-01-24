@@ -403,9 +403,18 @@ contract('ZkAssetOwnable', (accounts) => {
                 privateKey,
             );
 
-            await zkAssetOwnableTest.callApproveProof(JOIN_SPLIT_PROOF, transferProof.eth.outputs, spender, true, proofApprovalSignature);
+            await zkAssetOwnableTest.callApproveProof(
+                JOIN_SPLIT_PROOF,
+                transferProof.eth.outputs,
+                spender,
+                true,
+                proofApprovalSignature,
+            );
 
-            const loggedApprovalStatusA = await zkAssetOwnable.confidentialApproved.call(keccak256(transferProof.eth.output), spender);
+            const loggedApprovalStatusA = await zkAssetOwnable.confidentialApproved.call(
+                keccak256(transferProof.eth.output),
+                spender,
+            );
             expect(loggedApprovalStatusA).to.equal(true);
 
             const proofRejectSignature = signer.signApprovalForProof(
@@ -416,9 +425,18 @@ contract('ZkAssetOwnable', (accounts) => {
                 privateKey,
             );
 
-            await zkAssetOwnableTest.callApproveProof(JOIN_SPLIT_PROOF, transferProof.eth.outputs, spender, false, proofRejectSignature);
+            await zkAssetOwnableTest.callApproveProof(
+                JOIN_SPLIT_PROOF,
+                transferProof.eth.outputs,
+                spender,
+                false,
+                proofRejectSignature,
+            );
 
-            const loggedApprovalStatusB = await zkAssetOwnable.confidentialApproved.call(keccak256(transferProof.eth.output), spender);
+            const loggedApprovalStatusB = await zkAssetOwnable.confidentialApproved.call(
+                keccak256(transferProof.eth.output),
+                spender,
+            );
             expect(loggedApprovalStatusB).to.equal(false);
         });
     });

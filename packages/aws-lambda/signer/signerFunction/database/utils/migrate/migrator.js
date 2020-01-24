@@ -16,29 +16,31 @@ module.exports = (sequelize) => {
                 sequelize.getQueryInterface(), // queryInterface
                 sequelize.constructor, // DataTypes
                 () => {
-                    throw new Error('Migration tried to use old style "done" callback. Please upgrade to "umzug" and return a promise instead.');
+                    throw new Error(
+                        'Migration tried to use old style "done" callback. Please upgrade to "umzug" and return a promise instead.',
+                    );
                 },
             ],
             path: migrationsPath,
             pattern: /\.js$/,
         },
-    
+
         logging: () => {
             // console.log('migration logging')
             // console.log.apply(null, arguments);
         },
     });
-    
+
     const logUmzugEvent = (eventName) => {
         return (name) => {
-            console.log(`${ name } ${ eventName }`);
-        }
-    }
-  
+            console.log(`${name} ${eventName}`);
+        };
+    };
+
     umzug.on('migrating', logUmzugEvent('migrating'));
-    umzug.on('migrated',  logUmzugEvent('migrated'));
+    umzug.on('migrated', logUmzugEvent('migrated'));
     umzug.on('reverting', logUmzugEvent('reverting'));
-    umzug.on('reverted',  logUmzugEvent('reverted'));
+    umzug.on('reverted', logUmzugEvent('reverted'));
 
     return umzug;
 };

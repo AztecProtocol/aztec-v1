@@ -8,7 +8,6 @@ const validateNetworkId = require('./validateNetworkId');
 const isGanacheNetwork = require('./isGanacheNetwork');
 const getNetworkConfig = require('./getNetworkConfig');
 
-
 module.exports = {
     registerContracts,
     isTrue,
@@ -19,4 +18,4 @@ module.exports = {
     validateNetworkId,
     isGanacheNetwork,
     getNetworkConfig,
-}
+};
