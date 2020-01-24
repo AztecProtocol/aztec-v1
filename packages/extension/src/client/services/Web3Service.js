@@ -11,24 +11,30 @@ class ClientWeb3Service extends Web3Service {
 
     subscribeProfileListeners() {
         if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => {
-                this.eventListeners.notify('profile');
+            // TODO - to be removed
+            // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
+            window.ethereum.autoRefreshOnNetworkChange = false;
+
+            window.ethereum.on('accountsChanged', (accounts) => {
+                this.eventListeners.notify('profile', 'accountsChanged', accounts);
             });
 
-            window.ethereum.on('networkChanged', () => {
-                this.eventListeners.notify('profile');
+            window.ethereum.on('chainChanged', (chainId) => {
+                this.eventListeners.notify('profile', 'chainChanged', chainId);
+            });
+
+            // TODO - shall be removed in the future with autoRefreshOnNetworkChange
+            window.ethereum.on('networkChanged', (networkId) => {
+                this.eventListeners.notify('profile', 'networkChanged', networkId);
             });
         }
-        // TODO - other providers
     }
 
     bindProfileChange(cb, allowMultiple = false) {
         if (!allowMultiple) {
             this.eventListeners.removeAll('profile');
         }
-        if (!this.eventListeners.isListening('profile', cb)) {
-            this.eventListeners.add('profile', cb);
-        }
+        this.eventListeners.add('profile', cb);
     }
 
     unbindProfileChange(cb) {

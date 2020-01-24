@@ -1,14 +1,15 @@
 import asyncMap from '~/utils/asyncMap';
 import NoteService from '~/background/services/NoteService';
 import Web3Service from '~/helpers/Web3Service';
-import settings from '~/background/utils/settings';
 import getViewingKeyFromMetadata from './getViewingKeyFromMetadata';
 
 export default async function pickNotesFromBalance(args) {
     const {
-        assetId,
-        amount,
+        assetAddress,
         owner,
+        equalTo,
+        greaterThan,
+        lessThan,
         numberOfNotes,
     } = args;
     const {
@@ -18,13 +19,15 @@ export default async function pickNotesFromBalance(args) {
         },
     } = Web3Service;
 
-    const notes = await NoteService.pick(
+    const notes = await NoteService.fetch(
         networkId,
         owner || currentAddress,
-        assetId,
-        amount,
+        assetAddress,
         {
-            numberOfNotes: numberOfNotes || await settings('NUMBER_OF_INPUT_NOTES'),
+            equalTo,
+            greaterThan,
+            lessThan,
+            numberOfNotes,
         },
     );
 

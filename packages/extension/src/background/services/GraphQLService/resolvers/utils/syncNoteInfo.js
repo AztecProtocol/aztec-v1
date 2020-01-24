@@ -1,22 +1,10 @@
 import {
-    metadata,
-} from '@aztec/note-access';
-import {
-    METADATA_AZTEC_DATA_LENGTH,
-} from '~/config/constants';
-import decodePrivateKey from '~/background/utils/decodePrivateKey';
-import {
-    fromHexString,
-} from '~/utils/encryptedViewingKey';
-import {
-    valueFromViewingKey,
-} from '~/utils/note';
-import {
     argsError,
 } from '~/utils/error';
 import Web3Service from '~/helpers/Web3Service';
 import Note from '~/background/database/models/note';
 import syncLatestNoteOnChain from './syncLatestNoteOnChain';
+import getViewingKeyFromMetadata from './getViewingKeyFromMetadata';
 
 export default async function syncNoteInfo(args, ctx) {
     const {
@@ -48,27 +36,10 @@ export default async function syncNoteInfo(args, ctx) {
         });
     }
 
-    const metadataObj = metadata(note.metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2));
-    const {
-        viewingKey,
-    } = metadataObj.getAccess(userAddress) || {};
-
-    let value;
-    if (viewingKey) {
-        const {
-            keyStore,
-            session: {
-                pwDerivedKey,
-            },
-        } = ctx;
-
-        const privateKey = decodePrivateKey(keyStore, pwDerivedKey);
-        const realViewingKey = fromHexString(viewingKey).decrypt(privateKey);
-        value = valueFromViewingKey(realViewingKey);
-    }
+    const viewingKey = await getViewingKeyFromMetadata(note.metadata);
 
     return {
         ...note,
-        value,
+        viewingKey,
     };
 }

@@ -11,7 +11,7 @@ const dataProperties = [
     'status',
 ];
 
-export default class Note {
+export default class ZkNote {
     constructor({
         id,
     } = {}) {

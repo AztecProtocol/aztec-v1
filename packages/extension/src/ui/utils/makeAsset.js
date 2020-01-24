@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import {
     getAsset,
 } from '~/ui/apis/asset';
@@ -12,6 +13,11 @@ export default async function makeAsset(asset) {
 
     if (typeof asset === 'string') {
         assetObj = await getAsset(asset);
+    } else if (!(asset.scalingFactor instanceof BN)) {
+        assetObj = {
+            ...asset,
+            scalingFactor: new BN(asset.scalingFactor),
+        };
     }
 
     const {

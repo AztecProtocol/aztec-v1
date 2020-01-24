@@ -26,7 +26,9 @@ export default class EventListeners {
     }
 
     add = (eventName, cb) => {
-        if (!this.validateEventName(eventName, 'add')) return;
+        if (!this.validateEventName(eventName, 'add')
+            || this.isListening(eventName, cb)
+        ) return;
 
         this.eventListeners[eventName].push(cb);
     };
@@ -47,9 +49,9 @@ export default class EventListeners {
         this.eventListeners[eventName] = [];
     };
 
-    notify = (eventName, params) => {
+    notify = (eventName, ...params) => {
         const listeners = this.eventListeners[eventName];
-        listeners.forEach(cb => cb(params));
+        listeners.forEach(cb => cb(...params));
     };
 
     isListening = (eventName, cb) => this.eventListeners[eventName]
