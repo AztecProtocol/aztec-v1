@@ -7,7 +7,7 @@
 const { constants } = require('@aztec/dev-utils');
 const BN = require('bn.js');
 const EC = require('elliptic');
-const { hexToNumberString, randomHex, padLeft } = require('web3-utils');
+const { randomHex } = require('web3-utils');
 
 const decodePoint = require('./decodePoint');
 
@@ -55,14 +55,14 @@ const hYHex = '0x12c4f960e11ba5bf0184d3433a98127e90a6fdb2d1f12cdb369a5d387086662
  *  @default
  *  7673901602397024137095011250362199966051872585513276903826533215767972925880
  */
-bn128.H_X = new BN('7673901602397024137095011250362199966051872585513276903826533215767972925880', 10);
+bn128.H_X = new BN(hXHex, 16);
 
 /** Y-Coordinate of AZTEC's second generator point 'h'. Created from odd-valued root of (H_X^{3} + 3)
  *  @type {BN}
  *  @default
  *  8489654445897228341090914135473290831551238522473825886865492707826370766375
  */
-bn128.H_Y = new BN('8489654445897228341090914135473290831551238522473825886865492707826370766375', 10);
+bn128.H_Y = new BN(hYHex, 16);
 
 bn128.h = bn128.curve.point(bn128.H_X, bn128.H_Y);
 

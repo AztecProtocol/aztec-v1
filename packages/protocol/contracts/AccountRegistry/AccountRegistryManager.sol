@@ -28,12 +28,12 @@ contract AccountRegistryManager is Ownable, Modifiers {
     event UpgradeAccountRegistry(address indexed proxyAddress, address indexed newBehaviourAddress);
 
     /**
-     * @dev Constructor which deploys the proxy contract. The proxy contract stores all state for the 
+     * @dev Constructor which deploys the proxy contract. The proxy contract stores all state for the
      * AccountRegistry contract system
      * @param initialBehaviourAddress - address of the behaviour contract to be linked to be initialised
-     * when the proxy is deployed 
+     * when the proxy is deployed
      * @param aceAddress - address of ACE
-     * @param trustedGSNSignerAddress - address that is being trusted to produce signatures to approve 
+     * @param trustedGSNSignerAddress - address that is being trusted to produce signatures to approve
      * relayed GSN calls
      */
     constructor(
@@ -51,12 +51,12 @@ contract AccountRegistryManager is Ownable, Modifiers {
         proxyAddress = address(new AdminUpgradeabilityProxy(
             initialBehaviourAddress,
             adminAddress,
-            initialiseData 
+            initialiseData
         ));
 
         uint256 initialEpoch = 1;
         updateLatestEpoch(initialEpoch);
-    
+
         emit CreateProxy(proxyAddress, adminAddress);
     }
 
@@ -70,8 +70,7 @@ contract AccountRegistryManager is Ownable, Modifiers {
 
     /**
      * @dev Update the `latestEpoch` storage variable.
-     * @param newEpochNum - epoch number with which to update the 
-     * latestEpoch
+     * @param newEpochNum - epoch number with which to update the latestEpoch
      */
     function updateLatestEpoch(uint256 newEpochNum) internal {
         latestEpoch = newEpochNum;
@@ -86,15 +85,15 @@ contract AccountRegistryManager is Ownable, Modifiers {
         address newBehaviourAddress
     ) public onlyOwner checkZeroAddress(newBehaviourAddress) {
         require(ProxyAdmin(proxyAddress).admin() == address(this), 'this is not the admin of the proxy');
-        
+
         uint256 newBehaviourEpoch = IAccountRegistryBehaviour(newBehaviourAddress).epoch();
         require(
-            newBehaviourEpoch > latestEpoch, 
+            newBehaviourEpoch > latestEpoch,
             'expected new registry to be of epoch greater than existing registry'
         );
 
         ProxyAdmin(proxyAddress).upgradeTo(newBehaviourAddress);
-        
+
         updateLatestEpoch(newBehaviourEpoch);
         emit UpgradeAccountRegistry(proxyAddress, newBehaviourAddress);
     }

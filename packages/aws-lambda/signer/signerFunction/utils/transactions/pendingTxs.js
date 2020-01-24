@@ -1,17 +1,9 @@
 const {
-    types: {
-        Transactions,
-    },
+    types: { Transactions },
 } = require('../../database/models');
-const {
-    TRANSACTION_STATUS,
-    TRANSACTION_TYPE,
-} = require('../../config/constants');
+const { TRANSACTION_STATUS, TRANSACTION_TYPE } = require('../../config/constants');
 
-
-module.exports = async ({
-    dappId,
-}) => {
+module.exports = async ({ dappId }) => {
     return Transactions.findAll({
         attributes: ['signatureHash'],
         where: {

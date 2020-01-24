@@ -167,7 +167,7 @@ describe('Signer', () => {
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
 
-            const joinSplitProof = {eth: {outputs: randomHex(20), output: randomHex(20)}};
+            const joinSplitProof = { eth: { outputs: randomHex(20), output: randomHex(20) } };
 
             const signature = signer.signApprovalForProof(
                 verifyingContract,

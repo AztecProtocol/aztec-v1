@@ -31,21 +31,22 @@ contract AZTECAccountRegistry is LibEIP712 {
             keccak256("2"),
             address(this)
         ));
-            return keccak256(abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(
-                    SIGNATURE_TYPEHASH,
-                    _AZTECAccount.account,
-                    keccak256(bytes(_AZTECAccount.linkedPublicKey)
-            )))));
+
+        return keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                SIGNATURE_TYPEHASH,
+                _AZTECAccount.account,
+                keccak256(bytes(_AZTECAccount.linkedPublicKey)
+        )))));
     }
 
 
     event RegisterExtension(
         address indexed account,
         bytes linkedPublicKey,
-        bytes spendingPublicKey 
+        bytes spendingPublicKey
     );
 
     event LogAddress(
@@ -61,7 +62,8 @@ contract AZTECAccountRegistry is LibEIP712 {
     );
 
     /**
-        * @dev function to validate the user is either the sender or has submitted an EIP712 signature from the account they
+        * @dev function to validate the user is either the sender or has submitted an EIP712 signature from
+        * the account they
         * are registering in the AZTEC extension.
     **/
 
@@ -71,7 +73,7 @@ contract AZTECAccountRegistry is LibEIP712 {
      * sender is the ethereum address in question        *
      * @param _account - address the address to which a public key is being         registered
      * @param _linkedPublicKey - the public key the sender wishes to link to the _account
-     * @param _signature - an EIP712 compatible signature of the acount & public key 
+     * @param _signature - an EIP712 compatible signature of the acount & public key
      */
 
     function registerAZTECExtension(

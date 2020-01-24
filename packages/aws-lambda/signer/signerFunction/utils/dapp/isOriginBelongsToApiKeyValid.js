@@ -1,32 +1,22 @@
 const {
-    types: {
-        Dapps,
-    },
+    types: { Dapps },
 } = require('../../database/models');
-const {
-    log,
-    errorLog,
-} = require('../../utils/log');
+const { log, errorLog } = require('../../utils/log');
 
-
-module.exports = async ({
-    origin,
-    apiKey,
-}) => {
+module.exports = async ({ origin, apiKey }) => {
     log(`ORIGIN: ${origin}`);
-    if(!origin) {
+    if (!origin) {
         return false;
     }
 
     try {
-        const data = await Dapps.findOne({ where: {
-            apiKey,
-        } });
+        const data = await Dapps.findOne({
+            where: {
+                apiKey,
+            },
+        });
 
-        const {
-            origin: resultOrigin,
-            isEnabled,
-        } = data || {};
+        const { origin: resultOrigin, isEnabled } = data || {};
         return isEnabled && origin.includes(resultOrigin);
     } catch (e) {
         errorLog('isAPIKeyValid error', e);
