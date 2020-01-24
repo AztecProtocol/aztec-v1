@@ -29,7 +29,7 @@ const stepBatchSign = {
         {
             type: 'sign',
             name: 'approve',
-            run: apis.note.batchSignNotes,
+            run: apis.note.signProof,
         },
     ],
 };

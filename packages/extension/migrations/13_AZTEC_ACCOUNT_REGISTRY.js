@@ -2,7 +2,7 @@ const { fundRecipient } = require('@openzeppelin/gsn-helpers');
 const { toWei } = require('web3-utils');
 const Web3 = require('web3');
 
-const AZTECAccountRegistry = artifacts.require('./AZTECAccountRegistryGSN.sol');
+const AZTECAccountRegistry = artifacts.require('@aztec/protocol/contracts/Behaviour20200106.sol');
 const ACE = artifacts.require('./ACE.sol');
 
 

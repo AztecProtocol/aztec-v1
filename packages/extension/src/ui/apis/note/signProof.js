@@ -1,18 +1,17 @@
 import ConnectionService from '~/ui/services/ConnectionService';
 
-export default async function batchSignNotes({
-    inputNotes,
+export default async function signProof({
+    proof,
     sender,
     assetAddress,
 }) {
-    const noteHashes = inputNotes.map(({ noteHash }) => noteHash) || [];
     const {
         signature,
         error,
     } = await ConnectionService.post({
-        action: 'metamask.eip712.batchSignNotes',
+        action: 'metamask.eip712.signProof',
         data: {
-            noteHashes,
+            proofHash: proof.hash,
             assetAddress,
             sender,
         },
@@ -25,9 +24,9 @@ export default async function batchSignNotes({
     }
 
     return {
-        noteHashes,
+        proofHash: proof.hash,
         spender: sender,
-        spenderApprovals: noteHashes.map(() => true),
+        approval: true,
         signature,
     };
 }
