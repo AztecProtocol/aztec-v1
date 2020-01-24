@@ -8,7 +8,7 @@ const BN = require('bn.js');
 const fetch = require('cross-fetch');
 
 const setup = {
-    POINTS_DB_URL: 'https://aztec-ignition.s3-eu-west-2.amazonaws.com/MAIN%20IGNITION/range_proofs/',
+    POINTS_DB_URL: 'https://dy3hqfmba2gtj.cloudfront.net/',
 };
 
 /**
