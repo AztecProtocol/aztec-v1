@@ -13,11 +13,15 @@ export default async function updateNoteMetadata({
     } = note;
 
     const response = await ConnectionService.post({
-        action: 'metamask.zkAsset.updateNoteMetadata',
+        action: 'metamask.send',
         data: {
-            assetAddress,
-            noteHash,
-            metadata,
+            contract: 'ZkAsset',
+            at: assetAddress,
+            method: 'updateNoteMetaData',
+            data: [
+                noteHash,
+                metadata,
+            ],
         },
     });
 

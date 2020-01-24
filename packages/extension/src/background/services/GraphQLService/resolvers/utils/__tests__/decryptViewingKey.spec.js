@@ -25,12 +25,12 @@ describe('decryptViewingKey', () => {
 
     it('get credentials from storage to decrypt input viewingKey', async () => {
         await storyOf('ensureDomainPermission');
-        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey);
         expect(response).toBe(note.realViewingKey);
     });
 
     it('return empty string if there is no keyStore in storage', async () => {
-        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey);
         expect(response).toBe('');
 
         const keyStore = await AuthService.getKeyStore();
@@ -41,7 +41,7 @@ describe('decryptViewingKey', () => {
         await storyOf('ensureDomainPermission');
         await AuthService.logout();
 
-        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey);
         expect(response).toBe('');
 
         const keyStore = await AuthService.getKeyStore();
@@ -59,7 +59,7 @@ describe('decryptViewingKey', () => {
                 pwDerivedKey: new Uint8Array([0, 1, 2, 3]),
             }));
 
-        const response = await decryptViewingKey(note.viewingKey, userAccount.address);
+        const response = await decryptViewingKey(note.viewingKey);
         expect(response).toBe('');
 
         getPwDeriveKeySpy.mockRestore();

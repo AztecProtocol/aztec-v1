@@ -1,55 +1,69 @@
 import {
     errorLog,
 } from '~/utils/log';
-import manager from './helpers/SubscriptionManager';
+import SubscriptionManager from './helpers/SubscriptionManager';
+
+const manager = new SubscriptionManager();
 
 export default {
-    grantSubscription: ({
-        requestId,
-        type,
-        assetId,
-        noteId,
-    }) => {
+    reset: () => manager.reset(),
+    grantSubscription: (
+        {
+            clientId,
+            type,
+            id,
+        },
+        callback,
+    ) => {
         if (!manager.isValidType(type)) {
             errorLog(`Cannot grant subscription of type '${type}'.`);
             return false;
         }
 
-        manager.grantSubscription({
-            requestId,
+        return manager.grantSubscription({
+            clientId,
             type,
-            id: assetId || noteId,
+            id,
+            callback,
         });
-
-        return true;
     },
-    subscribe(port) {
-        const {
-            name: requestId,
-        } = port;
-        if (!manager.isValidRequest(requestId)) return;
-
-        manager.addSubscriber(port, requestId);
-    },
-    unsubscribe(port) {
-        const {
-            name: requestId,
-        } = port;
-        if (!manager.isValidRequest(requestId)) return;
-
-        manager.removeSubscribers(port, requestId);
-    },
-    onChange: (type, id, data) => {
+    removeSubscription: ({
+        clientId,
+        type,
+        id,
+    }, callback) => manager.removeSubscription({
+        clientId,
+        type,
+        id,
+        callback,
+    }),
+    removeAllSubscriptions: clientId => manager.removeAllSubscriptions(clientId),
+    notifySubscribers: (type, id, value, forceNotify = false) => {
         if (!manager.isValidType(type)) {
-            errorLog(`Cannot trigger subscription of type '${type}'.`);
+            errorLog(`Cannot notify subscriber of type '${type}'.`);
             return;
         }
 
-        const subscribers = manager.getSubscribers(type, id);
-        subscribers.forEach((port) => {
-            if (!port.error) {
-                port.postMessage(data);
-            }
+        const {
+            prevValue,
+            subscribers,
+        } = manager.getSubscription(type, id) || {};
+        if (!subscribers
+            || (!forceNotify && value === prevValue)
+        ) {
+            return;
+        }
+
+        manager.updateSubscriptionValue(type, id, value);
+        subscribers.forEach(({
+            clientId,
+            callback,
+        }) => {
+            callback(value, {
+                clientId,
+                type,
+                id,
+            });
         });
     },
 };

@@ -8,18 +8,19 @@ export default async function fetchNote(noteHash) {
 
     const { note } = await apollo.query(`
         note(id: "${noteHash}", currentAddress: "${currentUser.address}") {
-                value
-                status
-                noteHash
-                metadata
-                asset {
-                    address
-                    linkedTokenAddress
-                }
-                owner {
-                    address
-                }
-                decryptedViewingKey
+            value
+            status
+            noteHash
+            metadata
+            asset {
+                address
+                scalingFactor
+                linkedTokenAddress
+            }
+            owner {
+                address
+            }
+            decryptedViewingKey
         }
     `) || {};
 

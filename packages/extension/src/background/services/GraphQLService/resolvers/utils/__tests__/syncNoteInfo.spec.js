@@ -32,7 +32,6 @@ const generateMetadataStr = (access) => {
 
 describe('syncNoteInfo', () => {
     let testNote;
-    let noteValue;
     let noteData;
 
     const noteModelSpy = jest.spyOn(noteModel, 'get')
@@ -46,18 +45,17 @@ describe('syncNoteInfo', () => {
         const {
             hash,
             viewingKey,
-            value,
         } = testNote;
         const metadata = generateMetadataStr({
             address: userAccount.address,
             viewingKey,
         });
 
-        noteValue = value;
         noteData = {
             noteHash: hash,
-            metadata,
             owner: userAccount,
+            metadata,
+            viewingKey,
         };
     });
 
@@ -76,10 +74,7 @@ describe('syncNoteInfo', () => {
             id: noteData.noteHash,
         });
 
-        expect(response).toEqual({
-            ...noteData,
-            value: noteValue,
-        });
+        expect(response).toEqual(noteData);
 
         expect(noteModelSpy).toHaveBeenCalledTimes(1);
         expect(syncNoteSpy).not.toHaveBeenCalled();
@@ -101,16 +96,13 @@ describe('syncNoteInfo', () => {
             id: noteData.noteHash,
         });
 
-        expect(response).toEqual({
-            ...noteData,
-            value: noteValue,
-        });
+        expect(response).toEqual(noteData);
 
         expect(noteModelSpy).toHaveBeenCalledTimes(1);
         expect(syncNoteSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('return a note with undefined value if the user does not have access', async () => {
+    it('return a note with empty viewingKey if the user does not have access', async () => {
         const {
             viewingKey,
         } = testNote;
@@ -131,7 +123,7 @@ describe('syncNoteInfo', () => {
         expect(response).toEqual({
             ...noteData,
             metadata,
-            value: undefined,
+            viewingKey: '',
         });
 
         expect(noteModelSpy).toHaveBeenCalledTimes(1);
