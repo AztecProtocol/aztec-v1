@@ -6,11 +6,15 @@ export default async function publicApprove({
     assetAddress,
 }) {
     const response = await ConnectionService.post({
-        action: 'metamask.ace.publicApprove',
+        action: 'metamask.send',
         data: {
-            amount,
-            proofHash: proof.hash,
-            assetAddress,
+            contract: 'ACE',
+            method: 'publicApprove',
+            data: [
+                assetAddress,
+                proof.hash,
+                amount,
+            ],
         },
     });
 

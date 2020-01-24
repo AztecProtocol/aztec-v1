@@ -1,8 +1,10 @@
 import BigInt from 'apollo-type-bigint';
 import fetchAsset from './utils/fetchAsset';
-import getViewingKeyFromMetadata from './utils/getViewingKeyFromMetadata';
-import getDecryptedViewingKeyFromMetadata from './utils/getDecryptedViewingKeyFromMetadata';
 import getAssetBalance from './utils/getAssetBalance';
+import decryptViewingKey from './utils/decryptViewingKey';
+import {
+    valueFromViewingKey,
+} from '~/utils/note';
 
 const getAsset = async (parentAsset) => {
     if (typeof parentAsset !== 'string') {
@@ -21,11 +23,14 @@ export default {
     Note: {
         asset: async ({ asset }) => getAsset(asset),
         owner: async ({ owner }) => (typeof owner === 'string' && ({ address: owner })) || owner,
-        viewingKey: async ({ metadata }) => getViewingKeyFromMetadata(metadata),
-        decryptedViewingKey: async ({ metadata, owner }) => getDecryptedViewingKeyFromMetadata(
-            metadata,
-            owner,
-        ),
+        decryptedViewingKey: async ({ viewingKey }) => decryptViewingKey(viewingKey),
+        value: async ({ viewingKey }) => {
+            const decryptedViewingKey = await decryptViewingKey(viewingKey);
+            if (!decryptedViewingKey) {
+                return null;
+            }
+            return valueFromViewingKey(decryptedViewingKey);
+        },
     },
     Asset: {
         balance: async ({ address }) => getAssetBalance(address),

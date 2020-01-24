@@ -3,13 +3,13 @@ import gql from 'graphql-tag';
 export default function fetchNotesFromBalanceQuery(requestedFields) {
     return gql`
         query fetchNotesFromBalance(
-              $assetAddress: String!
-              $equalTo: Int
-              $greaterThan: Int
-              $lessThan: Int
-              $numberOfNotes: Int
-              $domain: String!
-              $currentAddress: String!
+            $assetAddress: String!
+            $equalTo: Int
+            $greaterThan: Int
+            $lessThan: Int
+            $numberOfNotes: Int
+            $domain: String!
+            $currentAddress: String!
         ) {
             fetchNotesFromBalance(
                 assetAddress: $assetAddress

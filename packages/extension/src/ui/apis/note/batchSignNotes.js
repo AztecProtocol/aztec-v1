@@ -1,6 +1,6 @@
 import ConnectionService from '~/ui/services/ConnectionService';
 
-export default async function signNotes({
+export default async function batchSignNotes({
     inputNotes,
     sender,
     assetAddress,
@@ -8,6 +8,7 @@ export default async function signNotes({
     const noteHashes = inputNotes.map(({ noteHash }) => noteHash) || [];
     const {
         signature,
+        error,
     } = await ConnectionService.post({
         action: 'metamask.eip712.batchSignNotes',
         data: {
@@ -16,6 +17,12 @@ export default async function signNotes({
             sender,
         },
     });
+
+    if (error) {
+        return {
+            error,
+        };
+    }
 
     return {
         noteHashes,

@@ -4,11 +4,15 @@ import {
 } from '~/utils/encryptedViewingKey';
 import decodePrivateKey from '~/background/utils/decodePrivateKey';
 
-export default async function decryptViewingKey(viewingKey, ownerAddress) {
+export default async function decryptViewingKey(viewingKey) {
+    if (!viewingKey) {
+        return '';
+    }
+
     const keyStore = await AuthService.getKeyStore();
     const {
         pwDerivedKey,
-    } = await AuthService.getSession(ownerAddress) || {};
+    } = await AuthService.getSession() || {};
     if (!keyStore || !pwDerivedKey) {
         return '';
     }

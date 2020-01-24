@@ -35,9 +35,30 @@ const uiResolvers = {
                 query: 'note',
                 data: {
                     ...args,
+                    requestedFields: `
+                        noteHash
+                        metadata
+                        viewingKey
+                        status
+                        asset {
+                            address
+                        }
+                    `,
                 },
             });
-            return noteResponse.note;
+
+            const {
+                note,
+            } = noteResponse || {};
+
+            if (!note) {
+                return null;
+            }
+
+            return {
+                ...note,
+                asset: note.asset.address,
+            };
         },
     },
 };
