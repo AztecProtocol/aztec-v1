@@ -1,4 +1,4 @@
-import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
+import AZTECAccountRegistryGSNContract from '~contracts/Behaviour20200106.json';
 import ACE from '~contracts/ACE.json';
 import IZkAsset from '~contracts/IZkAsset.json';
 import IERC20 from '~contracts/IERC20Mintable.json';
