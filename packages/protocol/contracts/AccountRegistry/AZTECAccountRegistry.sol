@@ -46,7 +46,7 @@ contract AZTECAccountRegistry is LibEIP712 {
     event RegisterExtension(
         address indexed account,
         bytes linkedPublicKey,
-        bytes spendingPublicKey 
+        bytes spendingPublicKey
     );
 
     event LogAddress(
@@ -72,7 +72,7 @@ contract AZTECAccountRegistry is LibEIP712 {
      * sender is the ethereum address in question        *
      * @param _account - address the address to which a public key is being         registered
      * @param _linkedPublicKey - the public key the sender wishes to link to the _account
-     * @param _signature - an EIP712 compatible signature of the acount & public key 
+     * @param _signature - an EIP712 compatible signature of the acount & public key
      */
 
     function registerAZTECExtension(

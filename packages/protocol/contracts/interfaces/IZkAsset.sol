@@ -13,17 +13,18 @@ interface IZkAsset {
      * to spend multiple notes on their behalf. This allows a batch approval of notes
      * to be performed, rather than individually for each note via confidentialApprove().
      *
-     * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
+    * @param _proofId - data of proof
+     * @param _proofOutputs - data of proof
      * @param _spender - address being approved to spend the notes
-     * @param _spenderApprovals - array of approvals, defining whether the _spender being approved or revoked permission
-     * to spend the relevant note. True if approval granted, false if revoked
-     * @param _batchSignature - ECDSA signature over the notes, approving them to be spent
+     * @param _approval - bool (true if approving, false if revoking)
+     * @param _proofSignature - ECDSA signature over the proof, approving it to be spent
      */
-    function batchConfidentialApprove(
-        bytes32[] calldata _noteHashes,
+    function approveProof(
+        uint24 _proofId,
+        bytes calldata _proofOutputs,
         address _spender,
-        bool[] calldata _spenderApprovals,
-        bytes calldata _batchSignature
+        bool _approval,
+        bytes calldata _proofSignature
     ) external;
 
     /**
