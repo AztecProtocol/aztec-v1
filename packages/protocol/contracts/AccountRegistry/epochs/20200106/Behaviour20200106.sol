@@ -40,13 +40,13 @@ contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNReci
     * @dev Perform a confidential transfer, mediated by a smart contracrt
     * @param _registryOwner - address of the note registry owner
     * @param _proofData - data generated from proof construction, which is used to validate the proof
-    * @param _noteHashes - array of hashes of notes involved in the transfer. A noteHash is a unique 
+    * @param _noteHashes - array of hashes of notes involved in the transfer. A noteHash is a unique
     * identifier of a particular note
     * @param _spender - address that will be spending the notes
     * @param _spenderApprovals - array of booleans, matched one to one with the _noteHashes array. Each
-    * boolean determines whether the particular note is being approved for spending, or if permission 
+    * boolean determines whether the particular note is being approved for spending, or if permission
     * is being revoked
-    * @param _batchSignature - EIP712 signature used to approve/revoke permission for the array of notes
+    * @param _proofSignature - EIP712 signature used to approve/revoke permission for the proof
     * to be spent
     */
     function confidentialTransferFrom(
@@ -55,12 +55,13 @@ contract Behaviour20200106 is BehaviourBase20200106, TransactionRelayer, GSNReci
         bytes32[] memory _noteHashes,
         address _spender,
         bool[] memory _spenderApprovals,
-        bytes memory _batchSignature
+        bytes memory _proofSignature
     ) public {
-        if(_batchSignature.length != 0) {
-            IZkAsset(_registryOwner).batchConfidentialApprove(_noteHashes, _spender,_spenderApprovals, _batchSignature);
+        bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
+
+        if(_proofSignature.length != 0) {
+            IZkAsset(_registryOwner).approveProof(JOIN_SPLIT_PROOF, proofOutputs, _spender, true, _proofSignature);
         }
-        (bytes memory proofOutputs) = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
         IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
     }
 

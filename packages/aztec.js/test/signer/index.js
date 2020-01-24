@@ -162,21 +162,18 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
-        it('should recover publicKey from signNotesForBatchConfidentialApprove() sig params', async () => {
+        it('should recover publicKey from signApprovalForProof() sig params', async () => {
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
-            const spenderApprovals = [true, true];
-            const testNoteA = await note.create(publicKey, 10);
-            const testNoteB = await note.create(publicKey, 30);
 
-            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
+            const joinSplitProof = {eth: {outputs: randomHex(20), output: randomHex(20)}};
 
-            const signature = signer.signNotesForBatchConfidentialApprove(
+            const signature = signer.signApprovalForProof(
                 verifyingContract,
-                noteHashes,
+                joinSplitProof.eth.outputs,
                 spender,
-                spenderApprovals,
+                true,
                 privateKey,
             );
 
@@ -184,13 +181,15 @@ describe('Signer', () => {
             const s = Buffer.from(signature.slice(66, 130), 'hex');
             const v = parseInt(signature.slice(130, 132), 16);
 
+            const proofHash = keccak256(joinSplitProof.eth.outputs);
+
             // Reconstruct messageHash, to use in ecrecover
             const domain = signer.generateZKAssetDomainParams(verifyingContract);
-            const schema = constants.eip712.MULTIPLE_NOTE_SIGNATURE;
+            const schema = constants.eip712.PROOF_SIGNATURE;
             const message = {
-                noteHashes,
+                proofHash,
                 spender,
-                spenderApprovals,
+                approval: true,
             };
 
             const { encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
@@ -249,16 +248,28 @@ describe('Signer', () => {
             expect(aztecSignature).to.equal(metaMaskSignature);
         });
 
-        it('signNotesForBatchConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
+        it('signApprovalForProof() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
-            const spenderApprovals = [true, true];
             const verifyingContract = randomHex(20);
-            const testNoteValue = 10;
-            const testNoteA = await note.create(aztecAccount.publicKey, testNoteValue);
-            const testNoteB = await note.create(aztecAccount.publicKey, testNoteValue);
 
-            const noteHashes = [testNoteA.noteHash, testNoteB.noteHash];
+            const joinSplitProof = randomHex(20);
+
+            const aztecSignature = signer.signApprovalForProof(
+                verifyingContract,
+                joinSplitProof,
+                spender,
+                true,
+                aztecAccount.privateKey,
+            );
+
+            const proofHash = keccak256(joinSplitProof);
+
+            const message = {
+                proofHash,
+                spender,
+                approval: true,
+            };
 
             const metaMaskTypedData = {
                 domain: {
@@ -267,10 +278,10 @@ describe('Signer', () => {
                     verifyingContract,
                 },
                 types: {
-                    MultipleNoteSignature: [
-                        { name: 'noteHashes', type: 'bytes32[]' },
+                    ProofSignature: [
+                        { name: 'proofHash', type: 'bytes32' },
                         { name: 'spender', type: 'address' },
-                        { name: 'spenderApprovals', type: 'bool[]' },
+                        { name: 'approval', type: 'bool' },
                     ],
                     EIP712Domain: [
                         { name: 'name', type: 'string' },
@@ -278,21 +289,9 @@ describe('Signer', () => {
                         { name: 'verifyingContract', type: 'address' },
                     ],
                 },
-                primaryType: 'MultipleNoteSignature',
-                message: {
-                    noteHashes,
-                    spender,
-                    spenderApprovals,
-                },
+                primaryType: 'ProofSignature',
+                message,
             };
-
-            const aztecSignature = signer.signNotesForBatchConfidentialApprove(
-                verifyingContract,
-                noteHashes,
-                spender,
-                spenderApprovals,
-                aztecAccount.privateKey,
-            );
 
             // eth-sig-util is the MetaMask signing package
             const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {

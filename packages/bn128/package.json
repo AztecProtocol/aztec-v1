@@ -50,7 +50,7 @@
   },
   "scripts": {
     "build:dev": "webpack --config ./webpack.dev.js",
-    "build": "PROD=false ./build.sh",
+    "build": "webpack --config ./webpack.prod.js",
     "build:prod": "webpack --config ./webpack.prod.js",
     "clean": "shx rm -rf ./dist || true",
     "lint": "eslint --ignore-path ../../.eslintignore .",
