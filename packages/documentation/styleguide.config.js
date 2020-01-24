@@ -161,55 +161,55 @@ module.exports = {
     // },
     {
       name: 'SDK',
-      content: 'styleguide/categories/JavaScriptSDK/overview.md',
+      content: 'styleguide/categories/WebSDK/overview.md',
       components: [],
       exampleMode: 'shown',
       pagePerSection: true,
       sections: [
         {
           name: 'Getting started',
-          content: 'styleguide/categories/JavaScriptSDK/gettingStarted.md',
+          content: 'styleguide/categories/WebSDK/gettingStarted.md',
           exampleMode: 'hide',
         },
         {
           name: 'window',
-          content: 'styleguide/categories/JavaScriptSDK/Window/index.md',
+          content: 'styleguide/categories/WebSDK/Window/index.md',
           exampleMode: 'hide',
         },
         {
           name: 'zkAsset',
-          content: 'styleguide/categories/JavaScriptSDK/ZkAsset/index.md',
+          content: 'styleguide/categories/WebSDK/ZkAsset/index.md',
           exampleMode: 'shown',
           sections: [
             {
               name: 'zkAsset.balance',
-              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/balance.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/balance.md',
               exampleMode: 'hide',
             },
             {
               name: 'zkAsset.fetchNotesFromBalance',
-              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/fetchNotesFromBalance.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md',
               exampleMode: 'hide',
             },
             {
               name: 'zkAsset.deposit',
-              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/deposit.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/deposit.md',
               usageMode: 'expand',
               pagePerSection: false,
             },
             {
               name: 'zkAsset.send',
-              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/send.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/send.md',
               exampleMode: 'hide',
             },
             {
               name: 'zkAsset.withdraw',
-              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/withdraw.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/withdraw.md',
               exampleMode: 'hide',
             },
             {
               name: 'zkAsset.refresh',
-              content: 'styleguide/categories/JavaScriptSDK/ZkAsset/refresh.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/refresh.md',
               exampleMode: 'hide',
             },
           ],
@@ -218,28 +218,28 @@ module.exports = {
         },
         {
           name: 'note',
-          content: 'styleguide/categories/JavaScriptSDK/Note/index.md',
+          content: 'styleguide/categories/WebSDK/Note/index.md',
           exampleMode: 'hide',
           pagePerSection: true,
           sections: [
             {
               name: 'note.value',
-              content: 'styleguide/categories/JavaScriptSDK/Note/value.md',
+              content: 'styleguide/categories/WebSDK/Note/value.md',
               exampleMode: 'hide',
             },
             {
               name: 'note.grantNoteAccess',
-              content: 'styleguide/categories/JavaScriptSDK/Note/grantNoteAccess.md',
+              content: 'styleguide/categories/WebSDK/Note/grantNoteAccess.md',
               exampleMode: 'hide',
             },
             {
               name: 'note.owner',
-              content: 'styleguide/categories/JavaScriptSDK/Note/owner.md',
+              content: 'styleguide/categories/WebSDK/Note/owner.md',
               exampleMode: 'hide',
             },
             {
               name: 'note.hash',
-              content: 'styleguide/categories/JavaScriptSDK/Note/hash.md',
+              content: 'styleguide/categories/WebSDK/Note/hash.md',
               exampleMode: 'hide',
             },
           ],

@@ -258,7 +258,6 @@ class Preview extends React.Component {
               }}
             />
           </Block>
-          )}
           <Block
             background="grey-darker"
             style={{
