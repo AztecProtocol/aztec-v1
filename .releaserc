@@ -1,5 +1,5 @@
 {
-    "branch": "feat-build-pipeline",
+    "branch": "develop",
     "plugins": [
         ["@semantic-release/commit-analyzer", {
               "preset": "angular",
