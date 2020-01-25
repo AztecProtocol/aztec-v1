@@ -35,11 +35,9 @@ export default async function setupNetworkConfig({
             isProxyContract,
         } = getContract(contractName, networkId);
         let proxyAddress;
-        console.log({ isProxyContract });
         if (isProxyContract) {
             proxyAddress = await getProxyAddress(contractName, networkId);
         }
-        console.log({ proxyAddress });
         return {
             name: contractName,
             config: contract,
