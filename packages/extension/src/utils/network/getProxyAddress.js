@@ -28,7 +28,7 @@ export default async function getProxyContract(contractName, networkId) {
     console.log(config, networks);
     console.log({ managerAddress, managerContractName });
 
-    Web3Service.registerInterface(config, {name: managerContractName});
+    Web3Service.registerInterface(config, { name: managerContractName });
 
     const proxyAddress = await Web3Service
         .useContract(managerContractName)
