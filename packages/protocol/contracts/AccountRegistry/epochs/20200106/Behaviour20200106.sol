@@ -124,33 +124,31 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
     }
 
     /**
-     * @dev Perform a confidential transfer, mediated by a smart contracrt
-     * @param _registryOwner - address of the note registry owner
-     * @param _proofData - data generated from proof construction, which is used to validate the proof
-     * @param _noteHashes - array of hashes of notes involved in the transfer. A noteHash is a unique
-     * identifier of a particular note
-     * @param _spender - address that will be spending the notes
-     * @param _spenderApprovals - array of booleans, matched one to one with the _noteHashes array. Each
-     * boolean determines whether the particular note is being approved for spending, or if permission
-     * is being revoked
-     * @param _proofSignature - EIP712 signature used to approve/revoke permission for the proof
-     * to be spent
-     */
-     function confidentialTransferFrom(
-         address _registryOwner,
-         bytes memory _proofData,
-         bytes32[] memory _noteHashes,
-         address _spender,
-         bool[] memory _spenderApprovals,
-         bytes memory _proofSignature
-     ) public {
-         bytes memory proofOutputs = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
+    * @dev Perform a confidential transfer, mediated by a smart contracrt
+    * @param _proofId - uint24 proofId 
+    * @param _registryOwner - address of the note registry owner
+    * @param _proofData - data generated from proof construction, which is used to validate the proof
+    * identifier of a particular note
+    * @param _spender - address that will be spending the notes
+    * boolean determines whether the particular note is being approved for spending, or if permission
+    * is being revoked
+    * @param _proofSignature - EIP712 signature used to approve/revoke permission for the proof
+    * to be spent
+    */
+    function confidentialTransferFrom(
+        uint24 _proofId,
+        address _registryOwner,
+        bytes memory _proofData,
+        address _spender,
+        bytes memory _proofSignature
+    ) public {
+        bytes memory proofOutputs = ace.validateProof(_proofId, address(this), _proofData);
 
-         if(_proofSignature.length != 0) {
-             IZkAsset(_registryOwner).approveProof(JOIN_SPLIT_PROOF, proofOutputs, _spender, true, _proofSignature);
-         }
-         IZkAsset(_registryOwner).confidentialTransferFrom(JOIN_SPLIT_PROOF, proofOutputs.get(0));
-     }
+        if(_proofSignature.length != 0) {
+            IZkAsset(_registryOwner).approveProof(_proofId, proofOutputs, _spender, true, _proofSignature);
+        }
+        IZkAsset(_registryOwner).confidentialTransferFrom(_proofId, proofOutputs.get(0));
+    }
 
     /**
     * @dev Deposit ERC20 tokens into zero-knowledge notes in a transaction mediated via the GSN. Called by a user

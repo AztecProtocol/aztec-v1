@@ -11,8 +11,8 @@ const {
 export default ({
     proofHash,
     spender,
-    approval,
     assetAddress,
+    approval,
 }) => {
     const domain = signer.generateZKAssetDomainParams(assetAddress);
     const schema = eip712.PROOF_SIGNATURE;
@@ -22,6 +22,7 @@ export default ({
         spender,
         approval,
     };
+
     const data = JSON.stringify({
         ...schema,
         message,

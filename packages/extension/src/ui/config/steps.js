@@ -9,6 +9,7 @@ import SignNotes from '~/ui/views/SignNotes';
 import SendConfirm from '~/ui/views/SendConfirm';
 import apis from '~uiModules/apis';
 
+
 export const sendSteps = {
     gsn: [
         {
