@@ -109,14 +109,14 @@ const handleAction = async (action, params) => {
             const {
                 assetAddress,
                 proofHash,
-                sender,
+                spender,
             } = params;
 
             const noteSchema = signProof({
                 assetAddress,
                 proofHash,
                 approval: true,
-                spender: sender,
+                spender,
             });
             const method = 'eth_signTypedData_v4';
             const { result } = await Web3Service.sendAsync({
@@ -128,6 +128,7 @@ const handleAction = async (action, params) => {
             response = {
                 signature: result,
             };
+
             break;
         }
         default:

@@ -1,3 +1,4 @@
+import { keccak256 } from 'web3-utils';
 import ConnectionService from '~/ui/services/ConnectionService';
 
 export default async function signProof({
@@ -5,15 +6,18 @@ export default async function signProof({
     sender,
     assetAddress,
 }) {
+    const proofHash = keccak256(proof.eth.outputs);
+
     const {
         signature,
         error,
     } = await ConnectionService.post({
         action: 'metamask.eip712.signProof',
         data: {
-            proofHash: proof.hash,
+            proofHash,
             assetAddress,
-            sender,
+            spender: sender,
+            approval: true,
         },
     });
 
@@ -24,7 +28,7 @@ export default async function signProof({
     }
 
     return {
-        proofHash: proof.hash,
+        proofHash,
         spender: sender,
         approval: true,
         signature,
