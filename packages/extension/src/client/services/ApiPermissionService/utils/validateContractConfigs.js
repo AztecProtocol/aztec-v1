@@ -2,7 +2,6 @@ import ApiError from '~/client/utils/ApiError';
 
 const requiredContracts = [
     'ACE',
-    'AZTECAccountRegistry',
 ];
 
 export default function validateContractConfigs(contractsConfig, networkId) {

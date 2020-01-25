@@ -1,25 +1,25 @@
-import AZTECAccountRegistryGSNContract from '~contracts/Behaviour20200106.json';
+import AccountRegistry from '~contracts/Behaviour20200106.json';
+import AccountRegistryManager from '~contracts/AccountRegistryManager.json';
 import ACE from '~contracts/IAZTEC.json';
 import IERC20 from '~contracts/IERC20Mintable.json';
 import IZkAsset from '~contracts/IZkAsset.json';
 
 export default {
-    AZTECAccountRegistry: {
-        name: 'AZTECAccountRegistry',
+    AccountRegistry: {
+        name: 'AccountRegistry',
         events: {
             registerExtension: 'RegisterExtension',
         },
-        config: AZTECAccountRegistryGSNContract,
+        config: AccountRegistry,
         networks: {
             4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
         },
     },
-    AZTECAccountRegistryGSN: {
-        name: 'AZTECAccountRegistryGSN',
+    AccountRegistryManager: {
+        name: 'AccountRegistryManager',
         events: {
-            registerExtension: 'RegisterExtension',
         },
-        config: AZTECAccountRegistryGSNContract,
+        config: AccountRegistryManager,
         networks: {
             4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
         },

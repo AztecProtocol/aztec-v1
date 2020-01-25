@@ -1,8 +1,4 @@
-const AZTECAccountRegistry = {
-    registerExtension: 'RegisterExtension',
-};
-
-const AZTECAccountRegistryGSN = {
+const AccountRegistry = {
     registerExtension: 'RegisterExtension',
 };
 
@@ -17,8 +13,7 @@ const ZkAsset = {
 };
 
 export {
-    AZTECAccountRegistry,
-    AZTECAccountRegistryGSN,
+    AccountRegistry,
     ACE,
     ZkAsset,
 };

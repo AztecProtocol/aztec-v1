@@ -20,7 +20,7 @@ export default async function registerAccountOnChain({
     } = secp256k1.accountFromPrivateKey(privateKey);
 
     const transactionData = {
-        contract: 'AZTECAccountRegistry',
+        contract: 'AccountRegistry',
         method: 'registerAZTECExtension',
         data: [
             address,

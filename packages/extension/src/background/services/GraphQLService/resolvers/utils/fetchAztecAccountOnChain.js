@@ -1,6 +1,6 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
-    AZTECAccountRegistry,
+    AccountRegistry,
 } from '~/config/contractEvents';
 
 export default async function fetchAztecAccountOnChain({
@@ -18,8 +18,8 @@ export default async function fetchAztecAccountOnChain({
     let error;
     try {
         const data = await Web3Service
-            .useContract('AZTECAccountRegistry')
-            .events(AZTECAccountRegistry.registerExtension)
+            .useContract('AccountRegistry')
+            .events(AccountRegistry.registerExtension)
             .where(options);
 
         const accounts = data.map(({

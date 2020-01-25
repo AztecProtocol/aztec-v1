@@ -37,7 +37,7 @@ const Deposit = ({
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
         const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
 
-        let allowanceSpender = Web3Service.getAddress('AZTECAccountRegistry');
+        let allowanceSpender = Web3Service.getAddress('AccountRegistry');
         let publicOwner = allowanceSpender;
         let sender = publicOwner;
         let steps = depositSteps[isGSNAvailable ? 'gsn' : 'metamask'];
