@@ -11,7 +11,7 @@ export default async function confidentialTransferFrom({
 }) {
     const proofData = proof.encodeABI(assetAddress);
     const response = await ConnectionService.sendTransaction({
-        contract: 'AZTECAccountRegistry',
+        contract: 'AccountRegistry',
         method: 'confidentialTransferFrom',
         data: [
             assetAddress,

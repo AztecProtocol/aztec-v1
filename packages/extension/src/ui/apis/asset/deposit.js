@@ -13,7 +13,7 @@ export default async function deposit({
     const proofData = proof.encodeABI(assetAddress);
 
     const transactionData = {
-        contract: 'AZTECAccountRegistry',
+        contract: 'AccountRegistry',
         method: 'deposit',
         data: [
             assetAddress,
