@@ -86,9 +86,6 @@
         "webpack-merge": "^4.2.2"
     },
     "scripts": {
-        "build:dev": "truffle compile --all && webpack --config webpack.dev.js",
-        "build": "yarn build:prod",
-        "build:prod": "truffle compile --all && webpack --config webpack.prod.js",
         "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
         "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh extension",
