@@ -94,7 +94,6 @@
         "lint": "eslint ./ --color",
         "start:ganache": "babel-node scripts/run start",
         "start:ui": "babel-node ./src/ui/mock/devServer",
-        "test": "jest ./src",
         "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
         "watch": "webpack --watch --config webpack.dev.js"
