@@ -1,0 +1,68 @@
+{
+    "abi": [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "proxyAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "adminAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "CreateProxy",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "proxyAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "newBehaviourAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "UpgradeAccountRegistry",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "initialBehaviourAddress",
+                    "type": "address"
+                }
+            ],
+            "name": "deployProxy",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "upgradeAccountRegistry",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.19"
+}

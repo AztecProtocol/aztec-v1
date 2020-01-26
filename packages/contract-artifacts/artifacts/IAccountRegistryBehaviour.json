@@ -1,0 +1,109 @@
+{
+    "abi": [
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "epoch",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "LogAddress",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "message",
+                    "type": "string"
+                }
+            ],
+            "name": "LogString",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "sig",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "LogBytes",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "account",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "linkedPublicKey",
+                    "type": "bytes"
+                },
+                {
+                    "indexed": false,
+                    "name": "spendingPublicKey",
+                    "type": "bytes"
+                }
+            ],
+            "name": "RegisterExtension",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "_account",
+                    "type": "address"
+                },
+                {
+                    "name": "_linkedPublicKey",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_spendingPublicKey",
+                    "type": "bytes"
+                },
+                {
+                    "name": "_signature",
+                    "type": "bytes"
+                }
+            ],
+            "name": "registerAZTECExtension",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.19"
+}

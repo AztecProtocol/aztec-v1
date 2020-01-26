@@ -1,0 +1,174 @@
+{
+    "abi": [
+        {
+            "constant": true,
+            "inputs": [
+                {
+                    "name": "relay",
+                    "type": "address"
+                },
+                {
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "name": "encodedFunction",
+                    "type": "bytes"
+                },
+                {
+                    "name": "transactionFee",
+                    "type": "uint256"
+                },
+                {
+                    "name": "gasPrice",
+                    "type": "uint256"
+                },
+                {
+                    "name": "gasLimit",
+                    "type": "uint256"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint256"
+                },
+                {
+                    "name": "approvalData",
+                    "type": "bytes"
+                },
+                {
+                    "name": "maxPossibleCharge",
+                    "type": "uint256"
+                }
+            ],
+            "name": "acceptRelayedCall",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "name": "",
+                    "type": "bytes"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "oldRelayHub",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "name": "newRelayHub",
+                    "type": "address"
+                }
+            ],
+            "name": "RelayHubChanged",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "initialize",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "setDefaultRelayHub",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "getHubAddr",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "relayHubVersion",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "context",
+                    "type": "bytes"
+                }
+            ],
+            "name": "preRelayedCall",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "context",
+                    "type": "bytes"
+                },
+                {
+                    "name": "success",
+                    "type": "bool"
+                },
+                {
+                    "name": "actualCharge",
+                    "type": "uint256"
+                },
+                {
+                    "name": "preRetVal",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "postRelayedCall",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x",
+    "schemaVersion": "3.0.19"
+}
