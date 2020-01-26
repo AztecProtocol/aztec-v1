@@ -318,7 +318,7 @@ contract('Account registry - relayer functionality', (accounts) => {
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(0);
     });
 
-    it.only('should delegate an address to perform confidentialTransferFrom()', async () => {
+    it('should allow a delegated address to spend notes in confidentialTransferFrom()', async () => {
         // Perform deposit first to create output notes
         const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();
         const publicOwner = registryContract.address;
@@ -333,7 +333,7 @@ contract('Account registry - relayer functionality', (accounts) => {
         });
 
         // Use created output notes in a confidentialTransferFrom() call
-        const delegatedAddress = accounts[3];
+        const delegatedAddress = registryContract.address;
         const transferInputNotes = outputNotes;
         const transferOutputNotes = await generateOutputNotes([25, 25]);
         const transferPublicValue = 0;
@@ -347,10 +347,6 @@ contract('Account registry - relayer functionality', (accounts) => {
             transferPublicOwner,
         );
         const transferProofData = transferProof.encodeABI(zkAsset.address);
-
-        const noteHashes = transferOutputNotes.map((transferOutputNote) => transferOutputNote.noteHash);
-
-        const spenderApprovals = [true, true];
         const delegatedAddressPrivateKey = getOwnerPrivateKey();
 
         const proofSignature = signer.signApprovalForProof(
@@ -364,11 +360,8 @@ contract('Account registry - relayer functionality', (accounts) => {
         const { receipt } = await registryContract.confidentialTransferFrom(
             zkAsset.address,
             transferProofData,
-            noteHashes,
             delegatedAddress,
-            spenderApprovals,
             proofSignature,
-            { from: delegatedAddress },
         );
         expect(receipt.status).to.equal(true);
 
@@ -378,6 +371,52 @@ contract('Account registry - relayer functionality', (accounts) => {
                 expect(status.toNumber()).to.equal(1);
                 expect(noteOwner).to.equal(userAddress);
             }),
+        );
+    });
+
+    it('should not allow a non-delegated address to spend notes using confidentialTransferFrom()', async () => {
+        // Perform deposit first to create output notes
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();
+        const publicOwner = registryContract.address;
+
+        const depositProof = new JoinSplitProof(inputNotes, outputNotes, registryContract.address, publicValue, publicOwner);
+        await erc20.approve(registryContract.address, depositAmount, { from: userAddress });
+
+        const depositProofData = depositProof.encodeABI(zkAsset.address);
+        const depositProofHash = depositProof.hash;
+        await registryContract.deposit(zkAsset.address, userAddress, depositProofHash, depositProofData, depositAmount, {
+            from: userAddress,
+        });
+
+        // Use created output notes in a confidentialTransferFrom() call
+        const delegatedAddress = registryContract.address;
+        const transferInputNotes = outputNotes;
+        const transferOutputNotes = await generateOutputNotes([25, 25]);
+        const transferPublicValue = 0;
+        const transferPublicOwner = publicOwner;
+
+        const transferProof = new JoinSplitProof(
+            transferInputNotes,
+            transferOutputNotes,
+            delegatedAddress,
+            transferPublicValue,
+            transferPublicOwner,
+        );
+        const transferProofData = transferProof.encodeABI(zkAsset.address);
+        const delegatedAddressPrivateKey = getOwnerPrivateKey();
+
+        const proofSignature = signer.signApprovalForProof(
+            zkAsset.address,
+            transferProof.eth.outputs,
+            delegatedAddress,
+            true,
+            delegatedAddressPrivateKey,
+        );
+
+        const notDelegatedAddress = randomHex(20);
+        await truffleAssert.reverts(
+            registryContract.confidentialTransferFrom(zkAsset.address, transferProofData, notDelegatedAddress, proofSignature),
+            'revert the note owner did not sign this proof',
         );
     });
 });
