@@ -1,0 +1,10 @@
+{
+    "abi": [],
+    "bytecode": "0x6080604052348015600f57600080fd5b50603580601d6000396000f3fe6080604052600080fdfea165627a7a72305820d2b1f941fbd927d904956d994b994cdf77793ae2b1fd11adb307ca20569ae6350029",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+    },
+    "deployedBytecode": "0x6080604052600080fdfea165627a7a72305820d2b1f941fbd927d904956d994b994cdf77793ae2b1fd11adb307ca20569ae6350029",
+    "schemaVersion": "3.0.19"
+}
