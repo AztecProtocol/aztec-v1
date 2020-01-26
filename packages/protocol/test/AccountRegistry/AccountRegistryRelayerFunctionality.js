@@ -1,5 +1,5 @@
 /* global artifacts, contract, expect */
-const { JoinSplitProof, ProofUtils } = require('aztec.js');
+const { JoinSplitProof, ProofUtils, signer } = require('aztec.js');
 const secp256k1 = require('@aztec/secp256k1');
 const truffleAssert = require('truffle-assertions');
 const { randomHex } = require('web3-utils');
@@ -9,7 +9,7 @@ const ERC20Mintable = artifacts.require('ERC20Mintable');
 const ZkAsset = artifacts.require('ZkAssetOwnable');
 const TestAccountMapping = artifacts.require('./test/TestAccountMapping');
 
-const { generateOutputNotes, generateDepositProofInputs } = require('../helpers/AccountRegistry');
+const { generateOutputNotes, generateDepositProofInputs, getOwnerPrivateKey } = require('../helpers/AccountRegistry');
 
 contract('Account registry - relayer functionality', (accounts) => {
     const [userAddress, anotherUserAddress, senderAddress] = accounts;
@@ -62,8 +62,8 @@ contract('Account registry - relayer functionality', (accounts) => {
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(depositAmount);
 
         await Promise.all(
-            outputNotes.map(async (note) => {
-                const { status, noteOwner } = await ace.getNote(zkAsset.address, note.noteHash);
+            outputNotes.map(async (individualNote) => {
+                const { status, noteOwner } = await ace.getNote(zkAsset.address, individualNote.noteHash);
                 expect(status.toNumber()).to.equal(1);
                 expect(noteOwner).to.equal(userAddress);
             }),
@@ -101,8 +101,8 @@ contract('Account registry - relayer functionality', (accounts) => {
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(depositAmount);
 
         await Promise.all(
-            outputNotes.map(async (note) => {
-                const { status, noteOwner } = await ace.getNote(zkAsset.address, note.noteHash);
+            outputNotes.map(async (individualNote) => {
+                const { status, noteOwner } = await ace.getNote(zkAsset.address, individualNote.noteHash);
                 expect(status.toNumber()).to.equal(1);
                 expect(noteOwner).to.equal(userAddress);
             }),
@@ -152,8 +152,8 @@ contract('Account registry - relayer functionality', (accounts) => {
         expect((await erc20.balanceOf(registryContract.address)).toNumber()).to.equal(0);
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(depositAmount);
 
-        const [note] = outputNotes;
-        const { status, noteOwner } = await ace.getNote(zkAsset.address, note.noteHash);
+        const [individualNote] = outputNotes;
+        const { status, noteOwner } = await ace.getNote(zkAsset.address, individualNote.noteHash);
         expect(status.toNumber()).to.equal(1);
         expect(noteOwner).to.equal(userAddress);
     });
@@ -177,7 +177,7 @@ contract('Account registry - relayer functionality', (accounts) => {
         const moreOutputNotes = [...outputNotes, ...extraOutputNotes];
         const morePublicValue = ProofUtils.getPublicValue(
             [],
-            moreOutputNotes.map((note) => note.k),
+            moreOutputNotes.map((individualNote) => individualNote.k),
         );
         const moreValueProof = new JoinSplitProof(
             inputNotes,
@@ -231,10 +231,10 @@ contract('Account registry - relayer functionality', (accounts) => {
         expect((await erc20.balanceOf(registryContract.address)).toNumber()).to.equal(0);
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(0);
 
-        const [note] = outputNotes;
+        const [individualNote] = outputNotes;
         let noNoteError = null;
         try {
-            await ace.getNote(zkAsset.address, note.noteHash);
+            await ace.getNote(zkAsset.address, individualNote.noteHash);
         } catch (e) {
             noNoteError = e;
         }
@@ -309,12 +309,75 @@ contract('Account registry - relayer functionality', (accounts) => {
 
         await truffleAssert.reverts(
             registryContract.deposit(...depositParams, { from: anotherUserAddress }),
-            'VM Exception while processing transaction: revert Cannot deposit note to other account if sender is not the same as owner',
+            'VM Exception while processing transaction: revert Cannot deposit individualNote to other account if sender is not the same as owner',
         );
 
         expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount);
         expect((await erc20.balanceOf(anotherUserAddress)).toNumber()).to.equal(initialAmount);
         expect((await erc20.balanceOf(registryContract.address)).toNumber()).to.equal(0);
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(0);
+    });
+
+    it.only('should delegate an address to perform confidentialTransferFrom()', async () => {
+        // Perform deposit first to create output notes
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();
+        const publicOwner = registryContract.address;
+
+        const depositProof = new JoinSplitProof(inputNotes, outputNotes, registryContract.address, publicValue, publicOwner);
+        await erc20.approve(registryContract.address, depositAmount, { from: userAddress });
+
+        const depositProofData = depositProof.encodeABI(zkAsset.address);
+        const depositProofHash = depositProof.hash;
+        await registryContract.deposit(zkAsset.address, userAddress, depositProofHash, depositProofData, depositAmount, {
+            from: userAddress,
+        });
+
+        // Use created output notes in a confidentialTransferFrom() call
+        const delegatedAddress = accounts[3];
+        const transferInputNotes = outputNotes;
+        const transferOutputNotes = await generateOutputNotes([25, 25]);
+        const transferPublicValue = 0;
+        const transferPublicOwner = publicOwner;
+
+        const transferProof = new JoinSplitProof(
+            transferInputNotes,
+            transferOutputNotes,
+            delegatedAddress,
+            transferPublicValue,
+            transferPublicOwner,
+        );
+        const transferProofData = transferProof.encodeABI(zkAsset.address);
+
+        const noteHashes = transferOutputNotes.map((transferOutputNote) => transferOutputNote.noteHash);
+
+        const spenderApprovals = [true, true];
+        const delegatedAddressPrivateKey = getOwnerPrivateKey();
+
+        const proofSignature = signer.signApprovalForProof(
+            zkAsset.address,
+            transferProof.eth.outputs,
+            delegatedAddress,
+            true,
+            delegatedAddressPrivateKey,
+        );
+
+        const { receipt } = await registryContract.confidentialTransferFrom(
+            zkAsset.address,
+            transferProofData,
+            noteHashes,
+            delegatedAddress,
+            spenderApprovals,
+            proofSignature,
+            { from: delegatedAddress },
+        );
+        expect(receipt.status).to.equal(true);
+
+        await Promise.all(
+            transferOutputNotes.map(async (individualNote) => {
+                const { status, noteOwner } = await ace.getNote(zkAsset.address, individualNote.noteHash);
+                expect(status.toNumber()).to.equal(1);
+                expect(noteOwner).to.equal(userAddress);
+            }),
+        );
     });
 });
