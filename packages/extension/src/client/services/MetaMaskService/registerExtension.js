@@ -31,8 +31,6 @@ export default ({
     linkedPublicKey,
 }) => {
     const accountRegistryContract = Web3Service.contract('AccountRegistry');
-    console.log(accountRegistryContract);
-
 
     const domainData = {
         name: 'AccountRegistry',
