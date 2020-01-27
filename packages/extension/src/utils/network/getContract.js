@@ -7,6 +7,7 @@ export default function getContract(contractName, networkId) {
     const {
         config,
         networks,
+        isProxyContract,
     } = contracts[contractName] || {};
     if (!config) {
         warnLog(`Contract ${contractName} is not defined in '~/config/contracts'`);
@@ -20,5 +21,6 @@ export default function getContract(contractName, networkId) {
     return {
         contract: config,
         address: address || '',
+        isProxyContract,
     };
 }

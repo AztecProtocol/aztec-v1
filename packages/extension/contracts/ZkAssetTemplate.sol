@@ -12,5 +12,8 @@ import "@aztec/protocol/contracts/ERC1724/ZkAssetMintable.sol";
 import "@aztec/protocol/contracts/ERC1724/ZkAssetBurnable.sol";
 import "@aztec/protocol/contracts/ERC1724/ZkAssetOwnable.sol";
 import "@aztec/protocol/contracts/ERC1724/ZkAsset.sol";
+import "@aztec/protocol/contracts/AccountRegistry/epochs/20200106/Behaviour20200106.sol";
+import "@aztec/protocol/contracts/AccountRegistry/AccountRegistryManager.sol";
+
 
 contract Dummy {}

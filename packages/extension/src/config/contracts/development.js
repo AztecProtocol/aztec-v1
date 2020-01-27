@@ -1,31 +1,27 @@
-import AZTECAccountRegistryGSNContract from '~contracts/AZTECAccountRegistryGSN.json';
+import AccountRegistry from '~contracts/Behaviour20200106.json';
+import AccountRegistryManager from '~contracts/AccountRegistryManager.json';
 import ACE from '~contracts/ACE.json';
-import IZkAsset from '~contracts/IZkAsset.json';
 import IERC20 from '~contracts/IERC20Mintable.json';
+import IZkAsset from '~contracts/IZkAsset.json';
 
 export default {
-    AZTECAccountRegistry: {
-        name: 'AZTECAccountRegistry',
+    AccountRegistry: {
+        name: 'AccountRegistry',
         events: {
             registerExtension: 'RegisterExtension',
         },
-        config: AZTECAccountRegistryGSNContract,
+        config: AccountRegistry,
         networks: {
-            // 4: '0x101a74Cc8544160037B4Ff43839f4EB24698b10B',
-            4: '0x01642306d1E929c62781e406F53eE49aEA57cC9e',
-            3: '0x4eb8f9e84e371d9A7Be5b8d6F32044eD9D9498c5',
+            4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
         },
+        isProxyContract: true,
+        managerContractName: 'AccountRegistryManager',
     },
-    AZTECAccountRegistryGSN: {
-        name: 'AZTECAccountRegistryGSN',
-        events: {
-            registerExtension: 'RegisterExtension',
-        },
-        config: AZTECAccountRegistryGSNContract,
+    AccountRegistryManager: {
+        name: 'AccountRegistryManager',
+        config: AccountRegistryManager,
         networks: {
-            // 4: '0x101a74Cc8544160037B4Ff43839f4EB24698b10B',
-            4: '0x01642306d1E929c62781e406F53eE49aEA57cC9e',
-            3: '0x4eb8f9e84e371d9A7Be5b8d6F32044eD9D9498c5',
+            4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
         },
     },
     ACE: {
@@ -35,8 +31,7 @@ export default {
         },
         config: ACE,
         networks: {
-            4: '0xFDd232eE75268D7Bc300ABFf960e45be78E1f245',
-            3: '0x59Bb9FEF8dA35054886F0461248392F847010F3a',
+            4: '0x66279F02E177867067895C6CF8bD6A02C03f2206',
         },
     },
     ZkAsset: {

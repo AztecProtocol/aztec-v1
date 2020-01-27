@@ -31,7 +31,12 @@ const generateDepositProofInputs = async ({ outputNoteValues = [20, 30], publicK
     };
 };
 
+const getOwnerPrivateKey = () => {
+    return noteOwnerAccount.privateKey;
+};
+
 module.exports = {
     generateOutputNotes,
     generateDepositProofInputs,
+    getOwnerPrivateKey,
 };

@@ -30,10 +30,10 @@ export default ({
     address,
     linkedPublicKey,
 }) => {
-    const accountRegistryContract = Web3Service.contract('AZTECAccountRegistry');
+    const accountRegistryContract = Web3Service.contract('AccountRegistry');
 
     const domainData = {
-        name: 'AZTECAccountRegistry',
+        name: 'AccountRegistry',
         version: '2',
         verifyingContract: accountRegistryContract.address,
     };

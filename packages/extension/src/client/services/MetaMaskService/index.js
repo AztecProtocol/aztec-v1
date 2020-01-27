@@ -6,7 +6,7 @@ import {
 } from '~/config/constants';
 import registerExtension from './registerExtension';
 import signNote from './signNote';
-import batchSignNotes from './batchSignNotes';
+import signProof from './signProof';
 
 const handleAction = async (action, params) => {
     let response = {};
@@ -105,20 +105,18 @@ const handleAction = async (action, params) => {
             };
             break;
         }
-        case 'metamask.eip712.batchSignNotes': {
+        case 'metamask.eip712.signProof': {
             const {
                 assetAddress,
-                noteHashes,
-                sender,
+                proofHash,
+                spender,
             } = params;
 
-            const spenderApprovals = noteHashes.map(() => true);
-
-            const noteSchema = batchSignNotes({
+            const noteSchema = signProof({
                 assetAddress,
-                noteHashes,
-                spenderApprovals,
-                spender: sender,
+                proofHash,
+                approval: true,
+                spender,
             });
             const method = 'eth_signTypedData_v4';
             const { result } = await Web3Service.sendAsync({
@@ -130,6 +128,7 @@ const handleAction = async (action, params) => {
             response = {
                 signature: result,
             };
+
             break;
         }
         default:

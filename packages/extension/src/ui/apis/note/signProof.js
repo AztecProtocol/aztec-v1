@@ -1,20 +1,23 @@
+import { keccak256 } from 'web3-utils';
 import ConnectionService from '~/ui/services/ConnectionService';
 
-export default async function batchSignNotes({
-    inputNotes,
+export default async function signProof({
+    proof,
     sender,
     assetAddress,
 }) {
-    const noteHashes = inputNotes.map(({ noteHash }) => noteHash) || [];
+    const proofHash = keccak256(proof.eth.outputs);
+
     const {
         signature,
         error,
     } = await ConnectionService.post({
-        action: 'metamask.eip712.batchSignNotes',
+        action: 'metamask.eip712.signProof',
         data: {
-            noteHashes,
+            proofHash,
             assetAddress,
-            sender,
+            spender: sender,
+            approval: true,
         },
     });
 
@@ -25,9 +28,9 @@ export default async function batchSignNotes({
     }
 
     return {
-        noteHashes,
+        proofHash,
         spender: sender,
-        spenderApprovals: noteHashes.map(() => true),
+        approval: true,
         signature,
     };
 }
