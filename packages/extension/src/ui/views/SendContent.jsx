@@ -131,11 +131,13 @@ class SendContent extends StepContentHelper {
     render() {
         const {
             steps,
-            currentStep,
         } = this.props;
+        const {
+            name: currentStepName,
+            showTaskList,
+        } = this.getCurrentStep();
         const stepConfig = this.getStepConfig();
         const blockConfig = this.getBlockConfig();
-        const currentStepName = steps[currentStep].name;
         const showSignature = isStepAfter(steps, currentStepName, 'approve')
             && !isStepAfter(steps, currentStepName, 'confirm');
 
@@ -151,7 +153,7 @@ class SendContent extends StepContentHelper {
                         {this.renderSignature()}
                     </Block>
                 )}
-                {(currentStep === steps.length - 1) && this.renderTaskList()}
+                {showTaskList && this.renderTaskList()}
             </StepContent>
         );
     }

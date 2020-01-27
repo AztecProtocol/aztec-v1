@@ -165,7 +165,7 @@ class WithdrawContent extends StepContentHelper {
                         {this.renderSignature()}
                     </Block>
                 )}
-                {step.blockStyle === 'sealed' && this.renderTaskList()}
+                {step.showTaskList && this.renderTaskList()}
             </StepContent>
         );
     }

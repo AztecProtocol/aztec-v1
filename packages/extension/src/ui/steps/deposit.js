@@ -47,6 +47,7 @@ const stepTransferViaGSN = {
             titleKey: 'transaction.step.relay',
         },
     ],
+    showTaskList: true,
     submitTextKey: 'deposit.approve.submit',
 };
 
@@ -71,6 +72,7 @@ const stepSend = {
             titleKey: 'transaction.confirmed',
         },
     ],
+    showTaskList: true,
     submitTextKey: 'deposit.send.submit',
 };
 
@@ -95,8 +97,9 @@ const stepSendViaGSN = {
             titleKey: 'transaction.confirmed',
         },
     ],
-    submitTextKey: 'transaction.send.submit',
+    showTaskList: true,
     autoStart: true,
+    submitTextKey: 'transaction.send.submit',
 };
 
 export default {

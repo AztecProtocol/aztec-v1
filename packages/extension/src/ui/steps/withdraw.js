@@ -56,6 +56,7 @@ const stepSend = {
             titleKey: 'transaction.confirmed',
         },
     ],
+    showTaskList: true,
     autoStart: true,
     submitTextKey: 'transaction.send.submit',
 };
@@ -81,6 +82,7 @@ const stepSendViaGSN = {
             titleKey: 'transaction.confirmed',
         },
     ],
+    showTaskList: true,
     autoStart: true,
     submitTextKey: 'transaction.send.submit',
 };
