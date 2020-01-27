@@ -6,4 +6,4 @@ module.exports = {
     balance,
     isOriginBelongsToApiKeyValid,
     getDappInfo,
-}
+};

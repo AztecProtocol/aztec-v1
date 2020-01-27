@@ -1,5 +1,5 @@
 {
-    "branch": "master",
+    "branch": "develop",
     "plugins": [
         ["@semantic-release/commit-analyzer", {
               "preset": "angular",
@@ -12,6 +12,9 @@
         }],
         ["@semantic-release/release-notes-generator", {
                 "preset": "angular"
+        }],
+        ["@semantic-release/exec", {
+            "publishCmd": "../monorepo-scripts/aws/aws-bundle-deploy.sh",
         }],
         ["@semantic-release/npm"],
         ["@semantic-release/git", {

@@ -5,7 +5,7 @@ const common = require('./webpack.common.js');
 
 const commonProduction = {
     mode: 'production',
-    devtool: 'source-map',
+    devtool: '',
     optimization: {
         minimize: true,
         usedExports: true,
@@ -46,6 +46,15 @@ const prodApiConfig = merge(common, commonProduction, {
             }),
         ],
         concatenateModules: false,
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendors',
+                    chunks: 'all',
+                },
+            },
+        },
     },
 });
 

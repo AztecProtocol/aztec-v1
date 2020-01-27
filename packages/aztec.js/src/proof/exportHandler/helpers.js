@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
-const { errors } = require('@aztec/dev-utils');
-const catalogue = require('./catalogue');
+import { errors } from '@aztec/dev-utils';
+
+import * as catalogue from './catalogue';
 
 const { AztecError } = errors;
 
@@ -25,4 +26,4 @@ helpers.validateEpochNum = function(proofType, epochNum) {
     }
 };
 
-module.exports = helpers;
+export default helpers;

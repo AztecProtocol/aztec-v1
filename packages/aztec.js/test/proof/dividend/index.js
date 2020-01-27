@@ -1,9 +1,8 @@
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
-
-const { DividendProof } = require('../../../src/proof');
-const note = require('../../../src/note');
+import secp256k1 from '@aztec/secp256k1';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import { DividendProof } from '../../../src/proof';
+import * as note from '../../../src/note';
 
 describe('Dividend Proof', () => {
     let notionalNote = {};

@@ -1,8 +1,5 @@
 module.exports = {
-    getConfig: ({
-        networkId,
-        database,
-    }) => ({
+    getConfig: ({ networkId, database }) => ({
         username: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: database || `${process.env.DB_DATABASE_PREFIX}_${networkId}`,

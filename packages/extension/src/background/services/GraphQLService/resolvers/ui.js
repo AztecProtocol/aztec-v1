@@ -9,7 +9,7 @@ import base from './base';
 const uiResolvers = {
     Account: {
         linkedPublicKey: async ({ address }) => Web3Service
-            .useContract('AZTECAccountRegistry')
+            .useContract('AccountRegistry')
             .method('accountMapping')
             .call(address),
     },

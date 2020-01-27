@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
-const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
-const { PRIVATE_RANGE } = require('./base/types');
+import { getProof, setDefaultEpoch, helpers } from './exportHandler';
+
+import proofTypes from './base/types';
 /**
  * Export the PrivateRangeProof for a default epoch
  *
@@ -9,7 +10,7 @@ const { PRIVATE_RANGE } = require('./base/types');
  * @returns A PrivateRangeProof construction for the default epoch
  */
 function PrivateRangeProof(...args) {
-    const Proof = getProof(PRIVATE_RANGE.name, this.epochNum);
+    const Proof = getProof(proofTypes.PRIVATE_RANGE.name, this.epochNum);
 
     return new Proof(...args);
 }
@@ -24,10 +25,10 @@ function PrivateRangeProof(...args) {
  * @returns A PrivateRangeProof construction for the given epoch number
  */
 PrivateRangeProof.epoch = function(epochNum, setAsDefault = false) {
-    helpers.validateEpochNum(PRIVATE_RANGE.name, epochNum);
+    helpers.validateEpochNum(proofTypes.PRIVATE_RANGE.name, epochNum);
 
     if (setAsDefault) {
-        setDefaultEpoch(PRIVATE_RANGE.name, epochNum);
+        setDefaultEpoch(proofTypes.PRIVATE_RANGE.name, epochNum);
     }
 
     return (...args) => {
@@ -35,4 +36,4 @@ PrivateRangeProof.epoch = function(epochNum, setAsDefault = false) {
     };
 };
 
-module.exports = PrivateRangeProof;
+export default PrivateRangeProof;

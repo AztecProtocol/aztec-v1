@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
-const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
-const { PUBLIC_RANGE } = require('./base/types');
+import { getProof, setDefaultEpoch, helpers } from './exportHandler';
+
+import proofTypes from './base/types';
 
 /**
  * Export the PublicRangeProof for a default epoch
@@ -10,7 +11,7 @@ const { PUBLIC_RANGE } = require('./base/types');
  * @returns A PublicRangeProof construction for the default epoch
  */
 function PublicRangeProof(...args) {
-    const Proof = getProof(PUBLIC_RANGE.name, this.epochNum);
+    const Proof = getProof(proofTypes.PUBLIC_RANGE.name, this.epochNum);
 
     return new Proof(...args);
 }
@@ -25,10 +26,10 @@ function PublicRangeProof(...args) {
  * @returns A PublicRangeProof construction for the given epoch number
  */
 PublicRangeProof.epoch = function(epochNum, setAsDefault = false) {
-    helpers.validateEpochNum(PUBLIC_RANGE.name, epochNum);
+    helpers.validateEpochNum(proofTypes.PUBLIC_RANGE.name, epochNum);
 
     if (setAsDefault) {
-        setDefaultEpoch(PUBLIC_RANGE.name, epochNum);
+        setDefaultEpoch(proofTypes.PUBLIC_RANGE.name, epochNum);
     }
 
     return (...args) => {
@@ -36,4 +37,4 @@ PublicRangeProof.epoch = function(epochNum, setAsDefault = false) {
     };
 };
 
-module.exports = PublicRangeProof;
+export default PublicRangeProof;

@@ -1,8 +1,5 @@
 const Sequelize = require('sequelize');
-const {
-    getConfig,
-} = require('../config');
-
+const { getConfig } = require('../config');
 
 class Connection {
     constructor() {
@@ -10,30 +7,16 @@ class Connection {
         this.sequelize = null;
     }
 
-    init({
-        networkId,
-    }) {
-        const {
-            username,
-            password,
-            database,
-            host,
-            port,
-            dialect,
-        } = getConfig({
+    init({ networkId }) {
+        const { username, password, database, host, port, dialect } = getConfig({
             networkId,
         });
 
-        this.sequelize = new Sequelize(
-            database,
-            username,
-            password,
-            {
-                host,
-                port,
-                dialect,
-            },
-        );
+        this.sequelize = new Sequelize(database, username, password, {
+            host,
+            port,
+            dialect,
+        });
     }
 
     getConnection() {
@@ -45,27 +28,15 @@ class Connection {
 
     // eslint-disable-next-line class-methods-use-this
     getDefaultConnection() {
-        const {
-            username,
-            password,
-            database,
-            host,
-            port,
-            dialect,
-        } = getConfig({
+        const { username, password, database, host, port, dialect } = getConfig({
             database: 'postgres',
         });
 
-        return new Sequelize(
-            database,
-            username,
-            password,
-            {
-                host,
-                port,
-                dialect,
-            },
-        );
+        return new Sequelize(database, username, password, {
+            host,
+            port,
+            dialect,
+        });
     }
 }
 
