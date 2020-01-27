@@ -1,5 +1,9 @@
 @import '../../styles/variables';
 
+.copy-wrapper {
+  display: inline-block;
+}
+
 @each $key, $size in $code-font-size-map {
   .size-#{$key} {
     font-size: $size;
