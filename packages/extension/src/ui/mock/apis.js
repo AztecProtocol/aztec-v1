@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 import {
     randomInt,
 } from '~/utils/random';
@@ -9,7 +10,6 @@ import {
 import {
     addresses,
     assets,
-    pastTransactions,
     randomRawNote,
     generate,
 } from './data';
@@ -62,15 +62,16 @@ export default mergeApis(realApis, {
     asset: {
         getAssets: async () => assets,
         getDomainAssets: async () => assets,
-        getPastTransactions: async (assetAddress = '', count = 2) => {
-            const transactions = !assetAddress
-                ? pastTransactions
-                : pastTransactions
-                    .filter(({ asset }) => asset.address === assetAddress);
-
-            return !count
-                ? transactions
-                : transactions.slice(0, count);
+        approveERC20Allowance: ({
+            requestedAllowance,
+        }) => {
+            const signed = window.confirm('Approve ERC20 Allowance?');
+            return {
+                requestedAllowance: signed ? requestedAllowance : 0,
+                error: signed ? null : {
+                    message: 'User denied transaction.',
+                },
+            };
         },
     },
     note: {

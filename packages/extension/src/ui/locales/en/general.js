@@ -2,6 +2,9 @@ export default {
     transaction: {
         description: 'AZTEC relays transactions via the Gas Station Network to increase privacy. You need to sign the transaction in metamask first.',
     },
+    token: 'token',
+    zkToken: 'zkToken',
+    zkAsset: 'zkAsset',
     click: {
         to: {
             copy: 'Click to copy',

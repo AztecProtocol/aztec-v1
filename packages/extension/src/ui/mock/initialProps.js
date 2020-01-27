@@ -11,7 +11,6 @@ import {
     assets,
     domains,
     notes,
-    pastTransactions,
     depositTransactions,
     sendTransactions,
     generate,
@@ -57,25 +56,10 @@ export default {
     'account.login': {
         goNext: dummyFunc,
     },
-    'account.assets': {
-        assets,
-        pastTransactions: pastTransactions.slice(0, 2),
-    },
-    'account.asset': {
-        ...assets[0],
-        prev: 'account',
-        pastTransactions: pastTransactions
-            .filter(({ asset }) => asset.address === assets[0].address)
-            .slice(0, 2),
-    },
-    'account.duplicated': {
-        address: addresses[0],
-        goNext: dummyFunc,
-    },
     deposit: {
         asset: makeAsset(assets[0]),
         publicOwner: randomAddress(),
-        transactions: [depositTransactions[0]],
+        transactions: depositTransactions,
         amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
         userAccessAccounts: [
             {

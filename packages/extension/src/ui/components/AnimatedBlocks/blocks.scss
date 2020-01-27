@@ -1,0 +1,214 @@
+@import '../../styles/variables';
+
+$block-bg-map: (
+  1: rgb(233, 236, 243),
+  2: rgb(224, 230, 238),
+);
+
+$block-spacing: map-get($spacing-map, 'm');
+$block-padding-v: map-get($spacing-map, 's');
+$block-padding-h: map-get($spacing-map, 'l');
+$block-border-radius: map-get($rounded-corner-map, 'm');
+
+$overlapped-block-offset: ($block-spacing * 2) + ($block-padding-v * 2);
+$sealed-block-offset: ($block-spacing * 2) + ($block-padding-v * 3);
+$sealed-block-size-offset: map-get($spacing-map, 'l');
+
+$block-transition-duration: 0.3s;
+
+$profile-icon-size: map-get($avatar-sizes-map, 'm');
+
+@mixin linked-blocks() {
+  $linked-line-width: map-get($spacing-map, 's');
+
+  .child-wrap {
+    &:before {
+      content: "";
+      width: $linked-line-width;
+      height: $block-spacing * 2;
+      position: absolute;
+      top: 0;
+      left: $block-padding-h + ($profile-icon-size / 2) - ($linked-line-width / 2);
+      transform: translateY(-50%);
+      background: $bg-gradient;
+      opacity: 1;
+    }
+  }
+}
+
+@mixin folded-block() {
+  .block-title {
+    transform: scaleY(0);
+  }
+
+  .block-title {
+    & + .block-content {
+      transform: translateY(-20px);
+    }
+  }
+
+  .block-extra {
+    max-height: 0px;
+    overflow: hidden;
+  }
+}
+
+@mixin overlapped-blocks() {
+  .head-wrap {
+    @include folded-block();
+
+    .block {
+      background: map-get($block-bg-map, 2);
+    }
+  }
+
+  .child-wrap {
+    transform: translateY(-$overlapped-block-offset);
+  }
+}
+
+@mixin sealed-blocks() {
+  .block {
+    .content-footnote {
+      display: none;
+    }
+  }
+
+  .head-wrap,
+  .child-wrap {
+    @include folded-block();
+  }
+
+  .head-wrap {
+    .block {
+      background: map-get($block-bg-map, 2);
+    }
+  }
+
+  .child-wrap {
+    transform: translateY(-$sealed-block-offset);
+
+    .block-content {
+      margin-bottom: -$sealed-block-size-offset;
+    }
+  }
+}
+
+.wrapper {
+  position: relative;
+  margin: -$block-spacing 0;
+}
+
+.block-wrapper {
+  position: relative;
+  padding: $block-spacing 0;
+}
+
+.block {
+  background: map-get($block-bg-map, 1);
+  box-shadow: 0 0 10px rgba(57, 59, 146, 0.1);
+  border-radius: $block-border-radius;
+  transition: all $block-transition-duration ease-out;
+}
+
+.child-wrap {
+  transform: translateY(0);
+  transition: all $block-transition-duration ease-out;
+}
+
+.block-content {
+  transform: translateY(0);
+  transition: all $block-transition-duration ease-out;
+}
+
+.block-title {
+  position: relative;
+  z-index: 1; // avoid popup in title to get overlapped by content
+  transform: scaleY(1);
+  transition: all $block-transition-duration / 2 ease-out;
+}
+
+.block-extra {
+  background: map-get($block-bg-map, 2);
+  box-shadow: 0px 10px 10px -10px rgba(57, 59, 146, 0.1) inset;
+  border-radius: 0 0 $block-border-radius $block-border-radius;
+  transition: all $block-transition-duration / 2 ease-out;
+}
+
+.sealed-icon {
+  $sealed-icon-size: map-get($avatar-sizes-map, 'l');
+  position: absolute;
+  top: map-get($spacing-map, 'xxl');
+  right: $block-padding-h;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $sealed-icon-size;
+  height: $sealed-icon-size;
+  border-radius: 100%;
+  background: $bg-gradient;
+  z-index: 1;
+  transition: all $block-transition-duration ease-out;
+  transition-delay: $block-transition-duration / 2;
+}
+
+.type-linked {
+  @include linked-blocks();
+}
+
+.linked-to-overlapped,
+.type-overlapped {
+  @include overlapped-blocks();
+}
+
+.linked-to-overlapped {
+  $hide-line-duration: $block-transition-duration / 2;
+
+  .child-wrap {
+    transition-delay: $hide-line-duration;
+
+    &:before {
+      opacity: 0;
+      transition: opacity $hide-line-duration ease-out;
+    }
+  }
+}
+
+.type-overlapped {
+  &.wrapper {
+    margin-bottom: -($overlapped-block-offset + $block-spacing);
+  }
+}
+
+.type-sealed,
+.overlapped-to-sealed {
+  @include sealed-blocks();
+}
+
+.overlapped-to-sealed {
+  .block-extra {
+    max-height: 1000px;
+  }
+
+  .sealed-icon {
+    transform: scale(0) rotate(20deg);
+  }
+}
+
+.type-sealed {
+  &.wrapper {
+    margin-bottom: -($sealed-block-offset + $block-spacing);
+  }
+
+  .sealed-icon {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.content-footnote {
+  display: block;
+
+  &.hide {
+    display: none;
+  }
+}

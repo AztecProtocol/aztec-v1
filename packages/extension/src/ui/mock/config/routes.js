@@ -7,6 +7,7 @@ import Restore from '~/ui/pages/Restore';
 import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
 import Icons from '~/ui/views/playground/Icons';
+import DepositContent from '~/ui/views/DepositContent';
 import depositSteps from '~/ui/steps/deposit';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 import {
@@ -82,19 +83,21 @@ export default {
     },
     deposit: {
         path: 'deposit',
-        step: depositSteps.gsn[0],
+        Content: DepositContent,
+        steps: depositSteps.gsn,
+        initialStep: 0,
         routes: {
-            approve: {
-                path: 'approve-erc20',
-                step: depositSteps.gsn[1],
-            },
-            publicApprove: {
-                path: 'approve-public',
-                step: depositSteps.gsnTransfer[2],
+            confirm: {
+                path: 'confirm',
+                Content: DepositContent,
+                steps: depositSteps.gsn,
+                initialStep: 1,
             },
             send: {
                 path: 'send',
-                step: depositSteps.gsn[2],
+                Content: DepositContent,
+                steps: depositSteps.gsn,
+                initialStep: 2,
             },
         },
     },
