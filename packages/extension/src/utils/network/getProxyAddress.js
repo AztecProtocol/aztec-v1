@@ -5,7 +5,6 @@ import {
 import Web3Service from '~/helpers/Web3Service';
 
 export default async function getProxyContract(contractName, networkId) {
-    console.log({ contractName });
     const {
         managerContractName,
     } = contracts[contractName] || {};
@@ -25,8 +24,6 @@ export default async function getProxyContract(contractName, networkId) {
     if (!managerAddress && config && config.networks[networkId]) {
         ({ address: managerAddress } = config.networks[networkId]);
     }
-    console.log(config, networks);
-    console.log({ managerAddress, managerContractName });
 
     Web3Service.registerInterface(config, { name: managerContractName });
 
