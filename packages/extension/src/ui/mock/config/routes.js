@@ -126,6 +126,12 @@ export default {
                 steps: withdrawSteps.gsn,
                 initialStep: 3,
             },
+            metamask: {
+                path: 'metamask',
+                Content: WithdrawContent,
+                steps: withdrawSteps.metamask,
+                initialStep: 0,
+            },
         },
     },
     send: {

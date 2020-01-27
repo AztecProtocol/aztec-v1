@@ -23,7 +23,7 @@ const stepSignNotes = {
         },
     ],
     autoStart: true,
-    submitTextKey: 'withdraw.sign.submit',
+    submitTextKey: 'transaction.sign.submit',
 };
 
 const stepConfirm = {
