@@ -9,11 +9,11 @@ import {
 } from '~/ui/config/settings';
 import parseInputAmount from '~/ui/utils/parseInputAmount';
 import makeAsset from '~/ui/utils/makeAsset';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import { withdrawSteps } from '~/ui/config/steps';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import WithdrawContent from '~/ui/views/WithdrawContent';
+import withdrawSteps from '~/ui/steps/withdraw';
 
 const Withdraw = ({
-    initialStep,
     currentAccount,
     assetAddress,
     amount,
@@ -46,16 +46,15 @@ const Withdraw = ({
     };
 
     return (
-        <AnimatedTransaction
-            initialStep={initialStep}
+        <StepsHandler
             steps={steps}
             fetchInitialData={fetchInitialData}
+            Content={WithdrawContent}
         />
     );
 };
 
 Withdraw.propTypes = {
-    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
@@ -67,7 +66,6 @@ Withdraw.propTypes = {
 };
 
 Withdraw.defaultProps = {
-    initialStep: 0,
     numberOfInputNotes: emptyIntValue,
 };
 

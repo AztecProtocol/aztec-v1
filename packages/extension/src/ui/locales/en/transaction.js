@@ -3,11 +3,7 @@ export default {
         create: {
             proof: 'Creating Proof',
         },
-        encrypt: {
-            keys: 'Encrypt Viewing Keys',
-        },
         send: 'Sending Transaction',
-        approve: 'Approve Transaction',
         confirmed: 'Confirming Transaction',
         sign: 'Signing Transaction',
         relay: 'Relaying Transaction',
@@ -15,6 +11,12 @@ export default {
     confirmed: 'Confirmed',
     approve: {
         submit: 'Approve Transaction',
+    },
+    request: {
+        signature: {
+            _: 'Signature Request',
+            received: 'Signature Received',
+        },
     },
     waiting: {
         sign: 'Please sign the transaction in MetaMask',
@@ -37,8 +39,4 @@ export default {
         },
     },
     success: 'Transaction completed!',
-    history: {
-        _: 'Transaction History',
-        empty: 'You have no transactions.',
-    },
 };

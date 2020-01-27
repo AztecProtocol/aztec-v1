@@ -17,19 +17,29 @@ import ListItem from '~/ui/components/ListItem';
 class StepContentHelper extends PureComponent {
     static getDerivedStateFromProps(nextProps, prevState) {
         const {
+            steps,
             currentStep,
             currentTask,
+            loading,
         } = nextProps;
         const {
+            explicitTaskType: prevExplicitTaskType,
             prevStep,
             prevTask,
         } = prevState;
-        if (currentStep === prevStep && currentTask === prevTask) {
-            return null;
+        const nextTask = steps[currentStep].tasks[currentTask + 1] || {};
+
+        let explicitTaskType = prevExplicitTaskType;
+        if (loading && currentTask === -1 && nextTask.type === 'sign') {
+            explicitTaskType = 'sign';
+        } else if (currentStep !== prevStep
+            || currentTask !== prevTask
+        ) {
+            explicitTaskType = '';
         }
 
         return {
-            explicitTaskType: '',
+            explicitTaskType,
             prevStep: currentStep,
             prevTask: currentTask,
         };
@@ -166,13 +176,15 @@ class StepContentHelper extends PureComponent {
 
         if (explicitTaskType === 'sign') {
             const task = this.getNextTask();
-            submitMessage = (
-                <Text
-                    text={task.message || i18n.t('transaction.waiting.sign')}
-                    color="orange"
-                    size="s"
-                />
-            );
+            if (task) {
+                submitMessage = (
+                    <Text
+                        text={task.message || i18n.t('transaction.waiting.sign')}
+                        color="orange"
+                        size="s"
+                    />
+                );
+            }
         }
 
         return submitMessage;
