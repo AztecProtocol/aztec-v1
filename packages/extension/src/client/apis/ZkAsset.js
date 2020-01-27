@@ -40,6 +40,11 @@ export default class ZkAsset {
         this.subscriptions = new SubscriptionManager();
     };
 
+    /**
+     * @function zkAsset.balance
+     *
+     * @returns {Integer} balance 
+     */
     async balance() {
         const { balance } = await ConnectionService.query(
             'assetBalance',
@@ -161,19 +166,19 @@ export default class ZkAsset {
 
     /**
      *
-     * Deposit
+     * @function zkAsset.deposit
      *
-     * - transactions ([Transaction!]!)
-     *       amount (Int!):                The equivalent note value to deposit.
-     *       to (Address!):                The output note owner.
-     *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
-     * - options (Object)
-     *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
+     * @param {Array} transactions
+     *       - amount (Int):                The equivalent note value to deposit.
+     *       - to (Address):                The output note owner.
+     *       - numberOfOutputNotes (Int):    Number of output notes of this transaction.
+     * @param {Object} options
+     *       - numberOfOutputNotes (Int):    Number of new notes for each transaction.
      *                                     Unless numberOfOutputNotes is defined in that transaction.
      *                                     Will use default value in setting if undefined.
-     *       userAccess ([Address!]):      The addresses that are able to see the real note value.
+     *       - userAccess ([Address]):      The addresses that are able to see the real note value.
      *
-     * @returns (Object)
+     * @returns {Object} (Object)
      * - success (Boolean)
      * - amount (Int)
      */
@@ -201,16 +206,16 @@ export default class ZkAsset {
 
     /**
      *
-     * Withdraw
+     * @function zkAsset.withdraw
      *
-     * - amount (Int!):                    The note value to withdraw.
-     * - options (Object)
-     *       to (Address):                 The linked token owner.
-     *                                     Will use current address if undefined.
-     *       numberOfInputNotes (Int):     Number of notes to be destroyed.
-     *                                     Will use default value in setting if undefined.
+     * @param {Int} amount:                    The note value to withdraw.
+     * @param {Object} options
+     *       - to (Address):                 The linked token owner.
+     *                                       Will use current address if undefined.
+     *       - numberOfInputNotes (Int):     Number of notes to be destroyed.
+     *                                       Will use default value in setting if undefined.
      *
-     * @returns (Object)
+     * @returns {Object}
      * - success (Boolean)
      * - amount (Int)
      */
@@ -242,21 +247,21 @@ export default class ZkAsset {
 
     /**
     *
-    * Send
+    * @function zkAsset.send
     *
-    * - transactions ([Transaction!]!)
-    *       amount (Int!):                The note value to send.
-    *       to (Address!):                The output note owner.
-    *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
-    * - options (Object)
-    *       numberOfInputNotes (Int):     Number of notes to be destroyed.
-    *                                     Will use default value in setting if undefined.
-    *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
-    *                                     Unless numberOfOutputNotes is defined in that transaction.
-    *                                     Will use default value in setting if undefined.
-    *       userAccess ([Address!]):      The addresses that are able to see the real note value.
+    * @param {Array} transactions
+    *       - amount (Int):                The note value to send.
+    *       - to (Address):                The output note owner.
+    *       - numberOfOutputNotes (Int):   Number of output notes of this transaction.
+    * @returns {Object} options
+    *       - numberOfInputNotes (Int):    Number of notes to be destroyed.
+    *                                      Will use default value in setting if undefined.
+    *       - numberOfOutputNotes (Int):   Number of new notes for each transaction.
+    *                                      Unless numberOfOutputNotes is defined in that transaction.
+    *                                      Will use default value in setting if undefined.
+    *       - userAccess ([Address]):      The addresses that are able to see the real note value.
     *
-    * @returns (Object)
+    * @returns {Object}
     * - success (Boolean)
     * - amount (Int)
     */
@@ -362,21 +367,21 @@ export default class ZkAsset {
 
     /**
     *
-    * Create Note From Balance
+    * @function zkAsset.createNoteFromBalance
     *
-    * - amount (Int!)
-    * - options (Object)
-    *       userAccess ([Address!]):      The addresses that are able to see the real note value.
-    *       numberOfInputNotes (Int):     Number of notes to be destroyed.
+    * @param {Integer} amount
+    * @param {Object} options
+    *       - userAccess ([Address]):       The addresses that are able to see the real note value.
+    *       - numberOfInputNotes (Int):     Number of notes to be destroyed.
     *                                     Will use default value in setting if undefined.
-    *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
+    *       - numberOfOutputNotes (Int):    Number of new notes for each transaction.
     *                                     Unless numberOfOutputNotes is defined in that transaction.
     *                                     Default value is 1.
     *
-    * @returns ([notes!])
+    * @returns {Array} Notes
     * - note (Object)
-    *       noteHash (String!)
-    *       value (Int!)
+    *       - noteHash (String!)
+    *       - value (Int!)
     */
     createNoteFromBalance = async (amount, {
         userAccess = [],
@@ -402,18 +407,18 @@ export default class ZkAsset {
 
     /**
     *
-    * Fetch Note From Balance
+    * @function zkAsset.fetchNotesFromBalance
     *
-    * - options (Object)
-    *       greaterThan (Int)
-    *       lessThan (Int)
-    *       equalTo (Int)
-    *       numberOfNotes (Int)
+    * @param {Object} options
+    *       - greaterThan (Int)
+    *       - lessThan (Int)
+    *       - equalTo (Int)
+    *       - numberOfNotes (Int)
     *
-    * @returns ([notes!])
+    * @returns {Array} notes
     * - note (Object)
-    *       noteHash (String!)
-    *       value (Int!)
+    *       - noteHash (String)
+    *       - value (Int)
     */
     fetchNotesFromBalance = async ({
         greaterThan,

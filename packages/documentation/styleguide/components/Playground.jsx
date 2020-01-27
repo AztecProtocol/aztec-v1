@@ -74,7 +74,7 @@ class Playground extends Component {
   };
 
   parseGitDocs = async () => {
-    const url = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/feat-sdk-ui/packages/extension/src/client/apis/ZkAsset.js';
+    const url = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/ebe76f17570a7a30ddf4fa00d7b47db319403aee/packages/extension/src/client/apis/Asset.js';
     const apiText = await fetch(url)
       .then((response) => {
         return response.text();
@@ -87,10 +87,12 @@ class Playground extends Component {
     // Need to add a @function tag to all the API
     // method tags which matches the 'name'
     // used in this react to document the method
-    // const { name } = this.props;
-    // const parsedTagsForMethod = parsedTags.filter((methodTag) => {
-    //   return methodTag.tags[0].function === name;
-    // }
+    const { name } = this.props;
+    const parsedTagsForMethod = parsedTags.filter((methodTag) => {
+      return methodTag.tags[0].function === name;
+    });
+    console.log({ name });
+    console.log({ parsedTagsForMethod });
 
     const parsedArguments = parsedTags.filter((tag) => {
       return tag.tags[0].tag !== 'returns';
