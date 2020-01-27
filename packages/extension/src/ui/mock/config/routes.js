@@ -9,12 +9,13 @@ import NoteAccess from '~/ui/pages/NoteAccess';
 import Icons from '~/ui/views/playground/Icons';
 import DepositContent from '~/ui/views/DepositContent';
 import WithdrawContent from '~/ui/views/WithdrawContent';
+import SendContent from '~/ui/views/SendContent';
 import depositSteps from '~/ui/steps/deposit';
 import withdrawSteps from '~/ui/steps/withdraw';
+import sendSteps from '~/ui/steps/send';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 import {
     registerSteps,
-    sendSteps,
 } from '~/ui/config/steps';
 
 export default {
@@ -136,17 +137,27 @@ export default {
     },
     send: {
         path: 'send',
-        step: sendSteps.gsn[0],
+        Content: SendContent,
+        steps: sendSteps.gsn,
+        initialStep: 0,
         routes: {
             sign: {
                 path: 'sign',
-                step: sendSteps.gsn[1],
+                Content: SendContent,
+                steps: sendSteps.gsn,
                 initialStep: 1,
+            },
+            confirm: {
+                path: 'confirm',
+                Content: SendContent,
+                steps: sendSteps.gsn,
+                initialStep: 2,
             },
             send: {
                 path: 'send',
-                step: sendSteps.gsn[2],
-                initialStep: 2,
+                Content: SendContent,
+                steps: sendSteps.gsn,
+                initialStep: 3,
             },
         },
     },

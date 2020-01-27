@@ -120,8 +120,3 @@ export const notes = [
         asset: assets[1],
     },
 ];
-
-export const sendTransactions = generate(3, () => ({
-    amount: randomInt(1, 100),
-    to: addresses[randomInt(1, addresses.length - 1)],
-}));
