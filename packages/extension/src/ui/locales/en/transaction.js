@@ -21,6 +21,9 @@ export default {
     waiting: {
         sign: 'Please sign the transaction in MetaMask',
     },
+    sign: {
+        submit: 'Sign the transaction',
+    },
     send: {
         _: 'Send',
         explain: 'After press send, please complete the transaction through metamask.',

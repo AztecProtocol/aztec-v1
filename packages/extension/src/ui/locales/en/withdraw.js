@@ -11,7 +11,6 @@ export default {
         description: `A MetaMask signature is required to withdraw ZkNotes.
             The signature should contain the following values:
         `,
-        submit: 'Sign Notes',
     },
     confirm: {
         description: `A MetaMask signature is required to withdraw ZkNotes.
