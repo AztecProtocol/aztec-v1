@@ -6,16 +6,16 @@ const contracts = (process.env.NODE_ENV === 'production')
     : developmentConfig;
 
 const {
-    AZTECAccountRegistry,
-    AZTECAccountRegistryGSN,
+    AccountRegistry,
+    AccountRegistryManager,
     ACE,
     ZkAsset,
     ERC20,
 } = contracts;
 
 export {
-    AZTECAccountRegistry,
-    AZTECAccountRegistryGSN,
+    AccountRegistry,
+    AccountRegistryManager,
     ACE,
     ZkAsset,
     ERC20,
