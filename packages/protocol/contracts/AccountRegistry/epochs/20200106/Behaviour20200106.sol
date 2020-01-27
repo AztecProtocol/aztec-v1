@@ -125,7 +125,7 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
 
     /**
     * @dev Perform a confidential transfer, mediated by a smart contracrt
-    * @param _proofId - uint24 proofId 
+    * @param _proofId - uint24 proofId
     * @param _registryOwner - address of the note registry owner
     * @param _proofData - data generated from proof construction, which is used to validate the proof
     * @param _spender - address that will be spending the notes
