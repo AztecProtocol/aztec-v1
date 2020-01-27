@@ -133,7 +133,7 @@ class DepositContent extends StepContentHelper {
                     blocks={blocks}
                     sealedIcon="aztec"
                 />
-                {step.blockStyle === 'sealed' && this.renderTaskList()}
+                {step.showTaskList && this.renderTaskList()}
             </StepContent>
         );
     }
