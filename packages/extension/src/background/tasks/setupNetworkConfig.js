@@ -3,13 +3,13 @@ import {
 } from '~/utils/storage';
 import {
     getContract,
+    getProxyAddress,
 } from '~/utils/network';
 import Web3Service from '~/helpers/Web3Service';
 
 const backgroundContracts = [
     'ACE',
-    'AZTECAccountRegistry',
-    'AZTECAccountRegistryGSN',
+    'AccountRegistry',
     'ZkAsset',
     'ERC20',
 ];
@@ -28,19 +28,23 @@ export default async function setupNetworkConfig({
         account,
     } = Web3Service;
 
-    const contractsConfig = backgroundContracts.map((contractName) => {
+    const contractsConfig = await Promise.all(backgroundContracts.map(async (contractName) => {
         const {
             contract,
             address,
+            isProxyContract,
         } = getContract(contractName, networkId);
+        let proxyAddress;
+        if (isProxyContract) {
+            proxyAddress = await getProxyAddress(contractName, networkId);
+        }
         return {
             name: contractName,
             config: contract,
             address: contractAddresses[contractName]
-                || address,
+                || isProxyContract ? proxyAddress : address,
         };
-    });
-
+    }));
     Web3Service.registerContractsConfig(contractsConfig);
 
     await set({
