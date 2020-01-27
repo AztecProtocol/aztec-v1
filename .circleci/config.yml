@@ -97,19 +97,6 @@ jobs:
             - run:
                 name: "Orchestrate Artifacts"
                 command: yarn script:orchestrate:artifacts
-    coverage:
-        working_directory: ~/repo
-        docker:
-            - image: circleci/node:10.15.3
-            - image: trufflesuite/ganache-cli:v6.4.1
-              command: ganache-cli -i 1234 -p 8545 -e 10000000 -l 6721975 -m=\"$TEST_MNEMONIC\"
-        steps:
-            - restore_cache:
-                keys:
-                    - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run:
-                name: "Cover Packages"
-                command: PKG=@aztec/protocol yarn coverage
     docs:
         working_directory: ~/repo
         docker:
@@ -183,13 +170,6 @@ workflows:
                     branches:
                         only:
                             - develop
-            - coverage:
-                requires:
-                    - lint
-                    - test
-                filters:
-                    branches:
-                        ignore: gh-pages
             - docs:
                 requires:
                     - lint

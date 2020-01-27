@@ -42,7 +42,7 @@ class Aztec {
             providerUrl = '',
             contractAddresses = {
                 ACE: '',
-                AZTECAccountRegistry: '',
+                AccountRegistry: '',
             },
             autoRefreshOnProfileChange = true,
         } = options;

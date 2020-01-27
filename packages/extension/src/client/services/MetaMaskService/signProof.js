@@ -9,19 +9,20 @@ const {
 
 
 export default ({
-    noteHashes,
+    proofHash,
     spender,
-    spenderApprovals,
     assetAddress,
+    approval,
 }) => {
     const domain = signer.generateZKAssetDomainParams(assetAddress);
-    const schema = eip712.MULTIPLE_NOTE_SIGNATURE;
+    const schema = eip712.PROOF_SIGNATURE;
 
     const message = {
-        noteHashes,
+        proofHash,
         spender,
-        spenderApprovals,
+        approval,
     };
+
     const data = JSON.stringify({
         ...schema,
         message,
