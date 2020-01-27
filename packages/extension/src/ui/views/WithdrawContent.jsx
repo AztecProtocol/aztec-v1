@@ -100,7 +100,7 @@ class WithdrawContent extends StepContentHelper {
                     : i18n.count('token', tokenValue, true),
                 contentFootnote: (
                     <BlockStatus
-                        text={i18n.t('deposit.approve.allowance')}
+                        text={i18n.t('withdraw.approve.allowance')}
                         iconName="check"
                     />
                 ),
