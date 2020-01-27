@@ -309,7 +309,7 @@ contract('Account registry - relayer functionality', (accounts) => {
 
         await truffleAssert.reverts(
             registryContract.deposit(...depositParams, { from: anotherUserAddress }),
-            'VM Exception while processing transaction: revert Cannot deposit individualNote to other account if sender is not the same as owner',
+            'VM Exception while processing transaction: revert Cannot deposit note to other account if sender is not the same as owner',
         );
 
         expect((await erc20.balanceOf(userAddress)).toNumber()).to.equal(initialAmount);
