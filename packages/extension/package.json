@@ -19,9 +19,9 @@
         "@aztec/protocol": "0.0.0-semantically-released",
         "@aztec/secp256k1": "^1.0.1",
         "@aztec/typed-data": "0.0.0-semantically-released",
-        "@openzeppelin/contracts-ethereum-package": "^2.4.0",
-        "@openzeppelin/gsn-helpers": "^0.2.1",
-        "@openzeppelin/gsn-provider": "^0.1.9",
+        "@openzeppelin/contracts-ethereum-package": "2.3.0",
+        "@openzeppelin/gsn-helpers": "0.2.1",
+        "@openzeppelin/gsn-provider": "0.1.9",
         "@openzeppelin/test-environment": "^0.1.1",
         "@trust/webcrypto": "^0.9.2",
         "apollo-cache-inmemory": "^1.6.2",
@@ -86,9 +86,6 @@
         "webpack-merge": "^4.2.2"
     },
     "scripts": {
-        "build:dev": "truffle compile && webpack --config webpack.dev.js",
-        "build": "yarn build:prod",
-        "build:prod": "truffle compile && webpack --config webpack.prod.js",
         "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deployContracts",
         "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh extension",
@@ -97,7 +94,6 @@
         "lint": "eslint ./ --color",
         "start:ganache": "babel-node scripts/run start",
         "start:ui": "babel-node ./src/ui/mock/devServer",
-        "test": "jest ./src",
         "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
         "watch": "webpack --watch --config webpack.dev.js"

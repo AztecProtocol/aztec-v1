@@ -2684,10 +2684,30 @@
     fs-extra "^8.1.0"
     try-require "^1.2.1"
 
+"@openzeppelin/contracts-ethereum-package@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-ethereum-package/-/contracts-ethereum-package-2.3.0.tgz#c89b5484f7d7c88bc134b41f589eac5a0319de02"
+  integrity sha512-voAH5uPmfZ0bpMHV6JgXoaWqkp0YIMmAino04nvJWso4S9di/rrWr8nnJB+b5bwQEz06u1rN9O3nXM9vIiHBlw==
+
 "@openzeppelin/contracts-ethereum-package@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-ethereum-package/-/contracts-ethereum-package-2.4.0.tgz#cd98612022cadb8710c26901bc564240a19a9b40"
   integrity sha512-GC1aOgTnuNnlhdYOCKFizLCQRgYlbImWi+aJ9Lw4Yw4BSLHzfPg+XV0tgn9l+KnFAzgoUEg2aD2wmaHZBjEnSw==
+
+"@openzeppelin/gsn-helpers@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/gsn-helpers/-/gsn-helpers-0.2.1.tgz#0cf052e3bd92efbfaf8183514c7818be2b37a7ea"
+  integrity sha512-EJra2VRQENhze5nHY1iBvPKHMuAmQU0i94EMbJBxiVCtmMzvrESb8r/nL2A6hkyoU/se/VQ4w9KVT28gv02EtQ==
+  dependencies:
+    axios "^0.19.0"
+    chai "^4.2.0"
+    commander "^2.20.0"
+    env-paths "^2.2.0"
+    fs-extra "^8.1.0"
+    lodash "^4.17.15"
+    sleep-promise "^8.0.1"
+    tmp "^0.1.0"
+    web3 "^1.2.1"
 
 "@openzeppelin/gsn-helpers@^0.2.1":
   version "0.2.3"
@@ -2704,7 +2724,7 @@
     tmp "^0.1.0"
     web3 "^1.2.1"
 
-"@openzeppelin/gsn-provider@^0.1.5", "@openzeppelin/gsn-provider@^0.1.9":
+"@openzeppelin/gsn-provider@0.1.9", "@openzeppelin/gsn-provider@^0.1.5", "@openzeppelin/gsn-provider@^0.1.9":
   version "0.1.9"
   resolved "https://registry.yarnpkg.com/@openzeppelin/gsn-provider/-/gsn-provider-0.1.9.tgz#ebbf5eea1322adc64f840bdae9b42fd01ddb9e83"
   integrity sha512-cGdQD/0XtSjBaUljmzDKYqvKmaHSEm3eIFFZXrNtsXuPhHsDwvcJ0raSMu3hKBhdX6e02iWk7VlirHY5BgU+lA==

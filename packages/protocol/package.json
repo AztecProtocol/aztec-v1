@@ -69,7 +69,7 @@
   },
   "scripts": {
     "clean": "shx rm -rf ./.0x-artifacts ./build ./coverage ./coverageEnv ./coverage.json || true",
-    "compile:contracts": "truffle compile",
+    "compile:contracts": "truffle compile --all",
     "coverage": "scripts/coverage.sh",
     "deploy:rinkeby": "truffle migrate --network rinkeby",
     "deploy:ropsten": "truffle migrate --network ropsten",
