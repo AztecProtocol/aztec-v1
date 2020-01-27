@@ -30,7 +30,7 @@ class StepContentHelper extends PureComponent {
         const nextTask = steps[currentStep].tasks[currentTask + 1] || {};
 
         let explicitTaskType = prevExplicitTaskType;
-        if (loading && currentTask === -1 && nextTask.type === 'sign') {
+        if (loading && nextTask.type === 'sign') {
             explicitTaskType = 'sign';
         } else if (currentStep !== prevStep
             || currentTask !== prevTask
@@ -171,6 +171,11 @@ class StepContentHelper extends PureComponent {
     renderSubmitMessage() {
         let submitMessage = null;
         const {
+            steps,
+            currentStep,
+            loading,
+        } = this.props;
+        const {
             explicitTaskType,
         } = this.state;
 
@@ -185,6 +190,14 @@ class StepContentHelper extends PureComponent {
                     />
                 );
             }
+        } else if (loading && currentStep === steps.length - 1) {
+            submitMessage = (
+                <Text
+                    text={i18n.t('transaction.autoClose')}
+                    color="label"
+                    size="xs"
+                />
+            );
         }
 
         return submitMessage;
@@ -193,6 +206,7 @@ class StepContentHelper extends PureComponent {
     renderTaskList() {
         const {
             currentTask,
+            error,
         } = this.props;
         const {
             tasks,
@@ -208,7 +222,15 @@ class StepContentHelper extends PureComponent {
                     const isFinished = i <= currentTask
                         || (!run && (i === currentTask + 1));
                     let statusIcon = null;
-                    if (isFinished) {
+                    if (error && i === currentTask + 1) {
+                        statusIcon = (
+                            <Icon
+                                name="error"
+                                color="red"
+                                size="s"
+                            />
+                        );
+                    } else if (isFinished) {
                         statusIcon = (
                             <Icon
                                 name="check"

@@ -24,6 +24,20 @@ const mock = async (data) => {
     return fakeData;
 };
 
+const mockSigningApi = (message) => {
+    const signed = window.confirm(message);
+    let error = null;
+    if (!signed) {
+        error = {
+            message: 'User denied transaction.',
+        };
+    }
+    return {
+        success: !error,
+        error,
+    };
+};
+
 const mergeApis = (defaultApis, customApis = {}) => {
     const mockApis = {};
     Object.keys(defaultApis).forEach((name) => {
@@ -65,14 +79,15 @@ export default mergeApis(realApis, {
         approveERC20Allowance: ({
             requestedAllowance,
         }) => {
-            const signed = window.confirm('Approve ERC20 Allowance?');
+            const {
+                error,
+            } = mockSigningApi('Approve ERC20 Allowance?');
             return {
-                requestedAllowance: signed ? requestedAllowance : 0,
-                error: signed ? null : {
-                    message: 'User denied transaction.',
-                },
+                requestedAllowance: !error ? requestedAllowance : 0,
+                error,
             };
         },
+        confidentialTransfer: () => mockSigningApi('Run confidentialTransfer?'),
     },
     note: {
         fetchNote: noteHash => ({
@@ -80,15 +95,7 @@ export default mergeApis(realApis, {
             value: randomInt(100),
             asset: assets[0],
         }),
-        signProof: () => {
-            const approval = window.confirm('Sign notes?');
-            return {
-                approval,
-                error: approval ? null : {
-                    message: 'User denied transaction.',
-                },
-            };
-        },
+        signProof: () => mockSigningApi('Sign notes?'),
     },
     proof: {
         createNoteFromBalance: ({

@@ -50,7 +50,7 @@ const stepSend = {
         {
             titleKey: 'withdraw.send.step',
             type: 'sign',
-            run: apis.asset.confidentialTransferFrom,
+            run: apis.asset.confidentialTransfer,
         },
         {
             titleKey: 'transaction.confirmed',
@@ -75,7 +75,7 @@ const stepSendViaGSN = {
         },
         {
             titleKey: 'transaction.step.relay',
-            run: apis.asset.confidentialTransfer,
+            run: apis.asset.confidentialTransferFrom,
         },
         {
             titleKey: 'transaction.confirmed',
