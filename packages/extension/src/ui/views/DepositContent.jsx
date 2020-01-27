@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+    Block,
     Text,
 } from '@aztec/guacamole-ui';
 import {
@@ -109,7 +110,11 @@ class DepositContent extends StepContentHelper {
                     ...asset,
                     type: 'asset',
                 },
-                extraContent: <RecipientList recipients={recipients} />,
+                extraContent: (
+                    <Block padding="l s">
+                        <RecipientList recipients={recipients} />
+                    </Block>
+                ),
             },
         ];
     }

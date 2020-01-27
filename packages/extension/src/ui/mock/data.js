@@ -121,11 +121,6 @@ export const notes = [
     },
 ];
 
-export const depositTransactions = generate(2, i => ({
-    amount: randomInt(1, 10000),
-    to: addresses[i + 1],
-}));
-
 export const sendTransactions = generate(3, () => ({
     amount: randomInt(1, 100),
     to: addresses[randomInt(1, addresses.length - 1)],
