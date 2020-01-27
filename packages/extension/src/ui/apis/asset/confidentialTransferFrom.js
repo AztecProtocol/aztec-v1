@@ -1,24 +1,28 @@
+import utils from '@aztec/dev-utils';
 import ConnectionService from '~/ui/services/ConnectionService';
+import Web3Service from '~/helpers/Web3Service';
+
+const {
+    proofs: {
+        JOIN_SPLIT_PROOF,
+    },
+
+} = utils;
 
 export default async function confidentialTransferFrom({
     assetAddress,
     proof,
-    noteHashes = [],
-    spender,
-    spenderApprovals = [],
     signature = '0x',
-    sender,
 }) {
     const proofData = proof.encodeABI(assetAddress);
     const response = await ConnectionService.sendTransaction({
-        contract: 'AZTECAccountRegistry',
+        contract: 'AccountRegistry',
         method: 'confidentialTransferFrom',
         data: [
+            JOIN_SPLIT_PROOF,
             assetAddress,
             proofData,
-            noteHashes,
-            spender || sender,
-            spenderApprovals,
+            Web3Service.contracts.AccountRegistry.address,
             signature,
         ],
     });
