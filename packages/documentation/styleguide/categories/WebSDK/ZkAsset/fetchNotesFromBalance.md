@@ -1,18 +1,5 @@
 Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
 
-__Arguments__
-- {Object} __Query__: which specifies four categories along which notes can be filtered and requested:
-  - numberOfNotes: number of notes which match the query to return
-  - equalTo: the exact value all notes need to match
-  - greaterThan: if no equalTo parameter, the minimum value of notes returned
-  - lessThan: if no equalTo parameter, the maximum value of notes returned
-
-__Returns__
-- {Array} Notes matching the supplied query
-
-
-&nbsp  
-
 ## Examples
 ### Fetch notes corresponding to a particular query
 ```js

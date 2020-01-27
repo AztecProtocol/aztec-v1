@@ -1,13 +1,3 @@
-Determine the balance of an asset
-
-__Arguments__
-_None_
-
-__Returns__
-- {Number} Balance of the asset
-
-&nbsp  
-
 ## Examples
 ### Get a user's balance, held by a ZkAsset
 ```js

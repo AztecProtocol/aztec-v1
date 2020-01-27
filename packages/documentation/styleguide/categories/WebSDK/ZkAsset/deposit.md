@@ -1,10 +1,5 @@
 Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
 
-
-<!-- __Arguments__
-- {String} __to__: Ethereum address to which the user is 'depositing' the zero-knowledge funds. The address will become the owner of the notes
-- {Number} __amount__: Number of public ERC20 tokens being converted into notes -->
-
 ## Examples
 ### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user
 ```js

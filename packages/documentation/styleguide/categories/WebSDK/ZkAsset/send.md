@@ -1,10 +1,5 @@
 Send funds confidentially to another Ethereum address
 
-__Arguments__
-- {String} __to__: Ethereum address to which the user is sending zero-knowledge funds
-- {Number} __amount__: units of value being transferred, where 1 unit is equivalent in value to 1 ERC20 token
-
-
 ## Examples
 ### Confidentially send value of 30units to another Ethereum address
 ```js

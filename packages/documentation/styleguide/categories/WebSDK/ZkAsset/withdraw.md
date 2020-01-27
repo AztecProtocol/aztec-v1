@@ -1,9 +1,5 @@
 Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens
 
-__Arguments__
-- {String} __to__: Ethereum address to the ERC20 tokens should be sent, upon withdrawal
-- {Number} __amount__: units of value being withdrawn. This will equal the number of ERC20 tokens the `to` address receives
-
 ## Examples
 ### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by user
 ```js
