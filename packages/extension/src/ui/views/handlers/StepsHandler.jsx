@@ -219,7 +219,7 @@ class StepsHandler extends PureComponent {
                 currentTask,
                 data,
             },
-            this.runTask,
+            ensureMinPendingTime(this.runTask, 300),
         );
     };
 

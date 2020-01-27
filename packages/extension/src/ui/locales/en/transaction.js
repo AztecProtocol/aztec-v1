@@ -39,4 +39,5 @@ export default {
         },
     },
     success: 'Transaction completed!',
+    autoClose: 'This window will close automatically when the transaction is confirmed.',
 };
