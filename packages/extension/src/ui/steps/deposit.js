@@ -2,7 +2,7 @@ import apis from '~uiModules/apis';
 
 const stepApproveERC20 = {
     name: 'approveERC20',
-    descriptionKey: 'deposit.approve.erc20.description',
+    descriptionKey: 'deposit.approve.description',
     blockStyle: 'linked',
     tasks: [
         {
@@ -27,7 +27,7 @@ const stepConfirm = {
 
 const stepTransferViaGSN = {
     name: 'send',
-    descriptionKey: 'deposit.send.explain',
+    descriptionKey: 'deposit.send.description',
     blockStyle: 'sealed',
     tasks: [
         {
@@ -53,7 +53,7 @@ const stepTransferViaGSN = {
 
 const stepSend = {
     name: 'send',
-    descriptionKey: 'deposit.send.explain',
+    descriptionKey: 'deposit.send.description',
     blockStyle: 'sealed',
     tasks: [
         {
@@ -73,7 +73,7 @@ const stepSend = {
         },
     ],
     showTaskList: true,
-    submitTextKey: 'deposit.send.submit',
+    submitTextKey: 'transaction.send.submit',
 };
 
 const stepSendViaGSN = {
