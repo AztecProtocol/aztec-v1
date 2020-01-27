@@ -67,7 +67,7 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
   }
 }
 
-@mixin sealed-blocks() {
+@mixin collapsed-blocks() {
   .block {
     .content-footnote {
       display: none;
@@ -116,6 +116,12 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
   transition: all $block-transition-duration ease-out;
 }
 
+@each $layer, $bg in $block-bg-map {
+  .block-layer-#{$layer} {
+    background: $bg;
+  }
+}
+
 .block-content {
   transform: translateY(0);
   transition: all $block-transition-duration ease-out;
@@ -152,16 +158,47 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
   transition-delay: $block-transition-duration / 2;
 }
 
+.content-footnote {
+  display: block;
+
+  &.hide {
+    display: none;
+  }
+}
+
 .type-linked {
   @include linked-blocks();
 }
 
-.linked-to-overlapped,
 .type-overlapped {
   @include overlapped-blocks();
+
+  &.wrapper {
+    margin-bottom: -($overlapped-block-offset + $block-spacing);
+  }
 }
 
-.linked-to-overlapped {
+.type-collapsed {
+  @include collapsed-blocks();
+
+  &.wrapper {
+    margin-bottom: -($sealed-block-offset + $block-spacing);
+  }
+}
+
+.type-sealed {
+  @include collapsed-blocks();
+
+  &.wrapper {
+    margin-bottom: -($sealed-block-offset + $block-spacing);
+  }
+
+  .sealed-icon {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.from-linked {
   $hide-line-duration: $block-transition-duration / 2;
 
   .child-wrap {
@@ -174,41 +211,26 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
   }
 }
 
-.type-overlapped {
-  &.wrapper {
-    margin-bottom: -($overlapped-block-offset + $block-spacing);
+.to-overlapped {
+  @include overlapped-blocks();
+}
+
+.to-collapsed {
+  @include collapsed-blocks();
+
+  .block-extra {
+    max-height: 1000px;
   }
 }
 
-.type-sealed,
-.overlapped-to-sealed {
-  @include sealed-blocks();
-}
+.to-sealed {
+  @include collapsed-blocks();
 
-.overlapped-to-sealed {
   .block-extra {
     max-height: 1000px;
   }
 
   .sealed-icon {
     transform: scale(0) rotate(20deg);
-  }
-}
-
-.type-sealed {
-  &.wrapper {
-    margin-bottom: -($sealed-block-offset + $block-spacing);
-  }
-
-  .sealed-icon {
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.content-footnote {
-  display: block;
-
-  &.hide {
-    display: none;
   }
 }
