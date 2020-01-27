@@ -27,7 +27,7 @@ class AnimatedBlocks extends PureComponent {
         }
 
         return {
-            transition: `${prevType}-to-${type}`,
+            transition: `to-${type}`,
         };
     }
 
@@ -86,6 +86,7 @@ class AnimatedBlocks extends PureComponent {
                     styles.wrapper,
                     styles[`type-${prevType}`],
                     {
+                        [styles[`from-${prevType}`]]: transition,
                         [styles[transition]]: transition,
                     },
                 )}
@@ -121,10 +122,7 @@ class AnimatedBlocks extends PureComponent {
                             },
                         )}
                     >
-                        <EntityBlock
-                            className={styles.block}
-                            {...block}
-                        >
+                        <EntityBlock {...block}>
                             {!!extraContent && (
                                 <div className={styles['block-extra']}>
                                     <Block padding="l xl">

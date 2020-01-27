@@ -19,8 +19,17 @@ const EntityBlock = ({
     hideContentFootnote,
     profile,
     children,
+    layer,
 }) => (
-    <div className={className}>
+    <div
+        className={classnames(
+            className,
+            styles.block,
+            {
+                [styles[`block-layer-${layer}`]]: layer > 0,
+            },
+        )}
+    >
         <Block padding="xs l">
             {!!title && (
                 <Block
@@ -86,6 +95,7 @@ EntityBlock.propTypes = {
     hideContentFootnote: PropTypes.bool,
     profile: profileShape,
     children: PropTypes.node,
+    layer: PropTypes.number,
 };
 
 EntityBlock.defaultProps = {
@@ -96,6 +106,7 @@ EntityBlock.defaultProps = {
     hideContentFootnote: false,
     profile: null,
     children: null,
+    layer: 0,
 };
 
 export default EntityBlock;
