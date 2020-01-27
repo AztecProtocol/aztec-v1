@@ -80,6 +80,15 @@ export default mergeApis(realApis, {
             value: randomInt(100),
             asset: assets[0],
         }),
+        signProof: () => {
+            const approval = window.confirm('Sign notes?');
+            return {
+                approval,
+                error: approval ? null : {
+                    message: 'User denied transaction.',
+                },
+            };
+        },
     },
     proof: {
         createNoteFromBalance: ({

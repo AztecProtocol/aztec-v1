@@ -8,11 +8,12 @@ import Login from '~/ui/pages/Login';
 import NoteAccess from '~/ui/pages/NoteAccess';
 import Icons from '~/ui/views/playground/Icons';
 import DepositContent from '~/ui/views/DepositContent';
+import WithdrawContent from '~/ui/views/WithdrawContent';
 import depositSteps from '~/ui/steps/deposit';
+import withdrawSteps from '~/ui/steps/withdraw';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 import {
     registerSteps,
-    withdrawSteps,
     sendSteps,
 } from '~/ui/config/steps';
 
@@ -103,15 +104,27 @@ export default {
     },
     withdraw: {
         path: 'withdraw',
-        step: withdrawSteps.gsn[0],
+        Content: WithdrawContent,
+        steps: withdrawSteps.gsn,
+        initialStep: 0,
         routes: {
             sign: {
                 path: 'sign',
-                step: withdrawSteps.gsn[1],
+                Content: WithdrawContent,
+                steps: withdrawSteps.gsn,
+                initialStep: 1,
+            },
+            confirm: {
+                path: 'confirm',
+                Content: WithdrawContent,
+                steps: withdrawSteps.gsn,
+                initialStep: 2,
             },
             send: {
                 path: 'send',
-                step: withdrawSteps.gsn[2],
+                Content: WithdrawContent,
+                steps: withdrawSteps.gsn,
+                initialStep: 3,
             },
         },
     },

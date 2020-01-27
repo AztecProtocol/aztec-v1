@@ -82,12 +82,11 @@ export default {
     withdraw: {
         asset: assets[0],
         currentAddress: addresses[0],
-        amount: randomInt(1, 100),
+        amount: randomInt(1, 10000),
         publicOwner: randomAddress(),
-    },
-    'withdraw.sign': {
         proof: {
-            inputNotes: generate(5, randomRawNote),
+            proofHash: `0x${randomId(150)}`,
+            spender: addresses[1],
         },
     },
     send: {
