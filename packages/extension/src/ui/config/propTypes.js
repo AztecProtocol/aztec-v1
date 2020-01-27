@@ -113,6 +113,7 @@ export const rawNoteShape = PropTypes.shape({
 });
 
 export const animatedBlockType = [
+    '',
     'linked',
     'overlapped',
     'collapsed',

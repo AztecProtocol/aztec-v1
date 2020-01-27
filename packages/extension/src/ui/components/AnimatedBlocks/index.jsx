@@ -108,10 +108,7 @@ class AnimatedBlocks extends PureComponent {
                         )}
                     </div>
                 )}
-                {blocks.map(({
-                    extraContent,
-                    ...block
-                }, i) => (
+                {blocks.map((block, i) => (
                     <div
                         key={+i}
                         className={classnames(
@@ -122,15 +119,10 @@ class AnimatedBlocks extends PureComponent {
                             },
                         )}
                     >
-                        <EntityBlock {...block}>
-                            {!!extraContent && (
-                                <div className={styles['block-extra']}>
-                                    <Block padding="l xl">
-                                        {extraContent}
-                                    </Block>
-                                </div>
-                            )}
-                        </EntityBlock>
+                        <EntityBlock
+                            layer={0}
+                            {...block}
+                        />
                     </div>
                 ))}
             </div>
@@ -139,7 +131,7 @@ class AnimatedBlocks extends PureComponent {
 }
 
 AnimatedBlocks.propTypes = {
-    type: PropTypes.oneOf(animatedBlockType).isRequired,
+    type: PropTypes.oneOf(animatedBlockType),
     blocks: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.oneOfType([
             PropTypes.string,
@@ -161,6 +153,7 @@ AnimatedBlocks.propTypes = {
 };
 
 AnimatedBlocks.defaultProps = {
+    type: '',
     sealedIcon: '',
 };
 

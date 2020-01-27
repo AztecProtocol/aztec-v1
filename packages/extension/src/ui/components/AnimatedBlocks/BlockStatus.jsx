@@ -22,8 +22,8 @@ const BlockStatus = ({
         <Block padding="0 xs">
             <Text
                 text={text}
-                size="xs"
-                color="label"
+                size="xxs"
+                color="primary"
             />
         </Block>
         <Icon
