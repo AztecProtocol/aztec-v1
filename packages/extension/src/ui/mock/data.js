@@ -51,7 +51,7 @@ export const assets = [
         name: 'Dai Stablecoin',
         symbol: 'DAI',
         decimals: 18,
-        scalingFactor: new BN('10000000000'),
+        scalingFactor: new BN('10000000000000000'),
         address: randomAddress(),
         linkedTokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
         icon: daiIcon,
@@ -121,39 +121,8 @@ export const notes = [
     },
 ];
 
-export const pastTransactions = [
-    {
-        type: 'deposit',
-        asset: assets[0],
-        address: addresses[0],
-        value: 50,
-        timestamp: Date.now() - 40 * 1000,
-    },
-    {
-        type: 'deposit',
-        asset: assets[1],
-        address: addresses[0],
-        value: 1000,
-        timestamp: Date.now() - 60 * 60 * 1000,
-    },
-    {
-        type: 'send',
-        asset: assets[0],
-        address: addresses[0],
-        value: 0.12,
-        timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000,
-    },
-    {
-        type: 'withdraw',
-        asset: assets[0],
-        address: addresses[0],
-        value: 1.523,
-        timestamp: Date.now() - 45 * 24 * 60 * 60 * 1000,
-    },
-];
-
-export const depositTransactions = generate(3, i => ({
-    amount: randomInt(1, 100),
+export const depositTransactions = generate(2, i => ({
+    amount: randomInt(1, 10000),
     to: addresses[i + 1],
 }));
 

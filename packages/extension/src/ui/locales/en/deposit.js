@@ -1,19 +1,24 @@
 export default {
+    title: 'Wrap Tokens',
     confirm: {
-        title: 'Deposit',
+        title: 'Wrap Tokens',
+        description: 'Please check the information below is correct before approving the AZTEC contract to spend tokens via MetaMask.',
         submit: 'Create Proof',
         explain: 'Check the above details are correct before proceeding.',
     },
     approve: {
         title: 'Approve Spend',
-        submit: 'Approve',
+        allowance: 'Allowance',
+        submit: 'Approve Spend',
         amount: 'Deposit',
         explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
         erc20: {
             title: 'Approve Allowance',
+            description: 'Please check the information below is correct before approving the AZTEC contract to spend tokens via MetaMask.',
             submit: 'Approve',
             explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
         },
+        public: 'Public Approve',
     },
     send: {
         title: 'Send Transaction',

@@ -111,3 +111,31 @@ export const rawNoteShape = PropTypes.shape({
         words: PropTypes.arrayOf(PropTypes.number).isRequired,
     }).isRequired,
 });
+
+export const animatedBlockType = [
+    'linked',
+    'overlapped',
+    'sealed',
+];
+
+export const transactionStepShape = PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    blockStyle: PropTypes.oneOf(animatedBlockType),
+    title: PropTypes.string,
+    titleKey: PropTypes.string,
+    tasks: PropTypes.arrayOf(PropTypes.shape({
+        name: PropTypes.string,
+        type: PropTypes.string,
+        title: PropTypes.string,
+        titleKey: PropTypes.string,
+        run: PropTypes.func,
+    })),
+    Content: PropTypes.func,
+    contentProps: PropTypes.object,
+    onSubmit: PropTypes.func,
+    onGoNext: PropTypes.func,
+    cancelText: PropTypes.string,
+    cancelTextKey: PropTypes.string,
+    submitText: PropTypes.string,
+    submitTextKey: PropTypes.string,
+});
