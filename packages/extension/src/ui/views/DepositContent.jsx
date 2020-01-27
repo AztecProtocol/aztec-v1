@@ -18,7 +18,7 @@ import StepContentHelper from '~/ui/views/handlers/StepContentHelper';
 import StepContent from '~/ui/components/StepContent';
 import AnimatedBlocks from '~/ui/components/AnimatedBlocks';
 import BlockStatus from '~/ui/components/AnimatedBlocks/BlockStatus';
-import ReceipientList from '~/ui/components/ReceipientList';
+import RecipientList from '~/ui/components/RecipientList';
 import HashText from '~/ui/components/HashText';
 
 class DepositContent extends StepContentHelper {
@@ -41,7 +41,7 @@ class DepositContent extends StepContentHelper {
 
         const tokenValue = noteValueToToken(amount, asset);
 
-        const receipients = transactions.map(({
+        const recipients = transactions.map(({
             to,
             amount: txAmount,
         }) => ({
@@ -109,7 +109,7 @@ class DepositContent extends StepContentHelper {
                     ...asset,
                     type: 'asset',
                 },
-                extraContent: <ReceipientList receipients={receipients} />,
+                extraContent: <RecipientList recipients={recipients} />,
             },
         ];
     }

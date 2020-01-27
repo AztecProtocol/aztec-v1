@@ -7,15 +7,15 @@ import {
 import ListItem from '~/ui/components/ListItem';
 import HashText from '~/ui/components/HashText';
 
-const ReceipientList = ({
+const RecipientList = ({
     className,
-    receipients,
+    recipients,
 }) => (
     <Offset
         className={className}
         margin="xs 0"
     >
-        {receipients.map(({
+        {recipients.map(({
             address,
             footnote,
         }, i) => (
@@ -45,9 +45,9 @@ const ReceipientList = ({
     </Offset>
 );
 
-ReceipientList.propTypes = {
+RecipientList.propTypes = {
     className: PropTypes.string,
-    receipients: PropTypes.arrayOf(PropTypes.shape({
+    recipients: PropTypes.arrayOf(PropTypes.shape({
         address: PropTypes.string.isRequired,
         footnote: PropTypes.oneOfType([
             PropTypes.string,
@@ -56,8 +56,8 @@ ReceipientList.propTypes = {
     })).isRequired,
 };
 
-ReceipientList.defaultProps = {
+RecipientList.defaultProps = {
     className: '',
 };
 
-export default ReceipientList;
+export default RecipientList;
