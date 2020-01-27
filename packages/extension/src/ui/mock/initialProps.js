@@ -94,21 +94,27 @@ export default {
             spender: addresses[1],
         },
     },
-    send: {
-        asset: makeAsset(assets[0]),
-        sender: randomAddress(),
-        transactions: sendTransactions,
-        amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        userAccessAccounts: [
-            {
-                address: randomAddress(),
+    send: () => {
+        const sendTransactions = generate(2, () => ({
+            amount: randomInt(1, 10000),
+            to: addresses[randomInt(1, addresses.length - 1)],
+        }));
+
+        return {
+            asset: makeAsset(assets[0]),
+            sender: randomAddress(),
+            transactions: sendTransactions,
+            amount: sendTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+            userAccessAccounts: [
+                {
+                    address: randomAddress(),
+                },
+            ],
+            proof: {
+                proofHash: `0x${randomId(150)}`,
+                spender: addresses[1],
             },
-        ],
-    },
-    'send.sign': {
-        proof: {
-            inputNotes: generate(3, randomRawNote),
-        },
+        };
     },
     noteAccess: {
         id: notes[0].noteHash,
