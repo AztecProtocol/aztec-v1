@@ -109,7 +109,11 @@ class WithdrawContent extends StepContentHelper {
                     ...asset,
                     type: 'token',
                 },
-                extraContent: <RecipientList recipients={recipients} />,
+                extraContent: (
+                    <Block padding="l s">
+                        <RecipientList recipients={recipients} />
+                    </Block>
+                ),
             },
         ];
     }

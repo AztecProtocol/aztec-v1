@@ -11,8 +11,6 @@ import {
     assets,
     domains,
     notes,
-    depositTransactions,
-    sendTransactions,
     generate,
     randomAddress,
     randomRawNote,
@@ -56,16 +54,23 @@ export default {
     'account.login': {
         goNext: dummyFunc,
     },
-    deposit: {
-        asset: makeAsset(assets[0]),
-        publicOwner: randomAddress(),
-        transactions: depositTransactions,
-        amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        userAccessAccounts: [
-            {
-                address: randomAddress(),
-            },
-        ],
+    deposit: () => {
+        const depositTransactions = generate(2, i => ({
+            amount: randomInt(1, 10000),
+            to: addresses[i + 1],
+        }));
+
+        return {
+            asset: makeAsset(assets[0]),
+            publicOwner: randomAddress(),
+            transactions: depositTransactions,
+            amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+            userAccessAccounts: [
+                {
+                    address: randomAddress(),
+                },
+            ],
+        };
     },
     'deposit.approve': ({
         asset,
