@@ -1,21 +1,10 @@
 const {
-    types: {
-        Transactions,
-    },
+    types: { Transactions },
 } = require('../../database/models');
 const signatureHash = require('../signatureHash');
-const {
-    TRANSACTION_STATUS,
-    TRANSACTION_TYPE,
-} = require('../../config/constants');
+const { TRANSACTION_STATUS, TRANSACTION_TYPE } = require('../../config/constants');
 
-
-module.exports = async ({
-    dappId,
-    signature,
-    from,
-    nonce,
-}) => {
+module.exports = async ({ dappId, signature, from, nonce }) => {
     const hash = signatureHash(signature);
     const status = TRANSACTION_STATUS.PENDING;
     const type = TRANSACTION_TYPE.SPENDING;

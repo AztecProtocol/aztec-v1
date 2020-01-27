@@ -1,5 +1,5 @@
-const JoinSplitFluidProof = require('../../../joinSplitFluid');
-const ProofType = require('../../../../base/types');
+import JoinSplitFluidProof from '../../../joinSplitFluid';
+import ProofType from '../../../../base/types';
 
 class BurnProof66305 extends JoinSplitFluidProof {
     /**
@@ -21,4 +21,4 @@ class BurnProof66305 extends JoinSplitFluidProof {
     }
 }
 
-module.exports = BurnProof66305;
+export default BurnProof66305;

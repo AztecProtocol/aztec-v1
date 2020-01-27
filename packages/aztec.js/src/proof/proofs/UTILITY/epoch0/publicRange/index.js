@@ -1,14 +1,13 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors, proofs } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const AbiCoder = require('web3-eth-abi');
-const { keccak256, padLeft } = require('web3-utils');
-
-const helpers = require('./helpers');
-const { inputCoder, outputCoder } = require('../../../../../encoder');
-const Proof = require('../../../../base/epoch0/proof');
-const ProofType = require('../../../../base/types');
-const ProofUtils = require('../../../../base/epoch0/utils');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors, proofs } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import AbiCoder from 'web3-eth-abi';
+import { keccak256, padLeft } from 'web3-utils';
+import helpers from './helpers';
+import { inputCoder, outputCoder } from '../../../../../encoder';
+import Proof from '../../../../base/epoch0/proof';
+import ProofType from '../../../../base/types';
+import ProofUtils from '../../../../base/epoch0/utils';
 
 const { AztecError } = errors;
 
@@ -205,4 +204,4 @@ class PublicRangeProof66563 extends Proof {
     }
 }
 
-module.exports = PublicRangeProof66563;
+export default PublicRangeProof66563;

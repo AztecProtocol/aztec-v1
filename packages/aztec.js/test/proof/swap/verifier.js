@@ -1,14 +1,13 @@
-const bn128 = require('@aztec/bn128');
-const { errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { padLeft, padRight, randomHex } = require('web3-utils');
-
-const { mockNoteSet, randomNoteValue } = require('../../helpers/note');
-const { mockZeroSwapProof } = require('../../helpers/proof');
-const { Proof, SwapProof } = require('../../../src/proof');
-const SwapVerifier = require('../../../src/proof/proofs/BALANCED/epoch0/swap/verifier');
+import * as bn128 from '@aztec/bn128';
+import { errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { padLeft, padRight, randomHex } from 'web3-utils';
+import { mockNoteSet, randomNoteValue } from '../../helpers/note';
+import { mockZeroSwapProof } from '../../helpers/proof';
+import { Proof, SwapProof } from '../../../src/proof';
+import SwapVerifier from '../../../src/proof/proofs/BALANCED/epoch0/swap/verifier';
 
 describe('Swap Proof Verifier', () => {
     const sender = randomHex(20);

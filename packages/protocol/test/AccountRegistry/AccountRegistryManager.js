@@ -118,7 +118,9 @@ contract('Account registry manager', async (accounts) => {
                 const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
                 const proxyContract = await Behaviour20200106.at(proxyAddress);
-                await proxyContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
+                const AZTECaddress = randomHex(20);
+
+                await proxyContract.registerAZTECExtension(address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig);
                 const storedLinkedPublicKey = await proxyContract.accountMapping.call(address);
                 expect(storedLinkedPublicKey).to.equal(linkedPublicKey);
             });
@@ -147,7 +149,9 @@ contract('Account registry manager', async (accounts) => {
                 const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
                 const proxyContract = await Behaviour20200106.at(proxyAddress);
-                await proxyContract.registerAZTECExtension(address, linkedPublicKey, spendingPublicKey, sig);
+                const AZTECaddress = randomHex(20);
+
+                await proxyContract.registerAZTECExtension(address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig);
 
                 // perform upgrade, and confirm that registered linkedPublicKey is still present in storage
                 const testBehaviour = await TestBehaviour.new();

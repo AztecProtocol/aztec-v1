@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
-const { getProof, setDefaultEpoch, helpers } = require('./exportHandler');
-const { DIVIDEND } = require('./base/types');
+import { getProof, setDefaultEpoch, helpers } from './exportHandler';
+
+import proofType from './base/types';
 
 /**
  * Export the DividendProof for a default epoch
@@ -10,7 +11,7 @@ const { DIVIDEND } = require('./base/types');
  * @returns A DividendProof construction for the default epoch
  */
 function DividendProof(...args) {
-    const Proof = getProof(DIVIDEND.name, this.epochNum);
+    const Proof = getProof(proofType.DIVIDEND.name, this.epochNum);
 
     return new Proof(...args);
 }
@@ -25,10 +26,10 @@ function DividendProof(...args) {
  * @returns A DividendProof construction for the given epoch number
  */
 DividendProof.epoch = function(epochNum, setAsDefault = false) {
-    helpers.validateEpochNum(DIVIDEND.name, epochNum);
+    helpers.validateEpochNum(proofType.DIVIDEND.name, epochNum);
 
     if (setAsDefault) {
-        setDefaultEpoch(DIVIDEND.name, epochNum);
+        setDefaultEpoch(proofType.DIVIDEND.name, epochNum);
     }
 
     return (...args) => {
@@ -36,4 +37,4 @@ DividendProof.epoch = function(epochNum, setAsDefault = false) {
     };
 };
 
-module.exports = DividendProof;
+export default DividendProof;

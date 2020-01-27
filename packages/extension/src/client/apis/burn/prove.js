@@ -1,4 +1,4 @@
-import aztec from 'aztec.js';
+import * as aztec from 'aztec.js';
 import {
     createNote,
     fromViewingKey,

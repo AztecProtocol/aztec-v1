@@ -3,7 +3,7 @@ const common = require('./webpack.common.js');
 
 const config = {
     mode: 'production',
-    devtool: 'source-map',
+    devtool: '',
 };
 
 const nodeConfig = merge(common, {
@@ -18,7 +18,7 @@ const nodeConfig = merge(common, {
 
 const webConfig = merge(common, {
     ...config,
-    node: { crypto: true },
+    node: { crypto: true, fs: 'empty' },
     output: { filename: 'bundle.web.js' },
     target: 'web',
 });

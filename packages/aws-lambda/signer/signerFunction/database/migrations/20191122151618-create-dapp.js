@@ -2,12 +2,7 @@
 
 module.exports = {
     up: (queryInterface, DataTypes) => {
-        const {
-            STRING,
-            INTEGER,
-            DATE,
-            BOOLEAN,
-        } = DataTypes;
+        const { STRING, INTEGER, DATE, BOOLEAN } = DataTypes;
 
         return queryInterface.createTable('Dapps', {
             id: {

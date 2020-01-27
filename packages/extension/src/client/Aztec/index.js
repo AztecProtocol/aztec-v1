@@ -1,4 +1,4 @@
-import aztec from 'aztec.js';
+import * as aztec from 'aztec.js';
 import {
     warnLog,
 } from '~/utils/log';
@@ -42,7 +42,7 @@ class Aztec {
             providerUrl = '',
             contractAddresses = {
                 ACE: '',
-                AZTECAccountRegistry: '',
+                AccountRegistry: '',
             },
             autoRefreshOnProfileChange = true,
         } = options;

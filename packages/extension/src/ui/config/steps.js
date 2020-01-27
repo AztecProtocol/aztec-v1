@@ -9,6 +9,7 @@ import SignNotes from '~/ui/views/SignNotes';
 import SendConfirm from '~/ui/views/SendConfirm';
 import apis from '~uiModules/apis';
 
+
 export const sendSteps = {
     gsn: [
         {
@@ -30,7 +31,7 @@ export const sendSteps = {
                 {
                     type: 'sign',
                     name: 'approve',
-                    run: apis.note.batchSignNotes,
+                    run: apis.note.signProof,
                 },
             ],
         },
@@ -111,7 +112,7 @@ export const withdrawSteps = {
                 {
                     type: 'sign',
                     name: 'approve',
-                    run: apis.note.batchSignNotes,
+                    run: apis.note.signProof,
                 },
             ],
         },

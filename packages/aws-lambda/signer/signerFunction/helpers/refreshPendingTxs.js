@@ -1,28 +1,14 @@
-const {
-    loadEvents,
-} = require('../utils/ethEvents');
-const {
-    updateExpiredTxs,
-    updateMultipleTxs,
-    pendingTxs,
-} = require('../utils/transactions')
-const {
-    TRANSACTION_STATUS,
-} = require('../config/constants');
+const { loadEvents } = require('../utils/ethEvents');
+const { updateExpiredTxs, updateMultipleTxs, pendingTxs } = require('../utils/transactions');
+const { TRANSACTION_STATUS } = require('../config/constants');
 
-
-module.exports = async ({
-    dappId,
-    networkId,
-}) => {
+module.exports = async ({ dappId, networkId }) => {
     const pending = await pendingTxs({
         dappId,
     });
     if (!pending.length) return;
 
-    const signaturesHashes = pending.map(({
-        signatureHash,
-    }) => signatureHash);
+    const signaturesHashes = pending.map(({ signatureHash }) => signatureHash);
 
     const transactions = await loadEvents({
         signaturesHashes,
@@ -36,7 +22,7 @@ module.exports = async ({
      * Update pending txs to OK status
      */
     if (transactionsOK.length) {
-        const updateTxs = transactionsOK.map(tx => ({
+        const updateTxs = transactionsOK.map((tx) => ({
             signatureHash: tx.signatureHash,
             actualCharge: tx.actualCharge,
             status: TRANSACTION_STATUS.OK,
@@ -48,7 +34,7 @@ module.exports = async ({
      * Update pending txs to Failed status
      */
     if (transactionsFailed.length) {
-        const updateTxs = transactionsFailed.map(tx => ({
+        const updateTxs = transactionsFailed.map((tx) => ({
             signatureHash: tx.signatureHash,
             actualCharge: tx.actualCharge,
             status: TRANSACTION_STATUS.FAILED,

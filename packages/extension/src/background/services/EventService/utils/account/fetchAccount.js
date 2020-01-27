@@ -1,6 +1,6 @@
 import Web3Service from '~/helpers/Web3Service';
 import {
-    AZTECAccountRegistry,
+    AccountRegistry,
 } from '~/config/contractEvents';
 
 export default async function fetchAccount({
@@ -13,7 +13,7 @@ export default async function fetchAccount({
         };
     }
 
-    const eventName = AZTECAccountRegistry.registerExtension;
+    const eventName = AccountRegistry.registerExtension;
 
     const options = {
         filter: {
@@ -28,14 +28,14 @@ export default async function fetchAccount({
         // and there is no account on chain for that address
         // it will break the next transaction sent via GSN
         const onChainLinkedPublicKey = await Web3Service
-            .useContract('AZTECAccountRegistry')
+            .useContract('AccountRegistry')
             .method('accountMapping')
             .call(address);
 
         let data = [];
         if (onChainLinkedPublicKey) {
             data = await Web3Service
-                .useContract('AZTECAccountRegistry')
+                .useContract('AccountRegistry')
                 .events(eventName)
                 .where(options);
         }

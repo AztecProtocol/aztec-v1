@@ -1,9 +1,5 @@
-const inputCoder = require('./inputCoder');
-const noteCoder = require('./noteCoder');
-const outputCoder = require('./outputCoder');
+import * as inputCoder from './inputCoder';
+import * as noteCoder from './noteCoder';
+import * as outputCoder from './outputCoder';
 
-module.exports = {
-    inputCoder,
-    noteCoder,
-    outputCoder,
-};
+export { inputCoder, noteCoder, outputCoder };

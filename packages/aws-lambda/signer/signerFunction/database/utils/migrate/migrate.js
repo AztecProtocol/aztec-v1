@@ -1,9 +1,6 @@
 const getCommand = require('./getCommand');
 const migrator = require('./migrator');
-const {
-    connection,
-} = require('../../helpers');
-
+const { connection } = require('../../helpers');
 
 module.exports = async (commandStr) => {
     const conn = connection.getConnection();
@@ -11,7 +8,7 @@ module.exports = async (commandStr) => {
     const command = getCommand(commandStr);
 
     if (!command) {
-        console.log(`invalid cmd: ${ commandStr }`);
+        console.log(`invalid cmd: ${commandStr}`);
         return;
     }
     try {
@@ -21,7 +18,7 @@ module.exports = async (commandStr) => {
         const pendingMigrations = await umzug.pending();
         console.log(`pendingMigrations:`, pendingMigrations);
 
-        console.log(`${ commandStr.toUpperCase() } BEGIN`);
+        console.log(`${commandStr.toUpperCase()} BEGIN`);
 
         await command(umzug);
     } catch (e) {

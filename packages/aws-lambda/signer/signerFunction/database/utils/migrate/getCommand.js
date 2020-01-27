@@ -3,23 +3,25 @@ const child_process = require('child_process');
 const path = require('path');
 const Promise = require('bluebird');
 
-
 function cmdStatus(umzug) {
     const result = {};
 
-    return umzug.executed()
-        .then(executed => {
+    return umzug
+        .executed()
+        .then((executed) => {
             result.executed = executed;
             return umzug.pending();
-        }).then(pending => {
+        })
+        .then((pending) => {
             result.pending = pending;
             return result;
-        }).then(({ executed: executedRaw, pending: pendingRaw }) => {
-            const executed = executedRaw.map(m => ({
+        })
+        .then(({ executed: executedRaw, pending: pendingRaw }) => {
+            const executed = executedRaw.map((m) => ({
                 ...m,
                 name: path.basename(m.file, '.js'),
             }));
-            const pending = pendingRaw.map(m => ({
+            const pending = pendingRaw.map((m) => ({
                 ...m,
                 name: path.basename(m.file, '.js'),
             }));
@@ -27,11 +29,11 @@ function cmdStatus(umzug) {
             const current = executed.length > 0 ? executed[0].file : '<NO_MIGRATIONS>';
             const status = {
                 current,
-                executed: executed.map(m => m.file),
-                pending: pending.map(m => m.file),
-            }
+                executed: executed.map((m) => m.file),
+                pending: pending.map((m) => m.file),
+            };
 
-            console.log(JSON.stringify(status, null, 2))
+            console.log(JSON.stringify(status, null, 2));
             return { executed, pending };
         });
 }
@@ -41,14 +43,13 @@ function cmdMigrate(umzug) {
 }
 
 function cmdMigrateNext(umzug) {
-    return cmdStatus(umzug)
-        .then(({ executed, pending }) => {
-            if (pending.length === 0) {
-                return Promise.reject(new Error('No pending migrations'));
-            }
-            const next = pending[0].name;
-            return umzug.up({ to: next });
-        })
+    return cmdStatus(umzug).then(({ executed, pending }) => {
+        if (pending.length === 0) {
+            return Promise.reject(new Error('No pending migrations'));
+        }
+        const next = pending[0].name;
+        return umzug.up({ to: next });
+    });
 }
 
 function cmdReset(umzug) {
@@ -56,14 +57,13 @@ function cmdReset(umzug) {
 }
 
 function cmdResetPrev(umzug) {
-    return cmdStatus(umzug)
-        .then(({ executed }) => {
-            if (executed.length === 0) {
-                return Promise.reject(new Error('Already at initial state'));
-            }
-            const prev = executed[executed.length - 1].name;
-            return umzug.down({ to: prev });
-        })
+    return cmdStatus(umzug).then(({ executed }) => {
+        if (executed.length === 0) {
+            return Promise.reject(new Error('Already at initial state'));
+        }
+        const prev = executed[executed.length - 1].name;
+        return umzug.down({ to: prev });
+    });
 }
 
 function cmdHardReset() {
@@ -83,10 +83,9 @@ function cmdHardReset() {
     });
 }
 
-
 module.exports = (cmd) => {
     let executeCmd;
-    switch(cmd) {
+    switch (cmd) {
         case 'status':
             executeCmd = cmdStatus;
             break;
@@ -119,4 +118,4 @@ module.exports = (cmd) => {
             executeCmd = null;
     }
     return executeCmd;
-}
+};

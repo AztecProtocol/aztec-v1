@@ -1,4 +1,3 @@
-
 module.exports = (data) => {
     const fields = [
         'relayerAddress',
@@ -12,15 +11,15 @@ module.exports = (data) => {
         'to',
     ];
 
-    if(data === null || !(data instanceof Object)) {
+    if (data === null || !(data instanceof Object)) {
         return false;
     }
 
-    for(let i = 0; i < data.length; i += 1) {
+    for (let i = 0; i < data.length; i += 1) {
         if (!data[fields[i]]) {
             return false;
         }
     }
 
     return true;
-}
+};
