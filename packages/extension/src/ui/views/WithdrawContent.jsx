@@ -19,7 +19,7 @@ import StepContent from '~/ui/components/StepContent';
 import AnimatedBlocks from '~/ui/components/AnimatedBlocks';
 import SignatureRequestBlock from '~/ui/components/SignatureRequestBlock';
 import BlockStatus from '~/ui/components/AnimatedBlocks/BlockStatus';
-import ReceipientList from '~/ui/components/ReceipientList';
+import RecipientList from '~/ui/components/RecipientList';
 import HashText from '~/ui/components/HashText';
 
 class WithdrawContent extends StepContentHelper {
@@ -42,7 +42,7 @@ class WithdrawContent extends StepContentHelper {
 
         const tokenValue = noteValueToToken(amount, asset);
 
-        const receipients = [
+        const recipients = [
             {
                 address: publicOwner,
                 footnote: (
@@ -109,7 +109,7 @@ class WithdrawContent extends StepContentHelper {
                     ...asset,
                     type: 'token',
                 },
-                extraContent: <ReceipientList receipients={receipients} />,
+                extraContent: <RecipientList recipients={recipients} />,
             },
         ];
     }
