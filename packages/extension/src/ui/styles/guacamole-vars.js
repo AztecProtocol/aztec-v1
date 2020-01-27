@@ -34,7 +34,7 @@ export const buttonSpacingHSizeMap = {
 export const buttonBorderWidth = '1px';
 export const outlinedButtonBorderWidth = '2px';
 export const colorMap = {
-  primary: '#898BF6',
+  primary: '#808dff',
   'primary-light': 'rgba(137, 139, 246, 0.7)',
   'primary-lighter': 'rgba(137, 139, 246, 0.45)',
   'primary-lightest': 'rgb(244, 245, 254)',
@@ -48,7 +48,7 @@ export const colorMap = {
   white: '#FFFFFF',
   'white-light': 'rgba(255, 255, 255, 0.85)',
   'white-lighter': 'rgba(255, 255, 255, 0.5)',
-  'white-lightest': 'rgba(255, 255, 255, 0.1)',
+  'white-lightest': 'rgba(255,255,255,0.3)',
   transparent: 'rgba(255, 255, 255, 0)',
   secondary: '#17173C',
   'secondary-light': '#222261',

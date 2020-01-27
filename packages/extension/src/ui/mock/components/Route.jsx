@@ -78,7 +78,10 @@ const MockRoute = ({
         <Route
             path={path}
             component={() => (
-                <Popup site={sites[0]}>
+                <Popup
+                    site={sites[0]}
+                    onClose={() => {}}
+                >
                     {contentNode}
                 </Popup>
             )}

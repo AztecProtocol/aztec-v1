@@ -38,7 +38,7 @@ const Header = ({
                 {!!icon && (
                     <Block
                         className="flex-fixed"
-                        right="s"
+                        right="m"
                     >
                         <Image
                             className={styles['site-icon']}
@@ -51,18 +51,17 @@ const Header = ({
                 <Block
                     className={styles['site-info']}
                     align="left"
-                    right="s"
+                    right="m"
                 >
                     <Text
                         text={title}
                         size="xs"
-                        weight="light"
                         showEllipsis
                     />
                     <div>
                         <Text
+                            className={styles['site-url']}
                             text={domain}
-                            size="xxs"
                             color="primary-lighter"
                             showEllipsis
                         />

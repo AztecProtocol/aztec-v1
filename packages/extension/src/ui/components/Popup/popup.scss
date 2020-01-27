@@ -11,7 +11,7 @@
     $header-bg: get-darken-color($bg, 10%);
   }
   .header {
-    background: map-get($color-map, 'white');
+    background: $header-bg;
   }
   .content {
     background: $bg;
@@ -20,7 +20,11 @@
 
 .popup-light {
   @extend %popup;
-  @include popup-blocks(map-get($color-map, 'white-lighter'));
+  @include popup-blocks(
+    map-get($color-map, 'white-lightest'),
+    rgba(255, 255, 255, 0.6),
+    // map-get($color-map, 'white-lighter'),
+  );
   color: $default-text-color;
 }
 
@@ -48,12 +52,6 @@
   overflow: hidden;
 }
 
-.header {
-  & + .content {
-    margin-top: 2px;
-  }
-}
-
 $radius: map-get($rounded-corner-map, 'm');
 
 .header {
@@ -70,18 +68,25 @@ $radius: map-get($rounded-corner-map, 'm');
 
 $close-icon-size: map-get($icon-size-map, 'l');
 $site-icon-size: map-get($avatar-sizes-map, 'm');
+$site-icon-info-spacing: map-get($spacing-map, 'm');
+$site-info-close-spacing: map-get($spacing-map, 'm');
 
 .site {
-  width: calc(100% - #{$close-icon-size + map-get($spacing-map, 's')});
+  width: calc(100% - #{$close-icon-size});
 }
 
 .site-info {
-  width: calc(100% - #{$site-icon-size});
+  width: calc(100% - #{$site-icon-size + $site-icon-info-spacing});
 }
 
 .site-icon {
   width: $site-icon-size;
   height: $site-icon-size;
+}
+
+.site-url {
+  font-size: map-get($font-size-map, 'xs');
+  line-height: 1;
 }
 
 .close-button {
