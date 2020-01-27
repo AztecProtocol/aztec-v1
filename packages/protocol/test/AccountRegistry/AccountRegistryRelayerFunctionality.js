@@ -423,7 +423,7 @@ contract('Account registry - relayer functionality', (accounts) => {
                 zkAsset.address,
                 transferProofData,
                 notDelegatedAddress,
-                proofSignature
+                proofSignature,
             ),
             'revert the note owner did not sign this proof',
         );
