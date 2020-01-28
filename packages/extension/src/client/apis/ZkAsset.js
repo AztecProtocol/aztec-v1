@@ -55,6 +55,12 @@ export default class ZkAsset {
         return balance || 0;
     }
 
+    /**
+     * @function zkAsset.totalSupplyOfLinkedToken
+     * @description zkAsset.totalSupplyOfLinkedToken: Get the total supply of the ERC20 token linked to the ZkAsset
+     *
+     * @returns {Integer} totalSupply Token number of ERC20 tokens
+     */
     async totalSupplyOfLinkedToken() {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -76,6 +82,13 @@ export default class ZkAsset {
         return totalSupply | 0; // eslint-disable-line no-bitwise
     }
 
+    /**
+     * @function zkAsset.balanceOfLinkedToken
+     * @description zkAsset.balanceOfLinkedToken: Get the linked ERC20 token balance for an address
+     * @param {String} account Ethereum address for which the balance of the linked ERC20 token is being fetched
+     *
+     * @returns {Integer} Balance Number of linked ERC20 tokens held by the `account`
+     */
     balanceOfLinkedToken = async (account) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -108,6 +121,14 @@ export default class ZkAsset {
         return balance | 0; // eslint-disable-line no-bitwise
     };
 
+    /**
+     * @function zkAsset.allowanceOfLinkedToken
+     * @description zkAsset.allowanceOfLinkedToken: Get the number of linked ERC20 tokens a spender is allowed to spend on behalf of an owner
+     * @param {String} owner Ethereum address which owns linked ERC20 tokens
+     * @param {String} spender Ethereum address that is expected to have previously been approved to spend ERC20 tokens on behalf of the owner
+     *
+     * @returns {Integer} Allowance Number of linked ERC20 tokens the spender has been approved to spend on the owner's behalf
+     */
     allowanceOfLinkedToken = async (owner = '', spender = '') => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -178,7 +199,7 @@ export default class ZkAsset {
      * 
      * - (Int) (optional) numberOfOutputNotes: Number of output notes to create
      * 
-     * @param {Object} options
+     * @param {Object} options Optional parameters to be passed:
      *       - (Int) numberOfOutputNotes: Number of new notes for each transaction.
      *                                     Unless numberOfOutputNotes is defined in that transaction.
      *                                     Will use default value in setting if undefined.
@@ -259,7 +280,7 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.send
-    * @description Send funds confidentially to another Ethereum address
+    * @description zkAsset.send: Send funds confidentially to another Ethereum address
     *
     * @param {Array} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
     * 
@@ -388,16 +409,16 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.createNoteFromBalance
-    * @description zkAsset.createNoteFromBalance: Manually create a note, with a particular value drawn from the user's balance
+    * @description zkAsset.createNoteFromBalance: Manually create notes, with particular values drawn from the user's balance
     *
     * @param {Integer} amount Value of the note to be created
     * @param {Object} options Optional arguments to be passed
     * 
     * - (Array) userAccess:       The addresses that are able to see the real note value.
     * 
-    * - (Int) numberOfInputNotes:     Number of notes to be destroyed.Will use default value in setting if undefined.
+    * - (Int) numberOfInputNotes:     Number of notes to be destroyed. Will use default value in setting if undefined.
     *                                     
-    * - (Int) numberOfOutputNotes:    Number of new notes for each transaction.Unless numberOfOutputNotes is defined in that transaction. Default value is 1.
+    * - (Int) numberOfOutputNotes:    Number of new notes for each transaction. Unless numberOfOutputNotes is defined in that transaction. Default value is 1.
     *
     * @returns {Array} Notes Arrray of note that have been created, where each note object contains:
     * - (String) noteHash
@@ -442,6 +463,7 @@ export default class ZkAsset {
     *
     * @returns {Array} notes: Fetched notes that satisfy the parameters of the fetch query. Each note is an object containing:
     * - (String) noteHash
+    * 
     * - (Int) value
     */
     fetchNotesFromBalance = async ({

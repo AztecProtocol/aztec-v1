@@ -184,20 +184,9 @@ module.exports = {
           exampleMode: 'shown',
           sections: [
             {
-              name: 'zkAsset.balance',
-              content: 'styleguide/categories/WebSDK/ZkAsset/balance.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: 'zkAsset.fetchNotesFromBalance',
-              content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md',
-              exampleMode: 'hide',
-            },
-            {
               name: 'zkAsset.deposit',
               content: 'styleguide/categories/WebSDK/ZkAsset/deposit.md',
               usageMode: 'expand',
-              pagePerSection: false,
             },
             {
               name: 'zkAsset.send',
@@ -210,8 +199,33 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.refresh',
-              content: 'styleguide/categories/WebSDK/ZkAsset/refresh.md',
+              name: 'zkAsset.balance',
+              content: 'styleguide/categories/WebSDK/ZkAsset/balance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.createNoteFromBalance',
+              content: 'styleguide/categories/WebSDK/ZkAsset/createNotesfromBalance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.fetchNotesFromBalance',
+              content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.balanceOfLinkedToken',
+              content: 'styleguide/categories/WebSDK/ZkAsset/balanceOfLinkedToken.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.allowanceOfLinkedToken',
+              content: 'styleguide/categories/WebSDK/ZkAsset/allowanceOfLinkedToken.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'zkAsset.totalSupplyOfLinkedToken',
+              content: 'styleguide/categories/WebSDK/ZkAsset/totalSupplyOfLinkedToken.md',
               exampleMode: 'hide',
             },
           ],
@@ -253,7 +267,7 @@ module.exports = {
     },
     {
       name: 'Reference Specification',
-      content: 'styleguide/categories/Referrence.md',
+      content: 'styleguide/categories/ReferenceSpecification.md',
       sections: [],
       sectionDepth: 1,
     },
