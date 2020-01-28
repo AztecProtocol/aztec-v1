@@ -119,10 +119,8 @@ class WithdrawContent extends StepContentHelper {
 
     renderSignature() {
         const {
-            proof: {
-                proofHash,
-                spender,
-            },
+            proofHash,
+            spender,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -174,10 +172,8 @@ WithdrawContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     publicOwner: PropTypes.string.isRequired,
-    proof: PropTypes.shape({
-        proofHash: PropTypes.string.isRequired,
-        spender: PropTypes.string.isRequired,
-    }),
+    spender: PropTypes.string.isRequired,
+    proofHash: PropTypes.string,
 };
 
 WithdrawContent.defaultProps = {

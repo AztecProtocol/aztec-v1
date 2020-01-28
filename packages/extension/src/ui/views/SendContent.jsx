@@ -107,10 +107,8 @@ class SendContent extends StepContentHelper {
 
     renderSignature() {
         const {
-            proof: {
-                proofHash,
-                spender,
-            },
+            proofHash,
+            spender,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -162,14 +160,13 @@ SendContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
-    proof: PropTypes.shape({
-        proofHash: PropTypes.string.isRequired,
-        spender: PropTypes.string.isRequired,
-    }),
+    spender: PropTypes.string.isRequired,
+    proofHash: PropTypes.string,
 };
 
 SendContent.defaultProps = {
     titleKey: 'send.title',
+    proofHash: '',
 };
 
 export default SendContent;

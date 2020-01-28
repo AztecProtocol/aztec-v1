@@ -63,7 +63,7 @@ const stepSend = {
         {
             type: 'sign',
             titleKey: 'account.create.send.step',
-            run: apis.asset.registerAccountOnChain,
+            run: apis.auth.registerAccountOnChain,
         },
         {
             titleKey: 'account.create.step',
@@ -89,7 +89,7 @@ const stepSendViaGSN = {
         },
         {
             titleKey: 'transaction.step.relay',
-            run: apis.asset.registerAccountOnChain,
+            run: apis.auth.registerAccountOnChain,
         },
         {
             titleKey: 'account.create.step',

@@ -5,7 +5,6 @@ import {
 } from '~/utils/random';
 import makeAsset from '~uiModules/utils/makeAsset';
 import {
-    seedPhrase,
     linkedPublicKey,
     addresses,
     assets,
@@ -75,10 +74,8 @@ export default {
         currentAddress: addresses[0],
         amount: randomInt(1, 10000),
         publicOwner: randomAddress(),
-        proof: {
-            proofHash: `0x${randomId(150)}`,
-            spender: addresses[1],
-        },
+        spender: addresses[1],
+        proofHash: `0x${randomId(150)}`,
     },
     send: () => {
         const sendTransactions = generate(2, () => ({
@@ -96,10 +93,8 @@ export default {
                     address: randomAddress(),
                 },
             ],
-            proof: {
-                proofHash: `0x${randomId(150)}`,
-                spender: addresses[1],
-            },
+            spender: addresses[1],
+            proofHash: `0x${randomId(150)}`,
         };
     },
     noteAccess: {
@@ -110,11 +105,10 @@ export default {
     createNote: {
         asset: assets[0],
         amount: randomInt(1, 100),
+        currentAddress: addresses[0],
         userAccessAccounts: generate(2, randomAccount),
-        proof: {
-            proofHash: `0x${randomId(150)}`,
-            spender: addresses[1],
-        },
+        spender: addresses[1],
+        proofHash: `0x${randomId(150)}`,
     },
     mint: {
         asset: assets[0],
