@@ -10,7 +10,6 @@ import {
     addresses,
     assets,
     domains,
-    notes,
     generate,
     randomAddress,
     randomAccount,
@@ -23,6 +22,10 @@ const address = addresses[0];
 export default {
     register: {
         address,
+        proof: {
+            address,
+            linkedPublicKey,
+        },
     },
     'register.backup': {
         seedPhrase,

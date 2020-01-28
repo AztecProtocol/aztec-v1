@@ -51,10 +51,7 @@ export default mergeApis(realApis, {
         getCurrentUser: () => ({
             address: addresses[0],
         }),
-        createKeyStore: () => ({
-            linkedPublicKey: 'linked_public_key',
-        }),
-        generateLinkedPublicKey: realApis.auth.generateLinkedPublicKey,
+        linkAccountToMetaMask: () => mockSigningApi('Link accounts?'),
     },
     account: {
         getExtensionAccount: address => ({

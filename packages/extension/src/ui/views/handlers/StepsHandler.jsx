@@ -45,7 +45,6 @@ class StepsHandler extends PureComponent {
             pendingInitialFetch: !!fetchInitialData,
             loading: false,
             error: null,
-            childError: null,
         };
     }
 
@@ -53,16 +52,23 @@ class StepsHandler extends PureComponent {
         this.fetchInitialData();
     }
 
-    handleSubmit = async () => {
+    handleSubmit = async (childData) => {
         const {
             loading,
+            data: prevData,
         } = this.state;
         if (loading) {
             return;
         }
 
         this.setState(
-            { loading: true },
+            {
+                loading: true,
+                data: {
+                    ...prevData,
+                    ...childData,
+                },
+            },
             this.validateSubmitData,
         );
     };
@@ -223,26 +229,6 @@ class StepsHandler extends PureComponent {
         );
     };
 
-    updateParentState = (childState) => {
-        const {
-            data: prevData,
-            error,
-        } = this.state;
-        if (error) return;
-
-        const {
-            error: childError,
-            ...childData
-        } = childState;
-        this.setState({
-            data: {
-                ...prevData,
-                ...childData,
-            },
-            childError,
-        });
-    }
-
     handleRetryStep = () => {
         this.setState({
             currentTask: -1,
@@ -305,33 +291,10 @@ class StepsHandler extends PureComponent {
             onSubmit,
         } = this.props;
         const {
-            steps,
-            currentStep,
             data: prevData,
         } = this.state;
-        const {
-            onSubmit: stepOnSubmit,
-        } = steps[currentStep];
 
         let data = prevData;
-        if (stepOnSubmit) {
-            const {
-                error: childError,
-                ...extraData
-            } = await stepOnSubmit(data) || {};
-            if (childError) {
-                this.setState({
-                    loading: false,
-                    childError,
-                });
-                return;
-            }
-            data = {
-                ...data,
-                ...extraData,
-            };
-        }
-
         if (onSubmit) {
             const {
                 error,
@@ -460,7 +423,6 @@ class StepsHandler extends PureComponent {
             data,
             loading,
             error,
-            childError,
         } = this.state;
 
         return (
@@ -471,8 +433,6 @@ class StepsHandler extends PureComponent {
                 currentTask={currentTask}
                 loading={loading}
                 error={error}
-                childError={childError}
-                updateParentState={this.updateParentState}
                 onPrevious={this.handleGoBack}
                 onNext={this.handleSubmit}
                 onRetryTask={this.handleRetryTask}
