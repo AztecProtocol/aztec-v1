@@ -33,7 +33,7 @@ class LiveDocUpdate extends Component {
 
   parseGitDocs = async () => {
     const url =
-      'https://raw.githubusercontent.com/AztecProtocol/AZTEC/8453b6009bf343937acb42879323833df47f00b6/packages/extension/src/client/apis/ZkAsset.js';
+      'https://raw.githubusercontent.com/AztecProtocol/AZTEC/e23644babfadefc05f5d532b4ef68ebc13bfba6b/packages/extension/src/client/apis/ZkAsset.js';
     const response = await fetch(url);
     const apiText = await response.text();
 

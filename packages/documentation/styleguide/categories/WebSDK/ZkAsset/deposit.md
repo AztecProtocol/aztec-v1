@@ -27,7 +27,7 @@ await asset.deposit(
   {},
 );
 
-const userPostDepositBalance = preDepositBalance + depositAmount;
+const userPostDepositBalance = userPreDepositBalance + depositAmount;
 console.info({ userPostDepositBalance });
 ```
 

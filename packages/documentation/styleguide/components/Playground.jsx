@@ -69,7 +69,7 @@ class Playground extends Component {
     const { displayMode } = this.context;
     // const isExampleHidden = exampleMode === ExampleModes.hide;
     // const isEditorHidden = settings.noeditor || isExampleHidden;
-    const preview = <Preview code={code} evalInContext={evalInContext} />;
+    const preview = <Preview code={code} evalInContext={evalInContext} name={name} />;
 
     return (
       <div>

@@ -6,6 +6,8 @@ import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
+import { keccak256 } from 'web3-utils';
+
 import styles from './preview.module.scss';
 import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
@@ -43,6 +45,7 @@ class Preview extends React.Component {
   };
 
   state = {
+    iframeId: 0,
     ethBalance: 0,
     network: 0,
     accounts: [],
@@ -57,6 +60,12 @@ class Preview extends React.Component {
   generateIframeContent = () => {
     const { code } = this.state;
     const { compilerConfig } = this.props;
+
+    // iframeId is the first 5 bytes code hash
+    const iframeId = keccak256(code).slice(5);
+    console.log('iframeId: ', iframeId);
+    this.setState({ iframeId });
+
     // all calls to window.aztec need to go to the parent window, as SDK not loaded in this iframe
     const compiledCode = compileCode(code, compilerConfig, console.log).replace(/window.aztec/g, 'window.parent.aztec');
     const asyncCompiledCode = `const code = async () => {
@@ -95,7 +104,7 @@ class Preview extends React.Component {
   getWeb3Data = async () => {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum);
-      if (this.state.zkAssetAddress) {
+      if (window.aztec.zkAsset) {
         await window.aztec.enable({
           apiKey: '',
         });
@@ -107,6 +116,7 @@ class Preview extends React.Component {
         });
       }
       const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
+
       this.setState({
         ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
         network: window.ethereum.networkVersion,
@@ -165,6 +175,7 @@ class Preview extends React.Component {
       isRunning: true,
       logs: [],
     });
+    await this.getWeb3Data();
     await this.compileCodeInIframe();
     this.setState({
       isRunning: false,
@@ -180,6 +191,7 @@ class Preview extends React.Component {
           ref={(ref) => {
             this.iframeRef = ref;
           }}
+          id={this.state.iframeId}
         />
         <Block background="white" borderRadius="xs" hasBorder>
           <Block padding="xs m" hasBorderBottom>
