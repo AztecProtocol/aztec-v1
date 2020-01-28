@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120px" height="114px" viewBox="0 0 120 114" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Deposit" stroke="none" stroke-width="1" fill-rule="evenodd">
+        <g id="Step-2" transform="translate(-613.000000, -466.000000)" fill-rule="nonzero">
+            <g id="Rectangle" transform="translate(570.000000, 287.000000)">
+                <g id="Group-6">
+                    <g transform="translate(22.000000, 155.000000)">
+                        <g id="Group-8" transform="translate(17.000000, 24.000000)">
+                            <g id="tick" transform="translate(4.000000, 0.000000)">
+                                <path d="M0.13561808,66.9092252 L39.7724146,114 C39.7724146,114 75.8068478,39.6433017 119.562002,2.14500318 C120.679191,1.18695611 119.454004,-0.563460714 118.182016,0.178485513 C75.9088468,24.8271878 32.6300873,83.4733548 32.6300873,83.4733548 L0.826811044,66.0628303 C0.288016528,65.7674924 -0.261577877,66.4386056 0.13561808,66.9092252 Z" id="Path"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

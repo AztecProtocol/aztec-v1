@@ -82,7 +82,6 @@ class GrantNoteAccessContent extends StepContentHelper {
             contentFootnote: (
                 <BlockStatus
                     text={i18n.t('send.approved')}
-                    iconName="check"
                 />
             ),
             hideContentFootnote: !approved,

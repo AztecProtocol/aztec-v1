@@ -101,7 +101,6 @@ class WithdrawContent extends StepContentHelper {
                 contentFootnote: (
                     <BlockStatus
                         text={i18n.t('withdraw.approve.allowance')}
-                        iconName="check"
                     />
                 ),
                 hideContentFootnote: !approved,
