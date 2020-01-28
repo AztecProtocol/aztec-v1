@@ -3,46 +3,49 @@ import PropTypes from 'prop-types';
 import {
     gsnConfigShape,
 } from '~/ui/config/propTypes';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import { linkAccountSteps } from '~/ui/config/steps';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import RegisterContent from '~/ui/views/RegisterContent';
+import registerSteps from '~/ui/config/steps';
+import apis from '~uiModules/apis';
 
 const RegisterAddress = ({
     currentAccount,
-    initialStep,
-    initialData,
     gsnConfig,
 }) => {
     const {
         isGSNAvailable,
     } = gsnConfig;
-    const steps = linkAccountSteps[isGSNAvailable ? 'gsn' : 'metamask'];
+    const steps = registerSteps[isGSNAvailable ? 'gsn' : 'metamask'].slice(1);
+
+    const fetchInitialData = async () => {
+        const {
+            keyStore,
+            pwDerivedKey,
+        } = await apis.auth.getAccountKeys();
+
+        return {
+            ...currentAccount,
+            keyStore,
+            pwDerivedKey,
+            isGSNAvailable,
+        };
+    };
 
     return (
-        <AnimatedTransaction
+        <StepsHandler
             steps={steps}
-            initialStep={initialStep}
-            initialData={{
-                ...initialData,
-                ...currentAccount,
-                isGSNAvailable,
-            }}
+            fetchInitialData={fetchInitialData}
+            Content={RegisterContent}
         />
     );
 };
 
 RegisterAddress.propTypes = {
-    initialStep: PropTypes.number,
-    initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string.isRequired,
     }).isRequired,
     gsnConfig: gsnConfigShape.isRequired,
-};
-
-RegisterAddress.defaultProps = {
-    initialStep: 0,
-    initialData: {},
 };
 
 export default RegisterAddress;

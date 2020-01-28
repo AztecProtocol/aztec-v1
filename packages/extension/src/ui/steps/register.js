@@ -53,8 +53,8 @@ const stepConfirm = {
 
 const stepSend = {
     name: 'send',
-    descriptionKey: 'account.create.send.description',
     blockStyle: 'sealed',
+    descriptionKey: 'account.create.send.description',
     tasks: [
         {
             titleKey: 'transaction.step.sign',
@@ -80,6 +80,7 @@ const stepSend = {
 
 const stepSendViaGSN = {
     name: 'send',
+    blockStyle: 'sealed',
     descriptionKey: 'transaction.gsn.send.description',
     tasks: [
         {
@@ -109,13 +110,13 @@ export default {
         stepLink,
         stepSign,
         stepConfirm,
-        stepSend,
+        stepSendViaGSN,
     ],
     metamask: [
         stepCreatePassword,
         stepLink,
         stepSign,
         stepConfirm,
-        stepSendViaGSN,
+        stepSend,
     ],
 };

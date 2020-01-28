@@ -9,7 +9,7 @@ export default {
         password: 'Enter Password',
         submit: 'Create Encryption Keys',
         send: {
-            description: `Your encryption keys needs to be linked to your Ethereum account.
+            description: `Your encryption keys need to be linked to your Ethereum account.
                 This requires a signature in MetaMask.
                 Check the values shown below are correct.
             `,
@@ -18,7 +18,7 @@ export default {
         },
     },
     link: {
-        description: `Your encryption keys needs to be linked to your Ethereum account.
+        description: `Your encryption keys need to be linked to your Ethereum account.
             This requires a signature in MetaMask.
             Check the values shown below are correct.
         `,

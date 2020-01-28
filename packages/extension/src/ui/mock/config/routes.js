@@ -1,7 +1,6 @@
 import Home from '~/ui/views/Home';
 import Loading from '~/ui/views/Loading';
 import RegisterContent from '~/ui/views/RegisterContent';
-import RegisterAddress from '~/ui/pages/RegisterAddress';
 import DomainPermission from '~/ui/pages/DomainPermission';
 import Restore from '~/ui/pages/Restore';
 import Login from '~/ui/pages/Login';
@@ -58,14 +57,9 @@ export default {
             },
             address: {
                 path: 'address',
-                Component: RegisterAddress,
-                routes: {
-                    confirm: {
-                        path: 'confirm',
-                        Component: RegisterAddress,
-                        initialStep: 1,
-                    },
-                },
+                Content: RegisterContent,
+                steps: registerSteps.gsn.slice(1),
+                initialStep: 0,
             },
             domain: {
                 path: 'domain',

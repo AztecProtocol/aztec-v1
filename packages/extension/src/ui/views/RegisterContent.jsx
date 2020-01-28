@@ -90,10 +90,8 @@ class RegisterContent extends StepContentHelper {
 
     renderSignature() {
         const {
-            proof: {
-                address,
-                linkedPublicKey,
-            },
+            address,
+            linkedPublicKey,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -192,10 +190,7 @@ class RegisterContent extends StepContentHelper {
 
 RegisterContent.propTypes = {
     address: PropTypes.string.isRequired,
-    proof: PropTypes.shape({
-        address: PropTypes.string.isRequired,
-        linkedPublicKey: PropTypes.string.isRequired,
-    }),
+    linkedPublicKey: PropTypes.string.isRequired,
 };
 
 RegisterContent.defaultProps = {
