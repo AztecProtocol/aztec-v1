@@ -1,5 +1,8 @@
 /* global artifacts */
 const dotenv = require('dotenv');
+const { fundRecipient } = require('@openzeppelin/gsn-helpers');
+const { toWei } = require('web3-utils');
+const Web3 = require('web3');
 
 dotenv.config();
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager.sol');
@@ -13,7 +16,15 @@ module.exports = (deployer, network) => {
             AccountRegistryManager,
             AccountRegistryBehaviour.address,
             ACE.address,
-        );
             useLocal ? process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS : process.env.TRUSTED_GSN_SIGNER_ADDRESS,
+        ).then(async (contract) => {
+            const WEB3_PROVIDER_URL = 'http://127.0.0.1:8545';
+            const web3 = new Web3(WEB3_PROVIDER_URL);
+            const proxyAddress = await contract.proxyAddress.call();
+            await fundRecipient(web3, {
+                recipient: proxyAddress,
+                amount: toWei('1'),
+            });
+        });
     }
 };
