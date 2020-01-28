@@ -1,9 +1,8 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-
-const Keccak = require('../../../../../keccak');
-const Verifier = require('../../../../base/epoch0/verifier');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import Keccak from '../../../../../keccak';
+import Verifier from '../../../../base/epoch0/verifier';
 
 const { ZERO_BN } = constants;
 
@@ -107,4 +106,4 @@ class JoinSplitVerifier65793 extends Verifier {
     }
 }
 
-module.exports = JoinSplitVerifier65793;
+export default JoinSplitVerifier65793;

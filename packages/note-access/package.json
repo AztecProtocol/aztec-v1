@@ -7,7 +7,7 @@
     "build:prod": "yarn build",
     "clean": "shx rm -rf ./lib",
     "lint": "eslint --ignore-path  ../../.eslintignore .",
-    "has:changed": "sh ../monorepo-scripts/ci/hasChanged.sh note-access",
+    "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh note-access",
     "test": "jest",
     "watch": "yarn build --watch"
   },

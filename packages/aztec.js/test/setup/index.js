@@ -1,15 +1,14 @@
-const bn128 = require('@aztec/bn128');
-const { constants } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const { expect } = require('chai');
+import * as bn128 from '@aztec/bn128';
+import { constants } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import setup from '../../src/setup';
 
-const setup = require('../../src/setup');
-
-const { K_MAX, K_MIN } = constants;
+const { K_MAX_TEST, K_MIN } = constants;
 
 describe('Trusted Setup', () => {
     it('should read signature and retrieve well-formed elliptic curve points', async () => {
-        const k = Math.floor(Math.random() * (K_MAX - K_MIN + 1)) + K_MIN;
+        const k = Math.floor(Math.random() * (K_MAX_TEST - K_MIN + 1)) + K_MIN;
         const point = await setup.fetchPoint(k);
         expect(BN.isBN(point.x)).to.equal(true);
         expect(BN.isBN(point.y)).to.equal(true);
@@ -35,7 +34,7 @@ describe('Trusted Setup', () => {
     });
 
     it('should fail if asked for a point > K_MAX', async () => {
-        const k = K_MAX * 2;
+        const k = K_MAX_TEST * 2;
         try {
             await setup.fetchPoint(k);
         } catch (err) {

@@ -1,0 +1,21 @@
+# ignored directories
+node_modules/*
+/test/*
+/migrations/*
+/build/*
+/demo/*
+
+# ignored file types
+**/*.sol
+**/*.json
+**/*.css
+**/*.scss
+**/*.md
+**/*.ico
+**/*.svg
+**/*.lock
+**/*.log
+**/*.yml
+
+# ignored file
+/src/ui/styles/guacamole-vars.js

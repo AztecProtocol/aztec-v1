@@ -1,0 +1,16 @@
+@import './variables';
+@import './font-face';
+
+:global(#aztec-popup-ui-app) {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: $default-font-family;
+  font-size: map-get($font-size-map, $default-font-size-key);
+  line-height: map-get($line-height-map, $default-font-size-key);
+  text-align: center;
+}
+
+:global(.text-code) {
+  font-family: $code-font-family;
+}

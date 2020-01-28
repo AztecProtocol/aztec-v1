@@ -1,5 +1,5 @@
-const JoinSplitFluidProof = require('../../../joinSplitFluid');
-const ProofType = require('../../../../base/types');
+import JoinSplitFluidProof from '../../../joinSplitFluid';
+import ProofType from '../../../../base/types';
 
 class MintProof66049 extends JoinSplitFluidProof {
     /**
@@ -21,4 +21,4 @@ class MintProof66049 extends JoinSplitFluidProof {
     }
 }
 
-module.exports = MintProof66049;
+export default MintProof66049;

@@ -12,6 +12,8 @@ const ROPSTEN_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', '
 
 const deployedContracts = [
     'ACE',
+    'AccountRegistryManager',
+    'Behaviour20200106',
     'Dividend',
     'ERC20Mintable',
     'FactoryAdjustable201907',
