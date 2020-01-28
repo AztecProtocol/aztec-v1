@@ -34,14 +34,10 @@ export function PlaygroundRenderer({
   tabButtons,
   tabBody,
   toolbar,
-  methodArgs,
-  methodReturn,
 }) {
   const { className, ...props } = previewProps;
   return (
     <div className={classes.root}>
-      <div> {methodArgs}</div>
-      <div>{methodReturn}</div>
       <div data-preview={name}>{preview}</div>
       <div className={classes.controls}>
         <div className={classes.tabs}>{tabButtons}</div>
