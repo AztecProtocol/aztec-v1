@@ -5,6 +5,7 @@ import {
     Text,
     Icon,
     Loader,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     transactionStepShape,
@@ -13,6 +14,11 @@ import {
 import i18n from '~/ui/helpers/i18n';
 import ensureMinPendingTime from '~/ui/utils/ensureMinPendingTime';
 import ListItem from '~/ui/components/ListItem';
+import {
+    colorMap,
+    iconSizeMap,
+} from '~/ui/styles/guacamole-vars';
+import checkGlyph from '~/ui/images/tick.svg';
 
 class StepContentHelper extends PureComponent {
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -232,10 +238,11 @@ class StepContentHelper extends PureComponent {
                         );
                     } else if (isFinished) {
                         statusIcon = (
-                            <Icon
-                                name="check"
-                                color="primary"
-                                size="m"
+                            <SVG
+                                glyph={checkGlyph}
+                                fill={colorMap.primary}
+                                width={iconSizeMap.s}
+                                height={iconSizeMap.s}
                             />
                         );
                     } else if (i === currentTask + 1) {

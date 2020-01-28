@@ -78,7 +78,6 @@ class DepositContent extends StepContentHelper {
                 contentFootnote: (
                     <BlockStatus
                         text={i18n.t('deposit.approve.allowance')}
-                        iconName="check"
                     />
                 ),
                 hideContentFootnote: !approved,

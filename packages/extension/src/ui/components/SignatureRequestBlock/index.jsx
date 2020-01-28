@@ -5,12 +5,16 @@ import {
     Block,
     FlexBox,
     Text,
-    Icon,
+    SVG,
 } from '@aztec/guacamole-ui';
 import prettyPrint from '~/utils/prettyPrint';
 import i18n from '~/ui/helpers/i18n';
 import EntityBlock from '~/ui/components/AnimatedBlocks/EntityBlock';
 import Code from '~/ui/components/Code';
+import {
+    iconSizeMap,
+} from '~/ui/styles/guacamole-vars';
+import checkGlyph from '~/ui/images/tick.svg';
 import styles from './sig.scss';
 
 const SignatureRequestBlock = ({
@@ -43,10 +47,11 @@ const SignatureRequestBlock = ({
                 valign="center"
             >
                 <Block padding="xs 0">
-                    <Icon
-                        name="check"
-                        size="xl"
+                    <SVG
+                        glyph={checkGlyph}
                         color="white"
+                        width={iconSizeMap.xl}
+                        height={iconSizeMap.xl}
                     />
                 </Block>
                 <Block padding="xs 0">
