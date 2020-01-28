@@ -22,28 +22,11 @@ const address = addresses[0];
 export default {
     register: {
         address,
-        proof: {
-            address,
-            linkedPublicKey,
-        },
-    },
-    'register.backup': {
-        seedPhrase,
-    },
-    'register.password': {},
-    'register.link': {
-        address,
-        linkedPublicKey: `0x${randomId(64)}`,
-    },
-    'register.confirm': {
-        address,
-        linkedPublicKey: `0x${randomId(64)}`,
+        linkedPublicKey,
     },
     'register.address': {
-        currentAccount: {
-            address,
-            linkedPublicKey,
-        },
+        address,
+        linkedPublicKey,
     },
     'register.domain': {
         domain: domains[0],
