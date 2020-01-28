@@ -82,7 +82,7 @@ class Preview extends React.Component {
     return iframeDoc;
   };
 
-  async componentDidMount() {
+  componentDidMount() {
     this.getWeb3Data();
   }
 
@@ -129,6 +129,7 @@ class Preview extends React.Component {
         });
       }
     });
+
     return new Promise((resolve) => {
       window.addEventListener('message', (event) => {
         if (event.data === 'EXAMPLE_RAN') {
@@ -158,6 +159,7 @@ class Preview extends React.Component {
       loadingTestEth: false,
     });
   };
+
   runCode = async () => {
     this.setState({
       isRunning: true,

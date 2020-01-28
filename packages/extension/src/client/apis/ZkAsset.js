@@ -57,7 +57,7 @@ export default class ZkAsset {
 
     /**
      * @function zkAsset.totalSupplyOfLinkedToken
-     * @description zkAsset.totalSupplyOfLinkedToken: Get the total supply of the ERC20 token linked to the ZkAsset
+     * @description zkAsset.totalSupplyOfLinkedToken Description: Get the total supply of the ERC20 token linked to the ZkAsset
      *
      * @returns {Integer} totalSupply Token number of ERC20 tokens
      */
@@ -84,7 +84,7 @@ export default class ZkAsset {
 
     /**
      * @function zkAsset.balanceOfLinkedToken
-     * @description zkAsset.balanceOfLinkedToken: Get the linked ERC20 token balance for an address
+     * @description zkAsset.balanceOfLinkedToken Description: Get the linked ERC20 token balance for an address
      * @param {String} account Ethereum address for which the balance of the linked ERC20 token is being fetched
      *
      * @returns {Integer} Balance Number of linked ERC20 tokens held by the `account`
@@ -123,7 +123,7 @@ export default class ZkAsset {
 
     /**
      * @function zkAsset.allowanceOfLinkedToken
-     * @description zkAsset.allowanceOfLinkedToken: Get the number of linked ERC20 tokens a spender is allowed to spend on behalf of an owner
+     * @description zkAsset.allowanceOfLinkedToken Description: Get the number of linked ERC20 tokens a spender is allowed to spend on behalf of an owner
      * @param {String} owner Ethereum address which owns linked ERC20 tokens
      * @param {String} spender Ethereum address that is expected to have previously been approved to spend ERC20 tokens on behalf of the owner
      *
@@ -189,7 +189,7 @@ export default class ZkAsset {
     /**
      *
      * @function zkAsset.deposit
-     * @description zkAsset.deposit: Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
+     * @description zkAsset.deposit Description: Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
      *
      * @param {Array} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
      * 
@@ -236,7 +236,7 @@ export default class ZkAsset {
     /**
      *
      * @function zkAsset.withdraw
-     * @description zkasset.withdraw: Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens
+     * @description zkasset.withdraw Description: Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens
      *
      * @param {Int} amount Units of value being withdrawn - will equal the number of ERC20 tokens the `to` address receives
      * @param {Object} options Optional arguments to be passed
@@ -280,7 +280,7 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.send
-    * @description zkAsset.send: Send funds confidentially to another Ethereum address
+    * @description zkAsset.send Description: Send funds confidentially to another Ethereum address
     *
     * @param {Array} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
     * 
@@ -409,7 +409,7 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.createNoteFromBalance
-    * @description zkAsset.createNoteFromBalance: Manually create notes, with particular values drawn from the user's balance
+    * @description zkAsset.createNoteFromBalance Description: Manually create notes, with particular values drawn from the user's balance
     *
     * @param {Integer} amount Value of the note to be created
     * @param {Object} options Optional arguments to be passed
@@ -421,6 +421,7 @@ export default class ZkAsset {
     * - (Int) numberOfOutputNotes:    Number of new notes for each transaction. Unless numberOfOutputNotes is defined in that transaction. Default value is 1.
     *
     * @returns {Array} Notes Arrray of note that have been created, where each note object contains:
+    * 
     * - (String) noteHash
     * 
     * - (Int) value
@@ -450,7 +451,7 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.fetchNotesFromBalance
-    * @description zkAsset.fetchNotesfromBalance: Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
+    * @description zkAsset.fetchNotesfromBalance Description: Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
     *
     * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch
     * - (Int) equalTo: the exact value all notes need to match
@@ -462,6 +463,7 @@ export default class ZkAsset {
     * - (Int) numberOfNotes: number of notes which match the query to return
     *
     * @returns {Array} notes: Fetched notes that satisfy the parameters of the fetch query. Each note is an object containing:
+    * 
     * - (String) noteHash
     * 
     * - (Int) value
