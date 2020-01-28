@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import parse from 'comment-parser';
 import PropTypes from 'prop-types';
+import { Block, Text, Row } from '@aztec/guacamole-ui';
 
 import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
@@ -9,6 +10,7 @@ import parseTagsForAPI from '../utils/parseTagsForAPI';
 
 class LiveDocUpdate extends Component {
   state = {
+    parsedDescription: [],
     parsedReturns: [],
     parsedArguments: [],
   };
@@ -31,7 +33,7 @@ class LiveDocUpdate extends Component {
 
   parseGitDocs = async () => {
     const url =
-      'https://raw.githubusercontent.com/AztecProtocol/AZTEC/feat-doc-examples/packages/extension/src/client/apis/Asset.js';
+      'https://raw.githubusercontent.com/AztecProtocol/AZTEC/f018e69bd9c154176b8a7c8746ca4c929de07bda/packages/extension/src/client/apis/ZkAsset.js';
     const response = await fetch(url);
     const apiText = await response.text();
 
@@ -46,7 +48,7 @@ class LiveDocUpdate extends Component {
     }
 
     const parsedArguments = APItags.tags.filter((tag) => {
-      return tag.tag !== 'returns' && tag.tag !== 'function';
+      return tag.tag !== 'returns' && tag.tag !== 'function' && tag.tag !== 'description';
     });
 
     const parsedReturns = APItags.tags.filter((tag) => {
@@ -57,7 +59,7 @@ class LiveDocUpdate extends Component {
       return tag.tag === 'description';
     });
 
-    this.setState({ parsedArguments, parsedReturns, parsedDescription });
+    this.setState({ parsedArguments, parsedReturns, parsedDescription: parsedDescription[0] });
   };
 
   render() {
@@ -65,11 +67,11 @@ class LiveDocUpdate extends Component {
     console.log({ parsedDescription });
 
     return (
-      <>
-        <MethodDescription description={parsedDescription} />
+      <Block>
+        <MethodDescription {...parsedDescription} />
         <MethodArgumentRenderer methods={[...parsedArguments]} />
         <MethodReturnRenderer methods={[...parsedReturns]} />
-      </>
+      </Block>
     );
   }
 }
