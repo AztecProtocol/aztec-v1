@@ -45,6 +45,7 @@ export const profileType = PropTypes.oneOf([
     'asset',
     'user',
     'aztec',
+    'metamask',
     'domain',
     'note',
 ]);
@@ -68,7 +69,7 @@ const noteProfileShape = PropTypes.shape({
 });
 
 const generalProfileShape = PropTypes.shape({
-    type: PropTypes.oneOf(['', 'domain', 'aztec']),
+    type: PropTypes.oneOf(['', 'domain', 'aztec', 'metamask']),
     src: PropTypes.string,
     alt: PropTypes.string,
 });

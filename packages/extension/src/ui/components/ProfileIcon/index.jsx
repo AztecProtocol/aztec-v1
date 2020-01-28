@@ -5,6 +5,7 @@ import {
     Avatar,
     Block,
     Text,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     themeType,
@@ -15,6 +16,7 @@ import {
 } from '~/ui/styles/guacamole-vars';
 import ProfileSvg from '~/ui/components/ProfileSvg';
 import AztecSvg from '~/ui/components/AztecSvg';
+import metamaskGlyph from '~/ui/images/metamask.svg';
 import colorSchemes from './config/colorSchemes';
 import shapeGenerators from './config/shapeGenerators';
 import styles from './icon.scss';
@@ -64,6 +66,14 @@ const ProfileIcon = ({
                 className={!tooltip ? className : ''}
                 theme={theme}
                 size={size}
+            />
+        );
+    } else if (type === 'metamask') {
+        iconNode = (
+            <SVG
+                glyph={metamaskGlyph}
+                width={avatarSizesMap[size]}
+                height={avatarSizesMap[size]}
             />
         );
     } else if (!type || src || icon) {
