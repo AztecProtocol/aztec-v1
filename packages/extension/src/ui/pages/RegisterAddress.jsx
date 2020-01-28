@@ -5,7 +5,7 @@ import {
 } from '~/ui/config/propTypes';
 import StepsHandler from '~/ui/views/handlers/StepsHandler';
 import RegisterContent from '~/ui/views/RegisterContent';
-import registerSteps from '~/ui/config/steps';
+import registerSteps from '~/ui/steps/register';
 import apis from '~uiModules/apis';
 
 const RegisterAddress = ({
