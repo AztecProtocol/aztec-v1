@@ -1,5 +1,3 @@
-Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
-
 ## Examples
 ### Fetch notes corresponding to a particular query
 ```js

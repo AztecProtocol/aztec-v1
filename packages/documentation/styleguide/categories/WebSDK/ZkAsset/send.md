@@ -1,5 +1,3 @@
-Send funds confidentially to another Ethereum address
-
 ## Examples
 ### Confidentially send value of 30units to another Ethereum address
 ```js

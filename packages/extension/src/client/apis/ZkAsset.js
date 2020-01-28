@@ -42,6 +42,7 @@ export default class ZkAsset {
 
     /**
      * @function zkAsset.balance
+     * @description Get the balance of a ZkAsset
      *
      * @returns {Integer} Balance of the ZkAsset 
      */
@@ -167,6 +168,7 @@ export default class ZkAsset {
     /**
      *
      * @function zkAsset.deposit
+     * @description Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
      *
      * @param {Array} transactions Transactions information which the user wants to have enacted 
      *       - (Int) amount: Number of public ERC20 tokens being converted into notes 
@@ -207,6 +209,7 @@ export default class ZkAsset {
     /**
      *
      * @function zkAsset.withdraw
+     * @description Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens
      *
      * @param {Int} amount Units of value being withdrawn - will equal the number of ERC20 tokens the `to` address receives
      * @param {Object} options
@@ -246,6 +249,7 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.send
+    * @description Send funds confidentially to another Ethereum address
     *
     * @param {Array} transactions
     *       - (Int) amount: Units of value to transfer, where 1 unit is equivalent in value to 1 ERC20 token
@@ -406,6 +410,7 @@ export default class ZkAsset {
     /**
     *
     * @function zkAsset.fetchNotesFromBalance
+    * @description Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
     *
     * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch
     *       - (Int) equalTo: the exact value all notes need to match

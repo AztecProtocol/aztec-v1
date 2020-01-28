@@ -1,5 +1,3 @@
-Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
-
 ## Examples
 ### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user
 ```js
