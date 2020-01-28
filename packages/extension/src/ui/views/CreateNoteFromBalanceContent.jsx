@@ -3,17 +3,16 @@ import PropTypes from 'prop-types';
 import {
     Block,
     Text,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     assetShape,
-    transactionShape,
 } from '~/ui/config/propTypes';
 import {
     capitalize,
 } from '~/utils/format';
 import i18n from '~/ui/helpers/i18n';
 import noteValueToToken from '~/ui/utils/noteValueToToken';
-import formatNumber from '~/ui/utils/formatNumber';
 import isStepAfter from '~/ui/utils/isStepAfter';
 import StepContentHelper from '~/ui/views/handlers/StepContentHelper';
 import StepContent from '~/ui/components/StepContent';
@@ -22,15 +21,20 @@ import BlockStatus from '~/ui/components/AnimatedBlocks/BlockStatus';
 import RecipientList from '~/ui/components/RecipientList';
 import HashText from '~/ui/components/HashText';
 import SignatureRequestBlock from '~/ui/components/SignatureRequestBlock';
+import accessGlyph from '~/ui/images/access.svg';
+import {
+    iconSizeMap,
+    colorMap,
+} from '~/ui/styles/guacamole-vars';
 
-class SendContent extends StepContentHelper {
+class CreateNoteFromBalanceContent extends StepContentHelper {
     getBlockConfig() {
         const {
             steps,
             currentStep,
             asset,
             amount,
-            transactions,
+            userAccessAccounts,
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
@@ -43,17 +47,16 @@ class SendContent extends StepContentHelper {
 
         const tokenValue = noteValueToToken(amount, asset);
 
-        const recipients = transactions.map(({
-            to,
-            amount: txAmount,
+        const recipients = userAccessAccounts.map(({
+            address,
         }) => ({
-            address: to,
+            address,
             footnote: (
-                <Text
-                    className="text-code"
-                    text={formatNumber(noteValueToToken(txAmount, asset))}
-                    color="label"
-                    weight="semibold"
+                <SVG
+                    glyph={accessGlyph}
+                    fill={colorMap.green}
+                    width={iconSizeMap.m}
+                    height={iconSizeMap.m}
                 />
             ),
         }));
@@ -93,7 +96,7 @@ class SendContent extends StepContentHelper {
                 <Block padding="xs 0">
                     <Block padding="xs">
                         <Text
-                            text={i18n.t('send.recipient')}
+                            text={i18n.t('note.access.recipient.title')}
                             color="label"
                             size="xxs"
                         />
@@ -159,18 +162,20 @@ class SendContent extends StepContentHelper {
     }
 }
 
-SendContent.propTypes = {
+CreateNoteFromBalanceContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
-    transactions: PropTypes.arrayOf(transactionShape).isRequired,
+    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    })).isRequired,
     proof: PropTypes.shape({
         proofHash: PropTypes.string.isRequired,
         spender: PropTypes.string.isRequired,
     }),
 };
 
-SendContent.defaultProps = {
-    titleKey: 'send.title',
+CreateNoteFromBalanceContent.defaultProps = {
+    titleKey: 'note.access.grant.title',
 };
 
-export default SendContent;
+export default CreateNoteFromBalanceContent;

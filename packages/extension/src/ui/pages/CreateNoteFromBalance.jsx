@@ -15,7 +15,8 @@ import parseInputAmount from '~/ui/utils/parseInputAmount';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import returnAndClose from '~/ui/helpers/returnAndClose';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 
 const handleClose = (accumData) => {
@@ -38,7 +39,6 @@ const handleClose = (accumData) => {
 };
 
 const CreateNoteFromBalance = ({
-    initialStep,
     currentAccount,
     assetAddress,
     amount: inputAmount,
@@ -74,51 +74,32 @@ const CreateNoteFromBalance = ({
             },
         ];
 
-        const {
-            proof,
-            inputNotes,
-            outputNotes,
-            remainderNote,
-        } = await apis.proof.createNoteFromBalance({
-            assetAddress,
-            currentAddress,
-            sender,
-            amount,
-            transactions,
-            publicOwner: currentAddress,
-            numberOfInputNotes,
-            numberOfOutputNotes,
-            userAccessAccounts,
-            gsnConfig,
-        });
-
         return {
             assetAddress,
+            currentAddress,
             asset,
             sender,
             amount,
             numberOfInputNotes,
             numberOfOutputNotes,
             userAccessAccounts,
-            proof,
-            inputNotes,
-            outputNotes,
-            remainderNote,
+            publicOwner: currentAddress,
+            transactions,
+            gsnConfig,
         };
     };
 
     return (
-        <AnimatedTransaction
-            initialStep={initialStep}
+        <StepsHandler
             steps={steps}
             fetchInitialData={fetchInitialData}
             onExit={handleClose}
+            Content={CreateNoteFromBalanceContent}
         />
     );
 };
 
 CreateNoteFromBalance.propTypes = {
-    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
@@ -131,7 +112,6 @@ CreateNoteFromBalance.propTypes = {
 };
 
 CreateNoteFromBalance.defaultProps = {
-    initialStep: 0,
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
     userAccess: [],

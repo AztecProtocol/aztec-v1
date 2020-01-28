@@ -4,7 +4,7 @@
   position: relative;
 
   &.signed {
-    background: map-get($custom-color-map, 'grass-green');
+    background: map-get($color-map, 'green');
   }
 }
 

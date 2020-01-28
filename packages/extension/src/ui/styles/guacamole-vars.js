@@ -58,7 +58,7 @@ export const colorMap = {
   red: '#F23A5B',
   purple: '#49098A',
   blue: '#2772CE',
-  green: '#41BA00',
+  green: 'rgb(76, 199, 170)',
   yellow: '#FACB00',
   orange: '#E57300',
   brown: '#49311A',
