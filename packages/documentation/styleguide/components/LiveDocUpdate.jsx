@@ -16,10 +16,7 @@ class LiveDocUpdate extends Component {
   };
 
   componentDidMount() {
-    const { name } = this.props;
-    if (name.includes('.')) {
-      this.parseGitDocs();
-    }
+    this.parseGitDocs();
   }
 
   componentDidUpdate(prevProps) {
@@ -63,6 +60,10 @@ class LiveDocUpdate extends Component {
   };
 
   render() {
+    if (this.props.showDocs === false) {
+      return;
+    }
+
     const { parsedArguments, parsedReturns, parsedDescription } = this.state;
 
     return (

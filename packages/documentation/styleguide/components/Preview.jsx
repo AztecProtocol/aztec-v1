@@ -63,7 +63,6 @@ class Preview extends React.Component {
 
     // iframeId is the first 5 bytes code hash
     const iframeId = keccak256(code).slice(5);
-    console.log('iframeId: ', iframeId);
     this.setState({ iframeId });
 
     // all calls to window.aztec need to go to the parent window, as SDK not loaded in this iframe
@@ -192,6 +191,8 @@ class Preview extends React.Component {
             this.iframeRef = ref;
           }}
           id={this.state.iframeId}
+          height="0"
+          width="0"
         />
         <Block background="white" borderRadius="xs" hasBorder>
           <Block padding="xs m" hasBorderBottom>

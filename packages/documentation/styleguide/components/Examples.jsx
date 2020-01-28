@@ -10,9 +10,15 @@ import LiveDocUpdate from './LiveDocUpdate';
 
 export default function Examples({ examples, name, exampleMode }) {
   const { codeRevision } = useStyleGuideContext();
+
+  let liveDocUpdate;
+  if (name.includes('.')) {
+    liveDocUpdate = <LiveDocUpdate name={name} />;
+  }
+
   return (
     <Block>
-      <LiveDocUpdate name={name} />
+      {liveDocUpdate}
       <ExamplesRenderer name={name}>
         {examples.map((example, index) => {
           switch (example.type) {
