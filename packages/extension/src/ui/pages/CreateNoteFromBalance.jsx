@@ -84,6 +84,7 @@ const CreateNoteFromBalance = ({
             numberOfOutputNotes,
             userAccessAccounts,
             publicOwner: currentAddress,
+            spender: sender,
             transactions,
             gsnConfig,
         };

@@ -34,6 +34,7 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
             currentStep,
             asset,
             amount,
+            currentAddress,
             userAccessAccounts,
         } = this.props;
 
@@ -46,8 +47,11 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
         } = asset;
 
         const tokenValue = noteValueToToken(amount, asset);
+        const userAccess = userAccessAccounts.length > 0
+            ? userAccessAccounts
+            : [{ address: currentAddress }];
 
-        const recipients = userAccessAccounts.map(({
+        const recipients = userAccess.map(({
             address,
         }) => ({
             address,
@@ -110,10 +114,8 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
 
     renderSignature() {
         const {
-            proof: {
-                proofHash,
-                spender,
-            },
+            proofHash,
+            spender,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -162,19 +164,19 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
 }
 
 CreateNoteFromBalanceContent.propTypes = {
+    currentAddress: PropTypes.string.isRequired,
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
         address: PropTypes.string.isRequired,
     })).isRequired,
-    proof: PropTypes.shape({
-        proofHash: PropTypes.string.isRequired,
-        spender: PropTypes.string.isRequired,
-    }),
+    spender: PropTypes.string.isRequired,
+    proofHash: PropTypes.string,
 };
 
 CreateNoteFromBalanceContent.defaultProps = {
     titleKey: 'note.access.grant.title',
+    proofHash: '',
 };
 
 export default CreateNoteFromBalanceContent;

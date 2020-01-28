@@ -190,11 +190,12 @@ class RegisterContent extends StepContentHelper {
 
 RegisterContent.propTypes = {
     address: PropTypes.string.isRequired,
-    linkedPublicKey: PropTypes.string.isRequired,
+    linkedPublicKey: PropTypes.string,
 };
 
 RegisterContent.defaultProps = {
     titleKey: 'account.create.title',
+    linkedPublicKey: '',
 };
 
 export default RegisterContent;

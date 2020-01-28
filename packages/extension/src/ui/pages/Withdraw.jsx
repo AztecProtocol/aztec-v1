@@ -40,6 +40,7 @@ const Withdraw = ({
             currentAddress,
             amount: parseInputAmount(amount),
             publicOwner: to,
+            spender: sender,
             sender,
             numberOfInputNotes,
         };

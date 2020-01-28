@@ -4,12 +4,14 @@ import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import StepsHandler from '~/ui/views/handlers/StepsHandler';
 import GrantNoteAccessContent from '~/ui/views/GrantNoteAccessContent';
-import steps from '~/ui/steps/grantNoteAccess';
+import grantNoteAccessSteps from '~/ui/steps/grantNoteAccess';
 
 const NoteAccess = ({
     id,
     addresses,
 }) => {
+    const steps = grantNoteAccessSteps.metamask;
+
     const fetchInitialData = async () => {
         const note = await apis.note.fetchNote(id);
         const asset = await makeAsset(note.asset);
@@ -19,6 +21,7 @@ const NoteAccess = ({
 
         return {
             amount: note.value,
+            note,
             asset,
             userAccessAccounts,
         };

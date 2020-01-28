@@ -44,6 +44,7 @@ const Send = ({
             currentAddress,
             asset,
             sender,
+            spender: sender,
             transactions: parsedTransactions,
             numberOfInputNotes,
             numberOfOutputNotes,
