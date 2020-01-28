@@ -166,8 +166,6 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
 }
 
 .fx-hide-title {
-  overflow: auto;
-
   .block-title {
     max-height: 0;
     opacity: 0;

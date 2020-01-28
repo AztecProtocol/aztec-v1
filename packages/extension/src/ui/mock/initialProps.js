@@ -13,7 +13,7 @@ import {
     notes,
     generate,
     randomAddress,
-    randomRawNote,
+    randomAccount,
 } from './data';
 
 const dummyFunc = () => {};
@@ -123,19 +123,10 @@ export default {
     createNote: {
         asset: assets[0],
         amount: randomInt(1, 100),
-        numberOfOutputNotes: 1,
-        inputNotes: generate(1, randomRawNote),
-        outputNotes: generate(2, randomRawNote),
-        remainderNote: randomRawNote(),
-        userAccessAccounts: [
-            {
-                address: randomAddress(),
-            },
-        ],
-    },
-    'createNote.sign': {
+        userAccessAccounts: generate(2, randomAccount),
         proof: {
-            inputNotes: generate(5, randomRawNote),
+            proofHash: `0x${randomId(150)}`,
+            spender: addresses[1],
         },
     },
     mint: {

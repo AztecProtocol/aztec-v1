@@ -14,6 +14,7 @@ module.exports = {
             secondary: '#17173C',
             'secondary-light': '#222261',
             'white-lightest': 'rgba(255,255,255,0.3)',
+            green: 'rgb(76, 199, 170)',
         },
         defaultTextColor: '#221635',
         defaultLabelColor: '#9699BA',

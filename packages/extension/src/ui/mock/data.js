@@ -20,6 +20,11 @@ export const generate = (count, generator) => {
 
 export const randomAddress = () => `0x${randomId(40)}`;
 
+export const randomAccount = () => ({
+    address: randomAddress(),
+    linkedPublicKey: `0x${randomId(64)}`,
+});
+
 export const randomRawNote = () => ({
     noteHash: `0x${randomId()}`,
     k: new BN(randomInt(100)),

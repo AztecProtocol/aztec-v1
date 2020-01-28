@@ -10,6 +10,7 @@ import Icons from '~/ui/views/playground/Icons';
 import DepositContent from '~/ui/views/DepositContent';
 import WithdrawContent from '~/ui/views/WithdrawContent';
 import SendContent from '~/ui/views/SendContent';
+import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
 import depositSteps from '~/ui/steps/deposit';
 import withdrawSteps from '~/ui/steps/withdraw';
 import sendSteps from '~/ui/steps/send';
@@ -163,15 +164,27 @@ export default {
     },
     createNote: {
         path: 'create-note',
-        step: createNoteFromBalanceSteps.gsn[0],
+        Content: CreateNoteFromBalanceContent,
+        steps: createNoteFromBalanceSteps.gsn,
+        initialStep: 0,
         routes: {
             sign: {
                 path: 'sign',
-                step: createNoteFromBalanceSteps.gsn[1],
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.gsn,
+                initialStep: 1,
+            },
+            confirm: {
+                path: 'confirm',
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.gsn,
+                initialStep: 2,
             },
             send: {
                 path: 'send',
-                step: createNoteFromBalanceSteps.gsn[2],
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.gsn,
+                initialStep: 3,
             },
         },
     },

@@ -5,13 +5,8 @@ import {
 import sleep from '~/utils/sleep';
 import realApis from '~/ui/apis';
 import {
-    emptyIntValue,
-} from '~/ui/config/settings';
-import {
     addresses,
     assets,
-    randomRawNote,
-    generate,
 } from './data';
 
 const mock = async (data) => {
@@ -96,36 +91,5 @@ export default mergeApis(realApis, {
             asset: assets[0],
         }),
         signProof: () => mockSigningApi('Sign notes?'),
-    },
-    proof: {
-        createNoteFromBalance: ({
-            numberOfInputNotes: customNumberOfInputNotes,
-            numberOfOutputNotes: customNumberOfOutputNotes,
-        }) => {
-            const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-                ? customNumberOfInputNotes
-                : 5;
-            const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-                ? customNumberOfOutputNotes
-                : 5;
-            const remainderNote = numberOfOutputNotes > 0
-                ? randomRawNote()
-                : null;
-            const inputNotes = generate(numberOfInputNotes, randomRawNote);
-            const outputNotes = generate(numberOfOutputNotes, randomRawNote);
-            if (remainderNote) {
-                outputNotes.push(remainderNote);
-            }
-
-            return {
-                proof: {
-                    inputNotes,
-                    outputNotes,
-                },
-                inputNotes,
-                outputNotes,
-                remainderNote,
-            };
-        },
     },
 });
