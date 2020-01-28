@@ -1,14 +1,13 @@
-const bn128 = require('@aztec/bn128');
-const BN = require('bn.js');
-const { proofs } = require('@aztec/dev-utils');
-const AbiCoder = require('web3-eth-abi');
-const { keccak256, padLeft } = require('web3-utils');
-
-const { inputCoder, outputCoder } = require('../../../../../encoder');
-const Proof = require('../../../../base/epoch0/proof');
-const ProofType = require('../../../../base/types');
-const ProofUtils = require('../../../../base/epoch0/utils');
-const signer = require('../../../../../signer');
+import * as bn128 from '@aztec/bn128';
+import BN from 'bn.js';
+import { proofs } from '@aztec/dev-utils';
+import AbiCoder from 'web3-eth-abi';
+import { keccak256, padLeft } from 'web3-utils';
+import { inputCoder, outputCoder } from '../../../../../encoder';
+import Proof from '../../../../base/epoch0/proof';
+import ProofType from '../../../../base/types';
+import ProofUtils from '../../../../base/epoch0/utils';
+import signer from '../../../../../signer';
 
 class JoinSplitProof65793 extends Proof {
     /**
@@ -187,4 +186,4 @@ class JoinSplitProof65793 extends Proof {
     }
 }
 
-module.exports = JoinSplitProof65793;
+export default JoinSplitProof65793;

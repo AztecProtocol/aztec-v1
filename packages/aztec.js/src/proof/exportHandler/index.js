@@ -1,10 +1,9 @@
 /* eslint-disable func-names */
-const catalogue = require('./catalogue');
-const helpers = require('./helpers');
+import * as catalogue from './catalogue';
 
-const exportHandler = {};
-exportHandler.catalogue = catalogue;
-exportHandler.helpers = helpers;
+import helpers from './helpers';
+
+export { catalogue, helpers };
 
 /**
  * Export the default epoch version of an AZTEC proof construction method
@@ -14,11 +13,11 @@ exportHandler.helpers = helpers;
  * @param args - rest parameter representing the inputs to a particular proof construction
  * @returns An instance of the selected AZTEC proof
  */
-exportHandler.getProof = function(proofSelector, epoch = undefined) {
+export function getProof(proofSelector, epoch = undefined) {
     const proofEpoch = epoch || catalogue.defaultProofEpochNums[proofSelector];
-    const Proof = exportHandler.catalogue.versions[proofSelector][proofEpoch];
+    const Proof = catalogue.versions[proofSelector][proofEpoch];
     return Proof;
-};
+}
 
 /**
  * Set the default proof epoch for which proofs should be exported from
@@ -26,8 +25,6 @@ exportHandler.getProof = function(proofSelector, epoch = undefined) {
  * @method setDefaultEpoch
  * @param defaultEpochNum - user specified default epoch number
  */
-exportHandler.setDefaultEpoch = (proofSelector, defaultEpochNum) => {
-    exportHandler.catalogue.defaultProofEpochNums[proofSelector] = defaultEpochNum;
-};
-
-module.exports = exportHandler;
+export function setDefaultEpoch(proofSelector, defaultEpochNum) {
+    catalogue.defaultProofEpochNums[proofSelector] = defaultEpochNum;
+}

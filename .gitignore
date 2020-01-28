@@ -10,10 +10,15 @@ dist/
 docs/
 lib/
 node_modules/
+screenshots/
 
 # files
 .DS_Store
 .env
+.env.development
+.env.production
+.env.test
+.env.integration
 *.log
 coverage.json
 lerna-debug.log*
@@ -28,3 +33,19 @@ packages/contract-addresses/package-lock.json
 packages/contract-artifacts/package-lock.json
 packages/dev-utils/package-lock.json
 packages/protocol/package-lock.json
+packages/extension/.ignore
+packages/extension/=
+packages/extension/src/background/contracts/IZkAsset.json
+packages/extension/src/background/contracts/IZkAsset.json
+packages/extension/src/background/contracts/AZTECAccountRegistry.json
+packages/extension/src/background/contracts/AZTECAccountRegistry.json
+packages/extension/src/background/contracts/IZkAsset.json
+packages/extension/src/background/contracts/ACE.json
+packages/extension/src/test/harness
+packages/aws-lambda/signer/.aws/
+packages/aws-lambda/signer/.aws-sam/
+packages/aws-lambda/.aws/
+packages/aws-lambda/.aws-sam/
+packages/aws-lambda/signer/template.yaml
+packages/aws-lambda/signer/packaged_dev.yaml
+packages/aws-lambda/signer/packaged_prod.yaml

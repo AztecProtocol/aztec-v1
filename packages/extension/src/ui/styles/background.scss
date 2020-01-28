@@ -1,0 +1,80 @@
+@import './variables';
+@import './font-face';
+
+:global(#background-app) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: $default-font-family;
+}
+
+:global(#aztec-popup-container) {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-attachment: fixed;
+  overflow: hidden;
+}
+
+:global(.aztec-overlay) {
+  position: absolute;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-attachment: fixed;
+  overflow: hidden;
+  background-color: $overlay-color;
+
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(-260px);
+    width: 100%;
+    height: 50%;
+    box-shadow: 0 100px 100px 100px rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.45);
+  }
+}
+
+:global(.aztec-popup) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: all ease 0.5s;
+  transform: translateY(100%) scale(0.7);
+  opacity: 0;
+  padding: $popup-page-spacing;
+  width: $popup-width + $popup-page-spacing * 2;
+  height: $popup-height + $popup-page-spacing * 2;
+
+  &:global(.shown) {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
+  }
+}
+
+:global(#aztec-popup-ui),
+:global(#aztec-popup-placeholder) {
+  width: 100%;
+  height: 100%;
+}
+
+@media all and (max-width: $popup-width + $popup-page-spacing * 2 - 1) {
+  :global(#aztec-popup) {
+    width: 100%;
+    height: 100%;
+  }
+}

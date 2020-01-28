@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="462px" height="462px" viewBox="0 0 462 462" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>Group 2</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="10.4317837%" y1="14.8317976%" x2="162.989961%" y2="87.5085594%" id="linearGradient-1">
+            <stop stop-color="#808DFF" offset="0%"></stop>
+            <stop stop-color="#9FC4FF" offset="100%"></stop>
+            <stop stop-color="#7174FF" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="10.4317837%" y1="14.8317976%" x2="121.235321%" y2="57.6842448%" id="linearGradient-2">
+            <stop stop-color="#5270FF" offset="0%"></stop>
+            <stop stop-color="#68A7FC" offset="100%"></stop>
+            <stop stop-color="#7174FF" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy-25" transform="translate(-218.000000, -219.000000)">
+            <g id="Group-2" transform="translate(206.000000, 207.000000)">
+                <path d="M99.1098464,71.6538462 L386.890124,71.6538462 C402.053654,71.6538462 414.346124,83.9463162 414.346124,99.1098464 L414.346124,386.890124 C414.346124,402.053654 402.053654,414.346124 386.890124,414.346124 L99.1098464,414.346124 C83.9463162,414.346124 71.6538462,402.053654 71.6538462,386.890124 L71.6538462,99.1098464 C71.6538462,83.9463162 83.9463162,71.6538462 99.1098464,71.6538462 Z M150.513688,123.057688 C135.350158,123.057688 123.057688,135.350158 123.057688,150.513688 L123.057688,335.486282 C123.057688,350.649812 135.350158,362.942282 150.513688,362.942282 L335.486282,362.942282 C350.649812,362.942282 362.942282,350.649812 362.942282,335.486282 L362.942282,150.513688 C362.942282,135.350158 350.649812,123.057688 335.486282,123.057688 L150.513688,123.057688 Z" id="Combined-Shape" fill="url(#linearGradient-1)" transform="translate(242.999985, 242.999985) rotate(-315.000000) translate(-242.999985, -242.999985) "></path>
+                <rect id="Combined-Shape" fill="url(#linearGradient-2)" opacity="0.491024926" transform="translate(242.999994, 242.999994) rotate(-315.000000) translate(-242.999994, -242.999994) " x="174.461538" y="174.461538" width="137.076911" height="137.076911" rx="27.4560002"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

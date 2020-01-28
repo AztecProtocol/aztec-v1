@@ -1,13 +1,12 @@
-const { errors } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
-const sinon = require('sinon');
-
-const { BurnProof, MintProof, Proof } = require('../../../src/proof');
-const BurnVerifier = require('../../../src/proof/proofs/BURN/epoch0/burn/verifier');
-const MintVerifier = require('../../../src/proof/proofs/MINT/epoch0/mint/verifier');
-const note = require('../../../src/note');
+import { errors } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import sinon from 'sinon';
+import { BurnProof, MintProof, Proof } from '../../../src/proof';
+import BurnVerifier from '../../../src/proof/proofs/BURN/epoch0/burn/verifier';
+import MintVerifier from '../../../src/proof/proofs/MINT/epoch0/mint/verifier';
+import * as note from '../../../src/note';
 
 describe('Join-Split Fluid Proof Verifier', () => {
     const { publicKey } = secp256k1.generateAccount();

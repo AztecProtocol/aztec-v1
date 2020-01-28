@@ -1,4 +1,4 @@
-const { constants, errors } = require('@aztec/dev-utils');
+import { constants, errors } from '@aztec/dev-utils';
 
 const helpers = {};
 
@@ -36,4 +36,4 @@ helpers.isInteger = (number) => {
     return number % 1 === 0;
 };
 
-module.exports = helpers;
+export default helpers;

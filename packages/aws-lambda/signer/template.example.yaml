@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sign a data with trusted private key, so cliend can send it to the GSN later
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 60
+    Environment:
+      Variables:
+        API_KEY_REQUIRED: False
+        SIGNER_ADDRESS: "0x4544..."
+        SIGNER_PRIVATE_KEY: "0x346..."
+        WEB3_PROVIDER_URL: "https://rinkeby.infu..."
+        RINKEBY_AZTECAccountRegistryGSN: ""
+  Api:
+    Cors:
+      AllowMethods: '''OPTIONS,POST'''
+      AllowHeaders: '''Content-Type'''
+      AllowOrigin: '''*'''
+
+Resources:
+  SignDataFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ./signerFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs10.x
+      FunctionName: sign-data
+      Role: arn:aws:iam::HERE-SOME-ID:role/HERE-YOUR-ROLE
+      Events:
+        SignData:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /sign-data
+            Method: post
+  MigrateDBFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./signerFunction
+      Handler: app.migrationHandler
+      Runtime: nodejs10.x
+      FunctionName: migrate-db
+      Role: arn:aws:iam::HERE-SOME-ID:role/HERE-YOUR-ROLE
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  SignDataApi:
+    Description: "API Gateway endpoint URL for SignData function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/sign-data/s"
+  SignDataFunction:
+    Description: "SignData Lambda Function ARN"
+    Value: !GetAtt SignDataFunction.Arn
+  MigrateDBFunction:
+    Description: "MigrateDB Lambda Function ARN"
+    Value: !GetAtt MigrateDBFunction.Arn
+  # SignDataFunctionIamRole:
+  #   Description: "Implicit IAM Role created for SignData function"
+  #   Value: !GetAtt SignDataFunctionRole.Arn

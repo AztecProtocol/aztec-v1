@@ -1,0 +1,32 @@
+@import '../../styles/variables';
+
+$hint-color: map-get($color-map, 'grey-darker');
+$arrow-size: 6px;
+
+.hint {
+  background: $hint-color;
+  color: map-get($color-map, 'white');
+  padding: map-get($spacing-map, 'xs') map-get($spacing-map, 's');
+  border-radius: 2px;
+}
+
+%arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.arrow-up {
+  @extend %arrow;
+  top: 0;
+  transform: translateX(-50%) translateY(-100%);
+  border-width: 0 $arrow-size $arrow-size $arrow-size;
+  border-color: transparent transparent $hint-color transparent;
+}
+
+.content {
+  white-space: nowrap;
+}

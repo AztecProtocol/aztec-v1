@@ -1,13 +1,12 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors, proofs } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const AbiCoder = require('web3-eth-abi');
-const { keccak256, padLeft, randomHex } = require('web3-utils');
-
-const { inputCoder, outputCoder } = require('../../../../../encoder');
-const Proof = require('../../../../base/epoch0/proof');
-const ProofType = require('../../../../base/types');
-const ProofUtils = require('../../../../base/epoch0/utils');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors, proofs } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import AbiCoder from 'web3-eth-abi';
+import { keccak256, padLeft, randomHex } from 'web3-utils';
+import { inputCoder, outputCoder } from '../../../../../encoder';
+import Proof from '../../../../base/epoch0/proof';
+import ProofType from '../../../../base/types';
+import ProofUtils from '../../../../base/epoch0/utils';
 
 const { AztecError } = errors;
 
@@ -185,4 +184,4 @@ class PrivateRangeProof66562 extends Proof {
     }
 }
 
-module.exports = PrivateRangeProof66562;
+export default PrivateRangeProof66562;

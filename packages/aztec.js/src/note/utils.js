@@ -4,9 +4,10 @@
  * @module module:note.utils
  */
 
-const secp256k1 = require('@aztec/secp256k1');
-const crypto = require('crypto');
-const { keccak256, padLeft } = require('web3-utils');
+import secp256k1 from '@aztec/secp256k1';
+
+import crypto from 'crypto';
+import { keccak256, padLeft } from 'web3-utils';
 
 const utils = {};
 
@@ -84,4 +85,4 @@ utils.randomCustomMetaData = () => {
     return arrayMetaData.join('');
 };
 
-module.exports = utils;
+export default utils;

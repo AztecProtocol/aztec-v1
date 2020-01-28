@@ -1,11 +1,10 @@
-const { constants, errors, proofs } = require('@aztec/dev-utils');
-const AbiCoder = require('web3-eth-abi');
-const { keccak256 } = require('web3-utils');
-
-const { inputCoder, outputCoder } = require('../../../encoder');
-const JoinSplitProof = require('../BALANCED/epoch0/joinSplit');
-const ProofType = require('../../base/types');
-const ProofUtils = require('../../base/epoch0/utils');
+import { constants, errors, proofs } from '@aztec/dev-utils';
+import AbiCoder from 'web3-eth-abi';
+import { keccak256 } from 'web3-utils';
+import { inputCoder, outputCoder } from '../../../encoder';
+import JoinSplitProof from '../BALANCED/epoch0/joinSplit';
+import ProofType from '../../base/types';
+import ProofUtils from '../../base/epoch0/utils';
 
 const { AztecError } = errors;
 
@@ -117,4 +116,4 @@ class JoinSplitFluidProof extends JoinSplitProof {
     }
 }
 
-module.exports = JoinSplitFluidProof;
+export default JoinSplitFluidProof;

@@ -1,0 +1,208 @@
+import {
+    argsError,
+} from '~/utils/error';
+import {
+    get,
+} from '~/utils/storage';
+import Note from '~/background/database/models/note';
+import ApiSessionManager from './helpers/ApiSessionManager';
+import validate from './utils/pickNotes/validate';
+import pickNotes from './utils/pickNotes';
+import pickNotesInRange from './utils/pickNotesInRange';
+
+const manager = new ApiSessionManager();
+
+export default {
+    initWithUser: async (
+        ownerAddress,
+        linkedPrivateKey,
+        linkedPublicKey,
+        networkId,
+    ) => manager.init(
+        networkId,
+        {
+            address: ownerAddress,
+            linkedPrivateKey,
+            linkedPublicKey,
+        },
+    ),
+    save: async () => manager.save(),
+    addNotes: async (
+        networkId,
+        ownerAddress,
+        notes,
+    ) => manager.addRawNotes({
+        networkId,
+        ownerAddress,
+        notes,
+    }),
+    getBalance: async (
+        networkId,
+        ownerAddress,
+        assetId,
+    ) => manager.ensureSynced(
+        networkId,
+        ownerAddress,
+        assetId,
+        ({ balance }) => balance,
+    ),
+    validatePick: async (
+        networkId,
+        ownerAddress,
+        assetId,
+        minSum,
+        {
+            numberOfNotes = 1,
+            allowLessNumberOfNotes = true,
+        } = {},
+    ) => {
+        if (numberOfNotes <= 0) {
+            return null;
+        }
+
+        return manager.ensureSynced(
+            networkId,
+            ownerAddress,
+            assetId,
+            async ({
+                balance,
+                getSortedValues,
+            }) => {
+                if (balance < minSum) {
+                    return argsError('note.pick.sum', {
+                        messageOptions: {
+                            count: numberOfNotes,
+                        },
+                        balance,
+                        numberOfNotes,
+                        value: minSum,
+                    });
+                }
+
+                try {
+                    const sortedValues = getSortedValues();
+                    validate({
+                        sortedValues,
+                        minSum,
+                        numberOfNotes,
+                        allowLessNumberOfNotes,
+                    });
+                } catch (error) {
+                    return error;
+                }
+
+                return null;
+            },
+        );
+    },
+    pick: async (
+        networkId,
+        ownerAddress,
+        assetId,
+        minSum,
+        {
+            numberOfNotes = 1,
+            allowLessNumberOfNotes = true,
+        } = {},
+    ) => {
+        if (numberOfNotes <= 0) {
+            return [];
+        }
+
+        return manager.ensureSynced(
+            networkId,
+            ownerAddress,
+            assetId,
+            async ({
+                balance,
+                noteValues,
+                getSortedValues,
+            }) => {
+                if (balance < minSum) {
+                    throw argsError('note.pick.sum', {
+                        messageOptions: {
+                            value: minSum,
+                        },
+                    });
+                }
+
+                const sortedValues = getSortedValues();
+                const noteKeyData = pickNotes({
+                    noteValues,
+                    sortedValues,
+                    minSum,
+                    numberOfNotes,
+                    allowLessNumberOfNotes,
+                });
+
+                const notes = await Promise.all(noteKeyData.map(async ({
+                    key,
+                    value,
+                }) => {
+                    const noteHash = await get(key);
+                    const note = await Note.get({ networkId }, noteHash);
+                    return {
+                        ...note,
+                        value,
+                    };
+                }));
+
+                return notes;
+            },
+        );
+    },
+    fetch: async (
+        networkId,
+        ownerAddress,
+        assetId,
+        {
+            equalTo,
+            greaterThan,
+            lessThan,
+            numberOfNotes,
+        } = {},
+    ) => {
+        if (typeof numberOfNotes === 'number'
+            && numberOfNotes <= 0) {
+            return [];
+        }
+        if (typeof equalTo === 'number'
+            && ((typeof greaterThan === 'number' && equalTo <= greaterThan)
+                || (typeof lessThan === 'number' && equalTo >= lessThan))
+        ) {
+            return [];
+        }
+
+        return manager.ensureSynced(
+            networkId,
+            ownerAddress,
+            assetId,
+            async ({
+                noteValues,
+            }) => {
+                const noteKeyData = pickNotesInRange({
+                    noteValues,
+                    equalTo,
+                    greaterThan,
+                    lessThan,
+                    numberOfNotes,
+                    allowLessNumberOfNotes: true,
+                });
+
+                const notes = await Promise.all(noteKeyData.map(async ({
+                    key,
+                    value,
+                }) => {
+                    const noteHash = await get(key);
+                    const note = await Note.get({ networkId }, noteHash);
+                    return {
+                        ...note,
+                        value,
+                    };
+                }));
+
+                return notes;
+            },
+        );
+    },
+};
