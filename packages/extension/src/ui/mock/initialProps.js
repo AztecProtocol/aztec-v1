@@ -117,8 +117,9 @@ export default {
         };
     },
     noteAccess: {
-        id: notes[0].noteHash,
-        addresses,
+        asset: assets[0],
+        amount: randomInt(1, 10000),
+        userAccessAccounts: generate(2, randomAccount),
     },
     createNote: {
         asset: assets[0],
