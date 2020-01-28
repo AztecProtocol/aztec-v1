@@ -55,6 +55,8 @@ class StepContentHelper extends PureComponent {
         super(props);
 
         this.state = {
+            data: {},
+            error: null,
             explicitTaskType: '',
             prevStep: 0,
             prevTask: -1,
@@ -69,10 +71,11 @@ class StepContentHelper extends PureComponent {
             currentStep,
             loading,
             error,
-            childError,
             onPrevious,
-            updateParentState,
         } = this.props;
+        const {
+            error: childError,
+        } = this.state;
         const {
             title,
             titleKey,
@@ -100,7 +103,6 @@ class StepContentHelper extends PureComponent {
             onPrevious,
             onNext: this.handleGoNext,
             onRetry: this.handleRetry,
-            updateParentState,
         };
     }
 
@@ -155,9 +157,20 @@ class StepContentHelper extends PureComponent {
     };
 
     handleGoNext = () => {
+        const error = this.validateSubmitData();
+        if (error) {
+            this.setState({
+                error,
+            });
+            return;
+        }
+
         const {
             onNext,
         } = this.props;
+        const {
+            data,
+        } = this.state;
 
         const nextTask = this.getNextTask();
         const nextTaskType = nextTask && nextTask.type;
@@ -166,13 +179,36 @@ class StepContentHelper extends PureComponent {
                 {
                     explicitTaskType: nextTaskType,
                 },
-                ensureMinPendingTime(onNext, 1000),
+                ensureMinPendingTime(() => onNext(data), 1000),
             );
             return;
         }
 
-        onNext();
+        onNext(data);
     };
+
+    validateSubmitData() { // eslint-disable-line class-methods-use-this
+        return null;
+    }
+
+    updateData(data) {
+        const {
+            data: prevData,
+        } = this.state;
+
+        this.setState({
+            data: {
+                ...prevData,
+                ...data,
+            },
+        });
+    }
+
+    clearError() {
+        this.setState({
+            error: null,
+        });
+    }
 
     renderSubmitMessage() {
         let submitMessage = null;
@@ -286,20 +322,16 @@ StepContentHelper.propTypes = {
     currentTask: PropTypes.number.isRequired,
     loading: PropTypes.bool.isRequired,
     error: errorShape,
-    childError: errorShape,
     onPrevious: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired,
     onRetryStep: PropTypes.func.isRequired,
     onRetryTask: PropTypes.func.isRequired,
-    updateParentState: PropTypes.func,
 };
 
 StepContentHelper.defaultProps = {
     title: '',
     titleKey: 'deposit.title',
     error: null,
-    childError: null,
-    updateParentState: null,
 };
 
 export default StepContentHelper;

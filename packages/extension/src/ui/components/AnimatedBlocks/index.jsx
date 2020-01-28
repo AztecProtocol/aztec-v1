@@ -2,14 +2,17 @@ import React, { PureComponent } from 'react';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {
-    Block,
-    Icon,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     animatedBlockType,
     profileShape,
 } from '~/ui/config/propTypes';
+import {
+    iconSizeMap,
+} from '~/ui/styles/guacamole-vars';
 import AztecSvg from '~/ui/components/AztecSvg';
+import linkGlyph from '~/ui/images/link.svg';
 import EntityBlock from './EntityBlock';
 import styles from './blocks.scss';
 
@@ -99,11 +102,12 @@ class AnimatedBlocks extends PureComponent {
                                 size="s"
                             />
                         )}
-                        {sealedIcon !== 'aztec' && (
-                            <Icon
-                                name={sealedIcon}
-                                size="m"
+                        {sealedIcon === 'link' && (
+                            <SVG
+                                glyph={linkGlyph}
                                 color="white"
+                                width={iconSizeMap.m}
+                                height={iconSizeMap.m}
                             />
                         )}
                     </div>

@@ -1,6 +1,6 @@
 import Home from '~/ui/views/Home';
 import Loading from '~/ui/views/Loading';
-import Register from '~/ui/pages/Register';
+import RegisterContent from '~/ui/views/RegisterContent';
 import RegisterAddress from '~/ui/pages/RegisterAddress';
 import DomainPermission from '~/ui/pages/DomainPermission';
 import Restore from '~/ui/pages/Restore';
@@ -11,14 +11,12 @@ import WithdrawContent from '~/ui/views/WithdrawContent';
 import SendContent from '~/ui/views/SendContent';
 import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
 import GrantNoteAccessContent from '~/ui/views/GrantNoteAccessContent';
+import registerSteps from '~/ui/steps/register';
 import depositSteps from '~/ui/steps/deposit';
 import withdrawSteps from '~/ui/steps/withdraw';
 import sendSteps from '~/ui/steps/send';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 import grantNoteAccessSteps from '~/ui/steps/grantNoteAccess';
-import {
-    registerSteps,
-} from '~/ui/config/steps';
 
 export default {
     _: {
@@ -30,23 +28,33 @@ export default {
     },
     register: {
         path: 'register',
-        Component: Register,
+        Content: RegisterContent,
+        steps: registerSteps.gsn,
+        initialStep: 0,
         routes: {
-            backup: {
-                path: 'backup',
-                step: registerSteps.gsn[1],
-            },
-            password: {
-                path: 'password',
-                step: registerSteps.gsn[2],
-            },
             link: {
                 path: 'link-account',
-                step: registerSteps.gsn[3],
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 1,
+            },
+            sign: {
+                path: 'sign',
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 2,
             },
             confirm: {
                 path: 'confirm',
-                step: registerSteps.gsn[4],
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 3,
+            },
+            send: {
+                path: 'send',
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 4,
             },
             address: {
                 path: 'address',
