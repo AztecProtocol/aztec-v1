@@ -2,65 +2,40 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import NoteAccessConfirm from '~/ui/views/NoteAccessConfirm';
-
-const steps = [
-    {
-        titleKey: 'note.access.grant.title',
-        submitTextKey: 'note.access.grant.submit',
-        content: NoteAccessConfirm,
-        tasks: [
-            {
-                name: 'encrypt',
-                run: apis.note.grantNoteAccess,
-            },
-            {
-                name: 'send',
-                run: apis.asset.updateNoteMetadata,
-            },
-        ],
-    },
-];
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import GrantNoteAccessContent from '~/ui/views/GrantNoteAccessContent';
+import steps from '~/ui/steps/grantNoteAccess';
 
 const NoteAccess = ({
-    initialStep,
     id,
     addresses,
 }) => {
     const fetchInitialData = async () => {
         const note = await apis.note.fetchNote(id);
-        const {
-            asset,
-        } = note;
-        const accounts = await Promise.all(addresses.map(apis.account.getExtensionAccount));
+        const asset = await makeAsset(note.asset);
+        const userAccessAccounts = await Promise.all(
+            addresses.map(apis.account.getExtensionAccount),
+        );
 
         return {
-            id,
-            addresses,
-            note,
-            asset: await makeAsset(asset),
-            accounts,
+            amount: note.value,
+            asset,
+            userAccessAccounts,
         };
     };
 
     return (
-        <AnimatedTransaction
-            initialStep={initialStep}
+        <StepsHandler
             steps={steps}
             fetchInitialData={fetchInitialData}
+            Content={GrantNoteAccessContent}
         />
     );
 };
 
 NoteAccess.propTypes = {
-    initialStep: PropTypes.number,
     id: PropTypes.string.isRequired,
     addresses: PropTypes.arrayOf(PropTypes.string).isRequired,
-};
-
-NoteAccess.defaultProps = {
-    initialStep: 0,
 };
 
 export default NoteAccess;

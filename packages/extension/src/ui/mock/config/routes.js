@@ -5,16 +5,17 @@ import RegisterAddress from '~/ui/pages/RegisterAddress';
 import DomainPermission from '~/ui/pages/DomainPermission';
 import Restore from '~/ui/pages/Restore';
 import Login from '~/ui/pages/Login';
-import NoteAccess from '~/ui/pages/NoteAccess';
 import Icons from '~/ui/views/playground/Icons';
 import DepositContent from '~/ui/views/DepositContent';
 import WithdrawContent from '~/ui/views/WithdrawContent';
 import SendContent from '~/ui/views/SendContent';
 import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
+import GrantNoteAccessContent from '~/ui/views/GrantNoteAccessContent';
 import depositSteps from '~/ui/steps/deposit';
 import withdrawSteps from '~/ui/steps/withdraw';
 import sendSteps from '~/ui/steps/send';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
+import grantNoteAccessSteps from '~/ui/steps/grantNoteAccess';
 import {
     registerSteps,
 } from '~/ui/config/steps';
@@ -190,7 +191,17 @@ export default {
     },
     noteAccess: {
         path: 'note-access',
-        Component: NoteAccess,
+        Content: GrantNoteAccessContent,
+        steps: grantNoteAccessSteps.gsn,
+        initialStep: 0,
+        routes: {
+            send: {
+                path: 'send',
+                Content: GrantNoteAccessContent,
+                steps: grantNoteAccessSteps.gsn,
+                initialStep: 1,
+            },
+        },
     },
     playground: {
         path: 'playground',

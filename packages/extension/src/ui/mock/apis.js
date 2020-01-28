@@ -87,7 +87,7 @@ export default mergeApis(realApis, {
     note: {
         fetchNote: noteHash => ({
             noteHash,
-            value: randomInt(100),
+            value: randomInt(10000),
             asset: assets[0],
         }),
         signProof: () => mockSigningApi('Sign notes?'),
