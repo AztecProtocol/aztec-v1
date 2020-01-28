@@ -93,6 +93,8 @@ module.exports = {
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
     Preview: path.join(__dirname, 'styleguide/components/Preview'),
+    Examples: path.join(__dirname, 'styleguide/components/Examples'),
+    ExamplesRenderer: path.join(__dirname, 'styleguide/components/ExamplesRenderer'),
   },
   sections: [
     {
@@ -248,12 +250,6 @@ module.exports = {
         },
       ],
       sectionDepth: 3,
-    },
-    {
-      name: 'Guides',
-      content: 'styleguide/categories/Guides.md',
-      sections: [],
-      sectionDepth: 1,
     },
     {
       name: 'Reference Specification',
