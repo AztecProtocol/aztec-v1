@@ -32,6 +32,7 @@ export default function acceptConnection() {
             if (clientProfile) {
                 try {
                     networkConfig = await setupNetworkConfig(clientProfile);
+                    connection.initUi();
                 } catch (e) {
                     const error = e.code === 4001
                         ? permissionError('user.denied.auth')

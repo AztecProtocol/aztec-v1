@@ -5,18 +5,13 @@ import {
 } from '~/utils/random';
 import makeAsset from '~uiModules/utils/makeAsset';
 import {
-    seedPhrase,
     linkedPublicKey,
     addresses,
     assets,
     domains,
-    notes,
-    pastTransactions,
-    depositTransactions,
-    sendTransactions,
     generate,
     randomAddress,
-    randomRawNote,
+    randomAccount,
 } from './data';
 
 const dummyFunc = () => {};
@@ -26,24 +21,11 @@ const address = addresses[0];
 export default {
     register: {
         address,
-    },
-    'register.backup': {
-        seedPhrase,
-    },
-    'register.password': {},
-    'register.link': {
-        address,
-        linkedPublicKey: `0x${randomId(64)}`,
-    },
-    'register.confirm': {
-        address,
-        linkedPublicKey: `0x${randomId(64)}`,
+        linkedPublicKey,
     },
     'register.address': {
-        currentAccount: {
-            address,
-            linkedPublicKey,
-        },
+        address,
+        linkedPublicKey,
     },
     'register.domain': {
         domain: domains[0],
@@ -57,31 +39,23 @@ export default {
     'account.login': {
         goNext: dummyFunc,
     },
-    'account.assets': {
-        assets,
-        pastTransactions: pastTransactions.slice(0, 2),
-    },
-    'account.asset': {
-        ...assets[0],
-        prev: 'account',
-        pastTransactions: pastTransactions
-            .filter(({ asset }) => asset.address === assets[0].address)
-            .slice(0, 2),
-    },
-    'account.duplicated': {
-        address: addresses[0],
-        goNext: dummyFunc,
-    },
-    deposit: {
-        asset: makeAsset(assets[0]),
-        publicOwner: randomAddress(),
-        transactions: [depositTransactions[0]],
-        amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        userAccessAccounts: [
-            {
-                address: randomAddress(),
-            },
-        ],
+    deposit: () => {
+        const depositTransactions = generate(2, i => ({
+            amount: randomInt(1, 10000),
+            to: addresses[i + 1],
+        }));
+
+        return {
+            asset: makeAsset(assets[0]),
+            publicOwner: randomAddress(),
+            transactions: depositTransactions,
+            amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+            userAccessAccounts: [
+                {
+                    address: randomAddress(),
+                },
+            ],
+        };
     },
     'deposit.approve': ({
         asset,
@@ -98,51 +72,47 @@ export default {
     withdraw: {
         asset: assets[0],
         currentAddress: addresses[0],
-        amount: randomInt(1, 100),
+        amount: randomInt(1, 10000),
         publicOwner: randomAddress(),
+        spender: addresses[1],
+        proofHash: `0x${randomId(150)}`,
     },
-    'withdraw.sign': {
-        proof: {
-            inputNotes: generate(5, randomRawNote),
-        },
-    },
-    send: {
-        asset: makeAsset(assets[0]),
-        sender: randomAddress(),
-        transactions: sendTransactions,
-        amount: depositTransactions.reduce((sum, tx) => sum + tx.amount, 0),
-        userAccessAccounts: [
-            {
-                address: randomAddress(),
-            },
-        ],
-    },
-    'send.sign': {
-        proof: {
-            inputNotes: generate(3, randomRawNote),
-        },
+    send: () => {
+        const sendTransactions = generate(2, () => ({
+            amount: randomInt(1, 10000),
+            to: addresses[randomInt(1, addresses.length - 1)],
+        }));
+
+        return {
+            asset: makeAsset(assets[0]),
+            sender: randomAddress(),
+            transactions: sendTransactions,
+            amount: sendTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+            userAccessAccounts: [
+                {
+                    address: randomAddress(),
+                },
+            ],
+            spender: addresses[1],
+            proofHash: `0x${randomId(150)}`,
+        };
     },
     noteAccess: {
-        id: notes[0].noteHash,
-        addresses,
+        asset: assets[0],
+        amount: randomInt(1, 10000),
+        userAccessAccounts: generate(2, randomAccount),
+        isGSNAvailable: true,
+    },
+    'noteAccess.MetaMask': {
+        isGSNAvailable: false,
     },
     createNote: {
         asset: assets[0],
         amount: randomInt(1, 100),
-        numberOfOutputNotes: 1,
-        inputNotes: generate(1, randomRawNote),
-        outputNotes: generate(2, randomRawNote),
-        remainderNote: randomRawNote(),
-        userAccessAccounts: [
-            {
-                address: randomAddress(),
-            },
-        ],
-    },
-    'createNote.sign': {
-        proof: {
-            inputNotes: generate(5, randomRawNote),
-        },
+        currentAddress: addresses[0],
+        userAccessAccounts: generate(2, randomAccount),
+        spender: addresses[1],
+        proofHash: `0x${randomId(150)}`,
     },
     mint: {
         asset: assets[0],

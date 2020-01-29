@@ -14,6 +14,7 @@ const Hint = ({
     <div className={classnames(styles.hint, className)}>
         <div className={styles[`arrow-${direction}`]} />
         <Text
+            className={styles.content}
             text={text}
             size="xxs"
         />

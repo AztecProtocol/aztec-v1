@@ -34,7 +34,7 @@ export const buttonSpacingHSizeMap = {
 export const buttonBorderWidth = '1px';
 export const outlinedButtonBorderWidth = '2px';
 export const colorMap = {
-  primary: '#898BF6',
+  primary: '#808dff',
   'primary-light': 'rgba(137, 139, 246, 0.7)',
   'primary-lighter': 'rgba(137, 139, 246, 0.45)',
   'primary-lightest': 'rgb(244, 245, 254)',
@@ -48,7 +48,7 @@ export const colorMap = {
   white: '#FFFFFF',
   'white-light': 'rgba(255, 255, 255, 0.85)',
   'white-lighter': 'rgba(255, 255, 255, 0.5)',
-  'white-lightest': 'rgba(255, 255, 255, 0.1)',
+  'white-lightest': 'rgba(255,255,255,0.3)',
   transparent: 'rgba(255, 255, 255, 0)',
   secondary: '#17173C',
   'secondary-light': '#222261',
@@ -58,7 +58,7 @@ export const colorMap = {
   red: '#F23A5B',
   purple: '#49098A',
   blue: '#2772CE',
-  green: '#41BA00',
+  green: 'rgb(76, 199, 170)',
   yellow: '#FACB00',
   orange: '#E57300',
   brown: '#49311A',
@@ -102,6 +102,16 @@ export const svgProgressThemeBgMap = {
   primary: 'primary-lightest',
   secondary: 'secondary-lightest',
   white: 'white-lighter',
+};
+export const loaderThemeColorMap = {
+  primary: 'primary-lighter',
+  secondary: 'secondary-lightest',
+  white: 'white',
+};
+export const loaderThemeInvertedColorMap = {
+  primary: 'white',
+  secondary: 'white',
+  white: 'grey-lighter',
 };
 export const iconSizeMap = {
   xxs: '12px',

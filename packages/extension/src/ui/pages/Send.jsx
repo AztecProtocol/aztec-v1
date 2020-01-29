@@ -10,11 +10,11 @@ import {
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import { sendSteps } from '~/ui/config/steps';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import SendContent from '~/ui/views/SendContent';
+import sendSteps from '~/ui/steps/send';
 
 const Send = ({
-    initialStep,
     currentAccount,
     assetAddress,
     transactions,
@@ -44,6 +44,7 @@ const Send = ({
             currentAddress,
             asset,
             sender,
+            spender: sender,
             transactions: parsedTransactions,
             numberOfInputNotes,
             numberOfOutputNotes,
@@ -53,16 +54,15 @@ const Send = ({
     };
 
     return (
-        <AnimatedTransaction
-            initialStep={initialStep}
+        <StepsHandler
             steps={steps}
             fetchInitialData={fetchInitialData}
+            Content={SendContent}
         />
     );
 };
 
 Send.propTypes = {
-    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
@@ -75,7 +75,6 @@ Send.propTypes = {
 };
 
 Send.defaultProps = {
-    initialStep: 0,
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
     userAccess: [],

@@ -115,7 +115,8 @@ class Connection {
 
                 const uiContainer = document.getElementById(this.containerId);
                 uiContainer.style.display = 'none';
-                uiContainer.innerHTML = ''; // clear previous ui
+
+                await this.uiFrame.ensureCreated();
 
                 const {
                     webClientId,
@@ -138,8 +139,7 @@ class Connection {
                     webClientId,
                 });
 
-                const frame = await this.uiFrame.init();
-                frame.contentWindow.postMessage({
+                this.uiFrame.frame.contentWindow.postMessage({
                     type: sendActionEvent,
                     action: {
                         ...action,
@@ -426,6 +426,11 @@ class Connection {
         });
     }
 
+    async initUi() {
+        const frame = await this.uiFrame.init();
+        return !!frame;
+    }
+
     abortUi({
         requestId,
         webClientId,
@@ -450,6 +455,13 @@ class Connection {
     closeUi = () => {
         const event = new CustomEvent('closeAztec');
         window.dispatchEvent(event);
+
+        this.uiFrame.frame.contentWindow.postMessage({
+            type: sendActionEvent,
+            action: {
+                type: 'closed',
+            },
+        }, '*');
     }
 
     openUi = (detail) => {

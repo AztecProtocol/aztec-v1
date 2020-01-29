@@ -1,8 +1,28 @@
 export default {
     create: {
-        _: 'Create new account',
-        title: 'AZTEC',
-        already: 'Already have an account?',
+        title: 'Setup AZTEC',
+        step: 'Creating Account',
+        description: `AZTEC creates a set of encryption keys that are used to make your assets private.
+            These keys are stored locally and encrypted with a password.
+            They do not control the spending of assets.
+        `,
+        password: 'Enter Password',
+        submit: 'Create Encryption Keys',
+        send: {
+            description: `Your encryption keys need to be linked to your Ethereum account.
+                This requires a signature in MetaMask.
+                Check the values shown below are correct.
+            `,
+            step: 'Sending Transaction',
+            submit: 'Create Account',
+        },
+    },
+    link: {
+        description: `Your encryption keys need to be linked to your Ethereum account.
+            This requires a signature in MetaMask.
+            Check the values shown below are correct.
+        `,
+        submit: 'Link Accounts',
     },
     login: {
         _: 'Login',
@@ -78,7 +98,6 @@ export default {
             _: 'Clear previous account',
         },
     },
-    assets: {
-        title: 'My Assets',
-    },
+    aztec: 'AZTEC Account',
+    ethereum: 'Ethereum Account',
 };
