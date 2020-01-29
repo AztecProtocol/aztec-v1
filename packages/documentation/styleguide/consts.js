@@ -25,6 +25,6 @@ export const UsageModes = Object.freeze({
   expand: 'expand',
 });
 
-export const zkAssetURL = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/4ebb36811fa075aece94fed526d1ac1318b67103/packages/extension/src/client/apis/ZkAsset.js';
+export const zkAssetURL = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/9cd05f40d2b921b04c0b78bda8259e4de89f9c97/packages/extension/src/client/apis/ZkAsset.js';
 
-export const noteURL = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/4ebb36811fa075aece94fed526d1ac1318b67103/packages/extension/src/client/apis/ZkNote.js';
+export const noteURL = 'https://raw.githubusercontent.com/AztecProtocol/AZTEC/9cd05f40d2b921b04c0b78bda8259e4de89f9c97/packages/extension/src/client/apis/ZkNote.js';

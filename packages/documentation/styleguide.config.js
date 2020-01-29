@@ -176,18 +176,13 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'note.value',
-              content: 'styleguide/categories/WebSDK/Note/value.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: 'note.owner',
-              content: 'styleguide/categories/WebSDK/Note/owner.md',
-              exampleMode: 'hide',
-            },
-            {
               name: 'note.equal',
               content: 'styleguide/categories/WebSDK/Note/equal.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.export',
+              content: 'styleguide/categories/WebSDK/Note/export.md',
               exampleMode: 'hide',
             },
             {

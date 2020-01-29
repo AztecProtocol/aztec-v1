@@ -1,3 +1,5 @@
+## Examples
+### 1) Grant note view access to a third party
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
@@ -10,10 +12,15 @@ const asset = await window.aztec.zkAsset(address);
 // Fetch notes
 const notes = await asset.fetchNotesFromBalance();
 
-// Get the value of the first note
-// const addressToGiveAccess = ''; // pass in some form of address here
-// await notes[0].grantNoteAccess(addressToGiveAccess);
+const noteHash = notes[0].noteHash;
+const noteToGrantAccess = await window.aztec.zkNote(noteHash);
+console.info({ noteToGrantAccess })
 
+// Select the addresses to grant access - [change to grant different addresses access]
+const addressToGrantAccess = [
+  '',
+];
 
-// ideally want to sure the fired event here
+const grantSuccess = await noteToGrantAccess.grantAccess(addressToGrantAccess);
+console.info({ grantSuccess });
 ```

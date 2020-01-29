@@ -453,7 +453,8 @@ export default class ZkAsset {
     * @function zkAsset.fetchNotesFromBalance
     * @description zkAsset.fetchNotesfromBalance Description: Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
     *
-    * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch
+    * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch. If not supplied, will return
+    * all the notes owned by the user
     * - (Int) equalTo: the exact value all notes need to match
     * 
     * - (Int) greaterThan: if no equalTo parameter, the minimum value of notes returned

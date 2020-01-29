@@ -46,7 +46,6 @@ export default class ZkNote {
     }
 
     /**
-     *
      * @function note.export
      * @description note.export Description: Export an aztec.js note instance for use in proofs
      * @returns {Class} Note Exported note class

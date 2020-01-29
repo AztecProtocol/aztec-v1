@@ -1,5 +1,5 @@
 ## Examples
-### 1) Generate a proof that a note is greater than 10
+### 1) Generate a proof that a note's value is equal to 10
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';

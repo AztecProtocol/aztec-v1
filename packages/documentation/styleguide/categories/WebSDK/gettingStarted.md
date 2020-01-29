@@ -3,13 +3,13 @@
 ### 1) Install the SDK in your dapp
 The SDK first needs to be installed into your dapp. This is done by adding one line of JavaScript to your Dapp
 
-```markdown
+```js static
 <script type="module" src="https://sdk.aztecprotocol.com/aztec.js" />
 ```
 
 Upon successfully loading, the SDK will then inject the following object into the _window_ of each page:
 
-```markdown
+```js static
 window.aztec = {
   enable: async function(options) {}
 }
@@ -29,7 +29,7 @@ The SDK now needs to be enabled in order for it to be used in your dapp. This is
 &nbsp 
 
 An example _options_ object to use the SDK on Rinkeby will therefore look like:
-```markdown
+```js static
 const options = {
     web3Provider: window.web3.currentProvider, // change this value to use a different web3 provider
     contractAddresses: {
