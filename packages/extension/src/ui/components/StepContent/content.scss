@@ -1,0 +1,64 @@
+@import '../../styles/variables';
+
+$single-footnote-height: map-get($line-height-map, 'xxs')
+  + map-get($spacing-map, 's') * 2;
+
+$footer-min-height: map-get($button-size-map, 'xl');
+
+.wrapper {
+  position: relative;
+  height: 100%;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  position: relative;
+  height: 100%;
+  overflow: auto;
+}
+
+.content {
+  height: 100%;
+}
+
+.singleFootnote {
+  .content {
+    height: calc(100% - #{$single-footnote-height});
+  }
+}
+
+.doubleFootnote {
+  .content {
+    height: calc(100% - #{$single-footnote-height * 2});
+  }
+}
+
+.footnote-wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.footer {
+  position: relative;
+  width: 100%;
+  min-height: $footer-min-height;
+}
+
+.footer-content {
+  position: absolute;
+  bottom: 0;
+  transform: translateY(0);
+  transition: all 0.25s ease-out;
+
+  &.hide {
+    transform: translateY(100%);
+  }
+}
+
+.footer-button {
+  flex: 1;
+  height: $footer-min-height !important;
+  border-radius: 0 !important;
+}

@@ -1,23 +1,17 @@
 /**
- * Read in points from the trusted setup points database.
- * NOTICE: THE TRUSTED SETUP IN THIS REPOSITORY WAS CREATED BY AZTEC ON A SINGLE DEVICE AND
- *   IS FOR TESTING AND DEVELOPMENT PURPOSES ONLY.
- *   We will be launching our multiparty computation trusted setup protocol shortly, where multiple entities
- *   create the trusted setup database and only one of them must act honestly in order for the setup database to be secure.
- *   If you wish to participate please let us know at hello@aztecprotocol.com
- *
  * @module setup
  */
 
-const bn128 = require('@aztec/bn128');
-const { constants } = require('@aztec/dev-utils');
-const BN = require('bn.js');
-const fetch = require('cross-fetch');
+import * as bn128 from '@aztec/bn128';
 
-const POINTS_DB_URL = 'https://ds8m7zxw3jpbz.cloudfront.net/data';
+import { constants } from '@aztec/dev-utils';
+import BN from 'bn.js';
+import fetch from 'cross-fetch';
+import path from 'path';
+import fs from 'fs';
 
 const setup = {
-    POINTS_DB_URL: 'https://ds8m7zxw3jpbz.cloudfront.net/data',
+    POINTS_DB_URL: 'https://dy3hqfmba2gtj.cloudfront.net/',
 };
 
 /**
@@ -69,26 +63,47 @@ setup.compress = (x, y) => {
     return compressed;
 };
 
-/**
- * Loads a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
- *
- * @method fetchPoint
- * @param {number} inputValue the integer whose negation was signed by the trusted setup key
- * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
- */
-setup.fetchPoint = async (inputValue) => {
+function localFetch(inputValue, K_MAX = constants.K_MAX_TEST, databasePath) {
+    const value = Number(inputValue);
+
+    if (value > K_MAX) {
+        throw new Error('point not found');
+    }
+
+    return new Promise((resolve, reject) => {
+        const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
+        const fileName = path.posix.resolve(databasePath, `data${(fileNum - 1) * constants.SIGNATURES_PER_FILE}.dat`);
+        fs.readFile(fileName, (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            // each file starts at 0 (0, 1000, 2000 etc)
+            const min = (fileNum - 1) * constants.SIGNATURES_PER_FILE;
+            const bytePosition = (value - min) * 32;
+            // eslint-disable-next-line new-cap
+            const signatureBuf = new Buffer.alloc(32);
+            data.copy(signatureBuf, 0, bytePosition, bytePosition + 32);
+
+            const x = new BN(signatureBuf);
+            return resolve(setup.decompress(x));
+        });
+    });
+}
+
+async function remoteFetch(inputValue) {
     const value = Number(inputValue);
     const fileNum = Math.ceil(Number(value + 1) / constants.SIGNATURES_PER_FILE);
 
     try {
-        const res = await fetch(`${setup.POINTS_DB_URL}${fileNum * constants.SIGNATURES_PER_FILE - 1}.dat`);
+        const pointURL = `${setup.POINTS_DB_URL}data${(fileNum - 1) * constants.SIGNATURES_PER_FILE}.dat`;
+        const res = await fetch(pointURL);
         if (res.status === 404) {
             throw new Error('point not found');
         }
         const data = await res.arrayBuffer();
         const pointString = Buffer.from(data);
 
-        // each file starts at 0 (0, 1024, 2048 etc)
+        // each file starts at 0 (0, 1000, 2000 etc)
         const min = (fileNum - 1) * constants.SIGNATURES_PER_FILE;
         const bytePosition = (value - min) * 32;
         // eslint-disable-next-line new-cap
@@ -100,6 +115,20 @@ setup.fetchPoint = async (inputValue) => {
     } catch (err) {
         throw err;
     }
+}
+
+/**
+ * Loads a trusted setup signature point h^{\frac{1}{y - k}}, y = setup key, k = input value
+ *
+ * @method fetchPoint
+ * @param {number} inputValue the integer whose negation was signed by the trusted setup key
+ * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
+ */
+setup.fetchPoint = async (inputValue) => {
+    if ((process.env.NODE_ENV === 'TEST' || process.env.NODE_ENV === 'development') && process.env.LOCAL_DATABASE_PATH) {
+        return localFetch(inputValue, constants.TEST_K_MAX, process.env.LOCAL_DATABASE_PATH);
+    }
+    return remoteFetch(inputValue);
 };
 
-module.exports = setup;
+export default setup;

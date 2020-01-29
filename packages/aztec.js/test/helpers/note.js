@@ -1,12 +1,10 @@
-const bn128 = require('@aztec/bn128');
-const { constants } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const crypto = require('crypto');
-const { padLeft, toHex } = require('web3-utils');
-
-const note = require('../../src/note');
-const ProofUtils = require('../../src/proof/base/epoch0/utils');
+import * as bn128 from '@aztec/bn128';
+import { constants } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import crypto from 'crypto';
+import { padLeft, toHex } from 'web3-utils';
+import * as note from '../../src/note';
 
 const mockLightNote = async (k) => {
     const a = padLeft(new BN(crypto.randomBytes(32), 16).umod(bn128.curve.n).toString(16), 64);
@@ -79,14 +77,44 @@ const mockNoteSet = async (kIn, kOut) => {
     return { inputNotes, outputNotes, trapdoor };
 };
 
+function kMaxBoundValue(value) {
+    if (process.env.NODE_ENV === 'TEST' || process.env.NODE_ENV === 'development') {
+        return value > constants.K_MAX_TEST ? constants.K_MAX_TEST : value;
+    }
+
+    return value > constants.K_MAX ? constants.K_MAX : value;
+}
+
 /**
  * Generate a random note value that is less than K_MAX
  *
  * @method randomNoteValue
+ * @param {number} maxValue max value of random note
  * @returns {BN} - big number instance of an AZTEC note value
  */
-const randomNoteValue = () => {
-    return Math.floor(Math.random() * constants.K_MAX);
+const randomNoteValue = (maxValue = constants.K_MAX) => {
+    return Math.floor(Math.random() * kMaxBoundValue(maxValue));
+};
+
+/**
+ * Generate a set of notes with a defined total value
+ *
+ * @method noteSetOfValue
+ * @param {number} numberOfNotes number of notes
+ * @param {number} totalValue sum of notes
+ * @returns {Array} - Array of notes
+ */
+const noteSetOfValue = (numberOfNotes, totalValue) => {
+    const averageValue = Math.floor(kMaxBoundValue(totalValue) / numberOfNotes);
+    const notes = [];
+    for (let i = 0; i < numberOfNotes; i += 1) {
+        if (i === numberOfNotes - 1) {
+            notes[i] = totalValue - averageValue * i;
+        } else {
+            notes[i] = averageValue;
+        }
+    }
+    return notes;
 };
 
 /**
@@ -96,33 +124,10 @@ const randomNoteValue = () => {
  * @param {number} nOut number of output notes
  */
 const balancedPublicValues = (nIn, nOut) => {
-    const kIn = Array(nIn)
-        .fill()
-        .map(() => randomNoteValue());
-    const kOut = Array(nOut)
-        .fill()
-        .map(() => randomNoteValue());
-    let delta = ProofUtils.getPublicValue(kIn, kOut);
-    while (delta > 0) {
-        if (delta >= constants.K_MAX) {
-            const k = randomNoteValue();
-            kOut.push(k);
-            delta -= k;
-        } else {
-            kOut.push(delta);
-            delta = 0;
-        }
-    }
-    while (delta < 0) {
-        if (-delta >= constants.K_MAX) {
-            const k = randomNoteValue();
-            kIn.push(k);
-            delta += k;
-        } else {
-            kIn.push(-delta);
-            delta = 0;
-        }
-    }
+    const transactionAmount = randomNoteValue();
+    const kIn = noteSetOfValue(nIn, transactionAmount);
+    const kOut = noteSetOfValue(nOut, transactionAmount);
+
     return { kIn, kOut };
 };
 
@@ -146,11 +151,4 @@ const userAccount2 = {
     spendingPublicKey: '0x02090a6b89b0588626f26babc87f2dc1e2c815b8248754bed93d837f7071411605',
 };
 
-module.exports = {
-    balancedPublicValues,
-    mockLightNoteSet,
-    mockNoteSet,
-    randomNoteValue,
-    userAccount,
-    userAccount2,
-};
+export { balancedPublicValues, mockLightNoteSet, mockNoteSet, randomNoteValue, userAccount, userAccount2 };

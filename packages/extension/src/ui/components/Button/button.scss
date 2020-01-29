@@ -1,0 +1,66 @@
+@import '../../styles/variables';
+@import '../../styles/functions';
+
+@keyframes bgShimmer {
+  0% {
+    background-color: rgba($bg-gradient-primary, 0.5);
+    background-position: 100% 100%;
+  }
+  100% {
+    background-color: rgba($bg-gradient-primary, 0.8);
+    background-position: 0% 0%;
+  }
+}
+
+@mixin background-shimmer($duration: 1s, $iteration-count: infinite) {
+  animation-duration: $duration;
+  animation-fill-mode: forwards;
+  animation-iteration-count: $iteration-count;
+  animation-name: bgShimmer;
+  animation-timing-function: linear;
+}
+
+@mixin button-background-loading {
+  background-image: linear-gradient(
+    111deg,
+    rgba($bg-gradient-primary, 0.8) 0%,
+    rgba($bg-gradient-primary, 0.3) 30%,
+    rgba($bg-gradient-primary, 0) 60%,
+    rgba($bg-gradient-primary, 0.1) 80%,
+    rgba($bg-gradient-primary, 0) 100%
+  ) !important;
+  background-size: 200% !important;
+  background: $bg-gradient-primary !important;
+}
+
+%button {
+  white-space: nowrap;
+}
+
+.white {
+  @extend %button;
+  color: $default-label-color !important;
+
+  &:hover {
+    color: get-darken-color($default-label-color, 10%) !important;
+  }
+}
+
+.primary {
+  @extend %button;
+  border-width: 0 !important;
+  background: $bg-gradient !important;
+
+  &:not(.disabled):hover {
+    @include button-background-loading();
+    @include background-shimmer(0.5s, 1);
+  }
+
+  &.outlined {
+    border: 2px solid map-get($color-map, 'primary') !important;
+  }
+
+  &.loading, &.loading:hover {
+    background: $bg-gradient !important;
+  }
+}

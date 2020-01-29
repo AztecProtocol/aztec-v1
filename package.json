@@ -51,9 +51,13 @@
     "test": "yarn wsrun --package $PKG --serial -c --if has:changed --ifDependency test",
     "test:integration": "yarn wsrun --package $PKG -c --if has:changed test:testNets",
     "watch": "yarn wsrun --package $PKG --parallel -c watch",
-    "wsrun": "wsrun --exclude-missing --fast-exit"
+    "wsrun": "wsrun --exclude-missing --fast-exit",
+    "webpack-defaults": "webpack-defaults"
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@semantic-release/exec": "^4.0.0"
+  }
 }

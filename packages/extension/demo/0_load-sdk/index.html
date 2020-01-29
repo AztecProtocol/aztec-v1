@@ -1,0 +1,25 @@
+<html>
+  <body>
+    <div id="message">
+      Loading AZTEC SDK...
+    </div>
+    <script type="module" src="http://localhost:5555/sdk/aztec.js"></script>
+    <script>
+      async function initAztecSdk() {
+        await window.aztec.enable();
+
+        const messageElem = document.getElementById('message');
+        messageElem.innerHTML = `
+          AZTEC SDK loaded and enabled!<br/>
+          You can now use the sdk in the console.
+        `;
+      };
+
+      if (window.aztec) {
+        initAztecSdk();
+      } else {
+        window.aztecCallback = initAztecSdk;
+      }
+    </script>
+  </body>
+</html>

@@ -4,7 +4,7 @@ import "../../ERC1724/ZkAssetOwnable.sol";
 
 /**
  * @title ZkAssetOwnableTest
- * @author AZTEC 
+ * @author AZTEC
  * @dev Used for testing purposes
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
@@ -14,7 +14,7 @@ contract ZkAssetOwnableTest {
 
     function setZkAssetOwnableAddress(address _zkAssetOwnableAddress) public {
         zkAssetOwnable = ZkAssetOwnable(_zkAssetOwnableAddress);
-    } 
+    }
 
     function callValidateProof(uint24 _proof, bytes memory _proofData) public {
         zkAssetOwnable.ace().validateProof(_proof, msg.sender, _proofData);
@@ -25,12 +25,13 @@ contract ZkAssetOwnableTest {
         zkAssetOwnable.confidentialTransferFrom(_proof, _proofOutput);
     }
 
-    function callBatchConfidentialApprove(
-        bytes32[] memory _noteHashes,
+    function callApproveProof(
+        uint24 _proofId,
+        bytes memory _proofOutputs,
         address _spender,
-        bool[] memory _spenderApprovals,
-        bytes memory _batchSignature
+        bool _approval,
+        bytes memory _proofSignature
     ) public {
-        zkAssetOwnable.batchConfidentialApprove(_noteHashes, _spender, _spenderApprovals, _batchSignature);
+        zkAssetOwnable.approveProof(_proofId, _proofOutputs, _spender, _approval, _proofSignature);
     }
 }
