@@ -3,37 +3,10 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "JOIN_SPLIT_PROOF",
+            "name": "BURN_PROOF",
             "outputs": [
                 {
-                    "name": "",
-                    "type": "uint24"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "PUBLIC_RANGE_PROOF",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint24"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "PRIVATE_RANGE_PROOF",
-            "outputs": [
-                {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
                 }
@@ -48,6 +21,22 @@
             "name": "DIVIDEND_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "JOIN_SPLIT_PROOF",
+            "outputs": [
+                {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
                 }
@@ -62,6 +51,7 @@
             "name": "MINT_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
                 }
@@ -73,9 +63,25 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "BURN_PROOF",
+            "name": "PRIVATE_RANGE_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
                 }
@@ -85,11 +91,11 @@
             "type": "function"
         }
     ],
-    "bytecode": "0x608060405234801561001057600080fd5b5060f08061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060595760003560e01c80625bf73214605e57806308ae900a14607c57806349518b281460825780638500e1f81460885780638e526d9b14608e578063df924625146094575b600080fd5b6064609a565b6040805162ffffff9092168252519081900360200190f35b606460a1565b606460a8565b606460af565b606460b6565b606460bd565b6201010181565b6201040381565b6201040281565b6201040181565b6201020181565b620103018156fea165627a7a72305820bba46b2a9d65824b1a9fec1c013bb609a7d3d42c7f78db1499e3ecb645e44a530029",
+    "bytecode": "0x608060405234801561001057600080fd5b5060f98061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060595760003560e01c80625bf73214605e57806308ae900a14607c57806349518b281460825780638500e1f81460885780638e526d9b14608e578063df924625146094575b600080fd5b6064609a565b6040805162ffffff9092168252519081900360200190f35b606460a1565b606460a8565b606460af565b606460b6565b606460bd565b6201010181565b6201040381565b6201040281565b6201040181565b6201020181565b620103018156fea265627a7a723158207202087e3b89bc09b5aa553aa7dadbc7aeeeafc9fe07e288810e2aa44c5e8ba464736f6c63430005100032",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
-    "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060595760003560e01c80625bf73214605e57806308ae900a14607c57806349518b281460825780638500e1f81460885780638e526d9b14608e578063df924625146094575b600080fd5b6064609a565b6040805162ffffff9092168252519081900360200190f35b606460a1565b606460a8565b606460af565b606460b6565b606460bd565b6201010181565b6201040381565b6201040281565b6201040181565b6201020181565b620103018156fea165627a7a72305820bba46b2a9d65824b1a9fec1c013bb609a7d3d42c7f78db1499e3ecb645e44a530029",
+    "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060595760003560e01c80625bf73214605e57806308ae900a14607c57806349518b281460825780638500e1f81460885780638e526d9b14608e578063df924625146094575b600080fd5b6064609a565b6040805162ffffff9092168252519081900360200190f35b606460a1565b606460a8565b606460af565b606460b6565b606460bd565b6201010181565b6201040381565b6201040281565b6201040181565b6201020181565b620103018156fea265627a7a723158207202087e3b89bc09b5aa553aa7dadbc7aeeeafc9fe07e288810e2aa44c5e8ba464736f6c63430005100032",
     "schemaVersion": "3.0.19"
 }

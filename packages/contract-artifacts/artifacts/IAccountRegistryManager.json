@@ -4,13 +4,15 @@
             "anonymous": false,
             "inputs": [
                 {
-                    "indexed": false,
+                    "indexed": true,
+                    "internalType": "address",
                     "name": "proxyAddress",
                     "type": "address"
                 },
                 {
-                    "indexed": false,
-                    "name": "adminAddress",
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "proxyAdmin",
                     "type": "address"
                 }
             ],
@@ -22,11 +24,26 @@
             "inputs": [
                 {
                     "indexed": false,
+                    "internalType": "uint256",
+                    "name": "newLatestEpoch",
+                    "type": "uint256"
+                }
+            ],
+            "name": "UpdateLatestEpoch",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
                     "name": "proxyAddress",
                     "type": "address"
                 },
                 {
-                    "indexed": false,
+                    "indexed": true,
+                    "internalType": "address",
                     "name": "newBehaviourAddress",
                     "type": "address"
                 }
@@ -35,9 +52,49 @@
             "type": "event"
         },
         {
+            "constant": true,
+            "inputs": [],
+            "name": "latestEpoch",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "proxyAddress",
+            "outputs": [
+                {
+                    "internalType": "address payable",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "getImplementation",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "initialBehaviourAddress",
                     "type": "address"
                 }
@@ -50,7 +107,13 @@
         },
         {
             "constant": false,
-            "inputs": [],
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "newBehaviourAddress",
+                    "type": "address"
+                }
+            ],
             "name": "upgradeAccountRegistry",
             "outputs": [],
             "payable": false,
@@ -61,7 +124,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"
