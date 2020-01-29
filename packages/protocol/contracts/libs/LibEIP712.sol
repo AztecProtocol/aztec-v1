@@ -120,7 +120,7 @@ contract LibEIP712 {
                     // validate signature length == 0x41 or 0x60 bytes. 
                     // will be 0x41 if one signature was provided, 0x60 if multiple signatures 
                     // have been provided - due to the relevant signature creation functions
-                    or(eq(byteLength, 0x41), eq(byteLength, 0x60)),
+                    eq(byteLength, 0x60),
                     // validate v == 27 or v == 28
                     or(eq(v, 27), eq(v, 28))
                 ),
