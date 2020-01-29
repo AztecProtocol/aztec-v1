@@ -17,11 +17,21 @@ const stepSignNotes = {
     tasks: [
         {
             type: 'sign',
-            run: apis.note.signProof,
+            run: apis.note.signNotes,
         },
     ],
     autoStart: true,
     submitTextKey: 'transaction.sign.submit',
+};
+
+const stepSignNotesForGSN = {
+    ...stepSignNotes,
+    tasks: [
+        {
+            type: 'sign',
+            run: apis.note.signProof,
+        },
+    ],
 };
 
 const stepConfirm = {
@@ -29,6 +39,11 @@ const stepConfirm = {
     descriptionKey: 'send.confirm.description',
     tasks: [],
     submitTextKey: 'transaction.send.submit',
+};
+
+const stepConfirmViaGSN = {
+    ...stepConfirm,
+    descriptionKey: 'transaction.gsn.send.description',
 };
 
 const stepSend = {
@@ -44,14 +59,15 @@ const stepSend = {
             run: apis.mock,
         },
         {
-            titleKey: 'send.send.step',
             type: 'sign',
+            titleKey: 'send.send.step',
             run: apis.asset.confidentialTransfer,
         },
         {
             titleKey: 'transaction.confirmed',
         },
     ],
+    showTaskList: true,
     autoStart: true,
     submitTextKey: 'transaction.send.submit',
 };
@@ -84,8 +100,8 @@ const stepSendViaGSN = {
 export default {
     gsn: [
         stepApprove,
-        stepSignNotes,
-        stepConfirm,
+        stepSignNotesForGSN,
+        stepConfirmViaGSN,
         stepSendViaGSN,
     ],
     metamask: [

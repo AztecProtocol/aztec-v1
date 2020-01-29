@@ -9,7 +9,7 @@ const stepApprove = {
 
 const stepSend = {
     name: 'send',
-    descriptionKey: 'note.access.send.description',
+    descriptionKey: 'note.access.grant.description',
     tasks: [
         {
             titleKey: 'transaction.step.create.proof',
@@ -31,7 +31,7 @@ const stepSend = {
 
 const stepSendViaGSN = {
     name: 'send',
-    descriptionKey: 'transaction.gsn.send.description',
+    descriptionKey: 'note.access.grant.description',
     tasks: [
         {
             titleKey: 'transaction.step.create.proof',
