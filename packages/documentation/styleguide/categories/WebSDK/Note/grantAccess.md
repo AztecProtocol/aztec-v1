@@ -1,12 +1,3 @@
-Grant note view access to a third party. Calling this method will update the metaData of the note and broadcast it on chain in the form of a event `UpdateNoteMetaData(noteOwner, noteHash, metaData)`
-
-__Arguments__
-- {String} __address__: Ethereum address which is to be given view access to the note
-
-__Returns__
-- {String} Ethereum address which owns the note
-
-
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';

@@ -187,7 +187,7 @@ module.exports = {
             },
             {
               name: 'note.equal',
-              content: 'styleguide/categories/WebSDK/Note/hash.md',
+              content: 'styleguide/categories/WebSDK/Note/equal.md',
               exampleMode: 'hide',
             },
             {
@@ -201,8 +201,8 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
-              name: 'note.greaterThanOrEqual',
-              content: 'styleguide/categories/WebSDK/Note/greaterThanOrEqual.md',
+              name: 'note.greaterThanOrEqualTo',
+              content: 'styleguide/categories/WebSDK/Note/greaterThanOrEqualTo.md',
               exampleMode: 'hide',
             },
             {
@@ -211,8 +211,8 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
-              name: 'note.lessThanOrEqual',
-              content: 'styleguide/categories/WebSDK/Note/lessThanOrEqual.md',
+              name: 'note.lessThanOrEqualTo',
+              content: 'styleguide/categories/WebSDK/Note/lessThanOrEqualTo.md',
               exampleMode: 'hide',
             },
           ],

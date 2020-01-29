@@ -205,7 +205,7 @@ export default class ZkAsset {
      *                                     Will use default value in setting if undefined.
      *       - (Array) userAccess: Addresses that have been granted view access to the note value
      *
-     * @returns {Object} txSummary Transaction summary information containing:
+     * @returns {Object} txSwummary Transaction summary information containing:
      * 
      * - (Boolean) success: describes whether the transaction was successful
      * 
