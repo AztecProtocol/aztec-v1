@@ -1,23 +1,23 @@
 @import '../../styles/variables';
 
-:global {
-  .hljs {
-    display: block;
-    padding: 0;
-    background: none;
-    font-family: $code-font-family;
-    font-size: map-get($code-font-size-map, 'xxs');
-    line-height: map-get($line-height-map, 'xxs');
-    color: $default-text-color;
-    user-select: text;
-    overflow-x: auto;
-  }
+.code {
+  display: block;
+  font-family: $code-font-family;
+  font-size: map-get($code-font-size-map, 'xxs');
+  line-height: map-get($line-height-map, 'xxs');
+  color: $default-text-color;
+  user-select: text;
+  overflow-x: auto;
+}
 
-  .hljs-attr {
-    color: map-get($color-map, 'primary-light');
-  }
+.attr {
+  color: map-get($color-map, 'primary-light');
+}
 
-  .hljs-string {
-    color: rgb(164, 194, 68);
-  }
+.str {
+  color: rgb(164, 194, 68);
+}
+
+.val {
+  color: map-get($color-map, 'purple');
 }

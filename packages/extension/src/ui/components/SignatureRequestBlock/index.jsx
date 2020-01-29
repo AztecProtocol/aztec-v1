@@ -34,7 +34,7 @@ const SignatureRequestBlock = ({
         {!signed && (
             <Block padding="xs xl m">
                 <Code>
-                    {prettyPrint(signatures)}
+                    {prettyPrint(signatures, 2)}
                 </Code>
             </Block>
         )}
