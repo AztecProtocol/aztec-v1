@@ -44,6 +44,7 @@ jobs:
                     - ~/repo/packages/secp256k1/node_modules
                     - ~/repo/packages/aztec.js/dist
                     - ~/repo/packages/bn128/dist
+                    - ~/repo/packages/secp256k1/lib
                     - ~/repo/packages/contract-addresses/lib
                     - ~/repo/packages/contract-artifacts/lib
                     - ~/repo/packages/dev-utils/lib
