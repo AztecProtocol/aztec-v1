@@ -7,7 +7,9 @@ import provePrivateRange from '~/client/apis/privateRange/prove';
 const dataProperties = [
     'noteHash',
     'value',
+    'viewingKey',
     'owner',
+    'asset',
     'status',
 ];
 
@@ -18,13 +20,19 @@ export default class ZkNote {
         this.id = id;
     }
 
-    isValid() {
-        return !!this.noteHash && this.value !== null;
+    get valid() {
+        return typeof this.value === 'number';
+    }
+
+    get visible() {
+        return !!this.viewingKey;
+    }
+
+    get destroyed() {
+        return this.status === 'DESTROYED';
     }
 
     async init() {
-        if (this.isValid()) return;
-
         let note;
         try {
             note = await ConnectionService.query(
@@ -32,7 +40,6 @@ export default class ZkNote {
                 { id: this.id },
             );
         } catch (error) {
-            // developers can use this.isValid() to check if a note exists
             if (error.key !== 'note.not.found') {
                 throw error;
             }
@@ -49,7 +56,7 @@ export default class ZkNote {
     // exports an aztec.js note instance for use in proofs
 
     async export() {
-        if (!this.isValid()) {
+        if (!this.visible) {
             return null;
         }
 
@@ -81,6 +88,12 @@ export default class ZkNote {
      * @returns (Bool!)
      */
     async grantAccess(addresses) {
+        if (!this.visible
+            || this.destroyed
+        ) {
+            return false;
+        }
+
         const addressList = typeof addresses === 'string'
             ? [addresses]
             : addresses;
@@ -102,7 +115,7 @@ export default class ZkNote {
      *
      * Equal
      *
-     * - note (Note!|aztec.Note!)
+     * - comparisonNote (Note!|aztec.Note!)
      * - options (Object)
      *       sender (Address):                  The proof sender.
      *                                          Will use current address if empty
@@ -110,15 +123,19 @@ export default class ZkNote {
      *
      * @returns (PrivateRangeProof)
      */
-    async equal(note, {
+    async equal(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
+        if (!this.visible) {
+            return false;
+        }
+
         const originalNote = await this.export();
         return provePrivateRange({
             type: 'eq',
             originalNote,
-            comparisonNote: note,
+            comparisonNote,
             utilityNote,
             sender,
         });
@@ -128,7 +145,7 @@ export default class ZkNote {
      *
      * GreaterThan
      *
-     * - note (Note! or aztec.Note!)
+     * - comparisonNote (Note! or aztec.Note!)
      * - options (Object)
      *       sender (Address):                  The proof sender.
      *                                          Will use current address if empty
@@ -136,14 +153,18 @@ export default class ZkNote {
      *
      * @returns (PrivateRangeProof)
      */
-    async greaterThan(note, {
+    async greaterThan(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
+        if (!this.visible) {
+            return false;
+        }
+
         const originalNote = await this.export();
         return provePrivateRange({
             originalNote,
-            comparisonNote: note,
+            comparisonNote,
             utilityNote,
             sender,
         });
@@ -153,7 +174,7 @@ export default class ZkNote {
      *
      * LessThan
      *
-     * - note (Note! or aztec.Note!)
+     * - comparisonNote (Note! or aztec.Note!)
      * - options
      *       sender (Address):                  The proof sender.
      *                                          Will use current address if empty
@@ -161,14 +182,18 @@ export default class ZkNote {
      *
      * @returns (PrivateRangeProof)
      */
-    async lessThan(note, {
+    async lessThan(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
-        const comparisonNote = await this.export();
+        if (!this.visible) {
+            return false;
+        }
+
+        const originalNote = await this.export();
         return provePrivateRange({
-            originalNote: note,
-            comparisonNote,
+            originalNote: comparisonNote,
+            comparisonNote: originalNote,
             utilityNote,
             sender,
         });
@@ -178,7 +203,7 @@ export default class ZkNote {
      *
      * GreaterThanOrEqualTo
      *
-     * - note (Note! or aztec.Note!)
+     * - comparisonNote (Note! or aztec.Note!)
      * - options
      *       sender (Address):                  The proof sender.
      *                                          Will use current address if empty
@@ -186,15 +211,19 @@ export default class ZkNote {
      *
      * @returns (PrivateRangeProof)
      */
-    async greaterThanOrEqualTo(note, {
+    async greaterThanOrEqualTo(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
+        if (!this.visible) {
+            return false;
+        }
+
         const originalNote = await this.export();
         return provePrivateRange({
             type: 'gte',
             originalNote,
-            comparisonNote: note,
+            comparisonNote,
             utilityNote,
             sender,
         });
@@ -204,7 +233,7 @@ export default class ZkNote {
      *
      * LessThanOrEqualTo
      *
-     * - note (Note! or aztec.Note!)
+     * - comparisonNote (Note! or aztec.Note!)
      * - options
      *       sender (Address):                  The proof sender.
      *                                          Will use current address if empty
@@ -212,15 +241,19 @@ export default class ZkNote {
      *
      * @returns (PrivateRangeProof)
      */
-    async lessThanOrEqualTo(note, {
+    async lessThanOrEqualTo(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
-        const comparisonNote = await this.export();
+        if (!this.visible) {
+            return false;
+        }
+
+        const originalNote = await this.export();
         return provePrivateRange({
             type: 'gte',
-            originalNote: note,
-            comparisonNote,
+            originalNote: comparisonNote,
+            comparisonNote: originalNote,
             utilityNote,
             sender,
         });
