@@ -10,7 +10,7 @@ import { keccak256, padLeft, randomHex } from 'web3-utils';
 import * as note from '../../src/note';
 import signer from '../../src/signer';
 
-describe('Signer', () => {
+describe.only('Signer', () => {
     let accounts;
     const domainTypes = {
         EIP712Domain: [
@@ -123,6 +123,7 @@ describe('Signer', () => {
                 spenderApproval,
                 privateKey,
             );
+            console.log({ signature });
             const v = parseInt(signature.slice(130, 132), 16);
             expect(v).to.be.oneOf([27, 28]);
         });
@@ -198,7 +199,7 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
-        it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
+        it.only('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
             const spenderApproval = true;
@@ -240,10 +241,13 @@ describe('Signer', () => {
                 aztecAccount.privateKey,
             );
 
+            console.log({ aztecSignature });
+
             // eth-sig-util is the MetaMask signing package
             const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
                 data: metaMaskTypedData,
             });
+            console.log({ metaMaskSignature });
             expect(aztecSignature).to.equal(metaMaskSignature);
         });
 

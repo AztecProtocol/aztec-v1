@@ -82,8 +82,8 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
     };
 
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
-    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
-    return signature;
+    // const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    return `0x${unformattedSignature}`;
 };
 
 /**
@@ -113,8 +113,8 @@ signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approva
         approval,
     };
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
-    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
-    return signature;
+    // const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    return `0x${unformattedSignature}`;
 };
 
 /**
@@ -132,13 +132,13 @@ signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approva
  */
 signer.signMultipleNotesForConfidentialTransfer = (verifyingContract, noteOwnerAccounts, notes, challenge, sender) => {
     const signaturesArray = noteOwnerAccounts.map((inputNoteOwner, index) => {
-        return signer.signNoteForConfidentialTransfer(
+        return (signer.signNoteForConfidentialTransfer(
             verifyingContract,
             inputNoteOwner,
             notes[index].noteHash,
             challenge,
             sender,
-        );
+        )).slice(2);
     });
     return `0x${signaturesArray.join('')}`;
 };
@@ -170,7 +170,7 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 
     const { privateKey } = noteOwnerAccount;
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
-    return unformattedSignature;
+    return `0x${unformattedSignature}`;
 };
 
 /**
@@ -195,9 +195,10 @@ signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
         status,
     };
 
-    const { unformattedSignature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
-    const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
-    return { signature, encodedTypedData };
+    let { unformattedSignature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
+    // const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    unformattedSignature = `0x${unformattedSignature}`;
+    return { unformattedSignature, encodedTypedData };
 };
 
 /**

@@ -22,7 +22,7 @@ const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/Factory
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-contract('ZkAssetOwnable', (accounts) => {
+contract.only('ZkAssetOwnable', (accounts) => {
     let ace;
     let erc20;
     let zkAssetOwnable;
@@ -48,6 +48,8 @@ contract('ZkAssetOwnable', (accounts) => {
                     spenderApproval,
                     aztecAccounts[i].privateKey,
                 );
+
+                console.log({ signature });
                 // eslint-disable-next-line no-await-in-loop
                 return zkAssetOwnable.confidentialApprove(notes[i].noteHash, zkAssetOwnableTest.address, true, signature);
             }),

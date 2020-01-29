@@ -42,7 +42,7 @@ const randomAddress = () => {
     return `0x${padLeft(crypto.randomBytes(20).toString('hex'))}`;
 };
 
-contract('ZkAsset', (accounts) => {
+contract.only('ZkAsset', (accounts) => {
     let ace;
     let erc20;
     const publicOwner = accounts[0];
@@ -229,6 +229,7 @@ contract('ZkAsset', (accounts) => {
             const depositProof = new JoinSplitProof(depositInputNotes, depositOutputNotes, sender, publicValue, publicOwner);
             const depositData = depositProof.encodeABI(zkAsset.address);
             const depositSignatures = depositProof.constructSignatures(zkAsset.address, depositInputOwnerAccounts);
+            console.log({ depositSignatures });
 
             await ace.publicApprove(zkAsset.address, depositProof.hash, 20, { from: accounts[0] });
             await zkAsset.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, { from: accounts[0] });
@@ -247,6 +248,7 @@ contract('ZkAsset', (accounts) => {
             );
             const withdrawData = withdrawProof.encodeABI(zkAsset.address);
             const withdrawSignatures = withdrawProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
+            console.log({ withdrawSignatures });
 
             const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](withdrawData, withdrawSignatures, {
                 from: accounts[0],
