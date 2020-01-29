@@ -115,13 +115,6 @@ module.exports = {
         reporter: 'spec',
     },
     networks: {
-        test: {
-            provider: new Web3.providers.HttpProvider('http://localhost:8545'),
-            gas: 6500000,
-            gasPrice: toHex(toWei('1', 'gwei')),
-            network_id: '*', // eslint-disable-line camelcase
-            port: 8545,
-        },
         development: {
             provider: engine,
             gas: 6500000,
@@ -131,21 +124,21 @@ module.exports = {
         },
         mainnet: {
             provider: mainnetProvider,
-            gas: 10e6,
+            gas: 9e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
             skipDryRun: true,
         },
         rinkeby: {
             provider: rinkebyProvider,
-            gas: 10e6,
+            gas: 9e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
             skipDryRun: true,
         },
         ropsten: {
             provider: ropstenProvider,
-            gas: 8e6,
+            gas: 7e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
             skipDryRun: true,
