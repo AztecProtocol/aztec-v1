@@ -49,7 +49,7 @@ const SignatureRequestBlock = ({
                 <Block padding="xs 0">
                     <SVG
                         glyph={checkGlyph}
-                        color="white"
+                        color="white-light"
                         width={iconSizeMap.xl}
                         height={iconSizeMap.xl}
                     />

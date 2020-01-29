@@ -103,6 +103,16 @@ export const svgProgressThemeBgMap = {
   secondary: 'secondary-lightest',
   white: 'white-lighter',
 };
+export const loaderThemeColorMap = {
+  primary: 'primary-lighter',
+  secondary: 'secondary-lightest',
+  white: 'white',
+};
+export const loaderThemeInvertedColorMap = {
+  primary: 'white',
+  secondary: 'white',
+  white: 'grey-lighter',
+};
 export const iconSizeMap = {
   xxs: '12px',
   xs: '14px',

@@ -285,7 +285,7 @@ class StepContentHelper extends PureComponent {
                         statusIcon = (
                             <Loader
                                 size="xxs"
-                                theme="secondary"
+                                theme="primary"
                             />
                         );
                     }
