@@ -6,6 +6,7 @@
             "name": "getHubAddr",
             "outputs": [
                 {
+                    "internalType": "address",
                     "name": "",
                     "type": "address"
                 }
@@ -18,38 +19,47 @@
             "constant": true,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "relay",
                     "type": "address"
                 },
                 {
+                    "internalType": "address",
                     "name": "from",
                     "type": "address"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "encodedFunction",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "transactionFee",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "gasPrice",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "gasLimit",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "nonce",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "approvalData",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "maxPossibleCharge",
                     "type": "uint256"
                 }
@@ -57,10 +67,12 @@
             "name": "acceptRelayedCall",
             "outputs": [
                 {
+                    "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "",
                     "type": "bytes"
                 }
@@ -73,6 +85,7 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "context",
                     "type": "bytes"
                 }
@@ -80,6 +93,7 @@
             "name": "preRelayedCall",
             "outputs": [
                 {
+                    "internalType": "bytes32",
                     "name": "",
                     "type": "bytes32"
                 }
@@ -92,18 +106,22 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "context",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "bool",
                     "name": "success",
                     "type": "bool"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "actualCharge",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "bytes32",
                     "name": "preRetVal",
                     "type": "bytes32"
                 }
@@ -118,7 +136,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"
