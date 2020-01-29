@@ -80,6 +80,22 @@ export default mergeApis(realApis, {
             };
         },
         confidentialTransfer: () => mockSigningApi('Run confidentialTransfer?'),
+        deposit: ({
+            isGSNAvailable,
+        }) => {
+            if (isGSNAvailable) {
+                return mock();
+            }
+            return mockSigningApi('Deposit?');
+        },
+        updateNoteMetadata: ({
+            isGSNAvailable,
+        }) => {
+            if (isGSNAvailable) {
+                return mock();
+            }
+            return mockSigningApi('Update note metadata?');
+        },
     },
     note: {
         fetchNote: noteHash => ({
@@ -87,6 +103,10 @@ export default mergeApis(realApis, {
             value: randomInt(10000),
             asset: assets[0],
         }),
-        signProof: () => mockSigningApi('Sign notes?'),
+        signNotes: () => mockSigningApi('Sign notes?'),
+        signProof: () => mockSigningApi('Sign proof?'),
+    },
+    ace: {
+        publicApprove: () => mockSigningApi('Run publicApprove?'),
     },
 });

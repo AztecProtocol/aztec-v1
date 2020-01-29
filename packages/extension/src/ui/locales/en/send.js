@@ -14,14 +14,15 @@ export default {
         `,
     },
     confirm: {
-        description: `A MetaMask signature is required to send ZkTokens.
-            The signature should contain the following values:
+        description: `The SDK has picked the most suitable notes for this transaction.
+            If everything looks good hit send!
         `,
     },
     send: {
         step: 'Sending ZkTokens',
-        description: `A MetaMask signature is required to send ZkTokens.
-            The signature should contain the following values:`,
+        description: `The SDK has picked the most suitable notes for this transaction.
+            If everything looks good hit send!
+        `,
     },
     recipient: 'Recipient',
 };
