@@ -67,5 +67,8 @@ module.exports = {
             xl: '40px',
             xxl: '48px',
         },
+        loaderThemeColorMap: {
+            primary: 'primary-lighter',
+        },
     },
 };
