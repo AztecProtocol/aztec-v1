@@ -5,6 +5,7 @@ import {
     Avatar,
     Block,
     Text,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     themeType,
@@ -15,6 +16,7 @@ import {
 } from '~/ui/styles/guacamole-vars';
 import ProfileSvg from '~/ui/components/ProfileSvg';
 import AztecSvg from '~/ui/components/AztecSvg';
+import metamaskGlyph from '~/ui/images/metamask.svg';
 import colorSchemes from './config/colorSchemes';
 import shapeGenerators from './config/shapeGenerators';
 import styles from './icon.scss';
@@ -43,8 +45,10 @@ const ProfileIcon = ({
     theme,
     type,
     address,
+    linkedTokenAddress,
     noteHash,
     src,
+    icon,
     alt,
     tooltip,
     size,
@@ -64,7 +68,15 @@ const ProfileIcon = ({
                 size={size}
             />
         );
-    } else if (!type || src) {
+    } else if (type === 'metamask') {
+        iconNode = (
+            <SVG
+                glyph={metamaskGlyph}
+                width={avatarSizesMap[size]}
+                height={avatarSizesMap[size]}
+            />
+        );
+    } else if (!type || src || icon) {
         const style = themeStyleMapping[theme];
 
         iconNode = (
@@ -72,10 +84,11 @@ const ProfileIcon = ({
                 className={classnames(
                     {
                         [wrapperClassName]: !tooltip,
-                        [styles['with-icon']]: !src,
+                        [styles['with-icon']]: !(src || icon),
+                        [styles['type-asset']]: type === 'asset',
                     },
                 )}
-                src={src}
+                src={src || icon}
                 alt={alt}
                 size={size}
                 shape="circular"
@@ -93,7 +106,7 @@ const ProfileIcon = ({
                         [wrapperClassName]: !tooltip,
                     },
                 )}
-                address={address || noteHash}
+                address={linkedTokenAddress || address || noteHash}
                 size={size}
                 alt={alt}
                 colorScheme={colorSchemes[type]}
@@ -143,8 +156,10 @@ ProfileIcon.propTypes = {
     theme: themeType,
     type: profileType,
     address: PropTypes.string,
+    linkedTokenAddress: PropTypes.string,
     noteHash: PropTypes.string,
     src: PropTypes.string,
+    icon: PropTypes.string,
     alt: PropTypes.string,
     tooltip: PropTypes.oneOfType([
         PropTypes.element,
@@ -157,9 +172,11 @@ ProfileIcon.defaultProps = {
     className: '',
     theme: 'primary',
     address: '',
+    linkedTokenAddress: '',
     noteHash: '',
     type: '',
     src: '',
+    icon: '',
     alt: '',
     tooltip: '',
     size: 'm',

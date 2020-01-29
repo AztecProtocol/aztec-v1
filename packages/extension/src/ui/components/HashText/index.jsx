@@ -5,6 +5,7 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import formatHash from '~/ui/utils/formatHash';
+import ClickToCopy from '~/ui/components/ClickToCopy';
 import styles from './hash.scss';
 
 const HashText = ({
@@ -13,12 +14,13 @@ const HashText = ({
     suffixLength,
     color,
     size,
+    clickToCopy,
 }) => {
     const hash = prefixLength >= 0 || suffixLength >= 0
         ? formatHash(text, Math.max(0, prefixLength), Math.max(0, suffixLength))
         : text;
 
-    return (
+    const textNode = (
         <Text
             className={classnames(
                 'text-code',
@@ -29,6 +31,19 @@ const HashText = ({
             text={hash}
             color={color}
         />
+    );
+
+    if (!clickToCopy) {
+        return textNode;
+    }
+
+    return (
+        <ClickToCopy
+            className={styles['copy-wrapper']}
+            text={text}
+        >
+            {textNode}
+        </ClickToCopy>
     );
 };
 
@@ -41,6 +56,7 @@ HashText.propTypes = {
     suffixLength: PropTypes.number,
     color: PropTypes.string,
     size: PropTypes.string,
+    clickToCopy: PropTypes.bool,
 };
 
 HashText.defaultProps = {
@@ -48,6 +64,7 @@ HashText.defaultProps = {
     suffixLength: -1,
     color: '',
     size: '',
+    clickToCopy: false,
 };
 
 export default HashText;

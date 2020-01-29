@@ -1,0 +1,26 @@
+@import '../../styles/variables';
+
+.block {
+  position: relative;
+  overflow: hidden;
+
+  &.signed {
+    background: map-get($color-map, 'green');
+  }
+}
+
+.signed-message {
+  position: absolute;
+  left: 2000px;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+  transition-delay: 0.2s;
+}
+
+.signed {
+  .signed-message {
+    position: relative;
+    left: 0;
+    opacity: 1;
+  }
+}
