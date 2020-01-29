@@ -7,6 +7,7 @@ import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
 import MethodReturnRenderer from './MethodReturnRenderer';
 import parseTagsForAPI from '../utils/parseTagsForAPI';
+import { zkAssetURL, noteURL } from '../consts';
 
 class LiveDocUpdate extends Component {
   state = {
@@ -28,9 +29,9 @@ class LiveDocUpdate extends Component {
     }
   }
 
+
   parseGitDocs = async () => {
-    const url =
-      'https://raw.githubusercontent.com/AztecProtocol/AZTEC/e23644babfadefc05f5d532b4ef68ebc13bfba6b/packages/extension/src/client/apis/ZkAsset.js';
+    const url = this.selectAPIURL();
     const response = await fetch(url);
     const apiText = await response.text();
 
@@ -59,11 +60,19 @@ class LiveDocUpdate extends Component {
     this.setState({ parsedArguments, parsedReturns, parsedDescription: parsedDescription[0] });
   };
 
-  render() {
-    if (this.props.showDocs === false) {
-      return;
-    }
+  selectAPIURL() {
+    const { name } = this.props;
 
+    let url;
+    if (name.includes('zkAsset')) {
+      url = zkAssetURL;
+    } else if (name.includes('note')) {
+      url = noteURL;
+    }
+    return url;
+  }
+
+  render() {
     const { parsedArguments, parsedReturns, parsedDescription } = this.state;
 
     return (
