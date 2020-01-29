@@ -96,7 +96,7 @@ class RegisterContent extends StepContentHelper {
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
         const signatures = {
-            address,
+            account: address,
             linkedPublicKey,
         };
 
