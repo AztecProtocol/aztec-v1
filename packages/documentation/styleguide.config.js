@@ -79,11 +79,12 @@ module.exports = {
     },
   },
   styleguideComponents: {
-    LogoRenderer: path.join(__dirname, 'styleguide/components/Logo'),
-    StyleGuideRenderer: path.join(__dirname, 'styleguide/components/StyleGuideRenderer'),
     ComponentsListRenderer: path.join(__dirname, 'styleguide/components/ComponentsListRenderer'),
+    Examples: path.join(__dirname, 'styleguide/components/Examples'),
+    LogoRenderer: path.join(__dirname, 'styleguide/components/Logo'),
     SectionHeadingRenderer: path.join(__dirname, 'styleguide/components/SectionHeadingRenderer'),
     HeadingRenderer: path.join(__dirname, 'styleguide/components/HeadingRenderer'),
+    StyleGuideRenderer: path.join(__dirname, 'styleguide/components/StyleGuideRenderer'),
     ReactComponent: path.join(__dirname, 'styleguide/components/ReactComponent'),
     ReactComponentRenderer: path.join(__dirname, 'styleguide/components/ReactComponentRenderer'),
     Playground: path.join(__dirname, 'styleguide/components/Playground'),
@@ -93,77 +94,18 @@ module.exports = {
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
     Preview: path.join(__dirname, 'styleguide/components/Preview'),
-    Examples: path.join(__dirname, 'styleguide/components/Examples'),
-    ExamplesRenderer: path.join(__dirname, 'styleguide/components/ExamplesRenderer'),
+    // ExamplesRenderer: path.join(__dirname, 'styleguide/components/ExamplesRenderer'),
   },
   sections: [
     {
       name: 'Introduction',
       content: 'styleguide/categories/Introduction.md',
-      sections: [
-        {
-          name: 'Background',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'Getting Started',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'Roadmap',
-          content: 'src/config/custom.md',
-          exampleMode: 'hide',
-        },
-      ],
-      sectionDepth: 1,
       exampleMode: 'collapse',
       usageMode: 'collapse',
     },
-    // {
-    //   name: 'Smart Contracts',
-    //   content: 'styleguide/categories/SmartContracts.md',
-    //   sections: [
-    //     {
-    //       name: 'ACE',
-    //       content: 'src/config/custom.md',
-    //       exampleMode: 'hide',
-    //     },
-    //     {
-    //       name: 'Validators',
-    //       content: 'src/config/custom.md',
-    //       exampleMode: 'hide',
-    //     },
-    //     {
-    //       name: 'ZkAsset',
-    //       content: 'src/config/custom.md',
-    //       exampleMode: 'hide',
-    //     },
-    //     {
-    //       name: 'ZkAssetOwnable',
-    //       content: 'src/config/custom.md',
-    //       exampleMode: 'hide',
-    //     },
-    //     {
-    //       name: 'ZkAssetMintable',
-    //       content: 'src/config/custom.md',
-    //       exampleMode: 'hide',
-    //     },
-    //     {
-    //       name: 'ZkAssetBurnable',
-    //       content: 'src/config/custom.md',
-    //       exampleMode: 'hide',
-    //     },
-    //   ],
-    //   sectionDepth: 2,
-    //   exampleMode: 'collapse',
-    //   usageMode: 'collapse',
-    //   pagePerSection: true,
-    // },
     {
       name: 'SDK',
-      content: 'styleguide/categories/WebSDK/overview.md',
+      content: 'styleguide/categories/WebSDK/sdkOverview.md',
       components: [],
       exampleMode: 'shown',
       pagePerSection: true,
@@ -171,11 +113,6 @@ module.exports = {
         {
           name: 'Getting started',
           content: 'styleguide/categories/WebSDK/gettingStarted.md',
-          exampleMode: 'hide',
-        },
-        {
-          name: 'window',
-          content: 'styleguide/categories/WebSDK/Window/index.md',
           exampleMode: 'hide',
         },
         {
@@ -205,14 +142,14 @@ module.exports = {
             },
             {
               name: 'zkAsset.createNoteFromBalance',
-              content: 'styleguide/categories/WebSDK/ZkAsset/createNotesfromBalance.md',
+              content: 'styleguide/categories/WebSDK/ZkAsset/createNoteFromBalance.md',
               exampleMode: 'hide',
             },
-            {
-              name: 'zkAsset.fetchNotesFromBalance',
-              content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md',
-              exampleMode: 'hide',
-            },
+            // {
+            //   name: 'zkAsset.fetchNotesFromBalance',
+            //   content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md ',
+            //   exampleMode: 'hide',
+            // },
             {
               name: 'zkAsset.balanceOfLinkedToken',
               content: 'styleguide/categories/WebSDK/ZkAsset/balanceOfLinkedToken.md',
@@ -244,18 +181,38 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
-              name: 'note.grantNoteAccess',
-              content: 'styleguide/categories/WebSDK/Note/grantNoteAccess.md',
-              exampleMode: 'hide',
-            },
-            {
               name: 'note.owner',
               content: 'styleguide/categories/WebSDK/Note/owner.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.hash',
+              name: 'note.equal',
               content: 'styleguide/categories/WebSDK/Note/hash.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.grantAccess',
+              content: 'styleguide/categories/WebSDK/Note/grantAccess.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.greaterThan',
+              content: 'styleguide/categories/WebSDK/Note/greaterThan.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.greaterThanOrEqual',
+              content: 'styleguide/categories/WebSDK/Note/greaterThanOrEqual.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.lessThan',
+              content: 'styleguide/categories/WebSDK/Note/lessThan.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: 'note.lessThanOrEqual',
+              content: 'styleguide/categories/WebSDK/Note/lessThanOrEqual.md',
               exampleMode: 'hide',
             },
           ],

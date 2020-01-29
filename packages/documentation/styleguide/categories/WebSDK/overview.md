@@ -1,6 +1,6 @@
-## Introduction
+## The role of the SDK
 
-The AZTEC SDK allows developers to use AZTEC's zero-knowledge proofs in order to transact confidentially over public Ethereum. It exposes a core API giving users the dapp builders the ability to deposit, send, and withdraw funds confidentially. This API is accompanied by a UI component which pops up at the relevant moment to guide the user through the API action.
+The AZTEC SDK allows developers to use AZTEC's zero-knowledge proofs in order to transact confidentially over public Ethereum. It exposes a core API,giving users the ability to deposit, send, and withdraw funds confidentially. This API is accompanied by a UI component which pops up at the relevant moment, guiding the user through the API action.
 
 Each API method is documented by showing a live demo of the method code. There is a in-page interactive JavaScript console associated with the docs for each method, which contains example code showing how the API can be used in your dapp. The consoles have a `Run` button which, when clicked, will cause the code to be executed and trigger any resulting action - such as the SDK UI popping up.
 

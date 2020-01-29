@@ -14,10 +14,15 @@ console.info(asset);
 
 The `zkAsset` has the following methods on it:
 - `async zkAsset.balance()`
-- `async zkAsset.fetchNotesFromBalance()`
 - `async zkAsset.deposit()`
 - `async zkAsset.send()`
 - `async zkAsset.withdraw()`
+- `async zkAsset.createNotesFromBalance()`
+- `async zkAsset.fetchNotesFromBalance()`
+- `async zkAsset.allowanceOfLinkedtoken()`
+- `async zkAsset.totalSupplyOfLinkedtoken()`
+
+
 
 
 
