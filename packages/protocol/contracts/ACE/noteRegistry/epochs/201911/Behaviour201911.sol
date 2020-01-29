@@ -16,7 +16,7 @@ import "../201907/Behaviour201907.sol";
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract Behaviour201911 is Behaviour201907 {
-    uint256 public constant slowReleaseEnd = 1580515200;
+    uint256 public constant slowReleaseEnd = 1585699199;
     bool public isAvailableDuringSlowRelease = false;
 
     modifier onlyIfAvailable() {

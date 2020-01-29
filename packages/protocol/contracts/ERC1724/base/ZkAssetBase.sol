@@ -24,13 +24,16 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "ZK_ASSET";
 
-    bytes32 constant internal MULTIPLE_NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
-        "MultipleNoteSignature(",
-            "bytes32[] noteHashes,",
+    bytes32 constant internal PROOF_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
+        "ProofSignature(",
+            "bytes32 proofHash,",
             "address spender,",
-            "bool[] spenderApprovals",
+            "bool approval",
         ")"
     ));
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
+
+    bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
 
     bytes32 constant internal NOTE_SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(
         "NoteSignature(",
@@ -39,7 +42,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             "bool spenderApproval",
         ")"
     ));
-    
+
     bytes32 constant internal JOIN_SPLIT_SIGNATURE_TYPE_HASH = keccak256(abi.encodePacked(
         "JoinSplitSignature(",
             "uint24 proof,",
@@ -161,46 +164,62 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
     /**
      * @dev Note owner can approve a third party address, such as a smart contract,
-     * to spend multiple notes on their behalf. This allows a batch approval of notes
-     * to be performed, rather than individually for each note via confidentialApprove(). 
+     * to spend a proof on their behalf. This allows a batch approval of notes
+     * to be performed, rather than individually for each note via confidentialApprove().
      *
-     * @param _noteHashes - array of the keccak256 hashes of notes, due to be spent
+     * @param _proofId - id of proof to be approved. Needs to be a balanced proof.
+     * @param _proofOutputs - data of proof
      * @param _spender - address being approved to spend the notes
-     * @param _spenderApprovals - array of approvals, defining whether the _spender being approved or revoked permission
-     * to spend the relevant note. True if approval granted, false if revoked
-     * @param _batchSignature - ECDSA signature over the notes, approving them to be spent
+     * @param _proofSignature - ECDSA signature over the proof, approving it to be spent
      */
-    function batchConfidentialApprove(
-        bytes32[] memory _noteHashes,
+    function approveProof(
+        uint24 _proofId,
+        bytes calldata _proofOutputs,
         address _spender,
-        bool[] memory _spenderApprovals,
-        bytes memory _batchSignature
-    ) public {
-
+        bool _approval,
+        bytes calldata _proofSignature
+    ) external {
         // Prevent possible replay attacks
-        bytes32 signatureHash = keccak256(abi.encodePacked(_batchSignature));
+        bytes32 signatureHash = keccak256(_proofSignature);
         require(signatureLog[signatureHash] != true, "signature has already been used");
         signatureLog[signatureHash] = true;
 
-        bytes32 _hashStruct = keccak256(abi.encode(
-            MULTIPLE_NOTE_SIGNATURE_TYPEHASH,
-            keccak256(abi.encodePacked(_noteHashes)),
-            _spender,
-            keccak256(abi.encodePacked(_spenderApprovals))
+        bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
+            EIP712_DOMAIN_TYPEHASH,
+            keccak256("ZK_ASSET"),
+            keccak256("1"),
+            address(this)
         ));
 
-        bytes32 msgHash = hashEIP712Message(_hashStruct);
+        bytes32 msgHash = keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                PROOF_SIGNATURE_TYPE_HASH,
+                keccak256(_proofOutputs),
+                _spender,
+                _approval
+            ))
+        ));
+
         address signer = recoverSignature(
             msgHash,
-            _batchSignature
+            _proofSignature
         );
 
-        // Permissioning check and approve
-        for (uint256 i = 0; i < _noteHashes.length; i += 1) {
-            ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), _noteHashes[i]);
-            require(status == 1, "only unspent notes can be approved");
-            require(noteOwner == signer, "the note owner did not sign this message");
-            confidentialApproved[_noteHashes[i]][_spender] = _spenderApprovals[i];
+        for (uint i = 0; i < _proofOutputs.getLength(); i += 1) {
+            bytes memory proofOutput = _proofOutputs.get(i);
+
+            (bytes memory inputNotes,,,) = proofOutput.extractProofOutput();
+
+            for (uint256 j = 0; j < inputNotes.getLength(); j += 1) {
+                (, bytes32 noteHash, ) = inputNotes.get(j).extractNote();
+                ( uint8 status, , , address noteOwner ) = ace.getNote(address(this), noteHash);
+                require(status == 1, "only unspent notes can be approved");
+                require(noteOwner == signer, "the note owner did not sign this proof");
+            }
+
+            confidentialApproved[keccak256(proofOutput)][_spender] = _approval;
         }
     }
 
@@ -234,8 +253,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
     /**
     * @dev Extract the appropriate ECDSA signature from an array of signatures,
-    * 
-    * @param _signatures - array of ECDSA signatures over all inputNotes 
+    *
+    * @param _signatures - array of ECDSA signatures over all inputNotes
     * @param _i - index used to determine which signature element is desired
     */
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
@@ -247,13 +266,13 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         assembly {
             // memory map of signatures
             // 0x00 - 0x20 : length of signature array
-            // 0x20 - 0x40 : first sig, v 
-            // 0x40 - 0x60 : first sig, r 
+            // 0x20 - 0x40 : first sig, v
+            // 0x40 - 0x60 : first sig, r
             // 0x60 - 0x80 : first sig, s
             // 0x80 - 0xa0 : second sig, v
             // and so on...
             // Length of a signature = 0x60
-            
+
             v := mload(add(add(_signatures, 0x20), mul(_i, 0x60)))
             r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
             s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
@@ -278,13 +297,17 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         address publicOwner,
         int256 publicValue) = _proofOutput.extractProofOutput();
 
-        uint256 length = inputNotes.getLength();
-        for (uint i = 0; i < length; i += 1) {
-            (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
-            require(
-                confidentialApproved[noteHash][msg.sender] == true,
-                "sender does not have approval to spend input note"
-            );
+        bytes32 proofHash = keccak256(_proofOutput);
+
+        if (confidentialApproved[proofHash][msg.sender] != true) {
+            uint256 length = inputNotes.getLength();
+            for (uint i = 0; i < length; i += 1) {
+                (, bytes32 noteHash, ) = inputNotes.get(i).extractNote();
+                require(
+                    confidentialApproved[noteHash][msg.sender] == true,
+                    "sender does not have approval to spend input note"
+                );
+            }
         }
 
         ace.updateNoteRegistry(_proof, _proofOutput, msg.sender);
@@ -367,7 +390,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     }
 
     /**
-    * @dev Update the metadata of a note that already exists in storage. 
+    * @dev Update the metadata of a note that already exists in storage.
     * @param noteHash - hash of a note, used as a unique identifier for the note
     * @param metaData - metadata to update the note with
     */
@@ -434,8 +457,8 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
                 noteAccess[addressID] = block.timestamp;
             }
         }
-    }   
-   
+    }
+
 
     /**
     * @dev Emit events for all input notes, which represent notes being destroyed

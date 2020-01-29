@@ -1,0 +1,30 @@
+@import '../../styles/variables';
+
+$panel-width: 320px;
+
+.section-extension {
+    width: 100%;
+    max-width: calc(100vw - #{$panel-width});
+    min-width: $popup-width + (map-get($spacing-map, 'm') * 2);
+    height: 100%;
+}
+
+.section-panel {
+    width: $panel-width;
+    height: 100%;
+    overflow: auto;
+}
+
+.browser-window {
+  background-image: url('https://cdn.dribbble.com/users/1875714/screenshots/6770456/dribbble_shot.png');
+  background-size: cover;
+  background-position: center;
+}
+
+:global(#aztec-popup-placeholder) {
+  display: none !important;
+}
+
+:global(#aztec-popup-ui) {
+  display: block !important;
+}

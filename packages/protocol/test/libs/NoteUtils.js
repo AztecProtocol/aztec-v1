@@ -1,6 +1,7 @@
 /* eslint-disable object-curly-newline */
 /* global artifacts, contract, describe, expect, it: true */
 const { encoder, JoinSplitProof, note } = require('aztec.js');
+
 const secp256k1 = require('@aztec/secp256k1');
 const truffleAssert = require('truffle-assertions');
 const { padLeft } = require('web3-utils');

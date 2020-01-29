@@ -1,6 +1,5 @@
 /* global artifacts, expect, contract, beforeEach, it:true */
 const { JoinSplitProof, signer } = require('aztec.js');
-const bn128 = require('@aztec/bn128');
 const {
     constants,
     proofs: { JOIN_SPLIT_PROOF },
@@ -25,8 +24,6 @@ const ZkAssetTest = artifacts.require('./ZkAssetTest');
 const JoinSplitValidator = artifacts.require('./JoinSplit');
 const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
-
-const configCRS = require('../configCRS');
 
 dotenv.config();
 const mnemonic = process.env.TEST_MNEMONIC;
@@ -72,25 +69,6 @@ contract('ZkAsset', (accounts) => {
     });
 
     describe('Success States', async () => {
-        it('should correctly load the CRS', async () => {
-            // check configCRS worked as expected
-            expect(bn128.CRS[0]).to.equal(configCRS.CRS[0]);
-            expect(bn128.CRS[1]).to.equal(configCRS.CRS[1]);
-            expect(bn128.CRS[2]).to.equal(configCRS.CRS[2]);
-            expect(bn128.CRS[3]).to.equal(configCRS.CRS[3]);
-            expect(bn128.CRS[4]).to.equal(configCRS.CRS[4]);
-            expect(bn128.CRS[5]).to.equal(configCRS.CRS[5]);
-
-            // check the ACE CRS was correctly set
-            const aceCRS = await ace.getCommonReferenceString();
-            expect(aceCRS[0]).to.equal(configCRS.CRS[0]);
-            expect(aceCRS[1]).to.equal(configCRS.CRS[1]);
-            expect(aceCRS[2]).to.equal(configCRS.CRS[2]);
-            expect(aceCRS[3]).to.equal(configCRS.CRS[3]);
-            expect(aceCRS[4]).to.equal(configCRS.CRS[4]);
-            expect(aceCRS[5]).to.equal(configCRS.CRS[5]);
-        });
-
         it('should compute the correct domain hash', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const domainHash = computeDomainHash(zkAsset.address);

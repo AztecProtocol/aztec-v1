@@ -1,5 +1,5 @@
-const JoinSplitFluidVerifier = require('../../../joinSplitFluid/verifier');
+import JoinSplitFluidVerifier from '../../../joinSplitFluid/verifier';
 
 class MintVerifier66049 extends JoinSplitFluidVerifier {}
 
-module.exports = MintVerifier66049;
+export default MintVerifier66049;

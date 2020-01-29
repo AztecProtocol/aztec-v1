@@ -1,16 +1,18 @@
-const bn128 = require('@aztec/bn128');
+import * as bn128 from '@aztec/bn128';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import crypto from 'crypto';
+import web3Utils from 'web3-utils';
+import * as noteAccess from '@aztec/note-access';
+
+import * as note from '../../src/note';
+import { userAccount, userAccount2 } from '../helpers/note';
+
 const {
     constants: { AZTEC_JS_METADATA_PREFIX_LENGTH, VIEWING_KEY_LENGTH },
     metadata: metaDataConstructor,
-} = require('@aztec/note-access');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const crypto = require('crypto');
-const web3Utils = require('web3-utils');
-
-const { userAccount, userAccount2 } = require('../helpers/note');
-const note = require('../../src/note');
+} = noteAccess;
 
 const { padLeft, toHex, randomHex } = web3Utils;
 

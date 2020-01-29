@@ -1,10 +1,9 @@
-const { errors } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
-
-const note = require('../../../src/note');
-const { PublicRangeProof } = require('../../../src/proof');
+import { errors } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import * as note from '../../../src/note';
+import { PublicRangeProof } from '../../../src/proof';
 
 describe('Public range proof', () => {
     const { publicKey } = secp256k1.generateAccount();

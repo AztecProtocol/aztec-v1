@@ -1,0 +1,22 @@
+@function rgba-to-rgb($rgba, $background-color: #ffffff) {
+  $rgb-color: rgb(red($rgba), green($rgba), blue($rgba));
+  @return mix($rgb-color, $background-color, alpha($rgba) * 100%);
+}
+
+@function get-darken-color($color, $amount) {
+  @if $color == white {
+    @return $color;
+  }
+
+  $opacity: alpha($color);
+  @if $opacity != 1 {
+    $rgb-color: rgb(red($color), green($color), blue($color));
+    @if $rgb-color == white {
+      @return rgba($rgb-color, $opacity * (100% + $amount) / 100%);
+    }
+
+    $color: mix($rgb-color, #ffffff, $opacity * 100%);
+  }
+
+  @return darken($color, $amount);
+}

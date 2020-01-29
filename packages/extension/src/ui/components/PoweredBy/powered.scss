@@ -1,0 +1,19 @@
+@import '../../styles/variables';
+
+.powered-by {
+  width: 100%;
+}
+
+.left {
+  padding-right: map-get($spacing-map, 's');
+  text-align: right;
+}
+
+.right {
+  padding-left: map-get($spacing-map, 's');
+  text-align: left;
+}
+
+.left, .right {
+  width: calc(50% - #{map-get($avatar-sizes-map, 'xs') / 2});
+}

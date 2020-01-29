@@ -1,13 +1,12 @@
-const bn128 = require('@aztec/bn128');
-const { constants, errors } = require('@aztec/dev-utils');
-const secp256k1 = require('@aztec/secp256k1');
-const BN = require('bn.js');
-const { expect } = require('chai');
-const { randomHex } = require('web3-utils');
-
-const { BurnProof, MintProof } = require('../../../src/proof');
-const note = require('../../../src/note');
-const { validateElement, validateScalar } = require('../../helpers/bn128');
+import * as bn128 from '@aztec/bn128';
+import { constants, errors } from '@aztec/dev-utils';
+import secp256k1 from '@aztec/secp256k1';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import { randomHex } from 'web3-utils';
+import { BurnProof, MintProof } from '../../../src/proof';
+import * as note from '../../../src/note';
+import { validateElement, validateScalar } from '../../helpers/bn128';
 
 const { publicKey } = secp256k1.generateAccount();
 const sender = randomHex(20);
