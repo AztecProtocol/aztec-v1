@@ -5,94 +5,13 @@
             "inputs": [
                 {
                     "indexed": true,
-                    "name": "aceAddress",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "linkedTokenAddress",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "name": "scalingFactor",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": true,
-                    "name": "_canAdjustSupply",
-                    "type": "bool"
-                },
-                {
-                    "indexed": false,
-                    "name": "_canConvert",
-                    "type": "bool"
-                }
-            ],
-            "name": "CreateZkAsset",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": false,
-                    "name": "noteRegistryId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "CreateNoteRegistry",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "name": "owner",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "noteHash",
-                    "type": "bytes32"
-                },
-                {
-                    "indexed": false,
-                    "name": "metadata",
-                    "type": "bytes"
-                }
-            ],
-            "name": "CreateNote",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "name": "owner",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "noteHash",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "DestroyNote",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
+                    "internalType": "address",
                     "name": "owner",
                     "type": "address"
                 },
                 {
                     "indexed": false,
+                    "internalType": "uint256",
                     "name": "value",
                     "type": "uint256"
                 }
@@ -105,11 +24,107 @@
             "inputs": [
                 {
                     "indexed": true,
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "noteHash",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bytes",
+                    "name": "metadata",
+                    "type": "bytes"
+                }
+            ],
+            "name": "CreateNote",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "noteRegistryId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "CreateNoteRegistry",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "aceAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "linkedTokenAddress",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "scalingFactor",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "bool",
+                    "name": "_canAdjustSupply",
+                    "type": "bool"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bool",
+                    "name": "_canConvert",
+                    "type": "bool"
+                }
+            ],
+            "name": "CreateZkAsset",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "noteHash",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "DestroyNote",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
                     "name": "owner",
                     "type": "address"
                 },
                 {
                     "indexed": false,
+                    "internalType": "uint256",
                     "name": "value",
                     "type": "uint256"
                 }
@@ -122,16 +137,19 @@
             "inputs": [
                 {
                     "indexed": true,
+                    "internalType": "address",
                     "name": "owner",
                     "type": "address"
                 },
                 {
                     "indexed": true,
+                    "internalType": "bytes32",
                     "name": "noteHash",
                     "type": "bytes32"
                 },
                 {
                     "indexed": false,
+                    "internalType": "bytes",
                     "name": "metadata",
                     "type": "bytes"
                 }
@@ -143,23 +161,32 @@
             "constant": false,
             "inputs": [
                 {
-                    "name": "_noteHashes",
-                    "type": "bytes32[]"
+                    "internalType": "uint24",
+                    "name": "_proofId",
+                    "type": "uint24"
                 },
                 {
+                    "internalType": "bytes",
+                    "name": "_proofOutputs",
+                    "type": "bytes"
+                },
+                {
+                    "internalType": "address",
                     "name": "_spender",
                     "type": "address"
                 },
                 {
-                    "name": "_spenderApprovals",
-                    "type": "bool[]"
+                    "internalType": "bool",
+                    "name": "_approval",
+                    "type": "bool"
                 },
                 {
-                    "name": "_batchSignature",
+                    "internalType": "bytes",
+                    "name": "_proofSignature",
                     "type": "bytes"
                 }
             ],
-            "name": "batchConfidentialApprove",
+            "name": "approveProof",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
@@ -169,18 +196,22 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes32",
                     "name": "_noteHash",
                     "type": "bytes32"
                 },
                 {
+                    "internalType": "address",
                     "name": "_spender",
                     "type": "address"
                 },
                 {
+                    "internalType": "bool",
                     "name": "_spenderApproval",
                     "type": "bool"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "_signature",
                     "type": "bytes"
                 }
@@ -195,10 +226,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "uint24",
                     "name": "_proof",
                     "type": "uint24"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "_proofOutput",
                     "type": "bytes"
                 }
@@ -213,14 +246,17 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "uint24",
                     "name": "_proofId",
                     "type": "uint24"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "_proofData",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "_signatures",
                     "type": "bytes"
                 }
@@ -235,10 +271,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "_proofData",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "_signatures",
                     "type": "bytes"
                 }
@@ -253,10 +291,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "metaData",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "addressPos",
                     "type": "uint256"
                 }
@@ -264,6 +304,7 @@
             "name": "extractAddress",
             "outputs": [
                 {
+                    "internalType": "address",
                     "name": "desiredAddress",
                     "type": "address"
                 }
@@ -276,10 +317,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes32",
                     "name": "noteHash",
                     "type": "bytes32"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "metaData",
                     "type": "bytes"
                 }
@@ -294,7 +337,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"
