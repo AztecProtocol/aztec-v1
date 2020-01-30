@@ -1,6 +1,6 @@
 {
   "name": "@aztec/secp256k1",
-  "description": "Utility wrapper around the secp256k1 curve",
+  "description": "Javascript wrapper around the secp256k1 curve",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
