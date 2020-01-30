@@ -3,6 +3,7 @@ import {
     warnLog,
 } from '~/utils/log';
 import Web3Service from '~/helpers/Web3Service';
+import getContractAddress from './getContractAddress';
 
 export default async function getProxyAddress(contractName, networkId) {
     const {
@@ -13,24 +14,15 @@ export default async function getProxyAddress(contractName, networkId) {
         return '';
     }
 
-    const {
-        config,
-        networks,
-    } = contracts[managerContractName] || {};
-    if (!config) {
-        warnLog(`Contract '${managerContractName}' is not defined in '~/config/contracts'`);
-        return '';
-    }
-
-    let managerAddress = (networks && networks[networkId]);
-    if (!managerAddress && config && config.networks[networkId]) {
-        ({ address: managerAddress } = config.networks[networkId]);
-    }
+    const managerAddress = getContractAddress(managerContractName, networkId);
     if (!managerAddress) {
         warnLog(`Address of contract '${managerContractName}' is not defined in its artifact.`);
         return '';
     }
 
+    const {
+        config,
+    } = contracts[managerContractName];
     Web3Service.registerInterface(config, { name: managerContractName });
 
     const proxyAddress = await Web3Service

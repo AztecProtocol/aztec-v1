@@ -10,7 +10,6 @@ module.exports = {
     resolve: {
         extensions: ['.mjs', '.js', '.jsx', '.json'],
         alias: {
-            // TODO: replace with artifacts package
             '~contracts': path.resolve(__dirname, './build/contracts'),
             '~uiModules': path.resolve(__dirname, './src/ui'),
         },

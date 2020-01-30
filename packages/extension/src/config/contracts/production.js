@@ -11,18 +11,12 @@ export default {
             registerExtension: 'RegisterExtension',
         },
         config: AccountRegistry,
-        networks: {
-            4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
-        },
         isProxyContract: true,
         managerContractName: 'AccountRegistryManager',
     },
     AccountRegistryManager: {
         name: 'AccountRegistryManager',
         config: AccountRegistryManager,
-        networks: {
-            4: '0xA1e862D85419a57D588CD4566e558f5987cFa67E',
-        },
     },
     ACE: {
         name: 'ACE',
@@ -30,9 +24,6 @@ export default {
             сreateNoteRegistry: 'CreateNoteRegistry',
         },
         config: ACE,
-        networks: {
-            4: '0x66279F02E177867067895C6CF8bD6A02C03f2206',
-        },
     },
     ZkAsset: {
         name: 'IZkAsset',
@@ -42,11 +33,9 @@ export default {
             destroyNote: 'DestroyNote',
         },
         config: IZkAsset,
-        networks: {},
     },
     ERC20: {
         name: 'ERC20',
         config: IERC20,
-        networks: {},
     },
 };
