@@ -6,7 +6,7 @@ const AccountRegistryBehaviour = artifacts.require('./AccountRegistry/epochs/202
 const ACE = artifacts.require('./ACE.sol');
 
 module.exports = (deployer, network) => {
-    deployer.deploy(AccountRegistryBehaviour).then(async (contract) => {
+    return deployer.deploy(AccountRegistryBehaviour).then(async (contract) => {
         if ((network === 'development' || network === 'test') && process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS) {
             const trustedGSNSignerAddress = process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS;
             await contract.initialize(ACE.address, trustedGSNSignerAddress);
