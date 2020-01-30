@@ -7,7 +7,7 @@ module.exports = {
     ],
     moduleNameMapper: {
         '^~testHelpers/(.*)$': path.resolve(__dirname, 'tests/helpers/$1'),
-        '^~contracts/(.*)$': path.resolve(__dirname, 'build/contracts/$1'),
+        '^~contracts/(.*)$': '@aztec/contract-artifacts/artifacts/$1',
     },
     globals: {
         SDK_VERSION: "'test'",
