@@ -42,12 +42,21 @@ jobs:
                     - ~/repo/packages/dev-utils/node_modules
                     - ~/repo/packages/extension/node_modules
                     - ~/repo/packages/secp256k1/node_modules
+                    - ~/repo/packages/note-access/node_modules
+                    - ~/repo/packages/typed-data/node_modules
+                    - ~/repo/packages/contract-addresses/node_modules
+                    - ~/repo/packages/contract-artifacts/node_modules
+                    - ~/repo/packages/extension/node_modules
+                    - ~/repo/packages/extension/build
                     - ~/repo/packages/aztec.js/dist
                     - ~/repo/packages/bn128/dist
                     - ~/repo/packages/secp256k1/lib
                     - ~/repo/packages/contract-addresses/lib
                     - ~/repo/packages/contract-artifacts/lib
+                    - ~/repo/packages/note-access/lib
                     - ~/repo/packages/dev-utils/lib
+                    - ~/repo/packages/typed-data/lib
+                    -
     lint:
         working_directory: ~/repo
         docker:
