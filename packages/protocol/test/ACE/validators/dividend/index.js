@@ -34,7 +34,7 @@ const getDefaultNotes = async () => {
     return { notionalNote, residualNote, targetNote, za, zb };
 };
 
-contract('Dividend Validator', (accounts) => {
+contract.only('Dividend Validator', (accounts) => {
     const sender = accounts[0];
 
     before(async () => {
@@ -58,6 +58,22 @@ contract('Dividend Validator', (accounts) => {
             const data = proof.encodeABI();
             const result = await dividendValidator.validateDividend(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
+        });
+
+        it('should validate proof when za = 0', async () => {
+
+        })
+
+        it('should validate proof when za = K_MAX', async () => {
+
+        });
+
+        it('should validate proof when zb = 0', async () => {
+
+        });
+
+        it('should validate proof when zb = K_MAX', async () => {
+
         });
     });
 
@@ -183,6 +199,21 @@ contract('Dividend Validator', (accounts) => {
             );
         });
 
+        it('should fail for za < 0', async () => {
+            // 0 is the lower bound for za
+            const { notionalNote, residualNote, targetNote } = await getDefaultNotes();
+            const za = -5
+            const zb = 100;
+
+            // note that the check for 0 < za < K_MAX occcurs at the start of the validator
+            const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
+            const data = proof.encodeABI();
+            await truffleAssert.reverts(
+                dividendValidator.validateDividend(data, sender, bn128.CRS),
+                truffleAssert.ErrorType.REVERT,
+            );
+        });
+
         it('should fail for for zb > K_MAX', async () => {
             const { notionalNote, residualNote, targetNote } = await getDefaultNotes();
             const za = 100;
@@ -193,6 +224,11 @@ contract('Dividend Validator', (accounts) => {
                 dividendValidator.validateDividend(data, sender, bn128.CRS),
                 truffleAssert.ErrorType.REVERT,
             );
+        });
+
+        it('should fail for zb < 0', async () => {
+            // 0 is the lower bound for zb
+
         });
 
         it('should fail if malformed proof data', async () => {
