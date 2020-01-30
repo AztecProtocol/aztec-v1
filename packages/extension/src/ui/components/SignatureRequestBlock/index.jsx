@@ -10,6 +10,7 @@ import {
 import prettyPrint from '~/utils/prettyPrint';
 import i18n from '~/ui/helpers/i18n';
 import EntityBlock from '~/ui/components/AnimatedBlocks/EntityBlock';
+import BlockStatus from '~/ui/components/AnimatedBlocks/BlockStatus';
 import Code from '~/ui/components/Code';
 import {
     iconSizeMap,
@@ -20,6 +21,7 @@ import styles from './sig.scss';
 const SignatureRequestBlock = ({
     signatures,
     signed,
+    loading,
 }) => (
     <EntityBlock
         className={classnames(
@@ -29,6 +31,12 @@ const SignatureRequestBlock = ({
             },
         )}
         title={signed ? '' : i18n.t('transaction.request.signature')}
+        titleFootnote={loading ? (
+            <BlockStatus
+                status="loading"
+                text={i18n.t('pending')}
+            />
+        ) : null}
         layer={1}
     >
         {!signed && (
@@ -69,10 +77,12 @@ const SignatureRequestBlock = ({
 SignatureRequestBlock.propTypes = {
     signatures: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
     signed: PropTypes.bool,
+    loading: PropTypes.bool,
 };
 
 SignatureRequestBlock.defaultProps = {
     signed: false,
+    loading: false,
 };
 
 export default SignatureRequestBlock;
