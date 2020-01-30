@@ -13,33 +13,41 @@ const styles = ({
 }) => ({
   heading: {
     margin: 0,
-    color: color.base,
+    color: '#1E1B2B',
     fontFamily: fontFamily.base,
-    fontWeight: fontWeightMap.normal,
-  },
-  heading1: {
-    fontSize: fontSize.h1,
-    fontWeight: fontWeightMap.light,
-  },
-  heading2: {
     fontSize: fontSize.h2,
     fontWeight: fontWeightMap.light,
   },
-  heading3: {
+  heading1: {
+    fontSize: fontSize.h2,
+    color: '#1E1B2B',
+    fontWeight: fontWeightMap.light,
+    margin: '8px 0px',
+  },
+  heading2: {
     fontSize: fontSize.h3,
-    fontWeight: fontWeightMap.normal,
+    color: '#1E1B2B',
+    fontWeight: fontWeightMap.light,
+    margin: '8px 0px',
+  },
+  heading3: {
+    fontSize: fontSize.h4,
+    fontWeight: fontWeightMap.light,
+    margin: '8px 0px',
   },
   heading4: {
-    fontSize: fontSize.h4,
-    fontWeight: fontWeightMap.normal,
+    fontSize: fontSize.h5,
+    fontWeight: fontWeightMap.light,
+    margin: '8px 0px',
   },
   heading5: {
-    fontSize: fontSize.h5,
-    fontWeight: fontWeightMap.semibold,
+    fontSize: fontSize.h6,
+    fontWeight: fontWeightMap.light,
+    margin: '8px 0px',
   },
   heading6: {
     fontSize: fontSize.h6,
-    fontWeight: fontWeightMap.bold,
+    fontWeight: fontWeightMap.light,
   },
 });
 

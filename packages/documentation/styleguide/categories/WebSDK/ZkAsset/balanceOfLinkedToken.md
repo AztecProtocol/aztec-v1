@@ -1,5 +1,5 @@
 ## Examples
-### 1) Get the balance of the linked token
+### Get the balance of the linked token
 
 ```js
 // Enable the SDK

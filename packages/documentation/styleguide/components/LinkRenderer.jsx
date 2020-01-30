@@ -7,15 +7,16 @@ const styles = ({
   color,
 }) => ({
   link: {
+    fontWeight: 300,
     '&, &:link, &:visited': {
       fontSize: 'inherit',
-      color: color.link,
+      color: 'inherit',
       fontFamily: 'Gill Sans',
       textDecoration: 'none',
     },
     '&:hover, &:active': {
       isolate: false,
-      color: color.linkHover,
+      opacity: 0.7,
       cursor: 'pointer',
     },
   },

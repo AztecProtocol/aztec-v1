@@ -1,5 +1,5 @@
 ## Examples
-### 1) Get a spender's allowance of linked tokens, on behalf of the owner
+### Get a spender's allowance of linked tokens, on behalf of the owner
 
 ```js
 // Enable the SDK

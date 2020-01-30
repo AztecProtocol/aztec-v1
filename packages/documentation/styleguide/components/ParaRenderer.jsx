@@ -16,15 +16,16 @@ export const styles = ({
   borderRadius,
 }) => ({
   para: {
-    color: color.base,
+    color: '#53506B',
     fontFamily: fontFamily.base,
     fontWeight: fontWeightMap.light,
     fontSize: fontSizeMap.s,
-    lineHeight: lineHeightMap.m,
-    marginTop: space[1],
-    marginBottom: space[1],
+    lineHeight: lineHeightMap.s,
+    marginTop: 0,
+    marginBottom: 0,
     '& > strong': {
       display: 'block',
+      color: '#1E1B2B',
       marginTop: space[2] * 2,
       fontWeight: fontWeightMap.bold,
     },

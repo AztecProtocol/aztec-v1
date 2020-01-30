@@ -1,7 +1,7 @@
 export default function parseTagsForAPI(APIname, parsedTags) {
   let parsedTagsForAPI;
   parsedTags.forEach((methodTag) => {
-    if (methodTag.tags[0].name === APIname) {
+    if (methodTag.tags[0].name.split('.')[1] === APIname.split('.')[1]) {
       parsedTagsForAPI = methodTag;
     }
   });

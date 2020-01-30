@@ -4,7 +4,9 @@ require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
 const { defaultFontFamily, fontSizeMap } = require('./src/config/typography');
-const { defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap } = require('./src/config/colors');
+const {
+  defaultTextColor, defaultLabelColor, defaultLinkColor, defaultBorderColor, colorMap,
+} = require('./src/config/colors');
 
 module.exports = {
   title: 'AZTEC Docs',
@@ -55,8 +57,8 @@ module.exports = {
       h6: fontSizeMap.xs,
     },
     color: {
-      base: '#20293E',
-      light: '#BDC0DF',
+      base: '#1E1B2B',
+      light: '#53506B',
       lightest: colorMap['grey-lightest'],
       link: '#fff',
       linkHover: 'rgba(255,255,255,0.8)',
@@ -64,18 +66,45 @@ module.exports = {
       sidebarBackground: colorMap['grey-lightest'],
       codeBackground: colorMap['grey-lightest'],
       codeBase: '#333',
-      name: colorMap.green,
+      name: colorMap.blue,
       type: colorMap.purple,
       codeComment: '#6d6d6d',
       codePunctuation: '#999',
       codeProperty: colorMap.orange,
       codeDeleted: colorMap.red,
-      codeString: colorMap.green,
+      codeString: colorMap.blue,
       codeInserted: colorMap.purple,
       codeOperator: '#9a6e3a',
-      codeKeyword: colorMap.blue,
+      codeKeyword: colorMap.red,
       codeFunction: colorMap.purple,
       codeVariable: colorMap.orange,
+    },
+    styles: function styles(theme) {
+      return {
+        Playground: {
+          preview: {
+            paddingLeft: 0,
+            paddingRight: 0,
+            borderWidth: [[0, 0, 1, 0]],
+            borderRadius: 0,
+          },
+        },
+        ComponentsListRenderer: {
+
+        },
+        Markdown: {
+          thead: {
+            fontWeight: '400 !important',
+          },
+        },
+        Code: {
+          code: {
+            // make inline code example appear the same color as links
+            color: theme.color.link,
+            fontSize: 14,
+          },
+        },
+      };
     },
   },
   styleguideComponents: {
@@ -92,6 +121,7 @@ module.exports = {
     PropsRenderer: path.join(__dirname, 'styleguide/components/PropsRenderer'),
     ParaRenderer: path.join(__dirname, 'styleguide/components/ParaRenderer'),
     TableOfContentsRenderer: path.join(__dirname, 'styleguide/components/TableOfContentsRenderer'),
+    TableRenderer: path.join(__dirname, 'styleguide/components/TableRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
     Preview: path.join(__dirname, 'styleguide/components/Preview'),
     // ExamplesRenderer: path.join(__dirname, 'styleguide/components/ExamplesRenderer'),
@@ -121,47 +151,47 @@ module.exports = {
           exampleMode: 'shown',
           sections: [
             {
-              name: 'zkAsset.deposit',
+              name: '.deposit',
               content: 'styleguide/categories/WebSDK/ZkAsset/deposit.md',
               usageMode: 'expand',
             },
             {
-              name: 'zkAsset.send',
+              name: '.send',
               content: 'styleguide/categories/WebSDK/ZkAsset/send.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.withdraw',
+              name: '.withdraw',
               content: 'styleguide/categories/WebSDK/ZkAsset/withdraw.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.balance',
+              name: '.balance',
               content: 'styleguide/categories/WebSDK/ZkAsset/balance.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.createNoteFromBalance',
+              name: '.createNoteFromBalance',
               content: 'styleguide/categories/WebSDK/ZkAsset/createNoteFromBalance.md',
               exampleMode: 'hide',
             },
-            // {
-            //   name: 'zkAsset.fetchNotesFromBalance',
-            //   content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md ',
-            //   exampleMode: 'hide',
-            // },
             {
-              name: 'zkAsset.balanceOfLinkedToken',
+              name: '.fetchNotesFromBalance',
+              content: 'styleguide/categories/WebSDK/ZkAsset/fetchNotesFromBalance.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.balanceOfLinkedToken',
               content: 'styleguide/categories/WebSDK/ZkAsset/balanceOfLinkedToken.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.allowanceOfLinkedToken',
+              name: '.allowanceOfLinkedToken',
               content: 'styleguide/categories/WebSDK/ZkAsset/allowanceOfLinkedToken.md',
               exampleMode: 'hide',
             },
             {
-              name: 'zkAsset.totalSupplyOfLinkedToken',
+              name: '.totalSupplyOfLinkedToken',
               content: 'styleguide/categories/WebSDK/ZkAsset/totalSupplyOfLinkedToken.md',
               exampleMode: 'hide',
             },
@@ -176,37 +206,37 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'note.equal',
+              name: '.equal',
               content: 'styleguide/categories/WebSDK/Note/equal.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.export',
+              name: '.export',
               content: 'styleguide/categories/WebSDK/Note/export.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.grantAccess',
+              name: '.grantAccess',
               content: 'styleguide/categories/WebSDK/Note/grantAccess.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.greaterThan',
+              name: '.greaterThan',
               content: 'styleguide/categories/WebSDK/Note/greaterThan.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.greaterThanOrEqualTo',
+              name: '.greaterThanOrEqualTo',
               content: 'styleguide/categories/WebSDK/Note/greaterThanOrEqualTo.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.lessThan',
+              name: '.lessThan',
               content: 'styleguide/categories/WebSDK/Note/lessThan.md',
               exampleMode: 'hide',
             },
             {
-              name: 'note.lessThanOrEqualTo',
+              name: '.lessThanOrEqualTo',
               content: 'styleguide/categories/WebSDK/Note/lessThanOrEqualTo.md',
               exampleMode: 'hide',
             },

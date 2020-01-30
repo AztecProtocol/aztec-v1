@@ -19,21 +19,31 @@ const styles = ({
     padding: [[spacingMap.m, spacingMap.l]],
     fontWeight: 400,
     fontSize: 16,
+    color: 'white !important',
   },
   item: {
     padding: [[space[1], 0]],
     fontWeight: 400,
     fontSize: 16,
+    color: 'white !important',
+  },
+  link: {
+    color: 'white !important',
+  },
+  a: {
+    color: 'white !important',
   },
   heading: {
     height: '100%',
   },
   selected: {
     fontWeight: 500,
+    color: 'white !important',
   },
   child: {
     fontWeight: 300,
     fontSize: 14,
+    color: 'white !important',
   },
 });
 

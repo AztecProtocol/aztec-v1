@@ -1,5 +1,5 @@
 ## Examples
-### 1) Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by user
+### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by user
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
@@ -33,7 +33,7 @@ await asset.withdraw([
 ], {})
 ```
 
-### 2) Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by a third party
+### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by a third party
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';

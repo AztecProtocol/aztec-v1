@@ -21,7 +21,6 @@ const notes = await asset.fetchNotesFromBalance(query);
 console.info({ notes });
 ```
 
-&nbsp  
 
 ### Fetch all notes
 ```js

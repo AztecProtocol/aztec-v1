@@ -1,5 +1,5 @@
 ## Examples
-### 1) Get a user's balance, held by a ZkAsset
+### Get a user's balance, held by a ZkAsset
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';

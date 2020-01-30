@@ -45,17 +45,11 @@ class LiveDocUpdate extends Component {
       throw new Error('Could not fetch docs for this API method');
     }
 
-    const parsedArguments = APItags.tags.filter((tag) => {
-      return tag.tag !== 'returns' && tag.tag !== 'function' && tag.tag !== 'description';
-    });
+    const parsedArguments = APItags.tags.filter(tag => tag.tag !== 'returns' && tag.tag !== 'function' && tag.tag !== 'description');
 
-    const parsedReturns = APItags.tags.filter((tag) => {
-      return tag.tag === 'returns';
-    });
+    const parsedReturns = APItags.tags.filter(tag => tag.tag === 'returns');
 
-    const parsedDescription = APItags.tags.filter((tag) => {
-      return tag.tag === 'description';
-    });
+    const parsedDescription = APItags.tags.filter(tag => tag.tag === 'description');
 
     this.setState({ parsedArguments, parsedReturns, parsedDescription: parsedDescription[0] });
   };
@@ -63,10 +57,31 @@ class LiveDocUpdate extends Component {
   selectAPIURL() {
     const { name } = this.props;
 
+    const noteApis = [
+      '.equal',
+      '.greaterThanOrEqualTo',
+      '.export',
+      '.grantAccess',
+      '.lessThan',
+      '.lessThanOrEqualTo',
+      '.greaterThan',
+    ];
+    const zkAssetApis = [
+      '.deposit',
+      '.send',
+      '.withdraw',
+      '.balance',
+      '.createNoteFromBalance',
+      '.fetchNotesFromBalance',
+      '.balanceOfLinkedToken',
+      '.totalSupplyOfLinkedToken',
+      '.allowanceOfLinkedToken',
+    ];
+
     let url;
-    if (name.includes('zkAsset')) {
+    if (zkAssetApis.indexOf(name) > -1) {
       url = zkAssetURL;
-    } else if (name.includes('note')) {
+    } else if (noteApis.indexOf(name) > -1) {
       url = noteURL;
     }
     return url;
@@ -76,7 +91,7 @@ class LiveDocUpdate extends Component {
     const { parsedArguments, parsedReturns, parsedDescription } = this.state;
 
     return (
-      <Block>
+      <Block padding="0">
         <MethodDescription {...parsedDescription} />
         <MethodArgumentRenderer methods={[...parsedArguments]} />
         <MethodReturnRenderer methods={[...parsedReturns]} />

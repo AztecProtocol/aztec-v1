@@ -1,5 +1,5 @@
 ## Examples
-### 1) Confidentially send value of 30units to another Ethereum address
+### Confidentially send value of 30units to another Ethereum address
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';

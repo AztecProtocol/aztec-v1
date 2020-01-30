@@ -1,54 +1,53 @@
-# AZTEC Protocol 1.0.0 specification  
+### AZTEC Protocol 1.0.0 specification  
 
-## Table of contents  
-	-	Architecture
-    -	The AZTEC Cryptography Engine
-    -	AZTEC notes and ABI encoding
-	-	The Note Registry
-	-	ACE, the AZTEC Cryptography Engine
-    -	Validating AZTEC proofs - defining the proof's identifier
-    -	Enacting confidential transfer instructions - defining the ABI encoding of proofOutputs
-    -	ABI encoding for bytes proofOutputs
-    -	ABI encoding for bytes proofOutput = proofOutputs[i]
-    -	Cataloguing valid proofs inside ACE
-    -	ACE owner
-	-	The key responsibilities of ACE
-	  -	Separating proof validation and note registry interactions
-	-	Contract Interactions
-    -	Zero-knowledge dApp contract interaction, an example flow with bilateral swaps
-    -	The rationale behind multilateral confidential transactions
-	-	Validating an AZTEC proof
-	-	Note registry implementation
-    -	Creating a note registry
-    -	Note Registry Variables
-    -	Implementation and upgradeability
-    -	How an upgrade works
-    -	Current note registry versions
-	-	Processing a transfer instruction
-  	-	A note on ERC20 token transfers
-	-	Minting AZTEC notes
-	  -	Minting and tokens
-	-	Burning AZTEC notes
-	-	Interacting with ACE: zkAsset
-	  -	Creating a confidential asset
-    -	Issuing a confidential transaction: confidentialTransfer
-    -	Issuing delegated confidential transactions: confidentialTransferFrom
-    -	Permissioning
-    -	Types of ZkAasset
-	-	Account Registry
-	-	Proof verification contracts
-    -	JoinSplit.sol
-    -	Swap.sol
-    -	Dividend.sol
-    -	PublicRange.sol
-    -	PrivateRange.sol
-    -	JoinSplitFluid.sol
-	-	Specification of Utility libraries
-	-	Appendix
-    -	A: Preventing collisions and front-running
-    -	B - Interest streaming via AZTEC notes
-	-	Glossary
-
+#### Table of contents  
+- [Architecture](#architecture)
+  - [The AZTEC Cryptography Engine](#the-aztec-cryptography-engine)
+  - [AZTEC notes and ABI encoding](#abi-encoding-and-aztec-data-types)
+- [The Note Registry](#the-note-registry)
+- [ACE, the AZTEC Cryptography Engine](#ace-the-aztec-cryptography-engine)
+  - [Validating AZTEC proofs - defining the proof's identifier](#validating-aztec-proofs---defining-the-proofs-identifier)
+  - [Enacting confidential transfer instructions - defining the ABI encoding of proofOutputs](#enacting-confidential-transfer-instructions---defining-the-abi-encoding-of-proofoutputs)
+  - [ABI encoding for `bytes proofOutputs`](#abi-encoding-for-bytes-proofoutputs)
+  - [ABI encoding for `bytes proofOutput = proofOutputs[i]`](#abi-encoding-for-bytes-proofoutput--proofoutputsi)
+  - [Cataloguing valid proofs inside ACE](#cataloguing-valid-proofs-inside-ace)
+  - [ACE owner](#ace-owner)
+- [The key responsibilities of `ACE`](#the-key-responsibilities-of-ace)
+  - [Separating proof validation and note registry interactions](#separating-proof-validation-and-note-registry-interactions)
+- [Contract Interactions](#contract-interactions)
+  - [Zero-knowledge dApp contract interaction, an example flow with bilateral swaps](#zero-knowledge-dapp-contract-interaction-an-example-flow-with-Swaps)
+  - [The rationale behind multilateral confidential transactions](#the-rationale-behind-multilateral-confidential-transactions)
+- [Validating an AZTEC proof](#validating-an-aztec-proof)
+- [Note registry implementation](#note-registry-implementation)
+  - [Creating a note registry](#creating-a-note-registry)
+  - [Note Registry Variables](#note-registry-variables)
+  - [Implementation and upgradeability](#implementation-and-upgradeability)
+  - [How an upgrade works](#how-an-upgrade-works)
+  - [Current note registry versions](#current-note-registry-versions)
+- [Processing a transfer instruction](#processing-a-transfer-instruction)
+  - [A note on ERC20 token transfers](#a-note-on-erc20-token-transfers)
+- [Minting AZTEC notes](#minting-aztec-notes)
+  - [Minting and tokens](#minting-and-tokens)
+- [Burning AZTEC notes](#burning-aztec-notes)
+- [Interacting with ACE: zkAsset](#interacting-with-ace-zkasset)
+  - [Creating a confidential asset](#creating-a-confidential-asset)
+  - [Issuing a confidential transaction: confidentialTransfer](#issuing-a-confidential-transaction-confidentialtransfer)
+  - [Issuing delegated confidential transactions: confidentialTransferFrom](#issuing-delegated-confidential-transactions-confidentialtransferfrom)
+  - [Permissioning](#permissioning)
+  - [Types of ZkAasset](#types-of-zkasset)
+- [Account Registry](#account-registry)
+- [Proof verification contracts](#proof-verification-contracts)
+  - [JoinSplit.sol](#aztec-verifiers-joinsplitsol)
+  - [Swap.sol](#aztec-verifiers-bilateralswapsol)
+  - [Dividend.sol](#aztec-verifiers-dividendcomputationsol)
+  - [PublicRange.sol](#aztec-verifiers-publicrangesol)
+  - [PrivateRange.sol](#aztec-verifiers-privaterangesol)
+  - [JoinSplitFluid.sol](#join-split-fluid)
+- [Specification of Utility libraries](#specification-of-utility-libraries)
+- [Appendix](#appendix)
+  - [A: Preventing collisions and front-running](#a-preventing-collisions-and-front-running)
+  - [B - Interest streaming via AZTEC notes](#b---interest-streaming-via-aztec-notes)
+- [Glossary](#glossary)
 
 # Architecture  
 
@@ -156,7 +155,7 @@ Generating `encryptedViewKeys`, `approvedAddresses` and formatting them into the
 
 This helper module exposes a key method `generateAccessMetaData()`:
 
-```
+``` static js
 /**
  * @method generateAccessMetaData - grant an Ethereum address view access to a note
  * @param {Array} access - mapping between an Ethereum address and the linked public key. The specified address
@@ -179,7 +178,7 @@ As inputs it takes an `access` object and the `noteViewKey`. The `access` object
 
 The `generateAccessMetaData()` function is itself called on the `Note` class via the method:
 
-```
+``` static js
 /**
  * Grant an Ethereum address access to the viewing key of a note
  *
@@ -216,7 +215,7 @@ The ACE.sol contract is responsible for validating the set of AZTEC zero-knowled
 While it is possible to define note registries that are external to ACE, the state of these contract's note registries cannot be guranteed and only a subset of proofs will be usable (i.e. if an asset uses an ACE note registry, transfer instructions from AZTEC proofs that involve multiple note registries are only enacted if every note registry is controlled by ACE).
 
 The ACE has the following interface:
-```
+``` static solidity
 /**
  * @title IACE
  * @author AZTEC
@@ -609,7 +608,7 @@ Of the various upgradeability patterns available, the unstructured storage proxy
 
 The behaviour contract defines the methods and contains the logic of the note registry. It is this contract that is the mutable, upgradeable contract and the method whereby the implementation of note registry methods is upgraded. All behaviour contracts must abide by a set minimum API in order to maintain compatibility with ACE:
 
-```
+``` static solidity
 /** 
  * @title/**
  * @title NoteRegistryBehaviour interface which defines the base API
@@ -781,7 +780,7 @@ The storage contract is referred to as the Proxy and it has four main responsibi
 - Faciliate a possible change of admin
 
 The interface is defined as:
-```
+``` static solidity
 /**
  * @title ProxyAdmin
  * @dev Minimal interface for the proxy contract to be used by the Factory contract.
@@ -800,7 +799,7 @@ In order to facilitate the process of upgrading the behaviour contract to a new 
 
 Factory contracts are used to deploy and link an upgraded behaviour instance to ACE. They are owned by the ACE and there is a factory contract for each type of behaviour instance that can be deployed: adjustable and mixed.
 
-```
+``` static solidity
 /** 
  * @title/**
  * @title NoteRegistryFactory
@@ -879,7 +878,7 @@ In order to build liquidity in particular assets when AZTEC launches, a slow rel
 
 Assets that have a note registry version of epoch 2 (Behaviour201911) will be **unavailable** during the slow release period:
 
-```
+``` static solidity
 contract Behaviour201911 is Behaviour201907 {
     uint256 public constant slowReleaseEnd = 1585699199;
     bool public isAvailableDuringSlowRelease = false;
@@ -921,7 +920,7 @@ It is also possible for the `ZkAsset` owner to make the asset available earlier 
 
 Assets that have a note registry version of epoch 3 (Behaviour201912) will be **available** during the slow release period. They have no concept of the `onlyIfAvailable()` modifier:
 
-```
+``` static solidity
 contract Behaviour201912 is Behaviour201911 {
     // redefining to always pass
     modifier onlyIfAvailable() {
@@ -1021,7 +1020,7 @@ If ERC20 tokens have been converted into AZTEC notes, which are subsequently bur
 # Interacting with ACE: zkAsset
 
 The `zkAsset.sol` contract is an implementation of a confidential token, that follows the [EIP-1724 standard](https://github.com/ethereum/EIPs/issues/1724). It is designed as a template that confidential digital asset builders can follow, to create an AZTEC-compatible asset. All `ZkAssets` must follow the following minimum interface:
-```
+``` static solidity
 pragma solidity >=0.5.0 <0.6.0;
 /**
  * @title IZkAsset
@@ -1181,7 +1180,7 @@ The `confidentialApprove(bytes32 _noteHash, address _spender, bool _status, byte
 
 The method has the following interface:
 
-```
+``` static solidity
 /**
 * @dev Note owner approving a third party, another address, to spend the note on
 * owner's behalf. This is necessary to allow the confidentialTransferFrom() method
@@ -1206,7 +1205,7 @@ The `_signature` is an ECDSA signature over an EIP712 message. This signature is
 
 The method validates the signature and, if this passes, updates a mapping of `noteHash` => `_spender` => `_spenderApproval`:
 
-```
+``` static solidity
 mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
 ```
 
@@ -1221,7 +1220,7 @@ This allows spending permission to be granted to multiple notes in a single atom
 
 The method has the following interface:
 
-```
+``` static solidity
 /**
  * @dev Note owner can approve a third party address, such as a smart contract,
  * to spend a proof on their behalf. This allows a batch approval of notes
@@ -1245,19 +1244,19 @@ function approveProof(
 
 It then updates the following mapping of `keccak256(proofOutputs)` => `spender` address => `_approval` status:
 
-```
+``` static solidity
 mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
 ```
 
 Later when this proof and associated notes are used in a `confidentialTransferFrom()` transaction, the `confidentialApproved` mapping is queried. Firstly, it is checked if:
 
-```
+``` static solidity
 confidentialApproved[proofHash][msg.sender] != true
 ```
 
 If this is the case then the notes were approved for spending via the `approveProof()` method and the transaction proceeds. If this is not `true`, then for each `inputNote` (notes to be spent) the following is checked:
 
-```
+``` static solidity
 confidentialApproved[noteHash][msg.sender] == true
 ```
 
@@ -1266,13 +1265,13 @@ confidentialApproved[noteHash][msg.sender] == true
 ### Granting note view key access
 AZTEC notes contain a `metaData` field, with a specification as outlined in the note ABI discussion. One of the principal uses of this data field, is to store encrypted viewing keys - to allow note view access to be granted to third parties. The `metaData` of a note is not stored in storage, rather it is emitted as an event along with the successful creation of a note:
 
-```
+``` static solidity
 emit CreateNote(noteOwner, noteHash, metadata);
 ```
 
 It may be desirable to grant note view key access to parties, beyond those for which an encrypted viewing key was initially provided when the note was created. To facilitate this, the `ZkAssetBase.sol` has an `updateNoteMetaData()` method:
 
-```
+``` static solidity
 /**
 * @dev Update the metadata of a note that already exists in storage. 
 * @param noteHash - hash of a note, used as a unique identifier for the note
@@ -1308,7 +1307,7 @@ The first category of permissioned caller is the `noteOwner`. A note owner shoul
 The second category of permissioned callers are those Ethereum addresses that are being granted view key access in the `metaData`. These addresses are explicitly  stated in the `approvedAddresses` section of `metaData`. 
 
 To enact this check, an `addressID` is first calculated - the `keccak256` hash of `msg.sender` and the hash of the note in question. We then make use of the `noteAccess`  mapping declared in the `ZkAsset`:
-```
+``` static solidity
 mapping(bytes32 => uint256) public noteAccess;
 ```
 
@@ -1316,7 +1315,7 @@ This is a mapping of `addressIDs` to a `uint256` , where the `uint256` is the `b
 
 We then compare `noteAccess[addressID]` to the value stored in `metaDataTimeLog[noteHash]`. `metaDataTimeLog` is a second mapping of the form:
 
-```
+``` static solidity
 mapping(bytes32 => uint256) public metaDataTimeLog;
 ```
 
@@ -1328,7 +1327,7 @@ By checking that `noteAccess[addressID] >= metaDataTimeLog[noteHash]` we satisfy
 It should be noted that ZkAssets which are ownable and inherit from the `ZkAssetOwnable.sol` contract have a concept of 'supporting proofs'. The owner is able to choose which proofs the `ZkAsset` supports and can interact with. 
 
 This is achieved through the `setProofs()` function, restricted to `onlyOwner`:
-```
+``` static solidity
 function setProofs(
     uint8 _epoch,
     uint256 _proofs
@@ -1370,7 +1369,7 @@ The contract has also been made upgradeable, to allow new methods for the above 
 
 The `AccountRegistry.sol` contract has the following interface:
 
-```
+``` static solidity
 contract IAccountRegistryBehaviour {
     uint256 public epoch;
 
@@ -1430,7 +1429,7 @@ Each user is generated a `linkedPublicKey` and `AZTECaddress` when they first si
 When transactions are being sent via the GSN and having their gas paid for, the SDK first programmatically signs the transaction with the user's `PK` over Ethereum's `secp256k1`. This is done, rather than through MetaMask, to save on a MetaMask popup signing prompt. The address that is recovered from a transaction signed in this way, using `ecrecover` is called the `AZTECaddress`. 
 
 These two variables `linkedPublicKey` and `AZTECaddress` are then passed to `registerAZTECExtension()`:
-```
+``` static solidity
 /**
  * @dev Registers a linkedPublicKey to an Ethereum address, if a valid signature is provided or the
  * sender is the ethereum address in question
@@ -1450,7 +1449,7 @@ AccountRegistry.registerAZTECExtension(
 ```
 The result of calling this method is principally that two mappings are set:
 
-```
+``` static solidity
 mapping(address => bytes) public accountMapping;
 mapping(address => address) public userToAZTECAccountMapping;
 
@@ -1484,7 +1483,7 @@ It does this through the method `acceptRelayedCall()`. This is called before a t
 
 This is important because although it is AZTEC servers that sign transactions to be relayed, users can technically relay them at any point in time. This opens up the possibility of a malicious user accumulating large numbers of signed transactions and then griefing the AZTEC contracts, draining all the GSN ether. By including the following check in `acceptRelayedCall()` 
 
-```
+``` static solidity
 if (block.timestamp > maxTimestamp) {
     return _rejectRelayedCall(uint256(GSNRecipientSignatureErrorCodes.INVALID_TIMESTAMP), context);
 }
@@ -1499,7 +1498,7 @@ griefing attacks are mitigated.
 
 This permissioning works because the AZTEC server private key has a corresponding Ethereum address referred to as the `trustedSigner` or `_trustedGSNSignerAddress`. The `acceptRelayedCall()` method checks in the following segment that the transaction was indeed signed by the `trustedSigner`:
 
-```
+``` static solidity
 if (keccak256(blob).toEthSignedMessageHash().recover(signature) == _trustedSigner) {
     if (block.timestamp > maxTimestamp) {
         return _rejectRelayedCall(uint256(GSNRecipientSignatureErrorCodes.INVALID_TIMESTAMP), context);
@@ -1561,7 +1560,7 @@ This contract's purpose is to manage the process of performing upgrades and keep
 
 The address of the proxy contract is defined on the `AccountRegistryManager.sol` via the state variable:
 
-```
+``` static solidity
 address payable public proxyAddress;
 ```
 

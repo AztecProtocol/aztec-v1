@@ -17,13 +17,13 @@ const styles = () => ({
     display: 'flex',
   },
   'level-1': {
-    fontSize: fontSizeMap.xxl,
-    padding: [[spacingMap.xxl, 0]],
+    fontSize: fontSizeMap.xl,
+    padding: [[spacingMap.xl, 0]],
     fontFamily: 'Gill Sans',
   },
   'level-2': {
-    fontSize: fontSizeMap.xl,
-    paddingTop: spacingMap.xxl,
+    fontSize: fontSizeMap.l,
+    paddingTop: spacingMap.xl,
     fontFamily: 'Gill Sans',
   },
   'level-3': {

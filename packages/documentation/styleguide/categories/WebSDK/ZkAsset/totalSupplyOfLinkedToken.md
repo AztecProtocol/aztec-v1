@@ -1,5 +1,5 @@
 ## Examples
-### 1) Get the total supply of the linkedToken
+### Get the total supply of the linkedToken
 
 ```js
 // Enable the SDK
