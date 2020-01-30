@@ -12,7 +12,7 @@ const ACE = artifacts.require('./ACE.sol');
 module.exports = (deployer, network) => {
     if (process.env.LOCAL_TRUSTED_GSN_SIGNER_ADDRESS || process.env.TRUSTED_GSN_SIGNER_ADDRESS) {
         const useLocal = network === 'development' || network === 'test';
-        deployer.deploy(
+        return deployer.deploy(
             AccountRegistryManager,
             AccountRegistryBehaviour.address,
             ACE.address,
@@ -27,4 +27,6 @@ module.exports = (deployer, network) => {
             });
         });
     }
+
+    return null;
 };
