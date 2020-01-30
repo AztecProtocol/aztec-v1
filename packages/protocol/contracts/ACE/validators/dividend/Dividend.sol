@@ -74,13 +74,13 @@ contract Dividend {
 
 
                 // Check that za < kMax
-                if gt(za, 1048576) {
+                if gt(za, 10000000) {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
 
                 // Check that zb < kMax
-                if gt(zb, 1048576) {
+                if gt(zb, 10000000) {
                     mstore(0x00, 400)
                     revert(0x00, 0x20)
                 }
