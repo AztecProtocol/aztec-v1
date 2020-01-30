@@ -26,6 +26,10 @@ const webpackConfig = (env = 'development', {
   return {
     resolve: {
       extensions: ['*', '.js', '.jsx', '.json'],
+      alias: {
+        'rsg-components/Examples/Examples': './Examples',
+        'rsg-components/Examples/ExamplesRenderer': './ExamplesRenderer',
+      },
     },
     resolveLoader: {
       modules: [
