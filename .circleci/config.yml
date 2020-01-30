@@ -144,7 +144,6 @@ jobs:
             - run:
                 name: "Release Packages"
                 command: yarn script:publish
-
 workflows:
     version: 2
     main:
