@@ -6,6 +6,11 @@ const common = require('./webpack.common.js');
 const commonProduction = {
     mode: 'production',
     devtool: '',
+    resolve: {
+        alias: {
+            '~contracts': '@aztec/contract-artifacts/artifacts',
+        },
+    },
     optimization: {
         minimize: true,
         usedExports: true,
