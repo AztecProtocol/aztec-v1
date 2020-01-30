@@ -198,6 +198,35 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
+        it('signMultipleNotesForConfidentialTransfer() should produce a well formatted signature', async () => {
+            const firstAztecAccount = secp256k1.generateAccount();
+            const secondAztecAccount = secp256k1.generateAccount();
+            const noteOwnerAccounts = [firstAztecAccount, secondAztecAccount];
+
+            const spender = randomHex(20);
+            const verifyingContract = randomHex(20);
+            const challenge = randomHex(20);
+
+            const testNotes = [
+                await note.create(firstAztecAccount.publicKey, 10),
+                await note.create(secondAztecAccount.publicKey, 20),
+            ];
+
+            const signatures = signer.signMultipleNotesForConfidentialTransfer(
+                verifyingContract,
+                noteOwnerAccounts,
+                testNotes,
+                challenge,
+                spender,
+            );
+
+            const expectedNumSignatures = noteOwnerAccounts.length;
+            const expectedSignatureLength = 130;
+
+            const expectedTotalLength = expectedSignatureLength * expectedNumSignatures;
+            expect(signatures.slice(2).length).to.equal(expectedTotalLength);
+        });
+
         it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
