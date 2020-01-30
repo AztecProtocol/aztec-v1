@@ -51,15 +51,6 @@ const prodApiConfig = merge(common, commonProduction, {
             }),
         ],
         concatenateModules: false,
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'vendors',
-                    chunks: 'all',
-                },
-            },
-        },
     },
 });
 
