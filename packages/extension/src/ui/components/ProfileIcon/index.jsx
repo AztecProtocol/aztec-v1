@@ -17,6 +17,7 @@ import {
 import ProfileSvg from '~/ui/components/ProfileSvg';
 import AztecSvg from '~/ui/components/AztecSvg';
 import metamaskGlyph from '~/ui/images/metamask.svg';
+import userGlyph from '~/ui/images/user.svg';
 import colorSchemes from './config/colorSchemes';
 import shapeGenerators from './config/shapeGenerators';
 import styles from './icon.scss';
@@ -117,6 +118,15 @@ const ProfileIcon = ({
                         className={styles['aztec-icon']}
                         theme="light"
                         size={size}
+                    />
+                )}
+                {type === 'user' && (
+                    <SVG
+                        className={styles['user-icon']}
+                        glyph={userGlyph}
+                        width={avatarSizesMap[size]}
+                        height={avatarSizesMap[size]}
+                        fill="rgba(0,0,0,0.6)"
                     />
                 )}
             </ProfileSvg>

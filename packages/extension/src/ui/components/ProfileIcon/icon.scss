@@ -38,6 +38,20 @@
   }
 }
 
+.type-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .user-icon {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(10%) scale(0.84);
+  }
+}
+
 .tooltip {
   display: none;
   position: absolute;
