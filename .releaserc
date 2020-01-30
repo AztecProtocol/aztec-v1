@@ -14,7 +14,7 @@
                 "preset": "angular"
         }],
         ["@semantic-release/exec", {
-            "publishCmd": "../monorepo-scripts/aws/aws-bundle-deploy.sh",
+            "publishCmd": "../monorepo-scripts/aws/aws-bundle-deploy.sh ${nextRelease.version} ${options.branch} ${commits.length} ${Date.now()}",
         }],
         ["@semantic-release/npm"],
         ["@semantic-release/git", {
