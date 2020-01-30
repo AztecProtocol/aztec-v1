@@ -39,7 +39,7 @@ export default async function setupNetworkConfig({
             address = await getProxyAddress(
                 contractName,
                 networkId,
-                contractAddresses[contractName],
+                contractAddresses,
             );
         }
 

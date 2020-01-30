@@ -43,6 +43,7 @@ class Aztec {
             contractAddresses = {
                 ACE: '',
                 AccountRegistry: '',
+                AccountRegistryManager: '',
             },
             autoRefreshOnProfileChange = true,
         } = options;
