@@ -34,10 +34,11 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
     struct AZTECAccount {
         address account;
         bytes linkedPublicKey;
+        address AZTECaddress;
     }
 
     string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
-    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey)";
+    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey,address AZTECaddress)";
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
@@ -86,8 +87,9 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
             keccak256(abi.encode(
                 SIGNATURE_TYPEHASH,
                 _AZTECAccount.account,
-                keccak256(bytes(_AZTECAccount.linkedPublicKey)
-        )))));
+                keccak256(bytes(_AZTECAccount.linkedPublicKey)),
+                _AZTECAccount.AZTECaddress
+        ))));
     }
 
     /**
@@ -112,7 +114,7 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
         signatureLog[signatureHash] = true;
 
         address signer = recoverSignature(
-            hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey)),
+            hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey, _AZTECaddress)),
             _signature
         );
         require(_account == signer, 'signer must be the account');
