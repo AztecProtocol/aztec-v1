@@ -5,7 +5,7 @@ import {
 import Web3Service from '~/helpers/Web3Service';
 import getContractAddress from './getContractAddress';
 
-export default async function getProxyAddress(contractName, networkId) {
+export default async function getProxyAddress(contractName, networkId, customConfig = {}) {
     const {
         managerContractName,
     } = contracts[contractName] || {};
@@ -14,7 +14,8 @@ export default async function getProxyAddress(contractName, networkId) {
         return '';
     }
 
-    const managerAddress = getContractAddress(managerContractName, networkId);
+    const managerAddress = customConfig[managerContractName]
+        || getContractAddress(managerContractName, networkId);
     if (!managerAddress) {
         warnLog(`Address of contract '${managerContractName}' is not defined in its artifact.`);
         return '';
