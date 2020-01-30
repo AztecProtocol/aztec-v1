@@ -90,6 +90,7 @@ contract LibEIP712 {
             mstore(_signature, _message)
 
             // load 'v' - we need it for a condition check
+            // add 0x60 to jump over 3 words - length of bytes array, r and s
             let v := mload(add(_signature, 0x60))
             v := shr(248, v) // bitshifting, to resemble padLeft
 
