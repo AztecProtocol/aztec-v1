@@ -5,38 +5,19 @@
             "inputs": [
                 {
                     "indexed": true,
-                    "name": "from",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "to",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "name": "value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "Transfer",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
+                    "internalType": "address",
                     "name": "owner",
                     "type": "address"
                 },
                 {
                     "indexed": true,
+                    "internalType": "address",
                     "name": "spender",
                     "type": "address"
                 },
                 {
                     "indexed": false,
+                    "internalType": "uint256",
                     "name": "value",
                     "type": "uint256"
                 }
@@ -45,13 +26,40 @@
             "type": "event"
         },
         {
-            "constant": false,
+            "anonymous": false,
             "inputs": [
                 {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
                     "name": "to",
                     "type": "address"
                 },
                 {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "Transfer",
+            "type": "event"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
                     "name": "value",
                     "type": "uint256"
                 }
@@ -59,6 +67,7 @@
             "name": "transfer",
             "outputs": [
                 {
+                    "internalType": "bool",
                     "name": "",
                     "type": "bool"
                 }
@@ -71,10 +80,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "spender",
                     "type": "address"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "value",
                     "type": "uint256"
                 }
@@ -82,6 +93,7 @@
             "name": "approve",
             "outputs": [
                 {
+                    "internalType": "bool",
                     "name": "",
                     "type": "bool"
                 }
@@ -94,14 +106,17 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "from",
                     "type": "address"
                 },
                 {
+                    "internalType": "address",
                     "name": "to",
                     "type": "address"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "value",
                     "type": "uint256"
                 }
@@ -109,6 +124,7 @@
             "name": "transferFrom",
             "outputs": [
                 {
+                    "internalType": "bool",
                     "name": "",
                     "type": "bool"
                 }
@@ -121,10 +137,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "_to",
                     "type": "address"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "_value",
                     "type": "uint256"
                 }
@@ -132,6 +150,7 @@
             "name": "mint",
             "outputs": [
                 {
+                    "internalType": "bool",
                     "name": "",
                     "type": "bool"
                 }
@@ -146,6 +165,7 @@
             "name": "totalSupply",
             "outputs": [
                 {
+                    "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
                 }
@@ -158,6 +178,7 @@
             "constant": true,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "who",
                     "type": "address"
                 }
@@ -165,6 +186,7 @@
             "name": "balanceOf",
             "outputs": [
                 {
+                    "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
                 }
@@ -177,10 +199,12 @@
             "constant": true,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "owner",
                     "type": "address"
                 },
                 {
+                    "internalType": "address",
                     "name": "spender",
                     "type": "address"
                 }
@@ -188,6 +212,7 @@
             "name": "allowance",
             "outputs": [
                 {
+                    "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
                 }
@@ -200,7 +225,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"

@@ -1,5 +1,6 @@
 {
     "name": "@aztec/sdk",
+    "description": "NPM package for AZTEC SDK",
     "sideEffects": [
         "**/*.css",
         "**/*.scss"

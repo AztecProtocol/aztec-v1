@@ -1,6 +1,6 @@
 {
   "name": "@aztec/bn128",
-  "description": "Barreto-Naehrig pairing friendly curve providing 128 bits of security",
+  "description": "JS helper library for a Barreto-Naehrig pairing friendly curve",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "browser": "./dist/bundle.web.js",
