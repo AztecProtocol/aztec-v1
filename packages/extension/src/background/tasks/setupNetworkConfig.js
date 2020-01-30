@@ -34,9 +34,13 @@ export default async function setupNetworkConfig({
             address: defaultAddress,
             isProxyContract,
         } = getContract(contractName, networkId);
-        let address = defaultAddress || contractAddresses[contractName];
+        let address = contractAddresses[contractName] || defaultAddress;
         if (!address && isProxyContract) {
-            address = await getProxyAddress(contractName, networkId);
+            address = await getProxyAddress(
+                contractName,
+                networkId,
+                contractAddresses[contractName],
+            );
         }
 
         return {
