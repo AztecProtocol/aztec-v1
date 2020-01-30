@@ -1,7 +1,9 @@
 const path = require('path');
+const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const Dotenv = require('dotenv-webpack');
+const packageJson = require('./package.json');
 
 module.exports = {
     target: 'web',
@@ -103,6 +105,9 @@ module.exports = {
         }),
         new Dotenv({
             path: './.env.development',
+        }),
+        new webpack.DefinePlugin({
+            SDK_VERSION: `'${packageJson.version}'`,
         }),
     ],
 };

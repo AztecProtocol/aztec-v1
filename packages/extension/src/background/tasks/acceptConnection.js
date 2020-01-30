@@ -4,16 +4,16 @@ import {
     backgroundReadyEvent,
     uiCloseEvent,
 } from '~/config/event';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
 import {
     permissionError,
 } from '~/utils/error';
 import Connection from '../utils/connection';
 import setupNetworkConfig from './setupNetworkConfig';
 
-const {
-    origin: uiSourceOrigin,
-} = new URL(urls.ui);
+const resourceOrigin = getResourceUrl('origin');
 
 export default function acceptConnection() {
     window.parent.postMessage({
@@ -41,7 +41,7 @@ export default function acceptConnection() {
                         error,
                     };
                 }
-            } else if (event.origin !== uiSourceOrigin) {
+            } else if (event.origin !== resourceOrigin) {
                 return;
             }
 
