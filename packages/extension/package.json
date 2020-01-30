@@ -95,7 +95,7 @@
         "generate:styles": "guacamole generateStyles",
         "generate:testData": "babel-node ./tests/generateTestData",
         "lint": "eslint ./ --color",
-        "test": "jest ./src",
+        "test": "jest -i ./src",
         "build:dev": "webpack --config webpack.dev.js",
         "build": "yarn build:prod",
         "build:prod": "webpack --config webpack.prod.js",
