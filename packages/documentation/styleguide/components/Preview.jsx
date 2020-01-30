@@ -1,7 +1,11 @@
 import React from 'react';
-import { Hook, Console, Decode, Unhook } from 'console-feed';
+import {
+  Hook, Console, Decode, Unhook,
+} from 'console-feed';
 import Web3 from 'web3';
-import { Block, FlexBox, Button, Text, Icon, ButtonGroup } from '@aztec/guacamole-ui';
+import {
+  Block, FlexBox, Button, Text, Icon, ButtonGroup,
+} from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
@@ -125,6 +129,7 @@ class Preview extends React.Component {
   };
 
   compileCodeInIframe = async () => {
+    Unhook(this.iframeRef.contentWindow.console);
     this.iframeRef.srcdoc = this.generateIframeContent();
     const iframeLoaded = new Promise((resolve) => {
       this.iframeRef.onload = resolve;
@@ -132,6 +137,7 @@ class Preview extends React.Component {
     await iframeLoaded;
     Hook(this.iframeRef.contentWindow.console, (log) => {
       const decodedLog = Decode(log);
+      console.log(decodedLog);
       if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
         this.setState({
           logs: [...this.state.logs, decodedLog],
@@ -182,7 +188,9 @@ class Preview extends React.Component {
   };
 
   render() {
-    const { isRunning, logs, network, accounts = [] } = this.state;
+    const {
+      isRunning, logs, network, accounts = [],
+    } = this.state;
     const isEnabled = network === '4';
     return (
       <>
@@ -246,33 +254,6 @@ class Preview extends React.Component {
               />
             </Block>
           )}
-          <Block
-            background="grey-darker"
-            style={{
-              borderRadius: '0 0 3px 3px',
-            }}
-            hasBorderTop
-            borderColor="white-lighter"
-          >
-            <Console
-              logs={logs}
-              filter={PERMITTED_LOGS}
-              variant="dark"
-              styles={{
-                LOG_BACKGROUND: 'transparent',
-                LOG_INFO_BACKGROUND: 'transparent',
-                LOG_RESULT_BACKGROUND: 'transparent',
-                LOG_WARN_BACKGROUND: 'transparent',
-                LOG_ERROR_BACKGROUND: 'transparent',
-                BASE_BACKGROUND_COLOR: 'transparent',
-                TABLE_TH_BACKGROUND_COLOR: 'transparent',
-                LOG_INFO_BORDER: 'none',
-                LOG_RESULT_BORDER: 'none',
-                LOG_ERROR_BORDER: 'none',
-                LOG_BORDER: 'none',
-              }}
-            />
-          </Block>
           <Block
             background="grey-darker"
             style={{
