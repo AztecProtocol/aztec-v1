@@ -7,9 +7,8 @@ const { keccak256 } = require('web3-utils');
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
 function createSignature(proxyAddress) {
-    const { privateKey, address } = secp256k1.generateAccount();
+    const { privateKey, address, publicKey } = secp256k1.generateAccount();
     const linkedPublicKey = keccak256('0x01');
-    const spendingPublicKey = keccak256('0x0');
     const domain = signer.generateAccountRegistryDomainParams(proxyAddress);
     const message = {
         account: address,
@@ -32,7 +31,7 @@ function createSignature(proxyAddress) {
     return {
         address,
         linkedPublicKey,
-        spendingPublicKey,
+        spendingPublicKey: `0x${publicKey.slice(4)}`,
         sig,
     };
 }

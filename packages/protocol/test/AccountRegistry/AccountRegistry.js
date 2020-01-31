@@ -30,7 +30,7 @@ contract('AccountRegistry', (accounts) => {
         });
 
         it('should be able to register the extension with a valid signature', async () => {
-            const { privateKey, address } = secp256k1.generateAccount();
+            const { privateKey, address, publicKey } = secp256k1.generateAccount();
 
             const domain = signer.generateAccountRegistryDomainParams(registryContract.address);
             const message = {
@@ -55,7 +55,7 @@ contract('AccountRegistry', (accounts) => {
                 address,
                 randomHex(20),
                 keccak256('0x01'),
-                keccak256('0x0'),
+                `0x${publicKey.slice(4)}`,
                 sig,
                 { from: accounts[2] },
             );
@@ -102,16 +102,13 @@ contract('AccountRegistry', (accounts) => {
 
             const replaySignature = legitimateSignature;
 
-            const secondAddress = randomHex(20);
-            const secondLinkedPublicKey = keccak256('0x01');
-            const secondSpendingPublicKey = keccak256('0x0');
 
             await truffleAssert.reverts(
                 registryContract.registerAZTECExtension(
-                    secondAddress,
+                    address,
                     randomHex(20),
-                    secondLinkedPublicKey,
-                    secondSpendingPublicKey,
+                    linkedPublicKey,
+                    spendingPublicKey,
                     replaySignature,
                 ),
                 'signature has already been used',
