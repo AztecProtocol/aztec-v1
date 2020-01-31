@@ -1,5 +1,4 @@
 import ethSigUtil from 'eth-sig-util';
-import EthCrypto from 'eth-crypto';
 import Web3Service from '~/client/services/Web3Service';
 import {
     SIGNING_PROVIDER,
@@ -68,13 +67,11 @@ const handleAction = async (action, params) => {
                 data: eip712Data,
                 sig: result,
             });
-            const compressedPublicKey = EthCrypto.publicKey.compress(
-                publicKey.slice(2),
-            );
+
 
             response = {
                 signature: result,
-                publicKey: `0x${compressedPublicKey}`,
+                publicKey,
             };
             break;
         }
