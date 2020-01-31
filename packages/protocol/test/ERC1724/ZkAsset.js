@@ -254,7 +254,7 @@ contract('ZkAsset', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it.only('should update a note registry by consuming input notes, with kPublic negative', async () => {
+        it('should update a note registry by consuming input notes, with kPublic negative', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
