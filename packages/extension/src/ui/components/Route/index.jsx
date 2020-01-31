@@ -13,6 +13,7 @@ const CustomRoute = ({
     action,
     Component,
     gsnConfig,
+    goToPage,
 }) => (
     <Route
         path={path}
@@ -21,6 +22,7 @@ const CustomRoute = ({
                 {...action}
                 gsnConfig={gsnConfig}
                 currentAccount={currentAccount}
+                goToPage={goToPage}
             />
         )}
     />
@@ -35,6 +37,7 @@ CustomRoute.propTypes = {
     action: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
     Component: PropTypes.func.isRequired,
     gsnConfig: gsnConfigShape.isRequired,
+    goToPage: PropTypes.func.isRequired,
 };
 
 export default CustomRoute;
