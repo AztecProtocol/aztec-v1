@@ -18,8 +18,8 @@ const getNotes = async (notionalNoteValue, residualNoteValue, targetNoteValue) =
 
 const getDefaultNotes = async () => {
     const notionalNoteValue = 90;
-    const targetNoteValue = 50;
-    const residualNoteValue = 4;
+    const targetNoteValue = 4;
+    const residualNoteValue = 50;
     const { notionalNote, residualNote, targetNote } = await getNotes(notionalNoteValue, residualNoteValue, targetNoteValue);
     const za = 100;
     const zb = 5;
@@ -47,15 +47,15 @@ contract('Dividend ABI Encoder', (accounts) => {
         expect(decoded[0].inputNotes[0].noteHash).to.equal(notionalNote.noteHash);
         expect(decoded[0].inputNotes[0].owner).to.equal(notionalNote.owner.toLowerCase());
 
-        expect(decoded[0].outputNotes[0].gamma.eq(residualNote.gamma)).to.equal(true);
-        expect(decoded[0].outputNotes[0].sigma.eq(residualNote.sigma)).to.equal(true);
-        expect(decoded[0].outputNotes[0].noteHash).to.equal(residualNote.noteHash);
-        expect(decoded[0].outputNotes[0].owner).to.equal(residualNote.owner.toLowerCase());
+        expect(decoded[0].outputNotes[0].gamma.eq(targetNote.gamma)).to.equal(true);
+        expect(decoded[0].outputNotes[0].sigma.eq(targetNote.sigma)).to.equal(true);
+        expect(decoded[0].outputNotes[0].noteHash).to.equal(targetNote.noteHash);
+        expect(decoded[0].outputNotes[0].owner).to.equal(targetNote.owner.toLowerCase());
 
-        expect(decoded[0].outputNotes[1].gamma.eq(targetNote.gamma)).to.equal(true);
-        expect(decoded[0].outputNotes[1].sigma.eq(targetNote.sigma)).to.equal(true);
-        expect(decoded[0].outputNotes[1].noteHash).to.equal(targetNote.noteHash);
-        expect(decoded[0].outputNotes[1].owner).to.equal(targetNote.owner.toLowerCase());
+        expect(decoded[0].outputNotes[1].gamma.eq(residualNote.gamma)).to.equal(true);
+        expect(decoded[0].outputNotes[1].sigma.eq(residualNote.sigma)).to.equal(true);
+        expect(decoded[0].outputNotes[1].noteHash).to.equal(residualNote.noteHash);
+        expect(decoded[0].outputNotes[1].owner).to.equal(residualNote.owner.toLowerCase());
 
         expect(decoded[0].publicOwner).to.equal(proof.publicOwner.toLowerCase());
         expect(decoded[0].publicValue).to.equal(proof.publicValue.toNumber());
