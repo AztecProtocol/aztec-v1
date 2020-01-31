@@ -32,10 +32,13 @@ contract('AccountRegistry', (accounts) => {
         it('should be able to register the extension with a valid signature', async () => {
             const { privateKey, address } = secp256k1.generateAccount();
 
+            const { address: AZTECaddress } = secp256k1.generateAccount();
+
             const domain = signer.generateAccountRegistryDomainParams(registryContract.address);
             const message = {
                 account: address,
                 linkedPublicKey: keccak256('0x01'),
+                AZTECaddress,
             };
 
             const encodedTypedData = typedData.encodeTypedData({
@@ -53,7 +56,7 @@ contract('AccountRegistry', (accounts) => {
 
             const { receipt: registerExtensionReceipt } = await registryContract.registerAZTECExtension(
                 address,
-                randomHex(20),
+                AZTECaddress,
                 keccak256('0x01'),
                 keccak256('0x0'),
                 sig,
@@ -66,11 +69,13 @@ contract('AccountRegistry', (accounts) => {
     describe('Failure States', () => {
         it('should fail to register the extension if the signature does not match the account', async () => {
             const { privateKey, address } = secp256k1.generateAccount();
+            const { address: AZTECaddress } = secp256k1.generateAccount();
 
             const domain = signer.generateAccountRegistryDomainParams(registryContract.address);
             const message = {
                 account: address,
                 linkedPublicKey: keccak256('0x01'),
+                AZTECaddress,
             };
             const encodedTypedData = typedData.encodeTypedData({
                 domain,
@@ -84,17 +89,18 @@ contract('AccountRegistry', (accounts) => {
 
             const dummyAddress = accounts[0];
             await truffleAssert.reverts(
-                registryContract.registerAZTECExtension(dummyAddress, randomHex(20), keccak256('0x01'), keccak256('0x0'), sig),
+                registryContract.registerAZTECExtension(dummyAddress, AZTECaddress, keccak256('0x01'), keccak256('0x0'), sig),
             );
         });
 
         it('should not be possible to use the same signature to register multiple accounts', async () => {
-            const { address, linkedPublicKey, spendingPublicKey, sig: legitimateSignature } = createSignature(
+            const { address, linkedPublicKey, AZTECaddress, spendingPublicKey, sig: legitimateSignature } = createSignature(
                 registryContract.address,
             );
+
             await registryContract.registerAZTECExtension(
                 address,
-                randomHex(20),
+                AZTECaddress,
                 linkedPublicKey,
                 spendingPublicKey,
                 legitimateSignature,
@@ -109,7 +115,7 @@ contract('AccountRegistry', (accounts) => {
             await truffleAssert.reverts(
                 registryContract.registerAZTECExtension(
                     secondAddress,
-                    randomHex(20),
+                    AZTECaddress,
                     secondLinkedPublicKey,
                     secondSpendingPublicKey,
                     replaySignature,
