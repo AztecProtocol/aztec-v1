@@ -26,3 +26,7 @@ $arrow-size: 6px;
   border-width: 0 $arrow-size $arrow-size $arrow-size;
   border-color: transparent transparent $hint-color transparent;
 }
+
+.content {
+  white-space: nowrap;
+}

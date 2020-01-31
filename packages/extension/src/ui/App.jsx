@@ -168,6 +168,7 @@ class App extends PureComponent {
         Object.keys(config).forEach((subName) => {
             const {
                 Component,
+                Content,
                 step,
                 path: subPath,
                 routes: childRoutes,
@@ -188,7 +189,7 @@ class App extends PureComponent {
                 routeNodes.push(...childRouteNodes);
             }
 
-            if (Component || (mock && step)) {
+            if (Component || (mock && (step || Content))) {
                 const routeNode = (
                     <Route
                         key={path}

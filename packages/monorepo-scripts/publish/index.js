@@ -8,5 +8,8 @@ multirelease([
     `${__dirname}/../../dev-utils/package.json`,
     `${__dirname}/../../protocol/package.json`,
     `${__dirname}/../../secp256k1/package.json`,
+    `${__dirname}/../../bn128/package.json`,
+    `${__dirname}/../../note-access/package.json`,
+    `${__dirname}/../../typed-data/package.json`,
     `${__dirname}/../../extension/package.json`,
 ]);

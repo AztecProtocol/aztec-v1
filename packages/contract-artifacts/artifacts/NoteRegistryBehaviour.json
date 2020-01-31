@@ -1,11 +1,37 @@
 {
     "abi": [
         {
+            "inputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "previousOwner",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "newOwner",
+                    "type": "address"
+                }
+            ],
+            "name": "OwnershipTransferred",
+            "type": "event"
+        },
+        {
             "constant": true,
             "inputs": [],
-            "name": "JOIN_SPLIT_PROOF",
+            "name": "BURN_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
                 }
@@ -17,11 +43,12 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "dataLocation",
+            "name": "DIVIDEND_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
                     "name": "",
-                    "type": "address"
+                    "type": "uint24"
                 }
             ],
             "payable": false,
@@ -31,11 +58,12 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "initialised",
+            "name": "JOIN_SPLIT_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
                     "name": "",
-                    "type": "bool"
+                    "type": "uint24"
                 }
             ],
             "payable": false,
@@ -45,9 +73,10 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "PUBLIC_RANGE_PROOF",
+            "name": "MINT_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
                 }
@@ -62,8 +91,99 @@
             "name": "PRIVATE_RANGE_PROOF",
             "outputs": [
                 {
+                    "internalType": "uint24",
                     "name": "",
                     "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "PUBLIC_RANGE_PROOF",
+            "outputs": [
+                {
+                    "internalType": "uint24",
+                    "name": "",
+                    "type": "uint24"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "dataLocation",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "initialised",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "isActiveBehaviour",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "isOwner",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
                 }
             ],
             "payable": false,
@@ -80,93 +200,10 @@
             "type": "function"
         },
         {
-            "constant": true,
-            "inputs": [],
-            "name": "DIVIDEND_PROOF",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint24"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "isActiveBehaviour",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "owner",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "MINT_PROOF",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint24"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "isOwner",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "BURN_PROOF",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint24"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "newOwner",
                     "type": "address"
                 }
@@ -178,44 +215,25 @@
             "type": "function"
         },
         {
-            "inputs": [],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "constructor"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "name": "previousOwner",
-                    "type": "address"
-                },
-                {
-                    "indexed": true,
-                    "name": "newOwner",
-                    "type": "address"
-                }
-            ],
-            "name": "OwnershipTransferred",
-            "type": "event"
-        },
-        {
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "_newOwner",
                     "type": "address"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "_scalingFactor",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "bool",
                     "name": "_canAdjustSupply",
                     "type": "bool"
                 },
                 {
+                    "internalType": "bool",
                     "name": "_canConvert",
                     "type": "bool"
                 }
@@ -232,22 +250,27 @@
             "name": "getRegistry",
             "outputs": [
                 {
+                    "internalType": "uint256",
                     "name": "scalingFactor",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "bytes32",
                     "name": "confidentialTotalMinted",
                     "type": "bytes32"
                 },
                 {
+                    "internalType": "bytes32",
                     "name": "confidentialTotalBurned",
                     "type": "bytes32"
                 },
                 {
+                    "internalType": "bool",
                     "name": "canConvert",
                     "type": "bool"
                 },
                 {
+                    "internalType": "bool",
                     "name": "canAdjustSupply",
                     "type": "bool"
                 }
@@ -260,6 +283,7 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "_proofOutputs",
                     "type": "bytes"
                 }
@@ -274,6 +298,7 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "_proofOutputs",
                     "type": "bytes"
                 }
@@ -288,10 +313,12 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "uint24",
                     "name": "_proof",
                     "type": "uint24"
                 },
                 {
+                    "internalType": "bytes",
                     "name": "_proofOutput",
                     "type": "bytes"
                 }
@@ -299,14 +326,17 @@
             "name": "updateNoteRegistry",
             "outputs": [
                 {
+                    "internalType": "address",
                     "name": "publicOwner",
                     "type": "address"
                 },
                 {
+                    "internalType": "uint256",
                     "name": "transferValue",
                     "type": "uint256"
                 },
                 {
+                    "internalType": "int256",
                     "name": "publicValue",
                     "type": "int256"
                 }
@@ -319,6 +349,7 @@
             "constant": true,
             "inputs": [
                 {
+                    "internalType": "bytes32",
                     "name": "_noteHash",
                     "type": "bytes32"
                 }
@@ -326,18 +357,22 @@
             "name": "getNote",
             "outputs": [
                 {
+                    "internalType": "uint8",
                     "name": "status",
                     "type": "uint8"
                 },
                 {
+                    "internalType": "uint40",
                     "name": "createdOn",
                     "type": "uint40"
                 },
                 {
+                    "internalType": "uint40",
                     "name": "destroyedOn",
                     "type": "uint40"
                 },
                 {
+                    "internalType": "address",
                     "name": "noteOwner",
                     "type": "address"
                 }
@@ -359,7 +394,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"
