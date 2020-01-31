@@ -1,5 +1,4 @@
 import async from 'async';
-import NoteService from '~/background/services/NoteService';
 import {
     subscription as NoteSubscription,
     saveNotes,
@@ -210,20 +209,7 @@ class Watcher {
             if (groupedNotes.isEmpty()) {
                 return;
             }
-            const {
-                createNotes,
-                destroyNotes,
-                updateNotes,
-            } = groupedNotes;
-            NoteService.addNotes(
-                networkId,
-                address,
-                [
-                    ...createNotes,
-                    ...destroyNotes,
-                    ...updateNotes,
-                ].filter(({ owner }) => owner === address),
-            );
+
             this.saveQueue.push({
                 name: 'Save Notes',
                 groupedNotes,
