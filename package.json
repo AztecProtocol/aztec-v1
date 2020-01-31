@@ -31,7 +31,7 @@
   "scripts": {
     "build": "lerna link && yarn wsrun --package $PKG --recursive --stages -c build",
     "build:docs": "yarn wsrun --package $PKG --parallel -c build:docs",
-    "build:prod": "lerna link && yarn wsrun --package $PKG --recursive --stages -c --if has:changed --ifDependency build:prod",
+    "build:prod": "lerna link && yarn wsrun --package $PKG --recursive --stages -c build:prod",
     "clean": "yarn wsrun --package $PKG --parallel -c clean",
     "clean:node_modules": "lerna clean --yes; shx rm -rf node_modules",
     "commit": "git-cz",
