@@ -1,14 +1,5 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-
-import "../interfaces/IAZTEC.sol";
-
-import "../libs/NoteUtils.sol";
-import "../libs/ProofUtils.sol";
-import "../libs/SafeMath8.sol";
-
 /**
  * @title IACE
  * @author AZTEC
@@ -16,6 +7,8 @@ import "../libs/SafeMath8.sol";
  * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
  **/
 contract IACE {
+
+    uint8 public latestEpoch;
 
     /**
     * @dev Burn AZTEC notes
