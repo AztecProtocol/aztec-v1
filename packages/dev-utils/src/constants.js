@@ -118,6 +118,7 @@ constants.eip712 = {
             AZTECAccount: [
                 { name: 'account', type: 'address' },
                 { name: 'linkedPublicKey', type: 'bytes' },
+                { name: 'AZTECaddress', type: 'address' },
             ],
             EIP712Domain: EIP712_DOMAIN,
         },
