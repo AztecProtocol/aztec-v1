@@ -1,4 +1,7 @@
-import * as aztec from 'aztec.js';
+import {
+    JoinSplitProof,
+    ProofUtils,
+} from 'aztec.js';
 import { keccak256 } from 'web3-utils';
 import {
     METADATA_AZTEC_DATA_LENGTH,
@@ -179,10 +182,6 @@ export default async function createNoteFromBalance({
         });
     }
 
-    const {
-        JoinSplitProof,
-        ProofUtils,
-    } = aztec;
     const publicValue = ProofUtils.getPublicValue(
         inputValues,
         outputValues,

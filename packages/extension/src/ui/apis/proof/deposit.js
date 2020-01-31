@@ -1,4 +1,7 @@
-import * as aztec from 'aztec.js';
+import {
+    JoinSplitProof,
+    ProofUtils,
+} from 'aztec.js';
 import {
     randomSumArray,
 } from '~/utils/random';
@@ -9,11 +12,6 @@ import settings from '~/background/utils/settings';
 import {
     batchGetExtensionAccount,
 } from '~/ui/apis/account';
-
-const {
-    JoinSplitProof,
-    ProofUtils,
-} = aztec;
 
 export default async function deposit({
     transactions,

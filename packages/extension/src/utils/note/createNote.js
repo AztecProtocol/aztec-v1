@@ -1,4 +1,6 @@
-import * as aztec from 'aztec.js';
+import {
+    note as noteUtils,
+} from 'aztec.js';
 
 export default async function createNote(value, publicKey, owner, access) {
     let accessArr;
@@ -16,5 +18,5 @@ export default async function createNote(value, publicKey, owner, access) {
         }
     }
 
-    return aztec.note.create(publicKey, value, accessArr, owner);
+    return noteUtils.create(publicKey, value, accessArr, owner);
 }
