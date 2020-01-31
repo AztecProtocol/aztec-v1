@@ -14,15 +14,15 @@ const constants = {
     /** Maximum value that can be held in an AZTEC Note
      *  @constant K_MAX
      *  @type {string}
-     *  @default 1048576
+     *  @default 10e6
      */
-    K_MAX: 1048576,
+    K_MAX: 10000000,
     /** Maximum value that can be held in an AZTEC note during tests
      *  @constant K_MAX_TEST
      *  @type {string}
      *  @default 0
      */
-    K_MAX_TEST: 14336,
+    K_MAX_TEST: 16000,
     /** Minimum value that can be held in an AZTEC note
      *  @constant K_MIN
      *  @type { string }
