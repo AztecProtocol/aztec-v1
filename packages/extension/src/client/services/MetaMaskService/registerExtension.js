@@ -24,11 +24,16 @@ const AZTECAccount = [
         name: 'linkedPublicKey',
         type: 'bytes',
     },
+    {
+        name: 'AZTECaddress',
+        type: 'address',
+    },
 ];
 
 export default ({
     address,
     linkedPublicKey,
+    aliasAddress,
 }) => {
     const accountRegistryContract = Web3Service.contract('AccountRegistry');
 
@@ -40,6 +45,7 @@ export default ({
 
     const message = {
         account: address,
+        AZTECaddress: aliasAddress,
         linkedPublicKey,
     };
 
@@ -59,6 +65,7 @@ export default ({
 export const generateTypedData = ({
     address,
     linkedPublicKey,
+    aliasAddress,
 }) => {
     const accountRegistryContract = Web3Service.contract('AccountRegistry');
 
@@ -70,9 +77,18 @@ export const generateTypedData = ({
 
     const message = {
         account: address,
+        AZTECaddress: aliasAddress,
         linkedPublicKey,
     };
-
+    console.log({
+        types: {
+            EIP712Domain: domainParams,
+            AZTECAccount,
+        },
+        domain: domainData,
+        primaryType: 'AZTECAccount',
+        message,
+    });
     return {
         types: {
             EIP712Domain: domainParams,
