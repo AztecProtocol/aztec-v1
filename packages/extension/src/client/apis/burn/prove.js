@@ -1,4 +1,7 @@
-import * as aztec from 'aztec.js';
+import {
+    BurnProof,
+    note as noteUtils,
+} from 'aztec.js';
 import {
     createNote,
     fromViewingKey,
@@ -11,10 +14,6 @@ import ContractError from '~/client/utils/ContractError';
 import ApiError from '~/client/utils/ApiError';
 // import validateExtensionAccount from '../utils/validateExtensionAccount';
 import toAztecNote from '../utils/toAztecNote';
-
-const {
-    BurnProof,
-} = aztec;
 
 export default async function proveBurn({
     assetAddress,
@@ -43,7 +42,7 @@ export default async function proveBurn({
     let balance;
     let oldBurnedCounterNote;
 
-    const zeroNote = await aztec.note.createZeroValueNote();
+    const zeroNote = await noteUtils.createZeroValueNote();
     if (confidentialTotalBurned === zeroNote.noteHash) {
         balance = 0;
         oldBurnedCounterNote = zeroNote;
