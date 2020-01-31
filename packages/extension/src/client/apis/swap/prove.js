@@ -1,4 +1,6 @@
-import * as aztec from 'aztec.js';
+import {
+    SwapProof,
+} from 'aztec.js';
 
 export default async function proveSwap({
     swap: {
@@ -9,10 +11,6 @@ export default async function proveSwap({
     },
     sender,
 }) {
-    const {
-        SwapProof,
-    } = aztec;
-
     // const taker = await validateAccount(takerBid.owner, true);
     // const maker = await validateAccount(takerAsk.owner, true);
 
