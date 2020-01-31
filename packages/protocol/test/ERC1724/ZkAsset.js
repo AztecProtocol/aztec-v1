@@ -235,7 +235,7 @@ contract('ZkAsset', (accounts) => {
 
             const transferInputNotes = depositOutputNotes;
             const transferInputOwnerAccounts = [aztecAccount];
-            const transferOutputNotes = await await helpers.getNotesForAccount(aztecAccount, [10]);
+            const transferOutputNotes = await helpers.getNotesForAccount(aztecAccount, [10]);
             const withdrawPublicValue = 10;
 
             const withdrawProof = new JoinSplitProof(
