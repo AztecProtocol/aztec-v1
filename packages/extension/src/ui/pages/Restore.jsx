@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import apis from '~uiModules/apis';
+import ConnectionService from '~uiModules/services/ConnectionService';
+import returnAndClose from '~uiModules/helpers/returnAndClose';
 import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
 import RestoreFromSeedPhrase from '~/ui/views/RestoreFromSeedPhrase';
 import CreatePassword from '~/ui/views/CreatePassword';
@@ -80,16 +82,30 @@ const steps = [
 const Restore = ({
     initialStep,
     currentAccount,
-}) => (
-    <AnimatedTransaction
-        initialStep={initialStep}
-        steps={steps}
-        initialData={{
-            currentAccount,
-            address: currentAccount.address,
-        }}
-    />
-);
+    domainRegistered,
+    goToPage,
+}) => {
+    const handleClose = async (data) => {
+        if (domainRegistered) {
+            returnAndClose(data);
+        } else {
+            goToPage('loading');
+            ConnectionService.returnToClient(data);
+        }
+    };
+
+    return (
+        <AnimatedTransaction
+            initialStep={initialStep}
+            steps={steps}
+            initialData={{
+                currentAccount,
+                address: currentAccount.address,
+            }}
+            onExit={handleClose}
+        />
+    );
+};
 
 Restore.propTypes = {
     initialStep: PropTypes.number,
@@ -97,10 +113,13 @@ Restore.propTypes = {
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string,
     }).isRequired,
+    domainRegistered: PropTypes.bool,
+    goToPage: PropTypes.func.isRequired,
 };
 
 Restore.defaultProps = {
     initialStep: 0,
+    domainRegistered: false,
 };
 
 export default Restore;

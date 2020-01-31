@@ -15,7 +15,7 @@ const stepApproveERC20 = {
 
 const stepConfirm = {
     name: 'confirmTransaction',
-    descriptionKey: 'transaction.gsn.send.description',
+    descriptionKey: 'deposit.send.description',
     blockStyle: 'overlapped',
     tasks: [
         {
@@ -23,6 +23,11 @@ const stepConfirm = {
         },
     ],
     submitTextKey: 'transaction.send.submit',
+};
+
+const stepConfirmForGSN = {
+    ...stepConfirm,
+    descriptionKey: 'transaction.gsn.send.description',
 };
 
 const stepTransferViaGSN = {
@@ -35,19 +40,20 @@ const stepTransferViaGSN = {
             run: apis.mock,
         },
         {
-            titleKey: 'transaction.step.sign',
-            run: apis.mock,
-        },
-        {
             type: 'sign',
             titleKey: 'deposit.approve.public',
             run: apis.ace.publicApprove,
+        },
+        {
+            titleKey: 'transaction.step.send',
+            run: apis.asset.confidentialTransferFrom,
         },
         {
             titleKey: 'transaction.step.relay',
         },
     ],
     showTaskList: true,
+    autoStart: true,
     submitTextKey: 'deposit.approve.submit',
 };
 
@@ -65,6 +71,7 @@ const stepSend = {
             run: apis.mock,
         },
         {
+            type: 'sign',
             titleKey: 'transaction.step.send',
             run: apis.asset.deposit,
         },
@@ -73,6 +80,7 @@ const stepSend = {
         },
     ],
     showTaskList: true,
+    autoStart: true,
     submitTextKey: 'transaction.send.submit',
 };
 
@@ -105,12 +113,12 @@ const stepSendViaGSN = {
 export default {
     gsn: [
         stepApproveERC20,
-        stepConfirm,
+        stepConfirmForGSN,
         stepSendViaGSN,
     ],
     gsnTransfer: [
         stepApproveERC20,
-        stepConfirm,
+        stepConfirmForGSN,
         stepTransferViaGSN,
     ],
     metamask: [

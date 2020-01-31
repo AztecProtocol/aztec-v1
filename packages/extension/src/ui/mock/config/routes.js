@@ -16,6 +16,9 @@ import withdrawSteps from '~/ui/steps/withdraw';
 import sendSteps from '~/ui/steps/send';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 import grantNoteAccessSteps from '~/ui/steps/grantNoteAccess';
+import {
+    invalidGSNConfig,
+} from '../data';
 
 export default {
     _: {
@@ -105,6 +108,19 @@ export default {
                 steps: depositSteps.gsn,
                 initialStep: 2,
             },
+            MetaMask: {
+                path: 'metamask',
+                Content: DepositContent,
+                steps: depositSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
+            },
+            publicApprove: {
+                path: 'public-approve',
+                Content: DepositContent,
+                steps: depositSteps.gsnTransfer,
+                initialStep: 0,
+            },
         },
     },
     withdraw: {
@@ -131,11 +147,12 @@ export default {
                 steps: withdrawSteps.gsn,
                 initialStep: 3,
             },
-            metamask: {
+            MetaMask: {
                 path: 'metamask',
                 Content: WithdrawContent,
                 steps: withdrawSteps.metamask,
                 initialStep: 0,
+                gsnConfig: invalidGSNConfig,
             },
         },
     },
@@ -163,6 +180,13 @@ export default {
                 steps: sendSteps.gsn,
                 initialStep: 3,
             },
+            MetaMask: {
+                path: 'metamask',
+                Content: SendContent,
+                steps: sendSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
+            },
         },
     },
     createNote: {
@@ -189,6 +213,13 @@ export default {
                 steps: createNoteFromBalanceSteps.gsn,
                 initialStep: 3,
             },
+            MetaMask: {
+                path: 'metamask',
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
+            },
         },
     },
     noteAccess: {
@@ -202,6 +233,13 @@ export default {
                 Content: GrantNoteAccessContent,
                 steps: grantNoteAccessSteps.gsn,
                 initialStep: 1,
+            },
+            MetaMask: {
+                path: 'metamask',
+                Content: GrantNoteAccessContent,
+                steps: grantNoteAccessSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
             },
         },
     },

@@ -101,6 +101,10 @@ export default {
         asset: assets[0],
         amount: randomInt(1, 10000),
         userAccessAccounts: generate(2, randomAccount),
+        isGSNAvailable: true,
+    },
+    'noteAccess.MetaMask': {
+        isGSNAvailable: false,
     },
     createNote: {
         asset: assets[0],
