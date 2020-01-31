@@ -1,6 +1,6 @@
 {
   "name": "@aztec/dev-utils",
-  "description": "Dev utils to be shared across AZTEC packages",
+  "description": "Dev utils library for AZTEC packages",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {

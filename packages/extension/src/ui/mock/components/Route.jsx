@@ -79,6 +79,7 @@ const MockRoute = ({
                 }}
                 gsnConfig={customGsnConfig || gsnConfig}
                 initialStep={initialStep}
+                goToPage={() => {}}
             />
         );
     } else {

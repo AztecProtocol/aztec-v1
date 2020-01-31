@@ -31,18 +31,22 @@ export default async function setupNetworkConfig({
     const contractsConfig = await Promise.all(backgroundContracts.map(async (contractName) => {
         const {
             contract,
-            address,
+            address: defaultAddress,
             isProxyContract,
         } = getContract(contractName, networkId);
-        let proxyAddress;
-        if (isProxyContract) {
-            proxyAddress = await getProxyAddress(contractName, networkId);
+        let address = contractAddresses[contractName] || defaultAddress;
+        if (!address && isProxyContract) {
+            address = await getProxyAddress(
+                contractName,
+                networkId,
+                contractAddresses,
+            );
         }
+
         return {
             name: contractName,
             config: contract,
-            address: contractAddresses[contractName]
-                || isProxyContract ? proxyAddress : address,
+            address,
         };
     }));
     Web3Service.registerContractsConfig(contractsConfig);

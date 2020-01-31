@@ -2,12 +2,7 @@
 
 pragma solidity >=0.5.0 <0.6.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
-import "../../interfaces/IACE.sol";
 import "../../ERC20/ERC20Mintable.sol";
-import "../../libs/LibEIP712.sol";
-import "../../libs/ProofUtils.sol";
 import "./ZkAssetOwnableBase.sol";
 
 /**
@@ -19,7 +14,7 @@ import "./ZkAssetOwnableBase.sol";
 **/
 contract ZkAssetMintableBase is ZkAssetOwnableBase {
     event UpdateTotalMinted(bytes32 noteHash, bytes metaData);
-    
+
     /**
     * @dev Executes a confidential minting procedure, dependent on the provided proofData
     * being succesfully validated by the zero-knowledge validator

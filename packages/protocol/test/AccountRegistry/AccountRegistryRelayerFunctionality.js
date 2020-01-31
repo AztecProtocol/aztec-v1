@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* global artifacts, contract, expect */
 const { JoinSplitProof, ProofUtils, signer } = require('aztec.js');
 const { proofs } = require('@aztec/dev-utils');

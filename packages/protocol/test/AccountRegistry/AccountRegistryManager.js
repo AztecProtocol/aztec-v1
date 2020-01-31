@@ -115,10 +115,9 @@ contract('Account registry manager', async (accounts) => {
             it('should successfully register account mapping', async () => {
                 // register an account with the extension, which will be put in storage under accountMapping
                 const proxyAddress = await manager.proxyAddress.call();
-                const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
+                const { address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
                 const proxyContract = await Behaviour20200106.at(proxyAddress);
-                const AZTECaddress = randomHex(20);
 
                 await proxyContract.registerAZTECExtension(address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig);
                 const storedLinkedPublicKey = await proxyContract.accountMapping.call(address);
@@ -146,10 +145,9 @@ contract('Account registry manager', async (accounts) => {
             it('should keep state after upgrade', async () => {
                 // register an account with the extension, which will be put in storage under accountMapping
                 const proxyAddress = await manager.proxyAddress.call();
-                const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
+                const { address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
                 const proxyContract = await Behaviour20200106.at(proxyAddress);
-                const AZTECaddress = randomHex(20);
 
                 await proxyContract.registerAZTECExtension(address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig);
 

@@ -92,6 +92,7 @@ class RegisterContent extends StepContentHelper {
         const {
             address,
             linkedPublicKey,
+            loading,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -104,6 +105,7 @@ class RegisterContent extends StepContentHelper {
             <SignatureRequestBlock
                 signatures={signatures}
                 signed={signed}
+                loading={loading && !signed}
             />
         );
     }
