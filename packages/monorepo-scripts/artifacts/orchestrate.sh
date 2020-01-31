@@ -36,7 +36,7 @@ yarn deploy:rinkeby
 yarn deploy:ropsten
 
 # Run mainnet deployment script
-yarn deploy:mainnet
+# yarn deploy:mainnet
 
 # Extract addresses from the newly generated truffle artifacts
 cd ../../
