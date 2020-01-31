@@ -115,7 +115,8 @@ contract Behaviour20200106 is GSNRecipientTimestampSignature, IAZTEC, LibEIP712 
             hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey, _AZTECaddress)),
             _signature
         );
-        require(_account == address(uint160(uint256(keccak256(_spendingPublicKey)))), 'address does not match public key');
+        require(_account == address(uint160(uint256(keccak256(_spendingPublicKey)))),
+            'address does not match public key');
         require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
         userToAZTECAccountMapping[_account] = _AZTECaddress;

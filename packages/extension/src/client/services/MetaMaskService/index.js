@@ -1,7 +1,5 @@
 import ethSigUtil from 'eth-sig-util';
-import EthCrypto from 'eth-crypto';
 import * as ethUtil from 'ethereumjs-util';
-import typedData from '@aztec/typed-data';
 import Web3Service from '~/client/services/Web3Service';
 import {
     SIGNING_PROVIDER,
