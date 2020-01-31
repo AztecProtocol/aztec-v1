@@ -11,8 +11,20 @@ pragma solidity >=0.5.0 <0.6.0;
  * The intended use case is to call this externally via `staticcall`.
  * External calls to OptimizedAZTEC can be treated as pure functions as this contract contains no
  * storage and makes no external calls (other than to precompiles)
- * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
- **/
+ * 
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
 library JoinSplitFluidABIEncoder {
     /**
      * Calldata map
