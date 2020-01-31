@@ -10,13 +10,13 @@ import {
 } from '../../utils/path';
 import {
     isDirectory,
+    ensureDirectory,
+    copyFolder,
 } from '../../utils/fs';
-import instance from '../../utils/instance';
 
 const sourcePackage = 'protocol';
-const folderName = 'contracts';
-const sourceFolder = 'build';
-const destFolder = 'build';
+const sourceFolder = 'build/contracts';
+const destFolder = 'build/contracts';
 
 export default function copyContracts({
     onError,
@@ -29,7 +29,7 @@ export default function copyContracts({
         return;
     }
 
-    const contractsPath = path.join(packagePath, `${sourceFolder}/${folderName}`);
+    const contractsPath = path.join(packagePath, sourceFolder);
     if (!isDirectory(contractsPath)) {
         errorLog('Cannot find source contracts', contractsPath);
         onError();
@@ -37,16 +37,12 @@ export default function copyContracts({
     }
 
     const destPath = path.join(projectRoot, destFolder);
+    ensureDirectory(destPath);
 
-    instance(
-        `cp -r ${contractsPath} ${destPath}`,
-        {
-            onError,
-            onClose: () => {
-                successLog('\nSuccessfully copied contracts!');
-                logEntries([`${sourcePackage} > ${destFolder}/${folderName}`]);
-                onClose();
-            },
-        },
-    );
+    copyFolder(contractsPath, destPath);
+
+    successLog('Successfully copied contracts!');
+    logEntries([`${sourcePackage} > ${destFolder}`]);
+
+    onClose();
 }

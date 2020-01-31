@@ -141,10 +141,19 @@ class StepContentHelper extends PureComponent {
 
     handleRetry = () => {
         const {
+            onRetryStep,
             onRetryTask,
         } = this.props;
+        const {
+            explicitTaskType,
+        } = this.state;
 
-        onRetryTask();
+        if (explicitTaskType) {
+            onRetryTask();
+            return;
+        }
+
+        onRetryStep();
     };
 
     handleGoNext = () => {
@@ -315,6 +324,7 @@ StepContentHelper.propTypes = {
     error: errorShape,
     onPrevious: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired,
+    onRetryStep: PropTypes.func.isRequired,
     onRetryTask: PropTypes.func.isRequired,
 };
 

@@ -5,18 +5,12 @@ import {
     Block,
     Text,
     SVG,
-    Loader,
 } from '@aztec/guacamole-ui';
 import {
     colorMap,
     iconSizeMap,
 } from '~/ui/styles/guacamole-vars';
 import checkGlyph from '~/ui/images/tick.svg';
-
-const statusColorMap = {
-    check: 'primary',
-    loading: 'label',
-};
 
 const BlockStatus = ({
     status,
@@ -30,7 +24,7 @@ const BlockStatus = ({
             <Text
                 text={text}
                 size="xxs"
-                color={statusColorMap[status]}
+                color="primary"
             />
         </Block>
         {status === 'check' && (
@@ -41,19 +35,11 @@ const BlockStatus = ({
                 height={iconSizeMap.s}
             />
         )}
-        {status === 'loading' && (
-            <Block padding="0 xxs">
-                <Loader
-                    theme="primary"
-                    size="xxs"
-                />
-            </Block>
-        )}
     </FlexBox>
 );
 
 BlockStatus.propTypes = {
-    status: PropTypes.oneOf(['check', 'loading']),
+    status: PropTypes.oneOf(['check']),
     text: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.node,

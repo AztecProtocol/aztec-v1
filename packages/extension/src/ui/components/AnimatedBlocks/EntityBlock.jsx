@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
-    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -15,7 +14,6 @@ import styles from './blocks.scss';
 const EntityBlock = ({
     className,
     title,
-    titleFootnote,
     content,
     contentFootnote,
     profile,
@@ -23,7 +21,6 @@ const EntityBlock = ({
     children,
     layer,
     hideTitile,
-    hideTitleFootnote,
     hideContentFootnote,
     hideExtra,
 }) => (
@@ -34,7 +31,6 @@ const EntityBlock = ({
             {
                 [styles[`block-layer-${layer}`]]: layer > 0,
                 [styles['fx-hide-title']]: hideTitile,
-                [styles['fx-hide-title-footnote']]: hideTitleFootnote,
                 [styles['fx-hide-content-footnote']]: hideContentFootnote,
                 [styles['fx-hide-extra']]: hideExtra,
             },
@@ -47,26 +43,11 @@ const EntityBlock = ({
                         className={styles['block-title']}
                         padding="xs xs 0"
                     >
-                        <FlexBox
-                            valign="center"
-                        >
-                            <Text
-                                className="flex-free-expand"
-                                text={title}
-                                size="xxs"
-                                color="label"
-                            />
-                            {!!titleFootnote && (
-                                <div
-                                    className={classnames(
-                                        'flex-fixed',
-                                        styles['title-footnote'],
-                                    )}
-                                >
-                                    {titleFootnote}
-                                </div>
-                            )}
-                        </FlexBox>
+                        <Text
+                            text={title}
+                            size="xxs"
+                            color="label"
+                        />
                     </Block>
                 )}
                 {!!(profile || content) && (
@@ -113,10 +94,6 @@ EntityBlock.propTypes = {
         PropTypes.string,
         PropTypes.node,
     ]),
-    titleFootnote: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.node,
-    ]),
     content: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.node,
@@ -130,7 +107,6 @@ EntityBlock.propTypes = {
     children: PropTypes.node,
     layer: PropTypes.number,
     hideTitile: PropTypes.bool,
-    hideTitleFootnote: PropTypes.bool,
     hideContentFootnote: PropTypes.bool,
     hideExtra: PropTypes.bool,
 };
@@ -138,7 +114,6 @@ EntityBlock.propTypes = {
 EntityBlock.defaultProps = {
     className: '',
     title: '',
-    titleFootnote: null,
     content: null,
     contentFootnote: null,
     profile: null,
@@ -147,7 +122,6 @@ EntityBlock.defaultProps = {
     layer: 1,
     hideContentFootnote: false,
     hideTitile: false,
-    hideTitleFootnote: false,
     hideExtra: false,
 };
 

@@ -1,9 +1,7 @@
+import urls from '~/config/urls';
 import {
     backgroundReadyEvent,
 } from '~/config/event';
-import {
-    getResourceUrl,
-} from '~/utils/versionControl';
 import Iframe from '~/utils/Iframe';
 
 class BackgroundFrame extends Iframe {
@@ -43,7 +41,7 @@ class BackgroundFrame extends Iframe {
 
 export default new BackgroundFrame({
     id: 'AZTECSDK',
-    src: getResourceUrl('background'),
+    src: urls.background,
     onReadyEventName: backgroundReadyEvent,
     width: '100vw',
     height: '100vh',

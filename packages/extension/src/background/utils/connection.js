@@ -24,9 +24,7 @@ import {
     sendActionEvent,
     sendQueryEvent,
 } from '~/config/event';
-import {
-    getResourceUrl,
-} from '~/utils/versionControl';
+import urls from '~/config/urls';
 import Iframe from '~/utils/Iframe';
 import {
     warnLog,
@@ -69,7 +67,7 @@ class Connection {
         this.containerId = 'aztec-popup-ui';
         this.uiFrame = new Iframe({
             id: 'AZTECSDK-POPUP',
-            src: getResourceUrl('ui'),
+            src: urls.ui,
             width: '100%',
             height: '100%',
             onReadyEventName: uiReadyEvent,

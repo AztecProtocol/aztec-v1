@@ -131,7 +131,7 @@ signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approva
  * for each note, and they are all concatenated together
  */
 signer.signMultipleNotesForConfidentialTransfer = (verifyingContract, noteOwnerAccounts, notes, challenge, sender) => {
-    const unformattedSignature = noteOwnerAccounts.map((inputNoteOwner, index) => {
+    const signaturesArray = noteOwnerAccounts.map((inputNoteOwner, index) => {
         return signer.signNoteForConfidentialTransfer(
             verifyingContract,
             inputNoteOwner,
@@ -140,8 +140,7 @@ signer.signMultipleNotesForConfidentialTransfer = (verifyingContract, noteOwnerA
             sender,
         );
     });
-
-    return `0x${unformattedSignature.join('')}`;
+    return `0x${signaturesArray.join('')}`;
 };
 
 /**
@@ -171,8 +170,7 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 
     const { privateKey } = noteOwnerAccount;
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
-
-    return `${unformattedSignature.slice(0, 130)}`;
+    return unformattedSignature;
 };
 
 /**

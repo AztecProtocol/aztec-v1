@@ -60,7 +60,7 @@ const Icons = ({
                     <ProfileIcon
                         type={type}
                         address={addr}
-                        size="s"
+                        size="l"
                     />
                 </Block>
             ))}
@@ -73,7 +73,7 @@ const Icons = ({
                     <ProfileIcon
                         type={type}
                         noteHash={noteHash}
-                        size="s"
+                        size="l"
                     />
                 </Block>
             ))}

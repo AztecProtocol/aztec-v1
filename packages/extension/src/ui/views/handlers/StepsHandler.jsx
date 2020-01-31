@@ -240,7 +240,6 @@ class StepsHandler extends PureComponent {
         this.setState(
             {
                 error: null,
-                loading: true,
             },
             ensureMinPendingTime(this.runTask, 600),
         );

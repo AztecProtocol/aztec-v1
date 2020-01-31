@@ -4,9 +4,7 @@ import {
     infuraProviderUrlPattern,
     defaultProviderUrl,
 } from '~/config/provider';
-import {
-    formatStrPattern,
-} from '~/utils/format';
+import formatStrPattern from '~/utils/formatStrPattern';
 
 export default function getProviderUrl(networkId, projectId = infuraProjectId) {
     const networkKey = Object.keys(networks)

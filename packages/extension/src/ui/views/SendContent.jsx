@@ -109,7 +109,6 @@ class SendContent extends StepContentHelper {
         const {
             proofHash,
             spender,
-            loading,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -122,7 +121,6 @@ class SendContent extends StepContentHelper {
             <SignatureRequestBlock
                 signatures={signatures}
                 signed={signed}
-                loading={loading && !signed}
             />
         );
     }

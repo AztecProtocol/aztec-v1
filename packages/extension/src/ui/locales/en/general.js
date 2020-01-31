@@ -33,6 +33,5 @@ export default {
         back: 'Go Back',
     },
     retry: 'Retry',
-    pending: 'Pending',
     poweredBy: 'Powered by',
 };

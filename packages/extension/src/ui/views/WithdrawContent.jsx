@@ -121,7 +121,6 @@ class WithdrawContent extends StepContentHelper {
         const {
             proofHash,
             spender,
-            loading,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -134,7 +133,6 @@ class WithdrawContent extends StepContentHelper {
             <SignatureRequestBlock
                 signatures={signatures}
                 signed={signed}
-                loading={loading && !signed}
             />
         );
     }

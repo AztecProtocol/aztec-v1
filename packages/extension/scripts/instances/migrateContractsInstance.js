@@ -11,7 +11,6 @@ const truffleExec = '.bin/truffle';
 
 export default function migrateContractsInstance({
     packageName,
-    network = 'development',
     onError,
     onClose,
 }) {
@@ -33,7 +32,7 @@ export default function migrateContractsInstance({
     }
 
     return instance(
-        `cd ${targetPath} && ${trufflePath} compile --all && ${trufflePath} migrate --reset --network ${network}`,
+        `cd ${targetPath} && ${trufflePath} compile --all && ${trufflePath} migrate --reset`,
         {
             onError,
             onClose,

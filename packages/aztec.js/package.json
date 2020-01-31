@@ -1,6 +1,6 @@
 {
   "name": "aztec.js",
-  "description": "AZTEC client side library library",
+  "description": "AZTEC cryptography library",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "browser": "./dist/bundle.web.js",

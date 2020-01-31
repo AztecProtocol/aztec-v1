@@ -14,7 +14,7 @@ export default async function getExtensionAccount(address) {
     `) || {};
 
     const { account } = accountResponse || {};
-    if (!account) {
+    if (!account || !account.linkedPublicKey) {
         return {
             address,
             linkedPublicKey: '',

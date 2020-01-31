@@ -2,7 +2,6 @@ import ApiError from '~/client/utils/ApiError';
 
 const requiredContracts = [
     'ACE',
-    'AccountRegistry',
 ];
 
 export default function validateContractConfigs(contractsConfig, networkId) {
