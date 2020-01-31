@@ -59,7 +59,8 @@ const Deposit = ({
                 allowanceSpender,
             );
         const approvedERC20Allowance = new BN(allowance);
-        const requestedAllowance = asset.scalingFactor.mul(new BN(amount));
+        const erc20Amount = asset.scalingFactor.mul(new BN(amount));
+        const requestedAllowance = erc20Amount;
         if (approvedERC20Allowance.gte(requestedAllowance)) {
             steps = steps.filter(({ name }) => name !== 'approveERC20');
         }
@@ -74,11 +75,11 @@ const Deposit = ({
             sender,
             spender: sender,
             amount,
-            numberOfOutputNotes,
-            userAccessAccounts,
+            erc20Amount,
             requestedAllowance,
             allowanceSpender,
-            spenderName: 'AZTEC',
+            numberOfOutputNotes,
+            userAccessAccounts,
             isGSNAvailable,
         };
     };
