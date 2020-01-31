@@ -1,20 +1,17 @@
 import {
     permissionError,
 } from '~/utils/error';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
 import AuthService from '~/background/services/AuthService';
 
-const {
-    origin: uiSourceOrigin,
-} = new URL(urls.ui);
-const {
-    origin: backgroundSourceOrigin,
-} = new URL(urls.background);
+const resourceOrigin = getResourceUrl('origin');
 
 export default async function validateDomain(_, args) {
     const { domain } = args;
 
-    const registeredDomain = domain === uiSourceOrigin || domain === backgroundSourceOrigin
+    const registeredDomain = domain === resourceOrigin
         ? domain
         : await AuthService.getRegisteredDomain(domain);
 

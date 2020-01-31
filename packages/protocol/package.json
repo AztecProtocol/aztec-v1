@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "description": "AZTEC smart contract repository",
+  "description": "Main AZTEC smart contract repository",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {
@@ -73,6 +73,7 @@
     "coverage": "scripts/coverage.sh",
     "deploy:rinkeby": "truffle migrate --network rinkeby",
     "deploy:ropsten": "truffle migrate --network ropsten",
+    "deploy:mainnet": "truffle migrate --network mainnet",
     "lint": "yarn lint:js && yarn lint:sol",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "solhint --ignore-path ../../.solhintignore \"contracts/**/*.sol\"",

@@ -6,6 +6,7 @@
             "name": "admin",
             "outputs": [
                 {
+                    "internalType": "address",
                     "name": "",
                     "type": "address"
                 }
@@ -18,6 +19,7 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "_newImplementation",
                     "type": "address"
                 }
@@ -32,6 +34,7 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "address",
                     "name": "_newAdmin",
                     "type": "address"
                 }
@@ -46,7 +49,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"

@@ -4,14 +4,17 @@
             "constant": true,
             "inputs": [
                 {
+                    "internalType": "bytes",
                     "name": "",
                     "type": "bytes"
                 },
                 {
+                    "internalType": "address",
                     "name": "",
                     "type": "address"
                 },
                 {
+                    "internalType": "uint256[6]",
                     "name": "",
                     "type": "uint256[6]"
                 }
@@ -19,6 +22,7 @@
             "name": "validatePublicRange",
             "outputs": [
                 {
+                    "internalType": "bytes",
                     "name": "",
                     "type": "bytes"
                 }
@@ -31,7 +35,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.7+commit.6da8b019.Emscripten.clang"
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"

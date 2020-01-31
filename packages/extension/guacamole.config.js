@@ -7,12 +7,14 @@ module.exports = {
     theme: {
         defaultFontFamily: '\'Gill Sans\', sans-serif',
         colorMap: {
-            primary: '#898BF6',
+            primary: '#808dff',
             'primary-light': 'rgba(137, 139, 246, 0.7)',
             'primary-lighter': 'rgba(137, 139, 246, 0.45)',
             'primary-lightest': 'rgb(244, 245, 254)',
             secondary: '#17173C',
             'secondary-light': '#222261',
+            'white-lightest': 'rgba(255,255,255,0.3)',
+            green: 'rgb(76, 199, 170)',
         },
         defaultTextColor: '#221635',
         defaultLabelColor: '#9699BA',
@@ -64,6 +66,9 @@ module.exports = {
             l: '32px',
             xl: '40px',
             xxl: '48px',
+        },
+        loaderThemeColorMap: {
+            primary: 'primary-lighter',
         },
     },
 };

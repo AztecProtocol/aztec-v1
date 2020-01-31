@@ -1,4 +1,8 @@
 import Polyglot from 'node-polyglot';
+import {
+    simplePluralize,
+    capitalize,
+} from '~/utils/format';
 
 const defaultLocale = 'en';
 
@@ -110,6 +114,29 @@ export default class I18n {
         }
 
         return phrase;
+    }
+
+    singular(key) {
+        return this.t(key, 1);
+    }
+
+    plural(key) {
+        if (this.has(`${key}.1`)) {
+            return this.t(`${key}._`);
+        }
+
+        const phrase = this.singular(key);
+        return simplePluralize(phrase || key);
+    }
+
+    count(key, count, capitalized = false) {
+        let phrase = parseInt(count, 10) === 1
+            ? this.singular(key)
+            : this.plural(key);
+        if (capitalized) {
+            phrase = capitalize(phrase);
+        }
+        return `${count} ${phrase}`;
     }
 
     ordinal(number) {

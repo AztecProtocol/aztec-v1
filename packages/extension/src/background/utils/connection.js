@@ -24,7 +24,9 @@ import {
     sendActionEvent,
     sendQueryEvent,
 } from '~/config/event';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
 import Iframe from '~/utils/Iframe';
 import {
     warnLog,
@@ -67,7 +69,7 @@ class Connection {
         this.containerId = 'aztec-popup-ui';
         this.uiFrame = new Iframe({
             id: 'AZTECSDK-POPUP',
-            src: urls.ui,
+            src: getResourceUrl('ui'),
             width: '100%',
             height: '100%',
             onReadyEventName: uiReadyEvent,
@@ -115,7 +117,8 @@ class Connection {
 
                 const uiContainer = document.getElementById(this.containerId);
                 uiContainer.style.display = 'none';
-                uiContainer.innerHTML = ''; // clear previous ui
+
+                await this.uiFrame.ensureCreated();
 
                 const {
                     webClientId,
@@ -138,8 +141,7 @@ class Connection {
                     webClientId,
                 });
 
-                const frame = await this.uiFrame.init();
-                frame.contentWindow.postMessage({
+                this.uiFrame.frame.contentWindow.postMessage({
                     type: sendActionEvent,
                     action: {
                         ...action,
@@ -426,6 +428,11 @@ class Connection {
         });
     }
 
+    async initUi() {
+        const frame = await this.uiFrame.init();
+        return !!frame;
+    }
+
     abortUi({
         requestId,
         webClientId,
@@ -450,6 +457,13 @@ class Connection {
     closeUi = () => {
         const event = new CustomEvent('closeAztec');
         window.dispatchEvent(event);
+
+        this.uiFrame.frame.contentWindow.postMessage({
+            type: sendActionEvent,
+            action: {
+                type: 'closed',
+            },
+        }, '*');
     }
 
     openUi = (detail) => {

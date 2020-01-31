@@ -279,7 +279,7 @@ contract('Account registry - relayer functionality', (accounts) => {
         expect((await erc20.balanceOf(ace.address)).toNumber()).to.equal(0);
     });
 
-    it("should not deposit notes belonging to non-owner when sending the transaction using the owner's alias address", async () => {
+    it("should not deposit notes belonging to non-owner when sending using the owner's alias address", async () => {
         const stranger = secp256k1.generateAccount();
         const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs({
             publicKey: stranger.publicKey,
@@ -311,6 +311,7 @@ contract('Account registry - relayer functionality', (accounts) => {
 
         await truffleAssert.reverts(
             registryContract.deposit(...depositParams, { from: anotherUserAddress }),
+            // eslint-disable-next-line max-len
             'VM Exception while processing transaction: revert Cannot deposit note to other account if sender is not the same as owner',
         );
 

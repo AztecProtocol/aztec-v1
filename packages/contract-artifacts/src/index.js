@@ -1,5 +1,7 @@
 /* eslint-disable */
 const ACE = require('../artifacts/ACE');
+const AccountRegistryManager = require('../artifacts/AccountRegistryManager');
+const Behaviour20200106 = require('../artifacts/Behaviour20200106');
 const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
@@ -44,6 +46,8 @@ const ZkAssetOwnableBase = require('../artifacts/ZkAssetOwnableBase');
 
 module.exports = {
     ACE,
+    AccountRegistryManager,
+    Behaviour20200106,
     Dividend,
     DividendABIEncoder,
     DividendInterface,
