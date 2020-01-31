@@ -36,8 +36,8 @@ CustomRoute.propTypes = {
     }).isRequired,
     action: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
     Component: PropTypes.func.isRequired,
-    goToPage: PropTypes.func.isRequired,
     gsnConfig: gsnConfigShape.isRequired,
+    goToPage: PropTypes.func.isRequired,
 };
 
 export default CustomRoute;

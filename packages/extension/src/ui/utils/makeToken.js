@@ -1,10 +1,14 @@
 import contractMetadataMapping from 'eth-contract-metadata';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
+
+const publicResourcePath = getResourceUrl('public');
 
 const formatIconUrl = (icon) => {
     if (!icon) return '';
 
-    return `${urls.public}/tokens/${icon}`;
+    return `${publicResourcePath}/tokens/${icon}`;
 };
 
 export default function makeToken(address) {

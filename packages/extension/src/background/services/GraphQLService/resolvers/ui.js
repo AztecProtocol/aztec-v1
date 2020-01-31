@@ -8,10 +8,11 @@ import base from './base';
 
 const uiResolvers = {
     Account: {
-        linkedPublicKey: async ({ address }) => Web3Service
-            .useContract('AccountRegistry')
-            .method('accountMapping')
-            .call(address),
+        linkedPublicKey: async ({ address, linkedPublicKey }) => linkedPublicKey
+            || Web3Service
+                .useContract('AccountRegistry')
+                .method('accountMapping')
+                .call(address),
     },
     Query: {
         user: async (_, { id }) => userModel.get({

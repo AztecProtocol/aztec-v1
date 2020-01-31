@@ -21,6 +21,8 @@ $default-link-color-name: 'secondary';
 $default-link-color: #898BF6;
 $overlay-theme-bg-map: ('primary':'primary-lightest','secondary':'secondary-lightest','white':'white-lighter');
 $svg-progress-theme-bg-map: ('primary':'primary-lightest','secondary':'secondary-lightest','white':'white-lighter');
+$loader-theme-color-map: ('primary':'primary-lighter','secondary':'secondary-lightest','white':'white');
+$loader-theme-inverted-color-map: ('primary':'white','secondary':'white','white':'grey-lighter');
 $icon-size-map: ('xxs':12px,'xs':14px,'s':16px,'m':18px,'l':24px,'xl':36px,'xxl':48px);
 $input-size-map: ('xs':24px,'s':28px,'m':32px,'l':40px);
 $input-font-size-key-map: ('xs':'xxs','s':'xxs','m':'xs','l':'xs');

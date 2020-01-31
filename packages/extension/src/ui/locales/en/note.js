@@ -28,13 +28,11 @@ export default {
             `,
         },
         confirm: {
-            description: `A MetaMask signature is required to grant access to ZkTokens.
-                The signature should contain the following values:
+            description: `If everything looks good hit send!
             `,
         },
         send: {
-            description: `A MetaMask signature is required to grant access to ZkTokens.
-                The signature should contain the following values:
+            description: `If everything looks good hit send!
             `,
         },
     },

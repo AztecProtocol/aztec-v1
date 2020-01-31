@@ -28,7 +28,7 @@ describe('grantNoteAccess', () => {
                 decryptedViewingKey: `0x${randomId(REAL_VIEWING_KEY_LENGTH)}`,
                 metadata: '',
             },
-            accounts,
+            userAccessAccounts: accounts,
         });
 
         const newMetaData = metadata(newMetaDataStr.slice(METADATA_AZTEC_DATA_LENGTH + 2));

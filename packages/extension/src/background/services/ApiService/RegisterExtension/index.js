@@ -3,16 +3,30 @@ import {
 } from '~/config/event';
 import filterStream from '~/utils/filterStream';
 import userPermissionQuery from '~/background/services/GraphQLService/Queries/userPermissionQuery';
+import AuthService from '~/background/services/AuthService';
 import query from '../utils/query';
 
 const registerExtensionUi = async (request, connection) => {
     const {
         requestId,
+        domain,
+        data: {
+            args,
+            ...rest
+        },
     } = request;
+    const registeredDomain = await AuthService.getRegisteredDomain(domain);
 
     connection.UiActionSubject.next({
         ...request,
         type: 'ui.register.extension',
+        data: {
+            ...rest,
+            args: {
+                ...args,
+                domainRegistered: !!registeredDomain,
+            },
+        },
     });
 
     return filterStream(
