@@ -30,6 +30,8 @@ class DepositContent extends StepContentHelper {
             asset,
             amount,
             transactions,
+            loading,
+            error,
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
@@ -78,10 +80,11 @@ class DepositContent extends StepContentHelper {
                     : i18n.count('token', tokenValue, true),
                 contentFootnote: (
                     <BlockStatus
+                        status={approved ? 'check' : 'loading'}
                         text={i18n.t('deposit.approve.allowance')}
                     />
                 ),
-                hideContentFootnote: !approved,
+                hideContentFootnote: !approved && (!loading || !!error),
                 profile: {
                     ...asset,
                     type: 'token',
