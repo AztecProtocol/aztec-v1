@@ -13,7 +13,8 @@
     "@openzeppelin/network": "^0.2.10",
     "@openzeppelin/upgrades": "^2.6.0",
     "axios": "^0.19.0",
-    "openzeppelin-solidity": "^2.4.0"
+    "openzeppelin-solidity": "^2.4.0",
+    "truffle-flattener": "^1.4.2"
   },
   "devDependencies": {
     "@0x/sol-coverage": "^3.0.0",
@@ -74,6 +75,8 @@
     "deploy:rinkeby": "truffle migrate --network rinkeby",
     "deploy:ropsten": "truffle migrate --network ropsten",
     "deploy:mainnet": "truffle migrate --network mainnet",
+    "deploy:aceOwner:ropsten": "truffle migrate --network ropsten --reset",
+    "deploy:aceOwner:mainnet": "truffle migrate --network mainnet --reset",
     "lint": "yarn lint:js && yarn lint:sol",
     "lint:js": "eslint --ignore-path ../../.eslintignore .",
     "lint:sol": "solhint --ignore-path ../../.solhintignore \"contracts/**/*.sol\"",

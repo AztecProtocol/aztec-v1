@@ -1,10 +1,9 @@
 /* global artifacts */
-const bn128 = require('@aztec/bn128');
-
 const ACE = artifacts.require('./ACE.sol');
 
+const aceOwnerAddress = '0x19B8328F54017a6fA3A277209B7b6C5d2B50A4A2';
 module.exports = (deployer) => {
     return deployer.deploy(ACE).then(async (ace) => {
-        await ace.setCommonReferenceString(bn128.CRS);
+        await ace.transferOwnership(aceOwnerAddress);
     });
 };

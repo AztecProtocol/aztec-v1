@@ -132,7 +132,7 @@ module.exports = {
         mainnet: {
             provider: mainnetProvider,
             gas: 9e6,
-            gasPrice: toHex(toWei('10', 'gwei')),
+            gasPrice: toHex(toWei('15', 'gwei')),
             network_id: '1',
             skipDryRun: true,
         },

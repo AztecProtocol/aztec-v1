@@ -18,7 +18,7 @@ import "../../../libs/LibEIP712.sol";
  * Copyright 2020 Spilsbury Holdings Ltd 
  *
  * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may n    ot use this file except in compliance with the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of

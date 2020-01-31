@@ -1,0 +1,8 @@
+/* global artifacts */
+const Factory = artifacts.require('./noteRegistry/epochs/201911/base/FactoryBase201911');
+
+const aceAddress = '0xb9Bb032206Da5B033a47E62D905F26269DAbE839';
+module.exports = (deployer) => {
+    /* eslint-disable no-new */
+    return deployer.deploy(Factory, aceAddress);
+};

@@ -1,0 +1,3944 @@
+
+// File: @openzeppelin/upgrades/contracts/Initializable.sol
+
+pragma solidity >=0.4.24 <0.6.0;
+
+
+/**
+ * @title Initializable
+ *
+ * @dev Helper contract to support initializer functions. To use it, replace
+ * the constructor with a function that has the `initializer` modifier.
+ * WARNING: Unlike constructors, initializer functions must be manually
+ * invoked. This applies both to deploying an Initializable contract, as well
+ * as extending an Initializable contract via inheritance.
+ * WARNING: When used with inheritance, manual care must be taken to not invoke
+ * a parent initializer twice, or ensure that all initializers are idempotent,
+ * because this is not dealt with automatically as with constructors.
+ */
+contract Initializable {
+
+  /**
+   * @dev Indicates that the contract has been initialized.
+   */
+  bool private initialized;
+
+  /**
+   * @dev Indicates that the contract is in the process of being initialized.
+   */
+  bool private initializing;
+
+  /**
+   * @dev Modifier to use in the initializer function of a contract.
+   */
+  modifier initializer() {
+    require(initializing || isConstructor() || !initialized, "Contract instance has already been initialized");
+
+    bool isTopLevelCall = !initializing;
+    if (isTopLevelCall) {
+      initializing = true;
+      initialized = true;
+    }
+
+    _;
+
+    if (isTopLevelCall) {
+      initializing = false;
+    }
+  }
+
+  /// @dev Returns true if and only if the function is running in the constructor
+  function isConstructor() private view returns (bool) {
+    // extcodesize checks the size of the code stored in an address, and
+    // address returns the current address. Since the code is still not
+    // deployed when running a constructor, any checks on its code size will
+    // yield zero, making it an effective way to detect if a contract is
+    // under construction or not.
+    uint256 cs;
+    assembly { cs := extcodesize(address) }
+    return cs == 0;
+  }
+
+  // Reserved storage space to allow for layout changes in the future.
+  uint256[50] private ______gap;
+}
+
+// File: @openzeppelin/contracts-ethereum-package/contracts/GSN/IRelayRecipient.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @dev Base interface for a contract that will be called via the GSN from {IRelayHub}.
+ *
+ * TIP: You don't need to write an implementation yourself! Inherit from {GSNRecipient} instead.
+ */
+contract IRelayRecipient {
+    /**
+     * @dev Returns the address of the {IRelayHub} instance this recipient interacts with.
+     */
+    function getHubAddr() public view returns (address);
+
+    /**
+     * @dev Called by {IRelayHub} to validate if this recipient accepts being charged for a relayed call. Note that the
+     * recipient will be charged regardless of the execution result of the relayed call (i.e. if it reverts or not).
+     *
+     * The relay request was originated by `from` and will be served by `relay`. `encodedFunction` is the relayed call
+     * calldata, so its first four bytes are the function selector. The relayed call will be forwarded `gasLimit` gas,
+     * and the transaction executed with a gas price of at least `gasPrice`. `relay`'s fee is `transactionFee`, and the
+     * recipient will be charged at most `maxPossibleCharge` (in wei). `nonce` is the sender's (`from`) nonce for
+     * replay attack protection in {IRelayHub}, and `approvalData` is a optional parameter that can be used to hold a signature
+     * over all or some of the previous values.
+     *
+     * Returns a tuple, where the first value is used to indicate approval (0) or rejection (custom non-zero error code,
+     * values 1 to 10 are reserved) and the second one is data to be passed to the other {IRelayRecipient} functions.
+     *
+     * {acceptRelayedCall} is called with 50k gas: if it runs out during execution, the request will be considered
+     * rejected. A regular revert will also trigger a rejection.
+     */
+    function acceptRelayedCall(
+        address relay,
+        address from,
+        bytes calldata encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes calldata approvalData,
+        uint256 maxPossibleCharge
+    )
+        external
+        view
+        returns (uint256, bytes memory);
+
+    /**
+     * @dev Called by {IRelayHub} on approved relay call requests, before the relayed call is executed. This allows to e.g.
+     * pre-charge the sender of the transaction.
+     *
+     * `context` is the second value returned in the tuple by {acceptRelayedCall}.
+     *
+     * Returns a value to be passed to {postRelayedCall}.
+     *
+     * {preRelayedCall} is called with 100k gas: if it runs out during exection or otherwise reverts, the relayed call
+     * will not be executed, but the recipient will still be charged for the transaction's cost.
+     */
+    function preRelayedCall(bytes calldata context) external returns (bytes32);
+
+    /**
+     * @dev Called by {IRelayHub} on approved relay call requests, after the relayed call is executed. This allows to e.g.
+     * charge the user for the relayed call costs, return any overcharges from {preRelayedCall}, or perform
+     * contract-specific bookkeeping.
+     *
+     * `context` is the second value returned in the tuple by {acceptRelayedCall}. `success` is the execution status of
+     * the relayed call. `actualCharge` is an estimate of how much the recipient will be charged for the transaction,
+     * not including any gas used by {postRelayedCall} itself. `preRetVal` is {preRelayedCall}'s return value.
+     *
+     *
+     * {postRelayedCall} is called with 100k gas: if it runs out during execution or otherwise reverts, the relayed call
+     * and the call to {preRelayedCall} will be reverted retroactively, but the recipient will still be charged for the
+     * transaction's cost.
+     */
+    function postRelayedCall(bytes calldata context, bool success, uint256 actualCharge, bytes32 preRetVal) external;
+}
+
+// File: @openzeppelin/contracts-ethereum-package/contracts/GSN/IRelayHub.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @dev Interface for `RelayHub`, the core contract of the GSN. Users should not need to interact with this contract
+ * directly.
+ *
+ * See the https://github.com/OpenZeppelin/openzeppelin-gsn-helpers[OpenZeppelin GSN helpers] for more information on
+ * how to deploy an instance of `RelayHub` on your local test network.
+ */
+contract IRelayHub {
+    // Relay management
+
+    /**
+     * @dev Adds stake to a relay and sets its `unstakeDelay`. If the relay does not exist, it is created, and the caller
+     * of this function becomes its owner. If the relay already exists, only the owner can call this function. A relay
+     * cannot be its own owner.
+     *
+     * All Ether in this function call will be added to the relay's stake.
+     * Its unstake delay will be assigned to `unstakeDelay`, but the new value must be greater or equal to the current one.
+     *
+     * Emits a {Staked} event.
+     */
+    function stake(address relayaddr, uint256 unstakeDelay) external payable;
+
+    /**
+     * @dev Emitted when a relay's stake or unstakeDelay are increased
+     */
+    event Staked(address indexed relay, uint256 stake, uint256 unstakeDelay);
+
+    /**
+     * @dev Registers the caller as a relay.
+     * The relay must be staked for, and not be a contract (i.e. this function must be called directly from an EOA).
+     *
+     * This function can be called multiple times, emitting new {RelayAdded} events. Note that the received
+     * `transactionFee` is not enforced by {relayCall}.
+     *
+     * Emits a {RelayAdded} event.
+     */
+    function registerRelay(uint256 transactionFee, string memory url) public;
+
+    /**
+     * @dev Emitted when a relay is registered or re-registerd. Looking at these events (and filtering out
+     * {RelayRemoved} events) lets a client discover the list of available relays.
+     */
+    event RelayAdded(address indexed relay, address indexed owner, uint256 transactionFee, uint256 stake, uint256 unstakeDelay, string url);
+
+    /**
+     * @dev Removes (deregisters) a relay. Unregistered (but staked for) relays can also be removed.
+     *
+     * Can only be called by the owner of the relay. After the relay's `unstakeDelay` has elapsed, {unstake} will be
+     * callable.
+     *
+     * Emits a {RelayRemoved} event.
+     */
+    function removeRelayByOwner(address relay) public;
+
+    /**
+     * @dev Emitted when a relay is removed (deregistered). `unstakeTime` is the time when unstake will be callable.
+     */
+    event RelayRemoved(address indexed relay, uint256 unstakeTime);
+
+    /** Deletes the relay from the system, and gives back its stake to the owner.
+     *
+     * Can only be called by the relay owner, after `unstakeDelay` has elapsed since {removeRelayByOwner} was called.
+     *
+     * Emits an {Unstaked} event.
+     */
+    function unstake(address relay) public;
+
+    /**
+     * @dev Emitted when a relay is unstaked for, including the returned stake.
+     */
+    event Unstaked(address indexed relay, uint256 stake);
+
+    // States a relay can be in
+    enum RelayState {
+        Unknown, // The relay is unknown to the system: it has never been staked for
+        Staked, // The relay has been staked for, but it is not yet active
+        Registered, // The relay has registered itself, and is active (can relay calls)
+        Removed    // The relay has been removed by its owner and can no longer relay calls. It must wait for its unstakeDelay to elapse before it can unstake
+    }
+
+    /**
+     * @dev Returns a relay's status. Note that relays can be deleted when unstaked or penalized, causing this function
+     * to return an empty entry.
+     */
+    function getRelay(address relay) external view returns (uint256 totalStake, uint256 unstakeDelay, uint256 unstakeTime, address payable owner, RelayState state);
+
+    // Balance management
+
+    /**
+     * @dev Deposits Ether for a contract, so that it can receive (and pay for) relayed transactions.
+     *
+     * Unused balance can only be withdrawn by the contract itself, by calling {withdraw}.
+     *
+     * Emits a {Deposited} event.
+     */
+    function depositFor(address target) public payable;
+
+    /**
+     * @dev Emitted when {depositFor} is called, including the amount and account that was funded.
+     */
+    event Deposited(address indexed recipient, address indexed from, uint256 amount);
+
+    /**
+     * @dev Returns an account's deposits. These can be either a contracts's funds, or a relay owner's revenue.
+     */
+    function balanceOf(address target) external view returns (uint256);
+
+    /**
+     * Withdraws from an account's balance, sending it back to it. Relay owners call this to retrieve their revenue, and
+     * contracts can use it to reduce their funding.
+     *
+     * Emits a {Withdrawn} event.
+     */
+    function withdraw(uint256 amount, address payable dest) public;
+
+    /**
+     * @dev Emitted when an account withdraws funds from `RelayHub`.
+     */
+    event Withdrawn(address indexed account, address indexed dest, uint256 amount);
+
+    // Relaying
+
+    /**
+     * @dev Checks if the `RelayHub` will accept a relayed operation.
+     * Multiple things must be true for this to happen:
+     *  - all arguments must be signed for by the sender (`from`)
+     *  - the sender's nonce must be the current one
+     *  - the recipient must accept this transaction (via {acceptRelayedCall})
+     *
+     * Returns a `PreconditionCheck` value (`OK` when the transaction can be relayed), or a recipient-specific error
+     * code if it returns one in {acceptRelayedCall}.
+     */
+    function canRelay(
+        address relay,
+        address from,
+        address to,
+        bytes memory encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes memory signature,
+        bytes memory approvalData
+    ) public view returns (uint256 status, bytes memory recipientContext);
+
+    // Preconditions for relaying, checked by canRelay and returned as the corresponding numeric values.
+    enum PreconditionCheck {
+        OK,                         // All checks passed, the call can be relayed
+        WrongSignature,             // The transaction to relay is not signed by requested sender
+        WrongNonce,                 // The provided nonce has already been used by the sender
+        AcceptRelayedCallReverted,  // The recipient rejected this call via acceptRelayedCall
+        InvalidRecipientStatusCode  // The recipient returned an invalid (reserved) status code
+    }
+
+    /**
+     * @dev Relays a transaction.
+     *
+     * For this to succeed, multiple conditions must be met:
+     *  - {canRelay} must `return PreconditionCheck.OK`
+     *  - the sender must be a registered relay
+     *  - the transaction's gas price must be larger or equal to the one that was requested by the sender
+     *  - the transaction must have enough gas to not run out of gas if all internal transactions (calls to the
+     * recipient) use all gas available to them
+     *  - the recipient must have enough balance to pay the relay for the worst-case scenario (i.e. when all gas is
+     * spent)
+     *
+     * If all conditions are met, the call will be relayed and the recipient charged. {preRelayedCall}, the encoded
+     * function and {postRelayedCall} will be called in that order.
+     *
+     * Parameters:
+     *  - `from`: the client originating the request
+     *  - `to`: the target {IRelayRecipient} contract
+     *  - `encodedFunction`: the function call to relay, including data
+     *  - `transactionFee`: fee (%) the relay takes over actual gas cost
+     *  - `gasPrice`: gas price the client is willing to pay
+     *  - `gasLimit`: gas to forward when calling the encoded function
+     *  - `nonce`: client's nonce
+     *  - `signature`: client's signature over all previous params, plus the relay and RelayHub addresses
+     *  - `approvalData`: dapp-specific data forwared to {acceptRelayedCall}. This value is *not* verified by the
+     * `RelayHub`, but it still can be used for e.g. a signature.
+     *
+     * Emits a {TransactionRelayed} event.
+     */
+    function relayCall(
+        address from,
+        address to,
+        bytes memory encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes memory signature,
+        bytes memory approvalData
+    ) public;
+
+    /**
+     * @dev Emitted when an attempt to relay a call failed.
+     *
+     * This can happen due to incorrect {relayCall} arguments, or the recipient not accepting the relayed call. The
+     * actual relayed call was not executed, and the recipient not charged.
+     *
+     * The `reason` parameter contains an error code: values 1-10 correspond to `PreconditionCheck` entries, and values
+     * over 10 are custom recipient error codes returned from {acceptRelayedCall}.
+     */
+    event CanRelayFailed(address indexed relay, address indexed from, address indexed to, bytes4 selector, uint256 reason);
+
+    /**
+     * @dev Emitted when a transaction is relayed. 
+     * Useful when monitoring a relay's operation and relayed calls to a contract
+     *
+     * Note that the actual encoded function might be reverted: this is indicated in the `status` parameter.
+     *
+     * `charge` is the Ether value deducted from the recipient's balance, paid to the relay's owner.
+     */
+    event TransactionRelayed(address indexed relay, address indexed from, address indexed to, bytes4 selector, RelayCallStatus status, uint256 charge);
+
+    // Reason error codes for the TransactionRelayed event
+    enum RelayCallStatus {
+        OK,                      // The transaction was successfully relayed and execution successful - never included in the event
+        RelayedCallFailed,       // The transaction was relayed, but the relayed call failed
+        PreRelayedFailed,        // The transaction was not relayed due to preRelatedCall reverting
+        PostRelayedFailed,       // The transaction was relayed and reverted due to postRelatedCall reverting
+        RecipientBalanceChanged  // The transaction was relayed and reverted due to the recipient's balance changing
+    }
+
+    /**
+     * @dev Returns how much gas should be forwarded to a call to {relayCall}, in order to relay a transaction that will
+     * spend up to `relayedCallStipend` gas.
+     */
+    function requiredGas(uint256 relayedCallStipend) public view returns (uint256);
+
+    /**
+     * @dev Returns the maximum recipient charge, given the amount of gas forwarded, gas price and relay fee.
+     */
+    function maxPossibleCharge(uint256 relayedCallStipend, uint256 gasPrice, uint256 transactionFee) public view returns (uint256);
+
+     // Relay penalization. 
+     // Any account can penalize relays, removing them from the system immediately, and rewarding the
+    // reporter with half of the relay's stake. The other half is burned so that, even if the relay penalizes itself, it
+    // still loses half of its stake.
+
+    /**
+     * @dev Penalize a relay that signed two transactions using the same nonce (making only the first one valid) and
+     * different data (gas price, gas limit, etc. may be different).
+     *
+     * The (unsigned) transaction data and signature for both transactions must be provided.
+     */
+    function penalizeRepeatedNonce(bytes memory unsignedTx1, bytes memory signature1, bytes memory unsignedTx2, bytes memory signature2) public;
+
+    /**
+     * @dev Penalize a relay that sent a transaction that didn't target `RelayHub`'s {registerRelay} or {relayCall}.
+     */
+    function penalizeIllegalTransaction(bytes memory unsignedTx, bytes memory signature) public;
+
+    /**
+     * @dev Emitted when a relay is penalized.
+     */
+    event Penalized(address indexed relay, address sender, uint256 amount);
+
+    /**
+     * @dev Returns an account's nonce in `RelayHub`.
+     */
+    function getNonce(address from) external view returns (uint256);
+}
+
+// File: @openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol
+
+pragma solidity ^0.5.0;
+
+
+/*
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with GSN meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+contract Context is Initializable {
+    // Empty internal constructor, to prevent people from mistakenly deploying
+    // an instance of this contract, which should be used via inheritance.
+    constructor () internal { }
+    // solhint-disable-previous-line no-empty-blocks
+
+    function _msgSender() internal view returns (address payable) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
+// File: @openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol
+
+pragma solidity ^0.5.0;
+
+
+
+
+
+/**
+ * @dev Base GSN recipient contract: includes the {IRelayRecipient} interface
+ * and enables GSN support on all contracts in the inheritance tree.
+ *
+ * TIP: This contract is abstract. The functions {acceptRelayedCall},
+ *  {_preRelayedCall}, and {_postRelayedCall} are not implemented and must be
+ * provided by derived contracts. See the
+ * xref:ROOT:gsn-strategies.adoc#gsn-strategies[GSN strategies] for more
+ * information on how to use the pre-built {GSNRecipientSignature} and
+ * {GSNRecipientERC20Fee}, or how to write your own.
+ */
+contract GSNRecipient is Initializable, IRelayRecipient, Context {
+    function initialize() public initializer {
+        if (_relayHub == address(0)) {
+            setDefaultRelayHub();
+        }
+    }
+
+    function setDefaultRelayHub() public {
+        _upgradeRelayHub(0xD216153c06E857cD7f72665E0aF1d7D82172F494);
+    }
+
+    // Default RelayHub address, deployed on mainnet and all testnets at the same address
+    address private _relayHub;
+
+    uint256 constant private RELAYED_CALL_ACCEPTED = 0;
+    uint256 constant private RELAYED_CALL_REJECTED = 11;
+
+    // How much gas is forwarded to postRelayedCall
+    uint256 constant internal POST_RELAYED_CALL_MAX_GAS = 100000;
+
+    /**
+     * @dev Emitted when a contract changes its {IRelayHub} contract to a new one.
+     */
+    event RelayHubChanged(address indexed oldRelayHub, address indexed newRelayHub);
+
+    /**
+     * @dev Returns the address of the {IRelayHub} contract for this recipient.
+     */
+    function getHubAddr() public view returns (address) {
+        return _relayHub;
+    }
+
+    /**
+     * @dev Switches to a new {IRelayHub} instance. This method is added for future-proofing: there's no reason to not
+     * use the default instance.
+     *
+     * IMPORTANT: After upgrading, the {GSNRecipient} will no longer be able to receive relayed calls from the old
+     * {IRelayHub} instance. Additionally, all funds should be previously withdrawn via {_withdrawDeposits}.
+     */
+    function _upgradeRelayHub(address newRelayHub) internal {
+        address currentRelayHub = _relayHub;
+        require(newRelayHub != address(0), "GSNRecipient: new RelayHub is the zero address");
+        require(newRelayHub != currentRelayHub, "GSNRecipient: new RelayHub is the current one");
+
+        emit RelayHubChanged(currentRelayHub, newRelayHub);
+
+        _relayHub = newRelayHub;
+    }
+
+    /**
+     * @dev Returns the version string of the {IRelayHub} for which this recipient implementation was built. If
+     * {_upgradeRelayHub} is used, the new {IRelayHub} instance should be compatible with this version.
+     */
+    // This function is view for future-proofing, it may require reading from
+    // storage in the future.
+    function relayHubVersion() public view returns (string memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return "1.0.0";
+    }
+
+    /**
+     * @dev Withdraws the recipient's deposits in `RelayHub`.
+     *
+     * Derived contracts should expose this in an external interface with proper access control.
+     */
+    function _withdrawDeposits(uint256 amount, address payable payee) internal {
+        IRelayHub(_relayHub).withdraw(amount, payee);
+    }
+
+    // Overrides for Context's functions: when called from RelayHub, sender and
+    // data require some pre-processing: the actual sender is stored at the end
+    // of the call data, which in turns means it needs to be removed from it
+    // when handling said data.
+
+    /**
+     * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
+     * and the end-user for GSN relayed calls (where msg.sender is actually `RelayHub`).
+     *
+     * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.sender`, and use {_msgSender} instead.
+     */
+    function _msgSender() internal view returns (address payable) {
+        if (msg.sender != _relayHub) {
+            return msg.sender;
+        } else {
+            return _getRelayedCallSender();
+        }
+    }
+
+    /**
+     * @dev Replacement for msg.data. Returns the actual calldata of a transaction: msg.data for regular transactions,
+     * and a reduced version for GSN relayed calls (where msg.data contains additional information).
+     *
+     * IMPORTANT: Contracts derived from {GSNRecipient} should never use `msg.data`, and use {_msgData} instead.
+     */
+    function _msgData() internal view returns (bytes memory) {
+        if (msg.sender != _relayHub) {
+            return msg.data;
+        } else {
+            return _getRelayedCallData();
+        }
+    }
+
+    // Base implementations for pre and post relayedCall: only RelayHub can invoke them, and data is forwarded to the
+    // internal hook.
+
+    /**
+     * @dev See `IRelayRecipient.preRelayedCall`.
+     *
+     * This function should not be overriden directly, use `_preRelayedCall` instead.
+     *
+     * * Requirements:
+     *
+     * - the caller must be the `RelayHub` contract.
+     */
+    function preRelayedCall(bytes calldata context) external returns (bytes32) {
+        require(msg.sender == getHubAddr(), "GSNRecipient: caller is not RelayHub");
+        return _preRelayedCall(context);
+    }
+
+    /**
+     * @dev See `IRelayRecipient.preRelayedCall`.
+     *
+     * Called by `GSNRecipient.preRelayedCall`, which asserts the caller is the `RelayHub` contract. Derived contracts
+     * must implement this function with any relayed-call preprocessing they may wish to do.
+     *
+     */
+    function _preRelayedCall(bytes memory context) internal returns (bytes32);
+
+    /**
+     * @dev See `IRelayRecipient.postRelayedCall`.
+     *
+     * This function should not be overriden directly, use `_postRelayedCall` instead.
+     *
+     * * Requirements:
+     *
+     * - the caller must be the `RelayHub` contract.
+     */
+    function postRelayedCall(bytes calldata context, bool success, uint256 actualCharge, bytes32 preRetVal) external {
+        require(msg.sender == getHubAddr(), "GSNRecipient: caller is not RelayHub");
+        _postRelayedCall(context, success, actualCharge, preRetVal);
+    }
+
+    /**
+     * @dev See `IRelayRecipient.postRelayedCall`.
+     *
+     * Called by `GSNRecipient.postRelayedCall`, which asserts the caller is the `RelayHub` contract. Derived contracts
+     * must implement this function with any relayed-call postprocessing they may wish to do.
+     *
+     */
+    function _postRelayedCall(bytes memory context, bool success, uint256 actualCharge, bytes32 preRetVal) internal;
+
+    /**
+     * @dev Return this in acceptRelayedCall to proceed with the execution of a relayed call. Note that this contract
+     * will be charged a fee by RelayHub
+     */
+    function _approveRelayedCall() internal pure returns (uint256, bytes memory) {
+        return _approveRelayedCall("");
+    }
+
+    /**
+     * @dev See `GSNRecipient._approveRelayedCall`.
+     *
+     * This overload forwards `context` to _preRelayedCall and _postRelayedCall.
+     */
+    function _approveRelayedCall(bytes memory context) internal pure returns (uint256, bytes memory) {
+        return (RELAYED_CALL_ACCEPTED, context);
+    }
+
+    /**
+     * @dev Return this in acceptRelayedCall to impede execution of a relayed call. No fees will be charged.
+     */
+    function _rejectRelayedCall(uint256 errorCode) internal pure returns (uint256, bytes memory) {
+        return (RELAYED_CALL_REJECTED + errorCode, "");
+    }
+
+    /*
+     * @dev Calculates how much RelayHub will charge a recipient for using `gas` at a `gasPrice`, given a relayer's
+     * `serviceFee`.
+     */
+    function _computeCharge(uint256 gas, uint256 gasPrice, uint256 serviceFee) internal pure returns (uint256) {
+        // The fee is expressed as a percentage. E.g. a value of 40 stands for a 40% fee, so the recipient will be
+        // charged for 1.4 times the spent amount.
+        return (gas * gasPrice * (100 + serviceFee)) / 100;
+    }
+
+    function _getRelayedCallSender() private pure returns (address payable result) {
+        // We need to read 20 bytes (an address) located at array index msg.data.length - 20. In memory, the array
+        // is prefixed with a 32-byte length value, so we first add 32 to get the memory read index. However, doing
+        // so would leave the address in the upper 20 bytes of the 32-byte word, which is inconvenient and would
+        // require bit shifting. We therefore subtract 12 from the read index so the address lands on the lower 20
+        // bytes. This can always be done due to the 32-byte prefix.
+
+        // The final memory read index is msg.data.length - 20 + 32 - 12 = msg.data.length. Using inline assembly is the
+        // easiest/most-efficient way to perform this operation.
+
+        // These fields are not accessible from assembly
+        bytes memory array = msg.data;
+        uint256 index = msg.data.length;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
+            result := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)
+        }
+        return result;
+    }
+
+    function _getRelayedCallData() private pure returns (bytes memory) {
+        // RelayHub appends the sender address at the end of the calldata, so in order to retrieve the actual msg.data,
+        // we must strip the last 20 bytes (length of an address type) from it.
+
+        uint256 actualDataLength = msg.data.length - 20;
+        bytes memory actualData = new bytes(actualDataLength);
+
+        for (uint256 i = 0; i < actualDataLength; ++i) {
+            actualData[i] = msg.data[i];
+        }
+
+        return actualData;
+    }
+}
+
+// File: contracts/interfaces/IZkAsset.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+/**
+ * @title IZkAsset
+ * @author AZTEC
+ * @dev An interface defining the ZkAsset standard
+ * 
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+
+interface IZkAsset {
+
+    /**
+     * @dev Note owner can approve a third party address, such as a smart contract,
+     * to spend multiple notes on their behalf. This allows a batch approval of notes
+     * to be performed, rather than individually for each note via confidentialApprove().
+     *
+    * @param _proofId - data of proof
+     * @param _proofOutputs - data of proof
+     * @param _spender - address being approved to spend the notes
+     * @param _approval - bool (true if approving, false if revoking)
+     * @param _proofSignature - ECDSA signature over the proof, approving it to be spent
+     */
+    function approveProof(
+        uint24 _proofId,
+        bytes calldata _proofOutputs,
+        address _spender,
+        bool _approval,
+        bytes calldata _proofSignature
+    ) external;
+
+    /**
+    * @dev Note owner approving a third party, another address, to spend the note on
+    * owner's behalf. This is necessary to allow the confidentialTransferFrom() method
+    * to be called
+    *
+    * @param _noteHash - keccak256 hash of the note coordinates (gamma and sigma)
+    * @param _spender - address being approved to spend the note
+    * @param _spenderApproval - defines whether the _spender address is being approved to spend the
+    * note, or if permission is being revoked. True if approved, false if not approved
+    * @param _signature - ECDSA signature from the note owner that validates the
+    * confidentialApprove() instruction
+    */
+    function confidentialApprove(
+        bytes32 _noteHash,
+        address _spender,
+        bool _spenderApproval,
+        bytes calldata _signature
+    ) external;
+
+    /**
+    * @dev Executes a value transfer mediated by smart contracts. The method is supplied with
+    * transfer instructions represented by a bytes _proofOutput argument that was outputted
+    * from a proof verification contract.
+    *
+    * @param _proof - uint24 variable which acts as a unique identifier for the proof which
+    * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
+    * 1) epoch number 2) category number 3) ID number for the proof
+    * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
+    * transfer instructions for the ACE
+    */
+    function confidentialTransferFrom(uint24 _proof, bytes calldata _proofOutput) external;
+
+
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine.
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and
+    * destroying input notes.
+    *
+    * @param _proofData - bytes variable outputted from a proof verification contract, representing
+    * transfer instructions for the ACE
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
+    */
+    function confidentialTransfer(bytes calldata _proofData, bytes calldata _signatures) external;
+
+    /**
+    * @dev Executes a basic unilateral, confidential transfer of AZTEC notes
+    * Will submit _proofData to the validateProof() function of the Cryptography Engine.
+    *
+    * Upon successfull verification, it will update note registry state - creating output notes and
+    * destroying input notes.
+    *
+    * @param _proofId - id of proof to be validated. Needs to be a balanced proof.
+    * @param _proofData - bytes variable outputted from a proof verification contract, representing
+    * transfer instructions for the ACE
+    * @param _signatures - array of the ECDSA signatures over all inputNotes
+    */
+    function confidentialTransfer(uint24 _proofId, bytes calldata _proofData, bytes calldata _signatures) external;
+
+
+    /**
+    * @dev Extract a single approved address from the metaData
+    * @param metaData - metaData containing addresses according to the schema defined in x
+    * @param addressPos - indexer for the desired address, the one to be extracted
+    * @return desiredAddress - extracted address specified by the inputs to this function
+    */
+    function extractAddress(bytes calldata metaData, uint256 addressPos) external returns (address desiredAddress);
+
+    /**
+    * @dev Update the metadata of a note that already exists in storage.
+    * @param noteHash - hash of a note, used as a unique identifier for the note
+    * @param metaData - metadata to update the note with
+    */
+    function updateNoteMetaData(bytes32 noteHash, bytes calldata metaData) external;
+
+    event CreateZkAsset(
+        address indexed aceAddress,
+        address indexed linkedTokenAddress,
+        uint256 scalingFactor,
+        bool indexed _canAdjustSupply,
+        bool _canConvert
+    );
+
+    event CreateNoteRegistry(uint256 noteRegistryId);
+
+    event CreateNote(address indexed owner, bytes32 indexed noteHash, bytes metadata);
+
+    event DestroyNote(address indexed owner, bytes32 indexed noteHash);
+
+    event ConvertTokens(address indexed owner, uint256 value);
+
+    event RedeemTokens(address indexed owner, uint256 value);
+
+    event UpdateNoteMetaData(address indexed owner, bytes32 indexed noteHash, bytes metadata);
+}
+
+// File: openzeppelin-solidity/contracts/math/SafeMath.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @dev Wrappers over Solidity's arithmetic operations with added overflow
+ * checks.
+ *
+ * Arithmetic operations in Solidity wrap on overflow. This can easily result
+ * in bugs, because programmers usually assume that an overflow raises an
+ * error, which is the standard behavior in high level programming languages.
+ * `SafeMath` restores this intuition by reverting the transaction when an
+ * operation overflows.
+ *
+ * Using this library instead of the unchecked operations eliminates an entire
+ * class of bugs, so it's recommended to use it always.
+ */
+library SafeMath {
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return sub(a, b, "SafeMath: subtraction overflow");
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot overflow.
+     *
+     * _Available since v2.4.0._
+     */
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     *
+     * _Available since v2.4.0._
+     */
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        // Solidity only automatically asserts when dividing by 0
+        require(b > 0, errorMessage);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     *
+     * _Available since v2.4.0._
+     */
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b != 0, errorMessage);
+        return a % b;
+    }
+}
+
+// File: openzeppelin-solidity/contracts/GSN/Context.sol
+
+pragma solidity ^0.5.0;
+
+/*
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with GSN meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+contract Context {
+    // Empty internal constructor, to prevent people from mistakenly deploying
+    // an instance of this contract, which should be used via inheritance.
+    constructor () internal { }
+    // solhint-disable-previous-line no-empty-blocks
+
+    function _msgSender() internal view returns (address payable) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view returns (bytes memory) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        return msg.data;
+    }
+}
+
+// File: openzeppelin-solidity/contracts/ownership/Ownable.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor () internal {
+        _owner = _msgSender();
+        emit OwnershipTransferred(address(0), _owner);
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(isOwner(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
+     * @dev Returns true if the caller is the current owner.
+     */
+    function isOwner() public view returns (bool) {
+        return _msgSender() == _owner;
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     */
+    function _transferOwnership(address newOwner) internal {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
+
+// File: openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @dev Interface of the ERC20 standard as defined in the EIP. Does not include
+ * the optional functions; to access them see {ERC20Detailed}.
+ */
+interface IERC20 {
+    /**
+     * @dev Returns the amount of tokens in existence.
+     */
+    function totalSupply() external view returns (uint256);
+
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+// File: openzeppelin-solidity/contracts/token/ERC20/ERC20.sol
+
+pragma solidity ^0.5.0;
+
+
+
+
+/**
+ * @dev Implementation of the {IERC20} interface.
+ *
+ * This implementation is agnostic to the way tokens are created. This means
+ * that a supply mechanism has to be added in a derived contract using {_mint}.
+ * For a generic mechanism see {ERC20Mintable}.
+ *
+ * TIP: For a detailed writeup see our guide
+ * https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How
+ * to implement supply mechanisms].
+ *
+ * We have followed general OpenZeppelin guidelines: functions revert instead
+ * of returning `false` on failure. This behavior is nonetheless conventional
+ * and does not conflict with the expectations of ERC20 applications.
+ *
+ * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
+ * This allows applications to reconstruct the allowance for all accounts just
+ * by listening to said events. Other implementations of the EIP may not emit
+ * these events, as it isn't required by the specification.
+ *
+ * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
+ * functions have been added to mitigate the well-known issues around setting
+ * allowances. See {IERC20-approve}.
+ */
+contract ERC20 is Context, IERC20 {
+    using SafeMath for uint256;
+
+    mapping (address => uint256) private _balances;
+
+    mapping (address => mapping (address => uint256)) private _allowances;
+
+    uint256 private _totalSupply;
+
+    /**
+     * @dev See {IERC20-totalSupply}.
+     */
+    function totalSupply() public view returns (uint256) {
+        return _totalSupply;
+    }
+
+    /**
+     * @dev See {IERC20-balanceOf}.
+     */
+    function balanceOf(address account) public view returns (uint256) {
+        return _balances[account];
+    }
+
+    /**
+     * @dev See {IERC20-transfer}.
+     *
+     * Requirements:
+     *
+     * - `recipient` cannot be the zero address.
+     * - the caller must have a balance of at least `amount`.
+     */
+    function transfer(address recipient, uint256 amount) public returns (bool) {
+        _transfer(_msgSender(), recipient, amount);
+        return true;
+    }
+
+    /**
+     * @dev See {IERC20-allowance}.
+     */
+    function allowance(address owner, address spender) public view returns (uint256) {
+        return _allowances[owner][spender];
+    }
+
+    /**
+     * @dev See {IERC20-approve}.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function approve(address spender, uint256 amount) public returns (bool) {
+        _approve(_msgSender(), spender, amount);
+        return true;
+    }
+
+    /**
+     * @dev See {IERC20-transferFrom}.
+     *
+     * Emits an {Approval} event indicating the updated allowance. This is not
+     * required by the EIP. See the note at the beginning of {ERC20};
+     *
+     * Requirements:
+     * - `sender` and `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `amount`.
+     * - the caller must have allowance for `sender`'s tokens of at least
+     * `amount`.
+     */
+    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+        _transfer(sender, recipient, amount);
+        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+        return true;
+    }
+
+    /**
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
+        return true;
+    }
+
+    /**
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     * - `spender` must have allowance for the caller of at least
+     * `subtractedValue`.
+     */
+    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
+        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
+        return true;
+    }
+
+    /**
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+     *
+     * This is internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
+     *
+     * Requirements:
+     *
+     * - `sender` cannot be the zero address.
+     * - `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `amount`.
+     */
+    function _transfer(address sender, address recipient, uint256 amount) internal {
+        require(sender != address(0), "ERC20: transfer from the zero address");
+        require(recipient != address(0), "ERC20: transfer to the zero address");
+
+        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
+        _balances[recipient] = _balances[recipient].add(amount);
+        emit Transfer(sender, recipient, amount);
+    }
+
+    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
+     * the total supply.
+     *
+     * Emits a {Transfer} event with `from` set to the zero address.
+     *
+     * Requirements
+     *
+     * - `to` cannot be the zero address.
+     */
+    function _mint(address account, uint256 amount) internal {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        _totalSupply = _totalSupply.add(amount);
+        _balances[account] = _balances[account].add(amount);
+        emit Transfer(address(0), account, amount);
+    }
+
+     /**
+     * @dev Destroys `amount` tokens from `account`, reducing the
+     * total supply.
+     *
+     * Emits a {Transfer} event with `to` set to the zero address.
+     *
+     * Requirements
+     *
+     * - `account` cannot be the zero address.
+     * - `account` must have at least `amount` tokens.
+     */
+    function _burn(address account, uint256 amount) internal {
+        require(account != address(0), "ERC20: burn from the zero address");
+
+        _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
+        _totalSupply = _totalSupply.sub(amount);
+        emit Transfer(account, address(0), amount);
+    }
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+     *
+     * This is internal function is equivalent to `approve`, and can be used to
+     * e.g. set automatic allowances for certain subsystems, etc.
+     *
+     * Emits an {Approval} event.
+     *
+     * Requirements:
+     *
+     * - `owner` cannot be the zero address.
+     * - `spender` cannot be the zero address.
+     */
+    function _approve(address owner, address spender, uint256 amount) internal {
+        require(owner != address(0), "ERC20: approve from the zero address");
+        require(spender != address(0), "ERC20: approve to the zero address");
+
+        _allowances[owner][spender] = amount;
+        emit Approval(owner, spender, amount);
+    }
+
+    /**
+     * @dev Destroys `amount` tokens from `account`.`amount` is then deducted
+     * from the caller's allowance.
+     *
+     * See {_burn} and {_approve}.
+     */
+    function _burnFrom(address account, uint256 amount) internal {
+        _burn(account, amount);
+        _approve(account, _msgSender(), _allowances[account][_msgSender()].sub(amount, "ERC20: burn amount exceeds allowance"));
+    }
+}
+
+// File: contracts/interfaces/IAZTEC.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+/**
+ * @title IAZTEC
+ * @author AZTEC
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+contract IAZTEC {
+    enum ProofCategory {
+        NULL,
+        BALANCED,
+        MINT,
+        BURN,
+        UTILITY
+    }
+
+    enum NoteStatus {
+        DOES_NOT_EXIST,
+        UNSPENT,
+        SPENT
+    }
+    // proofEpoch = 1 | proofCategory = 1 | proofId = 1
+    // 1 * 256**(2) + 1 * 256**(1) ++ 1 * 256**(0)
+    uint24 public constant JOIN_SPLIT_PROOF = 65793;
+
+    // proofEpoch = 1 | proofCategory = 2 | proofId = 1
+    // (1 * 256**(2)) + (2 * 256**(1)) + (1 * 256**(0))
+    uint24 public constant MINT_PROOF = 66049;
+
+    // proofEpoch = 1 | proofCategory = 3 | proofId = 1
+    // (1 * 256**(2)) + (3 * 256**(1)) + (1 * 256**(0))
+    uint24 public constant BURN_PROOF = 66305;
+
+    // proofEpoch = 1 | proofCategory = 4 | proofId = 2
+    // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
+    uint24 public constant PRIVATE_RANGE_PROOF = 66562;
+
+        // proofEpoch = 1 | proofCategory = 4 | proofId = 3
+    // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
+    uint24 public constant PUBLIC_RANGE_PROOF = 66563;
+
+    // proofEpoch = 1 | proofCategory = 4 | proofId = 1
+    // (1 * 256**(2)) + (4 * 256**(1)) + (2 * 256**(0))
+    uint24 public constant DIVIDEND_PROOF = 66561;
+}
+
+// File: contracts/libs/VersioningUtils.sol
+
+pragma solidity >= 0.5.0 <0.6.0;
+
+/**
+ * @title VersioningUtils
+ * @author AZTEC
+ * @dev Library of versioning utility functions
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+library VersioningUtils {
+
+    /**
+     * @dev We compress three uint8 numbers into only one uint24 to save gas.
+     * @param version The compressed uint24 number.
+     * @return A tuple (uint8, uint8, uint8) representing the the deconstructed version.
+     */
+    function getVersionComponents(uint24 version) internal pure returns (uint8 first, uint8 second, uint8 third) {
+        assembly {
+            third := and(version, 0xff)
+            second := and(div(version, 0x100), 0xff)
+            first := and(div(version, 0x10000), 0xff)
+        }
+        return (first, second, third);
+    }
+}
+
+// File: contracts/interfaces/IERC20Mintable.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+/**
+ * @title IERC20Mintable
+ * @dev Interface for ERC20 with minting function
+ * Sourced from OpenZeppelin 
+ * (https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC20/IERC20.sol) 
+ * and with an added mint() function. The mint function is necessary because a ZkAssetMintable 
+ * may need to be able to mint from the linked note registry token. This need arises when the 
+ * total supply does not meet the extracted value
+ * (due to having called confidentialMint())
+ */
+interface IERC20Mintable {
+
+    function transfer(address to, uint256 value) external returns (bool);
+
+    function approve(address spender, uint256 value) external returns (bool);
+
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+    
+    function mint(address _to, uint256 _value) external returns (bool);   
+
+
+    function totalSupply() external view returns (uint256);
+
+    function balanceOf(address who) external view returns (uint256);
+
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+// File: contracts/ACE/noteRegistry/interfaces/NoteRegistryBehaviour.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+
+
+/**
+ * @title NoteRegistryBehaviour interface which defines the base API
+        which must be implemented for every behaviour contract.
+ * @author AZTEC
+ * @dev This interface will mostly be used by ACE, in order to have an API to
+        interact with note registries through proxies.
+ * The implementation of all write methods should have an onlyOwner modifier.
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+contract NoteRegistryBehaviour is Ownable, IAZTEC {
+    using SafeMath for uint256;
+
+    bool public isActiveBehaviour;
+    bool public initialised;
+    address public dataLocation;
+
+    constructor () Ownable() public {
+        isActiveBehaviour = true;
+    }
+
+    /**
+        * @dev Initialises the data of a noteRegistry. Should be called exactly once.
+        *
+        * @param _newOwner - the address which the initialise call will transfer ownership to
+        * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
+        * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
+        * @param _canConvert - whether the noteRegistry can transfer value from private to public
+            representation and vice versa
+    */
+    function initialise(
+        address _newOwner,
+        uint256 _scalingFactor,
+        bool _canAdjustSupply,
+        bool _canConvert
+    ) public;
+
+    /**
+        * @dev Fetches data of the registry
+        *
+        * @return scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
+        * @return confidentialTotalMinted - the hash of the AZTEC note representing the total amount
+            which has been minted.
+        * @return confidentialTotalBurned - the hash of the AZTEC note representing the total amount
+            which has been burned.
+        * @return canConvert - the boolean whih defines if the noteRegistry can convert between
+            public and private.
+        * @return canConvert - the boolean whih defines if the noteRegistry can make use of
+            minting and burning methods.
+    */
+    function getRegistry() public view returns (
+        uint256 scalingFactor,
+        bytes32 confidentialTotalMinted,
+        bytes32 confidentialTotalBurned,
+        bool canConvert,
+        bool canAdjustSupply
+    );
+
+    /**
+        * @dev Enacts the state modifications needed given a successfully validated burn proof
+        *
+        * @param _proofOutputs - the output of the burn validator
+    */
+    function burn(bytes memory _proofOutputs) public;
+
+    /**
+        * @dev Enacts the state modifications needed given a successfully validated mint proof
+        *
+        * @param _proofOutputs - the output of the mint validator
+    */
+    function mint(bytes memory _proofOutputs) public;
+
+    /**
+        * @dev Enacts the state modifications needed given the output of a successfully validated proof.
+        * The _proofId param is used by the behaviour contract to (if needed) restrict the versions of proofs
+        * which the note registry supports, useful in case the proofOutputs schema changes for example.
+        *
+        * @param _proof - the id of the proof
+        * @param _proofOutput - the output of the proof validator
+        *
+        * @return publicOwner - the non-ACE party involved in this transaction. Either current or desired
+        *   owner of public tokens
+        * @return transferValue - the total public token value to transfer. Seperate value to abstract
+        *   away scaling factors in first version of AZTEC
+        * @return publicValue - the kPublic value to be used in zero-knowledge proofs
+    */
+    function updateNoteRegistry(
+        uint24 _proof,
+        bytes memory _proofOutput
+    ) public returns (
+        address publicOwner,
+        uint256 transferValue,
+        int256 publicValue
+    );
+
+    /**
+        * @dev Sets confidentialTotalMinted to a new value. The value must be the hash of a note;
+        *
+        * @param _newTotalNoteHash - the hash of the note representing the total minted value for an asset.
+    */
+    function setConfidentialTotalMinted(bytes32 _newTotalNoteHash) internal returns (bytes32);
+
+    /**
+        * @dev Sets confidentialTotalBurned to a new value. The value must be the hash of a note;
+        *
+        * @param _newTotalNoteHash - the hash of the note representing the total burned value for an asset.
+    */
+    function setConfidentialTotalBurned(bytes32 _newTotalNoteHash) internal returns (bytes32);
+
+    /**
+        * @dev Gets a defined note from the note registry, and returns the deconstructed object.
+            This is to avoid the interface to be
+        * _too_ opninated on types, even though it does require any subsequent note type to have
+            (or be able to mock) the return fields.
+        *
+        * @param _noteHash - the hash of the note being fetched
+        *
+        * @return status - whether a note has been spent or not
+        * @return createdOn - timestamp of the creation time of the note
+        * @return destroyedOn - timestamp of the time the note was destroyed (if it has been destroyed, 0 otherwise)
+        * @return noteOwner - address of the stored owner of the note
+    */
+    function getNote(bytes32 _noteHash) public view returns (
+        uint8 status,
+        uint40 createdOn,
+        uint40 destroyedOn,
+        address noteOwner
+    );
+
+    /**
+        * @dev Internal function to update the noteRegistry given a bytes array.
+        *
+        * @param _inputNotes - a bytes array containing notes
+    */
+    function updateInputNotes(bytes memory _inputNotes) internal;
+
+    /**
+        * @dev Internal function to update the noteRegistry given a bytes array.
+        *
+        * @param _outputNotes - a bytes array containing notes
+    */
+    function updateOutputNotes(bytes memory _outputNotes) internal;
+
+    /**
+        * @dev Internal function to create a new note object.
+        *
+        * @param _noteHash - the noteHash
+        * @param _noteOwner - the address of the owner of the note
+    */
+    function createNote(bytes32 _noteHash, address _noteOwner) internal;
+
+    /**
+        * @dev Internal function to delete a note object.
+        *
+        * @param _noteHash - the noteHash
+        * @param _noteOwner - the address of the owner of the note
+    */
+    function deleteNote(bytes32 _noteHash, address _noteOwner) internal;
+
+    /**
+        * @dev Public function used during slow release phase to manually enable an asset.
+    */
+    function makeAvailable() public;
+}
+
+// File: contracts/interfaces/ProxyAdmin.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @title ProxyAdmin
+ * @dev Minimal interface for the proxy contract
+ */
+contract ProxyAdmin {
+    function admin() external returns (address);
+
+    function upgradeTo(address _newImplementation) external;
+
+    function changeAdmin(address _newAdmin) external;
+}
+
+// File: contracts/ACE/noteRegistry/interfaces/NoteRegistryFactory.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+
+
+
+
+/**
+ * @title NoteRegistryFactory
+ * @author AZTEC
+ * @dev Interface definition for factories. Factory contracts have the responsibility of managing the full lifecycle of
+ * Behaviour contracts, from deploy to eventual upgrade. They are owned by ACE, and all methods should only be callable
+ * by ACE.
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ **/
+contract NoteRegistryFactory is IAZTEC, Ownable  {
+    event NoteRegistryDeployed(address behaviourContract);
+
+    constructor(address _aceAddress) public Ownable() {
+        transferOwnership(_aceAddress);
+    }
+
+    function deployNewBehaviourInstance() public returns (address);
+
+    function handoverBehaviour(address _proxy, address _newImplementation, address _newProxyAdmin) public onlyOwner {
+        require(ProxyAdmin(_proxy).admin() == address(this), "this is not the admin of the proxy");
+        ProxyAdmin(_proxy).upgradeTo(_newImplementation);
+        ProxyAdmin(_proxy).changeAdmin(_newProxyAdmin);
+    }
+}
+
+// File: openzeppelin-solidity/contracts/utils/Address.sol
+
+pragma solidity ^0.5.5;
+
+/**
+ * @dev Collection of functions related to the address type
+ */
+library Address {
+    /**
+     * @dev Returns true if `account` is a contract.
+     *
+     * This test is non-exhaustive, and there may be false-negatives: during the
+     * execution of a contract's constructor, its address will be reported as
+     * not containing a contract.
+     *
+     * IMPORTANT: It is unsafe to assume that an address for which this
+     * function returns false is an externally-owned account (EOA) and not a
+     * contract.
+     */
+    function isContract(address account) internal view returns (bool) {
+        // This method relies in extcodesize, which returns 0 for contracts in
+        // construction, since the code is only stored at the end of the
+        // constructor execution.
+
+        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
+        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
+        // for accounts without code, i.e. `keccak256('')`
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        // solhint-disable-next-line no-inline-assembly
+        assembly { codehash := extcodehash(account) }
+        return (codehash != 0x0 && codehash != accountHash);
+    }
+
+    /**
+     * @dev Converts an `address` into `address payable`. Note that this is
+     * simply a type cast: the actual underlying value is not changed.
+     *
+     * _Available since v2.4.0._
+     */
+    function toPayable(address account) internal pure returns (address payable) {
+        return address(uint160(account));
+    }
+
+    /**
+     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
+     * `recipient`, forwarding all available gas and reverting on errors.
+     *
+     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
+     * of certain opcodes, possibly making contracts go over the 2300 gas limit
+     * imposed by `transfer`, making them unable to receive funds via
+     * `transfer`. {sendValue} removes this limitation.
+     *
+     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
+     *
+     * IMPORTANT: because control is transferred to `recipient`, care must be
+     * taken to not create reentrancy vulnerabilities. Consider using
+     * {ReentrancyGuard} or the
+     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+     *
+     * _Available since v2.4.0._
+     */
+    function sendValue(address payable recipient, uint256 amount) internal {
+        require(address(this).balance >= amount, "Address: insufficient balance");
+
+        // solhint-disable-next-line avoid-call-value
+        (bool success, ) = recipient.call.value(amount)("");
+        require(success, "Address: unable to send value, recipient may have reverted");
+    }
+}
+
+// File: contracts/Proxies/Proxy.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @title Proxy
+ * @dev Implements delegation of calls to other contracts, with proper
+ * forwarding of return values and bubbling of failures.
+ * It defines a fallback function that delegates all calls to the address
+ * returned by the abstract _implementation() internal function.
+ */
+contract Proxy {
+    /**
+    * @dev Fallback function.
+    * Implemented entirely in `_fallback`.
+    */
+    function () payable external {
+        _fallback();
+    }
+
+    /**
+    * @return The Address of the implementation.
+    */
+    function _implementation() internal view returns (address);
+
+    /**
+    * @dev Delegates execution to an implementation contract.
+    * This is a low level function that doesn't return to its internal call site.
+    * It will return to the external caller whatever the implementation returns.
+    * @param implementation Address to delegate.
+    */
+    function _delegate(address implementation) internal {
+        assembly {
+        // Copy msg.data. We take full control of memory in this inline assembly
+        // block because it will not return to Solidity code. We overwrite the
+        // Solidity scratch pad at memory position 0.
+        calldatacopy(0, 0, calldatasize)
+
+        // Call the implementation.
+        // out and outsize are 0 because we don't know the size yet.
+        let result := delegatecall(gas, implementation, 0, calldatasize, 0, 0)
+
+        // Copy the returned data.
+        returndatacopy(0, 0, returndatasize)
+
+        switch result
+        // delegatecall returns 0 on error.
+        case 0 { revert(0, returndatasize) }
+        default { return(0, returndatasize) }
+        }
+    }
+
+    /**
+    * @dev Function that is run as the first thing in the fallback function.
+    * Can be redefined in derived contracts to add functionality.
+    * Redefinitions must call super._willFallback().
+    */
+    function _willFallback() internal {
+    }
+
+    /**
+    * @dev fallback implementation.
+    * Extracted to enable manual triggering.
+    */
+    function _fallback() internal {
+        _willFallback();
+        _delegate(_implementation());
+    }
+}
+
+// File: contracts/Proxies/BaseUpgradeabilityProxy.sol
+
+pragma solidity ^0.5.0;
+
+
+
+/**
+ * @title BaseUpgradeabilityProxy
+ * @dev This contract implements a proxy that allows to change the
+ * implementation address to which it will delegate.
+ * Such a change is called an implementation upgrade.
+ */
+contract BaseUpgradeabilityProxy is Proxy {
+    /**
+    * @dev Emitted when the implementation is upgraded.
+    * @param implementation Address of the new implementation.
+    */
+    event Upgraded(address indexed implementation);
+
+    /**
+    * @dev Storage slot with the address of the current implementation.
+    * This is the keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1, and is
+    * validated in the constructor.
+    */
+    bytes32 internal constant IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+
+    /**
+    * @dev Returns the current implementation.
+    * @return Address of the current implementation
+    */
+    function _implementation() internal view returns (address impl) {
+        bytes32 slot = IMPLEMENTATION_SLOT;
+        assembly {
+        impl := sload(slot)
+        }
+    }
+
+    /**
+    * @dev Upgrades the proxy to a new implementation.
+    * @param newImplementation Address of the new implementation.
+    */
+    function _upgradeTo(address newImplementation) internal {
+        _setImplementation(newImplementation);
+        emit Upgraded(newImplementation);
+    }
+
+    /**
+    * @dev Sets the implementation address of the proxy.
+    * @param newImplementation Address of the new implementation.
+    */
+    function _setImplementation(address newImplementation) internal {
+        require(Address.isContract(newImplementation), "Cannot set a proxy implementation to a non-contract address");
+
+        bytes32 slot = IMPLEMENTATION_SLOT;
+
+        assembly {
+        sstore(slot, newImplementation)
+        }
+    }
+}
+
+// File: contracts/Proxies/UpgradeabilityProxy.sol
+
+pragma solidity ^0.5.0;
+
+
+/**
+ * @title UpgradeabilityProxy
+ * @dev Extends BaseUpgradeabilityProxy with a constructor for initializing
+ * implementation and init data.
+ */
+contract UpgradeabilityProxy is BaseUpgradeabilityProxy {
+    /**
+    * @dev Contract constructor.
+    * @param _logic Address of the initial implementation.
+    * @param _data Data to send as msg.data to the implementation to initialize the proxied contract.
+    * It should include the signature and the parameters of the function to be called, as described in
+    * https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.
+    * This parameter is optional, if no data is given the initialization call to proxied contract will be skipped.
+    */
+    constructor(address _logic, bytes memory _data) public payable {
+        assert(IMPLEMENTATION_SLOT == bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1));
+        _setImplementation(_logic);
+        if(_data.length > 0) {
+            (bool success,) = _logic.delegatecall(_data);
+            require(success);
+        }
+    }
+}
+
+// File: contracts/Proxies/BaseAdminUpgradeabilityProxy.sol
+
+pragma solidity ^0.5.0;
+
+
+/**
+    * @title BaseAdminUpgradeabilityProxy
+    * @dev This contract combines an upgradeability proxy with an authorization
+    * mechanism for administrative tasks.
+    * All external functions in this contract must be guarded by the
+    * `ifAdmin` modifier. See ethereum/solidity#3864 for a Solidity
+    * feature proposal that would enable this to be done automatically.
+ */
+contract BaseAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
+    /**
+    * @dev Emitted when the administration has been transferred.
+    * @param previousAdmin Address of the previous admin.
+    * @param newAdmin Address of the new admin.
+    */
+    event AdminChanged(address previousAdmin, address newAdmin);
+
+    /**
+    * @dev Storage slot with the admin of the contract.
+    * This is the keccak-256 hash of "eip1967.proxy.admin" subtracted by 1, and is
+    * validated in the constructor.
+    */
+
+    bytes32 internal constant ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+
+    /**
+    * @dev Modifier to check whether the `msg.sender` is the admin.
+    * If it is, it will run the function. Otherwise, it will delegate the call
+    * to the implementation.
+    */
+    modifier ifAdmin() {
+        if (msg.sender == _admin()) {
+            _;
+        } else {
+            _fallback();
+        }
+    }
+
+    /**
+    * @return The address of the proxy admin.
+    */
+    function admin() external ifAdmin returns (address) {
+        return _admin();
+    }
+
+    /**
+    * @return The address of the implementation.
+    */
+    function implementation() external ifAdmin returns (address) {
+        return _implementation();
+    }
+
+    /**
+    * @dev Changes the admin of the proxy.
+    * Only the current admin can call this function.
+    * @param newAdmin Address to transfer proxy administration to.
+    */
+    function changeAdmin(address newAdmin) external ifAdmin {
+        require(newAdmin != address(0), "Cannot change the admin of a proxy to the zero address");
+        emit AdminChanged(_admin(), newAdmin);
+        _setAdmin(newAdmin);
+    }
+
+    /**
+    * @dev Upgrade the backing implementation of the proxy.
+    * Only the admin can call this function.
+    * @param newImplementation Address of the new implementation.
+    */
+    function upgradeTo(address newImplementation) external ifAdmin {
+        _upgradeTo(newImplementation);
+    }
+
+    /**
+    * @dev Upgrade the backing implementation of the proxy and call a function
+    * on the new implementation.
+    * This is useful to initialize the proxied contract.
+    * @param newImplementation Address of the new implementation.
+    * @param data Data to send as msg.data in the low level call.
+    * It should include the signature and the parameters of the function to be called, as described in
+    * https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.
+    */
+    function upgradeToAndCall(address newImplementation, bytes calldata data) payable external ifAdmin {
+        _upgradeTo(newImplementation);
+        (bool success,) = newImplementation.delegatecall(data);
+        require(success);
+    }
+
+    /**
+    * @return The admin slot.
+    */
+    function _admin() internal view returns (address adm) {
+        bytes32 slot = ADMIN_SLOT;
+        assembly {
+        adm := sload(slot)
+        }
+    }
+
+    /**
+    * @dev Sets the address of the proxy admin.
+    * @param newAdmin Address of the new proxy admin.
+    */
+    function _setAdmin(address newAdmin) internal {
+        bytes32 slot = ADMIN_SLOT;
+
+        assembly {
+        sstore(slot, newAdmin)
+        }
+    }
+
+    /**
+    * @dev Only fall back when the sender is not the admin.
+    */
+    function _willFallback() internal {
+        require(msg.sender != _admin(), "Cannot call fallback function from the proxy admin");
+        super._willFallback();
+    }
+}
+
+// File: contracts/Proxies/AdminUpgradeabilityProxy.sol
+
+pragma solidity ^0.5.0;
+
+
+/**
+ * @title AdminUpgradeabilityProxy
+ * @dev Extends from BaseAdminUpgradeabilityProxy with a constructor for
+ * initializing the implementation, admin, and init data.
+ */
+contract AdminUpgradeabilityProxy is BaseAdminUpgradeabilityProxy, UpgradeabilityProxy {
+    /**
+    * Contract constructor.
+    * @param _logic address of the initial implementation.
+    * @param _admin Address of the proxy administrator.
+    * @param _data Data to send as msg.data to the implementation to initialize the proxied contract.
+    * It should include the signature and the parameters of the function to be called, as described in
+    * https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.
+    * This parameter is optional, if no data is given the initialization call to proxied contract will be skipped.
+    */
+    constructor(address _logic, address _admin, bytes memory _data) UpgradeabilityProxy(_logic, _data) public payable {
+        assert(ADMIN_SLOT == bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1));
+        require(_admin != address(0x0), "Cannot set the admin address to address(0x0)");
+        _setAdmin(_admin);
+    }
+}
+
+// File: contracts/ACE/noteRegistry/NoteRegistryManager.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+
+
+
+
+
+
+
+
+/**
+ * @title NoteRegistryManager
+ * @author AZTEC
+ * @dev NoteRegistryManager will be inherrited by ACE, and its purpose is to manage the entire
+        lifecycle of noteRegistries and of
+        factories. It defines the methods which are used to deploy and upgrade registries, the methods
+        to enact state changes sent by
+        the owner of a registry, and it also manages the list of factories which are available.
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+contract NoteRegistryManager is IAZTEC, Ownable {
+    using SafeMath for uint256;
+    using VersioningUtils for uint24;
+
+    /**
+    * @dev event transmitted if and when a factory gets registered.
+    */
+    event SetFactory(
+        uint8 indexed epoch,
+        uint8 indexed cryptoSystem,
+        uint8 indexed assetType,
+        address factoryAddress
+    );
+
+    event CreateNoteRegistry(
+        address registryOwner,
+        address registryAddress,
+        uint256 scalingFactor,
+        address linkedTokenAddress,
+        bool canAdjustSupply,
+        bool canConvert
+    );
+
+    event UpgradeNoteRegistry(
+        address registryOwner,
+        address proxyAddress,
+        address newBehaviourAddress
+    );
+
+    // Every user has their own note registry
+
+    struct NoteRegistry {
+        NoteRegistryBehaviour behaviour;
+        IERC20Mintable linkedToken;
+        uint24 latestFactory;
+        uint256 totalSupply;
+        uint256 totalSupplemented;
+        mapping(address => mapping(bytes32 => uint256)) publicApprovals;
+    }
+
+    mapping(address => NoteRegistry) public registries;
+
+    /**
+    * @dev index of available factories, using very similar structure to proof registry in ACE.sol.
+    * The structure of the index is (epoch, cryptoSystem, assetType).
+    */
+    address[0x100][0x100][0x10000] factories;
+
+
+    uint8 public defaultRegistryEpoch = 1;
+    uint8 public defaultCryptoSystem = 1;
+
+    mapping(bytes32 => bool) public validatedProofs;
+
+    /**
+    * @dev Increment the default registry epoch
+    */
+    function incrementDefaultRegistryEpoch() public onlyOwner {
+        defaultRegistryEpoch = defaultRegistryEpoch + 1;
+    }
+
+    /**
+    * @dev Set the default crypto system to be used
+    * @param _defaultCryptoSystem - default crypto system identifier
+    */
+    function setDefaultCryptoSystem(uint8 _defaultCryptoSystem) public onlyOwner {
+        defaultCryptoSystem = _defaultCryptoSystem;
+    }
+
+    /**
+    * @dev Register a new Factory, iff no factory for that ID exists.
+            The epoch of any new factory must be at least as big as
+            the default registry epoch. Each asset type for each cryptosystem for
+            each epoch should have a note registry
+    *
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    * @param _factoryAddress - address of the deployed factory
+    */
+    function setFactory(uint24 _factoryId, address _factoryAddress) public onlyOwner {
+        require(_factoryAddress != address(0x0), "expected the factory contract to exist");
+        (uint8 epoch, uint8 cryptoSystem, uint8 assetType) = _factoryId.getVersionComponents();
+        require(factories[epoch][cryptoSystem][assetType] == address(0x0), "existing factories cannot be modified");
+        factories[epoch][cryptoSystem][assetType] = _factoryAddress;
+        emit SetFactory(epoch, cryptoSystem, assetType, _factoryAddress);
+    }
+
+    /**
+    * @dev Get the factory address associated with a particular factoryId. Fail if resulting address is 0x0.
+    *
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    */
+    function getFactoryAddress(uint24 _factoryId) public view returns (address factoryAddress) {
+        bool queryInvalid;
+        assembly {
+            // To compute the storage key for factoryAddress[epoch][cryptoSystem][assetType], we do the following:
+            // 1. get the factoryAddress slot
+            // 2. add (epoch * 0x10000) to the slot
+            // 3. add (cryptoSystem * 0x100) to the slot
+            // 4. add (assetType) to the slot
+            // i.e. the range of storage pointers allocated to factoryAddress ranges from
+            // factoryAddress_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = factoryAddress_slot 0xffffffff)
+
+            // Conveniently, the multiplications we have to perform on epoch, cryptoSystem and assetType correspond
+            // to their byte positions in _factoryId.
+            // i.e. (epoch * 0x10000) = and(_factoryId, 0xff0000)
+            // and  (cryptoSystem * 0x100) = and(_factoryId, 0xff00)
+            // and  (assetType) = and(_factoryId, 0xff)
+
+            // Putting this all together. The storage slot offset from '_factoryId' is...
+            // (_factoryId & 0xffff0000) + (_factoryId & 0xff00) + (_factoryId & 0xff)
+            // i.e. the storage slot offset IS the value of _factoryId
+            factoryAddress := sload(add(_factoryId, factories_slot))
+
+            queryInvalid := iszero(factoryAddress)
+        }
+
+        // wrap both require checks in a single if test. This means the happy path only has 1 conditional jump
+        if (queryInvalid) {
+            require(factoryAddress != address(0x0), "expected the factory address to exist");
+        }
+    }
+
+    /**
+    * @dev called when a mintable and convertible asset wants to perform an
+            action which puts the zero-knowledge and public
+            balance out of balance. For example, if minting in zero-knowledge, some
+            public tokens need to be added to the pool
+            managed by ACE, otherwise any private->public conversion runs the risk of not
+            having any public tokens to send.
+    *
+    * @param _value the value to be added
+    */
+    function supplementTokens(uint256 _value) external {
+        NoteRegistry storage registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist");
+        registry.totalSupply = registry.totalSupply.add(_value);
+        registry.totalSupplemented = registry.totalSupplemented.add(_value);
+        (
+            uint256 scalingFactor,
+            ,,
+            bool canConvert,
+            bool canAdjustSupply
+        ) = registry.behaviour.getRegistry();
+        require(canConvert == true, "note registry does not have conversion rights");
+        require(canAdjustSupply == true, "note registry does not have mint and burn rights");
+        registry.linkedToken.transferFrom(msg.sender, address(this), _value.mul(scalingFactor));
+    }
+
+    /**
+    * @dev Query the ACE for a previously validated proof
+    * @notice This is a virtual function, that must be overwritten by the contract that inherits from NoteRegistry
+    *
+    * @param _proof - unique identifier for the proof in question and being validated
+    * @param _proofHash - keccak256 hash of a bytes proofOutput argument. Used to identify the proof in question
+    * @param _sender - address of the entity that originally validated the proof
+    * @return boolean - true if the proof has previously been validated, false if not
+    */
+    function validateProofByHash(uint24 _proof, bytes32 _proofHash, address _sender) public view returns (bool);
+
+    /**
+    * @dev Default noteRegistry creation method. Doesn't take the id of the factory to use,
+            but generates it based on defaults and on the passed flags.
+    *
+    * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
+    * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
+    * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
+    * @param _canConvert - whether the noteRegistry can transfer value from private to public
+        representation and vice versa
+    */
+    function createNoteRegistry(
+        address _linkedTokenAddress,
+        uint256 _scalingFactor,
+        bool _canAdjustSupply,
+        bool _canConvert
+    ) public {
+        uint8 assetType = getAssetTypeFromFlags(_canConvert, _canAdjustSupply);
+
+        uint24 factoryId = computeVersionFromComponents(defaultRegistryEpoch, defaultCryptoSystem, assetType);
+
+        createNoteRegistry(
+            _linkedTokenAddress,
+            _scalingFactor,
+            _canAdjustSupply,
+            _canConvert,
+            factoryId
+        );
+    }
+
+    /**
+    * @dev NoteRegistry creation method. Takes an id of the factory to use.
+    *
+    * @param _linkedTokenAddress - address of any erc20 linked token (can not be 0x0 if canConvert is true)
+    * @param _scalingFactor - defines the number of tokens that an AZTEC note value of 1 maps to.
+    * @param _canAdjustSupply - whether the noteRegistry can make use of minting and burning
+    * @param _canConvert - whether the noteRegistry can transfer value from private to public
+        representation and vice versa
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    */
+    function createNoteRegistry(
+        address _linkedTokenAddress,
+        uint256 _scalingFactor,
+        bool _canAdjustSupply,
+        bool _canConvert,
+        uint24 _factoryId
+    ) public {
+        require(address(registries[msg.sender].behaviour) == address(0x0),
+            "address already has a linked note registry");
+        if (_canConvert) {
+            require(_linkedTokenAddress != address(0x0), "expected the linked token address to exist");
+        }
+        (,, uint8 assetType) = _factoryId.getVersionComponents();
+        // assetType is 0b00 where the bits represent (canAdjust, canConvert),
+        // so assetType can be one of 1, 2, 3 where
+        // 0 == no convert/no adjust (invalid)
+        // 1 == can convert/no adjust
+        // 2 == no convert/can adjust
+        // 3 == can convert/can adjust
+        uint8 flagAssetType = getAssetTypeFromFlags(_canConvert, _canAdjustSupply);
+        require (flagAssetType != uint8(0), "can not create asset with convert and adjust flags set to false");
+        require (flagAssetType == assetType, "expected note registry to match flags");
+
+        address factory = getFactoryAddress(_factoryId);
+
+        address behaviourAddress = NoteRegistryFactory(factory).deployNewBehaviourInstance();
+
+        bytes memory behaviourInitialisation = abi.encodeWithSignature(
+            "initialise(address,uint256,bool,bool)",
+            address(this),
+            _scalingFactor,
+            _canAdjustSupply,
+            _canConvert
+        );
+        address proxy = address(new AdminUpgradeabilityProxy(
+            behaviourAddress,
+            factory,
+            behaviourInitialisation
+        ));
+
+        registries[msg.sender] = NoteRegistry({
+            behaviour: NoteRegistryBehaviour(proxy),
+            linkedToken: IERC20Mintable(_linkedTokenAddress),
+            latestFactory: _factoryId,
+            totalSupply: 0,
+            totalSupplemented: 0
+        });
+
+        emit CreateNoteRegistry(
+            msg.sender,
+            proxy,
+            _scalingFactor,
+            _linkedTokenAddress,
+            _canAdjustSupply,
+            _canConvert
+        );
+    }
+
+    /**
+    * @dev Method to upgrade the registry linked with the msg.sender to a new factory, based on _factoryId.
+    * The submitted _factoryId must be of epoch equal or greater than previous _factoryId, and of the same assetType.
+    *
+    * @param _factoryId - uint24 which contains 3 uint8s representing (epoch, cryptoSystem, assetType)
+    */
+    function upgradeNoteRegistry(
+        uint24 _factoryId
+    ) public {
+        NoteRegistry storage registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry for sender doesn't exist");
+
+        (uint8 epoch,, uint8 assetType) = _factoryId.getVersionComponents();
+        uint24 oldFactoryId = registry.latestFactory;
+        (uint8 oldEpoch,, uint8 oldAssetType) = oldFactoryId.getVersionComponents();
+        require(epoch >= oldEpoch, "expected new registry to be of epoch equal or greater than existing registry");
+        require(assetType == oldAssetType, "expected assetType to be the same for old and new registry");
+
+        address factory = getFactoryAddress(_factoryId);
+        address newBehaviour = NoteRegistryFactory(factory).deployNewBehaviourInstance();
+
+        address oldFactory = getFactoryAddress(oldFactoryId);
+        registry.latestFactory = _factoryId;
+
+        NoteRegistryFactory(oldFactory).handoverBehaviour(address(registry.behaviour), newBehaviour, factory);
+        emit UpgradeNoteRegistry(
+            msg.sender,
+            address(registry.behaviour),
+            newBehaviour
+        );
+    }
+
+    /**
+    * @dev Internal method dealing with permissioning and transfer of public tokens.
+    *
+    * @param _publicOwner - the non-ACE party involved in this transaction. Either current or desired
+    *   owner of public tokens
+    * @param _transferValue - the total public token value to transfer. Seperate value to abstract
+    *   away scaling factors in first version of AZTEC
+    * @param _publicValue - the kPublic value to be used in zero-knowledge proofs
+    * @param _proofHash - usef for permissioning, hash of the proof that this spend is enacting
+    *
+    */
+    function transferPublicTokens(
+        address _publicOwner,
+        uint256 _transferValue,
+        int256 _publicValue,
+        bytes32 _proofHash
+    )
+        internal
+    {
+        NoteRegistry storage registry = registries[msg.sender];
+        // if < 0, depositing
+        // else withdrawing
+        if (_publicValue < 0) {
+            uint256 approvalForAddressForHash = registry.publicApprovals[_publicOwner][_proofHash];
+            registry.totalSupply = registry.totalSupply.add(uint256(-_publicValue));
+            require(
+                approvalForAddressForHash >= uint256(-_publicValue),
+                "public owner has not validated a transfer of tokens"
+            );
+
+            registry.publicApprovals[_publicOwner][_proofHash] = approvalForAddressForHash.sub(uint256(-_publicValue));
+            registry.linkedToken.transferFrom(
+                _publicOwner,
+                address(this),
+                _transferValue);
+        } else {
+            registry.totalSupply = registry.totalSupply.sub(uint256(_publicValue));
+            registry.linkedToken.transfer(
+                _publicOwner,
+                _transferValue
+            );
+        }
+    }
+
+    /**
+    * @dev Update the state of the note registry according to transfer instructions issued by a
+    * zero-knowledge proof. This method will verify that the relevant proof has been validated,
+    * make sure the same proof has can't be re-used, and it then delegates to the relevant noteRegistry.
+    *
+    * @param _proof - unique identifier for a proof
+    * @param _proofOutput - transfer instructions issued by a zero-knowledge proof
+    * @param _proofSender - address of the entity sending the proof
+    */
+    function updateNoteRegistry(
+        uint24 _proof,
+        bytes memory _proofOutput,
+        address _proofSender
+    ) public {
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist");
+        bytes32 proofHash = keccak256(_proofOutput);
+        bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+
+        require(
+            validateProofByHash(_proof, proofHash, _proofSender) == true,
+            "ACE has not validated a matching proof"
+        );
+        // clear record of valid proof - stops re-entrancy attacks and saves some gas
+        validatedProofs[validatedProofHash] = false;
+
+        (
+            address publicOwner,
+            uint256 transferValue,
+            int256 publicValue
+        ) = registry.behaviour.updateNoteRegistry(_proof, _proofOutput);
+        if (publicValue != 0) {
+            transferPublicTokens(publicOwner, transferValue, publicValue, proofHash);
+        }
+    }
+
+    /**
+    * @dev Adds a public approval record to the noteRegistry, for use by ACE when it needs to transfer
+        public tokens it holds to an external address. It needs to be associated with the hash of a proof.
+    */
+    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
+        NoteRegistry storage registry = registries[_registryOwner];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist");
+        registry.publicApprovals[msg.sender][_proofHash] = _value;
+    }
+
+    /**
+     * @dev Returns the registry for a given address.
+     *
+     * @param _registryOwner - address of the registry owner in question
+     *
+     * @return linkedTokenAddress - public ERC20 token that is linked to the NoteRegistry. This is used to
+     * transfer public value into and out of the system
+     * @return scalingFactor - defines how many ERC20 tokens are represented by one AZTEC note
+     * @return totalSupply - represents the total current supply of public tokens associated with a particular registry
+     * @return confidentialTotalMinted - keccak256 hash of the note representing the total minted supply
+     * @return confidentialTotalBurned - keccak256 hash of the note representing the total burned supply
+     * @return canConvert - flag set by the owner to decide whether the registry has public to private, and
+     * vice versa, conversion privilege
+     * @return canAdjustSupply - determines whether the registry has minting and burning privileges
+     */
+    function getRegistry(address _registryOwner) public view returns (
+        address linkedToken,
+        uint256 scalingFactor,
+        bytes32 confidentialTotalMinted,
+        bytes32 confidentialTotalBurned,
+        uint256 totalSupply,
+        uint256 totalSupplemented,
+        bool canConvert,
+        bool canAdjustSupply
+    ) {
+        NoteRegistry memory registry = registries[_registryOwner];
+        (
+            scalingFactor,
+            confidentialTotalMinted,
+            confidentialTotalBurned,
+            canConvert,
+            canAdjustSupply
+        ) = registry.behaviour.getRegistry();
+        linkedToken = address(registry.linkedToken);
+        totalSupply = registry.totalSupply;
+        totalSupplemented = registry.totalSupplemented;
+    }
+
+    /**
+     * @dev Returns the note for a given address and note hash.
+     *
+     * @param _registryOwner - address of the registry owner
+     * @param _noteHash - keccak256 hash of the note coordiantes (gamma and sigma)
+     *
+     * @return status - status of the note, details whether the note is in a note registry
+     * or has been destroyed
+     * @return createdOn - time the note was created
+     * @return destroyedOn - time the note was destroyed
+     * @return noteOwner - address of the note owner
+     */
+    function getNote(address _registryOwner, bytes32 _noteHash) public view returns (
+        uint8 status,
+        uint40 createdOn,
+        uint40 destroyedOn,
+        address noteOwner
+    ) {
+        NoteRegistry memory registry = registries[_registryOwner];
+        return registry.behaviour.getNote(_noteHash);
+    }
+
+    /**
+    * @dev Internal utility method which converts two booleans into a uint8 where the first boolean
+    * represents (1 == true, 0 == false) the bit in position 1, and the second boolean the bit in position 2.
+    * The output is 1 for an asset which can convert between public and private, 2 for one with no conversion
+    * but with the ability to mint and/or burn, and 3 for a mixed asset which can convert and mint/burn
+    *
+    */
+    function getAssetTypeFromFlags(bool _canConvert, bool _canAdjust) internal pure returns (uint8 assetType) {
+        uint8 convert = _canConvert ? 1 : 0;
+        uint8 adjust = _canAdjust ? 2 : 0;
+
+        assetType = convert + adjust;
+    }
+
+    /**
+    * @dev Internal utility method which converts three uint8s into a uint24
+    *
+    */
+    function computeVersionFromComponents(
+        uint8 _first,
+        uint8 _second,
+        uint8 _third
+    ) internal pure returns (uint24 version) {
+        assembly {
+            version := or(mul(_first, 0x10000), or(mul(_second, 0x100), _third))
+        }
+    }
+
+    /**
+    * @dev used for slow release, useless afterwards.
+    */
+    function makeAssetAvailable(address _registryOwner) public onlyOwner {
+        NoteRegistry memory registry = registries[_registryOwner];
+        registry.behaviour.makeAvailable();
+    }
+}
+
+// File: contracts/libs/NoteUtils.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+/**
+ * @title NoteUtils
+ * @author AZTEC
+ * @dev NoteUtils is a utility library that extracts user-readable information from AZTEC proof outputs.
+ *      Specifically, `bytes proofOutput` objects can be extracted from `bytes proofOutputs`,
+ *      `bytes proofOutput` and `bytes note` can be extracted into their constituent components,
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+library NoteUtils {
+
+    /**
+    * @dev Get the number of entries in an AZTEC-ABI array (bytes proofOutputs, bytes inputNotes, bytes outputNotes)
+    *      All 3 are rolled into a single function to eliminate 'wet' code - the implementations are identical
+    * @param _proofOutputsOrNotes `proofOutputs`, `inputNotes` or `outputNotes`
+    * @return number of entries in the pseudo dynamic array
+    */
+    function getLength(bytes memory _proofOutputsOrNotes) internal pure returns (
+        uint len
+    ) {
+        assembly {
+            // first word = the raw byte length
+            // second word = the actual number of entries (hence the 0x20 offset)
+            len := mload(add(_proofOutputsOrNotes, 0x20))
+        }
+    }
+
+    /**
+    * @dev Get a bytes object out of a dynamic AZTEC-ABI array
+    * @param _proofOutputsOrNotes `proofOutputs`, `inputNotes` or `outputNotes`
+    * @param _i the desired entry
+    * @return number of entries in the pseudo dynamic array
+    */
+    function get(bytes memory _proofOutputsOrNotes, uint _i) internal pure returns (
+        bytes memory out
+    ) {
+        bool valid;
+        assembly {
+            // check that i < the number of entries
+            valid := lt(
+                _i,
+                mload(add(_proofOutputsOrNotes, 0x20))
+            )
+            // memory map of the array is as follows:
+            // 0x00 - 0x20 : byte length of array
+            // 0x20 - 0x40 : n, the number of entries
+            // 0x40 - 0x40 + (0x20 * i) : relative memory offset to start of i'th entry (i <= n)
+
+            // Step 1: compute location of relative memory offset: _proofOutputsOrNotes + 0x40 + (0x20 * i) 
+            // Step 2: loaded relative offset and add to _proofOutputsOrNotes to get absolute memory location
+            out := add(
+                mload(
+                    add(
+                        add(_proofOutputsOrNotes, 0x40),
+                        mul(_i, 0x20)
+                    )
+                ),
+                _proofOutputsOrNotes
+            )
+        }
+        require(valid, "AZTEC array index is out of bounds");
+    }
+
+    /**
+    * @dev Extract constituent elements of a `bytes _proofOutput` object
+    * @param _proofOutput an AZTEC proof output
+    * @return inputNotes, AZTEC-ABI dynamic array of input AZTEC notes
+    * @return outputNotes, AZTEC-ABI dynamic array of output AZTEC notes
+    * @return publicOwner, the Ethereum address of the owner of any public tokens involved in the proof
+    * @return publicValue, the amount of public tokens involved in the proof
+    *         if (publicValue > 0), this represents a transfer of tokens from ACE to publicOwner
+    *         if (publicValue < 0), this represents a transfer of tokens from publicOwner to ACE
+    */
+    function extractProofOutput(bytes memory _proofOutput) internal pure returns (
+        bytes memory inputNotes,
+        bytes memory outputNotes,
+        address publicOwner,
+        int256 publicValue
+    ) {
+        assembly {
+            // memory map of a proofOutput:
+            // 0x00 - 0x20 : byte length of proofOutput
+            // 0x20 - 0x40 : relative offset to inputNotes
+            // 0x40 - 0x60 : relative offset to outputNotes
+            // 0x60 - 0x80 : publicOwner
+            // 0x80 - 0xa0 : publicValue
+            // 0xa0 - 0xc0 : challenge
+            inputNotes := add(_proofOutput, mload(add(_proofOutput, 0x20)))
+            outputNotes := add(_proofOutput, mload(add(_proofOutput, 0x40)))
+            publicOwner := and(
+                mload(add(_proofOutput, 0x60)),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
+            publicValue := mload(add(_proofOutput, 0x80))
+        }
+    }
+
+    /**
+    * @dev Extract the challenge from a bytes proofOutput variable
+    * @param _proofOutput bytes proofOutput, outputted from a proof validation smart contract
+    * @return bytes32 challenge - cryptographic variable that is part of the sigma protocol
+    */
+    function extractChallenge(bytes memory _proofOutput) internal pure returns (
+        bytes32 challenge
+    ) {
+        assembly {
+            challenge := mload(add(_proofOutput, 0xa0))
+        }
+    }
+
+    /**
+    * @dev Extract constituent elements of an AZTEC note
+    * @param _note an AZTEC note
+    * @return owner, Ethereum address of note owner
+    * @return noteHash, the hash of the note's public key
+    * @return metadata, note-specific metadata (contains public key and any extra data needed by note owner)
+    */
+    function extractNote(bytes memory _note) internal pure returns (
+            address owner,
+            bytes32 noteHash,
+            bytes memory metadata
+    ) {
+        assembly {
+            // memory map of a note:
+            // 0x00 - 0x20 : byte length of note
+            // 0x20 - 0x40 : note type
+            // 0x40 - 0x60 : owner
+            // 0x60 - 0x80 : noteHash
+            // 0x80 - 0xa0 : start of metadata byte array
+            owner := and(
+                mload(add(_note, 0x40)),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
+            noteHash := mload(add(_note, 0x60))
+            metadata := add(_note, 0x80)
+        }
+    }
+    
+    /**
+    * @dev Get the note type
+    * @param _note an AZTEC note
+    * @return noteType
+    */
+    function getNoteType(bytes memory _note) internal pure returns (
+        uint256 noteType
+    ) {
+        assembly {
+            noteType := mload(add(_note, 0x20))
+        }
+    }
+}
+
+// File: contracts/libs/ProofUtils.sol
+
+pragma solidity >= 0.5.0 <0.6.0;
+
+/**
+ * @title ProofUtils
+ * @author AZTEC
+ * @dev Library of proof utility functions
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+library ProofUtils {
+
+    /**
+     * @dev We compress three uint8 numbers into only one uint24 to save gas.
+     * Reverts if the category is not one of [1, 2, 3, 4].
+     * @param proof The compressed uint24 number.
+     * @return A tuple (uint8, uint8, uint8) representing the epoch, category and proofId.
+     */
+    function getProofComponents(uint24 proof) internal pure returns (uint8 epoch, uint8 category, uint8 id) {
+        assembly {
+            id := and(proof, 0xff)
+            category := and(div(proof, 0x100), 0xff)
+            epoch := and(div(proof, 0x10000), 0xff)
+        }
+        return (epoch, category, id);
+    }
+}
+
+// File: contracts/libs/SafeMath8.sol
+
+pragma solidity >=0.5.0 <= 0.6.0;
+
+/**
+ * @title SafeMath8
+ * @author AZTEC
+ * @dev Library of SafeMath arithmetic operations
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+
+library SafeMath8 {
+    
+    /**
+    * @dev SafeMath multiplication
+    * @param a - uint8 multiplier
+    * @param b - uint8 multiplicand
+    * @return uint8 result of multiplying a and b
+    */
+    function mul(uint8 a, uint8 b) internal pure returns (uint8) {
+        uint256 c = uint256(a) * uint256(b);
+        require(c < 256, "uint8 mul triggered integer overflow");
+        return uint8(c);
+    }
+
+    /**
+    * @dev SafeMath division
+    * @param a - uint8 dividend
+    * @param b - uint8 divisor
+    * @return uint8 result of dividing a by b
+    */
+    function div(uint8 a, uint8 b) internal pure returns (uint8) {
+        // assert(b > 0); // Solidity automatically throws when dividing by 0
+        // assert(a == b * c + a % b); // There is no case in which this doesn’t hold
+        return a / b;
+    }
+
+    /**
+    * @dev SafeMath subtraction
+    * @param a - uint8 minuend
+    * @param b - uint8 subtrahend
+    * @return uint8 result of subtracting b from a
+    */
+    function sub(uint8 a, uint8 b) internal pure returns (uint8) {
+        require(b <= a, "uint8 sub triggered integer underflow");
+        return a - b;
+    }
+
+    /**
+    * @dev SafeMath addition
+    * @param a - uint8 addend
+    * @param b - uint8 addend
+    * @return uint8 result of adding a and b
+    */
+    function add(uint8 a, uint8 b) internal pure returns (uint8) {
+        uint8 c = a + b;
+        require(c >= a, "uint8 add triggered integer overflow");
+        return c;
+    }
+}
+
+// File: contracts/ACE/ACE.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+
+
+
+// TODO: v-- harmonize
+
+
+
+
+/**
+ * @title The AZTEC Cryptography Engine
+ * @author AZTEC
+ * @dev ACE validates the AZTEC protocol's family of zero-knowledge proofs, which enables
+ *      digital asset builders to construct fungible confidential digital assets according to the AZTEC token standard.
+ * 
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+contract ACE is IAZTEC, Ownable, NoteRegistryManager {
+    using NoteUtils for bytes;
+    using ProofUtils for uint24;
+    using SafeMath for uint256;
+    using SafeMath8 for uint8;
+
+    event SetCommonReferenceString(bytes32[6] _commonReferenceString);
+    event SetProof(
+        uint8 indexed epoch,
+        uint8 indexed category,
+        uint8 indexed id,
+        address validatorAddress
+    );
+    event IncrementLatestEpoch(uint8 newLatestEpoch);
+
+    // The commonReferenceString contains one G1 group element and one G2 group element,
+    // that are created via the AZTEC protocol's trusted setup. All zero-knowledge proofs supported
+    // by ACE use the same common reference string.
+    bytes32[6] private commonReferenceString;
+
+    // `validators`contains the addresses of the contracts that validate specific proof types
+    address[0x100][0x100][0x10000] public validators;
+
+    // a list of invalidated proof ids, used to blacklist proofs in the case of a vulnerability being discovered
+    bool[0x100][0x100][0x10000] public disabledValidators;
+
+    // latest proof epoch accepted by this contract
+    uint8 public latestEpoch = 1;
+
+    /**
+    * @dev contract constructor. Sets the owner of ACE
+    **/
+    constructor() public Ownable() {}
+
+    /**
+    * @dev Mint AZTEC notes
+    *
+    * @param _proof the AZTEC proof object
+    * @param _proofData the mint proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function mint(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory) {
+
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist for the given address");
+
+        // Check that it's a mintable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        require(category == uint8(ProofCategory.MINT), "this is not a mint proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
+
+        registry.behaviour.mint(_proofOutputs);
+        return(_proofOutputs);
+    }
+
+    /**
+    * @dev Burn AZTEC notes
+    *
+    * @param _proof the AZTEC proof object
+    * @param _proofData the burn proof construction data
+    * @param _proofSender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return two `bytes` objects. The first contains the new confidentialTotalSupply note and the second contains the
+    * notes that were created. Returned so that a zkAsset can emit the appropriate events
+    */
+    function burn(
+        uint24 _proof,
+        bytes calldata _proofData,
+        address _proofSender
+    ) external returns (bytes memory) {
+        NoteRegistry memory registry = registries[msg.sender];
+        require(address(registry.behaviour) != address(0x0), "note registry does not exist for the given address");
+
+        // Check that it's a burnable proof
+        (, uint8 category, ) = _proof.getProofComponents();
+
+        require(category == uint8(ProofCategory.BURN), "this is not a burn proof");
+
+        bytes memory _proofOutputs = this.validateProof(_proof, _proofSender, _proofData);
+        require(_proofOutputs.getLength() > 0, "call to validateProof failed");
+
+        registry.behaviour.burn(_proofOutputs);
+        return _proofOutputs;
+    }
+
+    /**
+    * @dev Validate an AZTEC zero-knowledge proof. ACE will issue a validation transaction to the smart contract
+    *      linked to `_proof`. The validator smart contract will have the following interface:
+    *
+    *      function validate(
+    *          bytes _proofData,
+    *          address _sender,
+    *          bytes32[6] _commonReferenceString
+    *      ) public returns (bytes)
+    *
+    * @param _proof the AZTEC proof object
+    * @param _sender the Ethereum address of the original transaction sender. It is explicitly assumed that
+    *        an asset using ACE supplies this field correctly - if they don't their asset is vulnerable to front-running
+    * Unnamed param is the AZTEC zero-knowledge proof data
+    * @return a `bytes proofOutputs` variable formatted according to the Cryptography Engine standard
+    */
+    function validateProof(uint24 _proof, address _sender, bytes calldata) external returns (bytes memory) {
+        require(_proof != 0, "expected the proof to be valid");
+        // validate that the provided _proof object maps to a corresponding validator and also that
+        // the validator is not disabled
+        address validatorAddress = getValidatorAddress(_proof);
+        bytes memory proofOutputs;
+        assembly {
+            // the first evm word of the 3rd function param is the abi encoded location of proof data
+            let proofDataLocation := add(0x04, calldataload(0x44))
+
+            // manually construct validator calldata map
+            let memPtr := mload(0x40)
+            mstore(add(memPtr, 0x04), 0x100) // location in calldata of the start of `bytes _proofData` (0x100)
+            mstore(add(memPtr, 0x24), _sender)
+            mstore(add(memPtr, 0x44), sload(commonReferenceString_slot))
+            mstore(add(memPtr, 0x64), sload(add(0x01, commonReferenceString_slot)))
+            mstore(add(memPtr, 0x84), sload(add(0x02, commonReferenceString_slot)))
+            mstore(add(memPtr, 0xa4), sload(add(0x03, commonReferenceString_slot)))
+            mstore(add(memPtr, 0xc4), sload(add(0x04, commonReferenceString_slot)))
+            mstore(add(memPtr, 0xe4), sload(add(0x05, commonReferenceString_slot)))
+
+            // 0x104 because there's an address, the length 6 and the static array items
+            let destination := add(memPtr, 0x104)
+            // note that we offset by 0x20 because the first word is the length of the dynamic bytes array
+            let proofDataSize := add(calldataload(proofDataLocation), 0x20)
+            // copy the calldata into memory so we can call the validator contract
+            calldatacopy(destination, proofDataLocation, proofDataSize)
+            // call our validator smart contract, and validate the call succeeded
+            let callSize := add(proofDataSize, 0x104)
+            switch staticcall(gas, validatorAddress, memPtr, callSize, 0x00, 0x00)
+            case 0 {
+                mstore(0x00, 400) revert(0x00, 0x20) // call failed because proof is invalid
+            }
+
+            // copy returndata to memory
+            returndatacopy(memPtr, 0x00, returndatasize)
+            // store the proof outputs in memory
+            mstore(0x40, add(memPtr, returndatasize))
+            // the first evm word in the memory pointer is the abi encoded location of the actual returned data
+            proofOutputs := add(memPtr, mload(memPtr))
+        }
+
+        // if this proof satisfies a balancing relationship, we need to record the proof hash
+        if (((_proof >> 8) & 0xff) == uint8(ProofCategory.BALANCED)) {
+            uint256 length = proofOutputs.getLength();
+            for (uint256 i = 0; i < length; i += 1) {
+                bytes32 proofHash = keccak256(proofOutputs.get(i));
+                bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+                validatedProofs[validatedProofHash] = true;
+            }
+        }
+        return proofOutputs;
+    }
+
+    /**
+    * @dev Clear storage variables set when validating zero-knowledge proofs.
+    *      The only address that can clear data from `validatedProofs` is the address that created the proof.
+    *      Function is designed to utilize [EIP-1283](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1283.md)
+    *      to reduce gas costs. It is highly likely that any storage variables set by `validateProof`
+    *      are only required for the duration of a single transaction.
+    *      E.g. a decentralized exchange validating a swap proof and sending transfer instructions to
+    *      two confidential assets.
+    *      This method allows the calling smart contract to recover most of the gas spent by setting `validatedProofs`
+    * @param _proof the AZTEC proof object
+    * @param _proofHashes dynamic array of proof hashes
+    */
+    function clearProofByHashes(uint24 _proof, bytes32[] calldata _proofHashes) external {
+        uint256 length = _proofHashes.length;
+        for (uint256 i = 0; i < length; i += 1) {
+            bytes32 proofHash = _proofHashes[i];
+            require(proofHash != bytes32(0x0), "expected no empty proof hash");
+            bytes32 validatedProofHash = keccak256(abi.encode(proofHash, _proof, msg.sender));
+            require(validatedProofs[validatedProofHash] == true, "can only clear previously validated proofs");
+            validatedProofs[validatedProofHash] = false;
+        }
+    }
+
+    /**
+    * @dev Set the common reference string.
+    *      If the trusted setup is re-run, we will need to be able to change the crs
+    * @param _commonReferenceString the new commonReferenceString
+    */
+    function setCommonReferenceString(bytes32[6] memory _commonReferenceString) public {
+        require(isOwner(), "only the owner can set the common reference string");
+        commonReferenceString = _commonReferenceString;
+        emit SetCommonReferenceString(_commonReferenceString);
+    }
+
+    /**
+    * @dev Forever invalidate the given proof.
+    * @param _proof the AZTEC proof object
+    */
+    function invalidateProof(uint24 _proof) public {
+        require(isOwner(), "only the owner can invalidate a proof");
+        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
+        require(validators[epoch][category][id] != address(0x0), "can only invalidate proofs that exist");
+        disabledValidators[epoch][category][id] = true;
+    }
+
+    /**
+    * @dev Validate a previously validated AZTEC proof via its hash
+    *      This enables confidential assets to receive transfer instructions from a dApp that
+    *      has already validated an AZTEC proof that satisfies a balancing relationship.
+    * @param _proof the AZTEC proof object
+    * @param _proofHash the hash of the `proofOutput` received by the asset
+    * @param _sender the Ethereum address of the contract issuing the transfer instruction
+    * @return a boolean that signifies whether the corresponding AZTEC proof has been validated
+    */
+    function validateProofByHash(
+        uint24 _proof,
+        bytes32 _proofHash,
+        address _sender
+    ) public view returns (bool) {
+        // We need create a unique encoding of _proof, _proofHash and _sender,
+        // and use as a key to access validatedProofs
+        // We do this by computing bytes32 validatedProofHash = keccak256(ABI.encode(_proof, _proofHash, _sender))
+        // We also need to access disabledValidators[_proof.epoch][_proof.category][_proof.id]
+        // This bit is implemented in Yul, as 3-dimensional array access chews through
+        // a lot of gas in Solidity, as does ABI.encode
+        bytes32 validatedProofHash;
+        bool isValidatorDisabled;
+        assembly {
+            // inside _proof, we have 3 packed variables : [epoch, category, id]
+            // each is a uint8.
+
+            // We need to compute the storage key for `disabledValidators[epoch][category][id]`
+            // Type of array is bool[0x100][0x100][0x100]
+            // Solidity will only squish 32 boolean variables into a single storage slot, not 256
+            // => result of disabledValidators[epoch][category] is stored in 0x08 storage slots
+            // => result of disabledValidators[epoch] is stored in 0x08 * 0x100 = 0x800 storage slots
+
+            // To compute the storage slot  disabledValidators[epoch][category][id], we do the following:
+            // 1. get the disabledValidators slot
+            // 2. add (epoch * 0x800) to the slot (or epoch << 11)
+            // 3. add (category * 0x08) to the slot (or category << 3)
+            // 4. add (id / 0x20) to the slot (or id >> 5)
+
+            // Once the storage slot has been loaded, we need to isolate the byte that contains our boolean
+            // This will be equal to id % 0x20, which is also id & 0x1f
+
+            // Putting this all together. The storage slot offset from '_proof' is...
+            // epoch: ((_proof & 0xff0000) >> 16) << 11 = ((_proof & 0xff0000) >> 5)
+            // category: ((_proof & 0xff00) >> 8) << 3 = ((_proof & 0xff00) >> 5)
+            // id: (_proof & 0xff) >> 5
+            // i.e. the storage slot offset = _proof >> 5
+
+            // the byte index of the storage word that we require, is equal to (_proof & 0x1f)
+            // to convert to a bit index, we multiply by 8
+            // i.e. bit index = shl(3, and(_proof & 0x1f))
+            // => result = shr(shl(3, and(_proof & 0x1f), value))
+            isValidatorDisabled :=
+                shr(
+                    shl(
+                        0x03,
+                        and(_proof, 0x1f)
+                    ),
+                    sload(add(shr(5, _proof), disabledValidators_slot))
+                )
+
+            // Next, compute validatedProofHash = keccak256(abi.encode(_proofHash, _proof, _sender))
+            // cache free memory pointer - we will overwrite it when computing hash (cheaper than using free memory)
+            let memPtr := mload(0x40)
+            mstore(0x00, _proofHash)
+            mstore(0x20, _proof)
+            mstore(0x40, _sender)
+            validatedProofHash := keccak256(0x00, 0x60)
+            mstore(0x40, memPtr) // restore the free memory pointer
+        }
+        require(isValidatorDisabled == false, "proof id has been invalidated");
+        return validatedProofs[validatedProofHash];
+    }
+
+    /**
+    * @dev Adds or modifies a proof into the Cryptography Engine.
+    *       This method links a given `_proof` to a smart contract validator.
+    * @param _proof the AZTEC proof object
+    * @param _validatorAddress the address of the smart contract validator
+    */
+    function setProof(
+        uint24 _proof,
+        address _validatorAddress
+    ) public {
+        require(isOwner(), "only the owner can set a proof");
+        require(_validatorAddress != address(0x0), "expected the validator address to exist");
+        (uint8 epoch, uint8 category, uint8 id) = _proof.getProofComponents();
+        require(epoch <= latestEpoch, "the proof epoch cannot be bigger than the latest epoch");
+        require(validators[epoch][category][id] == address(0x0), "existing proofs cannot be modified");
+        validators[epoch][category][id] = _validatorAddress;
+        emit SetProof(epoch, category, id, _validatorAddress);
+    }
+
+    /**
+     * @dev Increments the `latestEpoch` storage variable.
+     */
+    function incrementLatestEpoch() public {
+        require(isOwner(), "only the owner can update the latest epoch");
+        latestEpoch = latestEpoch.add(1);
+        emit IncrementLatestEpoch(latestEpoch);
+    }
+
+    /**
+    * @dev Returns the common reference string.
+    * We use a custom getter for `commonReferenceString` - the default getter created by making the storage
+    * variable public indexes individual elements of the array, and we want to return the whole array
+    */
+    function getCommonReferenceString() public view returns (bytes32[6] memory) {
+        return commonReferenceString;
+    }
+
+    /**
+    * @dev Get the address of the relevant validator contract
+    *
+    * @param _proof unique identifier of a particular proof
+    * @return validatorAddress - the address of the validator contract
+    */
+    function getValidatorAddress(uint24 _proof) public view returns (address validatorAddress) {
+        bool isValidatorDisabled;
+        bool queryInvalid;
+        assembly {
+            // To compute the storage key for validatorAddress[epoch][category][id], we do the following:
+            // 1. get the validatorAddress slot
+            // 2. add (epoch * 0x10000) to the slot
+            // 3. add (category * 0x100) to the slot
+            // 4. add (id) to the slot
+            // i.e. the range of storage pointers allocated to validatorAddress ranges from
+            // validatorAddress_slot to (0xffff * 0x10000 + 0xff * 0x100 + 0xff = validatorAddress_slot 0xffffffff)
+
+            // Conveniently, the multiplications we have to perform on epoch, category and id correspond
+            // to their byte positions in _proof.
+            // i.e. (epoch * 0x10000) = and(_proof, 0xff0000)
+            // and  (category * 0x100) = and(_proof, 0xff00)
+            // and  (id) = and(_proof, 0xff)
+
+            // Putting this all together. The storage slot offset from '_proof' is...
+            // (_proof & 0xffff0000) + (_proof & 0xff00) + (_proof & 0xff)
+            // i.e. the storage slot offset IS the value of _proof
+            validatorAddress := sload(add(_proof, validators_slot))
+
+            isValidatorDisabled :=
+                shr(
+                    shl(0x03, and(_proof, 0x1f)),
+                    sload(add(shr(5, _proof), disabledValidators_slot))
+                )
+            queryInvalid := or(iszero(validatorAddress), isValidatorDisabled)
+        }
+
+        // wrap both require checks in a single if test. This means the happy path only has 1 conditional jump
+        if (queryInvalid) {
+            require(validatorAddress != address(0x0), "expected the validator address to exist");
+            require(isValidatorDisabled == false, "expected the validator address to not be disabled");
+        }
+    }
+}
+
+// File: contracts/libs/LibEIP712.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+/**
+ * @title Library of EIP712 utility constants and functions
+ * @author AZTEC
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
+contract LibEIP712 {
+
+    // EIP712 Domain Name value
+    string constant internal EIP712_DOMAIN_NAME = "AZTEC_CRYPTOGRAPHY_ENGINE";
+
+    // EIP712 Domain Version value
+    string constant internal EIP712_DOMAIN_VERSION = "1";
+
+    // Hash of the EIP712 Domain Separator Schema
+    bytes32 constant internal EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = keccak256(abi.encodePacked(
+        "EIP712Domain(",
+            "string name,",
+            "string version,",
+            "address verifyingContract",
+        ")"
+    ));
+
+    // Hash of the EIP712 Domain Separator data
+    // solhint-disable-next-line var-name-mixedcase
+    bytes32 public EIP712_DOMAIN_HASH;
+
+    constructor ()
+        public
+    {
+        EIP712_DOMAIN_HASH = keccak256(abi.encode(
+            EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
+            keccak256(bytes(EIP712_DOMAIN_NAME)),
+            keccak256(bytes(EIP712_DOMAIN_VERSION)),
+            address(this)
+        ));
+    }
+
+    /// @dev Calculates EIP712 encoding for a hash struct in this EIP712 Domain.
+    /// @param _hashStruct The EIP712 hash struct.  
+    /// @return EIP712 hash applied to this EIP712 Domain.
+    function hashEIP712Message(bytes32 _hashStruct)
+        internal
+        view
+        returns (bytes32 _result)
+    {
+        bytes32 eip712DomainHash = EIP712_DOMAIN_HASH;
+
+        // Assembly for more efficient computing:
+        // keccak256(abi.encodePacked(
+        //     EIP191_HEADER,
+        //     EIP712_DOMAIN_HASH,
+        //     hashStruct
+        // ));
+
+        assembly {
+            // Load free memory pointer. We're not going to use it - we're going to overwrite it!
+            // We need 0x60 bytes of memory for this hash,
+            // cheaper to overwrite the free memory pointer at 0x40, and then replace it, than allocating free memory
+            let memPtr := mload(0x40)
+            mstore(0x00, 0x1901)               // EIP191 header
+            mstore(0x20, eip712DomainHash)     // EIP712 domain hash
+            mstore(0x40, _hashStruct)          // Hash of struct
+            _result := keccak256(0x1e, 0x42)   // compute hash
+            // replace memory pointer
+            mstore(0x40, memPtr)
+        }
+    }
+
+    /// @dev Extracts the address of the signer with ECDSA.
+    /// @param _message The EIP712 message.
+    /// @param _signature The ECDSA values, v, r and s.
+    /// @return The address of the message signer.
+    function recoverSignature(
+        bytes32 _message,
+        bytes memory _signature
+    ) internal view returns (address _signer) {
+        bool result;
+        assembly {
+            // Here's a little trick we can pull. We expect `_signature` to be a byte array, of length 0x60, with
+            // 'v', 'r' and 's' located linearly in memory. Preceeding this is the length parameter of `_signature`.
+            // We *replace* the length param with the signature msg to get a memory block formatted for the precompile
+            // load length as a temporary variable
+
+            let byteLength := mload(_signature)
+
+            // store the signature message
+            mstore(_signature, _message)
+
+            // load 'v' - we need it for a condition check
+            // add 0x60 to jump over 3 words - length of bytes array, r and s
+            let v := mload(add(_signature, 0x60))
+            v := shr(248, v) // bitshifting, to resemble padLeft
+
+            /**
+            * Original memory map for input to precompile
+            *
+            * _signature : _signature + 0x20            message 
+            * _signature + 0x20 : _signature + 0x40     r
+            * _signature + 0x40 : _signature + 0x60     s
+            * _signature + 0x60 : _signature + 0x80     v
+
+            * Desired memory map for input to precompile
+            *
+            * _signature : _signature + 0x20            message 
+            * _signature + 0x20 : _signature + 0x40     v
+            * _signature + 0x40 : _signature + 0x60     r
+            * _signature + 0x60 : _signature + 0x80     s
+            */
+
+            // move s to v position
+            mstore(add(_signature, 0x60), mload(add(_signature, 0x40)))
+            // move r to s position
+            mstore(add(_signature, 0x40), mload(add(_signature, 0x20)))
+            // move v to r position
+            mstore(add(_signature, 0x20), v)
+            result := and(
+                and(
+                    // validate signature length == 0x41
+                    eq(byteLength, 0x41),
+                    // validate v == 27 or v == 28
+                    or(eq(v, 27), eq(v, 28))
+                ),
+                // validate call to precompile succeeds
+                staticcall(gas, 0x01, _signature, 0x80, _signature, 0x20) 
+            )
+            // save the _signer only if the first word in _signature is not `_message` anymore
+            switch eq(_message, mload(_signature))
+            case 0 {
+                _signer := mload(_signature)
+            }
+            mstore(_signature, byteLength) // and put the byte length back where it belongs
+        }
+        // wrap Failure States in a single if test, so that happy path only has 1 conditional jump
+        if (!(result && (_signer != address(0x0)))) {
+            require(_signer != address(0x0), "signer address cannot be 0");
+            require(result, "signature recovery failed");
+        }
+    }
+}
+
+// File: @openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol
+
+pragma solidity ^0.5.0;
+
+/**
+ * @dev Elliptic Curve Digital Signature Algorithm (ECDSA) operations.
+ *
+ * These functions can be used to verify that a message was signed by the holder
+ * of the private keys of a given address.
+ */
+library ECDSA {
+    /**
+     * @dev Returns the address that signed a hashed message (`hash`) with
+     * `signature`. This address can then be used for verification purposes.
+     *
+     * The `ecrecover` EVM opcode allows for malleable (non-unique) signatures:
+     * this function rejects them by requiring the `s` value to be in the lower
+     * half order, and the `v` value to be either 27 or 28.
+     *
+     * NOTE: This call _does not revert_ if the signature is invalid, or
+     * if the signer is otherwise unable to be retrieved. In those scenarios,
+     * the zero address is returned.
+     *
+     * IMPORTANT: `hash` _must_ be the result of a hash operation for the
+     * verification to be secure: it is possible to craft signatures that
+     * recover to arbitrary addresses for non-hashed data. A safe way to ensure
+     * this is by receiving a hash of the original message (which may otherwise
+     * be too long), and then calling {toEthSignedMessageHash} on it.
+     */
+    function recover(bytes32 hash, bytes memory signature) internal pure returns (address) {
+        // Check the signature length
+        if (signature.length != 65) {
+            return (address(0));
+        }
+
+        // Divide the signature in r, s and v variables
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        // ecrecover takes the signature parameters, and the only way to get them
+        // currently is to use assembly.
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
+        }
+
+        // EIP-2 still allows signature malleability for ecrecover(). Remove this possibility and make the signature
+        // unique. Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines
+        // the valid range for s in (281): 0 < s < secp256k1n ÷ 2 + 1, and for v in (282): v ∈ {27, 28}. Most
+        // signatures from current libraries generate a unique signature with an s-value in the lower half order.
+        //
+        // If your library generates malleable signatures, such as s-values in the upper range, calculate a new s-value
+        // with 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - s1 and flip v from 27 to 28 or
+        // vice versa. If your library also generates signatures with 0/1 for v instead 27/28, add 27 to v to accept
+        // these malleable signatures as well.
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return address(0);
+        }
+
+        if (v != 27 && v != 28) {
+            return address(0);
+        }
+
+        // If the signature is valid (and not malleable), return the signer address
+        return ecrecover(hash, v, r, s);
+    }
+
+    /**
+     * @dev Returns an Ethereum Signed Message, created from a `hash`. This
+     * replicates the behavior of the
+     * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign[`eth_sign`]
+     * JSON-RPC method.
+     *
+     * See {recover}.
+     */
+    function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32) {
+        // 32 is the length in bytes of hash,
+        // enforced by the type signature above
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    }
+}
+
+// File: contracts/AccountRegistry/GSNRecipientTimestampSignature.sol
+
+pragma solidity ^0.5.0;
+
+
+
+
+
+/**
+ * @dev A xref:ROOT:gsn-strategies.adoc#gsn-strategies[GSN strategy] that allows relayed 
+ * transactions through when they are accompanied by the signature of a trusted signer. 
+ * The intent is for this signature to be generated by a server that performs validations 
+ * off-chain. Note that nothing is charged to the user in this scheme. Thus, the server should make
+ * sure to account for this in their economic and threat model.
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+contract GSNRecipientTimestampSignature is Initializable, GSNRecipient {
+    using ECDSA for bytes32;
+
+    uint256 constant private RELAYED_CALL_REJECTED = 11;
+
+    address private _trustedSigner;
+
+    enum GSNRecipientSignatureErrorCodes {
+        INVALID_SIGNER,
+        INVALID_TIMESTAMP
+    }
+
+    /**
+     * @dev Sets the trusted signer that is going to be producing signatures to approve relayed calls.
+     */
+    function initialize(address trustedSigner) internal initializer {
+        require(trustedSigner != address(0), "GSNRecipientSignature: trusted signer is the zero address");
+        _trustedSigner = trustedSigner;
+
+        GSNRecipient.initialize();
+    }
+
+    /**
+     * @dev Return this in acceptRelayedCall to impede execution of a relayed call. No fees will be charged.
+     */
+    function _rejectRelayedCall(uint256 errorCode, bytes memory context) internal pure returns (uint256, bytes memory) {
+        return (RELAYED_CALL_REJECTED + errorCode, context);
+    }
+
+    /**
+     * @dev Ensures that only transactions with a trusted signature can be relayed through the GSN.
+     */
+    function acceptRelayedCall(
+        address relay,
+        address from,
+        bytes calldata encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes calldata approvalData,
+        uint256
+    )
+        external
+        view
+        returns (uint256, bytes memory context)
+    {
+        (
+            uint256 maxTimestamp,
+            bytes memory signature
+        ) = abi.decode(approvalData, (uint256, bytes));
+
+        bytes memory blob = abi.encodePacked(
+            relay,
+            from,
+            encodedFunction,
+            transactionFee,
+            gasPrice,
+            gasLimit,
+            nonce, // Prevents replays on RelayHub
+            getHubAddr(), // Prevents replays in multiple RelayHubs
+            address(this), // Prevents replays in multiple recipients
+            maxTimestamp // Prevents sends tx after long perion of time
+        );
+        context = abi.encode(signature);
+
+        if (keccak256(blob).toEthSignedMessageHash().recover(signature) == _trustedSigner) {
+            if (block.timestamp > maxTimestamp) {
+                return _rejectRelayedCall(uint256(GSNRecipientSignatureErrorCodes.INVALID_TIMESTAMP), context);
+            }
+            return _approveRelayedCall(context);
+        } else {
+            return _rejectRelayedCall(uint256(GSNRecipientSignatureErrorCodes.INVALID_SIGNER), context);
+        }
+    }
+
+    function _preRelayedCall(bytes memory) internal returns (bytes32) {
+        // solhint-disable-previous-line no-empty-blocks
+    }
+}
+
+// File: contracts/AccountRegistry/epochs/20200106/Behaviour20200106.sol
+
+pragma solidity >=0.5.0 <0.6.0;
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * @title Behaviour20200106 implementation
+ * @author AZTEC
+ * Note the behaviour contract version naming convention is based on the date on which the contract
+ * was created, in the format: YYYYMMDD
+ * 
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ **/
+contract Behaviour20200106 is GSNRecipientTimestampSignature, IAZTEC, LibEIP712 {
+    using NoteUtils for bytes;
+
+    /**
+    * @dev epoch number, used for version control in upgradeability. The naming convention is based on the
+    * date on which the contract was created, in the format: YYYYMMDD
+    */
+    uint256 public epoch = 20200106;
+
+    mapping(address => bytes) public accountMapping;
+    mapping(address => address) public userToAZTECAccountMapping;
+    mapping(bytes32 => bool) public signatureLog;
+
+    struct AZTECAccount {
+        address account;
+        bytes linkedPublicKey;
+        address AZTECaddress;
+    }
+
+    string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
+    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey,address AZTECaddress)";
+
+    bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
+    bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
+
+    event Addresses(address accountAddress, address signerAddress);
+
+    event RegisterExtension(
+        address indexed account,
+        bytes linkedPublicKey,
+        bytes spendingPublicKey
+    );
+
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
+
+    ACEModule.ACE ace;
+
+
+    /**
+    * @dev Initialize the contract and set up it's state. An initialize function rather than a constructor
+    * is used to make this compatible with the upgradeability pattern
+    * @param _aceAddress - address of the AZTEC Cryptography Engine
+    * @param _trustedGSNSignerAddress - address which will produce signature to approve relayed GSN calls
+    */
+    function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
+        ace = ACEModule.ACE(_aceAddress);
+        GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
+    }
+
+    /**
+    * @dev Calculates the EIP712 encoding for a hash struct in this EIP712 Domain.
+    * @param _AZTECAccount - struct containing an Ethereum address and the linkedPublicKey
+    * @return EIP712 hash applied to this EIP712 Domain.
+    **/
+    function hashAZTECAccount(AZTECAccount memory _AZTECAccount) internal view returns (bytes32) {
+        bytes32 DOMAIN_SEPARATOR = keccak256(abi.encode(
+            EIP712_DOMAIN_TYPEHASH,
+            keccak256("AccountRegistry"),
+            keccak256("2"),
+            address(this)
+        ));
+
+        return keccak256(abi.encodePacked(
+            "\x19\x01",
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(
+                SIGNATURE_TYPEHASH,
+                _AZTECAccount.account,
+                keccak256(bytes(_AZTECAccount.linkedPublicKey)),
+                _AZTECAccount.AZTECaddress
+        ))));
+    }
+
+    /**
+     * @dev Registers a linkedPublicKey to an Ethereum address, if a valid signature is provided or the
+     * sender is the ethereum address in question
+     * @param _account - address to which the linkedPublicKey is being registered
+     * @param _linkedPublicKey - an additional public key which the sender wishes to link to the _account
+     * @param _spendingPublicKey - the Ethereum public key associated with the Ethereum address
+     * @param _signature - an EIP712 compatible signature of the account & linkedPublicKey
+     */
+    function registerAZTECExtension(
+        address _account,
+        address _AZTECaddress,
+        bytes memory _linkedPublicKey,
+        bytes memory _spendingPublicKey,
+        bytes memory _signature
+    ) public {
+
+        // signature replay protection
+        bytes32 signatureHash = keccak256(abi.encodePacked(_signature));
+        require(signatureLog[signatureHash] != true, "signature has already been used");
+        signatureLog[signatureHash] = true;
+
+        address signer = recoverSignature(
+            hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey, _AZTECaddress)),
+            _signature
+        );
+        require(_account == signer, 'signer must be the account');
+        accountMapping[_account] = _linkedPublicKey;
+        userToAZTECAccountMapping[_account] = _AZTECaddress;
+
+        emit Addresses(_account, signer);
+        emit RegisterExtension(_account, _linkedPublicKey, _spendingPublicKey);
+    }
+
+    /**
+    * @dev Perform a confidential transfer, mediated by a smart contracrt
+    * @param _proofId - uint24 proofId
+    * @param _registryOwner - address of the note registry owner
+    * @param _proofData - data generated from proof construction, which is used to validate the proof
+    * @param _spender - address that will be spending the notes
+    * @param _proofSignature - EIP712 signature used to approve/revoke permission for the proof
+    * to be spent
+    */
+    function confidentialTransferFrom(
+        uint24 _proofId,
+        address _registryOwner,
+        bytes memory _proofData,
+        address _spender,
+        bytes memory _proofSignature
+    ) public {
+        bytes memory proofOutputs = ace.validateProof(_proofId, address(this), _proofData);
+
+        if(_proofSignature.length != 0) {
+            IZkAsset(_registryOwner).approveProof(_proofId, proofOutputs, _spender, true, _proofSignature);
+        }
+        IZkAsset(_registryOwner).confidentialTransferFrom(_proofId, proofOutputs.get(0));
+    }
+
+    /**
+    * @dev Deposit ERC20 tokens into zero-knowledge notes in a transaction mediated via the GSN. Called by a user
+    * @param _registryOwner - owner of the zkAsset
+    * @param _owner - owner of the ERC20s being deposited
+    * @param _proofHash - hash of the zero-knowledge deposit proof
+    * @param _proofData - cryptographic data associated with the zero-knowledge proof
+    * @param _value - number of ERC20s being deposited
+     */
+    function deposit(
+        address _registryOwner,
+        address _owner,
+        bytes32 _proofHash,
+        bytes memory _proofData,
+        uint256 _value
+    ) public {
+        bytes memory proofOutputs = ace.validateProof(
+            JOIN_SPLIT_PROOF,
+            address(this),
+            _proofData
+        );
+
+        if (_owner != _msgSender()) {
+            require(
+                userToAZTECAccountMapping[_owner] == _msgSender(),
+                "Sender has no permission to deposit on owner's behalf."
+            );
+
+            (,
+            bytes memory proofOutputNotes,
+            ,
+            ) = proofOutputs.get(0).extractProofOutput();
+            uint256 numberOfNotes = proofOutputNotes.getLength();
+            for (uint256 i = 0; i < numberOfNotes; i += 1) {
+                (address owner,,) = proofOutputNotes.get(i).extractNote();
+                require(owner == _owner, "Cannot deposit note to other account if sender is not the same as owner.");
+            }
+        }
+
+        (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
+        IERC20Mintable linkedToken = IERC20Mintable(linkedTokenAddress);
+
+        linkedToken.transferFrom(
+            _owner,
+            address(this),
+            _value
+        );
+
+        linkedToken.approve(address(ace), _value);
+
+        ace.publicApprove(_registryOwner, _proofHash, _value);
+
+        IZkAsset(_registryOwner).confidentialTransferFrom(
+            JOIN_SPLIT_PROOF,
+            proofOutputs.get(0)
+        );
+    }
+
+    /**
+    * @dev Approve a registry to spend up to a number of tokens, for a particular proof
+    * @param _registryOwner - address that is being approved to spend the tokens
+    * @param _proofHash - hash of the proof which is being approved to result in the spending of tokens
+    * @param _value - numer of tokens spending is approved up to
+    */
+    function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) public {
+        ace.publicApprove(_registryOwner, _proofHash, _value);
+    }
+
+    /**
+    * @dev Emits an event, annoucing that the relayed call has been successfully executed
+    * @param context - second argument in the tuple returned by acceptRelayedCall
+    * @param success - bool specifying whether the relayed call was successfully executed
+    * @param actualCharge - estimate of the transaction gas cost
+    * @param preRetVal - the return value of preRelayedCall
+    */
+    function _postRelayedCall(bytes memory context, bool success, uint256 actualCharge, bytes32 preRetVal) internal {
+        (bytes memory approveData) = abi.decode(context, (bytes));
+        emit GSNTransactionProcessed(keccak256(approveData), success, actualCharge);
+    }
+}

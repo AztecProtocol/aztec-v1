@@ -1,0 +1,14 @@
+/* global artifacts */
+const BN = require('bn.js');
+
+const ZkAsset = artifacts.require('./ZkAssetDetailed.sol');
+
+const DAIaddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
+const DAI_SCALING_FACTOR = new BN('10000000000000000').toString(10);
+const aceAddress = '0xb9Bb032206Da5B033a47E62D905F26269DAbE839';
+const name = 'zkDAI';
+const symbol = 'zkDAI';
+
+module.exports = (deployer) => {
+    return deployer.deploy(ZkAsset, aceAddress, DAIaddress, DAI_SCALING_FACTOR, name, symbol);
+};

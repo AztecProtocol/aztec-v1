@@ -8,8 +8,5 @@ const DividendInterface = artifacts.require('./DividendInterface.sol');
 Dividend.abi = DividendInterface.abi;
 
 module.exports = (deployer) => {
-    return deployer.deploy(Dividend).then(async ({ address: dividendAddress }) => {
-        const ace = await ACE.at(ACE.address);
-        await ace.setProof(proofs.DIVIDEND_PROOF, dividendAddress);
-    });
+    return deployer.deploy(Dividend)
 };

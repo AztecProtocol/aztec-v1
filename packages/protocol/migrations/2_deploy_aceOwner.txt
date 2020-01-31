@@ -1,0 +1,20 @@
+/* global artifacts */
+const ACEOwner = artifacts.require('./ACEOwner.sol');
+
+// Ethereum addresses that will own the multisig
+const owners = [
+    '0x7fb9f93Cc6614dDd76c893EC8b5310674aC3Fc5f',
+    '0x60bd35E6Fe653511e79903dfd826e942a152B6cF',
+    '0xD135B265B6C07bD7539bD56905bdB2cfBe332886',
+    '0xfE80adAF1cF5bd2933206c5f5563bfc11bbd6779',
+];
+
+// Number of required confirmations
+const required = 3;
+
+// Duration needed after a transaction is confirmed and before it becomes executable
+const secondsTimeLocked = 0;
+
+module.exports = (deployer) => {
+    deployer.deploy(ACEOwner, owners, required, secondsTimeLocked);
+};
