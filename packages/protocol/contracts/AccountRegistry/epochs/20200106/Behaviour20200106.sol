@@ -16,7 +16,19 @@ import "../../GSNRecipientTimestampSignature.sol";
  * @author AZTEC
  * Note the behaviour contract version naming convention is based on the date on which the contract
  * was created, in the format: YYYYMMDD
-    * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * 
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
 contract Behaviour20200106 is GSNRecipientTimestampSignature, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;

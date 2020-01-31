@@ -13,6 +13,19 @@ import "../../../interfaces/ProxyAdmin.sol";
  * @dev Interface definition for factories. Factory contracts have the responsibility of managing the full lifecycle of
  * Behaviour contracts, from deploy to eventual upgrade. They are owned by ACE, and all methods should only be callable
  * by ACE.
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
 contract NoteRegistryFactory is IAZTEC, Ownable  {
     event NoteRegistryDeployed(address behaviourContract);
