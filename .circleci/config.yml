@@ -56,7 +56,6 @@ jobs:
                     - ~/repo/packages/note-access/lib
                     - ~/repo/packages/dev-utils/lib
                     - ~/repo/packages/typed-data/lib
-                    -
     lint:
         working_directory: ~/repo
         docker:
