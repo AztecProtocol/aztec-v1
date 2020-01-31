@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* global artifacts, contract, expect */
 const { JoinSplitProof, ProofUtils, signer } = require('aztec.js');
 const { proofs } = require('@aztec/dev-utils');
@@ -417,7 +418,13 @@ contract('Account registry - relayer functionality', (accounts) => {
 
         const notDelegatedAddress = randomHex(20);
         await truffleAssert.reverts(
-            registryContract.confidentialTransferFrom(proofs.JOIN_SPLIT_PROOF, zkAsset.address, transferProofData, notDelegatedAddress, proofSignature),
+            registryContract.confidentialTransferFrom(
+                proofs.JOIN_SPLIT_PROOF,
+                zkAsset.address,
+                transferProofData,
+                notDelegatedAddress,
+                proofSignature,
+            ),
             'revert the note owner did not sign this proof',
         );
     });
