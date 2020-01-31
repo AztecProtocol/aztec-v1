@@ -30,7 +30,7 @@ contract('AccountRegistry', (accounts) => {
         });
 
         it('should be able to register the extension with a valid signature', async () => {
-            const { privateKey, address } = secp256k1.generateAccount();
+            const { privateKey, address, publicKey } = secp256k1.generateAccount();
 
             const { address: AZTECaddress } = secp256k1.generateAccount();
 
@@ -58,7 +58,7 @@ contract('AccountRegistry', (accounts) => {
                 address,
                 AZTECaddress,
                 keccak256('0x01'),
-                keccak256('0x0'),
+                `0x${publicKey.slice(4)}`,
                 sig,
                 { from: accounts[2] },
             );

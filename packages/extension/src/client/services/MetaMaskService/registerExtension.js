@@ -55,3 +55,31 @@ export default ({
 
     return data;
 };
+
+export const generateTypedData = ({
+    address,
+    linkedPublicKey,
+}) => {
+    const accountRegistryContract = Web3Service.contract('AccountRegistry');
+
+    const domainData = {
+        name: 'AccountRegistry',
+        version: '2',
+        verifyingContract: accountRegistryContract.address,
+    };
+
+    const message = {
+        account: address,
+        linkedPublicKey,
+    };
+
+    return {
+        types: {
+            EIP712Domain: domainParams,
+            AZTECAccount,
+        },
+        domain: domainData,
+        primaryType: 'AZTECAccount',
+        message,
+    };
+};
