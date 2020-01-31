@@ -13,10 +13,10 @@ import depositSteps from '~/ui/steps/deposit';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import DepositContent from '~/ui/views/DepositContent';
 
 const Deposit = ({
-    initialStep,
     currentAccount,
     assetAddress,
     transactions,
@@ -72,6 +72,7 @@ const Deposit = ({
             transactions: parsedTransactions,
             publicOwner,
             sender,
+            spender: sender,
             amount,
             numberOfOutputNotes,
             userAccessAccounts,
@@ -83,15 +84,14 @@ const Deposit = ({
     };
 
     return (
-        <AnimatedTransaction
-            initialStep={initialStep}
+        <StepsHandler
             fetchInitialData={fetchInitialData}
+            Content={DepositContent}
         />
     );
 };
 
 Deposit.propTypes = {
-    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
@@ -103,7 +103,6 @@ Deposit.propTypes = {
 };
 
 Deposit.defaultProps = {
-    initialStep: 0,
     numberOfOutputNotes: emptyIntValue,
     userAccess: [],
 };

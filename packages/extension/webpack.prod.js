@@ -6,6 +6,11 @@ const common = require('./webpack.common.js');
 const commonProduction = {
     mode: 'production',
     devtool: '',
+    resolve: {
+        alias: {
+            '~contracts': '@aztec/contract-artifacts/artifacts',
+        },
+    },
     optimization: {
         minimize: true,
         usedExports: true,
@@ -46,15 +51,6 @@ const prodApiConfig = merge(common, commonProduction, {
             }),
         ],
         concatenateModules: false,
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'vendors',
-                    chunks: 'all',
-                },
-            },
-        },
     },
 });
 

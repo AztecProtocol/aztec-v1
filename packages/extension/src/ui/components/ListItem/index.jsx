@@ -9,6 +9,7 @@ import {
     avatarSizesMap,
     fontSizeKeys,
     textColorNames,
+    sizeKeys,
 } from '~/ui/styles/guacamole-vars';
 import {
     themeType,
@@ -31,6 +32,7 @@ const ListItem = ({
     theme,
     size,
     textSize,
+    contentSpacingSize,
     profile,
     content,
     footnote,
@@ -63,7 +65,7 @@ const ListItem = ({
                 <Block
                     className="flex-free-expand"
                     align="left"
-                    left={spacingMapping[size]}
+                    left={spacingMapping[contentSpacingSize || size]}
                 >
                     {contentNode}
                 </Block>
@@ -99,6 +101,7 @@ ListItem.propTypes = {
     theme: themeType,
     size: PropTypes.oneOf(Object.keys(avatarSizesMap)),
     textSize: PropTypes.oneOf(['', 'inherit', ...fontSizeKeys]),
+    contentSpacingSize: PropTypes.oneOf(['', ...sizeKeys]),
     profile: profileShape,
     content: PropTypes.oneOfType([
         PropTypes.string,
@@ -116,6 +119,7 @@ ListItem.defaultProps = {
     theme: 'white',
     size: 's',
     textSize: '',
+    contentSpacingSize: '',
     profile: null,
     footnote: null,
     color: '',

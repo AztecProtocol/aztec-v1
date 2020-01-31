@@ -1,39 +1,19 @@
 export default {
-    confirm: {
-        title: 'Deposit',
-        submit: 'Create Proof',
-        explain: 'Check the above details are correct before proceeding.',
-    },
+    title: 'Wrap Tokens',
     approve: {
-        title: 'Approve Spend',
-        submit: 'Approve',
-        amount: 'Deposit',
-        explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
-        erc20: {
-            title: 'Approve Allowance',
-            submit: 'Approve',
-            explain: 'To proceed, please approve the AZTEC contract to spend tokens on your behalf.',
-        },
+        description: 'Please check the information below is correct before approving the AZTEC contract to spend tokens via MetaMask.',
+        allowance: 'Allowance',
+        submit: 'Approve Spend',
+        public: 'Public Approve',
+    },
+    confirm: {
+        description: `The SDK has generated new notes for this transaction.
+            If everything looks good hit send!
+        `,
     },
     send: {
-        title: 'Send Transaction',
-        submit: 'Send',
-        explain: 'AZTEC sends transactions through the Gas Station Network so you don\'t pay gas.',
-    },
-    transaction: {
-        _: 'Deposit Transaction',
-        description: '',
-    },
-    from: 'From',
-    amount: {
-        total: 'Total amount',
-    },
-    step: {
-        approve: {
-            erc20: 'Approve ERC20',
-        },
-        proof: {
-            create: 'Create Proof',
-        },
+        description: `The SDK has generated new notes for this transaction.
+            If everything looks good hit send!
+        `,
     },
 };

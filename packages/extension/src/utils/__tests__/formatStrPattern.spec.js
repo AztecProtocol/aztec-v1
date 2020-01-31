@@ -1,4 +1,6 @@
-import formatStrPattern from '../formatStrPattern';
+import {
+    formatStrPattern,
+} from '../format';
 
 let warnings = [];
 const consoleSpy = jest.spyOn(console, 'warn')

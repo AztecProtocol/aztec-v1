@@ -21,8 +21,9 @@ export default class Iframe {
         this.height = height;
         this.style = style;
         this.frame = null;
+        this.frameReady = false;
         this.onReadyEventName = onReadyEventName;
-        this.onReadyCallback = null;
+        this.onReadyCallbacks = [];
     }
 
     bindAwaitFrameReady() {
@@ -38,10 +39,21 @@ export default class Iframe {
             && event.origin === this.url.origin
         ) {
             this.unbindAwaitFrameReady();
-            this.onReadyCallback(this.frame);
-            this.onReadyCallback = null;
+            this.frameReady = true;
+            this.onReadyCallbacks.forEach(cb => cb(this.frame));
+            this.onReadyCallback = [];
         }
     };
+
+    async ensureCreated() {
+        return new Promise((resolve) => {
+            if (this.frameReady) {
+                resolve();
+            } else {
+                this.onReadyCallbacks.push(resolve);
+            }
+        });
+    }
 
     async init() {
         if (!this.onReadyEventName) {
@@ -63,7 +75,7 @@ export default class Iframe {
         }
 
         return new Promise((resolve) => {
-            this.onReadyCallback = resolve;
+            this.onReadyCallbacks = [resolve];
             this.bindAwaitFrameReady();
             this.create();
         });

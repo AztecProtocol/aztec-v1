@@ -40,6 +40,7 @@ const ProfileSvg = ({
             className={classnames(
                 className,
                 styles.profile,
+                styles[`size-${size}`],
             )}
             title={alt || address}
         >

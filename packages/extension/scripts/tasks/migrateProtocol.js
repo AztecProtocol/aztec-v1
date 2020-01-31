@@ -6,6 +6,7 @@ export default function migrateProtocol({
 } = {}) {
     return migrateContractsInstance({
         packageName: 'protocol',
+        network: 'test',
         onError,
         onClose,
     });

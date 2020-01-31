@@ -4,6 +4,7 @@ import {
     Route,
 } from 'react-router-dom';
 import Popup from '~/ui/components/Popup';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
 import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
 import routes from '../config/routes';
 import {
@@ -47,38 +48,57 @@ const MockRoute = ({
 }) => {
     const nameArr = name.split('.');
     const {
+        steps,
         initialStep,
         step,
+        Content,
+        gsnConfig: customGsnConfig,
     } = getConfigByName(nameArr) || {};
     const initialData = getInitialDataByName(nameArr);
     const {
         currentAccount,
         ...props
     } = initialData;
-    const contentNode = Component
-        ? (
+    let contentNode;
+    if (Content) {
+        contentNode = (
+            <StepsHandler
+                steps={steps}
+                initialStep={initialStep}
+                initialData={initialData}
+                Content={Content}
+            />
+        );
+    } else if (Component) {
+        contentNode = (
             <Component
                 {...props}
                 site={sites[0]}
                 currentAccount={currentAccount || {
                     address: addresses[0],
                 }}
-                gsnConfig={gsnConfig}
+                gsnConfig={customGsnConfig || gsnConfig}
                 initialStep={initialStep}
+                goToPage={() => {}}
             />
-        )
-        : (
+        );
+    } else {
+        contentNode = (
             <AnimatedTransaction
                 steps={[step]}
                 initialData={initialData}
             />
         );
+    }
 
     return (
         <Route
             path={path}
             component={() => (
-                <Popup site={sites[0]}>
+                <Popup
+                    site={sites[0]}
+                    onClose={() => {}}
+                >
                     {contentNode}
                 </Popup>
             )}
@@ -89,10 +109,12 @@ const MockRoute = ({
 MockRoute.propTypes = {
     path: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
+    Content: PropTypes.func,
     Component: PropTypes.func,
 };
 
 MockRoute.defaultProps = {
+    Content: null,
     Component: null,
 };
 

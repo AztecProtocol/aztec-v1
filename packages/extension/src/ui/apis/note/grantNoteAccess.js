@@ -11,9 +11,9 @@ export default function grantNoteAccess({
         decryptedViewingKey,
         metadata: prevMetadata,
     },
-    accounts,
+    userAccessAccounts,
 }) {
-    const noteAccess = accounts.map(({
+    const noteAccess = userAccessAccounts.map(({
         address,
         linkedPublicKey,
     }) => {

@@ -3,46 +3,65 @@ import PropTypes from 'prop-types';
 import {
     gsnConfigShape,
 } from '~/ui/config/propTypes';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import { linkAccountSteps } from '~/ui/config/steps';
+import ConnectionService from '~uiModules/services/ConnectionService';
+import returnAndClose from '~uiModules/helpers/returnAndClose';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import RegisterContent from '~/ui/views/RegisterContent';
+import registerSteps from '~/ui/steps/register';
+import apis from '~uiModules/apis';
 
 const RegisterAddress = ({
     currentAccount,
-    initialStep,
-    initialData,
+    domainRegistered,
     gsnConfig,
+    goToPage,
 }) => {
     const {
         isGSNAvailable,
     } = gsnConfig;
-    const steps = linkAccountSteps[isGSNAvailable ? 'gsn' : 'metamask'];
+    const steps = registerSteps[isGSNAvailable ? 'gsn' : 'metamask'].slice(1);
+
+    const fetchInitialData = async () => {
+        const {
+            keyStore,
+            pwDerivedKey,
+        } = await apis.auth.getAccountKeys();
+
+        return {
+            ...currentAccount,
+            keyStore,
+            pwDerivedKey,
+            isGSNAvailable,
+        };
+    };
+
+    const handleClose = async (data) => {
+        if (domainRegistered) {
+            returnAndClose(data);
+        } else {
+            goToPage('loading');
+            ConnectionService.returnToClient(data);
+        }
+    };
 
     return (
-        <AnimatedTransaction
+        <StepsHandler
             steps={steps}
-            initialStep={initialStep}
-            initialData={{
-                ...initialData,
-                ...currentAccount,
-                isGSNAvailable,
-            }}
+            fetchInitialData={fetchInitialData}
+            Content={RegisterContent}
+            onExit={handleClose}
         />
     );
 };
 
 RegisterAddress.propTypes = {
-    initialStep: PropTypes.number,
-    initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string.isRequired,
     }).isRequired,
+    domainRegistered: PropTypes.bool.isRequired,
     gsnConfig: gsnConfigShape.isRequired,
-};
-
-RegisterAddress.defaultProps = {
-    initialStep: 0,
-    initialData: {},
+    goToPage: PropTypes.func.isRequired,
 };
 
 export default RegisterAddress;
