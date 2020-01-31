@@ -31,14 +31,17 @@ const uiResolvers = {
             const { spendingPublicKey, ...rest } = await fetchAztecAccount({
                 address,
             });
-
-            const compressedPublicKey = EthCrypto.publicKey.compress(
-                spendingPublicKey.slice(2),
-            );
-
+            if (spendingPublicKey) {
+                const compressedPublicKey = EthCrypto.publicKey.compress(
+                    spendingPublicKey.slice(2),
+                );
+                return {
+                    ...rest,
+                    spendingPublicKey: `0x${compressedPublicKey}`,
+                };
+            }
             return {
                 ...rest,
-                spendingPublicKey: `0x${compressedPublicKey}`,
             };
         },
         note: async (_, args) => {

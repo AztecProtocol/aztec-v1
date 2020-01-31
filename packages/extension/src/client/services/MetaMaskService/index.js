@@ -1,11 +1,15 @@
 import ethSigUtil from 'eth-sig-util';
+import EthCrypto from 'eth-crypto';
+import * as ethUtil from 'ethereumjs-util';
+import typedData from '@aztec/typed-data';
 import Web3Service from '~/client/services/Web3Service';
 import {
     SIGNING_PROVIDER,
 } from '~/config/constants';
-import registerExtension from './registerExtension';
+import registerExtension, { generateTypedData } from './registerExtension';
 import signNote from './signNote';
 import signProof from './signProof';
+
 
 const handleAction = async (action, params) => {
     let response = {};
@@ -56,23 +60,24 @@ const handleAction = async (action, params) => {
         }
         case 'metamask.register.extension': {
             const eip712Data = registerExtension(params);
-            const method = 'eth_signTypedData_v3';
+            const method = 'eth_signTypedData_v4';
             const { result } = await Web3Service.sendAsync({
                 method,
                 params: [address, eip712Data],
                 from: address,
             });
 
-            const publicKey = ethSigUtil.extractPublicKey({
-                data: eip712Data,
-                sig: result,
-            });
+            const hash = ethSigUtil.TypedDataUtils.sign(generateTypedData(params));
+            const signature = ethUtil.toBuffer(result);
+            const sigParams = ethUtil.fromRpcSig(signature);
+            const publicKey = ethUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
 
 
             response = {
                 signature: result,
                 publicKey,
             };
+
             break;
         }
         case 'metamask.eip712.signNotes': {
@@ -89,7 +94,7 @@ const handleAction = async (action, params) => {
                     challenge,
                     sender,
                 });
-                const method = 'eth_signTypedData_v3';
+                const method = 'eth_signTypedData_v4';
                 return Web3Service.sendAsync({
                     method,
                     params: [address, noteSchema],
