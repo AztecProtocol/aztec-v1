@@ -1,6 +1,7 @@
 import {
     connectionRequestEvent,
     uiReadyEvent,
+    sendActionEvent,
 } from '~/config/event';
 import {
     warnLog,
@@ -10,7 +11,6 @@ import {
 } from '~/utils/random';
 import LRU from '~/utils/caches/LRU';
 import Web3Service from '~/helpers/Web3Service';
-import listenToInitialAction from '../utils/listenToInitialAction';
 import listenToConnectionApproval from '../utils/listenToConnectionApproval';
 
 class ConnectionManager {
@@ -24,20 +24,17 @@ class ConnectionManager {
         this.clientRequestId = '';
     }
 
-    async openConnection() {
+    async openConnection(listener) {
         if (this.port) {
             warnLog('Connection has been established.');
-            return null;
+            return true;
         }
 
         this.clientId = randomId();
 
-        const actionPromise = listenToInitialAction();
-        const portPromise = listenToConnectionApproval();
+        this.subscribeToBackgroundAction(listener);
 
-        window.parent.postMessage({
-            type: uiReadyEvent,
-        }, '*');
+        const portPromise = listenToConnectionApproval();
 
         window.parent.postMessage({
             type: connectionRequestEvent,
@@ -46,33 +43,42 @@ class ConnectionManager {
             sender: 'UI_CLIENT',
         });
 
-        const [
-            action,
-            {
-                port,
-                networkConfig,
-            },
-        ] = await Promise.all([
-            actionPromise,
-            portPromise,
-        ]);
-
         const {
-            requestId,
-            type,
-            data,
-        } = action;
+            port,
+            networkConfig,
+        } = await portPromise;
 
-        this.clientRequestId = requestId;
         this.port = port;
         this.port.onmessage = this.handlePortResponse;
 
         await Web3Service.init(networkConfig);
 
-        return {
-            type,
-            data,
-        };
+        window.parent.postMessage({
+            type: uiReadyEvent,
+        }, '*');
+
+        return true;
+    }
+
+    subscribeToBackgroundAction(actionListener) {
+        window.addEventListener('message', (e) => {
+            if (e.data.type === sendActionEvent) {
+                const {
+                    action,
+                } = e.data;
+                const {
+                    requestId,
+                    type,
+                    data,
+                } = action;
+
+                this.clientRequestId = requestId;
+                actionListener({
+                    type,
+                    data,
+                });
+            }
+        });
     }
 
     handlePortResponse = ({ data }) => {

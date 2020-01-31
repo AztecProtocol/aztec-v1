@@ -289,6 +289,7 @@ contract('ZkAsset', (accounts) => {
 
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
+            console.log(transferSignatures);
             const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, {
                 from: accounts[0],
             });

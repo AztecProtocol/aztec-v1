@@ -109,8 +109,13 @@ export const domains = [
 ];
 
 export const gsnConfig = {
-    isGSNAvailable: false,
+    isGSNAvailable: true,
     proxyContract: randomAddress(),
+};
+
+export const invalidGSNConfig = {
+    isGSNAvailable: false,
+    proxyContract: '',
 };
 
 export const notes = [

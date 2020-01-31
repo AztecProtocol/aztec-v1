@@ -115,6 +115,13 @@ module.exports = {
         reporter: 'spec',
     },
     networks: {
+        test: {
+            provider: new Web3.providers.HttpProvider('http://localhost:8545'),
+            gas: 6500000,
+            gasPrice: toHex(toWei('1', 'gwei')),
+            network_id: '*', // eslint-disable-line camelcase
+            port: 8545,
+        },
         development: {
             provider: engine,
             gas: 6500000,

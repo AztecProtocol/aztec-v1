@@ -7,6 +7,7 @@ export default async function linkAccountToMetaMask({
     const {
         publicKey: spendingPublicKey,
         signature,
+        error,
     } = await ConnectionService.post({
         action: 'metamask.register.extension',
         data: {
@@ -14,6 +15,12 @@ export default async function linkAccountToMetaMask({
             linkedPublicKey,
         },
     }) || {};
+
+    if (error) {
+        return {
+            error,
+        };
+    }
 
     return {
         spendingPublicKey,

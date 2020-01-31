@@ -41,6 +41,11 @@ const stepConfirm = {
     submitTextKey: 'transaction.send.submit',
 };
 
+const stepConfirmViaGSN = {
+    ...stepConfirm,
+    descriptionKey: 'transaction.gsn.send.description',
+};
+
 const stepSend = {
     name: 'send',
     descriptionKey: 'note.access.send.description',
@@ -96,7 +101,7 @@ export default {
     gsn: [
         stepApprove,
         stepBatchSign,
-        stepConfirm,
+        stepConfirmViaGSN,
         stepSendViaGSN,
     ],
     metamask: [

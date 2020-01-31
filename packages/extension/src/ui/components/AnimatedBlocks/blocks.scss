@@ -180,8 +180,15 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
   }
 }
 
+.fx-hide-title-footnote {
+  .title-footnote {
+    display: none;
+  }
+}
+
 .fx-hide-content-footnote {
   .content-footnote {
+    // TODO - make the transition smoother
     display: none;
   }
 }

@@ -2,6 +2,7 @@
 
 .block {
   position: relative;
+  overflow: hidden;
 
   &.signed {
     background: map-get($color-map, 'green');

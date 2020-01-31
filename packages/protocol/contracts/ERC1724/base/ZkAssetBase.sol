@@ -2,9 +2,11 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "../../ACE/ACE.sol";
+import "../../libs/NoteUtils.sol";
+import "../../interfaces/IACE.sol";
 import "../../interfaces/IAZTEC.sol";
 import "../../interfaces/IZkAsset.sol";
+import "../../interfaces/IERC20Mintable.sol";
 import "../../libs/LibEIP712.sol";
 import "../../libs/MetaDataUtils.sol";
 import "../../libs/ProofUtils.sol";
@@ -52,7 +54,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         ")"
     ));
 
-    ACE public ace;
+    IACE public ace;
     IERC20Mintable public linkedToken;
 
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
@@ -73,7 +75,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             keccak256(bytes(EIP712_DOMAIN_VERSION)),
             bytes32(uint256(address(this)))
         ));
-        ace = ACE(_aceAddress);
+        ace = IACE(_aceAddress);
         linkedToken = IERC20Mintable(_linkedTokenAddress);
         ace.createNoteRegistry(
             _linkedTokenAddress,
@@ -99,7 +101,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     *
     * @param _proofId - id of proof to be validated. Needs to be a balanced proof.
     * @param _proofData - bytes variable outputted from a proof verification contract, representing
-    * transfer instructions for the ACE
+    * transfer instructions for the IACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
@@ -119,7 +121,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * destroying input notes.
     *
     * @param _proofData - bytes variable outputted from a proof verification contract, representing
-    * transfer instructions for the ACE
+    * transfer instructions for the IACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
@@ -293,7 +295,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
-    * transfer instructions for the ACE
+    * transfer instructions for the IACE
     */
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,
