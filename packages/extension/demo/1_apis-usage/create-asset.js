@@ -47,7 +47,7 @@
     const erc20Address = deployedERC20.address;
     addAssetStatus(`✓ ERC20 deployed - ${erc20Address}`, true);
 
-    addAssetStatus('Deploying ZkAsset...');
+    addAssetStatus('Deploying zkAsset...');
     const scalingFactor = document.getElementById('new-asset-scaling-factor').value;
     const aceAddress = window.aztec.web3.getAddress('ACE');
     const ZkAsset = await fetchContract('ZkAssetOwnable');
@@ -60,7 +60,7 @@
       ],
     );
     const zkAssetAddress = deployedZkAsset.address;
-    addAssetStatus(`✓ ZkAsset deployed - ${zkAssetAddress}`, true);
+    addAssetStatus(`✓ zkAsset deployed - ${zkAssetAddress}`, true);
 
     if (value) {
       const account = window.aztec.web3.account();
@@ -76,7 +76,7 @@
       addAssetStatus(`✓ ERC20 balance = ${value}`, true);
     }
 
-    addAssetStatus(`✓ ZkAsset created with initial ERC20 balance = ${value}`, true);
+    addAssetStatus(`✓ zkAsset created with initial ERC20 balance = ${value}`, true);
 
     await sleep(500);
 
