@@ -80,7 +80,7 @@ contract('Dividend Validator', (accounts) => {
             const data = proof.encodeABI();
             const result = await dividendValidator.validateDividend(data, sender, bn128.CRS, { from: sender });
             expect(result).to.equal(proof.eth.outputs);
-        })
+        });
 
         it('should validate proof when za = K_MAX', async () => {
             // (k1 * zb) = (k2 * za) + k3
@@ -238,7 +238,7 @@ contract('Dividend Validator', (accounts) => {
         it('should fail to validate proof when zb = 0', async () => {
             // (k1 * zb) = (k2 * za) + k3
             // (10 * 0) = (3 * 0) + 0
-            // results in \bar{k3} = 0, which upon exponentiating will produce a 
+            // results in \bar{k3} = 0, which upon exponentiating will produce a
             // point at infinity. This should revert
             const za = 0;
             const zb = 0;
@@ -263,7 +263,7 @@ contract('Dividend Validator', (accounts) => {
         it('should fail for za > K_MAX', async () => {
             // (k1 * zb) = (k2 * za) + k3
             // (1 * 1) = (0 * K_MAX + 1) + 1
-            //  => K_MAX - 1 = 1 
+            //  => K_MAX - 1 = 1
 
             const za = K_MAX + 1;
             const zb = 1;
@@ -286,7 +286,7 @@ contract('Dividend Validator', (accounts) => {
         it('should fail for for zb > K_MAX', async () => {
             // (k1 * zb) = (k2 * za) + k3
             // (1 * K_MAX + 100) = (1 * K_MAX - 1) + 101
-            //  => K_MAX - 1 = 1 
+            //  => K_MAX - 1 = 1
             const za = K_MAX - 1;
             const zb = K_MAX + 100;
 
@@ -310,8 +310,8 @@ contract('Dividend Validator', (accounts) => {
             // (1 * 4294967293) = (1 * 4294967295) + 0
             //  => 4294967295 = 4294967295
 
-            const za = 2**32 - 1; // 4294967295
-            const zb = 2**32 - 1; // 4294967295
+            const za = 2 ** 32 - 1; // 4294967295
+            const zb = 2 ** 32 - 1; // 4294967295
 
             const k1 = 1;
             const k2 = 1;
