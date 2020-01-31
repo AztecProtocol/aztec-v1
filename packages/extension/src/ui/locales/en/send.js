@@ -1,21 +1,27 @@
 export default {
-    confirm: {
-        title: 'Send',
-        submit: 'Create Proof',
-        explain: 'Check the above details are correct before proceeding.',
-        sendAmount: 'Send',
+    title: 'Send ZkTokens',
+    approve: {
+        description: `A signature is required to send ZkTokens.
+            The SDK will pick the most suitable notes for the transaction.
+            Check the transaction details are correct before proceeding.
+        `,
+        submit: 'Looks Good!',
     },
-    notes: {
-        title: 'Approve Note Spending',
-        submit: 'Sign',
+    approved: 'Approved',
+    sign: {
+        description: `A MetaMask signature is required to send ZkTokens.
+            The signature should contain the following values:
+        `,
+    },
+    confirm: {
+        description: `A MetaMask signature is required to send ZkTokens.
+            The signature should contain the following values:
+        `,
     },
     send: {
-        title: 'Send',
-        submit: 'Send',
-        explain: 'AZTEC sends transactions through the Gas Station Network so you don\'t pay gas.',
+        step: 'Sending ZkTokens',
+        description: `A MetaMask signature is required to send ZkTokens.
+            The signature should contain the following values:`,
     },
-    transaction: {
-        _: 'Send Transaction',
-        description: '',
-    },
+    recipient: 'Recipient',
 };

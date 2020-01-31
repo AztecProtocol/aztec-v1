@@ -1,17 +1,12 @@
+/* eslint-disable no-alert */
 import {
     randomInt,
 } from '~/utils/random';
 import sleep from '~/utils/sleep';
 import realApis from '~/ui/apis';
 import {
-    emptyIntValue,
-} from '~/ui/config/settings';
-import {
     addresses,
     assets,
-    pastTransactions,
-    randomRawNote,
-    generate,
 } from './data';
 
 const mock = async (data) => {
@@ -22,6 +17,20 @@ const mock = async (data) => {
         timestamp: Date.now(),
     };
     return fakeData;
+};
+
+const mockSigningApi = (message) => {
+    const signed = window.confirm(message);
+    let error = null;
+    if (!signed) {
+        error = {
+            message: 'User denied transaction.',
+        };
+    }
+    return {
+        success: !error,
+        error,
+    };
 };
 
 const mergeApis = (defaultApis, customApis = {}) => {
@@ -42,10 +51,7 @@ export default mergeApis(realApis, {
         getCurrentUser: () => ({
             address: addresses[0],
         }),
-        createKeyStore: () => ({
-            linkedPublicKey: 'linked_public_key',
-        }),
-        generateLinkedPublicKey: realApis.auth.generateLinkedPublicKey,
+        linkAccountToMetaMask: () => mockSigningApi('Link accounts?'),
     },
     account: {
         getExtensionAccount: address => ({
@@ -62,53 +68,25 @@ export default mergeApis(realApis, {
     asset: {
         getAssets: async () => assets,
         getDomainAssets: async () => assets,
-        getPastTransactions: async (assetAddress = '', count = 2) => {
-            const transactions = !assetAddress
-                ? pastTransactions
-                : pastTransactions
-                    .filter(({ asset }) => asset.address === assetAddress);
-
-            return !count
-                ? transactions
-                : transactions.slice(0, count);
+        approveERC20Allowance: ({
+            requestedAllowance,
+        }) => {
+            const {
+                error,
+            } = mockSigningApi('Approve ERC20 Allowance?');
+            return {
+                requestedAllowance: !error ? requestedAllowance : 0,
+                error,
+            };
         },
+        confidentialTransfer: () => mockSigningApi('Run confidentialTransfer?'),
     },
     note: {
         fetchNote: noteHash => ({
             noteHash,
-            value: randomInt(100),
+            value: randomInt(10000),
             asset: assets[0],
         }),
-    },
-    proof: {
-        createNoteFromBalance: ({
-            numberOfInputNotes: customNumberOfInputNotes,
-            numberOfOutputNotes: customNumberOfOutputNotes,
-        }) => {
-            const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-                ? customNumberOfInputNotes
-                : 5;
-            const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-                ? customNumberOfOutputNotes
-                : 5;
-            const remainderNote = numberOfOutputNotes > 0
-                ? randomRawNote()
-                : null;
-            const inputNotes = generate(numberOfInputNotes, randomRawNote);
-            const outputNotes = generate(numberOfOutputNotes, randomRawNote);
-            if (remainderNote) {
-                outputNotes.push(remainderNote);
-            }
-
-            return {
-                proof: {
-                    inputNotes,
-                    outputNotes,
-                },
-                inputNotes,
-                outputNotes,
-                remainderNote,
-            };
-        },
+        signProof: () => mockSigningApi('Sign notes?'),
     },
 });

@@ -1,4 +1,5 @@
 import * as aztec from 'aztec.js';
+import { keccak256 } from 'web3-utils';
 import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~/config/constants';
@@ -195,8 +196,11 @@ export default async function createNoteFromBalance({
         publicOwner,
     );
 
+    const proofHash = keccak256(proof.eth.outputs);
+
     return {
         proof,
+        proofHash,
         inputNotes,
         outputNotes,
         remainderNote,

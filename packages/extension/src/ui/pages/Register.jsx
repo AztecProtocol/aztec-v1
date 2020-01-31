@@ -3,41 +3,39 @@ import PropTypes from 'prop-types';
 import {
     gsnConfigShape,
 } from '~/ui/config/propTypes';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import { registerSteps } from '~/ui/config/steps';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import RegisterContent from '~/ui/views/RegisterContent';
+import registerSteps from '~/ui/steps/register';
 
 const Register = ({
-    initialStep,
     currentAccount,
     gsnConfig,
 }) => {
     const {
         isGSNAvailable,
     } = gsnConfig;
+    const {
+        address,
+    } = currentAccount;
     const steps = registerSteps[isGSNAvailable ? 'gsn' : 'metamask'];
 
     return (
-        <AnimatedTransaction
+        <StepsHandler
             steps={steps}
-            initialStep={initialStep}
             initialData={{
-                ...currentAccount,
+                address,
                 isGSNAvailable,
             }}
+            Content={RegisterContent}
         />
     );
 };
 
 Register.propTypes = {
-    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
     gsnConfig: gsnConfigShape.isRequired,
-};
-
-Register.defaultProps = {
-    initialStep: 0,
 };
 
 export default Register;

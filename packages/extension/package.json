@@ -1,5 +1,6 @@
 {
     "name": "@aztec/sdk",
+    "description": "NPM package for AZTEC SDK",
     "sideEffects": [
         "**/*.css",
         "**/*.scss"
@@ -50,6 +51,7 @@
         "graphql": "^14.4.2",
         "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
+        "highlight.js": "^9.18.0",
         "html-webpack-plugin": "^3.2.0",
         "jest": "^24.8.0",
         "jspdf": "^1.5.3",
@@ -77,9 +79,9 @@
         "tweetnacl": "^1.0.1",
         "tweetnacl-util": "^0.15.0",
         "uuid": "^3.3.3",
-        "web3": "1.2.1",
+        "web3": "1.2.2",
         "web3-eth-abi": "^1.2.4",
-        "web3-utils": "1.2.1",
+        "web3-utils": "1.2.2",
         "webpack": "4.41.2",
         "webpack-cli": "3.3.10",
         "webpack-dev-server": "^3.8.0",

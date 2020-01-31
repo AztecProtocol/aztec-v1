@@ -1,6 +1,6 @@
 {
   "name": "@aztec/protocol",
-  "description": "AZTEC smart contract repository",
+  "description": "Main AZTEC smart contract repository",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {

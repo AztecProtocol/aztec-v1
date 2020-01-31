@@ -1,108 +1,121 @@
-import DepositConfirm from '~/ui/views/DepositConfirm';
-import ERC20AllowanceApprove from '~/ui/views/ERC20AllowanceApprove';
-import DepositApprove from '~/ui/views/DepositApprove';
-import TransactionSend from '~/ui/views/TransactionSend';
 import apis from '~uiModules/apis';
-
-const stepConfirm = {
-    titleKey: 'deposit.confirm.title',
-    tasks: [
-        {
-            name: 'proof',
-            run: apis.proof.deposit,
-        },
-    ],
-    content: DepositConfirm,
-    submitTextKey: 'deposit.confirm.submit',
-};
 
 const stepApproveERC20 = {
     name: 'approveERC20',
-    titleKey: 'deposit.approve.erc20.title',
+    descriptionKey: 'deposit.approve.description',
+    blockStyle: 'linked',
     tasks: [
         {
             type: 'sign',
-            name: 'approve',
             run: apis.asset.approveERC20Allowance,
         },
     ],
-    content: ERC20AllowanceApprove,
-    contentProps: {
-        explainKey: 'deposit.approve.erc20.explain',
-    },
-    submitTextKey: 'deposit.approve.erc20.submit',
+    submitTextKey: 'transaction.approve.submit',
 };
 
-const stepApprove = {
-    titleKey: 'deposit.approve.title',
+const stepConfirm = {
+    name: 'confirmTransaction',
+    descriptionKey: 'transaction.gsn.send.description',
+    blockStyle: 'overlapped',
     tasks: [
         {
-            type: 'sign',
-            name: 'approve',
-            run: apis.ace.publicApprove,
+            run: apis.proof.deposit,
         },
     ],
-    content: DepositApprove,
-    submitTextKey: 'deposit.approve.submit',
+    submitTextKey: 'transaction.send.submit',
 };
 
 const stepTransferViaGSN = {
-    titleKey: 'deposit.send.title',
+    name: 'send',
+    descriptionKey: 'deposit.send.description',
+    blockStyle: 'sealed',
     tasks: [
         {
-            name: 'send',
-            run: apis.asset.confidentialTransferFrom,
+            titleKey: 'transaction.step.create.proof',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.sign',
+            run: apis.mock,
+        },
+        {
+            type: 'sign',
+            titleKey: 'deposit.approve.public',
+            run: apis.ace.publicApprove,
+        },
+        {
+            titleKey: 'transaction.step.relay',
         },
     ],
-    content: TransactionSend,
-    contentProps: {
-        descriptionKey: 'deposit.send.explain',
-    },
-    submitTextKey: 'deposit.send.submit',
+    showTaskList: true,
+    submitTextKey: 'deposit.approve.submit',
 };
 
 const stepSend = {
-    titleKey: 'deposit.send.title',
+    name: 'send',
+    descriptionKey: 'deposit.send.description',
+    blockStyle: 'sealed',
     tasks: [
         {
-            name: 'send',
+            titleKey: 'transaction.step.create.proof',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.sign',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.send',
             run: apis.asset.deposit,
         },
+        {
+            titleKey: 'transaction.confirmed',
+        },
     ],
-    content: TransactionSend,
-    contentProps: {
-        descriptionKey: 'deposit.send.explain',
-    },
-    submitTextKey: 'deposit.send.submit',
+    showTaskList: true,
+    submitTextKey: 'transaction.send.submit',
 };
 
 const stepSendViaGSN = {
-    titleKey: 'deposit.send.title',
+    name: 'send',
+    descriptionKey: 'transaction.gsn.send.description',
+    blockStyle: 'sealed',
     tasks: [
         {
-            name: 'send',
+            titleKey: 'transaction.step.create.proof',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.sign',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.relay',
             run: apis.asset.deposit,
         },
+        {
+            titleKey: 'transaction.confirmed',
+        },
     ],
-    content: TransactionSend,
-    submitTextKey: 'deposit.send.submit',
+    showTaskList: true,
+    autoStart: true,
+    submitTextKey: 'transaction.send.submit',
 };
 
 export default {
     gsn: [
-        stepConfirm,
         stepApproveERC20,
+        stepConfirm,
         stepSendViaGSN,
     ],
     gsnTransfer: [
-        stepConfirm,
         stepApproveERC20,
-        stepApprove,
+        stepConfirm,
         stepTransferViaGSN,
     ],
     metamask: [
-        stepConfirm,
         stepApproveERC20,
+        stepConfirm,
         stepSend,
     ],
 };
