@@ -306,7 +306,7 @@
             "name": "ace",
             "outputs": [
                 {
-                    "internalType": "contract ACE",
+                    "internalType": "contract IACE",
                     "name": "",
                     "type": "address"
                 }
