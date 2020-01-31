@@ -111,8 +111,8 @@ contract('Integration', (accounts) => {
             const za = 100;
             const zb = 5;
             const notionalNote = await note.create(aztecAccount.publicKey, 90);
-            const residualNote = await note.create(aztecAccount.publicKey, 4);
-            const targetNote = await note.create(aztecAccount.publicKey, 50);
+            const targetNote = await note.create(aztecAccount.publicKey, 4);
+            const residualNote = await note.create(aztecAccount.publicKey, 50);
 
             const proof = new DividendProof(notionalNote, residualNote, targetNote, sender, za, zb);
             const data = proof.encodeABI();
