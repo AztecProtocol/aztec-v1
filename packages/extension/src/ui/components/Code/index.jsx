@@ -1,38 +1,68 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import highlight from 'highlight.js';
-import './code.scss';
+import classnames from 'classnames';
+import styles from './code.scss';
 
-class Code extends PureComponent {
-    componentDidMount() {
-        const snippet = ReactDOM.findDOMNode(this.snippet); // eslint-disable-line react/no-find-dom-node
-        highlight.highlightBlock(snippet);
-    }
+const generateNodes = (str) => {
+    const codeNodes = [];
+    str.split('\n').forEach((line, i) => {
+        const [,
+            whitespaces,
+            attr,
+            colon,
+            val,
+            comma,
+        ] = line.match(/^(\s+'?)([a-z-]+)('?:\s+)(.+)(,\s{0,})$/i) || [];
+        if (!attr) {
+            codeNodes.push(`${line}\n`);
+        } else {
+            codeNodes.push(
+                whitespaces,
+                (
+                    <span
+                        key={`attr-${+i}`}
+                        className={styles.attr}
+                    >
+                        {attr}
+                    </span>
+                ),
+                colon,
+            );
 
-    setSnippetRef = (ref) => {
-        this.snippet = ref;
-    };
-
-    render() {
-        const {
-            className,
-            language,
-            children,
-        } = this.props;
-
-        return (
-            <pre className={className}>
-                <code
-                    className={language}
-                    ref={this.setSnippetRef}
+            const isStr = val.match(/^'.+'$/);
+            codeNodes.push((
+                <span
+                    key={`val-${+i}`}
+                    className={styles[isStr ? 'str' : 'val']}
                 >
-                    {children}
-                </code>
-            </pre>
-        );
-    }
-}
+                    {val}
+                </span>
+            ));
+            codeNodes.push(`${comma}\n`);
+        }
+    });
+
+    return codeNodes;
+};
+
+const Code = ({
+    className,
+    language,
+    children,
+}) => (
+    <pre
+        className={classnames(
+            className,
+            styles.code,
+        )}
+    >
+        <code
+            className={language}
+        >
+            {generateNodes(children)}
+        </code>
+    </pre>
+);
 
 Code.propTypes = {
     className: PropTypes.string,

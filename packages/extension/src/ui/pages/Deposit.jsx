@@ -72,6 +72,7 @@ const Deposit = ({
             transactions: parsedTransactions,
             publicOwner,
             sender,
+            spender: sender,
             amount,
             numberOfOutputNotes,
             userAccessAccounts,

@@ -1,10 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./base/ZkAssetOwnableBase.sol";
-import "../libs/ProofUtils.sol";
-import "../libs/SafeMath8.sol";
-
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * @title ZkAssetOwnable
