@@ -8,11 +8,14 @@ const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
 function createSignature(proxyAddress) {
     const { privateKey, address, publicKey } = secp256k1.generateAccount();
+    const { address: AZTECaddress } = secp256k1.generateAccount();
+
     const linkedPublicKey = keccak256('0x01');
     const domain = signer.generateAccountRegistryDomainParams(proxyAddress);
     const message = {
         account: address,
         linkedPublicKey,
+        AZTECaddress,
     };
 
     const encodedTypedData = typedData.encodeTypedData({
@@ -32,6 +35,7 @@ function createSignature(proxyAddress) {
         address,
         linkedPublicKey,
         spendingPublicKey: `0x${publicKey.slice(4)}`,
+        AZTECaddress,
         sig,
     };
 }

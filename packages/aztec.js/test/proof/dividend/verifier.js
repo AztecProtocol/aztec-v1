@@ -14,10 +14,10 @@ describe('Dividend Proof Verifier', () => {
     const notionalNoteValue = 90;
     const { publicKey } = secp256k1.generateAccount();
     let residualNote = {};
-    const residualNoteValue = 4;
+    const residualNoteValue = 50;
     const sender = randomHex(20);
     let targetNote = {};
-    const targetNoteValue = 50;
+    const targetNoteValue = 4;
 
     before(async () => {
         notionalNote = await note.create(publicKey, notionalNoteValue);
