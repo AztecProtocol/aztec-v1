@@ -262,24 +262,28 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
         bytes memory _signature
     ){
-        bytes32 v;
         bytes32 r;
         bytes32 s;
+        uint8 v;
+
         assembly {
             // memory map of signatures
             // 0x00 - 0x20 : length of signature array
-            // 0x20 - 0x40 : first sig, v
-            // 0x40 - 0x60 : first sig, r
-            // 0x60 - 0x80 : first sig, s
-            // 0x80 - 0xa0 : second sig, v
+            // 0x20 - 0x40 : first sig, r
+            // 0x40 - 0x60 : first sig, s
+            // 0x61 - 0x62 : first sig, v
+            // 0x62 - 0x82 : second sig, r
             // and so on...
-            // Length of a signature = 0x60
+            // Length of a signature = 0x41
 
-            v := mload(add(add(_signatures, 0x20), mul(_i, 0x60)))
-            r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
-            s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
+            let sigLength := 0x41
+
+            r := mload(add(add(_signatures, 0x20), mul(_i, sigLength)))
+            s := mload(add(add(_signatures, 0x40), mul(_i, sigLength)))
+            v := mload(add(add(_signatures, 0x41), mul(_i, sigLength)))
         }
-        _signature = abi.encode(v, r, s);
+
+        _signature = abi.encodePacked(r, s, v);
     }
 
     /**
