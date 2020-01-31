@@ -29,7 +29,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "lerna link && yarn wsrun --package $PKG --recursive --stages -c --if has:changed --ifDependency build",
+    "build": "lerna link && yarn wsrun --package $PKG --recursive --stages -c build",
     "build:docs": "yarn wsrun --package $PKG --parallel -c build:docs",
     "build:prod": "lerna link && yarn wsrun --package $PKG --recursive --stages -c --if has:changed --ifDependency build:prod",
     "clean": "yarn wsrun --package $PKG --parallel -c clean",
