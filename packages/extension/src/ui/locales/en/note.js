@@ -18,12 +18,12 @@ export default {
             title: 'Grant Access',
             step: 'Granting Access',
             description: `This will grant another user view access to a portion of your balance.
-                It will not allow the ZkTokens to be spent without a signature from your MetaMask account.
+                It will not allow the zkTokens to be spent without a signature from your MetaMask account.
             `,
             submit: 'Grant Access',
         },
         sign: {
-            description: `A MetaMask signature is required to grant access to ZkTokens.
+            description: `A MetaMask signature is required to grant access to zkTokens.
                 The signature should contain the following values:
             `,
         },

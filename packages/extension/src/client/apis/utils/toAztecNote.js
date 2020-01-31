@@ -1,7 +1,9 @@
-import * as aztec from 'aztec.js';
+import {
+    note as noteUtils,
+} from 'aztec.js';
 
 export default async function toAztecNote(note) {
-    if (note instanceof aztec.note.Note) {
+    if (note instanceof noteUtils.Note) {
         return note;
     }
     if ('export' in note
