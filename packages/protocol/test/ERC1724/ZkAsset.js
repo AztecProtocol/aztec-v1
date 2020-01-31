@@ -254,7 +254,7 @@ contract('ZkAsset', (accounts) => {
             expect(receipt.status).to.equal(true);
         });
 
-        it('should update a note registry by consuming input notes, with kPublic negative', async () => {
+        it.only('should update a note registry by consuming input notes, with kPublic negative', async () => {
             const zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             const {
                 depositInputNotes,
@@ -289,6 +289,7 @@ contract('ZkAsset', (accounts) => {
 
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
+            console.log(transferSignatures);
             const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, {
                 from: accounts[0],
             });
