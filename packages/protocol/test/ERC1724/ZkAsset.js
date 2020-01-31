@@ -235,7 +235,7 @@ contract('ZkAsset', (accounts) => {
 
             const transferInputNotes = depositOutputNotes;
             const transferInputOwnerAccounts = [aztecAccount];
-            const transferOutputNotes = await await helpers.getNotesForAccount(aztecAccount, [10]);
+            const transferOutputNotes = await helpers.getNotesForAccount(aztecAccount, [10]);
             const withdrawPublicValue = 10;
 
             const withdrawProof = new JoinSplitProof(
@@ -289,7 +289,6 @@ contract('ZkAsset', (accounts) => {
 
             const transferData = withdrawalProof.encodeABI(zkAsset.address);
             const transferSignatures = withdrawalProof.constructSignatures(zkAsset.address, transferInputOwnerAccounts);
-            console.log(transferSignatures);
             const { receipt } = await zkAsset.methods['confidentialTransfer(bytes,bytes)'](transferData, transferSignatures, {
                 from: accounts[0],
             });
