@@ -19,6 +19,7 @@
   position: relative;
   display: inline-block;
   border-width: map-get($spacing-map, 'xxs');
+  border-color: map-get($color-map, 'transparent') !important;
   border-style: solid;
   border-radius: 100%;
   line-height: 0;

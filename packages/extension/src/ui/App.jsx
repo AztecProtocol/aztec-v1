@@ -73,6 +73,14 @@ class App extends PureComponent {
     };
 
     goToPage = (route) => {
+        if (route === 'loading') {
+            this.setState({
+                loading: true,
+                nextRoute: '',
+            });
+            return;
+        }
+
         const {
             history,
         } = this.props;
@@ -214,6 +222,7 @@ class App extends PureComponent {
                         currentAccount={currentAccount}
                         action={action}
                         Component={Component}
+                        goToPage={this.goToPage}
                     />
                 );
                 if (name === '_') {
@@ -234,7 +243,6 @@ class App extends PureComponent {
     render() {
         const {
             loading,
-            nextRoute,
         } = this.state;
 
         if (loading) {
