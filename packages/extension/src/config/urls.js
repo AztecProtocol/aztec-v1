@@ -1,8 +1,8 @@
 const production = {
     origin: 'https://sdk.aztecprotocol.com',
     public: 'https://sdk.aztecprotocol.com/{version}/sdk/public',
-    background: 'https://sdk.aztecprotocol.com/{version}/sdk/public/background.html',
-    ui: 'https://sdk.aztecprotocol.com/{version}/sdk/public/ui.html',
+    background: 'https://sdk.aztecprotocol.com/{version}/sdk/background.html',
+    ui: 'https://sdk.aztecprotocol.com/{version}/sdk/ui.html',
 };
 
 const development = {
