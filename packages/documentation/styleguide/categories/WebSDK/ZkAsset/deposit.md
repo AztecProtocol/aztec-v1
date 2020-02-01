@@ -1,5 +1,6 @@
 ## Examples
-### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user
+### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user. 
+Place your Ethereum address in the `user` variable
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
@@ -15,7 +16,7 @@ const userPreDepositBalance = await asset.balance();
 console.info({ userPreDepositBalance });
 
 // Deposit funds into the ZkAsset
-const user = '0xCF4cca97754C0C6a54621B6850f764354Ab2Cb3d';
+const user = ''; // [place your Ethereum address here]
 const depositAmount = 50;
 await asset.deposit(
   [

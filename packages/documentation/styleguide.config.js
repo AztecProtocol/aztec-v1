@@ -10,6 +10,7 @@ const {
 
 module.exports = {
   title: 'AZTEC Docs',
+  styleguideDir: 'public',
   require: [
     // path.resolve(__dirname, './src/styles/reset.scss'),
   ],

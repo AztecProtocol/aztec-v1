@@ -1,5 +1,6 @@
 ## Examples
 ### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by user
+Place your Ethereum address in the `user` variable
 ```js
 // Enable the SDK
 const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
@@ -11,12 +12,12 @@ const asset = await window.aztec.zkAsset(address);
 console.info({ asset });
 
 // Deposit funds into the ZkAsset
-const userAddress = '0xD4CD0b1EF54E8E4D73f68b01b5ccc125b13E3d1e';
+const user = '';
 const depositAmount = 50;
 await asset.deposit(
   [
     {
-      to: userAddress,
+      to: user,
       amount: depositAmount,
     }
   ]
@@ -27,7 +28,7 @@ await asset.deposit(
 const withdrawAmount = 10;
 await asset.withdraw([
   {
-    to: userAddress,
+    to: user,
     amount: withdrawAmount,
   }
 ], {})
