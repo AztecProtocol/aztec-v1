@@ -53,7 +53,6 @@ export default async function deposit({
                 ].filter((access, idx, arr) => idx === arr.findIndex(({
                     address,
                 }) => address === access.address));
-
             const notes = await createNotes(
                 noteValues,
                 spendingPublicKey,
