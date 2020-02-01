@@ -1,3 +1,4 @@
+import EthCrypto from 'eth-crypto';
 import {
     argsError,
 } from '~/utils/error';
@@ -17,7 +18,15 @@ export default async function getAccounts(args) {
     })));
 
     accounts = accounts
-        .map(({ account }) => account)
+        .map(({ account }) => {
+            const compressedPublicKey = EthCrypto.publicKey.compress(
+                account.spendingPublicKey.slice(2),
+            );
+            return {
+                ...account,
+                spendingPublicKey: `0x${compressedPublicKey}`,
+            };
+        })
         .filter(a => a);
     const onChainAccounts = accounts || [];
     const invalidAddresses = addresses

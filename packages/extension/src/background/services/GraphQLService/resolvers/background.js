@@ -1,3 +1,4 @@
+import EthCrypto from 'eth-crypto';
 import ClientSubscriptionService from '~/background/services/ClientSubscriptionService';
 import userModel from '~/database/models/user';
 import {
@@ -33,9 +34,23 @@ const backgroundResolvers = {
         fetchNotesFromBalance: ensureDomainPermission(async (_, args) => ({
             notes: await fetchNotesFromBalance(args),
         })),
-        account: ensureDomainPermission(async (_, args) => fetchAztecAccount({
-            address: args.currentAddress,
-        })),
+        account: ensureDomainPermission(async (_, args) => {
+            const { spendingPublicKey, ...rest } = await fetchAztecAccount({
+                address,
+            });
+            if (spendingPublicKey) {
+                const compressedPublicKey = EthCrypto.publicKey.compress(
+                    spendingPublicKey.slice(2),
+                );
+                return {
+                    ...rest,
+                    spendingPublicKey: `0x${compressedPublicKey}`,
+                };
+            }
+            return {
+                ...rest,
+            };
+        }),
         accounts: ensureDomainPermission(async (_, args, ctx) => ({
             accounts: await getAccounts(args, ctx),
         })),
