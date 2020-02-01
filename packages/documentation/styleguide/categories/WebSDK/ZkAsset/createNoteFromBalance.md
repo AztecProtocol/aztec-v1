@@ -2,7 +2,7 @@
 ### Create a note worth 10 from the use's balance
 ```js
 // Enable the SDK
-const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
+const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
