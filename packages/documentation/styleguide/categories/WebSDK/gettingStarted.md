@@ -50,7 +50,7 @@ Calling _enable()_ will perform 3 key actions:
 The function returns a promise which resolves to the full AZTEC api if all checks pass. Run the below code to see an example of the SDK being enabled, and the UI from a user's perspective:
 
 ```js
-const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
+const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 
 // Enable the SDK
 const result = await window.aztec.enable({ apiKey });
