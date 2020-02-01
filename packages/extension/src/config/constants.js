@@ -13,7 +13,6 @@ export const AZTEC_JS_METADATA_PREFIX_LENGTH = 130;
 export const START_EVENTS_SYNCING_BLOCK = 0;
 
 export const INFURA_API_KEY = '09c4eed231c840d5ace14ba5389a1a7c';
-export const SIGNING_PROVIDER = 'https://bv9t4hwozi.execute-api.us-east-1.amazonaws.com';
 
 export const NOTE_STATUS = {
     CREATED: 'CREATED',

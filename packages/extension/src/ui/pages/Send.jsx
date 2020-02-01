@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    gsnConfigShape,
     inputTransactionShape,
 } from '~/ui/config/propTypes';
 import {
     emptyIntValue,
 } from '~/ui/config/settings';
-import apis from '~uiModules/apis';
+import apis from '~/ui/apis';
+import getGSNConfig from '~/ui/helpers/getGSNConfig';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
 import StepsHandler from '~/ui/views/handlers/StepsHandler';
@@ -21,25 +21,26 @@ const Send = ({
     numberOfInputNotes,
     numberOfOutputNotes,
     userAccess,
-    gsnConfig,
 }) => {
-    const {
-        address: currentAddress,
-    } = currentAccount;
-    const {
-        isGSNAvailable,
-        proxyContract,
-    } = gsnConfig;
-    const steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
-    const sender = isGSNAvailable ? proxyContract : currentAddress;
-
     const fetchInitialData = async () => {
+        const gsnConfig = await getGSNConfig();
+        const {
+            isGSNAvailable,
+            proxyContract,
+        } = gsnConfig;
+        const {
+            address: currentAddress,
+        } = currentAccount;
+        const steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
+        const sender = isGSNAvailable ? proxyContract : currentAddress;
+
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
         const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
 
         return {
+            steps,
             assetAddress,
             currentAddress,
             asset,
@@ -55,7 +56,6 @@ const Send = ({
 
     return (
         <StepsHandler
-            steps={steps}
             fetchInitialData={fetchInitialData}
             Content={SendContent}
         />
@@ -71,7 +71,6 @@ Send.propTypes = {
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
     userAccess: PropTypes.arrayOf(PropTypes.string),
-    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Send.defaultProps = {
