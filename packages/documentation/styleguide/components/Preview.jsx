@@ -280,7 +280,6 @@ class Preview extends React.Component {
                     icon={<Icon name="local_gas_station" size="m" />}
                   />
                   <Button text={`${this.state.linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
-                  <Button text={`${this.state.linkedTokenBalance} Linked ERC20`} size="m" disabled className={styles.testEth} />
                   <Button
                     text="Get"
                     size="m"
