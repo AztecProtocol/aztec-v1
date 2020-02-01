@@ -1,10 +1,12 @@
 #!/bin/bash
 
-PACKAGES_TO_DEPLOY='extension,sdk'
+PACKAGES_TO_DEPLOY='extension,sdk';
+
+yarn build:prod;
 
 CWD_PATH=$(pwd);
-BUILD_PATH="$CWD_PATH/build"
-PACKAGE_NAME=$(echo $CWD_PATH | rev | cut -d'/' -f1 | rev)
+BUILD_PATH="$CWD_PATH/build";
+PACKAGE_NAME=$(echo $CWD_PATH | rev | cut -d'/' -f1 | rev);
 
 if [[ $PACKAGES_TO_DEPLOY == *$PACKAGE_NAME* ]]; then
     VERSION=$1;
@@ -20,4 +22,4 @@ if [[ $PACKAGES_TO_DEPLOY == *$PACKAGE_NAME* ]]; then
 
 fi
 
-exit 0
+exit 0;
