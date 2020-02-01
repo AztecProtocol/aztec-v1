@@ -21,10 +21,12 @@ const address = addresses[0];
 export default {
     register: {
         address,
+        AZTECaddress: randomAddress(),
         linkedPublicKey,
     },
     'register.address': {
         address,
+        AZTECaddress: randomAddress(),
         linkedPublicKey,
     },
     'register.domain': {

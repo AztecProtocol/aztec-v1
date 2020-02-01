@@ -25,12 +25,14 @@ const RegisterAddress = ({
         const {
             keyStore,
             pwDerivedKey,
+            AZTECaddress,
         } = await apis.auth.getAccountKeys();
 
         return {
             ...currentAccount,
             keyStore,
             pwDerivedKey,
+            AZTECaddress,
             isGSNAvailable,
         };
     };
