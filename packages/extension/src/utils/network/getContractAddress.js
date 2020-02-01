@@ -9,15 +9,13 @@ import * as contracts from '~/config/contracts';
 export default function getContractAddress(contractName, networkId) {
     let address;
 
-    if (process.env.NODE_ENV === 'production') {
-        let addresses;
-        try {
-            addresses = getContractAddressesForNetwork(networkId);
-        } catch (error) {
-            addresses = {};
-        }
-        address = addresses[contractName];
+    let addresses;
+    try {
+        addresses = getContractAddressesForNetwork(networkId) || {};
+    } catch (error) {
+        addresses = {};
     }
+    address = addresses[contractName];
 
     if (!address) {
         const contract = contracts[contractName];
