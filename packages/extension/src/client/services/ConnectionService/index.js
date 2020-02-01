@@ -1,5 +1,4 @@
 import {
-    mergeMap,
     filter,
     tap,
     take,
@@ -7,7 +6,6 @@ import {
 import {
     Subject,
     fromEvent,
-    from,
 } from 'rxjs';
 import {
     randomId,
@@ -33,6 +31,8 @@ import {
 import MetaMaskService from '~/client/services/MetaMaskService';
 import ApiError from '~/client/utils/ApiError';
 import getSiteData from '~/client/utils/getSiteData';
+import getApiKeyQuota from '~/client/utils/getApiKeyQuota';
+import getApiKeyApproval from '~/client/utils/getApiKeyApproval';
 import backgroundFrame from './backgroundFrame';
 
 class ConnectionService {
@@ -42,6 +42,7 @@ class ConnectionService {
     }
 
     setInitialVars() {
+        this.apiKey = '';
         this.port = null;
         this.MessageSubject = null;
         this.messages$ = null;
@@ -71,6 +72,11 @@ class ConnectionService {
     }
 
     async openConnection(clientProfile) {
+        const {
+            apiKey,
+        } = clientProfile;
+        this.apiKey = apiKey;
+
         const frame = await backgroundFrame.init();
 
         const backgroundResponse = fromEvent(window, 'message')
@@ -116,28 +122,52 @@ class ConnectionService {
                 case subscriptionResponseEvent:
                     this.handleReceiveSubscription(data.response);
                     break;
+                case actionRequestEvent:
+                    this.handleClientActionRequest(data);
+                    break;
+                case clientResponseEvent:
+                    this.handleReceiveResponse(data);
+                    break;
                 default:
-                    this.MessageSubject.next(data);
             }
         };
+    }
 
-        this.messages$.pipe(
-            filter(({ type }) => type === actionRequestEvent),
-            mergeMap(data => from(MetaMaskService(data))),
-            tap(({
-                requestId,
-                responseId,
-                response,
-            }) => this.port.postMessage({
-                type: actionResponseEvent,
-                origin: window.location.origin,
-                clientId: this.clientId,
-                sender: 'WEB_CLIENT',
-                requestId,
-                responseId,
-                data: response,
-            })),
-        ).subscribe();
+    handleReceiveResponse(data) {
+        this.MessageSubject.next(data);
+    }
+
+    async handleClientActionRequest(data) {
+        const {
+            requestId,
+            responseId,
+            data: {
+                action,
+                params,
+            },
+        } = data;
+        let response;
+
+        switch (action) {
+            case 'apiKeyQuota':
+                response = await getApiKeyQuota(this.apiKey);
+                break;
+            case 'apiKeyApproval':
+                response = await getApiKeyApproval(this.apiKey, params);
+                break;
+            default:
+                response = await MetaMaskService(action, params);
+        }
+
+        this.port.postMessage({
+            type: actionResponseEvent,
+            origin: window.location.origin,
+            clientId: this.clientId,
+            sender: 'WEB_CLIENT',
+            requestId,
+            responseId,
+            data: response,
+        });
     }
 
     async postToBackground({
