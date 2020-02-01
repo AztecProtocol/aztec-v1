@@ -40,6 +40,9 @@ export default {
             explain: 'AZTEC sends transactions through the Gas Station Network so you don\'t pay gas.',
             submit: 'Send',
         },
+        error: {
+            relayer: 'Relayer is not available at the moment. Please try again later.',
+        },
     },
     success: 'Transaction completed!',
     autoClose: 'This window will close automatically when the transaction is confirmed.',
