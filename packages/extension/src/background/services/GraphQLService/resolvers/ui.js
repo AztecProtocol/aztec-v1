@@ -1,4 +1,3 @@
-import EthCrypto from 'eth-crypto';
 import userModel from '~/database/models/user';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
@@ -27,23 +26,9 @@ const uiResolvers = {
             });
             return asset;
         },
-        account: async (_, { address }) => {
-            const { spendingPublicKey, ...rest } = await fetchAztecAccount({
-                address,
-            });
-            if (spendingPublicKey) {
-                const compressedPublicKey = EthCrypto.publicKey.compress(
-                    spendingPublicKey.slice(2),
-                );
-                return {
-                    ...rest,
-                    spendingPublicKey: `0x${compressedPublicKey}`,
-                };
-            }
-            return {
-                ...rest,
-            };
-        },
+        account: async (_, { address }) => await fetchAztecAccount({
+            address,
+        }),
         note: async (_, args) => {
             const {
                 note: noteResponse,
