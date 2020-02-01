@@ -57,7 +57,7 @@ class Preview extends React.Component {
     logs: [],
     code: '',
     initialCode: '',
-    zkAssetAddress: '0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a',
+    zkAssetAddress: '0x00408e1Ae7F5E590FAed44aE2cee5a9C23CA683d',
   };
 
   // eslint-disable-next-line react/sort-comp
@@ -105,26 +105,29 @@ class Preview extends React.Component {
   }
 
   getWeb3Data = async () => {
-    if (window.ethereum) {
-      const web3 = new Web3(window.ethereum);
-      if (window.aztec.zkAsset) {
-        await window.aztec.enable({
-          apiKey: '',
-        });
-        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
-        const linkedTokenBalance = await balanceOfLinkedToken();
+    try {
+      await window.ethereum.enable();
+      if (window.ethereum) {
+        const web3 = new Web3(window.ethereum);
+        if (window.aztec.zkAsset) {
+          await window.aztec.enable();
+          const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
+          const linkedTokenBalance = await balanceOfLinkedToken();
+          this.setState({
+            linkedTokenAddress,
+            linkedTokenBalance,
+          });
+        }
+        const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
+
         this.setState({
-          linkedTokenAddress,
-          linkedTokenBalance,
+          ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
+          network: window.ethereum.networkVersion,
+          accounts: [ethereum.selectedAddress],
         });
       }
-      const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
-
-      this.setState({
-        ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
-        network: window.ethereum.networkVersion,
-        accounts: [ethereum.selectedAddress],
-      });
+    } catch (err) {
+      console.log(err);
     }
   };
 
