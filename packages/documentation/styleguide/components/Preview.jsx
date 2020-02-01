@@ -57,7 +57,7 @@ class Preview extends React.Component {
     logs: [],
     code: '',
     initialCode: '',
-    zkAssetAddress: '0x00408e1Ae7F5E590FAed44aE2cee5a9C23CA683d',
+    zkAssetAddress: '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4',
   };
 
   // eslint-disable-next-line react/sort-comp
@@ -161,7 +161,7 @@ class Preview extends React.Component {
     this.setState({
       loadingTestTokens: true,
     });
-    await getTestERC20('0x7Fd548E8df0ba86216BfD390EAEB5026adCb5B8a');
+    await getTestERC20(this.state.zkAssetAddress);
     this.setState({
       loadingTestTokens: false,
     });
