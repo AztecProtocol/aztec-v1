@@ -251,7 +251,7 @@ describe('Asset.decryptNotes', () => {
         valueFromViewingKeySpy.mockClear();
     });
 
-    it('will not process note that is already in storage', async () => {
+    it('will still process note that is already in storage but will not affect balance', async () => {
         const valueFromViewingKeySpy = jest.spyOn(valueFromViewingKey, 'default');
         let balance = 0;
         let maxBlockNumber = 0;
@@ -275,6 +275,7 @@ describe('Asset.decryptNotes', () => {
 
         expect(asset.balance).toBe(testNotes[duplicatedIndex].value);
         expect(valueFromViewingKeySpy).toHaveBeenCalledTimes(1);
+        valueFromViewingKeySpy.mockClear();
 
         await asset.decryptNotes(notes);
 
