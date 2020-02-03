@@ -4,6 +4,7 @@ import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import Logo from './Logo';
 import AZTECLogo from '../../images/logo.png';
 import {
+  spacingMap,
   colorMap,
   defaultLabelColor,
 } from '../../src/styles/guacamole-vars';
@@ -52,6 +53,9 @@ const styles = ({
       color: colorMap.white,
     },
   },
+  content: {
+    margin: [[0, `-${spacingMap.s}`]],
+  },
 });
 
 export function TableOfContentsRenderer({
@@ -77,7 +81,9 @@ export function TableOfContentsRenderer({
               onChange={event => onSearchTermChange(event.target.value)}
             />
           </div>
-          {children}
+          <div className={classes.content}>
+            {children}
+          </div>
         </nav>
       </div>
     </div>

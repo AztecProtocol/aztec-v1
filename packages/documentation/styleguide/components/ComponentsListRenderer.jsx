@@ -97,14 +97,20 @@ export const ComponentsListRenderer = ({
 
         const isChild = !content || !content.props.items.length;
         const isItemSelected = `/#/${windowHash}` === href;
-        const handleClick = disableToggle
+        const isAbleToToggle = !disableToggle && !!heading;
+        const showContent = isOpen[defaultVisibleName]
+          || disableToggle
+          || (initialOpen && !(defaultVisibleName in isOpen));
+
+        const handleClick = !isAbleToToggle
           ? null
-          : () => heading && toggleOpen({
+          : () => toggleOpen({
             ...isOpen,
             [defaultVisibleName]: defaultVisibleName in isOpen
               ? !isOpen[defaultVisibleName]
               : !initialOpen,
           });
+
         const linkNode = isStatic
           ? (
             <div
@@ -123,10 +129,6 @@ export const ComponentsListRenderer = ({
             </Link>
           );
 
-        const showContent = isOpen[defaultVisibleName]
-          || disableToggle
-          || (initialOpen && !(defaultVisibleName in isOpen));
-
         return (
           <div
             key={href}
@@ -143,8 +145,8 @@ export const ComponentsListRenderer = ({
               className={classnames(
                 classes.label,
                 {
-                  [classes.staticButton]: isStatic && !disableToggle,
-                  [classes.staticItem]: isStatic && disableToggle,
+                  [classes.staticButton]: isStatic && isAbleToToggle,
+                  [classes.staticItem]: isStatic && !isAbleToToggle,
                 },
               )}
             >
