@@ -10,31 +10,40 @@ import {
 } from 'react-styleguidist/lib/client/utils/handleHash';
 import {
   spacingMap,
-} from '../../src/config/layout';
-import {
-  STATIC_SECTION_BUTTONS,
-} from '../constants/styles';
+  colorMap,
+  roundedCornerMap,
+} from '../../src/styles/guacamole-vars';
+import sectionsConfig from '../config/sections';
 
-const styles = ({
-  space,
-}) => ({
+const styles = () => ({
   root: {
-    padding: [[spacingMap.m, spacingMap.l]],
+    padding: [[0, spacingMap.m]],
     fontWeight: 400,
     fontSize: 16,
     color: 'white !important',
   },
   item: {
-    padding: [[space[1], 0]],
+    padding: [[spacingMap.xs, spacingMap.xs]],
     fontWeight: 400,
     fontSize: 16,
     color: 'white !important',
   },
-  link: {
-    color: 'white !important',
+  label: {
+    padding: [[spacingMap.xs, spacingMap.s]],
+  },
+  staticItem: {
+    cursor: 'default',
   },
   staticButton: {
-    cursor: 'default',
+    '&:hover': {
+      cursor: 'pointer',
+      padding: [[spacingMap.xs, spacingMap.s]],
+      background: colorMap['white-lightest'],
+      borderRadius: roundedCornerMap.s,
+    },
+  },
+  link: {
+    color: 'white !important',
   },
   a: {
     color: 'white !important',
@@ -74,42 +83,40 @@ export const ComponentsListRenderer = ({
         name,
         heading,
         href,
-        visibleName,
+        visibleName: defaultVisibleName,
         content,
         external,
       }) => {
+        const {
+          isStatic,
+          disableToggle,
+          visibleName,
+        } = sectionsConfig[name] || {};
+        const displayName = visibleName || defaultVisibleName;
+
         const isChild = !content || !content.props.items.length;
         const isItemSelected = `/#/${windowHash}` === href;
-        // hard-coded static button names for now
-        // as there's no way to use existing properties to define a button as "static" through styleguide.config
-        const isStatic = STATIC_SECTION_BUTTONS.indexOf(name) >= 0;
+        const handleClick = disableToggle
+          ? null
+          : () => heading && toggleOpen({
+            ...isOpen,
+            [defaultVisibleName]: !isOpen[defaultVisibleName],
+          });
         const linkNode = isStatic
           ? (
             <div
-              className={classnames(classes.staticButton, {
-                [classes.selected]: isItemSelected,
-              })}
-              onClick={() => heading && toggleOpen({
-                ...isOpen,
-                [visibleName]: !isOpen[visibleName],
-              })}
+              onClick={handleClick}
             >
-              {visibleName}
+              {displayName}
             </div>
           )
           : (
             <Link
-              className={classnames({
-                [classes.selected]: isItemSelected,
-              })}
               href={href}
               target={external ? '_blank' : undefined}
-              onClick={() => heading && toggleOpen({
-                ...isOpen,
-                [visibleName]: !isOpen[visibleName],
-              })}
+              onClick={handleClick}
             >
-              {visibleName}
+              {displayName}
             </Link>
           );
 
@@ -125,8 +132,18 @@ export const ComponentsListRenderer = ({
               },
             )}
           >
-            {linkNode}
-            {(isOpen[visibleName] || isStatic) && content}
+            <div
+              className={classnames(
+                classes.label,
+                {
+                  [classes.staticButton]: isStatic && !disableToggle,
+                  [classes.staticItem]: isStatic && disableToggle,
+                },
+              )}
+            >
+              {linkNode}
+            </div>
+            {(isOpen[defaultVisibleName] || disableToggle) && content}
           </div>
         );
       })}

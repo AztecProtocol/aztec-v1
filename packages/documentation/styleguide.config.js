@@ -136,7 +136,6 @@ module.exports = {
     },
     {
       name: 'SDK',
-      components: [],
       pagePerSection: true,
       sections: [
         {
@@ -151,9 +150,12 @@ module.exports = {
         },
         {
           name: 'zkAsset',
-          content: 'styleguide/categories/WebSDK/ZkAsset/index.md',
-          exampleMode: 'shown',
           sections: [
+            {
+              name: 'zkAsset-introduction',
+              content: 'styleguide/categories/WebSDK/ZkAsset/index.md',
+              exampleMode: 'shown',
+            },
             {
               name: '.deposit',
               content: 'styleguide/categories/WebSDK/ZkAsset/deposit.md',
@@ -205,10 +207,13 @@ module.exports = {
         },
         {
           name: 'note',
-          content: 'styleguide/categories/WebSDK/Note/index.md',
-          exampleMode: 'hide',
           pagePerSection: true,
           sections: [
+            {
+              name: 'note-introduction',
+              content: 'styleguide/categories/WebSDK/Note/index.md',
+              exampleMode: 'hide',
+            },
             {
               name: '.equal',
               content: 'styleguide/categories/WebSDK/Note/equal.md',
