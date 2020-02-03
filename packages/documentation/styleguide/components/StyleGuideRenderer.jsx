@@ -1,16 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Logo from 'react-styleguidist/lib/client/rsg-components/Logo';
-import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import {
   colorMap,
-} from '../../src/config/colors';
+} from '../../src/styles/guacamole-vars';
 import '@aztec/guacamole-ui/dist/styles/guacamole.css';
 import '../../src/styles/reset.scss';
 
 const xsmall = '@media (max-width: 600px)';
-const headerHeight = 64;
 const footerHeight = 80;
 const sidebarWidth = 240;
 
@@ -110,8 +107,6 @@ const styles = ({
 
 export const StyleGuideRenderer = ({
   classes,
-  title,
-  homepageUrl,
   toc,
   hasSidebar,
   children,
@@ -123,15 +118,6 @@ export const StyleGuideRenderer = ({
         <div className={classes.sections}>
           {children}
         </div>
-        <footer className={classes.footer}>
-          {
-// <Markdown
-//             className={classes.footerText}
-//             text={`Created with [React Styleguidist](${homepageUrl})`}
-//           />
-
-          }
-        </footer>
       </main>
     </div>
   </div>
@@ -139,8 +125,6 @@ export const StyleGuideRenderer = ({
 
 StyleGuideRenderer.propTypes = {
   classes: PropTypes.object.isRequired,
-  title: PropTypes.string.isRequired,
-  homepageUrl: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   toc: PropTypes.node.isRequired,
   hasSidebar: PropTypes.bool.isRequired,

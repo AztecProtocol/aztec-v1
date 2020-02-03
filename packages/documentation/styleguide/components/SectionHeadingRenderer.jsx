@@ -4,13 +4,9 @@ import classnames from 'classnames';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import {
   defaultTextColor,
-} from '../../src/config/colors';
-import {
   fontSizeMap,
-} from '../../src/config/typography';
-import {
   spacingMap,
-} from '../../src/config/layout';
+} from '../../src/styles/guacamole-vars';
 
 const styles = () => ({
   heading: {

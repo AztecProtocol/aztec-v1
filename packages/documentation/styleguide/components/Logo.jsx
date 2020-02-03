@@ -4,11 +4,11 @@ import Link from 'react-styleguidist/lib/client/rsg-components/Link';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import {
   colorMap,
-} from '../../src/config/colors';
+} from '../../src/styles/guacamole-vars';
 
 const styles = ({
   fontFamily,
-  space
+  space,
 }) => ({
   logo: {
     display: 'flex',

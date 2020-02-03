@@ -4,10 +4,9 @@ import classnames from 'classnames';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import {
   fontWeightMap,
-} from '../../src/config/typography';
+} from '../../src/styles/guacamole-vars';
 
 const styles = ({
-  color,
   fontFamily,
   fontSize,
 }) => ({

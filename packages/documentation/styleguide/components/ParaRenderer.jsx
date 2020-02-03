@@ -6,7 +6,7 @@ import {
   fontWeightMap,
   fontSizeMap,
   lineHeightMap,
-} from '../../src/config/typography';
+} from '../../src/styles/guacamole-vars';
 
 export const styles = ({
   space,
