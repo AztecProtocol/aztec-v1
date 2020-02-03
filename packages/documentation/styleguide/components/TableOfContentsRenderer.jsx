@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import Logo from './Logo';
 import AZTECLogo from '../../images/logo.png';
+import {
+  colorMap,
+  defaultLabelColor,
+} from '../../src/styles/guacamole-vars';
 
 const styles = ({
   space,
@@ -27,7 +31,7 @@ const styles = ({
     backgroundColor: 'rgba(255,255,255, 0.4)',
     fontFamily: fontFamily.base,
     fontSize: fontSize.base,
-    border: [[1, color.border, 'solid']],
+    border: [[1, colorMap['white-lightest'], 'solid']],
     borderRadius: '20px',
     transition: 'all ease-in-out .1s',
     '&:focus': {
@@ -35,13 +39,17 @@ const styles = ({
       backgroundColor: 'rgba(255,255,255, 0.8)',
       outline: 0,
       color: color.base,
+      '&::placeholder': {
+        fontWeight: 200,
+        color: defaultLabelColor,
+      },
     },
     '&::placeholder': {
       isolate: false,
       fontFamily: fontFamily.base,
       fontWeight: 200,
       fontSize: fontSize.base,
-      color: '#fff',
+      color: colorMap.white,
     },
   },
 });
