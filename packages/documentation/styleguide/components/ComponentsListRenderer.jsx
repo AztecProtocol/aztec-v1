@@ -11,9 +11,12 @@ import {
 import {
   spacingMap,
 } from '../../src/config/layout';
+import {
+  STATIC_SECTION_BUTTONS,
+} from '../constants/styles';
 
 const styles = ({
-  color, space,
+  space,
 }) => ({
   root: {
     padding: [[spacingMap.m, spacingMap.l]],
@@ -29,6 +32,9 @@ const styles = ({
   },
   link: {
     color: 'white !important',
+  },
+  staticButton: {
+    cursor: 'default',
   },
   a: {
     color: 'white !important',
@@ -65,27 +71,33 @@ export const ComponentsListRenderer = ({
       className={classes.root}
     >
       {visibleItems.map(({
+        name,
         heading,
         href,
         visibleName,
         content,
-        hasParent,
         external,
       }) => {
         const isChild = !content || !content.props.items.length;
         const isItemSelected = `/#/${windowHash}` === href;
-        return (
-          <div
-            key={href}
-            className={classnames(
-              classes.item,
-              {
-                [classes.heading]: heading,
-                [classes.child]: isChild,
+        // hard-coded static button names for now
+        // as there's no way to use existing properties to define a button as "static" through styleguide.config
+        const isStatic = STATIC_SECTION_BUTTONS.indexOf(name) >= 0;
+        const linkNode = isStatic
+          ? (
+            <div
+              className={classnames(classes.staticButton, {
                 [classes.selected]: isItemSelected,
-              },
-            )}
-          >
+              })}
+              onClick={() => heading && toggleOpen({
+                ...isOpen,
+                [visibleName]: !isOpen[visibleName],
+              })}
+            >
+              {visibleName}
+            </div>
+          )
+          : (
             <Link
               className={classnames({
                 [classes.selected]: isItemSelected,
@@ -99,8 +111,22 @@ export const ComponentsListRenderer = ({
             >
               {visibleName}
             </Link>
+          );
 
-            {isOpen[visibleName] && content}
+        return (
+          <div
+            key={href}
+            className={classnames(
+              classes.item,
+              {
+                [classes.heading]: heading,
+                [classes.child]: isChild,
+                [classes.selected]: isItemSelected,
+              },
+            )}
+          >
+            {linkNode}
+            {(isOpen[visibleName] || isStatic) && content}
           </div>
         );
       })}

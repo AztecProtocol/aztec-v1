@@ -136,11 +136,14 @@ module.exports = {
     },
     {
       name: 'SDK',
-      content: 'styleguide/categories/WebSDK/sdkOverview.md',
       components: [],
-      exampleMode: 'shown',
       pagePerSection: true,
       sections: [
+        {
+          name: 'The role of the SDK',
+          content: 'styleguide/categories/WebSDK/sdkOverview.md',
+          exampleMode: 'shown',
+        },
         {
           name: 'Getting started',
           content: 'styleguide/categories/WebSDK/gettingStarted.md',

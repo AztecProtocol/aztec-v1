@@ -5,7 +5,10 @@ import Logo from './Logo';
 import AZTECLogo from '../../images/logo.png';
 
 const styles = ({
-  space, color, fontFamily, fontSize, borderRadius,
+  space,
+  color,
+  fontFamily,
+  fontSize,
 }) => ({
   root: {
     fontFamily: fontFamily.base,
@@ -51,7 +54,11 @@ export function TableOfContentsRenderer({
       <div className={classes.root}>
         <nav>
           <Logo>
-            <img width="100%" src={AZTECLogo} />
+            <img
+              width="100%"
+              alt="AZTEC"
+              src={AZTECLogo}
+            />
           </Logo>
           <div className={classes.search}>
             <input
@@ -74,6 +81,10 @@ TableOfContentsRenderer.propTypes = {
   children: PropTypes.node,
   searchTerm: PropTypes.string.isRequired,
   onSearchTermChange: PropTypes.func.isRequired,
+};
+
+TableOfContentsRenderer.defaultProps = {
+  children: null,
 };
 
 export default Styled(styles)(TableOfContentsRenderer);
