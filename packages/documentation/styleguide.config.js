@@ -45,7 +45,6 @@ module.exports = {
     fontFamily: {
       base: 'Gill Sans',
     },
-
     fontSize: {
       base: 16,
       text: 16,
@@ -263,6 +262,7 @@ module.exports = {
       sectionDepth: 1,
     },
   ],
+  tocMode: 'collapse',
   webpackConfig: webpackConfig('development'),
   pagePerSection: true,
 };

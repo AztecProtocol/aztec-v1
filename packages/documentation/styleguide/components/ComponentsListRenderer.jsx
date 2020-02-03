@@ -86,6 +86,7 @@ export const ComponentsListRenderer = ({
         visibleName: defaultVisibleName,
         content,
         external,
+        initialOpen,
       }) => {
         const {
           isStatic,
@@ -100,7 +101,9 @@ export const ComponentsListRenderer = ({
           ? null
           : () => heading && toggleOpen({
             ...isOpen,
-            [defaultVisibleName]: !isOpen[defaultVisibleName],
+            [defaultVisibleName]: defaultVisibleName in isOpen
+              ? !isOpen[defaultVisibleName]
+              : !initialOpen,
           });
         const linkNode = isStatic
           ? (
@@ -119,6 +122,10 @@ export const ComponentsListRenderer = ({
               {displayName}
             </Link>
           );
+
+        const showContent = isOpen[defaultVisibleName]
+          || disableToggle
+          || (initialOpen && !(defaultVisibleName in isOpen));
 
         return (
           <div
@@ -143,7 +150,7 @@ export const ComponentsListRenderer = ({
             >
               {linkNode}
             </div>
-            {(isOpen[defaultVisibleName] || disableToggle) && content}
+            {showContent && content}
           </div>
         );
       })}
