@@ -80,15 +80,7 @@ export const generateTypedData = ({
         AZTECaddress: aliasAddress,
         linkedPublicKey,
     };
-    console.log({
-        types: {
-            EIP712Domain: domainParams,
-            AZTECAccount,
-        },
-        domain: domainData,
-        primaryType: 'AZTECAccount',
-        message,
-    });
+
     return {
         types: {
             EIP712Domain: domainParams,

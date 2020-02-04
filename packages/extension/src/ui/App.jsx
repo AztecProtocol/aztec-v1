@@ -19,7 +19,6 @@ import routes from '~uiModules/config/routes';
 import actions from '~/ui/config/actions';
 import getAuthRoute from '~/ui/utils/getAuthRoute';
 import ensureMinPendingTime from '~/ui/utils/ensureMinPendingTime';
-import getGsnConfig from '~/utils/getGSNConfig';
 import './styles/guacamole.css';
 import './styles/ui.scss';
 
@@ -35,7 +34,6 @@ class App extends PureComponent {
         this.state = {
             loading: !mock,
             currentAccount: null,
-            gsnConfig: {},
             action: null,
             nextRoute: '',
         };
@@ -114,8 +112,6 @@ class App extends PureComponent {
 
         const startTime = Date.now();
 
-        const gsnConfig = await getGsnConfig();
-
         const {
             type,
             data: actionData,
@@ -160,7 +156,6 @@ class App extends PureComponent {
             nextRoute: route,
             action: actionData,
             currentAccount,
-            gsnConfig,
         };
 
         const minDelayTime = Math.max(0, 2000 - (Date.now() - startTime));
@@ -185,7 +180,6 @@ class App extends PureComponent {
         const {
             currentAccount,
             action,
-            gsnConfig,
         } = this.state;
 
         Object.keys(config).forEach((subName) => {
@@ -218,7 +212,6 @@ class App extends PureComponent {
                         key={path}
                         name={name}
                         path={path}
-                        gsnConfig={gsnConfig}
                         currentAccount={currentAccount}
                         action={action}
                         Component={Component}

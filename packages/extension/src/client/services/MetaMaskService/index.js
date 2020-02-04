@@ -1,13 +1,9 @@
 import ethSigUtil from 'eth-sig-util';
 import * as ethUtil from 'ethereumjs-util';
 import Web3Service from '~/client/services/Web3Service';
-import {
-    SIGNING_PROVIDER,
-} from '~/config/constants';
 import registerExtension, { generateTypedData } from './registerExtension';
 import signNote from './signNote';
 import signProof from './signProof';
-
 
 const handleAction = async (action, params) => {
     let response = {};
@@ -28,32 +24,6 @@ const handleAction = async (action, params) => {
             response = await contractObj
                 .method(method)
                 .send(...data);
-            break;
-        }
-        case 'gsn.sign.transaction': {
-            const {
-                apiKey,
-                networkId,
-                ...data
-            } = params;
-            const result = await window.fetch(`${SIGNING_PROVIDER}/Stage/${networkId}/${apiKey}`, {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                mode: 'cors', // no-cors, *cors, same-origin
-                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: 'same-origin', // include, *same-origin, omit
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: JSON.stringify({ data }), // body data type must match "Content-Type" header
-            });
-            const {
-                data: {
-                    approvalData,
-                },
-            } = await result.json();
-
-            response = { approvalData };
             break;
         }
         case 'metamask.register.extension': {
@@ -137,14 +107,10 @@ const handleAction = async (action, params) => {
     return response;
 };
 
-export default async function MetaMaskService(query) {
+export default async function MetaMaskService(action, params) {
     let response;
     let error;
     try {
-        const {
-            action,
-            params,
-        } = query.data;
         response = await handleAction(action, params);
         ({
             error,
@@ -154,11 +120,8 @@ export default async function MetaMaskService(query) {
     }
 
     return {
-        ...query,
-        response: {
-            ...response,
-            error,
-            success: !error,
-        },
+        ...response,
+        error,
+        success: !error,
     };
 }

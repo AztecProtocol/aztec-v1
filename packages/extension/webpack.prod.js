@@ -1,6 +1,8 @@
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const TerserPlugin = require('terser-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const packageJson = require('./package.json');
 const common = require('./webpack.common.js');
 
 const commonProduction = {
@@ -25,6 +27,16 @@ const commonProduction = {
             /moment[/\\]locale$/,
             'en',
         ),
+        new HtmlWebpackPlugin({ // Also generate a test.html
+            filename: 'ui.html',
+            template: './templates/ui.html',
+            version: packageJson.version,
+        }),
+        new HtmlWebpackPlugin({ // Also generate a test.html
+            filename: 'background.html',
+            template: './templates/background.html',
+            version: packageJson.version,
+        }),
     ],
 };
 
