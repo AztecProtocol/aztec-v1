@@ -25,6 +25,7 @@ class RegisterContent extends StepContentHelper {
     getBlockConfig() {
         const {
             address,
+            AZTECaddress,
         } = this.props;
 
         return [
@@ -47,7 +48,7 @@ class RegisterContent extends StepContentHelper {
                 title: i18n.t('account.aztec'),
                 content: (
                     <HashText
-                        text={address}
+                        text={AZTECaddress}
                         size="xs"
                         prefixLength={10}
                         suffixLength={4}
