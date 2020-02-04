@@ -15,7 +15,6 @@ const backgroundContracts = [
 ];
 
 export default async function setupNetworkConfig({
-    apiKey,
     providerUrl = '',
     contractAddresses = {},
 }) {
@@ -52,7 +51,6 @@ export default async function setupNetworkConfig({
     Web3Service.registerContractsConfig(contractsConfig);
 
     await set({
-        apiKey,
         networkId,
     });
 
