@@ -26,7 +26,7 @@ const uiResolvers = {
             });
             return asset;
         },
-        account: async (_, { address }) => await fetchAztecAccount({
+        account: async (_, { address }) => fetchAztecAccount({
             address,
         }),
         note: async (_, args) => {
