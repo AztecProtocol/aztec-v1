@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import parse from 'comment-parser';
 import PropTypes from 'prop-types';
-import { Block, Text, Row } from '@aztec/guacamole-ui';
-
 import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
 import MethodReturnRenderer from './MethodReturnRenderer';
@@ -28,7 +26,6 @@ class LiveDocUpdate extends Component {
       this.parseGitDocs();
     }
   }
-
 
   parseGitDocs = async () => {
     const url = this.selectAPIURL();
@@ -91,11 +88,11 @@ class LiveDocUpdate extends Component {
     const { parsedArguments, parsedReturns, parsedDescription } = this.state;
 
     return (
-      <Block padding="0">
+      <div>
         <MethodDescription {...parsedDescription} />
-        <MethodArgumentRenderer methods={[...parsedArguments]} />
-        <MethodReturnRenderer methods={[...parsedReturns]} />
-      </Block>
+        {parsedArguments.length > 0 && <MethodArgumentRenderer methods={parsedArguments} />}
+        {parsedReturns.length > 0 && <MethodReturnRenderer methods={parsedReturns} />}
+      </div>
     );
   }
 }
