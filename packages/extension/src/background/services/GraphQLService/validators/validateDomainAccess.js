@@ -1,9 +1,10 @@
-import noteModel from '~/database/models/note';
-import assetModel from '~/database/models/asset';
 import {
     permissionError,
 } from '~/utils/error';
+import noteModel from '~/background/database/models/note';
+import assetModel from '~/background/database/models/asset';
 import AuthService from '~/background/services/AuthService';
+import Web3Service from '~/helpers/Web3Service';
 
 export default async function validateDomainAccess(_, args, ctx, info) {
     const {
@@ -13,6 +14,9 @@ export default async function validateDomainAccess(_, args, ctx, info) {
     let {
         assetId,
     } = args;
+    const {
+        networkId,
+    } = Web3Service;
     let noteId;
 
     const entityType = info.fieldName;
@@ -30,18 +34,20 @@ export default async function validateDomainAccess(_, args, ctx, info) {
     }
 
     if (noteId) {
-        const note = await noteModel.get({
-            id: noteId,
-        });
+        const note = await noteModel.get(
+            { networkId },
+            noteId,
+        );
         if (note) {
             const {
-                asset: assetKey,
+                asset: registryOwner,
             } = note;
             ({
                 id: assetId,
-            } = await assetModel.get({
-                key: assetKey,
-            }));
+            } = await assetModel.get(
+                { networkId },
+                { registryOwner },
+            ));
         }
     }
 
