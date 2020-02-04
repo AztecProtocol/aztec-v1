@@ -1,7 +1,4 @@
 import {
-    set,
-} from '~/utils/storage';
-import {
     getContract,
     getProxyAddress,
 } from '~/utils/network';
@@ -49,10 +46,6 @@ export default async function setupNetworkConfig({
         };
     }));
     Web3Service.registerContractsConfig(contractsConfig);
-
-    await set({
-        networkId,
-    });
 
     return {
         networkId,
