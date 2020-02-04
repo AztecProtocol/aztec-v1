@@ -39,6 +39,7 @@ const styles = () => ({
     fontFamily: 'Gill Sans',
   },
   title: {
+    padding: [[spacingMap.s, 0]],
     flex: '1 1 auto',
     lineHeight: 1,
   },

@@ -1,38 +1,46 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
 import Name from 'react-styleguidist/lib/client/rsg-components/Name';
-import JsDoc from 'react-styleguidist/lib/client/rsg-components/JsDoc';
 import Table from 'react-styleguidist/lib/client/rsg-components/Table';
 import Type from 'react-styleguidist/lib/client/rsg-components/Type';
+import PropsDescription from './PropsDescription';
 
-const getRowKey = (row) => row.name;
+const getRowKey = row => row.name;
 
-
-export const columns = [
+const columns = [
   {
     caption: 'Arguments',
     // eslint-disable-next-line react/prop-types
-    render: ({ name, tags = {} }) => <Name deprecated={!!tags.deprecated}>{`${name}`}</Name>,
+    render: ({ name, tags = {} }) => (
+      <Name deprecated={!!tags.deprecated}>
+        {`${name}`}
+      </Name>
+    ),
   },
   {
     caption: 'Type',
+    // eslint-disable-next-line react/prop-types
     render: ({ type }) => <Type>{type}</Type>,
   },
   {
     caption: 'Description',
     // eslint-disable-next-line react/prop-types
-    render: ({ description, tags = {} }) => (
-      <div>
-        {description && <Markdown text={description} />}
-        <JsDoc {...tags} />
-      </div>
+    render: ({ description }) => (
+      <PropsDescription
+        description={description || ''}
+      />
     ),
   },
 ];
 
-export default function MethodArgumentRenderer({ methods }) {
-  return <Table columns={columns} rows={methods} getRowKey={getRowKey} />;
+function MethodArgumentRenderer({ methods }) {
+  return (
+    <Table
+      columns={columns}
+      rows={methods}
+      getRowKey={getRowKey}
+    />
+  );
 }
 
 MethodArgumentRenderer.propTypes = {
@@ -46,3 +54,5 @@ MethodArgumentRenderer.propTypes = {
     }),
   ).isRequired,
 };
+
+export default MethodArgumentRenderer;

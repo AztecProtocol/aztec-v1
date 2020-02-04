@@ -1,15 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
+import {
+  spacingMap,
+} from '../../src/styles/guacamole-vars';
 
 export const styles = ({
   space, color, fontFamily, fontSize,
 }) => ({
+  tableWrapper: {
+    padding: [[spacingMap.xl, 0]],
+  },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    marginBottom: space[4],
-    marginTop: '20px',
   },
   tableHead: {
     borderBottom: [[1, color.border, 'solid']],
@@ -27,9 +31,9 @@ export const styles = ({
   },
   cell: {
     color: color.base,
-    paddingRight: space[2],
-    paddingTop: space[1],
-    paddingBottom: space[1],
+    paddingRight: spacingMap.l,
+    paddingTop: spacingMap.m,
+    paddingBottom: spacingMap.m,
     verticalAlign: 'top',
     fontFamily: fontFamily.base,
     fontSize: fontSize.small,
@@ -46,32 +50,36 @@ export const styles = ({
 });
 
 export function TableRenderer({
-  classes, columns, rows, getRowKey,
+  classes,
+  columns,
+  rows,
+  getRowKey,
 }) {
   return (
-    <table className={classes.table}>
-      <br />
-      <thead className={classes.tableHead}>
-        <tr>
-          {columns.map(({ caption }) => (
-            <th key={caption} className={classes.cellHeading}>
-              {caption}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map(row => (
-          <tr key={getRowKey(row)}>
-            {columns.map(({ render }, index) => (
-              <td key={index} className={classes.cell}>
-                {render(row)}
-              </td>
+    <div className={classes.tableWrapper}>
+      <table className={classes.table}>
+        <thead className={classes.tableHead}>
+          <tr>
+            {columns.map(({ caption }) => (
+              <th key={caption} className={classes.cellHeading}>
+                {caption}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map(row => (
+            <tr key={getRowKey(row)}>
+              {columns.map(({ render }, index) => (
+                <td key={+index} className={classes.cell}>
+                  {render(row)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

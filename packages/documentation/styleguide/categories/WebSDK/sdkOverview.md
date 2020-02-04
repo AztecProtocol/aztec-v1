@@ -1,5 +1,3 @@
-## The role of the SDK
-
 The AZTEC SDK allows developers to use AZTEC's zero-knowledge proofs in order to transact confidentially over public Ethereum. It exposes a core API,giving users the ability to deposit, send, and withdraw funds confidentially. This API is accompanied by a UI component which pops up at the relevant moment, guiding the user through the API action.
 
 &nbsp

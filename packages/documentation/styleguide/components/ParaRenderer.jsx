@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import prismTheme from 'react-styleguidist/lib/client/styles/prismTheme';
 import {
+  spacingMap,
   fontWeightMap,
   fontSizeMap,
   lineHeightMap,
@@ -23,6 +24,7 @@ export const styles = ({
     lineHeight: lineHeightMap.s,
     marginTop: 0,
     marginBottom: 0,
+    padding: [[spacingMap.xs, 0]],
     '& > strong': {
       display: 'block',
       color: '#1E1B2B',

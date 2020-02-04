@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  Offset,
+} from '@aztec/guacamole-ui';
 import Group from 'react-group';
 import Arguments from 'react-styleguidist/lib/client/rsg-components/Arguments';
 import Argument from 'react-styleguidist/lib/client/rsg-components/Argument';
@@ -67,7 +70,12 @@ function renderEnum(prop) {
     return <span>{getType(prop).value}</span>;
   }
 
-  const values = getType(prop).value.map(({ value }) => <Code key={value}>{showSpaces(unquote(value))}</Code>);
+  const values = getType(prop).value.map(({ value }) => (
+    <Code key={value}>
+      {showSpaces(unquote(value))}
+    </Code>
+  ));
+
   return (
     <span>
       One of:
@@ -98,7 +106,12 @@ function renderUnion(prop) {
     return <span>{type.value}</span>;
   }
 
-  const values = type.value.map((value, index) => <Type key={`${value.name}-${index}`}>{renderType(value)}</Type>);
+  const values = type.value.map((value, index) => (
+    <Type key={`${value.name}-${+index}`}>
+      {renderType(value)}
+    </Type>
+  ));
+
   return (
     <span>
       One of type:
@@ -141,13 +154,13 @@ function renderDescription(prop) {
   const returnDocumentation = (tags.return && tags.return[0]) || (tags.returns && tags.returns[0]);
 
   return (
-    <div>
+    <Offset margin="s">
       {description && <Markdown text={description} />}
       {extra && <Para>{extra}</Para>}
       <JsDoc {...tags} />
       {args.length > 0 && <Arguments args={args} heading />}
       {returnDocumentation && <Argument {...returnDocumentation} returns />}
-    </div>
+    </Offset>
   );
 }
 
@@ -182,10 +195,18 @@ export const columns = [
   },
 ];
 
-export default function PropsRenderer({ props }) {
-  return <Table columns={columns} rows={props} getRowKey={getRowKey} />;
+function PropsRenderer({ props }) {
+  return (
+    <Table
+      columns={columns}
+      rows={props}
+      getRowKey={getRowKey}
+    />
+  );
 }
 
 PropsRenderer.propTypes = {
   props: PropTypes.array.isRequired,
 };
+
+export default PropsRenderer;
