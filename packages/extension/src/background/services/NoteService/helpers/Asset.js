@@ -206,7 +206,7 @@ export default class Asset {
             const destroyed = isDestroyed(status);
             let key = await get(noteHash);
 
-            if (destroyed ^ !!key) { // eslint-disable-line no-bitwise
+            if (destroyed && !key) {
                 if (blockNumber > this.lastSynced) {
                     this.lastSynced = blockNumber;
                 }

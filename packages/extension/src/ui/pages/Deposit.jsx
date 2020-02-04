@@ -7,10 +7,10 @@ import {
 } from '~/ui/config/settings';
 import {
     inputTransactionShape,
-    gsnConfigShape,
 } from '~/ui/config/propTypes';
 import depositSteps from '~/ui/steps/deposit';
-import apis from '~uiModules/apis';
+import apis from '~/ui/apis';
+import getGSNConfig from '~/ui/helpers/getGSNConfig';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
 import StepsHandler from '~/ui/views/handlers/StepsHandler';
@@ -22,16 +22,17 @@ const Deposit = ({
     transactions,
     numberOfOutputNotes,
     userAccess,
-    gsnConfig,
 }) => {
-    const {
-        isGSNAvailable,
-        proxyContract,
-    } = gsnConfig;
     const {
         address: currentAddress,
     } = currentAccount;
+
     const fetchInitialData = async () => {
+        const gsnConfig = await getGSNConfig();
+        const {
+            isGSNAvailable,
+            proxyContract,
+        } = gsnConfig;
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
@@ -100,7 +101,6 @@ Deposit.propTypes = {
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     numberOfOutputNotes: PropTypes.number,
     userAccess: PropTypes.arrayOf(PropTypes.string),
-    gsnConfig: gsnConfigShape.isRequired,
 };
 
 Deposit.defaultProps = {

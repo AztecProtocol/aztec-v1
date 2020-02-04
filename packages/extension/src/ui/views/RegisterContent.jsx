@@ -91,6 +91,7 @@ class RegisterContent extends StepContentHelper {
     renderSignature() {
         const {
             address,
+            AZTECaddress,
             linkedPublicKey,
             loading,
         } = this.props;
@@ -98,6 +99,7 @@ class RegisterContent extends StepContentHelper {
         const signed = step.name === 'confirm';
         const signatures = {
             account: address,
+            AZTECaddress,
             linkedPublicKey,
         };
 
@@ -193,11 +195,13 @@ class RegisterContent extends StepContentHelper {
 RegisterContent.propTypes = {
     address: PropTypes.string.isRequired,
     linkedPublicKey: PropTypes.string,
+    AZTECaddress: PropTypes.string,
 };
 
 RegisterContent.defaultProps = {
     titleKey: 'account.create.title',
     linkedPublicKey: '',
+    AZTECaddress: '',
 };
 
 export default RegisterContent;

@@ -17,7 +17,9 @@ export default async function getAccounts(args) {
     })));
 
     accounts = accounts
-        .map(({ account }) => account)
+        .map(({ account }) => ({
+            ...account,
+        }))
         .filter(a => a);
     const onChainAccounts = accounts || [];
     const invalidAddresses = addresses

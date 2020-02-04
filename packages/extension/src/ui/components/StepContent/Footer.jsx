@@ -98,9 +98,16 @@ class Footer extends PureComponent {
             nextError,
         } = this.state;
 
-        const error = nextError || currentError || prevError;
+        let error = nextError || currentError || prevError;
         if (!error) {
             return null;
+        }
+
+        if (!error.message) {
+            error = {
+                ...error,
+                message: i18n.t(error.key, error.response),
+            };
         }
 
         const isFetal = error.fetal;
@@ -117,8 +124,7 @@ class Footer extends PureComponent {
                 padding="xs"
             >
                 <Text
-                    text={error.message
-                      || i18n.t(error.key, error.response)}
+                    text={error.message}
                     color="red"
                     size="xxs"
                 />

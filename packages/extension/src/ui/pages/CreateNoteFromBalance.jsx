@@ -5,7 +5,6 @@ import {
     valueOf,
 } from '~/utils/note';
 import {
-    gsnConfigShape,
     inputAmountType,
 } from '~/ui/config/propTypes';
 import {
@@ -15,6 +14,7 @@ import parseInputAmount from '~/ui/utils/parseInputAmount';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import returnAndClose from '~/ui/helpers/returnAndClose';
+import getGSNConfig from '~/ui/helpers/getGSNConfig';
 import StepsHandler from '~/ui/views/handlers/StepsHandler';
 import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
@@ -45,18 +45,19 @@ const CreateNoteFromBalance = ({
     numberOfInputNotes: customNumberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
     userAccess,
-    gsnConfig,
 }) => {
     const {
         address: currentAddress,
     } = currentAccount;
-    const {
-        isGSNAvailable,
-        proxyContract,
-    } = gsnConfig;
-    const steps = createNoteFromBalanceSteps[isGSNAvailable ? 'gsn' : 'metamask'];
 
     const fetchInitialData = async () => {
+        const gsnConfig = await getGSNConfig();
+        const {
+            isGSNAvailable,
+            proxyContract,
+        } = gsnConfig;
+        const steps = createNoteFromBalanceSteps[isGSNAvailable ? 'gsn' : 'metamask'];
+
         const asset = await makeAsset(assetAddress);
         const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
         const sender = isGSNAvailable ? proxyContract : currentAddress;
@@ -75,6 +76,7 @@ const CreateNoteFromBalance = ({
         ];
 
         return {
+            steps,
             assetAddress,
             currentAddress,
             asset,
@@ -92,7 +94,6 @@ const CreateNoteFromBalance = ({
 
     return (
         <StepsHandler
-            steps={steps}
             fetchInitialData={fetchInitialData}
             onExit={handleClose}
             Content={CreateNoteFromBalanceContent}
@@ -109,7 +110,6 @@ CreateNoteFromBalance.propTypes = {
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
     userAccess: PropTypes.arrayOf(PropTypes.string),
-    gsnConfig: gsnConfigShape.isRequired,
 };
 
 CreateNoteFromBalance.defaultProps = {
