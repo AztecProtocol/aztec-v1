@@ -263,6 +263,7 @@ class Web3Service {
         fromAddress,
         args,
         web3 = this.web3,
+        gasPrice,
     }) => {
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
@@ -281,8 +282,9 @@ class Web3Service {
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: fromAddress,
-                gas: estimatedGas,
                 ...methodSetting,
+                gas: estimatedGas,
+                gasPrice,
             });
         }
 
@@ -290,6 +292,7 @@ class Web3Service {
             const options = {
                 from: fromAddress,
                 ...methodSetting,
+                gasPrice,
                 gas: estimatedGas,
             };
 
@@ -356,15 +359,25 @@ class Web3Service {
                             this.abis[contractName],
                             contractAddress || this.getAddress(contractName),
                         );
+
                         gsnContract.setProvider(gsnProvider);
 
                         return {
-                            send: async (...args) => this.triggerMethod('send', {
-                                method: gsnContract.methods[methodName],
-                                fromAddress: signingInfo.address,
-                                args,
-                                web3,
-                            }),
+                            send: async (...args) => {
+                                let gasPrice;
+                                try {
+                                    gasPrice = await web3.eth.getGasPrice();
+                                } catch (e) {
+                                    console.log(e);
+                                }
+                                return this.triggerMethod('send', {
+                                    method: gsnContract.methods[methodName],
+                                    fromAddress: signingInfo.address,
+                                    args,
+                                    gasPrice: gasPrice ? gasPrice * 1.3 : 18000000000, // set gas price 30% higher than last few blocks median to ensure we get in the block
+                                    web3,
+                                });
+                            },
                         };
                     },
                 };
