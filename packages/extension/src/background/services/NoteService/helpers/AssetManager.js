@@ -178,6 +178,7 @@ class AssetManager {
         if (!this.assetMapping[assetId]) {
             this.assetMapping[assetId] = new Asset({
                 assetId,
+                version: this.version,
                 networkId: this.networkId,
                 owner: this.owner,
                 noteBucketCache: this.noteBucketCache,
