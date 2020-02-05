@@ -374,7 +374,7 @@ class Web3Service {
                                     method: gsnContract.methods[methodName],
                                     fromAddress: signingInfo.address,
                                     args,
-                                    gasPrice: gasPrice ? gasPrice * 1.3 : 18000000000, // set gas price 30% higher than last few blocks median to ensure we get in the block
+                                    gasPrice: gasPrice ? gasPrice * 2 : 18000000000, // set gas price 100% higher than last few blocks median to ensure we get in the block
                                     web3,
                                 });
                             },
