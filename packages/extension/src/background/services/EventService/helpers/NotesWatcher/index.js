@@ -201,6 +201,7 @@ class Watcher {
             onData,
             onError,
         } = await NoteSubscription.subscribe({
+            owner: address,
             fromBlock: lastSyncedBlock + 1,
             fromAssets,
             networkId,
