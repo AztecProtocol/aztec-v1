@@ -22,12 +22,14 @@ beforeEach(() => {
 });
 
 describe('recoverAssetNotesFromStorage', () => {
+    const version = randomInt();
     const networkId = randomInt();
     const owner = userAccount;
     const assetIds = Object.keys(assetSummary);
 
     it('recover note values from storage for given asset', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -40,6 +42,7 @@ describe('recoverAssetNotesFromStorage', () => {
         const targetAsset = assetIds[randomInt(0, assetIds.length - 1)];
 
         const recovered = await recoverAssetNotesFromStorage(
+            version,
             networkId,
             owner,
             targetAsset,
@@ -50,6 +53,7 @@ describe('recoverAssetNotesFromStorage', () => {
 
     it('recover assetNotes for the given network', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -73,6 +77,7 @@ describe('recoverAssetNotesFromStorage', () => {
             },
         };
         await saveToStorage(
+            version,
             anotherNetwork,
             owner,
             {
@@ -86,6 +91,7 @@ describe('recoverAssetNotesFromStorage', () => {
         expect(assetNotesB[targetAsset]).not.toEqual(assetNotes[targetAsset]);
 
         const recoveredA = await recoverAssetNotesFromStorage(
+            version,
             networkId,
             owner,
             targetAsset,
@@ -93,6 +99,7 @@ describe('recoverAssetNotesFromStorage', () => {
         expect(recoveredA).toEqual(assetNotes[targetAsset]);
 
         const recoveredB = await recoverAssetNotesFromStorage(
+            version,
             anotherNetwork,
             owner,
             targetAsset,
@@ -102,6 +109,7 @@ describe('recoverAssetNotesFromStorage', () => {
 
     it('recover assetNotes for the given owner', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -125,6 +133,7 @@ describe('recoverAssetNotesFromStorage', () => {
             },
         };
         await saveToStorage(
+            version,
             networkId,
             anotherOwner,
             {
@@ -138,6 +147,7 @@ describe('recoverAssetNotesFromStorage', () => {
         expect(assetNotesB[targetAsset]).not.toEqual(assetNotes[targetAsset]);
 
         const recoveredA = await recoverAssetNotesFromStorage(
+            version,
             networkId,
             owner,
             targetAsset,
@@ -145,6 +155,7 @@ describe('recoverAssetNotesFromStorage', () => {
         expect(recoveredA).toEqual(assetNotes[targetAsset]);
 
         const recoveredB = await recoverAssetNotesFromStorage(
+            version,
             networkId,
             anotherOwner,
             targetAsset,
@@ -155,6 +166,7 @@ describe('recoverAssetNotesFromStorage', () => {
     it('return empty object if there is no data for given asset in storage', async () => {
         const randomAsset = randomId();
         const recovered = await recoverAssetNotesFromStorage(
+            version,
             networkId,
             owner,
             randomAsset,

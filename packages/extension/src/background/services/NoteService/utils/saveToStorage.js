@@ -10,6 +10,7 @@ import dataKey from '~/utils/dataKey';
 import saveAssetNotesToStorage from './saveAssetNotesToStorage';
 
 export default async function saveToStorage(
+    version,
     networkId,
     owner,
     userAssetsData,
@@ -41,6 +42,7 @@ export default async function saveToStorage(
     });
 
     const userAssetsKey = dataKey('userAssets', {
+        version,
         user: userAddress,
         network: networkId,
     });
@@ -59,6 +61,7 @@ export default async function saveToStorage(
         const priorityDataKey = dataKey(
             'userAssetPriority',
             {
+                version,
                 user: userAddress,
                 network: networkId,
             },
@@ -70,6 +73,7 @@ export default async function saveToStorage(
 
     const assetNotesPromises = Object.keys(assetNotes)
         .map(assetId => saveAssetNotesToStorage(
+            version,
             networkId,
             userAddress,
             linkedPublicKey,

@@ -9,6 +9,7 @@ import {
 import parseNoteValuesStrings from './parseNoteValuesStrings';
 
 export default async function recoverAssetNotesFromStorage(
+    version,
     networkId,
     owner,
     assetId,
@@ -18,6 +19,7 @@ export default async function recoverAssetNotesFromStorage(
         linkedPrivateKey,
     } = owner;
     const assetNotes = await get(dataKey('userAssetNotes', {
+        version,
         network: networkId,
         user: address,
         asset: assetId,

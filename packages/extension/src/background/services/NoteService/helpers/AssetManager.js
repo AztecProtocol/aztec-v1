@@ -18,6 +18,7 @@ import Asset from './Asset';
 
 class AssetManager {
     constructor({
+        version,
         networkId,
         owner,
         maxAssets = defaultMaxAssets,
@@ -27,6 +28,7 @@ class AssetManager {
         maxProcesses = defaultMaxProcesses,
         notesPerBatch = defaultNotesPerBatch,
     }) {
+        this.version = version;
         this.networkId = networkId;
         this.owner = owner;
 
@@ -74,6 +76,7 @@ class AssetManager {
             priority,
             assetSummary,
         } = await recoverSummaryFromStorage(
+            this.version,
             this.networkId,
             this.owner,
         );
@@ -86,6 +89,7 @@ class AssetManager {
             } = assetSummary[assetId];
 
             this.assetMapping[assetId] = new Asset({
+                version: this.version,
                 networkId: this.networkId,
                 owner: this.owner,
                 noteBucketCache: this.noteBucketCache,
@@ -272,6 +276,7 @@ class AssetManager {
         });
 
         await saveToStorage(
+            this.version,
             this.networkId,
             this.owner,
             {
