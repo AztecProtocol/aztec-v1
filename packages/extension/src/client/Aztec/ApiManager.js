@@ -5,13 +5,16 @@ import ConnectionService from '~/client/services/ConnectionService';
 
 export default class ApiManager {
     constructor() {
-        this.apis = {};
         this.eventListeners = new EventListeners(['profileChanged']);
         this.enableProfileChangeListener = null;
 
         Web3Service.bindProfileChange((changedType, newTypeValue) => {
             this.eventListeners.notify('profileChanged', changedType, newTypeValue);
         });
+    }
+
+    generateDefaultApis() { // eslint-disable-line class-methods-use-this
+        return ApiPermissionService.generateApis();
     }
 
     bindProfileChangeListenerOnce(cb) {
@@ -125,8 +128,7 @@ export default class ApiManager {
             return;
         }
 
-        const apis = ApiPermissionService.generateApis();
-        this.apis = apis;
+        const apis = ApiPermissionService.generateApis(true);
         setApis(apis);
 
         if (autoRefreshOnProfileChange) {
@@ -142,18 +144,17 @@ export default class ApiManager {
         doResolved();
     });
 
-    async disable() {
+    async disable(setApis) {
         this.unbindProfileChangeListener();
+
+        const apis = this.generateDefaultApis();
+        setApis(apis);
+
         await ConnectionService.disconnect();
     }
 
     async refreshSession(options, cb, setApis) {
-        const emptyApis = {};
-        Object.keys(this.apis).forEach((apiName) => {
-            emptyApis[apiName] = null;
-        });
-        setApis(emptyApis);
-        await this.disable();
+        await this.disable(setApis);
         return this.enable(options, cb, setApis);
     }
 }

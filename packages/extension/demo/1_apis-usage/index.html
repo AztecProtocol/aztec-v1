@@ -42,7 +42,7 @@
       }
 
       function handleLoadSuccess() {
-        const account = window.aztec.web3.account();
+        const account = window.aztec.web3.getAccount();
         document.getElementById('sdk-status').innerHTML = `
           <div>
             AZTEC SDK loaded and enabled!<br/>

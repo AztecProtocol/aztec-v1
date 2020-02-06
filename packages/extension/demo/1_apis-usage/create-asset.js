@@ -63,7 +63,7 @@
     addAssetStatus(`✓ zkAsset deployed - ${zkAssetAddress}`, true);
 
     if (value) {
-      const account = window.aztec.web3.account();
+      const account = window.aztec.web3.getAccount();
       addAssetStatus(`Minting ERC20 with amount = ${value}...`);
       await window.aztec.web3
         .useContract('ERC20')
