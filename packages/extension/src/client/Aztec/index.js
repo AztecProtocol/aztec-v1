@@ -35,7 +35,7 @@ class Aztec {
         callback = null,
     ) => manager.enable(options, callback, (apis) => {
         Object.keys(apis).forEach((apiName) => {
-            if (this[apiName]) {
+            if (this[apiName] && apis[apiName]) {
                 warnLog(`Api '${apiName}' is already in Aztec.`);
                 return;
             }
@@ -44,10 +44,9 @@ class Aztec {
     });
 
     disable = async () => {
-        this.web3 = null;
-        this.zkAsset = null;
-        this.zkNote = null;
-
+        Object.keys(manager.apis).forEach((apiName) => {
+            this[apiName] = null;
+        });
         return manager.disable();
     }
 }

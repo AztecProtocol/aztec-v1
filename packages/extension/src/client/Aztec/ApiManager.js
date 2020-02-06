@@ -5,7 +5,30 @@ import ConnectionService from '~/client/services/ConnectionService';
 
 export default class ApiManager {
     constructor() {
+        this.apis = {};
         this.eventListeners = new EventListeners(['profileChanged']);
+        this.enableProfileChangeListener = null;
+
+        Web3Service.bindProfileChange((changedType, newTypeValue) => {
+            this.eventListeners.notify('profileChanged', changedType, newTypeValue);
+        });
+    }
+
+    bindProfileChangeListenerOnce(cb) {
+        Web3Service.unbindProfileChange(this.enableProfileChangeListener);
+        const listener = (changedType, newTypeValue) => {
+            this.unbindProfileChangeListener();
+            cb(changedType, newTypeValue);
+        };
+        this.enableProfileChangeListener = listener;
+        Web3Service.bindProfileChange(this.enableProfileChangeListener);
+    }
+
+    unbindProfileChangeListener() {
+        if (this.enableProfileChangeListener) {
+            Web3Service.unbindProfileChange(this.enableProfileChangeListener);
+            this.enableProfileChangeListener = null;
+        }
     }
 
     enable = async (
@@ -43,10 +66,8 @@ export default class ApiManager {
         };
 
         if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange((changedType, newTypeValue) => {
+            this.bindProfileChangeListenerOnce(() => {
                 networkSwitchedDuringStart = true;
-
-                this.eventListeners.notify('profileChanged', changedType, newTypeValue);
 
                 this.refreshSession(options, (success, error) => {
                     if (callback) {
@@ -54,7 +75,7 @@ export default class ApiManager {
                     }
                     const shouldReject = !!error && !callback;
                     doResolved(shouldReject, error);
-                });
+                }, setApis);
             });
         }
 
@@ -105,20 +126,12 @@ export default class ApiManager {
         }
 
         const apis = ApiPermissionService.generateApis();
+        this.apis = apis;
         setApis(apis);
 
         if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange((changedType, newTypeValue) => {
-                this.eventListeners.notify('profileChanged', changedType, newTypeValue);
-
-                this.refreshSession(options, (success, error) => {
-                    this.eventListeners.notify(
-                        'profileChanged',
-                        'aztecAccountChanged',
-                        success,
-                        error,
-                    );
-                });
+            this.bindProfileChangeListenerOnce(() => {
+                this.refreshSession(options, null, setApis);
             });
         }
 
@@ -130,12 +143,17 @@ export default class ApiManager {
     });
 
     async disable() {
-        this.eventListeners.removeAll('profileChanged');
+        this.unbindProfileChangeListener();
         await ConnectionService.disconnect();
     }
 
-    refreshSession = async (options, cb) => {
+    async refreshSession(options, cb, setApis) {
+        const emptyApis = {};
+        Object.keys(this.apis).forEach((apiName) => {
+            emptyApis[apiName] = null;
+        });
+        setApis(emptyApis);
         await this.disable();
-        return this.enable(options, cb);
+        return this.enable(options, cb, setApis);
     }
 }
