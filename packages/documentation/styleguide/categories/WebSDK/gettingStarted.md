@@ -4,7 +4,7 @@
 The SDK first needs to be installed into your dapp. This is done by adding one line of JavaScript to your Dapp
 
 ```js static
-<script type="module" src="https://sdk.aztecprotocol.com/aztec.js" />
+<script type="module" src="https://sdk.aztecprotocol.com/aztec.js"></script>
 ```
 
 Upon successfully loading, the SDK will then inject the following object into the _window_ of each page:

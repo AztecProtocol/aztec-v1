@@ -9,29 +9,26 @@ await window.aztec.enable({ apiKey });
 // Fetch the zkAsset
 const address = '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4';
 const asset = await window.aztec.zkAsset(address);
-console.info({ asset });
+console.info(asset);
 
 // Deposit funds into the ZkAsset
-const user = '';
+const user = ''; // [place your Ethereum address here]
 const depositAmount = 50;
 await asset.deposit(
   [
     {
       to: user,
       amount: depositAmount,
-    }
-  ]
+    },
+  ],
   {},
 );
+console.info('deposited funds');
 
 // Withdraw funds, to a different address
 const withdrawAmount = 10;
-await asset.withdraw([
-  {
-    to: user,
-    amount: withdrawAmount,
-  }
-], {})
+await asset.withdraw(withdrawAmount);
+console.info('withdrew funds');
 ```
 
 ### Convert 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by a third party
@@ -52,18 +49,17 @@ await asset.deposit(
     {
       to: userAddress,
       amount: depositAmount,
-    }
-  ]
+    },
+  ],
   {},
 );
+console.info('deposited funds');
+
 
 // Withdraw funds, to a different address
 const thirdPartyAddress = '0xc647637aeb0f2ac4d98037955091ff66f6d8a235';
 const withdrawAmount = 10;
-await asset.withdraw([
-  {
-    to: thirdPartyAddress,
-    amount: withdrawAmount,
-  }
-], {})
+await asset.withdraw(withdrawAmount);
+console.info('withdrew funds');
+
 ```

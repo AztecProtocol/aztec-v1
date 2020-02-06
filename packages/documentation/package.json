@@ -16,7 +16,7 @@
     "lint": "babel-node scripts/run lint",
     "start": "yarn styleguide",
     "styleguide": "styleguidist server",
-    "test": "jest ./src",
+    "test": "jest ./src --passWithNoTests",
     "transpile": "BABEL_ENV=transpile babel src -x \".js\",\".jsx\" --ignore \"**/*.spec.js\",\"**/demo/**\" -d dist"
   },
   "dependencies": {
