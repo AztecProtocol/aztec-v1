@@ -13,7 +13,6 @@ import {
 } from '~/utils/format';
 import i18n from '~/ui/helpers/i18n';
 import noteValueToToken from '~/ui/utils/noteValueToToken';
-import formatNumber from '~/ui/utils/formatNumber';
 import isStepAfter from '~/ui/utils/isStepAfter';
 import StepContentHelper from '~/ui/views/handlers/StepContentHelper';
 import StepContent from '~/ui/components/StepContent';
@@ -53,7 +52,7 @@ class DepositContent extends StepContentHelper {
             footnote: (
                 <Text
                     className="text-code"
-                    text={formatNumber(noteValueToToken(txAmount, asset))}
+                    text={noteValueToToken(txAmount, asset)}
                     color="label"
                     weight="semibold"
                 />
