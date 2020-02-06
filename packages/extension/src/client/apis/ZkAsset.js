@@ -1,3 +1,4 @@
+import BN from 'bn.js';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
@@ -56,7 +57,7 @@ export default class ZkAsset {
             });
         }
 
-        let totalSupply;
+        let totalSupply = 0;
         try {
             totalSupply = await Web3Service
                 .useContract('ERC20')
@@ -67,7 +68,7 @@ export default class ZkAsset {
             throw new ContractError('erc20.totalSupply');
         }
 
-        return totalSupply | 0; // eslint-disable-line no-bitwise
+        return new BN(totalSupply);
     }
 
     balanceOfLinkedToken = async (account) => {
@@ -99,7 +100,7 @@ export default class ZkAsset {
             });
         }
 
-        return balance | 0; // eslint-disable-line no-bitwise
+        return new BN(balance);
     };
 
     allowanceOfLinkedToken = async (owner = '', spender = '') => {
@@ -138,7 +139,7 @@ export default class ZkAsset {
             });
         }
 
-        return allowance | 0; // eslint-disable-line no-bitwise
+        return new BN(allowance);
     };
 
     subscribeToBalance = async (subscriber) => {
