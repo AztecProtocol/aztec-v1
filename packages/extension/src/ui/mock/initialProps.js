@@ -72,7 +72,7 @@ export default {
         requestedAllowance: asset.scalingFactor.mul(new BN(amount)),
     }),
     withdraw: {
-        asset: assets[0],
+        asset: makeAsset(assets[0]),
         currentAddress: addresses[0],
         amount: randomInt(1, 10000),
         publicOwner: randomAddress(),
@@ -100,7 +100,7 @@ export default {
         };
     },
     noteAccess: {
-        asset: assets[0],
+        asset: makeAsset(assets[0]),
         amount: randomInt(1, 10000),
         userAccessAccounts: generate(2, randomAccount),
         isGSNAvailable: true,
@@ -109,28 +109,12 @@ export default {
         isGSNAvailable: false,
     },
     createNote: {
-        asset: assets[0],
+        asset: makeAsset(assets[0]),
         amount: randomInt(1, 100),
         currentAddress: addresses[0],
         userAccessAccounts: generate(2, randomAccount),
         spender: addresses[1],
         proofHash: `0x${randomId(150)}`,
-    },
-    mint: {
-        asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
-        amount: randomInt(1, 1000),
-        goNext: dummyFunc,
-    },
-    burn: {
-        asset: assets[0],
-        user: {
-            address: addresses[0],
-        },
-        amount: randomInt(1, 1000),
-        goNext: dummyFunc,
     },
     'playground.icons.assets': {
         type: 'asset',

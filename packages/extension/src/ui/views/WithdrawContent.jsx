@@ -59,7 +59,7 @@ class WithdrawContent extends StepContentHelper {
             {
                 title: [
                     symbol
-                        ? `Zk${symbol}`
+                        ? i18n.t('zkSymbol', { symbol })
                         : capitalize(i18n.singular('zkAsset')),
                     ' (',
                     <HashText
@@ -73,7 +73,7 @@ class WithdrawContent extends StepContentHelper {
                     ')',
                 ],
                 content: symbol
-                    ? `${tokenValue} Zk${symbol}`
+                    ? `${tokenValue} ${i18n.t('zkSymbol', { symbol })}`
                     : i18n.count('zkToken', tokenValue, true),
                 profile: {
                     ...asset,

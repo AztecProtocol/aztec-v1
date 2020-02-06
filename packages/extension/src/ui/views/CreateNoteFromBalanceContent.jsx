@@ -68,7 +68,7 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
         return {
             title: [
                 symbol
-                    ? `Zk${symbol}`
+                    ? i18n.t('zkSymbol', { symbol })
                     : capitalize(i18n.singular('zkAsset')),
                 ' (',
                 <HashText
@@ -83,7 +83,7 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
             ],
             hideTitile: approved,
             content: symbol
-                ? `${tokenValue} Zk${symbol}`
+                ? `${tokenValue} ${i18n.t('zkSymbol', { symbol })}`
                 : i18n.count('zkToken', tokenValue, true),
             contentFootnote: (
                 <BlockStatus
