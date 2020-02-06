@@ -94,24 +94,6 @@ class AnimatedBlocks extends PureComponent {
                     },
                 )}
             >
-                {!!sealedIcon && type === 'sealed' && (
-                    <div className={styles['sealed-icon']}>
-                        {sealedIcon === 'aztec' && (
-                            <AztecSvg
-                                theme="light"
-                                size="s"
-                            />
-                        )}
-                        {sealedIcon === 'link' && (
-                            <SVG
-                                glyph={linkGlyph}
-                                color="white"
-                                width={iconSizeMap.m}
-                                height={iconSizeMap.m}
-                            />
-                        )}
-                    </div>
-                )}
                 {blocks.map((block, i) => (
                     <div
                         key={+i}
@@ -127,6 +109,24 @@ class AnimatedBlocks extends PureComponent {
                             layer={0}
                             {...block}
                         />
+                        {!!sealedIcon && type === 'sealed' && i === 0 && (
+                            <div className={styles['sealed-icon']}>
+                                {sealedIcon === 'aztec' && (
+                                    <AztecSvg
+                                        theme="light"
+                                        size="s"
+                                    />
+                                )}
+                                {sealedIcon === 'link' && (
+                                    <SVG
+                                        glyph={linkGlyph}
+                                        color="white"
+                                        width={iconSizeMap.m}
+                                        height={iconSizeMap.m}
+                                    />
+                                )}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
