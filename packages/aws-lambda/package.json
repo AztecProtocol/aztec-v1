@@ -1,0 +1,49 @@
+{
+    "name": "aws-signer",
+    "description": "aws lambda functions for signing GSN transactions",
+    "version": "0.0.0-semantically-released",
+    "author": "AZTEC",
+    "main": "app.js",
+    "bugs": {
+        "url": "https://github.com/AztecProtocol/AZTEC/issues"
+    },
+    "dependencies": {
+        "@aztec/contract-artifacts": "^1.18.0",
+        "ethjs-unit": "^0.1.6",
+        "jest": "^25.1.0",
+        "pg": "^7.12.1",
+        "pg-hstore": "^2.3.3",
+        "sequelize": "^5.21.2",
+        "umzug": "^2.2.0",
+        "underscore": "^1.9.2",
+        "web3": "^1.2.6"
+    },
+    "devDependencies": {
+        "chai": "^4.2.0",
+        "mocha": "^6.1.4"
+    },
+    "engines": {
+        "node": ">=8.3"
+    },
+    "scripts": {
+        "test": "jest",
+        "build:dev": "cd .. && sam build -t template.yaml",
+        "package:dev": "cd .. && sam package --template-file template.yaml --output-template-file packaged_dev.yaml",
+        "deploy:dev": "cd .. && aws cloudformation deploy --template-file packaged_dev.yaml --stack-name aztec-lambda"
+    },
+    "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
+    "keywords": [
+        "aztec",
+        "blockchain",
+        "confidentiality",
+        "cryptography",
+        "ethereum",
+        "privacy",
+        "protocol"
+    ],
+    "license": "LGPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/AztecProtocol/AZTEC.git"
+    }
+}

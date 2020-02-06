@@ -1,13 +1,13 @@
-const { approveData, trustedAccount } = require('./utils/signer');
-const { OK_200, NOT_FOUND_404, BAD_400, ACCESS_DENIED_401 } = require('./helpers/responses');
+const { trustedAccount } = require('./utils/signer');
+const { OK_200, NOT_FOUND_404, BAD_400 } = require('./helpers/responses');
 const { validateRequestData, registerContracts, refreshPendingTxs, validateNetworkId, getNetworkConfig } = require('./helpers');
 const { getParameters } = require('./utils/event');
 const web3Service = require('./services/Web3Service');
-const { monitorTx } = require('./utils/transactions');
 const { errorLog } = require('./utils/log');
 const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
 const { balance, getDappInfo } = require('./utils/dapp');
+
 
 const initializeDB = ({ networkId }) => {
     dbConnection.init({
@@ -40,7 +40,7 @@ const initialize = ({ networkId, authorizationRequired }) => {
     });
 };
 
-const authorizedApprovalData = async ({ networkId, apiKey, data }) => {
+const authorizedHasFreeTransactions = async ({ networkId, apiKey, origin }) => {
     const { id: dappId } = await getDappInfo({
         apiKey,
     });
@@ -52,35 +52,25 @@ const authorizedApprovalData = async ({ networkId, apiKey, data }) => {
     const countFreeTransactions = await balance({
         dappId,
     });
-    if (countFreeTransactions <= 0) {
-        return {
-            error: ACCESS_DENIED_401({
-                title: "Not enough free transaction, please contact to the dapp's support",
-            }),
-            result: null,
-        };
-    }
-
-    const result = await approveData(data);
-    const { signature } = result;
-
-    await monitorTx({
-        ...data,
-        dappId,
-        signature,
-    });
 
     return {
         error: null,
-        result,
+        result: {
+            quota: countFreeTransactions,
+            origin,
+            hasFreeTransactions: true,
+        },
     };
 };
 
-const unauthorizedApprovalData = async ({ data }) => {
-    const result = await approveData(data);
+const unauthorizedHasFreeTransactions = async ({origin}) => {
     return {
         error: null,
-        result,
+        result: {
+            hasFreeTransactions: true,
+            quota: 10000,
+            origin,
+        },
     };
 };
 
@@ -102,12 +92,11 @@ const responseOptions = (origin) => ({
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
-exports.signTxHandler = async (event) => {
-    if (event.httpMethod !== 'POST') {
+exports.balanceHandler = async (event) => {
+    if (event.httpMethod !== 'GET') {
         return NOT_FOUND_404();
     }
     const {
-        body: { data },
         path: { apiKey, networkId },
         headers: { origin },
     } = getParameters(event) || {};
@@ -128,13 +117,12 @@ exports.signTxHandler = async (event) => {
                 isRequired: authorizationRequired,
                 value: apiKey,
             },
-            origin: {
-                isRequired: authorizationRequired,
-                value: origin,
-            },
+            // origin: {
+            //     isRequired: authorizationRequired,
+            //     value: origin,
+            // },
             data: {
-                isRequired: true,
-                value: data,
+                isRequired: false,
             },
             networkId: {
                 isRequired: true,
@@ -147,19 +135,17 @@ exports.signTxHandler = async (event) => {
 
         let resp;
         if (authorizationRequired) {
-            resp = await authorizedApprovalData({
+            resp = await authorizedHasFreeTransactions({
+                origin,
                 networkId,
                 apiKey,
-                data,
             });
         } else {
-            resp = await unauthorizedApprovalData({
-                data,
-            });
+            resp = await unauthorizedHasFreeTransactions({origin});
         }
-        const { error: approvalError, result } = resp;
-        if (approvalError) {
-            return approvalError;
+        const { error: freeTransactionsError, result } = resp;
+        if (freeTransactionsError) {
+            return freeTransactionsError;
         }
         const options = responseOptions(origin);
         return OK_200(result, options);

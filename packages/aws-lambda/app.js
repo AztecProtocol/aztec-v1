@@ -1,8 +1,9 @@
-const { trustedAccount } = require('./utils/signer');
-const { OK_200, NOT_FOUND_404, BAD_400 } = require('./helpers/responses');
+const { approveData, trustedAccount } = require('./utils/signer');
+const { OK_200, NOT_FOUND_404, BAD_400, ACCESS_DENIED_401 } = require('./helpers/responses');
 const { validateRequestData, registerContracts, refreshPendingTxs, validateNetworkId, getNetworkConfig } = require('./helpers');
 const { getParameters } = require('./utils/event');
 const web3Service = require('./services/Web3Service');
+const { monitorTx } = require('./utils/transactions');
 const { errorLog } = require('./utils/log');
 const dbConnection = require('./database/helpers/connection');
 const db = require('./database');
@@ -39,7 +40,7 @@ const initialize = ({ networkId, authorizationRequired }) => {
     });
 };
 
-const authorizedHasFreeTransactions = async ({ networkId, apiKey }) => {
+const authorizedApprovalData = async ({ networkId, apiKey, data }) => {
     const { id: dappId } = await getDappInfo({
         apiKey,
     });
@@ -51,21 +52,35 @@ const authorizedHasFreeTransactions = async ({ networkId, apiKey }) => {
     const countFreeTransactions = await balance({
         dappId,
     });
+    if (countFreeTransactions <= 0) {
+        return {
+            error: ACCESS_DENIED_401({
+                title: "Not enough free transaction, please contact to the dapp's support",
+            }),
+            result: null,
+        };
+    }
+
+    const result = await approveData(data);
+    const { signature } = result;
+
+    await monitorTx({
+        ...data,
+        dappId,
+        signature,
+    });
 
     return {
         error: null,
-        result: {
-            hasFreeTransactions: countFreeTransactions > 0,
-        },
+        result,
     };
 };
 
-const unauthorizedHasFreeTransactions = async () => {
+const unauthorizedApprovalData = async ({ data }) => {
+    const result = await approveData(data);
     return {
         error: null,
-        result: {
-            hasFreeTransactions: true,
-        },
+        result,
     };
 };
 
@@ -87,11 +102,13 @@ const responseOptions = (origin) => ({
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  *
  */
-exports.balanceHandler = async (event) => {
-    if (event.httpMethod !== 'GET') {
+
+exports.signTxHandler = async (event) => {
+    if (event.httpMethod !== 'POST') {
         return NOT_FOUND_404();
     }
     const {
+        body: { data },
         path: { apiKey, networkId },
         headers: { origin },
     } = getParameters(event) || {};
@@ -117,7 +134,8 @@ exports.balanceHandler = async (event) => {
                 value: origin,
             },
             data: {
-                isRequired: false,
+                isRequired: true,
+                value: data,
             },
             networkId: {
                 isRequired: true,
@@ -130,16 +148,19 @@ exports.balanceHandler = async (event) => {
 
         let resp;
         if (authorizationRequired) {
-            resp = await authorizedHasFreeTransactions({
+            resp = await authorizedApprovalData({
                 networkId,
                 apiKey,
+                data,
             });
         } else {
-            resp = await unauthorizedHasFreeTransactions();
+            resp = await unauthorizedApprovalData({
+                data,
+            });
         }
-        const { error: freeTransactionsError, result } = resp;
-        if (freeTransactionsError) {
-            return freeTransactionsError;
+        const { error: approvalError, result } = resp;
+        if (approvalError) {
+            return approvalError;
         }
         const options = responseOptions(origin);
         return OK_200(result, options);

@@ -1,19 +1,20 @@
 'use strict';
 
-const app = require('../../app.js');
 const chai = require('chai');
-const expect = chai.expect;
-var event, context;
+// const balance = require('../balance.js');
 
-describe('Tests index', function() {
-    it('verifies successful response', async () => {
-        const result = await app.lambdaHandler(event, context);
+const {expect} = chai;
+let event; let context;
 
+describe('Balance test index', function() {
+    it('returns an origin error if the api is incorrect', async () => {
+        console.log(balance, event)
+        const result = await balance.balanceHandler(event, context);
         expect(result).to.be.an('object');
         expect(result.statusCode).to.equal(200);
         expect(result.body).to.be.an('string');
 
-        let response = JSON.parse(result.body);
+        const response = JSON.parse(result.body);
 
         expect(response).to.be.an('object');
         expect(response.message).to.be.equal('hello world');

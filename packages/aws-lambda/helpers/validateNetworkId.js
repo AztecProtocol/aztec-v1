@@ -13,7 +13,7 @@ module.exports = (networkId) => {
     }
 
     const isGanache = isGanacheNetwork(networkId);
-    const authorizationRequired = isGanache ? false : isTrue(process.env.API_KEY_REQUIRED);
+    const authorizationRequired = isGanache ? false : process.env.API_KEY_REQUIRED;
     if (!ids.includes(networkId) && !isGanache) {
         return {
             error: BAD_400(`"networkId" parameter has to be one of ${ids.join(', ')} values or ganache networkId`),
