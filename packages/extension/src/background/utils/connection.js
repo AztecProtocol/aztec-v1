@@ -118,11 +118,17 @@ class Connection {
                 const uiContainer = document.getElementById(this.containerId);
                 uiContainer.style.display = 'none';
 
-                await this.uiFrame.ensureCreated();
-
                 const {
                     webClientId,
                 } = this.requests[requestId];
+
+                this.ClientResponseSubject.next({
+                    type: uiOpenEvent,
+                    requestId,
+                    webClientId,
+                });
+
+                await this.uiFrame.ensureCreated();
 
                 this.openUi({
                     requestId,
@@ -133,12 +139,6 @@ class Connection {
                         // the entire 'psl' module to client or background-ui
                         domain: getDomainFromUrl(site.url),
                     },
-                });
-
-                this.ClientResponseSubject.next({
-                    type: uiOpenEvent,
-                    requestId,
-                    webClientId,
                 });
 
                 this.uiFrame.frame.contentWindow.postMessage({
