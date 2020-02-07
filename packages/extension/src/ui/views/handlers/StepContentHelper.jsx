@@ -240,6 +240,7 @@ class StepContentHelper extends PureComponent {
         const {
             currentTask,
             error,
+            loading,
         } = this.props;
         const {
             tasks,
@@ -272,7 +273,7 @@ class StepContentHelper extends PureComponent {
                                 height={iconSizeMap.s}
                             />
                         );
-                    } else if (i === currentTask + 1) {
+                    } else if (i === currentTask + 1 && loading) {
                         statusIcon = (
                             <Loader
                                 size="xxs"
@@ -280,6 +281,9 @@ class StepContentHelper extends PureComponent {
                             />
                         );
                     }
+
+                    const highlight = i < currentTask + 1
+                      || (i === currentTask + 1 && loading);
 
                     return (
                         <Block
@@ -290,7 +294,7 @@ class StepContentHelper extends PureComponent {
                                 content={(
                                     <Text
                                         text={title || i18n.t(titleKey)}
-                                        color={i > currentTask + 1 ? 'label' : 'default'}
+                                        color={highlight ? 'default' : 'label'}
                                         size="xs"
                                     />
                                 )}
