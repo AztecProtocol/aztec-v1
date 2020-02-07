@@ -127,6 +127,7 @@ $RECYCLE.BIN/
 
 # yaml file
 template.yaml
+packaged_dev.yaml
 
 
 # End of https://www.gitignore.io/api/osx,node,linux,windows
