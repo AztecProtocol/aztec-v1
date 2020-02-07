@@ -27,9 +27,9 @@
     },
     "scripts": {
         "test": "jest",
-        "build:dev": "cd .. && sam build -t template.yaml",
-        "package:dev": "cd .. && sam package --template-file template.yaml --output-template-file packaged_dev.yaml",
-        "deploy:dev": "cd .. && aws cloudformation deploy --template-file packaged_dev.yaml --stack-name aztec-lambda"
+        "build:dev": "sam build",
+        "package:dev": "sam package --template-file template.yaml --output-template-file packaged_dev.yaml",
+        "deploy:dev": "aws cloudformation deploy --template-file packaged_dev.yaml --stack-name aztec-lambda"
     },
     "homepage": "https://github.com/AztecProtocol/AZTEC/tree/master/packages/aztec.js#readme",
     "keywords": [

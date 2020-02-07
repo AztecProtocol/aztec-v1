@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sign a data with trusted private key, so cliend can send it to the GSN
+  later
+Globals:
+  Function:
+    Timeout: 60
+    Environment:
+      Variables:
+        API_KEY_REQUIRED: true
+        SIGNER_ADDRESS: '0x6794d16143e537a51d6745D3ae6bc99502b4331C'
+        SIGNER_PRIVATE_KEY: '0x097e4580ae2a25214eeaf43ef0dca39b4438bf20de25e7da121fbb1165834813'
+        SIGNER_GANACHE_ADDRESS: '0x24b934a7d1dd72bd8645a4958b0ff46bd29a5845'
+        SIGNER_GANACHE_PRIVATE_KEY: '0x8bd01a2eeb87f5a0370b227412a48454ebbe97122e2e8d37a83ed3beff4f7701'
+        INFURA_PROJECT_KEY: 09c4eed231c840d5ace14ba5389a1a7c
+        DB_HOST: db-aztec-stage.co31uhzhlukr.us-east-1.rds.amazonaws.com
+        DB_PORT: '5432'
+        DB_DATABASE_PREFIX: aztec
+        DB_USER: aztec_postgres
+        DB_PASSWORD: heuHEB73^33:dj>22he
+        MAIN_AZTECAccountRegistryGSN: '0xe8F0b0Ef4EF717F951f113B9Ef101a74858BfE7e'
+        ROPSTEN_AZTECAccountRegistryGSN: ''
+        RINKEBY_AZTECAccountRegistryGSN: '0x01642306d1E929c62781e406F53eE49aEA57cC9e'
+        GOERLI_AZTECAccountRegistryGSN: ''
+        KOVAN_AZTECAccountRegistryGSN: ''
+  Api:
+    Cors:
+      AllowMethods: '''OPTIONS,POST,GET'''
+      AllowHeaders: '''Content-Type'''
+      AllowOrigin: '''*'''
+Resources:
+  SignTxFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://aztec-lambda/97bd88987063cfd7d86423eae1ebea5c
+      Handler: app.signTxHandler
+      Runtime: nodejs10.x
+      Layers:
+      - Ref: DepLayer
+      FunctionName: sign-tx
+      Role: arn:aws:iam::278380418400:role/AWS-LAMBDA-KEY-SIGNER
+      Events:
+        SignTx:
+          Type: Api
+          Properties:
+            Path: /{networkId}/{apiKey}
+            Method: post
+  HasFreeTransactionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://aztec-lambda/97bd88987063cfd7d86423eae1ebea5c
+      Handler: balance.balanceHandler
+      Runtime: nodejs10.x
+      Layers:
+      - Ref: DepLayer
+      FunctionName: has-free-txs
+      Role: arn:aws:iam::278380418400:role/AWS-LAMBDA-KEY-SIGNER
+      Events:
+        SignTx:
+          Type: Api
+          Properties:
+            Path: /{networkId}/{apiKey}
+            Method: get
+  MigrateDBFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://aztec-lambda/97bd88987063cfd7d86423eae1ebea5c
+      Handler: migrate.migrationHandler
+      Runtime: nodejs10.x
+      FunctionName: migrate-db
+      Layers:
+      - Ref: DepLayer
+      Role: arn:aws:iam::278380418400:role/AWS-LAMBDA-KEY-SIGNER
+  DepLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: sam-app-dependencies
+      Description: Dependencies for sam app
+      ContentUri: s3://aztec-lambda/335f82a54fe5eb04b6efc42cf5a40f10
+      CompatibleRuntimes:
+      - nodejs10.x
+      LicenseInfo: MIT
+      RetentionPolicy: Retain
+Outputs:
+  SignTxApi:
+    Description: API Gateway endpoint URL for SignTx function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/{networkId}/{apiKey}/
+  SignTxFunction:
+    Description: SignTx Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - SignTxFunction
+      - Arn
+  SignTxFunctionIamRole:
+    Description: Implicit IAM Role created for SignTx function
+    Value:
+      Fn::GetAtt:
+      - SignTxFunction
+      - Arn
+  HasFreeTransactionsApi:
+    Description: API Gateway endpoint URL for HasFreeTransactions function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage/{networkId}/{apiKey}/
+  HasFreeTransactionsFunction:
+    Description: SignTx Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - HasFreeTransactionsFunction
+      - Arn
+  MigrateDBFunction:
+    Description: MigrateDB Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - MigrateDBFunction
+      - Arn

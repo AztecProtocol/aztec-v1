@@ -1,4 +1,4 @@
-const { AccountRegistry } = require('@aztec/contract-artifacts');
+const { Behaviour20200106 } = require('@aztec/contract-artifacts');
 
 const AccountRegistryConfig = {
     name: 'AccountRegistry',
@@ -6,10 +6,10 @@ const AccountRegistryConfig = {
         registerExtension: 'RegisterExtension',
         GSNTransactionProcessed: 'GSNTransactionProcessed',
     },
-    config: AccountRegistry,
+    config: Behaviour20200106,
     networks: {
         4: process.env.RINKEBY_AZTECAccountRegistryGSN,
-        1: process.env.MAINNET_AZTECAccountRegistryGSN,
+        1: process.env.MAIN_AZTECAccountRegistryGSN,
     },
 };
 

@@ -40,8 +40,8 @@ const initialize = ({ networkId, authorizationRequired }) => {
     });
 };
 
-const authorizedHasFreeTransactions = async ({ networkId, apiKey, origin }) => {
-    const { id: dappId } = await getDappInfo({
+const authorizedHasFreeTransactions = async ({ networkId, apiKey }) => {
+    const { id: dappId, origin } = await getDappInfo({
         apiKey,
     });
 
@@ -58,7 +58,7 @@ const authorizedHasFreeTransactions = async ({ networkId, apiKey, origin }) => {
         result: {
             quota: countFreeTransactions,
             origin,
-            hasFreeTransactions: true,
+            hasFreeTransactions: countFreeTransactions > 0,
         },
     };
 };

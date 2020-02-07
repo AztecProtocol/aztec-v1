@@ -1,5 +1,5 @@
 const web3Service = require('../../services/Web3Service');
-const { AZTECAccountRegistryGSNConfig } = require('../../config/contracts');
+const { AccountRegistry } = require('../../config/contracts');
 
 module.exports = async ({ signaturesHashes, networkId }) => {
     const options = {
@@ -18,7 +18,7 @@ module.exports = async ({ signaturesHashes, networkId }) => {
         name: AZTECAccountRegistryGSNContract,
         events: { GSNTransactionProcessed },
         networks,
-    } = AZTECAccountRegistryGSNConfig;
+    } = AccountRegistry;
 
     const events = await web3Service
         .useContract(AZTECAccountRegistryGSNContract)
