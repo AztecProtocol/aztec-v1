@@ -1,11 +1,12 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
+import "./TestBehaviour.sol";
 
 /**
-  * @title TestBehaviour
+  * @title TestFnOverloadBehaviour
   * @author AZTEC
-  * @dev Deploys a TestBehaviour
+  * @dev Deploys a TestFnOverloadBehaviour, for use in testing function overload behaviour on 
+  * upgrades
  * Copyright 2020 Spilsbury Holdings Ltd 
  *
  * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
@@ -19,10 +20,10 @@ import "../../../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
-contract TestBehaviour is Behaviour20200106 {
+contract TestFnOverload is TestBehaviour {
     uint256 public epoch = 2;
 
     function newFeature() pure public returns (string memory) {
-        return 'new feature';
+        return 'function overload';
     }
 }

@@ -55,6 +55,18 @@ contract IAccountRegistryBehaviour {
 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) external;
 
+    function acceptRelayedCall(
+        address relay,
+        address from,
+        bytes calldata encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes calldata approvalData,
+        uint256
+    ) external returns(uint256, bytes memory context);
+
     event Addresses(address accountAddress, address signerAddress);
     
     event RegisterExtension(
