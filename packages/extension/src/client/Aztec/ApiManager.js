@@ -1,3 +1,6 @@
+import {
+    getNetworkName,
+} from '~/utils/network';
 import EventListeners from '~/utils/EventListeners';
 import Web3Service from '~/client/services/Web3Service';
 import ApiPermissionService from '~/client/services/ApiPermissionService';
@@ -9,7 +12,23 @@ export default class ApiManager {
         this.enableProfileChangeListener = null;
 
         Web3Service.bindProfileChange((changedType, newTypeValue) => {
-            this.eventListeners.notify('profileChanged', changedType, newTypeValue);
+            let objValue = newTypeValue;
+            switch (changedType) {
+                case 'accountsChanged':
+                    objValue = {
+                        address: newTypeValue,
+                    };
+                    break;
+                case 'networkChanged':
+                case 'chainChanged':
+                    objValue = {
+                        id: newTypeValue,
+                        name: getNetworkName(Web3Service.networkId),
+                    };
+                    break;
+                default:
+            }
+            this.eventListeners.notify('profileChanged', changedType, objValue);
         });
     }
 
