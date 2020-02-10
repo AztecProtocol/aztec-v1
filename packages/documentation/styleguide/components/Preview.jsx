@@ -162,6 +162,7 @@ class Preview extends React.Component {
       loadingTestTokens: true,
     });
     await getTestERC20(this.state.zkAssetAddress);
+    await this.getWeb3Data();
     this.setState({
       loadingTestTokens: false,
     });
@@ -173,6 +174,7 @@ class Preview extends React.Component {
     });
 
     await getTestEth();
+    await this.getWeb3Data();
     this.setState({
       loadingTestEth: false,
     });
