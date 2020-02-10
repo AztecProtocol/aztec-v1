@@ -7,7 +7,7 @@ const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegis
 const Behaviour20200106 = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
 const TestBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
 const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
-const createSignature = require('../helpers/AccountRegistryManager');
+const createSignature = require('../helpers/AccountRegistry/AccountRegistryManager');
 
 contract('Account registry manager', async (accounts) => {
     const owner = accounts[0];

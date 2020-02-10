@@ -9,9 +9,13 @@ const { randomHex } = require('web3-utils');
 const ACE = artifacts.require('./ACE');
 const ERC20Mintable = artifacts.require('ERC20Mintable');
 const ZkAsset = artifacts.require('ZkAssetOwnable');
-const TestAccountMapping = artifacts.require('./test/TestAccountMapping');
+const TestAccountMapping = artifacts.require('./test/AccountRegistry/epochs/20200106/TestAccountMapping');
 
-const { generateOutputNotes, generateDepositProofInputs, getOwnerPrivateKey } = require('../helpers/AccountRegistry');
+const {
+    generateOutputNotes,
+    generateDepositProofInputs,
+    getOwnerPrivateKey,
+} = require('../../../helpers/AccountRegistry/epochs/20200106/Behaviour20200106');
 
 contract('Account registry - relayer functionality', (accounts) => {
     const [userAddress, anotherUserAddress, senderAddress] = accounts;
