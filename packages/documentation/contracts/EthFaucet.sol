@@ -12,7 +12,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol"
 import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
 
 
-contract AZTECAccountRegistry {
+contract AccountRegistry {
     mapping(address => bytes) public accountMapping;
 }
 
@@ -20,8 +20,8 @@ contract AZTECAccountRegistry {
 
 contract EthFaucet is Initializable, GSNRecipient {
     mapping(address =>uint256) public faucetMapping;
-    address accountRegistryAddress;
 	address trustedSigner;
+  address accountRegistryAddress;
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
 
     constructor(address _accountRegistryAddress, address _trustedAddress) public {
@@ -41,7 +41,7 @@ contract EthFaucet is Initializable, GSNRecipient {
 
     // @dev allow users to request 0.1eth every 24 hours
     function requestTestEth(address _recipient) public payable {
-      // bytes memory linkedPublicKey = AZTECAccountRegistry(accountRegistryAddress).accountMapping(_recipient);
+      // bytes memory linkedPublicKey = AccountRegistry(accountRegistryAddress).accountMapping(_recipient);
 
       // require(linkedPublicKey.length > 0, 'Please register this address with the SDK to request ETH');
       require(faucetMapping[_recipient] +  1 days <= block.timestamp, 'Greedy please wait 24hours between requests');

@@ -27,7 +27,7 @@ const getTestEth = async (iframeLog) => {
 
   const lastFetch = await web3Service
     .useContract('EthFaucet')
-    .at('0x0aC9612A5c767E5a5C81787A67f5AAef96B6A968')
+    .at('0x82eeb5989e4d9D37950755aE252c3003540F0624')
     .method('faucetMapping')
     .call(address);
   if (lastFetch + 24 * 60 * 60 > Date.now() / 1000) {
@@ -74,7 +74,7 @@ const getTestEth = async (iframeLog) => {
   try {
     const receipt = await web3Service
       .useContract('EthFaucet')
-      .at('0x0aC9612A5c767E5a5C81787A67f5AAef96B6A968')
+      .at('0x82eeb5989e4d9D37950755aE252c3003540F0624')
       .method('requestTestEth')
       .useGSN({
         signingInfo: tempAccount,
