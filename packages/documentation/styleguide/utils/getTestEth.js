@@ -11,6 +11,7 @@ const web3Service = new Web3Service();
 const getTestEth = async (iframeLog) => {
   // use console.info here so we can log results;
   //
+  iframeLog.info('Requesting 0.1 ETH from Faucet');
   await web3Service.init();
   web3Service.registerInterface(
     EthFaucet,
@@ -34,6 +35,7 @@ const getTestEth = async (iframeLog) => {
     return;
   }
 
+  iframeLog.info('Request valid signing via GSN');
 
   // generate a random account
   const tempAccount = EthCrypto.createIdentity();
@@ -67,6 +69,8 @@ const getTestEth = async (iframeLog) => {
       return approvalData;
     },
   });
+
+  iframeLog.info('Relaying signed tx');
   try {
     const receipt = await web3Service
       .useContract('EthFaucet')
@@ -79,7 +83,7 @@ const getTestEth = async (iframeLog) => {
       .send(address);
 
 
-    iframeLog.info('Eth Faucet Transaction Sent', receipt);
+    iframeLog.info('Eth Faucet Transaction confirmed', receipt);
     iframeLog.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
   } catch (err) {
     iframeLog.error(err);
