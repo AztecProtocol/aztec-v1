@@ -128,7 +128,9 @@ class Preview extends React.Component {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum);
       if (window.aztec.zkAsset) {
-        await window.aztec.enable();
+        await window.aztec.enable({
+          apiKey: AZTEC_API_KEY,
+        });
         const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
