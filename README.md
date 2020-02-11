@@ -201,7 +201,7 @@ AZTEC ran Ignition, an MPC ceremony to generate a CRS for our privacy network an
 
 ### Are AZTEC transactions anonymous as well as confidential?
 
-The AZTEC protocol currently only supports confidentiality of amounts. We will be adding User privacy and Data privacy to the protocol and SDK.
+The AZTEC protocol currently only supports confidentiality of amounts. We will be adding User privacy and Code privacy to the protocol and SDK.
 
 ### This sounds interesting! How can I get involved?
 
