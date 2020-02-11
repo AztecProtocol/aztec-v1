@@ -95,7 +95,27 @@ class Preview extends React.Component {
   };
 
   componentDidMount() {
-    this.getWeb3Data();
+    this.setUpWeb3();
+  }
+
+  setUpWeb3 = async () => {
+    if (window.ethereum) {
+      try {
+        await window.ethereum.enable();
+        await this.getWeb3Data();
+        window.ethereum.on('accountsChanged', () => {
+          this.getWeb3Data();
+        });
+        window.ethereum.on('chainChanged', () => {
+          this.getWeb3Data();
+        });
+        window.ethereum.on('networkChanged', () => {
+          this.getWeb3Data();
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -105,29 +125,24 @@ class Preview extends React.Component {
   }
 
   getWeb3Data = async () => {
-    try {
-      await window.ethereum.enable();
-      if (window.ethereum) {
-        const web3 = new Web3(window.ethereum);
-        if (window.aztec.zkAsset) {
-          await window.aztec.enable();
-          const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
-          const linkedTokenBalance = await balanceOfLinkedToken();
-          this.setState({
-            linkedTokenAddress,
-            linkedTokenBalance,
-          });
-        }
-        const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
-
+    if (window.ethereum) {
+      const web3 = new Web3(window.ethereum);
+      if (window.aztec.zkAsset) {
+        await window.aztec.enable();
+        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
+        const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
-          ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
-          network: window.ethereum.networkVersion,
-          accounts: [ethereum.selectedAddress],
+          linkedTokenAddress,
+          linkedTokenBalance,
         });
       }
-    } catch (err) {
-      console.log(err);
+      const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
+
+      this.setState({
+        ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
+        network: window.ethereum.networkVersion,
+        accounts: [ethereum.selectedAddress],
+      });
     }
   };
 
