@@ -29,7 +29,7 @@ module.exports = {
       scripts: [
         {
           type: 'text/javascript',
-          src: 'https://sdk.aztecprotocol.com/1.3.0/sdk/aztec.js',
+          src: 'https://sdk.aztecprotocol.com/aztec.js',
         },
       ],
     },
