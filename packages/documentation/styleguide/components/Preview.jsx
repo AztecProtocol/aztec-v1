@@ -17,7 +17,6 @@ import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
 import getTestERC20 from '../utils/getTestERC20';
 import getTestEth from '../utils/getTestEth';
-import evalInContext from '../utils/evalInContext';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
 
@@ -156,8 +155,15 @@ class Preview extends React.Component {
         this.setState({
           logs: [...this.state.logs, decodedLog],
         });
+        this.scrollLogs();
       }
     });
+  }
+
+  scrollLogs = () => {
+    if (this.consoleRef) {
+      this.consoleRef.scrollTop = this.consoleRef.scrollHeight;
+    }
   }
 
   compileCodeInIframe = async () => {
@@ -173,6 +179,7 @@ class Preview extends React.Component {
         this.setState({
           logs: [...this.state.logs, decodedLog],
         });
+        this.scrollLogs();
       }
     });
 
@@ -223,6 +230,10 @@ class Preview extends React.Component {
     });
   };
 
+  setConsoleRef = (ref) => {
+    this.consoleRef = ref;
+  }
+
   render() {
     const {
       isRunning, logs, network, accounts = [],
@@ -270,24 +281,29 @@ class Preview extends React.Component {
               }}
               className={styles.logs}
             >
-              <Console
-                logs={logs}
-                filter={PERMITTED_LOGS}
-                variant="dark"
-                styles={{
-                  LOG_BACKGROUND: 'transparent',
-                  LOG_INFO_BACKGROUND: 'transparent',
-                  LOG_RESULT_BACKGROUND: 'transparent',
-                  LOG_WARN_BACKGROUND: 'transparent',
-                  LOG_ERROR_BACKGROUND: 'transparent',
-                  BASE_BACKGROUND_COLOR: 'transparent',
-                  TABLE_TH_BACKGROUND_COLOR: 'transparent',
-                  LOG_INFO_BORDER: 'none',
-                  LOG_RESULT_BORDER: 'none',
-                  LOG_ERROR_BORDER: 'none',
-                  LOG_BORDER: 'none',
-                }}
-              />
+              <div
+
+                ref={this.setConsoleRef}
+              >
+                <Console
+                  logs={logs}
+                  filter={PERMITTED_LOGS}
+                  variant="dark"
+                  styles={{
+                    LOG_BACKGROUND: 'transparent',
+                    LOG_INFO_BACKGROUND: 'transparent',
+                    LOG_RESULT_BACKGROUND: 'transparent',
+                    LOG_WARN_BACKGROUND: 'transparent',
+                    LOG_ERROR_BACKGROUND: 'transparent',
+                    BASE_BACKGROUND_COLOR: 'transparent',
+                    TABLE_TH_BACKGROUND_COLOR: 'transparent',
+                    LOG_INFO_BORDER: 'none',
+                    LOG_RESULT_BORDER: 'none',
+                    LOG_ERROR_BORDER: 'none',
+                    LOG_BORDER: 'none',
+                  }}
+                />
+              </div>
             </Block>
           )}
           <Block
