@@ -140,7 +140,6 @@ class Preview extends React.Component {
     await iframeLoaded;
     Hook(this.iframeRef.contentWindow.console, (log) => {
       const decodedLog = Decode(log);
-      console.log(decodedLog);
       if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
         this.setState({
           logs: [...this.state.logs, decodedLog],
@@ -157,11 +156,18 @@ class Preview extends React.Component {
     });
   };
 
+  log = (log) => {
+    this.setState({
+      logs: [...this.state.logs, log],
+    });
+  }
+
   getTestERC20 = async () => {
     this.setState({
       loadingTestTokens: true,
     });
-    await getTestERC20(this.state.zkAssetAddress);
+
+    await getTestERC20(this.state.zkAssetAddress, this.iframeRef.contentWindow.console);
     await this.getWeb3Data();
     this.setState({
       loadingTestTokens: false,
@@ -173,7 +179,7 @@ class Preview extends React.Component {
       loadingTestEth: true,
     });
 
-    await getTestEth();
+    await getTestEth(this.iframeRef.contentWindow.console);
     await this.getWeb3Data();
     this.setState({
       loadingTestEth: false,

@@ -8,7 +8,7 @@ import { INFURA_API_KEY, SIGNING_PROVIDER, AZTEC_API_KEY } from '../constants/ke
 
 const web3Service = new Web3Service();
 
-const getTestEth = async () => {
+const getTestEth = async (iframeLog) => {
   // use console.info here so we can log results;
   //
   await web3Service.init();
@@ -31,7 +31,7 @@ const getTestEth = async () => {
     .call(address);
 
   if (lastFetch + 24 * 60 * 60 > Date.now() / 1000) {
-    console.error('You can only request 0.1ETH every 24 hours from the faucet again');
+    iframeLog.error('You can only request 0.1ETH every 24 hours from the faucet again');
     return;
   }
 
@@ -80,7 +80,7 @@ const getTestEth = async () => {
     .send(address);
 
 
-  console.info('Transaction Sent', receipt);
-  console.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
+  iframeLog.info('Eth Faucet Transaction Sent', receipt);
+  iframeLog.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
 };
 export default getTestEth;
