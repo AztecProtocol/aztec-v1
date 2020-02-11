@@ -25,14 +25,17 @@ const mintERC20 = async (zkAssetAddress, iframeLog) => {
       name: 'ERC20Mintable',
     }
   );
+  try {
+    const receipt = await web3Service
+      .useContract('ERC20Mintable')
+      .at(linkedTokenAddress)
+      .method('mint')
+      .send(account.address, 200);
 
-  const receipt = await web3Service
-    .useContract('ERC20Mintable')
-    .at(linkedTokenAddress)
-    .method('mint')
-    .send(account.address, 200);
-
-  iframeLog.info('Transaction Sent', receipt);
-  iframeLog.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
+    iframeLog.info('Transaction Sent', receipt);
+    iframeLog.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
+  } catch (err) {
+    iframeLog.error(err);
+  }
 };
 export default mintERC20;

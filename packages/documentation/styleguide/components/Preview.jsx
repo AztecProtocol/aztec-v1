@@ -131,6 +131,17 @@ class Preview extends React.Component {
     }
   };
 
+  setupLogingInIframe = async () => {
+    Hook(this.iframeRef.contentWindow.console, (log) => {
+      const decodedLog = Decode(log);
+      if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
+        this.setState({
+          logs: [...this.state.logs, decodedLog],
+        });
+      }
+    });
+  }
+
   compileCodeInIframe = async () => {
     Unhook(this.iframeRef.contentWindow.console);
     this.iframeRef.srcdoc = this.generateIframeContent();
@@ -156,17 +167,12 @@ class Preview extends React.Component {
     });
   };
 
-  log = (log) => {
-    this.setState({
-      logs: [...this.state.logs, log],
-    });
-  }
 
   getTestERC20 = async () => {
     this.setState({
       loadingTestTokens: true,
     });
-
+    this.setupLogingInIframe();
     await getTestERC20(this.state.zkAssetAddress, this.iframeRef.contentWindow.console);
     await this.getWeb3Data();
     this.setState({
@@ -179,6 +185,7 @@ class Preview extends React.Component {
       loadingTestEth: true,
     });
 
+    this.setupLogingInIframe();
     await getTestEth(this.iframeRef.contentWindow.console);
     await this.getWeb3Data();
     this.setState({

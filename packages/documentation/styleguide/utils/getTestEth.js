@@ -29,7 +29,6 @@ const getTestEth = async (iframeLog) => {
     .at('0x0aC9612A5c767E5a5C81787A67f5AAef96B6A968')
     .method('faucetMapping')
     .call(address);
-
   if (lastFetch + 24 * 60 * 60 > Date.now() / 1000) {
     iframeLog.error('You can only request 0.1ETH every 24 hours from the faucet again');
     return;
@@ -68,19 +67,22 @@ const getTestEth = async (iframeLog) => {
       return approvalData;
     },
   });
+  try {
+    const receipt = await web3Service
+      .useContract('EthFaucet')
+      .at('0x0aC9612A5c767E5a5C81787A67f5AAef96B6A968')
+      .method('requestTestEth')
+      .useGSN({
+        signingInfo: tempAccount,
+        gsnProvider,
+      })
+      .send(address);
 
-  const receipt = await web3Service
-    .useContract('EthFaucet')
-    .at('0x0aC9612A5c767E5a5C81787A67f5AAef96B6A968')
-    .method('requestTestEth')
-    .useGSN({
-      signingInfo: tempAccount,
-      gsnProvider,
-    })
-    .send(address);
 
-
-  iframeLog.info('Eth Faucet Transaction Sent', receipt);
-  iframeLog.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
+    iframeLog.info('Eth Faucet Transaction Sent', receipt);
+    iframeLog.info(`View on EtherScan https://rinkeby.etherscan.io/tx/${receipt.transactionHash}`);
+  } catch (err) {
+    iframeLog.error(err);
+  }
 };
 export default getTestEth;
