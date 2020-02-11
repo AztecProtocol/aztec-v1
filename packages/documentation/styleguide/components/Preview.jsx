@@ -132,6 +132,7 @@ class Preview extends React.Component {
   };
 
   setupLogingInIframe = async () => {
+    Unhook(this.iframeRef.contentWindow.console);
     Hook(this.iframeRef.contentWindow.console, (log) => {
       const decodedLog = Decode(log);
       if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
