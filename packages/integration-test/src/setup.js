@@ -265,7 +265,8 @@ class Setup {
             scalingFactor: ERC20_SCALING_FACTOR,
 
             /**
-             * @param {Object} proxyAddresses - addresses of the deployed account registry proxy contracts for each network
+             * @param {Object} proxyAddresses - addresses of the deployed account registry proxy contracts for each network. 
+             * Note, these proxy addresses are for the 1.17.0 '@aztec/contract-addresses' package 
              */
             proxyAddresses: {
                 rinkeby: '0x293B83486Cb24Adf8Cc36497284441FB9e8DB4A1',
