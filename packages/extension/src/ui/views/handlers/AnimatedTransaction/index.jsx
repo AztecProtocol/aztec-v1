@@ -508,6 +508,9 @@ class AnimatedTransaction extends PureComponent {
 
     render() {
         const {
+            testId,
+        } = this.props;
+        const {
             pendingInitialFetch,
             step,
             direction,
@@ -519,6 +522,7 @@ class AnimatedTransaction extends PureComponent {
 
         return (
             <FlexBox
+                testId={testId}
                 direction="column"
                 expand
                 stretch
@@ -554,6 +558,7 @@ class AnimatedTransaction extends PureComponent {
 }
 
 AnimatedTransaction.propTypes = {
+    testId: PropTypes.string,
     steps: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string,
         titleKey: PropTypes.string,
@@ -585,6 +590,7 @@ AnimatedTransaction.propTypes = {
 };
 
 AnimatedTransaction.defaultProps = {
+    testId: undefined,
     steps: [],
     initialStep: 0,
     initialTask: -1,

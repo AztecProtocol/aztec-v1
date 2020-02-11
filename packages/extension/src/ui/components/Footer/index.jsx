@@ -37,6 +37,7 @@ const Footer = ({
                 />
                 <Block top="m">
                     <TextButton
+                        testId={`button-step-${isFetal ? 'close' : 'retry'}`}
                         theme="underline"
                         text={i18n.t(isFetal ? 'close' : 'retry')}
                         size="m"
@@ -64,6 +65,7 @@ const Footer = ({
         >
             {!!onPrevious && (
                 <Button
+                    testId="button-step-previous"
                     className={styles.button}
                     theme="white"
                     text={cancelText || i18n.t('cancel')}
@@ -74,6 +76,7 @@ const Footer = ({
             )}
             {!!onNext && (
                 <Button
+                    testId="button-step-next"
                     className={styles.button}
                     text={nextText || i18n.t('next')}
                     onSubmit={onNext}

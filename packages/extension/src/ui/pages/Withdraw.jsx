@@ -48,6 +48,7 @@ const Withdraw = ({
 
     return (
         <StepsHandler
+            testId="steps-withdraw"
             fetchInitialData={fetchInitialData}
             Content={WithdrawContent}
         />

@@ -40,6 +40,7 @@ const Register = ({
 
     return (
         <StepsHandler
+            testId="steps-register"
             fetchInitialData={fetchInitialData}
             Content={RegisterContent}
             onExit={handleClose}

@@ -123,6 +123,7 @@ const StepContent = ({
                                 >
                                     <TextButton
                                         {...footnote}
+                                        testId="link-footer"
                                         Link={Link}
                                         color="label"
                                         size="xxs"

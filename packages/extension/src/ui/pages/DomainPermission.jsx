@@ -50,6 +50,7 @@ const DomainPermission = ({
 
     return (
         <AnimatedTransaction
+            testId="steps-domain-access"
             steps={steps}
             fetchInitialData={fetchInitialData}
         />

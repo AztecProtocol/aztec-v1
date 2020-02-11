@@ -94,6 +94,7 @@ const CreateNoteFromBalance = ({
 
     return (
         <StepsHandler
+            testId="steps-create-note"
             fetchInitialData={fetchInitialData}
             onExit={handleClose}
             Content={CreateNoteFromBalanceContent}
