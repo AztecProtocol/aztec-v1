@@ -14,7 +14,7 @@ export default class ApiManager {
         Web3Service.bindProfileChange((changedType, newTypeValue) => {
             let objValue = newTypeValue;
             switch (changedType) {
-                case 'accountsChanged':
+                case 'accountChanged':
                     objValue = {
                         address: newTypeValue,
                     };
@@ -70,12 +70,16 @@ export default class ApiManager {
         } = options;
         let networkSwitchedDuringStart = false;
 
-        const doResolved = (shouldReject = false, error = null) => {
+        const doResolved = async ({
+            shouldReject = false,
+            error = null,
+            aztecAccount = null,
+        }) => {
             if (!networkSwitchedDuringStart) {
                 this.eventListeners.notify(
                     'profileChanged',
                     'aztecAccountChanged',
-                    !shouldReject && !error,
+                    aztecAccount,
                     error,
                 );
             }
@@ -95,8 +99,10 @@ export default class ApiManager {
                     if (callback) {
                         callback(!error, error);
                     }
-                    const shouldReject = !!error && !callback;
-                    doResolved(shouldReject, error);
+                    doResolved({
+                        shouldReject: !!error && !callback,
+                        error,
+                    });
                 }, setApis);
             });
         }
@@ -115,6 +121,7 @@ export default class ApiManager {
             return;
         }
 
+        let aztecAccount;
         try {
             const {
                 networkId,
@@ -130,14 +137,18 @@ export default class ApiManager {
 
             await Web3Service.init(networkConfig);
 
-            await ApiPermissionService.ensurePermission();
+            ({
+                account: aztecAccount,
+            } = await ApiPermissionService.ensurePermission());
         } catch (error) {
             if (!networkSwitchedDuringStart) {
                 if (callback) {
                     callback(false, error);
                 }
-                const shouldReject = !callback;
-                doResolved(shouldReject, error);
+                doResolved({
+                    shouldReject: !callback,
+                    error,
+                });
             }
             return;
         }
@@ -160,7 +171,9 @@ export default class ApiManager {
             callback(true, null);
         }
 
-        doResolved();
+        doResolved({
+            aztecAccount,
+        });
     });
 
     async disable(setApis) {

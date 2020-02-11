@@ -40,6 +40,7 @@ const registerExtension = async (request, connection) => {
     let {
         userPermission: { account = {} },
     } = await query(request, userPermissionQuery(`
+        address
         linkedPublicKey
         blockNumber
     `)) || {};
