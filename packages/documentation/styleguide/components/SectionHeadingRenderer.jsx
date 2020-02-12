@@ -57,7 +57,6 @@ export const SectionHeadingRenderer = ({
   href,
   depth,
   children,
-  toolbar,
   deprecated,
 }) => {
   const headingLevel = Math.min(6, depth);
@@ -77,11 +76,6 @@ export const SectionHeadingRenderer = ({
           {children}
         </a>
       </div>
-      {toolbar && (
-        <div className={classes.toolbar}>
-          {toolbar}
-        </div>
-      )}
     </div>
   );
 };
@@ -89,7 +83,6 @@ export const SectionHeadingRenderer = ({
 SectionHeadingRenderer.propTypes = {
   classes: PropTypes.object.isRequired,
   children: PropTypes.node,
-  toolbar: PropTypes.node,
   id: PropTypes.string.isRequired,
   href: PropTypes.string.isRequired,
   depth: PropTypes.number.isRequired,
@@ -98,7 +91,6 @@ SectionHeadingRenderer.propTypes = {
 
 SectionHeadingRenderer.defaultProps = {
   children: null,
-  toolbar: null,
   deprecated: false,
 };
 
