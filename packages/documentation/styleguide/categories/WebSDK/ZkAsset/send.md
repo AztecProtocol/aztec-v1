@@ -1,6 +1,10 @@
 ## Examples
 ### Confidentially send value of 30units to another Ethereum address
 ```js
+// Get the injected address [change to use a different address]
+const addressToDeposit = window.ethereum.selectedAddress;
+const addressToSend = window.ethereum.selectedAddress;
+
 // Enable the SDK
 const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 await window.aztec.enable({ apiKey });
@@ -11,7 +15,6 @@ const asset = await window.aztec.zkAsset(address);
 console.info(asset)
 
 // // Deposit funds into the ZkAsset
-const addressToDeposit = '0xD4CD0b1EF54E8E4D73f68b01b5ccc125b13E3d1e';
 const depositAmount = 50;
 await asset.deposit(
   [
@@ -22,10 +25,8 @@ await asset.deposit(
   ],
   {},
 );
-console.info('deposited funds');
 
 // Send funds
-const addressToSend = ''; // [place your Ethereum address here]
 const sendAmount = 30;
 await asset.send([
   {

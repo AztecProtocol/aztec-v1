@@ -16,9 +16,9 @@ const noteHash = notes[0].noteHash;
 const noteToGrantAccess = await window.aztec.zkNote(noteHash);
 console.info({ noteToGrantAccess })
 
-// Select the addresses to grant access - [change to grant different addresses access]
+// Select the addresses to grant access
 const addressToGrantAccess = [
-  '',
+  window.ethereum.selectedAddress, // [change to grant access to different addresses]
 ];
 
 const grantSuccess = await noteToGrantAccess.grantAccess(addressToGrantAccess);

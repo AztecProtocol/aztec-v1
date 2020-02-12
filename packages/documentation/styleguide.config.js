@@ -124,7 +124,6 @@ module.exports = {
     TableRenderer: path.join(__dirname, 'styleguide/components/TableRenderer'),
     LinkRenderer: path.join(__dirname, 'styleguide/components/LinkRenderer'),
     Preview: path.join(__dirname, 'styleguide/components/Preview'),
-    // ExamplesRenderer: path.join(__dirname, 'styleguide/components/ExamplesRenderer'),
   },
   sections: [
     {
@@ -151,7 +150,7 @@ module.exports = {
           name: 'zkAsset',
           sections: [
             {
-              name: 'zkAsset-introduction',
+              name: 'Introduction',
               content: 'styleguide/categories/WebSDK/ZkAsset/index.md',
               exampleMode: 'shown',
             },
@@ -209,7 +208,7 @@ module.exports = {
           pagePerSection: true,
           sections: [
             {
-              name: 'note-introduction',
+              name: 'Introduction',
               content: 'styleguide/categories/WebSDK/Note/index.md',
               exampleMode: 'hide',
             },

@@ -1,11 +1,7 @@
 import React from 'react';
-import {
-  Hook, Console, Decode, Unhook,
-} from 'console-feed';
+import { Hook, Console, Decode, Unhook } from 'console-feed';
 import Web3 from 'web3';
-import {
-  Block, FlexBox, Button, Text, Icon, ButtonGroup,
-} from '@aztec/guacamole-ui';
+import { Block, FlexBox, Button, Text, Icon, ButtonGroup } from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
@@ -68,8 +64,11 @@ class Preview extends React.Component {
     const iframeId = keccak256(code).slice(5);
     this.setState({ iframeId });
 
-    // all calls to window.aztec need to go to the parent window, as SDK not loaded in this iframe
-    const compiledCode = compileCode(code, compilerConfig, console.log).replace(/window.aztec/g, 'window.parent.aztec');
+    // all calls to window.aztec and window.ethereum need to go to the parent window,
+    // as SDK and MetaMask injection not loaded in this iframe
+    const compiledCode = compileCode(code, compilerConfig, console.log)
+      .replace(/window.aztec/g, 'window.parent.aztec')
+      .replace(/window.ethereum/g, 'window.parent.ethereum');
     const asyncCompiledCode = `const code = async () => {
       try {
         ${compiledCode};
@@ -244,10 +243,10 @@ class Preview extends React.Component {
   }
 
   render() {
-    const {
-      isRunning, logs, network, accounts = [],
-    } = this.state;
+    const { isRunning, logs, network, accounts = [] } = this.state;
     const isEnabled = network === '4';
+    console.log('ethBalance: ', this.state.ethBalance);
+    console.log('erc20 balance: ', this.state.linkedTokenBalance);
     return (
       <>
         <iframe
