@@ -102,15 +102,23 @@ class Preview extends React.Component {
       try {
         await window.ethereum.enable();
         await this.getWeb3Data();
-        window.ethereum.on('accountsChanged', () => {
-          this.getWeb3Data();
-        });
-        window.ethereum.on('chainChanged', () => {
-          this.getWeb3Data();
-        });
-        window.ethereum.on('networkChanged', () => {
-          this.getWeb3Data();
-        });
+        if (!this.txSubscription) {
+          window.ethereum.on('accountsChanged', () => {
+            this.getWeb3Data();
+          });
+          window.ethereum.on('chainChanged', () => {
+            this.getWeb3Data();
+          });
+          window.ethereum.on('networkChanged', () => {
+            this.getWeb3Data();
+          });
+          const web3 = new Web3(window.ethereum);
+
+          this.txSubscription = web3.eth.subscribe('newBlockHeaders')
+            .on('data', (transaction) => {
+              this.getWeb3Data();
+            });
+        }
       } catch (err) {
         console.log(err);
       }
@@ -120,6 +128,7 @@ class Preview extends React.Component {
   componentWillUnmount() {
     // Clear pending changes
     this.handleChange.cancel();
+    this.txSubscription.unsubscribe();
     Unhook(window.console);
   }
 
