@@ -25,16 +25,21 @@ export default async function getApiKeyQuota(apiKey) {
             mode: 'cors',
             cache: 'no-cache',
         });
-        ({
+        const currentOrigin = window.location.origin;
+        const {
             data: {
-                hasFreeTransactions,
+                quota,
+                origin,
             },
-        } = await result.json());
+        } = await result.json();
+        if (currentOrigin === origin) {
+            hasFreeTransactions = quota > 0;
+        }
     } catch (e) {
         warnLog('Failed to get apiKey quota.', e);
     }
 
     return {
-        hasFreeTransactions: hasFreeTransactions || false,
+        hasFreeTransactions,
     };
 }
