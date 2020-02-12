@@ -142,7 +142,7 @@ contract('Account registry manager', async (accounts) => {
 
                 const proxyContract = await TestBehaviour.at(existingProxy);
                 const isNewFeatureImplemented = await proxyContract.newFeature();
-                expect(isNewFeatureImplemented).to.equal(true);
+                expect(isNewFeatureImplemented).to.equal('new feature');
             });
 
             it('should set a state variable on an upgraded behaviour contract', async () => {

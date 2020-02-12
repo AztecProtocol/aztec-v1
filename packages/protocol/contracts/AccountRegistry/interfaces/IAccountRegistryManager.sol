@@ -20,8 +20,12 @@ contract IAccountRegistryManager {
 
     function getImplementation() external;
 
-    function deployProxy(address initialBehaviourAddress) external;
+    function isOwner() external view;
 
+    function renounceOwnership() external;
+
+    function transferOwnership(address newOwner) external;
+ 
     function upgradeAccountRegistry(address newBehaviourAddress) external;
     
     event CreateProxy(address indexed proxyAddress, address indexed proxyAdmin);
