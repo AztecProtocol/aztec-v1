@@ -59,7 +59,9 @@ const CreateNoteFromBalance = ({
         const steps = createNoteFromBalanceSteps[isGSNAvailable ? 'gsn' : 'metamask'];
 
         const asset = await makeAsset(assetAddress);
-        const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
+        const userAccessAccounts = userAccess
+            ? await apis.account.batchGetExtensionAccount(userAccess)
+            : [];
         const sender = isGSNAvailable ? proxyContract : currentAddress;
         const amount = parseInputAmount(inputAmount);
         const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
