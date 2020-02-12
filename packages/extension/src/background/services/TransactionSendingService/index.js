@@ -48,13 +48,14 @@ const sendTransaction = async (query, connection) => {
         };
     } catch (e) {
         errorLogProduction(e);
-        let error = {
-            key: 'transaction.gsn.error',
-        };
-        if (error.message.match(/relayer/)) {
+        let error;
+        if (e.message.match(/relayer/)) {
             error = {
                 key: 'transaction.gsn.error.relayer',
-                fetal: true,
+            };
+        } else {
+            error = {
+                key: 'transaction.gsn.error',
             };
         }
         return {
