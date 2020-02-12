@@ -12,22 +12,29 @@ export default class ApiManager {
         this.enableProfileChangeListener = null;
 
         Web3Service.bindProfileChange((changedType, newTypeValue) => {
-            let objValue = newTypeValue;
-            switch (changedType) {
-                case 'accountChanged':
-                    objValue = {
-                        address: newTypeValue,
-                    };
-                    break;
-                case 'networkChanged':
-                case 'chainChanged':
-                    objValue = {
-                        id: newTypeValue,
-                        name: getNetworkName(Web3Service.networkId),
-                    };
-                    break;
-                default:
+            let objValue = newTypeValue || null;
+            if (objValue) {
+                switch (changedType) {
+                    case 'accountChanged':
+                        objValue = {
+                            address: newTypeValue,
+                        };
+                        break;
+                    case 'networkChanged':
+                    case 'chainChanged':
+                        if (newTypeValue === 'loading') {
+                            objValue = null;
+                        } else {
+                            objValue = {
+                                id: newTypeValue,
+                                name: getNetworkName(newTypeValue),
+                            };
+                        }
+                        break;
+                    default:
+                }
             }
+
             this.eventListeners.notify('profileChanged', changedType, objValue);
         });
     }
