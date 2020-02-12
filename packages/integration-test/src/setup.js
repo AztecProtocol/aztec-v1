@@ -105,7 +105,12 @@ class Setup {
     /**
      * @method getContractPromise - get an object whose key is the name of a contract, and the value is a function that
      * returns the Truffle representation of the contract
-     * @param {string} nameOfContract
+     * @param {string} nameOfContract - name of the contract for which the contract promise should be generated
+     * @param {string} address - (optional) address at which the contract should be instantiated. Can be supplied to override the
+     * default address used, whereby the default is the address associated with the `nameOfContract`.
+     *
+     * An example of where `address` will be supplied is when generating a deployed proxy contract. In this case the address will be
+     * the address of the proxy, whilst `nameOfContract` will be the behaviour implementation the address is cast with.
      */
     getContractPromise(nameOfContract, address = null) {
         const extractedContractArtifact = contractArtifacts[nameOfContract];
