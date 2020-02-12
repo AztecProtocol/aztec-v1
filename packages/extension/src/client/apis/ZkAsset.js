@@ -20,6 +20,10 @@ export default class ZkAsset {
         this.id = id;
     }
 
+    get valid() {
+        return !!this.address;
+    }
+
     isValid() {
         return !!this.address;
     }
