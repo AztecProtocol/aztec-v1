@@ -79,7 +79,7 @@ class Setup {
     }
 
     /**
-     * @method getAddresses() - get the addresses for the desired contracts to deploy
+     * @method getAddresses() - get all the deployed contract addresses for a particular network
      */
     getAddresses() {
         const contractAddresses = getContractAddressesForNetwork(this.networkId);
@@ -107,7 +107,7 @@ class Setup {
      * returns the Truffle representation of the contract
      * @param {string} nameOfContract
      */
-    getContractPromise(nameOfContract) {
+    getContractPromise(nameOfContract, address = null) {
         const extractedContractArtifact = contractArtifacts[nameOfContract];
         if (extractedContractArtifact === undefined) {
             throw new AztecError(codes.NO_CONTRACT_ARTIFACT, {
@@ -124,8 +124,9 @@ class Setup {
             });
         }
 
+        const contractAddress = address || extractedContractAddress;
         const truffleRepresentation = this.getTruffleContractRepresentation(extractedContractArtifact);
-        return async () => truffleRepresentation.at(extractedContractAddress);
+        return async () => truffleRepresentation.at(contractAddress);
     }
 
     /**
@@ -177,6 +178,29 @@ class Setup {
     }
 
     /**
+     * @method getProxyAddress - get the Ethereum address of the proxy contract which stores the state for the
+     * account registry
+     * @returns {String} address of the proxy contract for the relevant network
+     */
+    getProxyAddress() {
+        return this.config.proxyAddresses[this.NETWORK];
+    }
+
+    /**
+     * @method getProxyContract - get the deployed proxy contract representation, cast with a particular behaviour
+     * contract interface/implementation for a specific network
+     * @param {String} behaviourName - name of the Behaviour contract whose interface and implementation the proxy will
+     * be cast with
+     * @returns {Object} Truffle contract representing the proxy contract deployed for a specific network, cast with the
+     * specified interface and method implementation
+     */
+    async getProxyContract(behaviourName) {
+        const proxyAddress = this.getProxyAddress();
+        const proxyContract = this.getContractPromise(behaviourName, proxyAddress);
+        return proxyContract();
+    }
+
+    /**
      * @method initialiseConfig - define and set the configuration to be used for the integration test
      * @param {Object} config -  setup the integration test according to the specific scenario and environment the
      * user wishes to test. If not provided, the defaultConfig is used
@@ -189,6 +213,8 @@ class Setup {
              */
             contractsToDeploy: [
                 'ACE',
+                'AccountRegistryManager',
+                'Behaviour20200207',
                 'Dividend',
                 'ERC20Mintable',
                 'FactoryAdjustable201907',
@@ -221,6 +247,12 @@ class Setup {
             runAdjustSupplyTests: false,
 
             /**
+             * @param {bool} runAccountRegistryTest - boolean determining whether the tests that perform Account Registry
+             * related tests should be run. Set to true if so, false if not
+             */
+            runAccountRegistryTests: true,
+
+            /**
              * @param {bool} runUpgradeTest - boolean determining whether the test that performs a note registry upgrade
              * should be performed. Set to true if so, false if not
              *
@@ -231,6 +263,16 @@ class Setup {
              * @param {BN} scalingFactor - factor to convert between AZTEC note value and ERC20 token value
              */
             scalingFactor: ERC20_SCALING_FACTOR,
+
+            /**
+             * @param {Object} proxyAddresses - addresses of the deployed account registry proxy contracts for each network.
+             * Note, these proxy addresses are for the 1.17.0 '@aztec/contract-addresses' package
+             */
+            proxyAddresses: {
+                rinkeby: '0x293B83486Cb24Adf8Cc36497284441FB9e8DB4A1',
+                ropsten: '0xb2b550203a2A89C67A8b9eD6B6F86FFF29f718Ae',
+                mainnet: '0xe8f0b0ef4ef717f951f113b9ef101a74858bfe7e',
+            },
         };
 
         this.config = Object.assign({}, defaultConfig, config);

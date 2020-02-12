@@ -2,6 +2,7 @@
 const ACE = require('../artifacts/ACE');
 const AccountRegistryManager = require('../artifacts/AccountRegistryManager');
 const Behaviour20200106 = require('../artifacts/Behaviour20200106');
+const Behaviour20200207 = require('../artifacts/Behaviour20200207');
 const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
@@ -48,6 +49,7 @@ module.exports = {
     ACE,
     AccountRegistryManager,
     Behaviour20200106,
+    Behaviour20200207,
     Dividend,
     DividendABIEncoder,
     DividendInterface,

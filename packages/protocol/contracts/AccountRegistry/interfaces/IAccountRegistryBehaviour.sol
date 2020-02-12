@@ -17,6 +17,8 @@ pragma solidity >=0.5.0 <0.6.0;
 contract IAccountRegistryBehaviour {
     uint256 public epoch;
 
+    address public GSNSigner;
+
     struct AZTECAccount {
         address account;
         bytes linkedPublicKey;
@@ -45,6 +47,14 @@ contract IAccountRegistryBehaviour {
         bytes calldata _batchSignature
     ) external;
 
+    function confidentialTransferFrom(
+        uint24 _proofId,
+        address _registryOwner,
+        bytes calldata _proofData,
+        address _spender,
+        bytes calldata _proofSignature   
+    ) external;
+
     function deposit(
         address _registryOwner,
         address _owner,
@@ -55,6 +65,20 @@ contract IAccountRegistryBehaviour {
 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) external;
 
+    function acceptRelayedCall(
+        address relay,
+        address from,
+        bytes calldata encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes calldata approvalData,
+        uint256
+    ) external returns(uint256, bytes memory context);
+
+    function setGSNSigner() external;
+
     event Addresses(address accountAddress, address signerAddress);
     
     event RegisterExtension(
@@ -62,4 +86,7 @@ contract IAccountRegistryBehaviour {
         bytes linkedPublicKey,
         bytes spendingPublicKey 
     );
+
+    event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
+
 }
