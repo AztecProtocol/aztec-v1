@@ -2,7 +2,7 @@
 import 'fake-indexeddb/auto';
 import Dexie from 'dexie';
 import {
-    mockMigrations,
+    mockMigrations, // eslint-disable-line import/named
 } from '~/background/database/migrations';
 import {
     sdkSettingDbName,
