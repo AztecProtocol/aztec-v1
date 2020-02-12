@@ -232,11 +232,6 @@
   dependencies:
     lodash "^4.17.11"
 
-"@aztec/contract-artifacts@1.18.0":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@aztec/contract-artifacts/-/contract-artifacts-1.18.0.tgz#38c94f0217a97d4232fb9ae4d2d01cfd57cd389f"
-  integrity sha512-FA0QIVGZKDkMe4dDmZRRirl0cXhfhBydlUaCt24Zx+bGSTeuT9wpPfp0K5HfILTD8tZ7YYGlx4cc4yw3x/RP1w==
-
 "@aztec/guacamole-ui@1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@aztec/guacamole-ui/-/guacamole-ui-1.1.3.tgz#df43b350842a0e3239ab30528217bd56ba6deac9"
@@ -23508,7 +23503,6 @@ websocket@^1.0.28:
   dependencies:
     debug "^2.2.0"
     es5-ext "^0.10.50"
-    gulp "^4.0.2"
     nan "^2.14.0"
     typedarray-to-buffer "^3.1.5"
     yaeti "^0.0.6"
