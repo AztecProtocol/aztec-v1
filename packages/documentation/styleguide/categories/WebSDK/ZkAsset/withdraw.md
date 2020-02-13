@@ -2,7 +2,7 @@
 ### Withdraw 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by user
 Place your Ethereum address in the `user` variable
 ```js
-// Get the injected address [change to use a different address]
+// Get the injected address
 const userAddress = window.ethereum.selectedAddress;
 
 // Enable the SDK
@@ -33,7 +33,7 @@ await asset.withdraw(withdrawAmount);
 
 ### Withdraw 10 units of zero-knowledge notes into 10 ERC20 tokens, to be owned by a third party
 ```js
-// Get the injected address [change to use a different address]
+// Get the injected address
 const userAddress = window.ethereum.selectedAddress;
 const thirdPartyAddress = window.ethereum.selectedAddress;
 

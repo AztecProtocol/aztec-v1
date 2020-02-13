@@ -2,7 +2,7 @@
 ### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user. 
 Place your Ethereum address in the `user` variable
 ```js
-// Get the injected address [change to use a different address]
+// Get the injected address
 const userAddress = window.ethereum.selectedAddress;
 
 // Enable the SDK
@@ -36,7 +36,7 @@ console.info({ userPostDepositBalance });
 ### Give a third party zero-knowledge notes worth 50 ERC20 tokens
 
 ```js
-// Get the injected address [change to use a different address]
+// Get the injected address
 const thirdParty = window.ethereum.selectedAddress;
 
 // Enable the SDK

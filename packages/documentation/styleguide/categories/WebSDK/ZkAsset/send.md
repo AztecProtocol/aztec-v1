@@ -1,7 +1,7 @@
 ## Examples
 ### Confidentially send value of 30units to another Ethereum address
 ```js
-// Get the injected address [change to use a different address]
+// Get the injected address
 const addressToDeposit = window.ethereum.selectedAddress;
 const addressToSend = window.ethereum.selectedAddress;
 

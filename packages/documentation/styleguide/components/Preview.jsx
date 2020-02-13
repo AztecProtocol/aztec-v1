@@ -6,7 +6,7 @@ import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
-import { keccak256 } from 'web3-utils';
+import { keccak256, toChecksumAddress } from 'web3-utils';
 
 import styles from './preview.module.scss';
 import { AZTEC_API_KEY } from '../constants/keys';
@@ -57,18 +57,21 @@ class Preview extends React.Component {
 
   // eslint-disable-next-line react/sort-comp
   generateIframeContent = () => {
-    const { code } = this.state;
+    const { code, accounts } = this.state;
     const { compilerConfig } = this.props;
 
     // iframeId is the first 5 bytes code hash
     const iframeId = keccak256(code).slice(5);
     this.setState({ iframeId });
 
-    // all calls to window.aztec and window.ethereum need to go to the parent window,
-    // as SDK and MetaMask injection not loaded in this iframe
+    // all calls to window.aztec need to go to the parent window,
+    // as SDK not loaded in this iframe
+    const userAddress = toChecksumAddress(accounts[0]);
+    console.log({ userAddress });
     const compiledCode = compileCode(code, compilerConfig, console.log)
       .replace(/window.aztec/g, 'window.parent.aztec')
-      .replace(/window.ethereum/g, 'window.parent.ethereum');
+      .replace(/window.ethereum.selectedAddress/g, `'${userAddress.toString()}'`);
+
     const asyncCompiledCode = `const code = async () => {
       try {
         ${compiledCode};
@@ -116,16 +119,15 @@ class Preview extends React.Component {
           });
           const web3 = new Web3(window.ethereum);
 
-          this.txSubscription = web3.eth.subscribe('newBlockHeaders')
-            .on('data', (transaction) => {
-              this.getWeb3Data();
-            });
+          this.txSubscription = web3.eth.subscribe('newBlockHeaders').on('data', (transaction) => {
+            this.getWeb3Data();
+          });
         }
       } catch (err) {
         console.log(err);
       }
     }
-  }
+  };
 
   componentWillUnmount() {
     // Clear pending changes
@@ -166,13 +168,13 @@ class Preview extends React.Component {
         this.scrollLogs();
       }
     });
-  }
+  };
 
   scrollLogs = () => {
     if (this.consoleRef) {
       this.consoleRef.scrollTop = this.consoleRef.scrollHeight;
     }
-  }
+  };
 
   compileCodeInIframe = async () => {
     Unhook(this.iframeRef.contentWindow.console);
@@ -199,7 +201,6 @@ class Preview extends React.Component {
       });
     });
   };
-
 
   getTestERC20 = async () => {
     this.setState({
@@ -240,7 +241,7 @@ class Preview extends React.Component {
 
   setConsoleRef = (ref) => {
     this.consoleRef = ref;
-  }
+  };
 
   render() {
     const { isRunning, logs, network, accounts = [] } = this.state;
@@ -289,10 +290,7 @@ class Preview extends React.Component {
               }}
               className={styles.logs}
             >
-              <div
-
-                ref={this.setConsoleRef}
-              >
+              <div ref={this.setConsoleRef}>
                 <Console
                   logs={logs}
                   filter={PERMITTED_LOGS}
