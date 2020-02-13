@@ -96,6 +96,7 @@ const Restore = ({
 
     return (
         <AnimatedTransaction
+            testId="steps-restore"
             initialStep={initialStep}
             steps={steps}
             initialData={{

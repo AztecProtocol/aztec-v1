@@ -130,6 +130,7 @@ class Footer extends PureComponent {
                 />
                 <Block top="xxs">
                     <TextButton
+                        testId={`button-step-${isFetal ? 'close' : 'retry'}`}
                         theme="underline"
                         text={i18n.t(isFetal ? 'close' : 'retry')}
                         size="m"
@@ -216,6 +217,7 @@ class Footer extends PureComponent {
             >
                 {!!(onPrevious && prevText) && (
                     <Button
+                        testId="button-step-previous"
                         className={styles['footer-button']}
                         theme="white"
                         text={prevText}
@@ -226,6 +228,7 @@ class Footer extends PureComponent {
                 )}
                 {!!(onNext && nextText) && (
                     <Button
+                        testId="button-step-next"
                         className={styles['footer-button']}
                         text={nextText}
                         onSubmit={onNext}

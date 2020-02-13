@@ -29,6 +29,7 @@ const NoteAccess = ({
 
     return (
         <StepsHandler
+            testId="steps-note-access"
             steps={steps}
             fetchInitialData={fetchInitialData}
             Content={GrantNoteAccessContent}

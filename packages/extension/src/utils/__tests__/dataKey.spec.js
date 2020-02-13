@@ -14,21 +14,21 @@ beforeEach(() => {
 describe('dataKey', () => {
     it('return a key for storage using pattern defined in config/dataKey', () => {
         expect(dataKey(
-            'asset',
+            'note',
             {
                 count: 123,
             },
-        )).toBe('a:123');
+        )).toBe('n:123');
 
         expect(dataKey(
-            'asset',
+            'note',
             {
                 count: 123,
                 id: 'abc',
                 address: '0xqaz',
 
             },
-        )).toBe('a:123');
+        )).toBe('n:123');
     });
 
     it('accept custom config object', () => {
@@ -95,11 +95,11 @@ describe('dataKey', () => {
 
     it('keep variable if key is not defined in data', () => {
         expect(dataKey(
-            'asset',
+            'note',
             {
                 name: 'abc',
             },
-        )).toBe('a:{count}');
+        )).toBe('n:{count}');
         expect(warnings.length).toBe(1);
 
         expect(dataKey(
@@ -115,7 +115,6 @@ describe('dataKey', () => {
 describe('getPrefix', () => {
     it('get prefix of a dataKey from pattern defined in config/dataKey', () => {
         expect(getPrefix('note')).toBe('n:');
-        expect(getPrefix('asset')).toBe('a:');
     });
 
     it('get prefix from a custom pattern', () => {

@@ -47,6 +47,7 @@ const RegisterAddress = ({
 
     return (
         <StepsHandler
+            testId="steps-register-address"
             fetchInitialData={fetchInitialData}
             Content={RegisterContent}
             onExit={handleClose}

@@ -16,7 +16,7 @@ class ClientWeb3Service extends Web3Service {
             window.ethereum.autoRefreshOnNetworkChange = false;
 
             window.ethereum.on('accountsChanged', (accounts) => {
-                this.eventListeners.notify('profile', 'accountsChanged', accounts);
+                this.eventListeners.notify('profile', 'accountChanged', accounts[0]);
             });
 
             window.ethereum.on('chainChanged', (chainId) => {
@@ -30,7 +30,7 @@ class ClientWeb3Service extends Web3Service {
         }
     }
 
-    bindProfileChange(cb, allowMultiple = false) {
+    bindProfileChange(cb, allowMultiple = true) {
         if (!allowMultiple) {
             this.eventListeners.removeAll('profile');
         }

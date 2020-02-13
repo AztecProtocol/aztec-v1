@@ -87,6 +87,7 @@ const Deposit = ({
 
     return (
         <StepsHandler
+            testId="steps-deposit"
             fetchInitialData={fetchInitialData}
             Content={DepositContent}
         />

@@ -10,6 +10,7 @@ import {
 import styles from './button.scss';
 
 const CustomButton = ({
+    testId,
     className,
     theme,
     outlined,
@@ -18,6 +19,7 @@ const CustomButton = ({
     ...props
 }) => (
     <Button
+        testId={testId}
         className={classnames(
             className,
             styles[theme],
@@ -36,6 +38,7 @@ const CustomButton = ({
 );
 
 CustomButton.propTypes = {
+    testId: PropTypes.string,
     className: PropTypes.string,
     theme: themeType,
     outlined: PropTypes.bool,
@@ -44,6 +47,7 @@ CustomButton.propTypes = {
 };
 
 CustomButton.defaultProps = {
+    testId: undefined,
     className: '',
     theme: 'primary',
     outlined: false,

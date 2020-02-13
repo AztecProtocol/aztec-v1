@@ -13,7 +13,6 @@ import {
 } from '~/utils/format';
 import i18n from '~/ui/helpers/i18n';
 import noteValueToToken from '~/ui/utils/noteValueToToken';
-import formatNumber from '~/ui/utils/formatNumber';
 import isStepAfter from '~/ui/utils/isStepAfter';
 import StepContentHelper from '~/ui/views/handlers/StepContentHelper';
 import StepContent from '~/ui/components/StepContent';
@@ -51,7 +50,7 @@ class SendContent extends StepContentHelper {
             footnote: (
                 <Text
                     className="text-code"
-                    text={formatNumber(noteValueToToken(txAmount, asset))}
+                    text={noteValueToToken(txAmount, asset)}
                     color="label"
                     weight="semibold"
                 />
@@ -61,7 +60,7 @@ class SendContent extends StepContentHelper {
         return {
             title: [
                 symbol
-                    ? `Zk${symbol}`
+                    ? i18n.t('zkSymbol', { symbol })
                     : capitalize(i18n.singular('zkAsset')),
                 ' (',
                 <HashText
@@ -76,7 +75,7 @@ class SendContent extends StepContentHelper {
             ],
             hideTitile: approved,
             content: symbol
-                ? `${tokenValue} Zk${symbol}`
+                ? `${tokenValue} ${i18n.t('zkSymbol', { symbol })}`
                 : i18n.count('zkToken', tokenValue, true),
             contentFootnote: (
                 <BlockStatus

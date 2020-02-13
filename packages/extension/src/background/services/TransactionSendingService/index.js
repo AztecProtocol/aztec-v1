@@ -2,6 +2,9 @@ import {
     GSNProvider,
 } from '@openzeppelin/gsn-provider';
 import Web3Service from '~/helpers/Web3Service';
+import {
+    errorLogProduction,
+} from '~/utils/log';
 import retrieveSigningInfo from '~/utils/retrieveSigningInfo';
 import { getProviderUrl } from '~/utils/network';
 import makeApproveFunction from './makeApproveFunction';
@@ -44,11 +47,15 @@ const sendTransaction = async (query, connection) => {
             responseId,
         };
     } catch (e) {
-        let error = e;
-        if (error.message.match(/relayer/)) {
+        errorLogProduction(e);
+        let error;
+        if (e.message.match(/relayer/)) {
             error = {
                 key: 'transaction.gsn.error.relayer',
-                fetal: true,
+            };
+        } else {
+            error = {
+                key: 'transaction.gsn.error',
             };
         }
         return {

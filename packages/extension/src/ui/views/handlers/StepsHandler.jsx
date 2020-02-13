@@ -444,6 +444,9 @@ class StepsHandler extends PureComponent {
 
     render() {
         const {
+            testId,
+        } = this.props;
+        const {
             pendingInitialFetch,
         } = this.state;
 
@@ -453,6 +456,7 @@ class StepsHandler extends PureComponent {
 
         return (
             <FlexBox
+                testId={testId}
                 direction="column"
                 expand
                 stretch
@@ -466,6 +470,7 @@ class StepsHandler extends PureComponent {
 }
 
 StepsHandler.propTypes = {
+    testId: PropTypes.string,
     steps: PropTypes.arrayOf(transactionStepShape),
     Content: PropTypes.func,
     initialStep: PropTypes.number,
@@ -482,6 +487,7 @@ StepsHandler.propTypes = {
 };
 
 StepsHandler.defaultProps = {
+    testId: undefined,
     steps: [],
     Content: null,
     initialStep: 0,

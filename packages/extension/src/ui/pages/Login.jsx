@@ -32,6 +32,7 @@ const Login = ({
     currentAccount,
 }) => (
     <AnimatedTransaction
+        testId="steps-login"
         steps={steps}
         initialData={{
             address: currentAccount.address,

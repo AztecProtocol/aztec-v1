@@ -71,6 +71,7 @@ const Header = ({
             {!!onClose && (
                 <div className="flex-fixed">
                     <Clickable
+                        testId="button-close-popup"
                         className={styles['close-button']}
                         onClick={onClose}
                     >

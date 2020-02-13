@@ -11,6 +11,7 @@ import {
     permissionError,
 } from '~/utils/error';
 import Connection from '../utils/connection';
+import migrateIndexedDB from './migrateIndexedDB';
 import setupNetworkConfig from './setupNetworkConfig';
 
 const resourceOrigin = getResourceUrl('origin');
@@ -31,6 +32,7 @@ export default function acceptConnection() {
 
             if (clientProfile) {
                 try {
+                    await migrateIndexedDB();
                     networkConfig = await setupNetworkConfig(clientProfile);
                     connection.initUi();
                 } catch (e) {

@@ -20,6 +20,7 @@ import {
 
 jest.mock('~/utils/storage');
 
+const version = randomInt();
 const networkId = randomInt();
 const owner = userAccount;
 let assetManager;
@@ -28,6 +29,7 @@ beforeEach(() => {
     storage.reset();
 
     assetManager = new AssetManager({
+        version,
         networkId,
         owner,
     });
@@ -69,6 +71,7 @@ describe('AssetManager.init', () => {
 
     it('init Assets from previous summary data saved in storage', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -112,6 +115,7 @@ describe('AssetManager.init', () => {
 
     it('will not override priority if it has been set', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {

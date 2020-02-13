@@ -4,7 +4,7 @@
   const zkAssetAddress = document.body.getAttribute('asset');
   const {
       address: accountAddress,
-  } = window.aztec.web3.account();
+  } = window.aztec.web3.getAccount();
   let asset;
   let allowanceStatus;
   let depositStatus;
@@ -151,7 +151,7 @@
 
     withdrawStatus.clear();
 
-    const account = window.aztec.web3.account();
+    const account = window.aztec.web3.getAccount();
 
     try {
       const resp = await asset.withdraw(
@@ -185,7 +185,7 @@
 
     sendStatus.clear();
 
-    const account = window.aztec.web3.account();
+    const account = window.aztec.web3.getAccount();
 
     try {
       const resp = await asset.send(
@@ -231,7 +231,7 @@
       }
     }
 
-    const account = window.aztec.web3.account();
+    const account = window.aztec.web3.getAccount();
 
     try {
       const resp = await asset.createNoteFromBalance(

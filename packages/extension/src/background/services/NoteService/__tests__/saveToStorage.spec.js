@@ -2,6 +2,7 @@ import {
     userAccount,
 } from '~testHelpers/testUsers';
 import {
+    randomInt,
     randomId,
 } from '~/utils/random';
 import * as storage from '~/utils/storage';
@@ -20,6 +21,7 @@ beforeEach(() => {
 });
 
 describe('saveToStorage', () => {
+    const version = randomInt();
     const networkId = randomId(10);
     const {
         address,
@@ -31,14 +33,17 @@ describe('saveToStorage', () => {
     };
 
     const userAssetsDataKey = dataKey('userAssets', {
+        version,
         user: owner.address,
         network: networkId,
     });
     const assetPriorityDataKey = dataKey('userAssetPriority', {
+        version,
         user: owner.address,
         network: networkId,
     });
     const getAssetNotesDataKey = assetId => dataKey('userAssetNotes', {
+        version,
         user: owner.address,
         asset: assetId,
         network: networkId,
@@ -65,6 +70,7 @@ describe('saveToStorage', () => {
 
     it('save asset note values to storage', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -89,6 +95,7 @@ describe('saveToStorage', () => {
 
     it('merge summary with previous summary data in storage', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -115,6 +122,7 @@ describe('saveToStorage', () => {
         };
 
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -143,6 +151,7 @@ describe('saveToStorage', () => {
 
     it('override existing asset in storage', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -162,6 +171,7 @@ describe('saveToStorage', () => {
             },
         };
         await saveToStorage(
+            version,
             networkId,
             owner,
             {

@@ -7,6 +7,7 @@ import {
 } from '~/utils/crypto';
 
 export default async function saveAssetNotesToStorage(
+    version,
     networkId,
     userAddress,
     linkedPublicKey,
@@ -14,6 +15,7 @@ export default async function saveAssetNotesToStorage(
     noteValues,
 ) {
     const storageKey = dataKey('userAssetNotes', {
+        version,
         user: userAddress,
         asset: assetId,
         network: networkId,

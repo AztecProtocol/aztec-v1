@@ -10,7 +10,7 @@ import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';
 import pickNotesInRange from './utils/pickNotesInRange';
 
-const manager = new ApiSessionManager();
+const manager = new ApiSessionManager('1');
 
 export default {
     initWithUser: async (

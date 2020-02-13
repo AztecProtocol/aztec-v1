@@ -50,6 +50,7 @@ const CreatePassword = ({
         >
             <Block align="left">
                 <TextInput
+                    testId="input-password"
                     setInputRef={setInputRef}
                     theme="inline"
                     type={visible ? 'text' : 'password'}

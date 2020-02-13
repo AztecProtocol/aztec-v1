@@ -254,6 +254,9 @@ class Web3Service {
                             }
                         });
                     }, 1000);
+                })
+                .on('error', (error) => {
+                    reject(error);
                 });
         });
     }

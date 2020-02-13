@@ -41,6 +41,7 @@ export default {
             submit: 'Send',
         },
         error: {
+            _: 'GSN is not available at the moment. Please try again later.',
             relayer: 'Relayer is not available at the moment. Please try again later.',
         },
     },

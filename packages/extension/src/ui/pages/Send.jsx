@@ -56,6 +56,7 @@ const Send = ({
 
     return (
         <StepsHandler
+            testId="steps-send"
             fetchInitialData={fetchInitialData}
             Content={SendContent}
         />

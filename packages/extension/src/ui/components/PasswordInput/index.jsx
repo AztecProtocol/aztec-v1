@@ -30,6 +30,7 @@ const PasswordInput = ({
 
     return (
         <TextInput
+            testId="input-password"
             setInputRef={setInputRef}
             theme="inline"
             type={visible ? 'text' : 'password'}

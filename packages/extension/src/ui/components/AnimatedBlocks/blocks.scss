@@ -147,7 +147,7 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
 .sealed-icon {
   $sealed-icon-size: map-get($avatar-sizes-map, 'l');
   position: absolute;
-  top: map-get($spacing-map, 'xxl');
+  bottom: $block-spacing;
   right: $block-padding-h;
   display: flex;
   align-items: center;

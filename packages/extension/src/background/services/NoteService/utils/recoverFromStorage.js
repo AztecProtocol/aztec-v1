@@ -9,6 +9,7 @@ import dataKey from '~/utils/dataKey';
 import recoverAssetNotesFromStorage from './recoverAssetNotesFromStorage';
 
 export default async function recoverFromStorage(
+    version,
     networkId,
     owner,
 ) {
@@ -17,6 +18,7 @@ export default async function recoverFromStorage(
         linkedPrivateKey,
     } = owner;
     const encryptedSummary = await get(dataKey('userAssets', {
+        version,
         user: userAddress,
         network: networkId,
     })) || {};
@@ -32,6 +34,7 @@ export default async function recoverFromStorage(
     });
 
     const priority = await get(dataKey('userAssetPriority', {
+        version,
         user: userAddress,
         network: networkId,
     })) || [];
@@ -40,6 +43,7 @@ export default async function recoverFromStorage(
     await Promise.all(priority
         .map(async (assetId) => {
             assetNotes[assetId] = await recoverAssetNotesFromStorage(
+                version,
                 networkId,
                 owner,
                 assetId,

@@ -22,12 +22,14 @@ beforeEach(() => {
 });
 
 describe('recoverSummaryFromStorage', () => {
+    const version = randomInt();
     const networkId = randomId();
     const owner = userAccount;
     const assetIds = Object.keys(assetSummary);
 
     it('recover asset summary and priority from storage', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -38,6 +40,7 @@ describe('recoverSummaryFromStorage', () => {
         );
 
         const recovered = await recoverSummaryFromStorage(
+            version,
             networkId,
             owner,
         );
@@ -50,6 +53,7 @@ describe('recoverSummaryFromStorage', () => {
 
     it('recover data for the given network', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -80,6 +84,7 @@ describe('recoverSummaryFromStorage', () => {
         expect(priorityB).not.toEqual(priority);
 
         await saveToStorage(
+            version,
             anotherNetwork,
             owner,
             {
@@ -90,6 +95,7 @@ describe('recoverSummaryFromStorage', () => {
         );
 
         const recoveredA = await recoverSummaryFromStorage(
+            version,
             networkId,
             owner,
         );
@@ -99,6 +105,7 @@ describe('recoverSummaryFromStorage', () => {
         });
 
         const recoveredB = await recoverSummaryFromStorage(
+            version,
             anotherNetwork,
             owner,
         );
@@ -110,6 +117,7 @@ describe('recoverSummaryFromStorage', () => {
 
     it('recover data for the given network', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -140,6 +148,7 @@ describe('recoverSummaryFromStorage', () => {
         expect(priorityB).not.toEqual(priority);
 
         await saveToStorage(
+            version,
             networkId,
             anotherOwner,
             {
@@ -150,6 +159,7 @@ describe('recoverSummaryFromStorage', () => {
         );
 
         const recoveredA = await recoverSummaryFromStorage(
+            version,
             networkId,
             owner,
         );
@@ -159,6 +169,7 @@ describe('recoverSummaryFromStorage', () => {
         });
 
         const recoveredB = await recoverSummaryFromStorage(
+            version,
             networkId,
             anotherOwner,
         );
@@ -170,6 +181,7 @@ describe('recoverSummaryFromStorage', () => {
 
     it('get empty object and array if there is no data in storage', async () => {
         const recovered = await recoverSummaryFromStorage(
+            version,
             networkId,
             owner,
         );

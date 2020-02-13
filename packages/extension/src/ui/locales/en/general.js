@@ -5,6 +5,7 @@ export default {
     token: 'token',
     zkToken: 'zkToken',
     zkAsset: 'zkAsset',
+    zkSymbol: 'zk%{symbol}',
     click: {
         to: {
             copy: 'Click to copy',

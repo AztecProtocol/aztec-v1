@@ -1,9 +1,7 @@
 import {
-    set,
-} from '~/utils/storage';
-import {
     getContract,
     getProxyAddress,
+    getNetworkName,
 } from '~/utils/network';
 import Web3Service from '~/helpers/Web3Service';
 
@@ -15,7 +13,6 @@ const backgroundContracts = [
 ];
 
 export default async function setupNetworkConfig({
-    apiKey,
     providerUrl = '',
     contractAddresses = {},
 }) {
@@ -27,6 +24,12 @@ export default async function setupNetworkConfig({
         networkId,
         account,
     } = Web3Service;
+    const networkName = getNetworkName(networkId);
+    const networkAddresses = contractAddresses[networkName] || {};
+    const customAddresses = {
+        ...contractAddresses,
+        ...networkAddresses,
+    };
 
     const contractsConfig = await Promise.all(backgroundContracts.map(async (contractName) => {
         const {
@@ -34,12 +37,13 @@ export default async function setupNetworkConfig({
             address: defaultAddress,
             isProxyContract,
         } = getContract(contractName, networkId);
-        let address = contractAddresses[contractName] || defaultAddress;
+        let address = customAddresses[contractName]
+            || defaultAddress;
         if (!address && isProxyContract) {
             address = await getProxyAddress(
                 contractName,
                 networkId,
-                contractAddresses,
+                customAddresses,
             );
         }
 
@@ -50,11 +54,6 @@ export default async function setupNetworkConfig({
         };
     }));
     Web3Service.registerContractsConfig(contractsConfig);
-
-    await set({
-        apiKey,
-        networkId,
-    });
 
     return {
         networkId,
