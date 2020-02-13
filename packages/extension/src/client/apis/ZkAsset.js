@@ -3,6 +3,8 @@ import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
 import ApiError from '~/client/utils/ApiError';
+import parseInputTransactions from '~/client/utils/parseInputTransactions';
+import parseInputInteger from '~/client/utils/parseInputInteger';
 import SubscriptionManager from './SubscriptionManager';
 
 const dataProperties = [
@@ -197,8 +199,8 @@ export default class ZkAsset {
             {
                 proofType: 'DEPOSIT_PROOF',
                 assetAddress: this.address,
-                transactions,
-                numberOfOutputNotes,
+                transactions: parseInputTransactions(transactions),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
                 userAccess,
             },
         );
@@ -238,9 +240,9 @@ export default class ZkAsset {
             {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
-                amount,
+                amount: parseInputInteger(amount),
                 to: to || address,
-                numberOfInputNotes,
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
             },
         );
     };
@@ -274,9 +276,9 @@ export default class ZkAsset {
         {
             proofType: 'TRANSFER_PROOF',
             assetAddress: this.address,
-            transactions,
-            numberOfInputNotes,
-            numberOfOutputNotes,
+            transactions: parseInputTransactions(transactions),
+            numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+            numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
             userAccess,
         },
     );
@@ -395,10 +397,10 @@ export default class ZkAsset {
             {
                 proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
                 assetAddress: this.address,
-                amount,
+                amount: parseInputInteger(amount),
                 userAccess,
-                numberOfInputNotes,
-                numberOfOutputNotes,
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
             },
         ) || {};
 
@@ -429,10 +431,10 @@ export default class ZkAsset {
         'fetchNotesFromBalance',
         {
             assetAddress: this.address,
-            greaterThan,
-            lessThan,
-            equalTo,
-            numberOfNotes,
+            greaterThan: parseInputInteger(greaterThan),
+            lessThan: parseInputInteger(lessThan),
+            equalTo: parseInputInteger(equalTo),
+            numberOfNotes: parseInputInteger(numberOfNotes),
         },
     );
 }
