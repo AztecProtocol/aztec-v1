@@ -35,6 +35,12 @@ export default {
             description: `If everything looks good hit send!
             `,
         },
+        user: {
+            _: 'Access',
+            description: `The above user will be granted view access to the new zkTokens.
+                It will not allow the zkTokens to be spent without a signature from their recipient's MetaMask account.
+            `,
+        },
     },
     sign: {
         title: 'Approve Note Spending',

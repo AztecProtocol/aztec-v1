@@ -37,7 +37,9 @@ const Send = ({
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-        const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
+        const userAccessAccounts = userAccess
+            ? await apis.account.batchGetExtensionAccount(userAccess)
+            : [];
 
         return {
             steps,
