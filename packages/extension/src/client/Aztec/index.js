@@ -4,10 +4,12 @@ import {
 } from '~/utils/log';
 import ApiManager from './ApiManager';
 
-const manager = new ApiManager();
+let manager;
 
 class Aztec {
     constructor() {
+        manager = new ApiManager();
+
         const apis = manager.generateDefaultApis();
         Object.keys(apis).forEach((apiName) => {
             this[apiName] = apis[apiName];

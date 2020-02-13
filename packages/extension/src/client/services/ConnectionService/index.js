@@ -36,10 +36,10 @@ import getApiKeyApproval from '~/client/utils/getApiKeyApproval';
 import backgroundFrame from './backgroundFrame';
 
 class ConnectionService {
-    constructor() {
+    async init() {
         this.clientId = randomId();
         this.setInitialVars();
-        backgroundFrame.init();
+        await backgroundFrame.init();
     }
 
     setInitialVars() {

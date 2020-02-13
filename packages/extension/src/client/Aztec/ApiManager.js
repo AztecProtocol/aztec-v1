@@ -9,6 +9,8 @@ import ConnectionService from '~/client/services/ConnectionService';
 
 export default class ApiManager {
     constructor() {
+        ConnectionService.init();
+
         this.eventListeners = new EventListeners(['profileChanged']);
         this.enableProfileChangeListener = null;
         this.enabledOptions = null;
@@ -206,6 +208,7 @@ export default class ApiManager {
     }
 
     async refreshSession(options, cb, setApis) {
+        this.enabledOptions = null;
         await this.disable(setApis);
         return this.enable(options, cb, setApis);
     }
