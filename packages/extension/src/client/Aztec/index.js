@@ -22,6 +22,10 @@ class Aztec {
         });
     }
 
+    get enabled() { // eslint-disable-line class-methods-use-this
+        return !!manager.enabledOptions;
+    }
+
     addListener(eventName, callback) { // eslint-disable-line class-methods-use-this
         manager.eventListeners.add(eventName, callback);
     }
