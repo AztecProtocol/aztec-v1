@@ -1,3 +1,4 @@
+import isEqual from 'lodash/isEqual';
 import {
     getNetworkName,
 } from '~/utils/network';
@@ -10,6 +11,7 @@ export default class ApiManager {
     constructor() {
         this.eventListeners = new EventListeners(['profileChanged']);
         this.enableProfileChangeListener = null;
+        this.enabledOptions = null;
 
         Web3Service.bindProfileChange((changedType, newTypeValue) => {
             let objValue = newTypeValue || null;
@@ -65,6 +67,15 @@ export default class ApiManager {
         callback = null,
         setApis,
     ) => new Promise(async (resolve, reject) => {
+        if (isEqual(options, this.enabledOptions)) {
+            if (callback) {
+                callback(true, null);
+            }
+
+            resolve(true);
+            return;
+        }
+
         const {
             apiKey = '',
             providerUrl = '',
@@ -92,7 +103,7 @@ export default class ApiManager {
             }
 
             if (!shouldReject) {
-                resolve(!!error);
+                resolve(!error);
             } else if (!callback) {
                 reject(error);
             }
@@ -177,6 +188,8 @@ export default class ApiManager {
         if (callback) {
             callback(true, null);
         }
+
+        this.enabledOptions = options;
 
         doResolved({
             aztecAccount,
