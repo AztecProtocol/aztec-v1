@@ -1,8 +1,12 @@
 import expectErrorResponse from '~testHelpers/expectErrorResponse';
+import {
+    NUMBER_OF_INPUT_NOTES,
+} from '~/config/settings';
 import generateSortedValues from '../utils/generateSortedValues';
 import pickNotes from '../utils/pickNotes';
 import getStartIndex from '../utils/pickNotes/getStartIndex';
 import pickKeysByValues from '../utils/pickNotes/pickKeysByValues';
+import * as validate from '../utils/pickNotes/validate';
 import * as pickValues from '../utils/pickNotes/pickValues';
 
 describe('getStartIndex', () => {
@@ -105,6 +109,43 @@ describe('pickNotes', () => {
                 value: 10,
             },
         ]);
+    });
+
+    it('pick random number of notes if numberOfNotes is not undefined', () => {
+        const validateSpy = jest.spyOn(validate, 'default');
+
+        const noteValues = {
+            0: ['n:1'],
+            1: ['n:2'],
+            2: ['n:3'],
+            4: ['n:6'],
+            8: ['n:4'],
+        };
+        const sortedValues = generateSortedValues(noteValues);
+
+        const notes1 = pickNotes({
+            noteValues,
+            sortedValues,
+            minSum: 6,
+        });
+        expect(NUMBER_OF_INPUT_NOTES >= 2).toBe(true);
+        expect(notes1.length).toBe(NUMBER_OF_INPUT_NOTES);
+        expect(validateSpy).toHaveBeenCalledTimes(1);
+
+        const notes2 = pickNotes({
+            noteValues,
+            sortedValues,
+            minSum: 13,
+        });
+        expect(notes2.length >= 3).toBe(true);
+        expect(validateSpy).toHaveBeenCalledTimes(3);
+
+        const notes3 = pickNotes({
+            noteValues,
+            sortedValues,
+            minSum: 15,
+        });
+        expect(notes3.length >= 4).toBe(true);
     });
 
     it('throw error if there is no note combinations >= min sum', () => {

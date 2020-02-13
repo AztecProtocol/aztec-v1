@@ -6,7 +6,7 @@ export default function pickNotesFromBalanceQuery(requestedFields) {
             $assetId: String!,
             $amount: Int!,
             $owner: String!,
-            $numberOfNotes: Int!
+            $numberOfNotes: Int
             $domain: String!
             $currentAddress: String!
         ) {

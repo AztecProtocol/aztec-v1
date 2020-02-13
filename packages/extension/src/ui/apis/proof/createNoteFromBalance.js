@@ -51,7 +51,7 @@ export default async function createNoteFromBalance({
 
     const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
         ? customNumberOfInputNotes
-        : await settings('NUMBER_OF_INPUT_NOTES');
+        : undefined;
 
     const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
         ? customNumberOfOutputNotes

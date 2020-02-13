@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import settings from '~/background/utils/settings';
 import {
     valueOf,
 } from '~/utils/note';
@@ -42,8 +41,8 @@ const CreateNoteFromBalance = ({
     currentAccount,
     assetAddress,
     amount: inputAmount,
-    numberOfInputNotes: customNumberOfInputNotes,
-    numberOfOutputNotes: customNumberOfOutputNotes,
+    numberOfInputNotes,
+    numberOfOutputNotes,
     userAccess,
 }) => {
     const {
@@ -64,12 +63,6 @@ const CreateNoteFromBalance = ({
             : [];
         const sender = isGSNAvailable ? proxyContract : currentAddress;
         const amount = parseInputAmount(inputAmount);
-        const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-            ? customNumberOfInputNotes
-            : await settings('NUMBER_OF_INPUT_NOTES');
-        const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-            ? customNumberOfOutputNotes
-            : await settings('NUMBER_OF_OUTPUT_NOTES');
         const transactions = [
             {
                 amount,
