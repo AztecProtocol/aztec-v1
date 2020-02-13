@@ -13,9 +13,9 @@
       function handleReload(type, value) {
         let message;
         if (type === 'accountChanged') {
-          message = `Switching account to ${value}...`;
+          message = `Switching account to ${value.address}...`;
         } else if (type === 'networkChanged') {
-          message = `Switching network to ${value}...`;
+          message = `Switching network to ${value.name} (${value.id})...`;
         } else {
           message = 'Signing in to AZTEC account...';
         }
