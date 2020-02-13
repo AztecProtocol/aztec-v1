@@ -3,6 +3,7 @@ import {
     ProofUtils,
 } from 'aztec.js';
 import { keccak256 } from 'web3-utils';
+import uniqBy from 'lodash/uniqBy';
 import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~/config/constants';
@@ -164,14 +165,15 @@ export default async function createNoteFromBalance({
                 address: to,
                 linkedPublicKey,
             };
-            const userAccess = !userAccessAccounts
+            const userAccess = !userAccessAccounts.length
                 ? ownerAccess
-                : [
-                    ...userAccessAccounts,
-                    ownerAccess,
-                ].filter((access, i, arr) => i === arr.findIndex(({
-                    address,
-                }) => address === access.address));
+                : uniqBy(
+                    [
+                        ...userAccessAccounts,
+                        ownerAccess,
+                    ],
+                    'address',
+                );
             const newNotes = await createNotes(
                 values,
                 spendingPublicKey,

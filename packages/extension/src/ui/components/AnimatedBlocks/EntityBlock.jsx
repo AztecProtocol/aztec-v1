@@ -98,7 +98,7 @@ const EntityBlock = ({
         )}
         {!!extraContent && (
             <div className={styles['block-extra']}>
-                <Block padding="0 l">
+                <Block padding="s l">
                     {extraContent}
                 </Block>
             </div>

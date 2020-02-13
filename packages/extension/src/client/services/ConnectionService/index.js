@@ -39,6 +39,7 @@ class ConnectionService {
     constructor() {
         this.clientId = randomId();
         this.setInitialVars();
+        backgroundFrame.init();
     }
 
     setInitialVars() {
@@ -77,7 +78,7 @@ class ConnectionService {
         } = clientProfile;
         this.apiKey = apiKey;
 
-        const frame = await backgroundFrame.init();
+        const frame = await backgroundFrame.ensureCreated();
 
         const backgroundResponse = fromEvent(window, 'message')
             .pipe(

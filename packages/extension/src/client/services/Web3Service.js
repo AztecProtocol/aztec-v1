@@ -11,10 +11,6 @@ class ClientWeb3Service extends Web3Service {
 
     subscribeProfileListeners() {
         if (window.ethereum) {
-            // TODO - to be removed
-            // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
-            window.ethereum.autoRefreshOnNetworkChange = false;
-
             window.ethereum.on('accountsChanged', (accounts) => {
                 this.eventListeners.notify('profile', 'accountChanged', accounts[0]);
             });

@@ -48,7 +48,7 @@ export default class Iframe {
     async ensureCreated() {
         return new Promise((resolve) => {
             if (this.frameReady) {
-                resolve();
+                resolve(this.frame);
             } else {
                 this.onReadyCallbacks.push(resolve);
             }
@@ -60,6 +60,8 @@ export default class Iframe {
             warnLog("Please define 'onReadyEventName' in the constructor or call .create() instead.");
             return null;
         }
+
+        this.frameReady = false;
 
         // clear previous unresolved init
         this.unbindAwaitFrameReady();

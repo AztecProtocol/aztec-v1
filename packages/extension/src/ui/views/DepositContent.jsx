@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-    Block,
     Text,
 } from '@aztec/guacamole-ui';
 import {
@@ -29,6 +28,7 @@ class DepositContent extends StepContentHelper {
             asset,
             amount,
             transactions,
+            userAccessAccounts,
             loading,
             error,
         } = this.props;
@@ -112,11 +112,22 @@ class DepositContent extends StepContentHelper {
                     ...asset,
                     type: 'asset',
                 },
-                extraContent: (
-                    <Block padding="l s">
-                        <RecipientList recipients={recipients} />
-                    </Block>
-                ),
+                extraContent: [
+                    <RecipientList
+                        key="recipients"
+                        recipients={recipients}
+                    />,
+                    currentStep === 0 && userAccessAccounts.length
+                        ? (
+                            <RecipientList
+                                key="access"
+                                title={i18n.t('note.access.user')}
+                                description={i18n.t('note.access.user.description')}
+                                recipients={userAccessAccounts}
+                            />
+                        )
+                        : null,
+                ],
             },
         ];
     }
@@ -145,10 +156,14 @@ DepositContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
+    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    })),
 };
 
 DepositContent.defaultProps = {
     titleKey: 'deposit.title',
+    userAccessAccounts: [],
 };
 
 export default DepositContent;

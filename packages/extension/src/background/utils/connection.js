@@ -128,7 +128,7 @@ class Connection {
                     webClientId,
                 });
 
-                await this.uiFrame.ensureCreated();
+                const frame = await this.uiFrame.ensureCreated();
 
                 this.openUi({
                     requestId,
@@ -141,13 +141,14 @@ class Connection {
                     },
                 });
 
-                this.uiFrame.frame.contentWindow.postMessage({
+                frame.contentWindow.postMessage({
                     type: sendActionEvent,
                     action: {
                         ...action,
                         data: args,
                     },
                 }, '*');
+
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';
                 this.uiFrame.open();

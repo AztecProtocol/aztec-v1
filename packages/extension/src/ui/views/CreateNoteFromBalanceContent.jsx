@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
     Block,
-    Text,
     SVG,
 } from '@aztec/guacamole-ui';
 import {
@@ -96,18 +95,10 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
                 type: 'asset',
             },
             extraContent: (
-                <Block padding="xs 0">
-                    <Block padding="xs">
-                        <Text
-                            text={i18n.t('note.access.recipient.title')}
-                            color="label"
-                            size="xxs"
-                        />
-                    </Block>
-                    <Block padding="s">
-                        <RecipientList recipients={recipients} />
-                    </Block>
-                </Block>
+                <RecipientList
+                    title={i18n.t('note.access.recipient.title')}
+                    recipients={recipients}
+                />
             ),
         };
     }

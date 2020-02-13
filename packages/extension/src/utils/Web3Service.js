@@ -40,6 +40,9 @@ class Web3Service {
             }
         } else {
             provider = window.ethereum;
+            // TODO - to be removed
+            // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
+            provider.autoRefreshOnNetworkChange = false;
         }
 
         if (!provider) {
@@ -209,13 +212,9 @@ class Web3Service {
 
     async deploy(config, constructorArguments = []) {
         const {
-            contractName,
             abi,
             bytecode,
         } = config;
-        if (!this.abis[contractName]) {
-            this.registerInterface(config);
-        }
 
         const contractObj = new this.web3.eth.Contract(abi);
         contractObj.options.data = bytecode;
@@ -246,7 +245,11 @@ class Web3Service {
                                 const {
                                     contractAddress,
                                 } = transactionReceipt;
-                                const contract = this.deployed(contractName, contractAddress);
+                                const contract = new this.web3.eth.Contract(
+                                    abi,
+                                    contractAddress,
+                                );
+                                contract.address = contractAddress;
                                 resolve(contract);
                             } else if (error) {
                                 clearInterval(interval);
