@@ -40,6 +40,9 @@ class Web3Service {
             }
         } else {
             provider = window.ethereum;
+            // TODO - to be removed
+            // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
+            provider.autoRefreshOnNetworkChange = false;
         }
 
         if (!provider) {
