@@ -12,8 +12,16 @@ export default async function ensurePermission() {
         throw new ApiError('domain.not.registered');
     }
 
+    const {
+        address,
+        linkedPublicKey,
+    } = account;
+
     return {
-        account,
+        account: {
+            address,
+            linkedPublicKey,
+        },
         domain,
     };
 }
