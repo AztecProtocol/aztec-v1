@@ -13,6 +13,7 @@ import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
 import getTestERC20 from '../utils/getTestERC20';
 import getTestEth from '../utils/getTestEth';
+import getContractAddress from '../utils/getContractAddress';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
 
@@ -52,12 +53,14 @@ class Preview extends React.Component {
     logs: [],
     code: '',
     initialCode: '',
-    zkAssetAddress: '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4',
+    zkAssetAddress: getContractAddress('ZkAsset'),
+    userAddress: '',
+    isWeb3Loaded: false,
   };
 
   // eslint-disable-next-line react/sort-comp
   generateIframeContent = () => {
-    const { code, accounts } = this.state;
+    const { code } = this.state;
     const { compilerConfig } = this.props;
 
     // iframeId is the first 5 bytes code hash
@@ -66,11 +69,9 @@ class Preview extends React.Component {
 
     // all calls to window.aztec need to go to the parent window,
     // as SDK not loaded in this iframe
-    const userAddress = toChecksumAddress(accounts[0]);
-    console.log({ userAddress });
     const compiledCode = compileCode(code, compilerConfig, console.log)
       .replace(/window.aztec/g, 'window.parent.aztec')
-      .replace(/window.ethereum.selectedAddress/g, `'${userAddress.toString()}'`);
+      .replace(/window.ethereum/g, 'window.parent.ethereum');
 
     const asyncCompiledCode = `const code = async () => {
       try {
@@ -104,9 +105,16 @@ class Preview extends React.Component {
       try {
         await window.ethereum.enable();
         await this.getWeb3Data();
-        await window.aztec.enable({
-          apiKey: AZTEC_API_KEY,
-        });
+        if (!window.aztec.enabled) {
+          try {
+            await window.aztec.enable({
+              apiKey: AZTEC_API_KEY,
+            });
+          } catch (e) {
+            console.log(e);
+          }
+        }
+
         if (!this.txSubscription) {
           window.ethereum.on('accountsChanged', () => {
             this.getWeb3Data();
@@ -126,6 +134,15 @@ class Preview extends React.Component {
       } catch (err) {
         console.log(err);
       }
+
+      const { code, accounts, zkAssetAddress } = this.state;
+      const userAddress = accounts[0];
+      const updatedCode = code
+        .replace(/zkAssetAddress = ''/g, `zkAssetAddress = '${toChecksumAddress(zkAssetAddress)}'`)
+        .replace(/userAddress = ''/g, `userAddress = '${toChecksumAddress(userAddress)}'`)
+        .replace(/thirdPartyAddress = ''/g, `thirdPartyAddress = '${toChecksumAddress(userAddress)}'`);
+
+      this.setState({ code: updatedCode, isWeb3Loaded: true });
     }
   };
 
@@ -139,7 +156,7 @@ class Preview extends React.Component {
   getWeb3Data = async () => {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum);
-      if (window.aztec.zkAsset) {
+      if (window.aztec.enabled) {
         const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
@@ -152,7 +169,7 @@ class Preview extends React.Component {
       this.setState({
         ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
         network: window.ethereum.networkVersion,
-        accounts: [ethereum.selectedAddress],
+        accounts: [window.ethereum.selectedAddress],
       });
     }
   };
@@ -244,10 +261,9 @@ class Preview extends React.Component {
   };
 
   render() {
-    const { isRunning, logs, network, accounts = [] } = this.state;
+    const { isRunning, isWeb3Loaded, logs, network, accounts = [] } = this.state;
     const isEnabled = network === '4';
-    console.log('ethBalance: ', this.state.ethBalance);
-    console.log('erc20 balance: ', this.state.linkedTokenBalance);
+
     return (
       <>
         <iframe
@@ -274,6 +290,7 @@ class Preview extends React.Component {
                 [styles.textArea]: true,
                 [styles.codeRunning]: isRunning,
                 [styles.rinkeby]: !isEnabled,
+                [styles.web3Data]: !isWeb3Loaded,
               })}
               stretch
               expand
