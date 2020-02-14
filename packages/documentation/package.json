@@ -20,6 +20,7 @@
     "transpile": "BABEL_ENV=transpile babel src -x \".js\",\".jsx\" --ignore \"**/*.spec.js\",\"**/demo/**\" -d dist"
   },
   "dependencies": {
+    "@aztec/contract-addresses": "1.16.1",
     "@aztec/guacamole-ui": "^1.1.2",
     "@babel/core": "^7.4.0",
     "@babel/node": "^7.2.2",

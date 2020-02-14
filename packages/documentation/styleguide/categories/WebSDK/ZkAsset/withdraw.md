@@ -10,7 +10,7 @@ const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
-const address = '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4';
+const address = zkAssetPlaceholder;
 const asset = await window.aztec.zkAsset(address);
 console.info(asset);
 
@@ -42,8 +42,8 @@ const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
-const address = '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4';
-const asset = await window.aztec.zkAsset(address);
+const zkAssetAddress = '';
+const asset = await window.aztec.zkAsset(zkAssetAddress);
 
 // Deposit funds into the ZkAsset
 const depositAmount = 50;

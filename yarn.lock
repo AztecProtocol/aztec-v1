@@ -225,6 +225,13 @@
     ethers "~4.0.4"
     lodash "^4.17.11"
 
+"@aztec/contract-addresses@1.16.1":
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/@aztec/contract-addresses/-/contract-addresses-1.16.1.tgz#59a3ee5a389739b8d25aa2aa0c25e4ec6ba4cb12"
+  integrity sha512-zps7VLZgbkKsRTZLQlZxg7xPE/Lxmo8UhO2u1F2lnJ6zMEQJ+ODCx4znHwI4OH7s20AjiGqeimwKyUx5CkJIVA==
+  dependencies:
+    lodash "^4.17.11"
+
 "@aztec/guacamole-ui@1.1.2", "@aztec/guacamole-ui@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@aztec/guacamole-ui/-/guacamole-ui-1.1.2.tgz#912aa63b1151913036145373604ad3ade7f38c60"

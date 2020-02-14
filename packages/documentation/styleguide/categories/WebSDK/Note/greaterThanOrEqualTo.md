@@ -8,8 +8,8 @@ const apiKey = '7FJF5YK-WV1M90Y-G25V2MW-FG2ZMDV';
 await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
-const address = '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4';
-const asset = await window.aztec.zkAsset(address);
+const zkAssetAddress = '';
+const asset = await window.aztec.zkAsset(zkAssetAddress);
 
 // Fetch your notes
 const allNotes = await asset.fetchNotesFromBalance();

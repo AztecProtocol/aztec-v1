@@ -3,15 +3,15 @@
 Place your Ethereum address in the `user` variable
 ```js
 // Get the injected address
-const userAddress = window.ethereum.selectedAddress;
+const userAddress = '';
 
 // Enable the SDK
 const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
-const address = '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4';
-const asset = await window.aztec.zkAsset(address);
+const zkAssetAddress = '';
+const asset = await window.aztec.zkAsset(zkAssetAddress);
 console.info( asset );
 
 const userPreDepositBalance = await asset.balance();
@@ -37,15 +37,15 @@ console.info({ userPostDepositBalance });
 
 ```js
 // Get the injected address
-const thirdParty = window.ethereum.selectedAddress;
+const thirdPartyAddress = '';
 
 // Enable the SDK
 const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
 await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
-const address = '0x70c23EEC80A6387464Af55bD7Ee6C8dA273C4fb4';
-const asset = await window.aztec.zkAsset(address);
+const zkAssetAddress = '';
+const asset = await window.aztec.zkAsset(zkAssetAddress);
 console.info( asset );
 
 
@@ -57,7 +57,7 @@ const depositAmount = 50;
 await asset.deposit(
   [
     {
-      to: thirdParty,
+      to: thirdPartyAddress,
       amount: depositAmount,
     },
   ],
