@@ -10,6 +10,12 @@ import Web3Service from '~/client/services/Web3Service';
 const urlPattern = urls.apiKeyQuota;
 
 export default async function getApiKeyQuota(apiKey) {
+    if (!apiKey) {
+        return {
+            hasFreeTransactions: false,
+        };
+    }
+
     const {
         networkId,
     } = Web3Service;
