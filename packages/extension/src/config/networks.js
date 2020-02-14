@@ -1,25 +1,25 @@
 export default {
     GANACHE: {
-        networkName: 'ganache',
+        networkName: 'Ganache',
     },
     MAIN: {
         id: 1,
-        networkName: 'mainnet',
+        networkName: 'Mainnet',
     },
     ROPSTEN: {
         id: 3,
-        networkName: 'ropsten',
+        networkName: 'Ropsten',
     },
     RINKEBY: {
         id: 4,
-        networkName: 'rinkeby',
+        networkName: 'Rinkeby',
     },
     GOERLI: {
         id: 5,
-        networkName: 'goerli',
+        networkName: 'Goerli',
     },
     KOVAN: {
         id: 42,
-        networkName: 'kovan',
+        networkName: 'Kovan',
     },
 };
