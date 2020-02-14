@@ -25,7 +25,7 @@ export const styles = ({
     paddingBottom: space[1],
     textAlign: 'left',
     fontFamily: fontFamily.base,
-    fontWeight: 'bold',
+    fontWeight: '300',
     fontSize: fontSize.small,
     whiteSpace: 'nowrap',
   },

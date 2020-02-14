@@ -17,7 +17,7 @@ export const styles = ({
   borderRadius,
 }) => ({
   para: {
-    color: '#53506B',
+    color: color.base,
     fontFamily: fontFamily.base,
     fontWeight: fontWeightMap.light,
     fontSize: fontSizeMap.s,
@@ -27,7 +27,7 @@ export const styles = ({
     padding: [[spacingMap.xs, 0]],
     '& > strong': {
       display: 'block',
-      color: '#1E1B2B',
+      color: color.base,
       marginTop: space[2] * 2,
       fontWeight: fontWeightMap.bold,
     },
