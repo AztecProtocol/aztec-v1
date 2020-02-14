@@ -29,21 +29,7 @@ $default-font-family: 'Gill Sans', sans-serif;
   src: url('/fonts/Gill Sans Nova Medium.woff') format('woff');
 }
 
-@font-face {
-  font-family: 'Gill Sans';
-  font-weight: 600;
-  font-style: normal;
-  src: url('/fonts/Gill Sans Nova Bold.woff');
-  src: url('/fonts/Gill Sans Nova Bold.woff') format('woff');
-}
 
-@font-face {
-  font-family: 'Gill Sans';
-  font-weight: 700;
-  font-style: normal;
-  src: url('/fonts/Gill Sans Nova Heavy.woff');
-  src: url('/fonts/Gill Sans Nova Heavy.woff') format('woff');
-}
 
 html, body {
   font-family: $default-font-family !important;

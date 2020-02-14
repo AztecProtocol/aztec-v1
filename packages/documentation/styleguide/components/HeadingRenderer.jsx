@@ -20,33 +20,32 @@ const styles = ({
   heading1: {
     fontSize: fontSize.h2,
     color: '#1E1B2B',
-    fontWeight: fontWeightMap.light,
     margin: '8px 0px',
   },
   heading2: {
     fontSize: fontSize.h3,
     color: '#1E1B2B',
-    fontWeight: fontWeightMap.light,
     margin: '8px 0px',
   },
   heading3: {
     fontSize: fontSize.h4,
-    fontWeight: fontWeightMap.light,
+    color: '#1E1B2B',
     margin: '8px 0px',
   },
   heading4: {
     fontSize: fontSize.h5,
-    fontWeight: fontWeightMap.light,
+    color: '#1E1B2B',
     margin: '8px 0px',
   },
   heading5: {
     fontSize: fontSize.h6,
-    fontWeight: fontWeightMap.light,
+    color: '#1E1B2B',
     margin: '8px 0px',
   },
   heading6: {
     fontSize: fontSize.h6,
-    fontWeight: fontWeightMap.light,
+    color: '#1E1B2B',
+    margin: '8px 0px',
   },
 });
 
@@ -57,6 +56,7 @@ function HeadingRenderer({
   ...props
 }) {
   const Tag = `h${level}`;
+  console.log(props, children);
   const headingClasses = classnames(
     classes.heading,
     classes[`heading${level}`],

@@ -1,7 +1,11 @@
 import React from 'react';
-import { Hook, Console, Decode, Unhook } from 'console-feed';
+import {
+  Hook, Console, Decode, Unhook,
+} from 'console-feed';
 import Web3 from 'web3';
-import { Block, FlexBox, Button, Text, Icon, ButtonGroup } from '@aztec/guacamole-ui';
+import {
+  Block, FlexBox, Button, Text, Icon, ButtonGroup,
+} from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import PropTypes from 'prop-types';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
@@ -132,7 +136,7 @@ class Preview extends React.Component {
   componentWillUnmount() {
     // Clear pending changes
     this.handleChange.cancel();
-    this.txSubscription.unsubscribe();
+    this.txSubscription && this.txSubscription.unsubscribe();
     Unhook(window.console);
   }
 
@@ -244,7 +248,9 @@ class Preview extends React.Component {
   };
 
   render() {
-    const { isRunning, logs, network, accounts = [] } = this.state;
+    const {
+      isRunning, logs, network, accounts = [],
+    } = this.state;
     const isEnabled = network === '4';
     console.log('ethBalance: ', this.state.ethBalance);
     console.log('erc20 balance: ', this.state.linkedTokenBalance);

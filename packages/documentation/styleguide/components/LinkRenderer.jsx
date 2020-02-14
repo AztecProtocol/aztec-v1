@@ -5,9 +5,12 @@ import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 
 const styles = ({
   color,
+  fontSize,
 }) => ({
   link: {
     fontWeight: 300,
+    fontSize: fontSize.small,
+    color: '#1E1B2B',
     '&, &:link, &:visited': {
       fontSize: 'inherit',
       color: 'inherit',
