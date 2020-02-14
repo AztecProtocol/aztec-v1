@@ -13,7 +13,7 @@ export default {
     ACE: {
         name: 'ACE',
         events: {
-            сreateNoteRegistry: 'CreateNoteRegistry',
+            createNoteRegistry: 'CreateNoteRegistry',
         },
     },
     ZkAsset: {
