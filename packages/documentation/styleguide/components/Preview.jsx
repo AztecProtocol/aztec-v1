@@ -132,6 +132,7 @@ class Preview extends React.Component {
         if (!this.txSubscription) {
           window.ethereum.on('accountsChanged', () => {
             this.getWeb3Data();
+            this.updateCode();
           });
           window.ethereum.on('chainChanged', () => {
             this.getWeb3Data();
@@ -148,17 +149,20 @@ class Preview extends React.Component {
       } catch (err) {
         console.log(err);
       }
-
-      const { code, accounts, zkAssetAddress } = this.state;
-      const userAddress = accounts[0];
-      const updatedCode = code
-        .replace(/zkAssetAddress = ''/g, `zkAssetAddress = '${toChecksumAddress(zkAssetAddress)}'`)
-        .replace(/userAddress = ''/g, `userAddress = '${toChecksumAddress(userAddress)}'`)
-        .replace(/thirdPartyAddress = ''/g, `thirdPartyAddress = '${toChecksumAddress(userAddress)}'`);
-
-      this.setState({ code: updatedCode, isWeb3Loaded: true });
+      this.updateCode();
     }
   };
+
+  updateCode = () => {
+    const { code, accounts, zkAssetAddress } = this.state;
+    const userAddress = accounts[0];
+    const updatedCode = code
+      .replace(/zkAssetAddress = ''/g, `zkAssetAddress = '${toChecksumAddress(zkAssetAddress)}'`)
+      .replace(/userAddress = ''/g, `userAddress = '${toChecksumAddress(userAddress)}'`)
+      .replace(/thirdPartyAddress = ''/g, `thirdPartyAddress = '${toChecksumAddress(userAddress)}'`);
+
+    this.setState({ code: updatedCode, isWeb3Loaded: true });
+  }
 
   componentWillUnmount() {
     // Clear pending changes
@@ -168,7 +172,7 @@ class Preview extends React.Component {
   getWeb3Data = async () => {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum);
-      if (window.aztec.enabled) {
+      if (!!window.aztec && window.aztec.enabled) {
         const { zkAssetAddress } = this.state;
         const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
@@ -316,7 +320,6 @@ class Preview extends React.Component {
                 [styles.textArea]: true,
                 [styles.codeRunning]: isRunning,
                 [styles.rinkeby]: !isEnabled,
-                [styles.web3Data]: !isWeb3Loaded,
                 [styles.enableAztec]: !window.aztec || (window.aztec && !window.aztec.enabled),
               })}
               stretch
