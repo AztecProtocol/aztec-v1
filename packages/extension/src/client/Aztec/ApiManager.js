@@ -1,4 +1,5 @@
 import isEqual from 'lodash/isEqual';
+import asyncForEach from '~/utils/asyncForEach';
 import {
     getNetworkName,
 } from '~/utils/network';
@@ -9,11 +10,17 @@ import ConnectionService from '~/client/services/ConnectionService';
 
 export default class ApiManager {
     constructor() {
-        ConnectionService.init();
-
+        this.setApis = () => {};
         this.eventListeners = new EventListeners(['profileChanged']);
-        this.enableProfileChangeListener = null;
-        this.enabledOptions = null;
+        this.oneTimeProfileChangeListener = null;
+        this.autoRefreshOnProfileChange = true;
+        this.currentOptions = null;
+        this.aztecAccount = null;
+        this.error = null;
+        this.sessionPromise = null;
+        this.enableListenersMapping = {};
+
+        ConnectionService.init();
 
         Web3Service.bindProfileChange((changedType, newTypeValue) => {
             let objValue = newTypeValue || null;
@@ -43,40 +50,130 @@ export default class ApiManager {
         });
     }
 
-    generateDefaultApis() { // eslint-disable-line class-methods-use-this
-        return ApiPermissionService.generateApis();
+    generateDefaultApis() {
+        const apis = ApiPermissionService.generateApis();
+        this.setApis(apis);
     }
 
-    bindProfileChangeListenerOnce(cb) {
-        Web3Service.unbindProfileChange(this.enableProfileChangeListener);
+    bindOneTimeProfileChangeListener(cb) {
+        Web3Service.unbindProfileChange(this.oneTimeProfileChangeListener);
         const listener = (changedType, newTypeValue) => {
-            this.unbindProfileChangeListener();
+            this.unbindOneTimeProfileChangeListener();
             cb(changedType, newTypeValue);
         };
-        this.enableProfileChangeListener = listener;
-        Web3Service.bindProfileChange(this.enableProfileChangeListener);
+        this.oneTimeProfileChangeListener = listener;
+        Web3Service.bindProfileChange(this.oneTimeProfileChangeListener);
     }
 
-    unbindProfileChangeListener() {
-        if (this.enableProfileChangeListener) {
-            Web3Service.unbindProfileChange(this.enableProfileChangeListener);
-            this.enableProfileChangeListener = null;
+    unbindOneTimeProfileChangeListener() {
+        if (this.oneTimeProfileChangeListener) {
+            Web3Service.unbindProfileChange(this.oneTimeProfileChangeListener);
+            this.oneTimeProfileChangeListener = null;
         }
     }
+
+    addEnableListener(options, listener) {
+        const optionsKey = JSON.stringify(options);
+        if (!this.enableListenersMapping[optionsKey]) {
+            this.enableListenersMapping[optionsKey] = [];
+        }
+
+        this.enableListenersMapping[optionsKey].push(listener);
+    }
+
+    flushEnableListeners(options) {
+        const optionsKey = JSON.stringify(options);
+        const callbacks = this.enableListenersMapping[optionsKey] || [];
+
+        delete this.enableListenersMapping[optionsKey];
+
+        callbacks.forEach((cb) => {
+            cb(this.aztecAccount, this.error);
+        });
+    }
+
+    handleResolveSession = (
+        options,
+        {
+            aztecAccount = null,
+            error = null,
+        },
+    ) => {
+        this.aztecAccount = aztecAccount;
+        this.error = error;
+        this.eventListeners.notify(
+            'profileChanged',
+            'aztecAccountChanged',
+            aztecAccount,
+            error,
+        );
+        this.flushEnableListeners(options);
+    };
 
     enable = async (
         options = {},
         callback = null,
-        setApis,
-    ) => new Promise(async (resolve, reject) => {
-        if (isEqual(options, this.enabledOptions)) {
+    ) => {
+        if (!isEqual(options, this.currentOptions)) {
+            this.flushEnableListeners(this.currentOptions);
+            this.currentOptions = options;
+        } else if (!this.error) {
             if (callback) {
-                callback(true, null);
+                if (this.sessionPromise) {
+                    this.addEnableListener(options, callback);
+                } else {
+                    callback(this.aztecAccount, this.error);
+                }
             }
-
-            resolve(true);
-            return;
+            return this.sessionPromise || this.aztecAccount;
         }
+
+        if (callback) {
+            this.addEnableListener(options, callback);
+        }
+
+        this.sessionPromise = new Promise((resolve, reject) => {
+            this.addEnableListener(options, (aztecAccount, error) => {
+                this.sessionPromise = null;
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(aztecAccount);
+                }
+            });
+        });
+
+        this.refreshSession(options);
+
+        return this.sessionPromise;
+    };
+
+    async disable(options = this.currentOptions) {
+        this.flushEnableListeners(options);
+        this.currentOptions = null;
+        this.aztecAccount = null;
+        this.error = null;
+        this.unbindOneTimeProfileChangeListener();
+        this.generateDefaultApis();
+        await ConnectionService.disconnect();
+    }
+
+    async refreshSession(options) {
+        this.aztecAccount = null;
+        this.error = null;
+        this.generateDefaultApis();
+        await ConnectionService.disconnect();
+
+        let networkSwitchedDuringStart = false;
+
+        this.bindOneTimeProfileChangeListener(() => {
+            networkSwitchedDuringStart = true;
+            if (this.autoRefreshOnProfileChange) {
+                this.refreshSession(options);
+            } else {
+                this.flushEnableListeners(options);
+            }
+        });
 
         const {
             apiKey = '',
@@ -86,130 +183,66 @@ export default class ApiManager {
                 AccountRegistry: '',
                 AccountRegistryManager: '',
             },
-            autoRefreshOnProfileChange = true,
         } = options;
-        let networkSwitchedDuringStart = false;
 
-        const doResolved = async ({
-            shouldReject = false,
-            error = null,
-            aztecAccount = null,
-        }) => {
-            if (!networkSwitchedDuringStart) {
-                this.eventListeners.notify(
-                    'profileChanged',
-                    'aztecAccountChanged',
-                    aztecAccount,
-                    error,
-                );
-            }
-
-            if (!shouldReject) {
-                resolve(!error);
-            } else if (!callback) {
-                reject(error);
-            }
-        };
-
-        if (autoRefreshOnProfileChange) {
-            this.bindProfileChangeListenerOnce(() => {
-                networkSwitchedDuringStart = true;
-
-                this.refreshSession(options, (success, error) => {
-                    if (callback) {
-                        callback(!error, error);
-                    }
-                    doResolved({
-                        shouldReject: !!error && !callback,
-                        error,
-                    });
-                }, setApis);
-            });
-        }
-
-        const networkConfig = await ConnectionService.openConnection({
-            apiKey,
-            providerUrl,
-            contractAddresses,
-        });
-
-        if (networkSwitchedDuringStart) {
-            // this statement is true if:
-            //   - user allows metamask to access current page
-            //   - user switches address
-            // while opening connection
-            return;
-        }
-
-        let aztecAccount;
-        try {
-            const {
-                networkId,
-                contractsConfig,
-                error,
-            } = networkConfig || {};
-
-            if (error) {
-                throw error;
-            }
-
-            ApiPermissionService.validateContractConfigs(contractsConfig, networkId);
-
-            await Web3Service.init(networkConfig);
-
+        const tasks = [
+            async () => ConnectionService.openConnection({
+                apiKey,
+                providerUrl,
+                contractAddresses,
+            }),
             ({
-                account: aztecAccount,
-            } = await ApiPermissionService.ensurePermission());
-        } catch (error) {
-            if (!networkSwitchedDuringStart) {
-                if (callback) {
-                    callback(false, error);
+                error,
+                ...networkConfig
+            }) => {
+                if (error) {
+                    throw error;
                 }
-                doResolved({
-                    shouldReject: !callback,
+                ApiPermissionService.validateContractConfigs(networkConfig);
+                return networkConfig;
+            },
+            async networkConfig => Web3Service.init(networkConfig),
+            async () => {
+                const {
+                    account: aztecAccount,
+                } = await ApiPermissionService.ensurePermission() || {};
+                return aztecAccount;
+            },
+            (aztecAccount) => {
+                const apis = ApiPermissionService.generateApis(true);
+                this.setApis(apis);
+
+                if (this.autoRefreshOnProfileChange) {
+                    this.bindOneTimeProfileChangeListener(() => {
+                        this.refreshSession(options);
+                    });
+                }
+
+                this.handleResolveSession(options, {
+                    aztecAccount,
+                });
+            },
+        ];
+
+        try {
+            let prevResult;
+            await asyncForEach(tasks, async (task) => {
+                if (networkSwitchedDuringStart
+                    || !isEqual(options, this.currentOptions)
+                ) {
+                    return;
+                }
+
+                prevResult = await task(prevResult);
+            });
+        } catch (error) {
+            if (!networkSwitchedDuringStart
+                && isEqual(options, this.currentOptions)
+            ) {
+                this.handleResolveSession(options, {
                     error,
                 });
             }
-            return;
         }
-
-        if (networkSwitchedDuringStart) {
-            // resolve has been pass to another enable() and should be triggered there
-            return;
-        }
-
-        const apis = ApiPermissionService.generateApis(true);
-        setApis(apis);
-
-        if (autoRefreshOnProfileChange) {
-            this.bindProfileChangeListenerOnce(() => {
-                this.refreshSession(options, null, setApis);
-            });
-        }
-
-        if (callback) {
-            callback(true, null);
-        }
-
-        this.enabledOptions = options;
-
-        doResolved({
-            aztecAccount,
-        });
-    });
-
-    async disable(setApis) {
-        this.unbindProfileChangeListener();
-
-        const apis = this.generateDefaultApis();
-        setApis(apis);
-
-        await ConnectionService.disconnect();
-    }
-
-    async refreshSession(options, cb, setApis) {
-        this.enabledOptions = null;
-        await this.disable(setApis);
-        return this.enable(options, cb, setApis);
     }
 }

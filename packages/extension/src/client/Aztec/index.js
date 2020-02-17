@@ -10,10 +10,13 @@ class Aztec {
     constructor() {
         manager = new ApiManager();
 
-        const apis = manager.generateDefaultApis();
-        Object.keys(apis).forEach((apiName) => {
-            this[apiName] = apis[apiName];
-        });
+        manager.setApis = (apis) => {
+            Object.keys(apis).forEach((apiName) => {
+                this[apiName] = apis[apiName];
+            });
+        };
+
+        manager.generateDefaultApis();
 
         Object.keys(aztec).forEach((name) => {
             if (this[name]) {
@@ -25,7 +28,15 @@ class Aztec {
     }
 
     get enabled() { // eslint-disable-line class-methods-use-this
-        return !!manager.enabledOptions;
+        return !!manager.aztecAccount;
+    }
+
+    get autoRefreshOnProfileChange() { // eslint-disable-line class-methods-use-this
+        return manager.autoRefreshOnProfileChange;
+    }
+
+    set autoRefreshOnProfileChange(autoRefresh) { // eslint-disable-line class-methods-use-this
+        manager.autoRefreshOnProfileChange = autoRefresh;
     }
 
     addListener(eventName, callback) { // eslint-disable-line class-methods-use-this
@@ -39,17 +50,9 @@ class Aztec {
     enable = async (
         options = {},
         callback = null,
-    ) => manager.enable(options, callback, (apis) => {
-        Object.keys(apis).forEach((apiName) => {
-            this[apiName] = apis[apiName];
-        });
-    });
+    ) => manager.enable(options, callback);
 
-    disable = async () => manager.disable((apis) => {
-        Object.keys(apis).forEach((apiName) => {
-            this[apiName] = apis[apiName];
-        });
-    });
+    disable = async () => manager.disable();
 }
 
 export default Aztec;
