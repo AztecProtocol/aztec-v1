@@ -56,7 +56,6 @@ function HeadingRenderer({
   ...props
 }) {
   const Tag = `h${level}`;
-  console.log(props, children);
   const headingClasses = classnames(
     classes.heading,
     classes[`heading${level}`],

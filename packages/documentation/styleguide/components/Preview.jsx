@@ -17,7 +17,6 @@ import { AZTEC_API_KEY } from '../constants/keys';
 import compileCode from '../utils/compileCode';
 import getTestERC20 from '../utils/getTestERC20';
 import getTestEth from '../utils/getTestEth';
-import getContractAddress from '../utils/getContractAddress';
 import PERMITTED_LOGS from '../constants/logs';
 import networkNames from '../constants/networks';
 
@@ -56,7 +55,6 @@ class Preview extends React.Component {
     logs: [],
     code: '',
     initialCode: '',
-    zkAssetAddress: getContractAddress('ZkAsset'),
     userAddress: '',
     isWeb3Loaded: false,
   };
@@ -157,7 +155,7 @@ class Preview extends React.Component {
     const { code, accounts, zkAssetAddress } = this.state;
     const userAddress = accounts[0];
     const updatedCode = code
-      .replace(/zkAssetAddress = ''/g, `zkAssetAddress = '${toChecksumAddress(zkAssetAddress)}'`)
+      .replace(/zkAssetAddress = ''/g, `zkAssetAddress = '${zkAssetAddress}'`)
       .replace(/userAddress = ''/g, `userAddress = '${toChecksumAddress(userAddress)}'`)
       .replace(/thirdPartyAddress = ''/g, `thirdPartyAddress = '${toChecksumAddress(userAddress)}'`);
 
@@ -174,7 +172,8 @@ class Preview extends React.Component {
       const web3 = new Web3(window.ethereum);
       if (!!window.aztec && window.aztec.enabled) {
         const { zkAssetAddress } = this.state;
-        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(zkAssetAddress);
+
+        const { balanceOfLinkedToken, linkedTokenAddress, ...rest } = await window.aztec.zkAsset(zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
           linkedTokenAddress,
