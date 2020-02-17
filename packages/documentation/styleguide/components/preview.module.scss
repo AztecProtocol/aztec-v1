@@ -51,6 +51,26 @@
     height: 100%;
   }
 }
+.enableAztec{
+  pointer-events: none;
+  &:after {
+    content: 'AZTEC needs to be setup to use the interactive docs.';
+    color: map-get($color-map, 'white');
+    transition: all ease 0.3s;
+    background: rgba(137,139,246,0.72);
+    font-weight: 400;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    pointer-events: all;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+  }
+}
 
 .rinkeby {
   pointer-events: none;
@@ -100,6 +120,14 @@
   font-weight: 400;
   padding-top: 0px;
   padding-bottom: 0px;
+}
+.setupAZTEC {
+  border-radius: 0px 0px 3px 3px;
+  background: map-get($color-map, 'primary');
+  font-weight: 400;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  width: 100%;
 }
 .logs {
   padding: 10px;

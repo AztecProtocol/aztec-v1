@@ -103,20 +103,31 @@ class Preview extends React.Component {
     this.setUpWeb3();
   }
 
+  setupAZTEC = async () => {
+    await this.setUpWeb3();
+    this.setState({
+      isAZTECLoading: true,
+    });
+    if (!window.aztec.enabled && window.ethereum.networkVersion === '4') {
+      try {
+        await window.aztec.enable({
+          apiKey: AZTEC_API_KEY,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    await this.getWeb3Data();
+    this.setState({
+      isAZTECLoading: false,
+    });
+  }
+
   setUpWeb3 = async () => {
     if (window.ethereum) {
       try {
         await window.ethereum.enable();
         await this.getWeb3Data();
-        if (!window.aztec.enabled) {
-          try {
-            await window.aztec.enable({
-              apiKey: AZTEC_API_KEY,
-            });
-          } catch (e) {
-            console.log(e);
-          }
-        }
 
         if (!this.txSubscription) {
           window.ethereum.on('accountsChanged', () => {
@@ -151,8 +162,6 @@ class Preview extends React.Component {
 
   componentWillUnmount() {
     // Clear pending changes
-    this.handleChange.cancel();
-    this.txSubscription && this.txSubscription.unsubscribe();
     Unhook(window.console);
   }
 
@@ -166,6 +175,7 @@ class Preview extends React.Component {
         this.setState({
           linkedTokenAddress,
           linkedTokenBalance,
+          isWeb3Loaded: true,
         });
       }
       const ethBalance = await web3.eth.getBalance(window.ethereum.selectedAddress);
@@ -174,6 +184,7 @@ class Preview extends React.Component {
         ethBalance: parseFloat(web3.utils.fromWei(ethBalance)).toFixed(2),
         network: window.ethereum.networkVersion,
         accounts: [window.ethereum.selectedAddress],
+        isWeb3Loaded: true,
       });
     }
   };
@@ -270,10 +281,14 @@ class Preview extends React.Component {
   };
 
   render() {
-    const { isRunning, isWeb3Loaded, logs, network, accounts = [] } = this.state;
+    const {
+      isRunning, isWeb3Loaded, logs, network, accounts = [], isAZTECLoading,
+    } = this.state;
     const isEnabled = network === '4';
 
-    const { code, ethBalance, linkedTokenBalance, loadingTestEth, loadingTestTokens } = this.state;
+    const {
+      code, ethBalance, linkedTokenBalance, loadingTestEth, loadingTestTokens,
+    } = this.state;
 
     return (
       <>
@@ -302,6 +317,7 @@ class Preview extends React.Component {
                 [styles.codeRunning]: isRunning,
                 [styles.rinkeby]: !isEnabled,
                 [styles.web3Data]: !isWeb3Loaded,
+                [styles.enableAztec]: !window.aztec || (window.aztec && !window.aztec.enabled),
               })}
               stretch
               expand
@@ -344,47 +360,62 @@ class Preview extends React.Component {
             background="grey-darker"
             style={{
               borderRadius: '0 0 3px 3px',
+              position: 'relative',
             }}
-            hasBorderTop
-            borderColor="white-lighter"
           >
-            <FlexBox align="space-between" stretch expand>
-              <FlexBox align="flex-start">
-                <ButtonGroup className={styles.group}>
-                  <Button text={`${ethBalance} ETH`} size="m" disabled className={styles.testEth} />
+
+            {!!window.aztec && window.aztec.enabled
+              ? (
+                <FlexBox align="space-between" stretch expand>
+                  <FlexBox align="flex-start">
+                    <ButtonGroup className={styles.group}>
+                      <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
+                      <Button
+                        text="Get ETH"
+                        size="m"
+                        onClick={(isEnabled || this.state.ethBalance < 0.1) && this.getTestEth}
+                        rounded={false}
+                        disabled={!isEnabled || this.state.ethBalance > 0.1}
+                        isLoading={this.state.loadingTestEth}
+                        className={styles.testEth}
+                        icon={<Icon name="local_gas_station" size="m" />}
+                      />
+                      <Button text={`${this.state.linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
+                      <Button
+                        text="Get"
+                        size="m"
+                        disabled={!isEnabled}
+                        onClick={this.getTestERC20}
+                        rounded={false}
+                        isLoading={this.state.loadingTestTokens}
+                        className={styles.testEth}
+                      />
+                    </ButtonGroup>
+                  </FlexBox>
                   <Button
-                    text="Get ETH"
+                    text="Run Code"
                     size="m"
-                    onClick={(isEnabled || ethBalance < 0.1) && this.getTestEth}
+                    onClick={this.runCode}
+                    isLoading={isRunning}
                     rounded={false}
-                    disabled={!isEnabled || ethBalance > 0.1}
-                    isLoading={loadingTestEth}
-                    className={styles.testEth}
-                    icon={<Icon name="local_gas_station" size="m" />}
-                  />
-                  <Button text={`${linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
-                  <Button
-                    text="Get"
-                    size="m"
+                    className={styles.runCode}
                     disabled={!isEnabled}
-                    onClick={this.getTestERC20}
-                    rounded={false}
-                    isLoading={loadingTestTokens}
-                    className={styles.testEth}
+                    icon={<Icon name="eject" size="m" rotate={90} />}
                   />
-                </ButtonGroup>
-              </FlexBox>
-              <Button
-                text="Run Code"
-                size="m"
-                onClick={this.runCode}
-                isLoading={isRunning}
-                rounded={false}
-                className={styles.runCode}
-                disabled={!isEnabled}
-                icon={<Icon name="eject" size="m" rotate={90} />}
-              />
-            </FlexBox>
+                </FlexBox>
+              ) : (
+                <Button
+                  text="Setup AZTEC"
+                  size="m"
+                  onClick={this.setupAZTEC}
+                  isLoading={isAZTECLoading}
+                  rounded={false}
+                  className={styles.setupAZTEC}
+                  disabled={!isEnabled}
+                />
+
+              )
+            }
           </Block>
         </Block>
       </>
