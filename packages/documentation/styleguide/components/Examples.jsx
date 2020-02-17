@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
 import { useStyleGuideContext } from 'react-styleguidist/lib/client/rsg-components/Context';
-import { Block, Text, Row } from '@aztec/guacamole-ui';
+import { Block } from '@aztec/guacamole-ui';
 
 import ExamplesRenderer from './ExamplesRenderer';
 import Playground from './Playground';

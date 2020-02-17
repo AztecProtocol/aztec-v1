@@ -4,7 +4,6 @@ import cx from 'clsx';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 
 const styles = ({
-  color,
   fontSize,
 }) => ({
   link: {
@@ -28,8 +27,9 @@ const styles = ({
 export function LinkRenderer({
   classes, children, ...props
 }) {
+  const { className } = props;
   return (
-    <a {...props} className={cx(classes.link, props.className)}>
+    <a {...props} className={cx(classes.link, className)}>
       {children}
     </a>
   );

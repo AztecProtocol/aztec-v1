@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 
 export const styles = ({ space }) => ({
@@ -30,11 +29,9 @@ export function PlaygroundRenderer({
   classes,
   name,
   preview,
-  previewProps,
   tabButtons,
   tabBody,
 }) {
-  const { className, ...props } = previewProps;
   return (
     <div className={classes.root}>
       <div data-preview={name}>{preview}</div>
@@ -50,10 +47,8 @@ PlaygroundRenderer.propTypes = {
   classes: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   preview: PropTypes.node.isRequired,
-  previewProps: PropTypes.object.isRequired,
   tabButtons: PropTypes.node.isRequired,
   tabBody: PropTypes.node.isRequired,
-  toolbar: PropTypes.node.isRequired,
 };
 
 export default Styled(styles)(PlaygroundRenderer);

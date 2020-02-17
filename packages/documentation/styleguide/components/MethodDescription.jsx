@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Block, Text } from '@aztec/guacamole-ui';
 
@@ -11,5 +11,5 @@ export default function MethodDescription({ description }) {
 }
 
 MethodDescription.propTypes = {
-  // description: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
 };

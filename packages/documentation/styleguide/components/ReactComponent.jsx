@@ -23,7 +23,6 @@ export default class ReactComponent extends Component {
     exampleMode: PropTypes.string.isRequired,
     usageMode: PropTypes.string.isRequired,
   };
-  static contextType = Context;
 
   state = {
     activeTab: this.props.usageMode === UsageModes.expand ? DOCS_TAB_USAGE : undefined,
@@ -34,6 +33,9 @@ export default class ReactComponent extends Component {
       activeTab: state.activeTab !== name ? name : undefined,
     }));
   };
+
+  static contextType = Context;
+
 
   render() {
     const { activeTab } = this.state;

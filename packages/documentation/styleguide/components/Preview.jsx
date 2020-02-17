@@ -44,7 +44,6 @@ class Preview extends React.Component {
   }, 100);
 
   static propTypes = {
-    code: PropTypes.string.isRequired,
     compilerConfig: PropTypes.object.isRequired,
   };
 
@@ -131,7 +130,7 @@ class Preview extends React.Component {
           });
           const web3 = new Web3(window.ethereum);
 
-          this.txSubscription = web3.eth.subscribe('newBlockHeaders').on('data', (transaction) => {
+          this.txSubscription = web3.eth.subscribe('newBlockHeaders').on('data', () => {
             this.getWeb3Data();
           });
         }
@@ -161,7 +160,8 @@ class Preview extends React.Component {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum);
       if (window.aztec.enabled) {
-        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(this.state.zkAssetAddress);
+        const { zkAssetAddress } = this.state;
+        const { balanceOfLinkedToken, linkedTokenAddress } = await window.aztec.zkAsset(zkAssetAddress);
         const linkedTokenBalance = await balanceOfLinkedToken();
         this.setState({
           linkedTokenAddress,
@@ -179,12 +179,13 @@ class Preview extends React.Component {
   };
 
   setupLogingInIframe = async () => {
+    const { logs: stateLogs } = this.state;
     Unhook(this.iframeRef.contentWindow.console);
     Hook(this.iframeRef.contentWindow.console, (log) => {
       const decodedLog = Decode(log);
       if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
         this.setState({
-          logs: [...this.state.logs, decodedLog],
+          logs: [...stateLogs, decodedLog],
         });
         this.scrollLogs();
       }
@@ -198,6 +199,8 @@ class Preview extends React.Component {
   };
 
   compileCodeInIframe = async () => {
+    const { logs: stateLogs } = this.state;
+
     Unhook(this.iframeRef.contentWindow.console);
     this.iframeRef.srcdoc = this.generateIframeContent();
     const iframeLoaded = new Promise((resolve) => {
@@ -208,7 +211,7 @@ class Preview extends React.Component {
       const decodedLog = Decode(log);
       if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
         this.setState({
-          logs: [...this.state.logs, decodedLog],
+          logs: [...stateLogs, decodedLog],
         });
         this.scrollLogs();
       }
@@ -227,8 +230,10 @@ class Preview extends React.Component {
     this.setState({
       loadingTestTokens: true,
     });
+
+    const { zkAssetAddress } = this.state;
     this.setupLogingInIframe();
-    await getTestERC20(this.state.zkAssetAddress, this.iframeRef.contentWindow.console);
+    await getTestERC20(zkAssetAddress, this.iframeRef.contentWindow.console);
     await this.getWeb3Data();
     this.setState({
       loadingTestTokens: false,
@@ -268,6 +273,8 @@ class Preview extends React.Component {
     const { isRunning, isWeb3Loaded, logs, network, accounts = [] } = this.state;
     const isEnabled = network === '4';
 
+    const { code, ethBalance, linkedTokenBalance, loadingTestEth, loadingTestTokens } = this.state;
+
     return (
       <>
         <iframe
@@ -299,7 +306,7 @@ class Preview extends React.Component {
               stretch
               expand
             >
-              <Editor code={this.state.code} onChange={this.handleChange} />
+              <Editor code={code} onChange={this.handleChange} />
             </FlexBox>
           </Block>
           {!!logs.length && (
@@ -344,25 +351,25 @@ class Preview extends React.Component {
             <FlexBox align="space-between" stretch expand>
               <FlexBox align="flex-start">
                 <ButtonGroup className={styles.group}>
-                  <Button text={`${this.state.ethBalance} ETH`} size="m" disabled className={styles.testEth} />
+                  <Button text={`${ethBalance} ETH`} size="m" disabled className={styles.testEth} />
                   <Button
                     text="Get ETH"
                     size="m"
-                    onClick={(isEnabled || this.state.ethBalance < 0.1) && this.getTestEth}
+                    onClick={(isEnabled || ethBalance < 0.1) && this.getTestEth}
                     rounded={false}
-                    disabled={!isEnabled || this.state.ethBalance > 0.1}
-                    isLoading={this.state.loadingTestEth}
+                    disabled={!isEnabled || ethBalance > 0.1}
+                    isLoading={loadingTestEth}
                     className={styles.testEth}
                     icon={<Icon name="local_gas_station" size="m" />}
                   />
-                  <Button text={`${this.state.linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
+                  <Button text={`${linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
                   <Button
                     text="Get"
                     size="m"
                     disabled={!isEnabled}
                     onClick={this.getTestERC20}
                     rounded={false}
-                    isLoading={this.state.loadingTestTokens}
+                    isLoading={loadingTestTokens}
                     className={styles.testEth}
                   />
                 </ButtonGroup>
@@ -384,11 +391,5 @@ class Preview extends React.Component {
     );
   }
 }
-Preview.propTypes = {
-  code: PropTypes.string,
-  methodName: PropTypes.string,
-};
-Preview.defaultProps = {
-  code: '',
-};
+
 export default Preview;
