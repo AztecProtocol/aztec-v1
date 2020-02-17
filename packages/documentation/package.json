@@ -36,6 +36,7 @@
     "clsx": "^1.1.0",
     "comment-parser": "^0.7.2",
     "console-feed": "^2.8.11",
+    "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^2.1.1",
     "cz-conventional-changelog": "^3.0.2",
     "del": "^4.0.0",

@@ -1,6 +1,7 @@
 import webpack from 'webpack';
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 
 const webpackConfig = (env = 'development', {
   locale = 'en',
@@ -73,6 +74,9 @@ const webpackConfig = (env = 'development', {
         /moment[/\\]locale$/,
         new RegExp(locale.toLowerCase())
       ),
+      new CopyPlugin([
+        { from: 'fonts', to: 'fonts' },
+      ]),
     ],
     module: {
       rules: [

@@ -2,17 +2,13 @@ require('babel-polyfill');
 require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
-const {
-  fontSizeMap,
-  defaultBorderColor,
-  colorMap,
-} = require('./src/styles/guacamole-vars');
+const { fontSizeMap, defaultBorderColor, colorMap } = require('./src/styles/guacamole-vars');
 
 module.exports = {
   title: 'AZTEC Docs',
   styleguideDir: 'public',
   require: [
-    // path.resolve(__dirname, './src/styles/reset.scss'),
+    // path.resolve(__dirname, './src/styles/reset.scss')
   ],
   template: {
     head: {
@@ -89,9 +85,7 @@ module.exports = {
             borderRadius: 0,
           },
         },
-        ComponentsListRenderer: {
-
-        },
+        ComponentsListRenderer: {},
         Markdown: {
           thead: {
             fontWeight: '400 !important',
