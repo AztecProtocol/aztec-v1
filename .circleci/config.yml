@@ -1,4 +1,7 @@
-version: 2.0
+version: 2.1
+
+orbs:
+    aws-cli: circleci/aws-cli@0.1.20
 
 jobs:
     build:
@@ -42,11 +45,13 @@ jobs:
                     - ~/repo/packages/dev-utils/node_modules
                     - ~/repo/packages/extension/node_modules
                     - ~/repo/packages/secp256k1/node_modules
+                    - ~/repo/packages/documentation/node_modules
                     - ~/repo/packages/aztec.js/dist
                     - ~/repo/packages/bn128/dist
                     - ~/repo/packages/contract-addresses/lib
                     - ~/repo/packages/contract-artifacts/lib
                     - ~/repo/packages/dev-utils/lib
+                    - ~/repo/packages/documentation/public
     lint:
         working_directory: ~/repo
         docker:
@@ -97,7 +102,7 @@ jobs:
             - run:
                 name: "Orchestrate Artifacts"
                 command: yarn script:orchestrate:artifacts
-    docs:
+    docs-aztecjs:
         working_directory: ~/repo
         docker:
             - image: circleci/node:10.15.3
@@ -118,7 +123,25 @@ jobs:
             - run:
                 name: "Publish Docs"
                 command: yarn publish:docs
-
+    deploy-docs-sdk:
+        working_directory: ~/repo
+        executor: aws-cli/default
+        steps:
+            - aws-cli/setup:
+                profile-name: circleci
+            - restore_cache:
+                keys:
+                    - repo-{{ .Environment.CIRCLE_SHA1 }}
+            - run: echo "current dir is" ${pwd} 
+            - run: 
+                name: Delete old docs
+                command: aws s3 rm s3://aztec-test-doc-deploy --recursive
+            - run:
+                name: Upload new docs
+                command: aws s3 cp ./packages/documentation/public s3://aztec-test-doc-deploy --recursive --metadata-directive REPLACE --cache-control "max-age=3600" --acl public-read
+            # - run:
+            #     - name: Clear cache
+            #     - command: aws cloudfront create-invalidation --distribution-id ${AWS_CLOUDFRONT_DISTRIBUTION} --paths "/*"
     release:
         working_directory: ~/repo
         docker:
@@ -170,7 +193,7 @@ workflows:
                     branches:
                         only:
                             - develop
-            - docs:
+            - docs-aztecjs:
                 requires:
                     - lint
                     - test
@@ -178,6 +201,15 @@ workflows:
                     branches:
                         only:
                             - develop
+            - deploy-docs-sdk:
+                requires:
+                    - build
+                context: aws
+                #     - test
+                # filters:
+                #     branches:
+                #         only:
+                #             - develop
             - release:
                 requires:
                     - lint

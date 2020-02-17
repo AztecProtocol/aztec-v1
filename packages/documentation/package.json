@@ -7,7 +7,7 @@
   },
   "description": "AZTEC Protocol documentation based on React Styleguidist",
   "scripts": {
-    "build": "styleguidist build",
+    "build": "truffle compile --all && styleguidist build",
     "bundle": "babel-node scripts/run bundle",
     "clean": "babel-node scripts/run clean",
     "copy": "babel-node scripts/run copy",
