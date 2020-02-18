@@ -385,7 +385,7 @@ class Preview extends React.Component {
                       />
                       <Button text={`${this.state.linkedTokenBalance} ERC20`} size="m" disabled className={styles.testEth} />
                       <Button
-                        text="Get"
+                        text="Get ERC20 tokens"
                         size="m"
                         disabled={!isEnabled}
                         onClick={this.getTestERC20}
