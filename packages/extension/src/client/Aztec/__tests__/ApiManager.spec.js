@@ -44,6 +44,34 @@ describe('ApiManager listeners', () => {
             name: 'Rinkeby',
         });
     });
+
+    it('generate default apis again if not enabled', () => {
+        const generateDefaultApisSpy = jest.spyOn(manager, 'generateDefaultApis')
+            .mockImplementation(jest.fn());
+
+        expect(generateDefaultApisSpy).toHaveBeenCalledTimes(0);
+
+        Web3Service.eventListeners.notify('profile', 'networkChanged', '12345');
+        expect(generateDefaultApisSpy).toHaveBeenCalledTimes(1);
+
+        manager.aztecAccount = {
+            address: 'aztec_address',
+        };
+
+        Web3Service.eventListeners.notify('profile', 'networkChanged', '12345');
+        expect(generateDefaultApisSpy).toHaveBeenCalledTimes(1);
+
+        manager.aztecAccount = null;
+        manager.sessionPromise = {};
+
+        Web3Service.eventListeners.notify('profile', 'accountChanged', 'address_123');
+        expect(generateDefaultApisSpy).toHaveBeenCalledTimes(1);
+
+        manager.sessionPromise = null;
+
+        Web3Service.eventListeners.notify('profile', 'networkChanged', '12345');
+        expect(generateDefaultApisSpy).toHaveBeenCalledTimes(2);
+    });
 });
 
 describe('ApiManager.handleResolveSession', () => {

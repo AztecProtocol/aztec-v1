@@ -45,13 +45,16 @@ export default class ApiManager {
                     default:
                 }
             }
+            if (!this.aztecAccount && !this.sessionPromise) {
+                this.generateDefaultApis();
+            }
 
             this.eventListeners.notify('profileChanged', changedType, objValue);
         });
     }
 
-    generateDefaultApis() {
-        const apis = ApiPermissionService.generateApis();
+    async generateDefaultApis() {
+        const apis = await ApiPermissionService.generateApis();
         this.setApis(apis);
     }
 
@@ -154,14 +157,14 @@ export default class ApiManager {
         this.aztecAccount = null;
         this.error = null;
         this.unbindOneTimeProfileChangeListener();
-        this.generateDefaultApis();
+        await this.generateDefaultApis();
         await ConnectionService.disconnect();
     }
 
     async refreshSession(options) {
         this.aztecAccount = null;
         this.error = null;
-        this.generateDefaultApis();
+        await this.generateDefaultApis();
         await ConnectionService.disconnect();
 
         let networkSwitchedDuringStart = false;
@@ -208,8 +211,8 @@ export default class ApiManager {
                 } = await ApiPermissionService.ensurePermission() || {};
                 return aztecAccount;
             },
-            (aztecAccount) => {
-                const apis = ApiPermissionService.generateApis(true);
+            async (aztecAccount) => {
+                const apis = await ApiPermissionService.generateApis(true);
                 this.setApis(apis);
 
                 if (this.autoRefreshOnProfileChange) {

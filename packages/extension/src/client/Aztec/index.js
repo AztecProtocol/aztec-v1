@@ -16,8 +16,6 @@ class Aztec {
             });
         };
 
-        manager.generateDefaultApis();
-
         Object.keys(aztec).forEach((name) => {
             if (this[name]) {
                 warnLog(`Api '${name}' is already in Aztec.`);
@@ -25,6 +23,10 @@ class Aztec {
             }
             this[name] = aztec[name];
         });
+    }
+
+    async generateInitialApis() { // eslint-disable-line class-methods-use-this
+        await manager.generateDefaultApis();
     }
 
     get enabled() { // eslint-disable-line class-methods-use-this
