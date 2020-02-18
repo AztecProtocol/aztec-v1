@@ -31,7 +31,7 @@ export default async function getApiKeyQuota(apiKey) {
             mode: 'cors',
             cache: 'no-cache',
         });
-        const currentOrigin = window.location.origin;
+        const currentOrigin = window.location.host;
         const {
             data: {
                 quota,
