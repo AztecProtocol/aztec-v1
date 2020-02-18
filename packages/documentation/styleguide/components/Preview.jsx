@@ -55,7 +55,7 @@ class Preview extends React.Component {
     logs: [],
     code: '',
     initialCode: '',
-    zkAssetAddress: '0x260473e8267a5F355c5610a0ed87ea01EBB58b94',
+    zkAssetAddress: '0x54Fac13e652702a733464bbcB0Fb403F1c057E1b',
     userAddress: '',
     isWeb3Loaded: false,
   };
