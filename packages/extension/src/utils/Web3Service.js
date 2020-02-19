@@ -365,12 +365,21 @@ class Web3Service {
                         gsnContract.setProvider(gsnProvider);
 
                         return {
-                            send: async (...args) => this.triggerMethod('send', {
-                                method: gsnContract.methods[methodName],
-                                fromAddress: signingInfo.address,
-                                args,
-                                web3,
-                            }),
+                            send: async (...args) => {
+                                let gasPrice;
+                                try {
+                                    gasPrice = await web3.eth.getGasPrice();
+                                } catch (e) {
+                                    console.log(e);
+                                }
+                                return this.triggerMethod('send', {
+                                    method: gsnContract.methods[methodName],
+                                    fromAddress: signingInfo.address,
+                                    args,
+                                    gasPrice: gasPrice ? gasPrice * 2 : 18000000000, // set gas price 100% higher than last few blocks median to ensure we get in the block
+                                    web3,
+                                });
+                            },
                         };
                     },
                 };
