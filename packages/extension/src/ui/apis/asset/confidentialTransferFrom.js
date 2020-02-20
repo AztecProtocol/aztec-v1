@@ -12,9 +12,10 @@ export default async function confidentialTransferFrom({
     proof,
     signature = '0x',
     spender,
+    isGSNAvailable,
 }) {
     const proofData = proof.encodeABI(assetAddress);
-    const response = await ConnectionService.sendTransaction({
+    const transactionData = {
         contract: 'AccountRegistry',
         method: 'confidentialTransferFrom',
         data: [
@@ -24,7 +25,13 @@ export default async function confidentialTransferFrom({
             spender,
             signature,
         ],
-    });
+    };
+    const response = isGSNAvailable
+        ? await ConnectionService.sendTransaction(transactionData)
+        : await ConnectionService.post({
+            action: 'metamask.send',
+            data: transactionData,
+        });
 
     return {
         ...response,
