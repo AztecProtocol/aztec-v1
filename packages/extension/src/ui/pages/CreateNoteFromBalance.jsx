@@ -61,7 +61,7 @@ const CreateNoteFromBalance = ({
         const userAccessAccounts = userAccess
             ? await apis.account.batchGetExtensionAccount(userAccess)
             : [];
-        const sender = isGSNAvailable ? proxyContract : currentAddress;
+        const sender = proxyContract;
         const amount = parseInputAmount(inputAmount);
         const transactions = [
             {
@@ -72,6 +72,7 @@ const CreateNoteFromBalance = ({
 
         return {
             steps,
+            retryWithMetaMaskStep: createNoteFromBalanceSteps.metamask.slice(-1)[0],
             assetAddress,
             currentAddress,
             asset,
@@ -84,6 +85,7 @@ const CreateNoteFromBalance = ({
             spender: sender,
             transactions,
             gsnConfig,
+            isGSNAvailable,
         };
     };
 
