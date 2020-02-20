@@ -137,6 +137,19 @@ constants.eip712 = {
         primaryType: 'JoinSplitSignature',
     },
     JOIN_SPLIT_SIGNATURE_TYPE_HASH,
+    PERMIT_SIGNATURE: {
+        types: {
+            PermitSignature: [
+                { name: 'holder', type: 'address' },
+                { name: 'spender', type: 'address' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'expiry', type: 'uint256' },
+                { name: 'allowed', type: 'bool' },
+            ],
+            EIP712Domain: EIP712_DOMAIN,
+        },
+        primaryType: 'PermitSignature',
+    },
     PROOF_SIGNATURE: {
         types: {
             ProofSignature: [
