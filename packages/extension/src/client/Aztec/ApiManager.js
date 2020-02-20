@@ -45,7 +45,10 @@ export default class ApiManager {
                     default:
                 }
             }
-            if (!this.aztecAccount && !this.sessionPromise) {
+
+            if (!this.autoRefreshOnProfileChange) {
+                this.disable();
+            } else if (!this.aztecAccount && !this.sessionPromise) {
                 this.generateDefaultApis();
             }
 
@@ -173,8 +176,6 @@ export default class ApiManager {
             networkSwitchedDuringStart = true;
             if (this.autoRefreshOnProfileChange) {
                 this.refreshSession(options);
-            } else {
-                this.flushEnableListeners(options);
             }
         });
 

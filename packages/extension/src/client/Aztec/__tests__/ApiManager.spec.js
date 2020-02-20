@@ -14,6 +14,16 @@ beforeEach(() => {
 });
 
 describe('ApiManager listeners', () => {
+    let generateDefaultApisSpy;
+    let disableSpy;
+
+    beforeEach(() => {
+        generateDefaultApisSpy = jest.spyOn(manager, 'generateDefaultApis')
+            .mockImplementation(jest.fn());
+        disableSpy = jest.spyOn(manager, 'disable')
+            .mockImplementation(jest.fn());
+    });
+
     it('has an event listener for account and network changes', () => {
         const listener = jest.fn();
         manager.eventListeners.add('profileChanged', listener);
@@ -45,10 +55,17 @@ describe('ApiManager listeners', () => {
         });
     });
 
-    it('generate default apis again if not enabled', () => {
-        const generateDefaultApisSpy = jest.spyOn(manager, 'generateDefaultApis')
-            .mockImplementation(jest.fn());
+    it('call disable if autoRefreshOnProfileChange is false', () => {
+        manager.autoRefreshOnProfileChange = false;
 
+        expect(disableSpy).toHaveBeenCalledTimes(0);
+
+        Web3Service.eventListeners.notify('profile', 'networkChanged', '12345');
+
+        expect(disableSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('generate default apis again if not enabled', () => {
         expect(generateDefaultApisSpy).toHaveBeenCalledTimes(0);
 
         Web3Service.eventListeners.notify('profile', 'networkChanged', '12345');
@@ -71,6 +88,8 @@ describe('ApiManager listeners', () => {
 
         Web3Service.eventListeners.notify('profile', 'networkChanged', '12345');
         expect(generateDefaultApisSpy).toHaveBeenCalledTimes(2);
+
+        expect(disableSpy).toHaveBeenCalledTimes(0);
     });
 });
 
@@ -660,32 +679,11 @@ describe('ApiManager.refreshSession', () => {
         expect(refreshSessionSpy).toHaveBeenCalledWith(options);
     });
 
-    it('will not run refreshSession again if autoRefreshOnProfileChange is false', async () => {
-        manager.currentOptions = options;
+    it('will not run refreshSession again and stop remaining tasks if autoRefreshOnProfileChange is false', async () => {
         manager.autoRefreshOnProfileChange = false;
 
-        const promise = manager.refreshSession(options);
-
-        const refreshSessionSpy = jest.spyOn(manager, 'refreshSession');
-
-        await promise;
-
-        expect(refreshSessionSpy).toHaveBeenCalledTimes(0);
-
-        Web3Service.eventListeners.notify(
-            'profile',
-            'accountChanged',
-            'new-address',
-        );
-
-        expect(refreshSessionSpy).toHaveBeenCalledTimes(0);
-    });
-
-    it('will flush listeners when profile is changed if autoRefreshOnProfileChange is false', async () => {
-        manager.currentOptions = options;
-        manager.autoRefreshOnProfileChange = false;
-
-        const flushEnableListenersSpy = jest.spyOn(manager, 'flushEnableListeners');
+        const disableSpy = jest.spyOn(manager, 'disable')
+            .mockImplementation(jest.fn());
 
         const taskSpies = [
             openConnectionSpy,
@@ -695,11 +693,13 @@ describe('ApiManager.refreshSession', () => {
         ];
 
         await asyncForEach(taskSpies, async (spy, currentIdx) => {
+            manager.currentOptions = options;
+
             taskSpies.forEach((task) => {
                 task.mockClear();
             });
             resolveSessionSpy.mockClear();
-            flushEnableListenersSpy.mockClear();
+            disableSpy.mockClear();
 
             spy.mockImplementationOnce(() => {
                 Web3Service.eventListeners.notify(
@@ -714,11 +714,12 @@ describe('ApiManager.refreshSession', () => {
             const refreshSessionSpy = jest.spyOn(manager, 'refreshSession')
                 .mockImplementation(jest.fn());
 
-            expect(refreshSessionSpy).toHaveBeenCalledTimes(0);
+            expect(disableSpy).toHaveBeenCalledTimes(0);
 
             await promise;
 
             expect(refreshSessionSpy).toHaveBeenCalledTimes(0);
+            expect(disableSpy).toHaveBeenCalledTimes(1);
 
             taskSpies.forEach((task, i) => {
                 if (i <= currentIdx) {
@@ -729,8 +730,6 @@ describe('ApiManager.refreshSession', () => {
             });
 
             expect(resolveSessionSpy).toHaveBeenCalledTimes(0);
-            expect(flushEnableListenersSpy).toHaveBeenCalledTimes(1);
-            expect(flushEnableListenersSpy).toHaveBeenCalledWith(options);
 
             refreshSessionSpy.mockRestore();
         });
