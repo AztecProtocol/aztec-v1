@@ -1,0 +1,11 @@
+@import '../../styles/variables';
+
+$block-radius: map-get($rounded-corner-map, 'm');
+
+.left-button {
+  border-radius: 0 0 0 $block-radius !important;
+}
+
+.right-button {
+  border-radius: 0 0 $block-radius 0 !important;
+}

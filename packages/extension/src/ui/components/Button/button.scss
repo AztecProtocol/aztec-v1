@@ -64,3 +64,8 @@
     background: $bg-gradient !important;
   }
 }
+
+.secondary {
+  background: #c5c6cc !important;
+  color: map-get($color-map, 'white') !important;
+}

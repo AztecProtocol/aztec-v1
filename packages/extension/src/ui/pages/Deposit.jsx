@@ -70,6 +70,7 @@ const Deposit = ({
 
         return {
             steps,
+            retryWithMetaMaskStep: depositSteps.metamask.slice(-1)[0],
             currentAccount,
             assetAddress,
             asset,

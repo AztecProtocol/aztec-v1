@@ -60,6 +60,5 @@ $footer-min-height: map-get($button-size-map, 'xl');
 
 .footer-button {
   flex: 1;
-  height: $footer-min-height !important;
   border-radius: 0 !important;
 }
