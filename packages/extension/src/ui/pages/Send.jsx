@@ -32,7 +32,7 @@ const Send = ({
             address: currentAddress,
         } = currentAccount;
         const steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
-        const sender = isGSNAvailable ? proxyContract : currentAddress;
+        const sender = proxyContract;
 
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
@@ -43,6 +43,7 @@ const Send = ({
 
         return {
             steps,
+            retryWithMetaMaskStep: sendSteps.metamask.slice(-1)[0],
             assetAddress,
             currentAddress,
             asset,
@@ -53,6 +54,7 @@ const Send = ({
             numberOfOutputNotes,
             userAccessAccounts,
             amount,
+            isGSNAvailable,
         };
     };
 
