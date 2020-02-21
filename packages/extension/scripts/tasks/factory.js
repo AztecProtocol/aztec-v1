@@ -54,7 +54,6 @@ export default function taskFactory(
             );
 
             shell.stdout.on('data', (text) => {
-
                 if (!silent) {
                     log(text.toString());
                 }

@@ -36,4 +36,4 @@ export default function generateAccounts() {
             acc.push(`--account=${privateKey},${balance}`);
             return acc;
         }, []);
-};
+}
