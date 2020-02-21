@@ -80,6 +80,13 @@ const EIP712_DOMAIN = [
     { name: 'verifyingContract', type: 'address' },
 ];
 
+const EIP712_DOMAIN_CHAIN_ID = [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+]
+
 // keccak256 hash of "EIP712Domain(string name,string version,address verifyingContract)"
 const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766';
 
@@ -111,7 +118,12 @@ constants.eip712 = {
         version: '1',
         salt: '0x210db872dec2e06c375dd40a5a354307bb4ba52ba65bd84594554580ae6f0639',
     },
+    DAI_DOMAIN_PARAMS: {
+        name: 'Dai Stablecoin',
+        version: '1',
+    },
     EIP712_DOMAIN,
+    EIP712_DOMAIN_CHAIN_ID,
     EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH,
     ACCOUNT_REGISTRY_SIGNATURE: {
         types: {
@@ -139,16 +151,16 @@ constants.eip712 = {
     JOIN_SPLIT_SIGNATURE_TYPE_HASH,
     PERMIT_SIGNATURE: {
         types: {
-            PermitSignature: [
+            Permit: [
                 { name: 'holder', type: 'address' },
                 { name: 'spender', type: 'address' },
                 { name: 'nonce', type: 'uint256' },
                 { name: 'expiry', type: 'uint256' },
                 { name: 'allowed', type: 'bool' },
             ],
-            EIP712Domain: EIP712_DOMAIN,
+            EIP712Domain: EIP712_DOMAIN_CHAIN_ID, // compatible with DAI contract
         },
-        primaryType: 'PermitSignature',
+        primaryType: 'Permit',
     },
     PROOF_SIGNATURE: {
         types: {

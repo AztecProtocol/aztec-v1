@@ -53,6 +53,21 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
     };
 };
 
+
+/**
+ * Generate EIP712 domain parameters for DAI token
+ * @method generateDAIDomainParams
+ * @param
+ */
+signer.generateDAIDomainParams = (chainId, verifyingContract) => {
+    return {
+        ...constants.eip712.DAI_DOMAIN_PARAMS,
+        chainId,
+        verifyingContract,
+    }
+
+};
+
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a
  * ZkAsset. The ZkAsset.confidentialApprove() method must be called when granting note spending permission
@@ -213,9 +228,9 @@ signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
  * @param {Number} expiry - unix timestamp corresponding to the upper boundary for when the permit is valid
  * @param {Bool} allowed - whether approval is being granted or revoked
  */
-signer.signPermit = (verifyingContract, holderAccount, spender, nonce, expiry, allowed) => {
+signer.signPermit = (chainId, verifyingContract, holderAccount, spender, nonce, expiry, allowed) => {
     const { address: holder, privateKey } = holderAccount;
-    const domain = signer.generateAccountRegistryDomainParams(verifyingContract);
+    const domain = signer.generateDAIDomainParams(chainId, verifyingContract);
     const schema = constants.eip712.PERMIT_SIGNATURE;
 
     const message = {

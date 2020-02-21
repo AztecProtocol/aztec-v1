@@ -306,9 +306,10 @@ describe('Signer', () => {
             const nonce = 5;
             const expiry = 10;
             const allowed = true;
-            const aztecSignature = signer.signPermit(verifyingContract, holderAccount, spender, nonce, expiry, allowed);
+            const chainId = 4;
+            const aztecSignature = signer.signPermit(chainId, verifyingContract, holderAccount, spender, nonce, expiry, allowed);
 
-            const domain = signer.generateAccountRegistryDomainParams(verifyingContract);
+            const domain = signer.generateDAIDomainParams(chainId, verifyingContract);
             const { types, primaryType } = constants.eip712.PERMIT_SIGNATURE;
             const metaMaskTypedData = {
                 domain,
