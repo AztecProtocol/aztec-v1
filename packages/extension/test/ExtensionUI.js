@@ -1,19 +1,13 @@
-/* global artifacts, expect, contract, beforeEach, it:true */
+/* global artifacts, expect, contract, it:true */
 
 // ### External Dependencies
-const { expect } = require('chai');
-const chai = require('chai');
 const dotenv = require('dotenv');
-const path = require('path');
-const truffleAssert = require('truffle-assertions');
 
 const Environment = require('./harness');
 
 const ACE = artifacts.require('@aztec/protocol/contracts/ACE/ACE.sol');
 const ERC20Mintable = artifacts.require('@aztec/protocol/contracts/ERC20/ERC20Mintable.sol');
 const ZkAssetOwnable = artifacts.require('@aztec/protocol/contracts/ERC1724/ZkAssetOwnable.sol');
-
-const extensionPath = path.resolve(__dirname + '/../client');
 
 dotenv.config();
 
@@ -23,7 +17,7 @@ function randomInt(from, to = null) {
     return start + Math.floor(Math.random() * (offset + 1));
 }
 
-contract.skip('Extension', (accounts) => {
+contract('Extension', (accounts) => {
     const [user] = accounts;
     const totalBalance = 10000;
     let environment;
@@ -36,7 +30,7 @@ contract.skip('Extension', (accounts) => {
         await zkAsset.setProofs(1, 17);
         await erc20.mint(user, totalBalance);
         await erc20.approve(ace.address, totalBalance);
-        environment = await Environment.init(extensionPath, { debug: true, observeTime: 0 });
+        environment = await Environment.init({ debug: false, observeTime: 0 });
     });
 
     after(async () => {
@@ -45,14 +39,13 @@ contract.skip('Extension', (accounts) => {
 
     it.only('should successfully create an AZTEC account', async () => {
         await environment.createAccount();
+        const homepage = await environment.getPage(target => target.url().match(/localhost/));
+        await homepage.api.reload();
 
-        const extensionPage = await environment.openExtension();
-        const header = await extensionPage.api.waitForXPath("//div[contains(., 'My Assets')]");
-        expect(header).to.not.equal(undefined);
-        await extensionPage.close();
+        await new Promise(resolve => homepage.initialiseAztec(resolve));
     });
 
-    it.only('should set an AZTEC asset', async () => {
+    it('should set an AZTEC asset', async () => {
         const homepage = Object.values(environment.openPages)
             .find(p => p.aztecContext === true);
 
@@ -65,7 +58,7 @@ contract.skip('Extension', (accounts) => {
         expect(erc20Balance).to.equal(totalBalance);
     });
 
-    it.only('should complete a deposit', async () => {
+    it('should complete a deposit', async () => {
         /// DEPOSIT
         const homepage = Object.values(environment.openPages)
             .find(p => p.aztecContext === true);
@@ -98,7 +91,7 @@ contract.skip('Extension', (accounts) => {
         const bal = await newPage.api.evaluate(async (address) => await (await window.aztec.asset(address)).balance(), zkAsset.address);
     });
 
-    it.only('should complete a withdraw', async () => {
+    it('should complete a withdraw', async () => {
         /// WITHDRAW
         const withdrawAmount = randomInt(1, depositAmount);
         await newPage.api.evaluate(async (address, withdrawAmount, senderAddress, recipientAddress) => {

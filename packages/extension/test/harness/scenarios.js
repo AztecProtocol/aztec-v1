@@ -4,25 +4,20 @@ async function createAccount() {
         throw new Error('Please initialise your environment first');
     }
 
-    let homepage = await environment.openPage('https://www.aztecprotocol.com/');
-    await homepage.initialiseAztec();
+    const homepage = await environment.openPage('https://localhost:5550/');
 
-    await environment.metamask.approve();
+    await new Promise(async (resolve) => {
+        homepage.initialiseAztec(resolve);
+        await environment.metamask.approve();
 
-    const registerPage = await environment.getPage(target => target.url().match(/register/));
-    await registerPage.clickMain();
-    await registerPage.clickMain();
-    await registerPage.clickMain();
-
-    await registerPage.typeMain('password');
-
-    await registerPage.clickMain();
-    await registerPage.clickMain();
-
-    await environment.metamask.sign();
-
-    const authorizePage = await environment.getPage(target => target.url().match(/register\/domain/));
-    await authorizePage.clickMain();
+        await homepage.sdk.typeMain('password');
+        await homepage.sdk.clickMain("//button[contains(., 'Create Encryption Keys')]");
+        await homepage.sdk.clickMain("//button[contains(., 'Link Accounts')]");
+        await environment.metamask.sign();
+        await homepage.sdk.clickMain("//button[contains(., 'Send Transaction')]");
+        await environment.metamask.confirm();
+        await homepage.sdk.clickMain("//button[contains(., 'Grant Access')]");
+    });
 }
 
 async function restoreAccount(seedPhrase) {

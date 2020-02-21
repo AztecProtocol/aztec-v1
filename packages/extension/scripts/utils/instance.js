@@ -98,7 +98,7 @@ const childProcessHandler = (childProcess, {
         if (onReceiveOutput) {
             onReceiveOutput(output);
         } else {
-            process.stdout.write(output);
+            // process.stdout.write(output);
         }
     };
 
@@ -117,7 +117,7 @@ const childProcessHandler = (childProcess, {
         if (onReceiveErrorOutput) {
             onReceiveErrorOutput(output);
         } else {
-            log(`stderr:\n ${output}`);
+            // log(`stderr:\n ${output}`);
         }
     });
 
@@ -152,12 +152,14 @@ export default function instance(...args) {
         || (args.length === 2 && !Array.isArray(args[1]))
     ) {
         [command, options] = args;
+        errorLog(command);
         childProcess = exec(command);
     } else {
         [command, params, options] = args;
         const {
             windowsVerbatimArguments,
         } = options;
+        errorLog(command, params);
         childProcess = spawn(
             command,
             params,
