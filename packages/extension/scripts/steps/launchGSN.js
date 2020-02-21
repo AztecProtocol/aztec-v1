@@ -1,10 +1,6 @@
 import Web3 from 'web3';
 
 import {
-    defaultFromAccount,
-} from '../utils/GNSHelpers';
-
-import {
     DEFAULT_GSN_RELAYER_PORT,
 } from '../config/constants';
 
@@ -17,6 +13,15 @@ import getNetwork from '../utils/getNetwork';
 import {
     argv,
 } from '../utils/cmd';
+
+async function defaultFromAccount(web3) {
+    try {
+        const accounts = await web3.eth.getAccounts();
+        return accounts[0];
+    } catch (error) {
+        throw Error(`Failed to retrieve accounts: ${error}`);
+    }
+}
 
 const network = getNetwork();
 

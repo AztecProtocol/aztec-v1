@@ -7,7 +7,7 @@ import serveSDK from '../steps/serveSDK';
 import serveTemplate from '../steps/serveTemplate';
 import launchGSN from '../steps/launchGSN';
 import copyContracts from '../steps/copyContracts';
-import buildExtension from '../steps/buildExtension';
+import buildSDK from '../steps/buildSDK';
 import runIntegrationTest from '../steps/runIntegrationTest';
 
 import Scenario from './scenario';
@@ -25,7 +25,7 @@ export default new Scenario(
         serveTemplate,
         launchGSN,
         copyContracts,
-        buildExtension,
+        buildSDK,
         runIntegrationTest,
     ],
 );
