@@ -53,7 +53,7 @@ const Deposit = ({
             steps = depositSteps.gsnTransfer;
         }
 
-        const tokenSupportsPermit = getTokenPermitStatus(asset.linkedTokenAddress);
+        const tokenSupportsPermit = asset.supportsPermit;
         if (tokenSupportsPermit) {
             steps = depositSteps.gsnWithPermit;
         }
