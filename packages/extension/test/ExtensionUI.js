@@ -79,12 +79,10 @@ contract('Extension', (accounts) => {
         expect(balance).to.equal(amountToDeposit);
     });
 
-    it.skip('should send zkNotes from one user to another', async () => {
+    it('should send zkNotes from one user to another', async () => {
         await environment.wait(2000);
 
         await environment.send(zkAsset.address, user1, amountToSend);
-
-        console.log(user1);
 
         await environment.metamask.switchAccount(1);
         const homepage = await environment.getPage(target => target.url().match(/localhost/));
@@ -95,10 +93,7 @@ contract('Extension', (accounts) => {
 
         await new Promise(resolve => homepage.initialiseAztec(resolve));
 
-        const loggedIn = await homepage
-            .api
-            .evaluate(async () => window.aztec.web3.account);
-        console.log(loggedIn);
+        // await environment.wait(3000000);
         const transferedBalance = await homepage
             .api
             .evaluate(async address => (await window.aztec.zkAsset(address)).balance(), zkAsset.address);
