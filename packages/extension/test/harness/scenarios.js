@@ -50,8 +50,23 @@ async function send(assetAddress, to, amount) {
     });
 }
 
+async function withdraw(assetAddress, amount) {
+    const environment = this;
+    const homepage = await environment.getPage(target => target.url().match(/localhost/));
+
+    await new Promise(async (resolve) => {
+        homepage.triggerWithdraw(assetAddress, amount, resolve);
+
+        await homepage.sdk.clickMain("//button[contains(., 'Approve Withdraw')]");
+        await environment.metamask.sign();
+        await homepage.sdk.clickMain("//button[contains(., 'Send Transaction')]");
+        await environment.metamask.confirm();
+    });
+}
+
 module.exports = {
     createAccount,
     deposit,
     send,
+    withdraw,
 };

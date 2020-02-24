@@ -75,6 +75,16 @@ module.exports = {
 
                 callback();
             },
+            triggerWithdraw: async function (assetAddress, amount, callback) {
+                await this.api.waitFor(() => !!window.aztec);
+
+                // eslint-disable-next-line no-shadow
+                await this.api.evaluate(async (address, amount) => {
+                    return (await window.aztec.zkAsset(address)).withdraw(amount);
+                }, assetAddress, amount);
+
+                callback();
+            },
             screenshot: async function (fileName) {
                 const name = fileName || `${Date.now()}.png`;
                 const path = `${environment.screenshotPath}/${name}`;

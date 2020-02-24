@@ -17,6 +17,7 @@ contract('Extension', (accounts) => {
     const totalBalance = 10000;
     const amountToDeposit = 500;
     const amountToSend = amountToDeposit / 2;
+    const amountToWithdraw = 100;
     let environment;
     let zkAsset;
     let erc20;
@@ -93,10 +94,34 @@ contract('Extension', (accounts) => {
 
         await new Promise(resolve => homepage.initialiseAztec(resolve));
 
-        // await environment.wait(3000000);
-        const transferedBalance = await homepage
+        // // await environment.wait(3000000);
+        // const transferedBalance = await homepage
+        //     .api
+        //     .evaluate(async address => (await window.aztec.zkAsset(address)).balance(), zkAsset.address);
+        // expect(transferedBalance).to.equal(amountToSend);
+    });
+
+    it('should withdraw from a zkAsset into an ERC20', async () => {
+        await environment.metamask.switchAccount(2);
+        const homepage = await environment.getPage(target => target.url().match(/localhost/));
+
+        await homepage.api.bringToFront();
+
+        await homepage.api.reload();
+
+        await new Promise(resolve => homepage.initialiseAztec(resolve));
+
+        const preWithdrawPublicBalance = await erc20.balanceOf(user2);
+
+        await environment.withdraw(zkAsset.address, amountToWithdraw);
+
+        const balance = await homepage
             .api
             .evaluate(async address => (await window.aztec.zkAsset(address)).balance(), zkAsset.address);
-        expect(transferedBalance).to.equal(amountToSend);
+
+        expect(balance).to.equal((amountToDeposit - amountToSend) - amountToWithdraw);
+        const postWithdrawPublicBalance = await erc20.balanceOf(user2);
+
+        expect(preWithdrawPublicBalance.toNumber() + amountToWithdraw).to.equal(postWithdrawPublicBalance.toNumber());
     });
 });
