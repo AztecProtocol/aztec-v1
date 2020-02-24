@@ -85,7 +85,7 @@ const EIP712_DOMAIN_CHAIN_ID = [
     { name: 'version', type: 'string' },
     { name: 'chainId', type: 'uint256' },
     { name: 'verifyingContract', type: 'address' },
-]
+];
 
 // keccak256 hash of "EIP712Domain(string name,string version,address verifyingContract)"
 const EIP712_DOMAIN_SEPARATOR_SCHEMA_HASH = '0x91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a2766';

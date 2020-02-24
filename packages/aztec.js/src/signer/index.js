@@ -53,7 +53,6 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
     };
 };
 
-
 /**
  * Generate EIP712 domain parameters for DAI token
  * @method generateDAIDomainParams
@@ -64,8 +63,7 @@ signer.generateDAIDomainParams = (chainId, verifyingContract) => {
         ...constants.eip712.DAI_DOMAIN_PARAMS,
         chainId,
         verifyingContract,
-    }
-
+    };
 };
 
 /**
@@ -220,7 +218,7 @@ signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
 /**
  * Allows a user to create a signature for use in the DAI.permit() function. Creates an EIP712 ECDSA
  * signature
- * 
+ *
  * @method signPermit
  * @param {Object} holderAccount - address that owns the tokens, which is approving a spender to spend
  * @param {Address} spender - address being approved to spend the tokens

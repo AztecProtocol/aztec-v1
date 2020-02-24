@@ -278,7 +278,6 @@ describe('Signer', () => {
                 aztecAccount.privateKey,
             );
 
-
             const domain = signer.generateZKAssetDomainParams(verifyingContract);
             const { types, primaryType } = constants.eip712.PROOF_SIGNATURE;
             const metaMaskTypedData = {
