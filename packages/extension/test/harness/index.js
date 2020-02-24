@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const puppeteer = require('puppeteer');
 const path = require('path');
-const fs = require('fs');
 
 const scenarios = require('./scenarios');
 const steps = require('./steps');
@@ -39,7 +38,7 @@ async function init({
     environment.browser = await puppeteer.launch({
         defaultViewport: null,
         devtools: debug,
-        slowMo: observeTime,
+        // slowMo: observeTime,
         headless: false, // extension are allowed only in head-full mode
         args: [
             `--disable-extensions-except=${metamaskPath}`,

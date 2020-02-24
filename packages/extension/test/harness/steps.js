@@ -32,7 +32,7 @@ module.exports = {
                 try {
                     await this.api.close();
                 } catch (e) {
-                    console.log('page already closed');
+                    // console.log('page already closed');
                 }
                 delete environment.openPages[this.id];
             },
@@ -44,7 +44,36 @@ module.exports = {
                     return window.aztec.enable();
                 });
                 callback();
-                return;
+            },
+            triggerDeposit: async function (assetAddress, toAddress, amount, callback) {
+                await this.api.waitFor(() => !!window.aztec);
+                // eslint-disable-next-line no-shadow
+                await this.api.evaluate(async (address, userAddress, amount) => {
+                    return (await window.aztec.zkAsset(address)).deposit([
+                        {
+                            to: userAddress,
+                            amount: amount,
+                        },
+                    ],
+                    {});
+                }, assetAddress, toAddress, amount);
+                callback();
+            },
+            triggerSend: async function (assetAddress, toAddress, amount, callback) {
+                await this.api.waitFor(() => !!window.aztec);
+
+                // eslint-disable-next-line no-shadow
+                await this.api.evaluate(async (address, userAddress, amount) => {
+                    return (await window.aztec.zkAsset(address)).send([
+                        {
+                            to: userAddress,
+                            amount: amount,
+                        },
+                    ],
+                    {});
+                }, assetAddress, toAddress, amount);
+
+                callback();
             },
             screenshot: async function (fileName) {
                 const name = fileName || `${Date.now()}.png`;

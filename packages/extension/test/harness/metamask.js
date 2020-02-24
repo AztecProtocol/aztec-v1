@@ -65,15 +65,16 @@ async function Metamask() {
             await page.clickMain('.btn-primary');
         },
         addAccount: async function(privateKey) {
-            // let extension = await this.open();
-            // await extension.clickMain('.account-menu__icon');
-            // let btn = await extension.api.waitForXPath('//div[contains(@class, \'menu__item__text\') and contains(//div, \'Import Account\')]');
-            // await btn.click();
+            const extension = await this.open('new-account/import');
 
-            // btn = await extension.api.waitForXPath('//div[contains(@class, \'new-account__tabs__tab\') and contains(., \'Import\')]');
-            // await btn.click();
-            // await page.typeMain(privateKey, '#private-key-box');
-            // await extension.clickMain('.btn-secondary');
+            await extension.typeMain(privateKey, '#private-key-box');
+            await extension.clickMain('.btn-secondary');
+        },
+        switchAccount: async function(accountNum) {
+            const extension = await this.open();
+            await extension.api.bringToFront();
+            await extension.clickMain('.account-menu__icon');
+            await extension.clickMain(`//div[contains(text(), 'Account ${accountNum}')]`);
         },
     };
 
