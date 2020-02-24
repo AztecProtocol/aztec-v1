@@ -27,6 +27,7 @@ export default function acceptConnection() {
     window.addEventListener('message', async (event) => {
         if (event.data.type === connectionRequestEvent) {
             const {
+                requestId,
                 clientProfile,
             } = event.data;
 
@@ -61,6 +62,7 @@ export default function acceptConnection() {
                 type: connectionApprovedEvent,
                 code: '200',
                 data: networkConfig,
+                requestId,
             }, '*', [channel.port2]);
         }
     });

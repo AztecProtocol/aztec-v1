@@ -363,6 +363,14 @@ describe('ApiManager.refreshSession', () => {
     const validateContractConfigsSpy = jest.spyOn(ApiPermissionService, 'validateContractConfigs');
 
     const initWeb3ServiceSpy = jest.spyOn(Web3Service, 'init')
+        .mockImplementation(() => {
+            Web3Service.account = {
+                address: 'account_address',
+            };
+            Web3Service.networkId = 'network_id';
+        });
+
+    const registerContractsSpy = jest.spyOn(Web3Service, 'registerContractsConfig')
         .mockImplementation(jest.fn());
 
     const aztecAccount = {
@@ -377,7 +385,14 @@ describe('ApiManager.refreshSession', () => {
         }));
 
     const defaultApis = {
-        run: jest.fn(),
+        web3: {
+            account: {
+                address: 'account_address',
+            },
+            network: {
+                id: 'network_id',
+            },
+        },
     };
     const fullApis = {
         run: jest.fn(),
@@ -389,7 +404,7 @@ describe('ApiManager.refreshSession', () => {
     const options = {
         apiKey,
         contractAddresses,
-        providerUrl: '',
+        providerUrl: 'provider_url',
     };
     let mockSetApis;
     let resolveSessionSpy;
@@ -398,6 +413,7 @@ describe('ApiManager.refreshSession', () => {
         openConnectionSpy.mockClear();
         validateContractConfigsSpy.mockClear();
         initWeb3ServiceSpy.mockClear();
+        registerContractsSpy.mockClear();
         ensurePermissionSpy.mockClear();
         generateApisSpy.mockClear();
 
@@ -413,8 +429,9 @@ describe('ApiManager.refreshSession', () => {
     });
 
     afterAll(() => {
-        openConnectionSpy.mockRestore();
         initWeb3ServiceSpy.mockRestore();
+        registerContractsSpy.mockRestore();
+        openConnectionSpy.mockRestore();
         ensurePermissionSpy.mockRestore();
         generateApisSpy.mockRestore();
     });
@@ -426,15 +443,23 @@ describe('ApiManager.refreshSession', () => {
         expect(openConnectionSpy).toHaveBeenCalledWith(options);
 
         const {
+            providerUrl,
+        } = options;
+        const {
             error,
             ...networkConfig
         } = generateNetworkConfig(options);
 
+        expect(initWeb3ServiceSpy).toHaveBeenCalledTimes(1);
+        expect(initWeb3ServiceSpy).toHaveBeenCalledWith({
+            providerUrl,
+        });
+
         expect(validateContractConfigsSpy).toHaveBeenCalledTimes(1);
         expect(validateContractConfigsSpy).toHaveBeenCalledWith(networkConfig);
 
-        expect(initWeb3ServiceSpy).toHaveBeenCalledTimes(1);
-        expect(initWeb3ServiceSpy).toHaveBeenCalledWith(networkConfig);
+        expect(registerContractsSpy).toHaveBeenCalledTimes(1);
+        expect(registerContractsSpy).toHaveBeenCalledWith(networkConfig.contractsConfig);
 
         expect(ensurePermissionSpy).toHaveBeenCalledTimes(1);
 
@@ -457,8 +482,9 @@ describe('ApiManager.refreshSession', () => {
 
         await manager.refreshSession(options);
 
+        expect(initWeb3ServiceSpy).toHaveBeenCalledTimes(1);
         expect(openConnectionSpy).toHaveBeenCalledTimes(1);
-        expect(initWeb3ServiceSpy).toHaveBeenCalledTimes(0);
+        expect(registerContractsSpy).toHaveBeenCalledTimes(0);
         expect(ensurePermissionSpy).toHaveBeenCalledTimes(0);
         expect(resolveSessionSpy).toHaveBeenCalledTimes(1);
         expect(resolveSessionSpy).toHaveBeenCalledWith(options, {
@@ -472,8 +498,10 @@ describe('ApiManager.refreshSession', () => {
             message: 'an error occurred',
         };
         const taskSpies = [
-            validateContractConfigsSpy,
             initWeb3ServiceSpy,
+            openConnectionSpy,
+            validateContractConfigsSpy,
+            registerContractsSpy,
             ensurePermissionSpy,
         ];
 
@@ -525,9 +553,10 @@ describe('ApiManager.refreshSession', () => {
             apiKey: `${options.apiKey}-2`,
         };
         const taskSpies = [
+            initWeb3ServiceSpy,
             openConnectionSpy,
             validateContractConfigsSpy,
-            initWeb3ServiceSpy,
+            registerContractsSpy,
             ensurePermissionSpy,
         ];
 
@@ -605,9 +634,10 @@ describe('ApiManager.refreshSession', () => {
             two: 2,
         };
         const taskSpies = [
+            initWeb3ServiceSpy,
             openConnectionSpy,
             validateContractConfigsSpy,
-            initWeb3ServiceSpy,
+            registerContractsSpy,
             ensurePermissionSpy,
         ];
 
@@ -686,9 +716,10 @@ describe('ApiManager.refreshSession', () => {
             .mockImplementation(jest.fn());
 
         const taskSpies = [
+            initWeb3ServiceSpy,
             openConnectionSpy,
             validateContractConfigsSpy,
-            initWeb3ServiceSpy,
+            registerContractsSpy,
             ensurePermissionSpy,
         ];
 
@@ -733,5 +764,25 @@ describe('ApiManager.refreshSession', () => {
 
             refreshSessionSpy.mockRestore();
         });
+    });
+
+    it('abort if previous account or netowrk is null and autoRefreshOnProfileChange is false', async () => {
+        manager.autoRefreshOnProfileChange = false;
+
+        initWeb3ServiceSpy.mockImplementationOnce(() => {
+            Web3Service.account = {
+                address: '',
+            };
+        });
+
+        await manager.refreshSession(options);
+
+        expect(initWeb3ServiceSpy).toHaveBeenCalledTimes(1);
+        expect(validateContractConfigsSpy).toHaveBeenCalledTimes(0);
+        expect(registerContractsSpy).toHaveBeenCalledTimes(0);
+        expect(ensurePermissionSpy).toHaveBeenCalledTimes(0);
+        expect(resolveSessionSpy).toHaveBeenCalledTimes(0);
+
+        expect(mockSetApis).toHaveBeenLastCalledWith(defaultApis);
     });
 });
