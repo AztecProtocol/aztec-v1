@@ -6,9 +6,6 @@ const scenarios = require('./scenarios');
 const steps = require('./steps');
 const Metamask = require('./metamask');
 
-// open html page in pupeteer which loads sdk
-// step through sign up and tx
-
 async function init({
     metamaskPath = path.resolve(path.join(__dirname, '/metamask-extension/')),
     metamaskMnemonic = process.env.GANACHE_TESTING_ACCOUNT_0_MNEMONIC,
