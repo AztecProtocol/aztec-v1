@@ -51,7 +51,8 @@ contract Dai is LibNote {
 
     // --- EIP712 niceties ---
     bytes32 public DOMAIN_SEPARATOR;
-    // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
+    // bytes32 public constant PERMIT_TYPEHASH = 
+    // keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
     bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
     constructor(uint256 chainId_) public {
@@ -123,11 +124,11 @@ contract Dai is LibNote {
                 "\x19\x01",
                 DOMAIN_SEPARATOR,
                 keccak256(abi.encode(PERMIT_TYPEHASH,
-                                     holder,
-                                     spender,
-                                     nonce,
-                                     expiry,
-                                     allowed))
+                                    holder,
+                                    spender,
+                                    nonce,
+                                    expiry,
+                                    allowed))
         ));
 
         require(holder != address(0), "Dai/invalid-address-0");

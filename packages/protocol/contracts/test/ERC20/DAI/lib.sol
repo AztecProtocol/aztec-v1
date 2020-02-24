@@ -33,10 +33,10 @@ contract LibNote {
             mstore(add(mark, 0x20), 224)              // bytes size (padded)
             calldatacopy(add(mark, 0x40), 0, 224)     // bytes payload
             log4(mark, 288,                           // calldata
-                 shl(224, shr(224, calldataload(0))), // msg.sig
-                 caller,                              // msg.sender
-                 calldataload(4),                     // arg1
-                 calldataload(36)                     // arg2
+                shl(224, shr(224, calldataload(0))), // msg.sig
+                caller,                              // msg.sender
+                calldataload(4),                     // arg1
+                calldataload(36)                     // arg2
                 )
         }
     }

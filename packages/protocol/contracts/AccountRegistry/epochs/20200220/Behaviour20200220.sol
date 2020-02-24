@@ -32,8 +32,6 @@ contract Behaviour20200220 is Behaviour20200207 {
     */
     uint256 public epoch = 20200220;
 
-    event ContractAddress(address variable);
-
     /**
     * @dev This deposit() implementation performs the standard AccountRegistry deposit functionality, but it
     * is also specifically compatible with the DAI permit() function. 
@@ -46,6 +44,8 @@ contract Behaviour20200220 is Behaviour20200207 {
     * @param _proofHash - hash of the zero-knowledge deposit proof
     * @param _proofData - cryptographic data associated with the zero-knowledge proof
     * @param _value - number of ERC20s being deposited
+    * @param signature - EIP712 signature supplied to permit() for granting approval
+    * @param nonce - permit nonce used for signature replay protection
      */
     function deposit(
         address _registryOwner,
@@ -56,7 +56,6 @@ contract Behaviour20200220 is Behaviour20200207 {
         bytes memory signature,
         uint256 nonce     
     ) public {
-        emit ContractAddress(address(this));
         bytes memory proofOutputs = ace.validateProof(
             JOIN_SPLIT_PROOF,
             address(this),
@@ -83,8 +82,13 @@ contract Behaviour20200220 is Behaviour20200207 {
 
         (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
         IERC20Permit linkedToken = IERC20Permit(linkedTokenAddress);
+        
 
-        permit(linkedTokenAddress, _owner, nonce, signature);
+        // default params for deposit permit() call
+        bool allowed = true;
+        uint256 expiry = uint256(-1);
+        address spender = address(this);
+        permit(linkedTokenAddress, _owner, nonce, allowed, expiry, spender, signature);
 
         linkedToken.transferFrom(
             _owner,
@@ -104,17 +108,28 @@ contract Behaviour20200220 is Behaviour20200207 {
 
     /**
     * @dev Call linkedToken.permit(), to grant an address approval to spend linkedToken tokens
-    * on holder's behalf. Makes use of the new DAI permit() method
+    * on holder's behalf. Makes use of the new DAI permit() method. Permissioning is performed by 
+    * signature verification. 
+    * 
+    * Method exposed to give user agency over revoking/approving, setting expiry, spender etc. 
     *
     * @param linkedTokenAddress - address of the linkedToken
     * @param holder - owner of the ERC20 tokens, which are being approved to be spent by the spender
-    * @param signature - signature required for permit function
+    * @param nonce - permit nonce used for signature replay protection
+    * @param allowed - bool representing whether approval is being granted or revoked
+    * @param expiry - period of time for which the approval is valid
+    * @param spender - address being approved to spend 
+    * @param signature - EIP712 signature supplied to permit() for granting approval
     */
-    function permit(address linkedTokenAddress, address holder, uint256 nonce, bytes memory signature) public {
-        bool allowed = true;
-        uint256 expiry = uint256(-1);
-        address spender = address(this);
-
+    function permit(
+        address linkedTokenAddress,
+        address holder,
+        uint256 nonce,
+        bool allowed,
+        uint256 expiry,
+        address spender,
+        bytes memory signature
+    ) public {
         bytes32 r;
         bytes32 s;
         uint8 v;
