@@ -47,7 +47,7 @@ export default class ApiManager {
             }
 
             if (!this.autoRefreshOnProfileChange) {
-                this.disable();
+                this.disable(this.currentOptions, true);
             } else if (!this.aztecAccount && !this.sessionPromise) {
                 this.generateDefaultApis();
             }
@@ -59,6 +59,7 @@ export default class ApiManager {
     async generateDefaultApis() {
         const apis = await ApiPermissionService.generateApis();
         this.setApis(apis);
+        return apis;
     }
 
     bindOneTimeProfileChangeListener(cb) {
@@ -154,12 +155,14 @@ export default class ApiManager {
         return this.sessionPromise;
     };
 
-    async disable(options = this.currentOptions) {
-        this.flushEnableListeners(options);
+    async disable(options = this.currentOptions, internalCall = false) {
         this.currentOptions = null;
         this.aztecAccount = null;
         this.error = null;
-        this.unbindOneTimeProfileChangeListener();
+        this.flushEnableListeners(options);
+        if (!internalCall) {
+            this.unbindOneTimeProfileChangeListener();
+        }
         await this.generateDefaultApis();
         await ConnectionService.disconnect();
     }
@@ -167,10 +170,12 @@ export default class ApiManager {
     async refreshSession(options) {
         this.aztecAccount = null;
         this.error = null;
-        await this.generateDefaultApis();
+        const defaultApis = await this.generateDefaultApis();
         await ConnectionService.disconnect();
+        const hasWalletPermission = !!(defaultApis.web3.account && defaultApis.web3.network);
 
         let networkSwitchedDuringStart = false;
+        let abort = false;
 
         this.bindOneTimeProfileChangeListener(() => {
             networkSwitchedDuringStart = true;
@@ -190,6 +195,18 @@ export default class ApiManager {
         } = options;
 
         const tasks = [
+            async () => {
+                await Web3Service.init({
+                    providerUrl,
+                });
+                const {
+                    account,
+                    networkId,
+                } = Web3Service;
+                if (!hasWalletPermission || !account.address || !networkId) {
+                    abort = true;
+                }
+            },
             async () => ConnectionService.openConnection({
                 apiKey,
                 providerUrl,
@@ -205,7 +222,7 @@ export default class ApiManager {
                 ApiPermissionService.validateContractConfigs(networkConfig);
                 return networkConfig;
             },
-            async networkConfig => Web3Service.init(networkConfig),
+            async ({ contractsConfig }) => Web3Service.registerContractsConfig(contractsConfig),
             async () => {
                 const {
                     account: aztecAccount,
@@ -232,6 +249,7 @@ export default class ApiManager {
             let prevResult;
             await asyncForEach(tasks, async (task) => {
                 if (networkSwitchedDuringStart
+                    || abort
                     || !isEqual(options, this.currentOptions)
                 ) {
                     return;
