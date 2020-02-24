@@ -5,7 +5,6 @@ const {
     signer: { signPermit },
 } = require('aztec.js');
 const { generateAccount } = require('@aztec/secp256k1');
-const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
 const { randomHex } = require('web3-utils');
 
@@ -18,7 +17,7 @@ const ZkAsset = artifacts.require('ZkAssetOwnable');
 
 const standardAccount = require('../../../helpers/getOwnerAccount');
 
-contract('Behaviour20200220', async (accounts) => {
+contract.only('Behaviour20200220', async (accounts) => {
     let behaviour20200220;
     let manager;
     let proxyContract;
@@ -31,16 +30,13 @@ contract('Behaviour20200220', async (accounts) => {
 
     // Signature params
     const chainID = 4;
-    const nonce = 1;
+    const nonce = 0;
     const expiry = -1; // a massive number in the contract
     const allowed = true;
 
     beforeEach(async () => {
         ace = await ACE.deployed();
-
-        // deploy DAI contract
         dai = await DAI.new(chainID, opts);
-
         zkAsset = await ZkAsset.new(ace.address, dai.address, 1, {
             from: accounts[2],
         });
