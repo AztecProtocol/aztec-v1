@@ -121,11 +121,9 @@ export default class Iframe {
     }
 
     close() {
-        setTimeout(() => {
-            this.frame.style.display = 'none';
-            this.frame.height = 0;
-            this.frame.width = 0;
-        }, 500);
+        this.frame.style.display = 'none';
+        this.frame.height = 0;
+        this.frame.width = 0;
     }
 
     updateStyle({

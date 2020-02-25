@@ -71,36 +71,36 @@ class ConnectionService {
         if (!this.port) return;
 
         let requestId = this.disconnectRequestId;
+        let callbackKey = `${requestId}-disconnect`;
         if (requestId) {
             await new Promise((resolve) => {
-                if (!this.callbackMapping[requestId]) {
-                    this.callbackMapping[requestId] = {
-                        [uiCloseEvent]: [],
-                    };
+                if (!this.callbackMapping[callbackKey]) {
+                    this.callbackMapping[callbackKey] = [];
                 }
-                this.callbackMapping[requestId][uiCloseEvent].push(resolve);
+                this.callbackMapping[callbackKey].push(resolve);
             });
             return;
         }
 
         requestId = randomId();
         this.disconnectRequestId = requestId;
+        callbackKey = `${requestId}-disconnect`;
 
-        const uiDisconnected = new Promise((resolve) => {
-            this.callbackMapping[requestId] = {
-                [uiCloseEvent]: [resolve],
-            };
-        });
+        backgroundFrame.close();
 
         await this.postToBackground({
             type: clientDisconnectEvent,
             requestId,
         });
 
-        await uiDisconnected;
-
         this.disconnectRequestId = null;
         this.setInitialVars();
+
+        if (this.callbackMapping[callbackKey]) {
+            this.callbackMapping[callbackKey].forEach((cb) => {
+                cb();
+            });
+        }
     }
 
     async openConnection(clientProfile) {
