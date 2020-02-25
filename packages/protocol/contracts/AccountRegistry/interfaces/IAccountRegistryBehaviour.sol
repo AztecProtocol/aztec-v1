@@ -67,9 +67,9 @@ contract IAccountRegistryBehaviour {
         address _registryOwner,
         address _owner,
         bytes32 _proofHash,
-        bytes memory _proofData,
+        bytes calldata _proofData,
         uint256 _value,
-        bytes memory signature,
+        bytes calldata signature,
         uint256 nonce
     ) external;
 
