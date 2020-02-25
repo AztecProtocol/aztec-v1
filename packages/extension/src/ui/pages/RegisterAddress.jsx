@@ -29,6 +29,7 @@ const RegisterAddress = ({
         return {
             ...currentAccount,
             steps,
+            retryWithMetaMaskStep: registerSteps.metamask.slice(-1)[0],
             keyStore,
             pwDerivedKey,
             AZTECaddress,

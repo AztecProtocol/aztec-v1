@@ -24,6 +24,7 @@ const Register = ({
 
         return {
             steps,
+            retryWithMetaMaskStep: registerSteps.metamask.slice(-1)[0],
             address,
             isGSNAvailable,
         };
