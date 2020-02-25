@@ -46,6 +46,7 @@ contract Behaviour20200220 is Behaviour20200207 {
     * @param _value - number of ERC20s being deposited
     * @param signature - EIP712 signature supplied to permit() for granting approval
     * @param nonce - permit nonce used for signature replay protection
+    * @param expiry - unix timestamp up to which the permit is valid
      */
     function deposit(
         address _registryOwner,
