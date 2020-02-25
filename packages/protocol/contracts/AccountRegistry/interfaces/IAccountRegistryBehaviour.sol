@@ -70,7 +70,18 @@ contract IAccountRegistryBehaviour {
         bytes calldata _proofData,
         uint256 _value,
         bytes calldata signature,
-        uint256 nonce
+        uint256 nonce,
+        uint256 expiry
+    ) external;
+
+    function permit(
+        address linkedTokenAddress,
+        address holder,
+        uint256 nonce,
+        bool allowed,
+        uint256 expiry,
+        address spender,
+        bytes calldata signature
     ) external;
 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) external;
