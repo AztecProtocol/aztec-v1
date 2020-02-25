@@ -39,7 +39,6 @@ module.exports = {
             initialiseAztec: async function (callback) {
                 this.aztecContext = true;
                 await this.api.waitFor(() => !!window.aztec);
-                await this.api.evaluate(() => window.aztec.autoRefreshOnProfileChange = false);
                 await this.api.evaluate(() => {
                     return window.aztec.enable();
                 });
