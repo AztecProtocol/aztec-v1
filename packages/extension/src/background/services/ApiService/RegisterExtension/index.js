@@ -40,7 +40,7 @@ const registerExtension = async (request, connection) => {
             } = {},
         } = await registerExtensionUi(request, connection));
 
-        if (account.linkedPublicKey) {
+        if (!error && account.linkedPublicKey) {
             // query again to start EventService and NoteService
             await query(request, userPermissionQuery(`
                 linkedPublicKey
@@ -49,8 +49,18 @@ const registerExtension = async (request, connection) => {
         }
     }
 
+    const {
+        address,
+        linkedPublicKey,
+    } = account || {};
+
     return {
-        account,
+        account: !address
+            ? null
+            : {
+                address,
+                linkedPublicKey,
+            },
         error,
     };
 };
