@@ -41,7 +41,6 @@ const handleAction = async (action, params) => {
             const sigParams = ethUtil.fromRpcSig(signature);
             const publicKey = ethUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
 
-
             response = {
                 signature: result,
                 publicKey,
@@ -102,38 +101,39 @@ const handleAction = async (action, params) => {
 
             break;
         }
-            case 'metamask.eip712.permit': {
-                const {
-                    allowed,
-                    exipiry,
-                    nonce,
-                    spender,
-                    verifyingContract,
-                } = params;
+        case 'metamask.eip712.permit': {
+            const {
+                allowed,
+                expiry,
+                nonce,
+                spender,
+                verifyingContract,
+            } = params;
 
-                const permitSchema = permit({
-                    allowed,
-                    exipiry,
-                    nonce,
-                    spender,
-                    verifyingContract
-                });
-                const method = 'eth_signTypedData_v4';
-                const { result } = await Web3Service.sendAsync({
-                    method,
-                    params: [address, permitSchema],
-                    from: address,
-                });
+            const permit = permitSchema({
+                allowed,
+                expiry,
+                nonce,
+                spender,
+                holder: address,
+                verifyingContract,
+                chainId: Web3Service.networkId,
+            });
+            const method = 'eth_signTypedData_v4';
+            const { result } = await Web3Service.sendAsync({
+                method,
+                params: [address, permit],
+                from: address,
+            });
 
-                response = {
-                    signature: result,
-                };
+            response = {
+                signature: result,
+            };
 
-                break;
-            }
-            default:
+            break;
         }
         default:
+            break;
     }
 
     return response;

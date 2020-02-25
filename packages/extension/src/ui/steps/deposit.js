@@ -124,6 +124,32 @@ const stepSendViaGSN = {
     submitTextKey: 'transaction.send.submit',
 };
 
+const stepSendViaGSNPermit = {
+    name: 'send',
+    descriptionKey: 'transaction.gsn.send.description',
+    blockStyle: 'sealed',
+    tasks: [
+        {
+            titleKey: 'transaction.step.create.proof',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.sign',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.relay',
+            run: apis.asset.depositWithPermit,
+        },
+        {
+            titleKey: 'transaction.confirmed',
+        },
+    ],
+    showTaskList: true,
+    autoStart: true,
+    submitTextKey: 'transaction.send.submit',
+};
+
 export default {
     gsn: [
         stepApproveERC20,
@@ -138,7 +164,7 @@ export default {
     gsnWithPermit: [
         stepPermitERC20,
         stepConfirmForGSN,
-        stepSendViaGSN,
+        stepSendViaGSNPermit,
     ],
 
     metamask: [

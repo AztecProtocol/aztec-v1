@@ -8,8 +8,9 @@ pragma solidity >=0.5.0 <0.6.0;
  * (https://github.com/OpenZeppelin/openzeppelin-solidity/blob/master/contracts/token/ERC20/IERC20.sol) 
  * and with an added permit() and mint() function. 
  */
-interface IERC20Permit {
+contract IERC20Permit {
 
+    mapping (address => uint)                      public nonces;
     function transfer(address to, uint256 value) external returns (bool);
 
     function approve(address spender, uint256 value) external returns (bool);

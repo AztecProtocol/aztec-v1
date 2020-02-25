@@ -7,21 +7,22 @@ const {
     },
 } = utils;
 
-
 export default ({
     spender,
     verifyingContract,
     allowed,
     expiry,
-    spender,
-    nonce
+    nonce,
+    chainId,
+    holder,
 }) => {
-    const domain = signer.generateDAIDomainparams(chainId, verifyingContract);
+    const domain = signer.generateDAIDomainParams(chainId, verifyingContract);
     const schema = eip712.PERMIT_SIGNATURE;
 
     const message = {
         allowed,
         spender,
+        holder,
         expiry,
         nonce,
     };

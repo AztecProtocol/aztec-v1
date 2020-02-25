@@ -3,52 +3,52 @@ import Web3Service from '~/helpers/Web3Service';
 
 export default async function permitERC20({
     asset,
-    requestedAllowance,
     allowanceSpender,
 }) {
-
-
     const {
         linkedTokenAddress,
     } = asset;
 
     let error;
+    let nonce;
     try {
-       const nonce =  await Web3Service
-            .useContract('ERC20')
+        nonce = await Web3Service
+            .useContract('IERC20Permit')
             .at(linkedTokenAddress)
             .method('nonces')
-            .send(
+            .call(
                 allowanceSpender,
             );
     } catch (e) {
+        console.log(e);
         error = e;
     }
-    const exipry = Date.now() + 24 * 60 * 60;
+    const expiry = Date.now() + 24 * 60 * 60;
     const {
         signature,
-        error,
+        error: errorSig,
     } = await ConnectionService.post({
         action: 'metamask.eip712.permit',
         data: {
             nonce,
             expiry,
-            allowed: requestedAllowance
+            allowed: true,
+            verifyingContract: linkedTokenAddress,
             spender: allowanceSpender,
         },
     });
 
-    if (error) {
+    if (errorSig || error) {
         return {
-            error,
+            error: errorSig || error,
         };
     }
 
     return {
-        spender: sender,
+        spender: allowanceSpender,
         nonce,
         expiry,
-        allowed; requestedAllowance,
+        allowed: true,
         signature,
     };
 }
