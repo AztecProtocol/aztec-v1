@@ -54,56 +54,17 @@ contract Behaviour20200220 is Behaviour20200207 {
         bytes memory _proofData,
         uint256 _value,
         bytes memory signature,
-        uint256 nonce     
+        uint256 nonce,
+        uint256 expiry     
     ) public {
-        bytes memory proofOutputs = ace.validateProof(
-            JOIN_SPLIT_PROOF,
-            address(this),
-            _proofData
-        );
-
-
-        if (_owner != _msgSender()) {
-            require(
-                userToAZTECAccountMapping[_owner] == _msgSender(),
-                "Sender has no permission to deposit on owner's behalf."
-            );
-
-            (,
-            bytes memory proofOutputNotes,
-            ,
-            ) = proofOutputs.get(0).extractProofOutput();
-            uint256 numberOfNotes = proofOutputNotes.getLength();
-            for (uint256 i = 0; i < numberOfNotes; i += 1) {
-                (address owner,,) = proofOutputNotes.get(i).extractNote();
-                require(owner == _owner, "Cannot deposit note to other account if sender is not the same as owner.");
-            }
-        }
-
-        (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);
-        IERC20Permit linkedToken = IERC20Permit(linkedTokenAddress);
-        
+        (address linkedTokenAddress,,,,,,,) = ace.getRegistry(_registryOwner);        
 
         // default params for deposit permit() call
         bool allowed = true;
-        uint256 expiry = uint256(-1);
         address spender = address(this);
         permit(linkedTokenAddress, _owner, nonce, allowed, expiry, spender, signature);
 
-        linkedToken.transferFrom(
-            _owner,
-            address(this),
-            _value
-        );
-
-        linkedToken.approve(address(ace), _value);
-
-        ace.publicApprove(_registryOwner, _proofHash, _value);
-
-        IZkAsset(_registryOwner).confidentialTransferFrom(
-            JOIN_SPLIT_PROOF,
-            proofOutputs.get(0)
-        );
+        super.deposit(_registryOwner, _owner, _proofHash, _proofData, _value);
     }
 
     /**

@@ -16,6 +16,7 @@ const DAI = artifacts.require('./test/ERC20/DAI/Dai');
 const ZkAsset = artifacts.require('ZkAssetOwnable');
 
 const standardAccount = require('../../../helpers/getOwnerAccount');
+const timetravel = require('../../../timeTravel');
 
 contract('Behaviour20200220', async (accounts) => {
     let behaviour20200220;
@@ -172,8 +173,8 @@ contract('Behaviour20200220', async (accounts) => {
             const depositAmount = publicValue * -1;
 
             const { receipt } = await proxyContract.methods[
-                'deposit(address,address,bytes32,bytes,uint256,bytes,uint256)'
-            ](zkAsset.address, userAddress, proofHash, proofData, depositAmount, signature, nonce, { from: userAddress });
+                'deposit(address,address,bytes32,bytes,uint256,bytes,uint256,uint256)'
+            ](zkAsset.address, userAddress, proofHash, proofData, depositAmount, signature, nonce, expiry, { from: userAddress });
 
             expect(receipt.status).to.equal(true);
             expect((await dai.balanceOf(userAddress)).toNumber()).to.equal(tokensMinted - depositAmount);
@@ -228,6 +229,7 @@ contract('Behaviour20200220', async (accounts) => {
         it('should fail to perform deposit if permit signature is fake', async () => {
             const nonce = 0;
             const { publicKey, address: userAddress } = standardAccount;
+            const expiry = -1;
 
             // mint DAI tokens
             const tokensMinted = 500;
@@ -251,7 +253,7 @@ contract('Behaviour20200220', async (accounts) => {
             const depositAmount = publicValue * -1;
 
             await truffleAssert.reverts(
-                proxyContract.methods['deposit(address,address,bytes32,bytes,uint256,bytes,uint256)'](
+                proxyContract.methods['deposit(address,address,bytes32,bytes,uint256,bytes,uint256,uint256)'](
                     zkAsset.address,
                     userAddress,
                     proofHash,
@@ -259,6 +261,7 @@ contract('Behaviour20200220', async (accounts) => {
                     depositAmount,
                     signature,
                     nonce,
+                    expiry,
                     { from: userAddress },
                 ),
                 'Dai/invalid-permit',
@@ -295,7 +298,7 @@ contract('Behaviour20200220', async (accounts) => {
             const depositAmount = publicValue * -1;
 
             await truffleAssert.reverts(
-                proxyContract.methods['deposit(address,address,bytes32,bytes,uint256,bytes,uint256)'](
+                proxyContract.methods['deposit(address,address,bytes32,bytes,uint256,bytes,uint256,uint256)'](
                     zkAsset.address,
                     userAddress,
                     proofHash,
@@ -303,9 +306,57 @@ contract('Behaviour20200220', async (accounts) => {
                     depositAmount,
                     signature,
                     nonce,
+                    expiry,
                     { from: userAddress },
                 ),
                 'Dai/invalid-nonce',
+            );
+        });
+
+        it('should fail to perform deposit if time is greater than expiry', async () => {
+            const nonce = 0;
+            const expiry = 100;
+            const allowed = true;
+            const { publicKey, address: userAddress } = standardAccount;
+
+            // mint DAI tokens
+            const tokensMinted = 500;
+            await dai.mint(userAddress, tokensMinted, opts);
+
+            const inputNotes = [];
+            const outputNotes = [await note.create(publicKey, 10), await note.create(publicKey, 5)];
+            const publicValue = -15;
+            const sender = proxyContract.address;
+            const publicOwner = proxyContract.address;
+
+            const depositProof = new JoinSplitProof(inputNotes, outputNotes, sender, publicValue, publicOwner);
+            const spender = proxyContract.address;
+            const signature = signPermit(chainID, dai.address, standardAccount, spender, nonce, expiry, allowed);
+
+            expect((await dai.balanceOf(userAddress)).toNumber()).to.equal(tokensMinted);
+            expect((await dai.balanceOf(ace.address)).toNumber()).to.equal(0);
+            expect((await dai.balanceOf(proxyContract.address)).toNumber()).to.equal(0);
+
+            const proofData = depositProof.encodeABI(zkAsset.address);
+            const proofHash = depositProof.hash;
+            const depositAmount = publicValue * -1;
+
+            // advance time by > expiry, to check that permit reverts due to expired expiry
+            await timetravel.advanceTimeAndBlock(1000);
+
+            await truffleAssert.reverts(
+                proxyContract.methods['deposit(address,address,bytes32,bytes,uint256,bytes,uint256,uint256)'](
+                    zkAsset.address,
+                    userAddress,
+                    proofHash,
+                    proofData,
+                    depositAmount,
+                    signature,
+                    nonce,
+                    expiry,
+                    { from: userAddress },
+                ),
+                'Dai/permit-expired',
             );
         });
     });
