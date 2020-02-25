@@ -62,6 +62,16 @@ contract IAccountRegistryBehaviour {
         bytes calldata _proofData,
         uint256 _value
     ) external;
+    
+    function deposit(
+        address _registryOwner,
+        address _owner,
+        bytes32 _proofHash,
+        bytes memory _proofData,
+        uint256 _value,
+        bytes memory signature,
+        uint256 nonce
+    ) external;
 
     function publicApprove(address _registryOwner, bytes32 _proofHash, uint256 _value) external;
 
