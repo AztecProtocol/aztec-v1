@@ -9,10 +9,10 @@ const production = {
 };
 
 const development = {
-    origin: 'http://localhost:5555',
-    public: 'http://localhost:5555/sdk/public',
-    background: 'http://localhost:5555/sdk/public/background.html',
-    ui: 'http://localhost:5555/sdk/public/ui.html',
+    origin: 'https://localhost:5555',
+    public: 'https://localhost:5555/sdk/public',
+    background: 'https://localhost:5555/sdk/public/background.html',
+    ui: 'https://localhost:5555/sdk/public/ui.html',
     apiKeyQuota,
 };
 

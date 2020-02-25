@@ -26,6 +26,7 @@ npm-debug.log*
 scTopics
 yarn-debug.log*
 yarn-error.log*
+*.pem
 
 # packages
 packages/aztec.js/package-lock.json
