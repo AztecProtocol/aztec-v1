@@ -28,6 +28,7 @@ const registerExtension = async (request, connection) => {
     } = await query(request, userPermissionQuery(`
         address
         linkedPublicKey
+        spendingPublicKey
         blockNumber
     `)) || {};
 
@@ -52,6 +53,7 @@ const registerExtension = async (request, connection) => {
     const {
         address,
         linkedPublicKey,
+        spendingPublicKey,
     } = account || {};
 
     return {
@@ -60,6 +62,7 @@ const registerExtension = async (request, connection) => {
             : {
                 address,
                 linkedPublicKey,
+                spendingPublicKey,
             },
         error,
     };

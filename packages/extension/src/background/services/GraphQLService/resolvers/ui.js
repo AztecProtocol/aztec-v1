@@ -1,4 +1,3 @@
-import userModel from '~/database/models/user';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
 import mergeResolvers from './utils/mergeResolvers';
@@ -15,8 +14,8 @@ const uiResolvers = {
                 .call(address),
     },
     Query: {
-        user: async (_, { id }) => userModel.get({
-            id,
+        user: async (_, { address }) => fetchAztecAccount({
+            address,
         }),
         asset: async (_, { id }) => {
             const {

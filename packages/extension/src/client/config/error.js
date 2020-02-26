@@ -31,6 +31,10 @@ export default {
             linked: 'Address has no linked AZTEC extension account.',
         },
     },
+    user: {
+        unregistered: "Cannot call '%{fn}' on unregistered user.",
+        logout: "'%{fn}' can only be called on current logged in account.",
+    },
     input: {
         contract: {
             address: {

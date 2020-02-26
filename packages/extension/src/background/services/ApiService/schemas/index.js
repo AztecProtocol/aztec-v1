@@ -1,4 +1,7 @@
 import emptySchema from './emptySchema';
+import user from './user';
+import encryptMessage from './encryptMessage';
+import decryptMessage from './decryptMessage';
 import asset from './asset';
 import assetBalance from './assetBalance';
 import fetchNotesFromBalance from './fetchNotesFromBalance';
@@ -14,6 +17,9 @@ export default {
     registerExtension: emptySchema,
     registerDomain: emptySchema,
     account: emptySchema,
+    user,
+    encryptMessage,
+    decryptMessage,
     asset,
     assetBalance,
     fetchNotesFromBalance,
