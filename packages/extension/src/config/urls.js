@@ -8,6 +8,14 @@ const production = {
     apiKeyQuota,
 };
 
+const staging = {
+    origin: 'https://staging.aztecprotocol.com',
+    public: 'https://staging.aztecprotocol.com/sdk/public',
+    background: 'https://staging.aztecprotocol.com/sdk/background.html',
+    ui: 'https://staging.aztecprotocol.com/sdk/ui.html',
+    apiKeyQuota,
+};
+
 const development = {
     origin: 'https://localhost:5555',
     public: 'https://localhost:5555/sdk/public',
@@ -16,8 +24,18 @@ const development = {
     apiKeyQuota,
 };
 
-const config = process.env.NODE_ENV === 'production'
-    ? production
-    : development;
+function getConfig() {
+    if (process.env.NODE_ENV === 'production') {
+        return production;
+    }
+
+    if (process.env.NODE_ENV === 'integration') {
+        return staging;
+    }
+
+    return development;
+}
+
+const config = getConfig();
 
 export default config;

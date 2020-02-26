@@ -30,6 +30,7 @@ yarn-error.log*
 
 # packages
 packages/aztec.js/package-lock.json
+packages/extension/test/harness/index.html
 packages/contract-addresses/package-lock.json
 packages/contract-artifacts/package-lock.json
 packages/dev-utils/package-lock.json

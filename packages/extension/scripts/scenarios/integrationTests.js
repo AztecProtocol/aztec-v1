@@ -9,6 +9,7 @@ import launchGSN from '../steps/launchGSN';
 import copyContracts from '../steps/copyContracts';
 import buildSDK from '../steps/buildSDK';
 import runIntegrationTest from '../steps/runIntegrationTest';
+import setSdkServeUrl from '../steps/setSdkServeUrl';
 
 import Scenario from './scenario';
 
@@ -21,6 +22,7 @@ export default new Scenario(
         installCertificate,
         createCertificate,
         installCertificate,
+        setSdkServeUrl,
         serveSDK,
         serveTemplate,
         launchGSN,
