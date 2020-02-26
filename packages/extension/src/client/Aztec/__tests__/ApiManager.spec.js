@@ -2,6 +2,7 @@ import asyncForEach from '~/utils/asyncForEach';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiPermissionService from '~/client/services/ApiPermissionService';
+import Account from '~/client/apis/Account';
 import ApiManager from '../ApiManager';
 
 jest.spyOn(ConnectionService, 'init')
@@ -119,10 +120,17 @@ describe('ApiManager.handleResolveSession', () => {
             aztecAccount,
         });
 
-        expect(manager.aztecAccount).toBe(aztecAccount);
+        expect(manager.aztecAccount).toBeInstanceOf(Account);
+        expect(manager.aztecAccount.address).toBe(aztecAccount.address);
         expect(manager.error).toBe(null);
         expect(profileListener).toHaveBeenCalledTimes(1);
-        expect(profileListener).toHaveBeenLastCalledWith('aztecAccountChanged', aztecAccount, null);
+        expect(profileListener).toHaveBeenLastCalledWith(
+            'aztecAccountChanged',
+            expect.objectContaining({
+                address: aztecAccount.address,
+            }),
+            null,
+        );
         expect(flushEnableListenersSpy).toHaveBeenCalledTimes(1);
         expect(flushEnableListenersSpy).toHaveBeenCalledWith(options);
     });
