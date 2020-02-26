@@ -240,16 +240,17 @@ export default class ZkAsset {
     * Send
     *
     * - transactions ([Transaction!]!)
-    *       amount (Int!):                The note value to send.
-    *       to (Address!):                The output note owner.
-    *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
+    *       amount (Int!):                  The note value to send.
+    *       to (Address!):                  The output note owner.
+    *       numberOfOutputNotes (Int):      Number of output notes of this transaction.
+    *       aztecAccountNotRequired (Bool): Not to enforce receipient to have an aztec account if set to true.
     * - options (Object)
-    *       numberOfInputNotes (Int):     Number of notes to be destroyed.
-    *                                     Will use default value in setting if undefined.
-    *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
-    *                                     Unless numberOfOutputNotes is defined in that transaction.
-    *                                     Will use default value in setting if undefined.
-    *       userAccess ([Address!]):      The addresses that are able to see the real note value.
+    *       numberOfInputNotes (Int):       Number of notes to be destroyed.
+    *                                       Will use default value in setting if undefined.
+    *       numberOfOutputNotes (Int):      Number of new notes for each transaction.
+    *                                       Unless numberOfOutputNotes is defined in that transaction.
+    *                                       Will use default value in setting if undefined.
+    *       userAccess ([Address!]):        The addresses that are able to see the real note value.
     *
     * @returns (Object)
     * - success (Boolean)
