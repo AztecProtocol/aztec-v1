@@ -18,8 +18,13 @@ const dataProperties = [
 export default class ZkAsset {
     constructor({
         id,
+        ...asset
     } = {}) {
+        dataProperties.forEach((key) => {
+            this[key] = asset[key];
+        });
         this.id = id;
+        this.subscriptions = new SubscriptionManager();
     }
 
     get valid() {
@@ -29,23 +34,6 @@ export default class ZkAsset {
     isValid() {
         return !!this.address;
     }
-
-    init = async () => {
-        if (this.isValid()) return;
-
-        const { asset } = await ConnectionService.query(
-            'asset',
-            { id: this.id },
-        ) || {};
-
-        if (asset) {
-            dataProperties.forEach((key) => {
-                this[key] = asset[key];
-            });
-        }
-
-        this.subscriptions = new SubscriptionManager();
-    };
 
     async balance() {
         const { balance } = await ConnectionService.query(
