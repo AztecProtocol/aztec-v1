@@ -13,7 +13,9 @@
     "@openzeppelin/network": "^0.2.10",
     "@openzeppelin/upgrades": "^2.6.0",
     "axios": "^0.19.0",
-    "openzeppelin-solidity": "^2.4.0"
+    "openzeppelin-solidity": "^2.4.0",
+    "web3": "^1.2.6",
+    "web3-eth-abi": "^1.2.6"
   },
   "devDependencies": {
     "@0x/sol-coverage": "^3.0.0",
