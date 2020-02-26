@@ -35,6 +35,6 @@ export default async function confidentialTransferFrom({
 
     return {
         ...response,
-        success: !!(response && response.txReceipt),
+        success: !!(response && response.success),
     };
 }
