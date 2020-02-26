@@ -10,7 +10,6 @@ const ACEAddress = '0xb9Bb032206Da5B033a47E62D905F26269DAbE839';
 module.exports = (deployer) => {
     return deployer.deploy(AccountRegistryBehaviour).then(async (behaviourContract) => {
         const trustedGSNSignerAddress = process.env.TRUSTED_GSN_SIGNER_ADDRESS;
-        console.log({ trustedGSNSignerAddress });
         await behaviourContract.initialize(ACEAddress, trustedGSNSignerAddress);
     });
 };
