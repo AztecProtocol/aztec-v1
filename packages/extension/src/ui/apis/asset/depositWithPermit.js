@@ -26,6 +26,7 @@ export default async function deposit({
             erc20Amount.toString(),
             signature,
             nonce,
+            expiry,
         ],
     };
 
