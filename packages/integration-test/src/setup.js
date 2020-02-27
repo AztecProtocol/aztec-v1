@@ -109,8 +109,9 @@ class Setup {
      * @param {string} address - (optional) address at which the contract should be instantiated. Can be supplied to override the
      * default address used, whereby the default is the address associated with the `nameOfContract`.
      *
-     * An example of where `address` will be supplied is when generating a deployed proxy contract. In this case the address will be
-     * the address of the proxy, whilst `nameOfContract` will be the behaviour implementation the address is cast with.
+     * An example of where `address` will be supplied is when generating a deployed
+     * proxy contract. In this case the address will be the address of the proxy, whilst
+     * `nameOfContract` will be the behaviour implementation the address is cast with.
      */
     getContractPromise(nameOfContract, address = null) {
         const extractedContractArtifact = contractArtifacts[nameOfContract];
