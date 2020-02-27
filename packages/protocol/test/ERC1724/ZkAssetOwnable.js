@@ -208,7 +208,7 @@ contract('ZkAssetOwnable', (accounts) => {
                 withdrawalPublicValue,
             } = await helpers.getDefaultDepositAndTransferNotes();
 
-            const outputNotesOwnedByContract = depositOutputNotes.map(noteData => {
+            const outputNotesOwnedByContract = depositOutputNotes.map((noteData) => {
                 // eslint-disable-next-line no-param-reassign
                 noteData.owner = zkAssetOwnableTest.address;
                 return noteData;
@@ -710,8 +710,7 @@ contract('ZkAssetOwnable', (accounts) => {
             const transferData = transferProof.encodeABI(zkAssetOwnable.address);
 
             await truffleAssert.reverts(
-                zkAssetOwnableTest
-                    .callApproveAndTransferFrom(JOIN_SPLIT_PROOF, transferData),
+                zkAssetOwnableTest.callApproveAndTransferFrom(JOIN_SPLIT_PROOF, transferData),
                 'the note owner did not sign this message',
             );
         });
