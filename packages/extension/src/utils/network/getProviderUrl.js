@@ -21,7 +21,7 @@ export default function getProviderUrl(networkId, projectId = infuraProjectId) {
     } = network;
 
     return formatStrPattern(infuraProviderUrlPattern, {
-        networkName,
+        networkName: networkName.toLowerCase(),
         projectId,
     });
 }

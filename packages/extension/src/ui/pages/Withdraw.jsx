@@ -30,11 +30,12 @@ const Withdraw = ({
             proxyContract,
         } = gsnConfig;
         const steps = isGSNAvailable ? withdrawSteps.gsn : withdrawSteps.metamask;
-        const sender = isGSNAvailable ? proxyContract : currentAddress;
+        const sender = proxyContract;
         const asset = await makeAsset(assetAddress);
 
         return {
             steps,
+            retryWithMetaMaskStep: withdrawSteps.metamask.slice(-1)[0],
             assetAddress,
             asset,
             currentAddress,
@@ -43,6 +44,7 @@ const Withdraw = ({
             spender: sender,
             sender,
             numberOfInputNotes,
+            isGSNAvailable,
         };
     };
 

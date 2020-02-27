@@ -4,14 +4,17 @@ import {
 } from '~/utils/log';
 import ApiManager from './ApiManager';
 
-const manager = new ApiManager();
+let manager;
 
 class Aztec {
     constructor() {
-        const apis = manager.generateDefaultApis();
-        Object.keys(apis).forEach((apiName) => {
-            this[apiName] = apis[apiName];
-        });
+        manager = new ApiManager();
+
+        manager.setApis = (apis) => {
+            Object.keys(apis).forEach((apiName) => {
+                this[apiName] = apis[apiName];
+            });
+        };
 
         Object.keys(aztec).forEach((name) => {
             if (this[name]) {
@@ -20,6 +23,26 @@ class Aztec {
             }
             this[name] = aztec[name];
         });
+    }
+
+    async generateInitialApis() { // eslint-disable-line class-methods-use-this
+        await manager.generateDefaultApis();
+    }
+
+    get enabled() { // eslint-disable-line class-methods-use-this
+        return !!manager.aztecAccount;
+    }
+
+    get account() { // eslint-disable-line class-methods-use-this
+        return manager.aztecAccount;
+    }
+
+    get autoRefreshOnProfileChange() { // eslint-disable-line class-methods-use-this
+        return manager.autoRefreshOnProfileChange;
+    }
+
+    set autoRefreshOnProfileChange(autoRefresh) { // eslint-disable-line class-methods-use-this
+        manager.autoRefreshOnProfileChange = autoRefresh;
     }
 
     addListener(eventName, callback) { // eslint-disable-line class-methods-use-this
@@ -33,17 +56,9 @@ class Aztec {
     enable = async (
         options = {},
         callback = null,
-    ) => manager.enable(options, callback, (apis) => {
-        Object.keys(apis).forEach((apiName) => {
-            this[apiName] = apis[apiName];
-        });
-    });
+    ) => manager.enable(options, callback);
 
-    disable = async () => manager.disable((apis) => {
-        Object.keys(apis).forEach((apiName) => {
-            this[apiName] = apis[apiName];
-        });
-    });
+    disable = async () => manager.disable();
 }
 
 export default Aztec;

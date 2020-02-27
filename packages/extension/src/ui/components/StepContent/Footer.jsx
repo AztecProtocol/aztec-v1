@@ -220,6 +220,7 @@ class Footer extends PureComponent {
                         testId="button-step-previous"
                         className={styles['footer-button']}
                         theme="white"
+                        size="xl"
                         text={prevText}
                         onSubmit={onPrevious}
                         disabled={loading || disableOnPrevious}
@@ -230,6 +231,7 @@ class Footer extends PureComponent {
                     <Button
                         testId="button-step-next"
                         className={styles['footer-button']}
+                        size="xl"
                         text={nextText}
                         onSubmit={onNext}
                         loading={loading}

@@ -1,7 +1,6 @@
 import asyncMap from '~/utils/asyncMap';
 import NoteService from '~/background/services/NoteService';
 import Web3Service from '~/helpers/Web3Service';
-import settings from '~/background/utils/settings';
 import getViewingKeyFromMetadata from './getViewingKeyFromMetadata';
 
 export default async function pickNotesFromBalance(args) {
@@ -24,7 +23,7 @@ export default async function pickNotesFromBalance(args) {
         assetId,
         amount,
         {
-            numberOfNotes: numberOfNotes || await settings('NUMBER_OF_INPUT_NOTES'),
+            numberOfNotes,
         },
     );
 

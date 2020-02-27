@@ -7,6 +7,8 @@ import {
 
 class Web3Service {
     constructor() {
+        this.providerUrl = '';
+        this.provider = null;
         this.web3 = null;
         this.eth = null;
         this.contracts = {};
@@ -29,44 +31,52 @@ class Web3Service {
         contractsConfig,
         account,
     } = {}) {
-        this.reset();
-
-        let provider;
-        if (providerUrl) {
-            if (providerUrl.match(/^wss?:\/\//)) {
-                provider = new Web3.providers.WebsocketProvider(providerUrl);
+        let {
+            web3,
+            provider,
+        } = this;
+        if (!web3 || providerUrl !== this.providerUrl) {
+            if (providerUrl) {
+                if (providerUrl.match(/^wss?:\/\//)) {
+                    provider = new Web3.providers.WebsocketProvider(providerUrl);
+                } else {
+                    provider = new Web3.providers.HttpProvider(providerUrl);
+                }
             } else {
-                provider = new Web3.providers.HttpProvider(providerUrl);
+                provider = window.ethereum;
             }
-        } else {
-            provider = window.ethereum;
             // TODO - to be removed
             // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
             provider.autoRefreshOnNetworkChange = false;
+
+            if (!provider) {
+                errorLog('Provider cannot be empty.');
+                return;
+            }
+
+            if (typeof provider.enable === 'function') {
+                await provider.enable();
+            }
+
+            web3 = new Web3(provider);
+
+            this.providerUrl = providerUrl;
+            this.provider = provider;
+            this.web3 = web3;
+            this.eth = web3.eth;
         }
 
-        if (!provider) {
-            errorLog('Provider cannot be empty.');
-            return;
-        }
-
-        if (provider
-            && typeof provider.enable === 'function'
-        ) {
-            await provider.enable();
-        }
-
-        const web3 = new Web3(provider);
         const networkId = await web3.eth.net.getId();
-
-        this.web3 = web3;
-        this.eth = web3.eth;
         this.networkId = networkId || 0;
 
         if (account) {
             this.account = account;
         } else {
-            const [address] = await web3.eth.getAccounts();
+            let [address] = await web3.eth.getAccounts();
+            if (!address && typeof provider.enable === 'function') {
+                await provider.enable();
+                [address] = await web3.eth.getAccounts();
+            }
             this.account = {
                 address,
             };

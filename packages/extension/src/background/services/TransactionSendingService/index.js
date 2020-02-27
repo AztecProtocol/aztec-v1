@@ -42,6 +42,7 @@ const sendTransaction = async (query, connection) => {
         return {
             ...query,
             data: {
+                success: !!receipt,
                 txReceipt: receipt,
             },
             responseId,

@@ -6,7 +6,7 @@
         "**/*.scss"
     ],
     "license": "LGPL-3.0",
-    "version": "1.3.0",
+    "version": "1.8.0",
     "author": "AZTEC",
     "bugs": {
         "url": "https://github.com/AztecProtocol/AZTEC/issues"
@@ -66,7 +66,7 @@
         "normalize.css": "^8.0.1",
         "prop-types": "^15.7.2",
         "psl": "^1.2.0",
-        "puppeteer": "^1.20.0",
+        "puppeteer": "^2.1.1",
         "react": "^16.8.6",
         "react-dev-utils": "^9.0.3",
         "react-dom": "^16.8.6",
@@ -91,7 +91,7 @@
     },
     "scripts": {
         "copy": "babel-node scripts/run copy",
-        "deploy:contracts": "babel-node scripts/run deployContracts",
+        "deploy:contracts": "babel-node scripts/run deploy",
         "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh extension",
         "generate:styles": "guacamole generateStyles",
         "generate:testData": "babel-node ./tests/generateTestData",
@@ -102,7 +102,7 @@
         "build:prod": "webpack --config webpack.prod.js",
         "start:ganache": "babel-node scripts/run start",
         "start:ui": "babel-node ./src/ui/mock/devServer",
-        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && NODE_ENV=integration truffle test ./test/*",
+        "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && babel-node scripts/run integrationTests",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
         "watch": "webpack --watch --config webpack.dev.js"
     },

@@ -45,6 +45,9 @@ export default {
             relayer: 'Relayer is not available at the moment. Please try again later.',
         },
     },
+    error: {
+        _: 'Error',
+    },
     success: 'Transaction completed!',
     autoClose: 'This window will close automatically when the transaction is confirmed.',
 };

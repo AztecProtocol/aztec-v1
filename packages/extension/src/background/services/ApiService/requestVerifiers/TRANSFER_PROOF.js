@@ -1,3 +1,6 @@
+import {
+    argsError,
+} from '~/utils/error';
 import ensureInputNotes from '../utils/ensureInputNotes';
 import validateAccounts from '../utils/validateAccounts';
 
@@ -19,7 +22,16 @@ export default async function verifyTransferRequest({
         return noteError;
     }
 
-    const addresses = transactions.map(({ to }) => to);
+    const addresses = transactions
+        .filter(({ aztecAccountNotRequired }) => !aztecAccountNotRequired)
+        .map(({ to }) => to);
+
+    if (addresses.length !== transactions.length
+        && (!userAccess || !userAccess.length)
+    ) {
+        return argsError('note.viewingKey.noAccess');
+    }
+
     if (userAccess && userAccess.length > 0) {
         userAccess.forEach((address) => {
             if (addresses.indexOf(address) < 0) {

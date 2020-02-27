@@ -19,21 +19,11 @@ const stepSignNotes = {
     tasks: [
         {
             type: 'sign',
-            run: apis.note.signNotes,
+            run: apis.note.signProof,
         },
     ],
     autoStart: true,
     submitTextKey: 'transaction.sign.submit',
-};
-
-const stepSignNotesForGSN = {
-    ...stepSignNotes,
-    tasks: [
-        {
-            type: 'sign',
-            run: apis.note.signProof,
-        },
-    ],
 };
 
 const stepConfirm = {
@@ -65,7 +55,7 @@ const stepSend = {
         {
             titleKey: 'withdraw.send.step',
             type: 'sign',
-            run: apis.asset.confidentialTransfer,
+            run: apis.asset.confidentialTransferFrom,
         },
         {
             titleKey: 'transaction.confirmed',
@@ -105,7 +95,7 @@ const stepSendViaGSN = {
 export default {
     gsn: [
         stepApprove,
-        stepSignNotesForGSN,
+        stepSignNotes,
         stepConfirmViaGSN,
         stepSendViaGSN,
     ],

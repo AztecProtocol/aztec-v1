@@ -40,7 +40,7 @@ const CustomButton = ({
 CustomButton.propTypes = {
     testId: PropTypes.string,
     className: PropTypes.string,
-    theme: themeType,
+    theme: PropTypes.oneOf(['white', 'primary', 'secondary']),
     outlined: PropTypes.bool,
     disabled: PropTypes.bool,
     loading: PropTypes.bool,
