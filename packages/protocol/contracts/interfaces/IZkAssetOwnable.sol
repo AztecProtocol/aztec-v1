@@ -49,7 +49,7 @@ interface IZkAssetOwnable {
     * note, or if permission is being revoked. True if approved, false if not approved
     * @param _signature - ECDSA signature from the note owner that validates the
     * confidentialApprove() instruction
-    */ 
+    */
     function confidentialApprove(
         bytes32 _noteHash,
         address _spender,
