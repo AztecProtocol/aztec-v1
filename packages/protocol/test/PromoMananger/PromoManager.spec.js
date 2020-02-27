@@ -42,10 +42,10 @@ contract('PromoManager', async (accounts) => {
             const opts = { from: accounts[0], gas: 4700000 };
 
             // [fundNote] = await helpers.getNotesForAccount(managerAccount, [totalValue]);
+            zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             promoManager = await PromoManager.new(ace.address, managerAccount.addreess, zkAsset.address );
             fundNote = await note.create(managerAccount.publicKey, 100);
             fundNote.owner = promoManager.address;
-            zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             // fundNote.owner = promoManager.address;
             await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), opts);
             await erc20.approve(ace.address, scalingFactor.mul(tokensTransferred), opts);
@@ -69,7 +69,7 @@ contract('PromoManager', async (accounts) => {
             });
 
             it('should be able to call setCodes', async () => {
-                const {receipt} = await promoManager.initialize( fundNote.noteHash);
+                 await promoManager.initialize( fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
                 code1.owner = promoManager.address;
                 remainder.owner = promoManager.address;
@@ -116,7 +116,7 @@ contract('PromoManager', async (accounts) => {
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
                 code1.owner = promoManager.address;
                 remainder.owner = promoManager.address;
-                const proofSetCodes = new JoinSplitProof([fundNote], [remainder, code1], promoManager.address,0 ,accounts[0]);
+                const proofSetCodes = new JoinSplitProof([fundNote], [remainder, code1,], promoManager.address,0 ,accounts[0]);
                 const proofDataSetCodes = proofSetCodes.encodeABI(promoManager.address);
 
                 const {receipt} = await promoManager.setCodes([keccak256(Web3EthAbi.encodeParameters(['string'], ['1234']))], proofDataSetCodes);
