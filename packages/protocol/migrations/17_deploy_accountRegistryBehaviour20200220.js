@@ -2,7 +2,7 @@
 const dotenv = require('dotenv');
 
 dotenv.config();
-const AccountRegistryBehaviour20200220 = artifacts.require('./AccountRegistry/epochs/20200207/Behaviour20200220');
+const AccountRegistryBehaviour20200220 = artifacts.require('./AccountRegistry/epochs/20200220/Behaviour20200220');
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
 
 module.exports = (deployer, network) => {
