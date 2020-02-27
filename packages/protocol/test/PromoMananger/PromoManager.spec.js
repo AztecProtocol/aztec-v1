@@ -165,19 +165,19 @@ contract('PromoManager', async (accounts) => {
                     managerAccount.privateKey,
                 );
                 await zkAsset.confidentialApprove(fundNote.noteHash, promoManager.address,true ,signature);
-                const signature = signer.signNoteForConfidentialApprove(
+
+                const {receipt} = await promoManager.setCodes([keccak256(Web3EthAbi.encodeParameters(['string'], ['1234']))], proofDataSetCodes);
+                expect(receipt.status).to.equal(true);
+
+                const {receipt: receipt2} = await promoManager.claim1(keccak256(Web3EthAbi.encodeParameters(['string', 'uint256', 'address'], ['1234', 55, accounts[0]])));
+                const signature2 = signer.signNoteForConfidentialApprove(
                     zkAsset.address,
                     code1.noteHash,
                     promoManager.address,
                     true,
                     managerAccount.privateKey,
                 );
-                await zkAsset.confidentialApprove(code1.noteHash, promoManager.address,true ,signature);
-
-                const {receipt} = await promoManager.setCodes([keccak256(Web3EthAbi.encodeParameters(['string'], ['1234']))], proofDataSetCodes);
-                expect(receipt.status).to.equal(true);
-
-                const {receipt: receipt2} = await promoManager.claim1(keccak256(Web3EthAbi.encodeParameters(['string', 'uint256', 'address'], ['1234', 55, accounts[0]])));
+                await zkAsset.confidentialApprove(code1.noteHash, promoManager.address,true ,signature2);
 
                 expect(receipt2.status).to.equal(true);
                 const [code1New] = await helpers.getNotesForAccount(managerAccount, [10]);
