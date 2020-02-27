@@ -1,6 +1,5 @@
 /* global artifacts */
 const dotenv = require('dotenv');
-const { getContractAddressesForNetwork, NetworkId: networkIds } = require('@aztec/contract-addresses');
 
 dotenv.config();
 const AccountRegistryBehaviour20200220 = artifacts.require('./AccountRegistry/epochs/20200207/Behaviour20200220');
@@ -15,9 +14,7 @@ module.exports = (deployer, network) => {
         if (isLocal) {
             managerContract = await AccountRegistryManager.deployed();
         } else {
-            const formattedNetwork = network[0].toUpperCase() + network.slice(1);
-            const { AccountRegistryManager: managerAddress } = getContractAddressesForNetwork(networkIds[formattedNetwork]);
-            managerContract = await AccountRegistryManager.at(managerAddress);
+            managerContract = await AccountRegistryManager.at(AccountRegistryManager.address);
         }
 
         // Perform the upgrade
