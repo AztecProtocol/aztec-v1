@@ -78,11 +78,9 @@ contract PromoManager is GSNRecipientTimestampSignature {
 
     constructor(
         address _aceAddress,
-        address _trustedGSNSignerAddress, 
         address _zkDaiAddress
     ) public {
 
-        GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
 
         _owner = msg.sender;
         zkDAI = IZkAsset(_zkDaiAddress);
@@ -92,11 +90,12 @@ contract PromoManager is GSNRecipientTimestampSignature {
 
 
 
-    function initialize( bytes32 _unallocatedNoteHash) initializer onlyOwner public {
+    function initialize( bytes32 _unallocatedNoteHash, address _trustedGSNSignerAddress) initializer onlyOwner public {
         // make this constant and remove all variables we know before hand in a constructor
 
         // initialise function should be only owner
         unallocatedNoteHash = _unallocatedNoteHash; // initialise as the zero value note
+        GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
     }
 
 
