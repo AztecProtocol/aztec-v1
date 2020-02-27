@@ -134,6 +134,7 @@ module.exports = {
             gas: 9e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '1',
+            confirmations: 2,
             skipDryRun: true,
         },
         rinkeby: {
@@ -141,6 +142,7 @@ module.exports = {
             gas: 9e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '4',
+            confirmations: 3,
             skipDryRun: true,
         },
         ropsten: {
@@ -148,6 +150,7 @@ module.exports = {
             gas: 7e6,
             gasPrice: toHex(toWei('10', 'gwei')),
             network_id: '3',
+            confirmations: 3,
             skipDryRun: true,
         },
     },
