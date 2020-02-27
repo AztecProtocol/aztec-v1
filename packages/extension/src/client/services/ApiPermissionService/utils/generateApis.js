@@ -11,6 +11,9 @@ const availableWeb3Apis = [
     'useContract',
     'getAddress',
     'deploy',
+    'registerContract',
+    'registerInterface',
+    'sendAsync',
 ];
 
 export default async function generateApis(hasPermission = false) {
