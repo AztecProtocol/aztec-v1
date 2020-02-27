@@ -1,3 +1,4 @@
+import EthCrypto from 'eth-crypto';
 import {
     uiReturnEvent,
 } from '~/config/event';
@@ -55,6 +56,7 @@ const registerExtension = async (request, connection) => {
         linkedPublicKey,
         spendingPublicKey,
     } = account || {};
+    const compressedPublicKey = `0x${EthCrypto.publicKey.compress(spendingPublicKey.slice(2))}`;
 
     return {
         account: !address
@@ -62,7 +64,8 @@ const registerExtension = async (request, connection) => {
             : {
                 address,
                 linkedPublicKey,
-                spendingPublicKey,
+                spendingPublicKey: compressedPublicKey,
+                publicKey: spendingPublicKey,
             },
         error,
     };
