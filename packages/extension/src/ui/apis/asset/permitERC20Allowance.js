@@ -20,7 +20,6 @@ export default async function permitERC20({
                 allowanceSpender,
             );
     } catch (e) {
-        console.log(e);
         error = e;
     }
     const expiry = Date.now() + 24 * 60 * 60;

@@ -374,7 +374,7 @@ class Web3Service {
                                 try {
                                     gasPrice = await web3.eth.getGasPrice();
                                 } catch (e) {
-                                    console.log(e);
+                                    errorLog(e);
                                 }
                                 return this.triggerMethod('send', {
                                     method: gsnContract.methods[methodName],
