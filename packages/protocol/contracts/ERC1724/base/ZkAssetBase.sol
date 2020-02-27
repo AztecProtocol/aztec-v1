@@ -163,7 +163,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         bytes32 signatureHash = keccak256(abi.encodePacked(_signature));
         require(signatureLog[signatureHash] != true, "signature has already been used");
-        signatureLog[signatureHash] = true;
+        // Only need to prevent replay from calls where msg.sender isn't owner of note.
+        if (_signature.length != 0) {
+            signatureLog[signatureHash] = true;
+        }
 
         bytes32 _hashStruct = keccak256(abi.encode(
                 NOTE_SIGNATURE_TYPEHASH,

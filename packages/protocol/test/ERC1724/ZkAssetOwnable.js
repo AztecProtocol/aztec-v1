@@ -198,6 +198,55 @@ contract('ZkAssetOwnable', (accounts) => {
             expect(result.status.toNumber()).to.equal(constants.statuses.NOTE_SPENT);
         });
 
+        it('should allow a contract to spend notes if it is the owner', async () => {
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
+
+            const outputNotesOwnedByContract = depositOutputNotes.map(noteData => {
+                // eslint-disable-next-line no-param-reassign
+                noteData.owner = zkAssetOwnableTest.address;
+                return noteData;
+            });
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                outputNotesOwnedByContract,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
+
+            const transferProof = new JoinSplitProof(
+                outputNotesOwnedByContract,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+
+            const { receipt } = await zkAssetOwnableTest.callApproveAndTransferFrom(JOIN_SPLIT_PROOF, transferData);
+            expect(receipt.status).to.equal(true);
+
+            const spentNoteHash = outputNotesOwnedByContract[0].noteHash;
+            const result = await ace.getNote(zkAssetOwnable.address, spentNoteHash);
+            expect(result.status.toNumber()).to.equal(constants.statuses.NOTE_SPENT);
+        });
+
         it('should delegate, using confidentialApprove(), a contract to update a note registry with kPublic = 0', async () => {
             const depositOutputNoteValues = [10, 20];
             const depositPublicValue = -30;
@@ -583,6 +632,86 @@ contract('ZkAssetOwnable', (accounts) => {
                     true,
                     emptySignature,
                 ),
+                'the note owner did not sign this message',
+            );
+        });
+
+        it('should fail to perform confidentialApprove() if signature is empty and notes not owned by sender', async () => {
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                depositPublicValue,
+                transferInputNotes,
+            } = await helpers.getDefaultDepositAndTransferNotes();
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
+
+            const emptySignature = [];
+            await truffleAssert.reverts(
+                zkAssetOwnable.confidentialApprove(
+                    transferInputNotes[0].noteHash,
+                    zkAssetOwnableTest.address,
+                    true,
+                    emptySignature,
+                ),
+                'the note owner did not sign this message',
+            );
+        });
+
+        it('should not allow a contract to spend notes if it is not the owner', async () => {
+            const {
+                depositInputNotes,
+                depositOutputNotes,
+                depositInputOwnerAccounts,
+                transferInputNotes,
+                transferOutputNotes,
+                depositPublicValue,
+                withdrawalPublicValue,
+            } = await helpers.getDefaultDepositAndTransferNotes();
+
+            const depositProof = new JoinSplitProof(
+                depositInputNotes,
+                depositOutputNotes,
+                sender,
+                depositPublicValue,
+                publicOwner,
+            );
+            const depositData = depositProof.encodeABI(zkAssetOwnable.address);
+            const depositSignatures = depositProof.constructSignatures(zkAssetOwnable.address, depositInputOwnerAccounts);
+            await ace.publicApprove(zkAssetOwnable.address, depositProof.hash, depositPublicValue, {
+                from: accounts[0],
+            });
+            await zkAssetOwnable.methods['confidentialTransfer(bytes,bytes)'](depositData, depositSignatures, {
+                from: accounts[0],
+            });
+
+            const transferProof = new JoinSplitProof(
+                transferInputNotes,
+                transferOutputNotes,
+                sender,
+                withdrawalPublicValue,
+                publicOwner,
+            );
+            const transferData = transferProof.encodeABI(zkAssetOwnable.address);
+
+            await truffleAssert.reverts(
+                zkAssetOwnableTest
+                    .callApproveAndTransferFrom(JOIN_SPLIT_PROOF, transferData),
                 'the note owner did not sign this message',
             );
         });
