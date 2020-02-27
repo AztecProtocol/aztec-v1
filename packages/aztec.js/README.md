@@ -1,9 +1,8 @@
 ## Aztec.js
 
-This library contains the methods required to construct AZTEC zero-knowledge proofs. 
+This library contains the methods required to construct AZTEC zero-knowledge proofs.
 
 It also contains various utility functions, such as methods to appropriately ABI encode the proofs and to construct the EIP712 signatures [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) required to spend AZTEC notes.
-
 
 ## Usage
 
