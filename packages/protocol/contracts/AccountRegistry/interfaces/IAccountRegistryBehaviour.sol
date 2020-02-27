@@ -39,15 +39,6 @@ contract IAccountRegistryBehaviour {
     function initialize(address _aceAddress, address _trustedGSNSignerAddress) external;
 
     function confidentialTransferFrom(
-        address _registryOwner,
-        bytes calldata _proofData,
-        bytes32[] calldata _noteHashes,
-        address _spender,
-        bool[] calldata _spenderApprovals,
-        bytes calldata _batchSignature
-    ) external;
-
-    function confidentialTransferFrom(
         uint24 _proofId,
         address _registryOwner,
         bytes calldata _proofData,
