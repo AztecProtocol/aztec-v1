@@ -16,7 +16,11 @@ const dataProperties = [
 export default class ZkNote {
     constructor({
         id,
+        ...note
     } = {}) {
+        dataProperties.forEach((key) => {
+            this[key] = note[key];
+        });
         this.id = id;
     }
 
@@ -30,26 +34,6 @@ export default class ZkNote {
 
     get destroyed() {
         return this.status === 'DESTROYED';
-    }
-
-    async init() {
-        let note;
-        try {
-            note = await ConnectionService.query(
-                'note',
-                { id: this.id },
-            );
-        } catch (error) {
-            if (error.key !== 'note.not.found') {
-                throw error;
-            }
-        }
-
-        if (note) {
-            dataProperties.forEach((key) => {
-                this[key] = note[key];
-            });
-        }
     }
 
     // @dev

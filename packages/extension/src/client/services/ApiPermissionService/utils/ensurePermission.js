@@ -15,12 +15,14 @@ export default async function ensurePermission() {
     const {
         address,
         linkedPublicKey,
+        spendingPublicKey,
     } = account;
 
     return {
         account: {
             address,
             linkedPublicKey,
+            spendingPublicKey,
         },
         domain,
     };

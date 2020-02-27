@@ -20,6 +20,7 @@ const {
     ACE,
     ZkAsset,
     ERC20,
+    IERC20Permit,
 } = configs;
 
 export {
@@ -28,4 +29,5 @@ export {
     ACE,
     ZkAsset,
     ERC20,
+    IERC20Permit,
 };

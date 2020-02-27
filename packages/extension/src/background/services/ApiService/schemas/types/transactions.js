@@ -16,6 +16,9 @@ const transactionsType = {
                 gte: 1,
             },
         },
+        aztecAccountNotRequired: {
+            type: 'boolean',
+        },
     },
 };
 

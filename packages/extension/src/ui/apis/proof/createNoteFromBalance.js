@@ -117,14 +117,14 @@ export default async function createNoteFromBalance({
     const extraAmount = sum - inputAmount;
 
     const addresses = (transactions || []).map(({ to }) => to);
-    if (extraAmount > 0) {
-        addresses.push(currentAddress);
-    }
+    addresses.push(currentAddress);
     const accountMapping = {};
     const accounts = await batchGetExtensionAccount(addresses);
     accounts.forEach((account) => {
         accountMapping[account.address] = account;
     });
+
+    const currentAccount = accountMapping[currentAddress];
 
     const outputValues = [];
     const outputNotes = [];
@@ -133,7 +133,7 @@ export default async function createNoteFromBalance({
         const {
             spendingPublicKey,
             linkedPublicKey,
-        } = accountMapping[currentAddress];
+        } = currentAccount;
         remainderNote = await createNote(
             extraAmount,
             spendingPublicKey,
@@ -161,10 +161,12 @@ export default async function createNoteFromBalance({
                 spendingPublicKey,
             } = accountMapping[to];
             outputValues.push(...values);
-            const ownerAccess = {
-                address: to,
-                linkedPublicKey,
-            };
+            const ownerAccess = !linkedPublicKey
+                ? null
+                : {
+                    address: to,
+                    linkedPublicKey,
+                };
             const userAccess = !userAccessAccounts.length
                 ? ownerAccess
                 : uniqBy(
@@ -173,10 +175,10 @@ export default async function createNoteFromBalance({
                         ownerAccess,
                     ],
                     'address',
-                );
+                ).filter(a => a);
             const newNotes = await createNotes(
                 values,
-                spendingPublicKey,
+                spendingPublicKey || currentAccount.spendingPublicKey,
                 to,
                 userAccess,
             );

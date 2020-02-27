@@ -3,6 +3,7 @@ import {
     getNetworkName,
 } from '~/utils/network';
 import Web3Service from '~/client/services/Web3Service';
+import accountFactory from '~/client/apis/accountFactory';
 import assetFactory from '~/client/apis/assetFactory';
 import noteFactory from '~/client/apis/noteFactory';
 
@@ -51,6 +52,7 @@ export default async function generateApis(hasPermission = false) {
     // TODO - assign mock modules that show warnings when calling apis before enabled
 
     return {
+        user: hasPermission ? accountFactory : null,
         zkAsset: hasPermission ? assetFactory : null,
         zkNote: hasPermission ? noteFactory : null,
         web3,

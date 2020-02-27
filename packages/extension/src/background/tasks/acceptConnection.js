@@ -10,6 +10,9 @@ import {
 import {
     permissionError,
 } from '~/utils/error';
+import {
+    errorLog,
+} from '~/utils/log';
 import Connection from '../utils/connection';
 import migrateIndexedDB from './migrateIndexedDB';
 import setupNetworkConfig from './setupNetworkConfig';
@@ -45,6 +48,7 @@ export default function acceptConnection() {
                     };
                 }
             } else if (event.origin !== resourceOrigin) {
+                errorLog(`Invalid origin '${event.origin}'. Events can only be sent from '${resourceOrigin}'.`);
                 return;
             }
 

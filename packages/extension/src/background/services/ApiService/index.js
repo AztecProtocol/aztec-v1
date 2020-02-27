@@ -1,6 +1,9 @@
 import registerExtension from './RegisterExtension';
 import registerDomain from './RegisterDomain';
 import account from './Account';
+import user from './Account/user';
+import encryptMessage from './Account/encrypt';
+import decryptMessage from './Account/decrypt';
 import prove from './Prove';
 import asset from './Asset';
 import assetBalance from './Asset/getBalance';
@@ -15,6 +18,9 @@ const apis = {
     registerExtension,
     registerDomain,
     account,
+    user,
+    encryptMessage,
+    decryptMessage,
     asset,
     assetBalance,
     fetchNotesFromBalance,

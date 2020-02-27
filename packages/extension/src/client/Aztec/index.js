@@ -33,6 +33,10 @@ class Aztec {
         return !!manager.aztecAccount;
     }
 
+    get account() { // eslint-disable-line class-methods-use-this
+        return manager.aztecAccount;
+    }
+
     get autoRefreshOnProfileChange() { // eslint-disable-line class-methods-use-this
         return manager.autoRefreshOnProfileChange;
     }

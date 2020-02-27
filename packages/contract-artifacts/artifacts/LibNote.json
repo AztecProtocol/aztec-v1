@@ -1,0 +1,48 @@
+{
+    "abi": [
+        {
+            "anonymous": true,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "bytes4",
+                    "name": "sig",
+                    "type": "bytes4"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "usr",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "arg1",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "arg2",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bytes",
+                    "name": "data",
+                    "type": "bytes"
+                }
+            ],
+            "name": "LogNote",
+            "type": "event"
+        }
+    ],
+    "bytecode": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72315820502d6a90652f9d8fa7e3d7bc3f9fcecf541fd8dbd986585dc0e2e0f6cfd27f4d64736f6c63430005100032",
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+    },
+    "deployedBytecode": "0x6080604052600080fdfea265627a7a72315820502d6a90652f9d8fa7e3d7bc3f9fcecf541fd8dbd986585dc0e2e0f6cfd27f4d64736f6c63430005100032",
+    "schemaVersion": "3.0.19"
+}

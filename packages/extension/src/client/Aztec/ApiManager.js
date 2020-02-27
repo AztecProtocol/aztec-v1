@@ -7,6 +7,7 @@ import EventListeners from '~/utils/EventListeners';
 import Web3Service from '~/client/services/Web3Service';
 import ApiPermissionService from '~/client/services/ApiPermissionService';
 import ConnectionService from '~/client/services/ConnectionService';
+import Account from '~/client/apis/Account';
 
 export default class ApiManager {
     constructor() {
@@ -106,12 +107,14 @@ export default class ApiManager {
             error = null,
         },
     ) => {
-        this.aztecAccount = aztecAccount;
+        this.aztecAccount = aztecAccount
+            ? new Account(aztecAccount)
+            : null;
         this.error = error;
         this.eventListeners.notify(
             'profileChanged',
             'aztecAccountChanged',
-            aztecAccount,
+            this.aztecAccount,
             error,
         );
         this.flushEnableListeners(options);

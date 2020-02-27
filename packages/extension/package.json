@@ -14,8 +14,8 @@
     "main": "index.js",
     "dependencies": {
         "@aztec/bn128": "0.0.0-semantically-released",
+        "@aztec/contract-artifacts": "0.0.0-semantically-released",
         "@aztec/contract-addresses": "1.16.1",
-        "@aztec/contract-artifacts": "1.18.0",
         "@aztec/dev-utils": "0.0.0-semantically-released",
         "@aztec/guacamole-ui": "1.2.0",
         "@aztec/note-access": "0.0.0-semantically-released",

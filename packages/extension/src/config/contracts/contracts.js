@@ -27,4 +27,7 @@ export default {
     ERC20: {
         name: 'ERC20',
     },
+    IERC20Permit: {
+        name: 'IERC20Permit',
+    },
 };

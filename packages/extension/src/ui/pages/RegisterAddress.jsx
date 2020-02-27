@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ConnectionService from '~/ui/services/ConnectionService';
-import returnAndClose from '~/ui/helpers/returnAndClose';
 import getGSNConfig from '~/ui/helpers/getGSNConfig';
 import StepsHandler from '~/ui/views/handlers/StepsHandler';
 import RegisterContent from '~/ui/views/RegisterContent';
@@ -10,8 +8,6 @@ import apis from '~uiModules/apis';
 
 const RegisterAddress = ({
     currentAccount,
-    domainRegistered,
-    goToPage,
 }) => {
     const fetchInitialData = async () => {
         const gsnConfig = await getGSNConfig();
@@ -29,6 +25,7 @@ const RegisterAddress = ({
         return {
             ...currentAccount,
             steps,
+            retryWithMetaMaskStep: registerSteps.metamask.slice(-1)[0],
             keyStore,
             pwDerivedKey,
             AZTECaddress,
@@ -36,21 +33,11 @@ const RegisterAddress = ({
         };
     };
 
-    const handleClose = async (data) => {
-        if (domainRegistered) {
-            returnAndClose(data);
-        } else {
-            goToPage('loading');
-            ConnectionService.returnToClient(data);
-        }
-    };
-
     return (
         <StepsHandler
             testId="steps-register-address"
             fetchInitialData={fetchInitialData}
             Content={RegisterContent}
-            onExit={handleClose}
         />
     );
 };
@@ -60,8 +47,6 @@ RegisterAddress.propTypes = {
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string.isRequired,
     }).isRequired,
-    domainRegistered: PropTypes.bool.isRequired,
-    goToPage: PropTypes.func.isRequired,
 };
 
 export default RegisterAddress;
