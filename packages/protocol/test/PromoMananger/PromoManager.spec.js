@@ -27,7 +27,6 @@ contract('PromoManager', async (accounts) => {
     beforeEach(async () => {
         ace = await ACE.at(ACE.address);
         erc20 = await ERC20Mintable.new({ from: accounts[0] });
-        console.log('doing first before');
     });
 
     describe.only('Success states', async () => {
@@ -40,12 +39,12 @@ contract('PromoManager', async (accounts) => {
         let promoManager;
 
         beforeEach(async () => {
-            console.log('doing second before');
             const opts = { from: accounts[0], gas: 4700000 };
 
             // [fundNote] = await helpers.getNotesForAccount(managerAccount, [totalValue]);
+            promoManager = await PromoManager.new();
             fundNote = await note.create(managerAccount.publicKey, 100);
-            // fundNote.owner = managerAccount.address;
+            fundNote.owner = promoManager.address;
             zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
             // fundNote.owner = promoManager.address;
             await erc20.mint(accounts[0], scalingFactor.mul(tokensTransferred), opts);
@@ -59,7 +58,6 @@ contract('PromoManager', async (accounts) => {
             });
             expect(firstProofReceipt.status).to.equal(true);
 
-            promoManager = await PromoManager.new(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
         });
         describe('Initialisation', async () => {
 
@@ -73,33 +71,13 @@ contract('PromoManager', async (accounts) => {
             it('should be able to call setCodes', async () => {
                 await promoManager.initialize(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
-                // code1.owner = promoManager.address;
-                // remainder.owner = promoManager.address;
+                code1.owner = promoManager.address;
+                remainder.owner = promoManager.address;
                 const proofSetCodes = new JoinSplitProof([fundNote], [remainder, code1], promoManager.address, 0 ,accounts[0]);
-                console.log('signNote',
-
-                    zkAsset.address,
-                    fundNote.noteHash,
-                    promoManager.address,
-                    true,
-                    managerAccount.privateKey,
-                );
-                const signature = signer.signNoteForConfidentialApprove(
-                    zkAsset.address,
-                    fundNote.noteHash,
-                    promoManager.address,
-                    true,
-                    managerAccount.privateKey,
-                );
 
                 console.log(zkAsset.address, promoManager.address);
 
 
-                const { receipt: approveReceipt } = await zkAsset.confidentialApprove(fundNote.noteHash, promoManager.address,true ,signature);
-                console.log(approveReceipt);
-                const loggedApprovalStatus = await zkAsset.confidentialApproved.call(fundNote.noteHash, promoManager.address);
-                expect(loggedApprovalStatus).to.equal(true);
-                expect(approveReceipt.status).to.equal(true);
                 const proofDataSetCodes = proofSetCodes.encodeABI(promoManager.address);
 
                 // spend note
@@ -113,32 +91,13 @@ contract('PromoManager', async (accounts) => {
 
                 await promoManager.initialize(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
-                // code1.owner = promoManager.address;
-                // remainder.owner = promoManager.address;
+                code1.owner = promoManager.address;
+                remainder.owner = promoManager.address;
                 const proofSetCodes = new JoinSplitProof([fundNote], [code1, remainder], promoManager.address,0 ,accounts[0]);
-                console.log('signNote',
-
-                    zkAsset.address,
-                    fundNote.noteHash,
-                    promoManager.address,
-                    true,
-                    managerAccount.privateKey,
-                );
-                const signature = signer.signNoteForConfidentialApprove(
-                    zkAsset.address,
-                    fundNote.noteHash,
-                    promoManager.address,
-                    true,
-                    managerAccount.privateKey,
-                );
 
                 console.log(zkAsset.address, promoManager.address);
 
 
-                const { receipt: approveReceipt } = await zkAsset.confidentialApprove(fundNote.noteHash, promoManager.address,true ,signature);
-                console.log(approveReceipt);
-                const loggedApprovalStatus = await zkAsset.confidentialApproved.call(fundNote.noteHash, promoManager.address);
-                expect(loggedApprovalStatus).to.equal(true);
 
                 const proofDataSetCodes = proofSetCodes.encodeABI(promoManager.address);
 
@@ -151,33 +110,19 @@ contract('PromoManager', async (accounts) => {
                 expect(receipt2.status).to.equal(true);
 
             });
-            it.only('should be able to call claim2 a code', async () => {
+            it('should be able to call claim2 a code', async () => {
 
                 await promoManager.initialize(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
+                code1.owner = promoManager.address;
+                remainder.owner = promoManager.address;
                 const proofSetCodes = new JoinSplitProof([fundNote], [remainder, code1], promoManager.address,0 ,accounts[0]);
                 const proofDataSetCodes = proofSetCodes.encodeABI(promoManager.address);
-                const signature = signer.signNoteForConfidentialApprove(
-                    zkAsset.address,
-                    fundNote.noteHash,
-                    promoManager.address,
-                    true,
-                    managerAccount.privateKey,
-                );
-                await zkAsset.confidentialApprove(fundNote.noteHash, promoManager.address,true ,signature);
 
                 const {receipt} = await promoManager.setCodes([keccak256(Web3EthAbi.encodeParameters(['string'], ['1234']))], proofDataSetCodes);
                 expect(receipt.status).to.equal(true);
 
                 const {receipt: receipt2} = await promoManager.claim1(keccak256(Web3EthAbi.encodeParameters(['string', 'uint256', 'address'], ['1234', 55, accounts[0]])));
-                const signature2 = signer.signNoteForConfidentialApprove(
-                    zkAsset.address,
-                    code1.noteHash,
-                    promoManager.address,
-                    true,
-                    managerAccount.privateKey,
-                );
-                await zkAsset.confidentialApprove(code1.noteHash, promoManager.address,true ,signature2);
 
                 expect(receipt2.status).to.equal(true);
                 const [code1New] = await helpers.getNotesForAccount(managerAccount, [10]);

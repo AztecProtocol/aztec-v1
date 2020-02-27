@@ -36,6 +36,7 @@ contract PromoManager is GSNRecipientTimestampSignature {
     using SafeMath for uint256;
 
 
+    address private _owner;
 
     mapping(bytes32 => bool) public codeRedemptions;
     mapping(bytes32 => bytes32) public codeToTotalNotes;
@@ -56,7 +57,20 @@ contract PromoManager is GSNRecipientTimestampSignature {
         address owner;
         bytes32 noteHash;
     }
+ /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(isOwner(), "Ownable: caller is not the owner");
+        _;
+    }
 
+    /**
+     * @dev Returns true if the caller is the current owner.
+     */
+    function isOwner() public view returns (bool) {
+        return _msgSender() == _owner;
+    }
 
     function _noteCoderToStruct(bytes memory note) internal pure returns (Note memory codedNote) {
         (address owner, bytes32 noteHash,) = note.extractNote();
@@ -69,6 +83,7 @@ contract PromoManager is GSNRecipientTimestampSignature {
                         _zkDaiAddress, bytes32 _unallocatedNoteHash) initializer public {
         GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
         DAI = IERC20Mintable(_daiAddress);
+        _owner = _msgSender();
         zkDAI = IZkAsset(_zkDaiAddress);
         ace = IACE(_aceAddress);
         unallocatedNoteHash = _unallocatedNoteHash;
@@ -79,7 +94,7 @@ contract PromoManager is GSNRecipientTimestampSignature {
      * @dev Sets a mapping of a code hash to a noteHash 
      **/
 
-    function setCodes(bytes32[] memory _codeHashes, bytes memory _proofData) public {
+    function setCodes(bytes32[] memory _codeHashes, bytes memory _proofData) public onlyOwner {
         (bytes memory _proofOutputs) = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
         // inputNotes1 is the un allocated balance
         (bytes memory _proofInputNotes, bytes memory _proofOutputNotes, ,) = _proofOutputs.get(0).extractProofOutput();
@@ -88,10 +103,10 @@ contract PromoManager is GSNRecipientTimestampSignature {
         }
         require(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash == unallocatedNoteHash, 'hash incorrect');
 
-        // zkDAI.confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(this), true, '');
+        zkDAI.confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(this), true, '');
         // zkDAI.confidentialApprove(_noteCoderToStruct(_proofInputNotes.get(0)).noteHash, address(zkDAI), true, '');
         zkDAI.confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs.get(0));
-        // unallocatedNoteHash = _noteCoderToStruct(_proofOutputNotes.get(0)).noteHash;
+        unallocatedNoteHash = _noteCoderToStruct(_proofOutputNotes.get(0)).noteHash;
     }
 
     function claim1(bytes32 _codeHash) public {
@@ -112,7 +127,7 @@ contract PromoManager is GSNRecipientTimestampSignature {
         // here we cheeck that proof input notes == 
         require(codeToTotalNotes[codeHash] == _noteCoderToStruct(_proofInputNotes.get(0)).noteHash, 'bad note');
         require(_proofInputNotes.getLength() == 1, 'bad length');
-        // zkDAI.confidentialApprove(codeToTotalNotes[codeHash], address(this), true, '');
+        zkDAI.confidentialApprove(codeToTotalNotes[codeHash], address(this), true, '');
         zkDAI.confidentialTransferFrom(JOIN_SPLIT_PROOF, _proofOutputs.get(0));
     }
 
