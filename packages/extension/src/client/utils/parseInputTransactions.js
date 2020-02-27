@@ -5,8 +5,15 @@ export default function parseInputTransactions(transactions) {
         return transactions;
     }
 
-    return transactions.map(tx => ({
+    return transactions.map(({
+        amount,
+        numberOfOutputNotes,
+        aztecAccountNotRequired,
+        ...tx
+    }) => ({
         ...tx,
-        amount: parseInputInteger(tx.amount),
+        amount: parseInputInteger(amount),
+        numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
+        aztecAccountNotRequired: aztecAccountNotRequired || false,
     }));
 }

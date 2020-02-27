@@ -28,11 +28,12 @@ module.exports = {
             xs: 'xl',
             xxs: 'xl',
         },
-        buttonSizeMap: {
-            l: '44px',
-        },
         buttonThemeMap: {
             primary: 'primary',
+            secondary: 'grey-light',
+        },
+        buttonTextSizeMap: {
+            xl: 's',
         },
         inputFontSizeKeyMap: {
             l: 'xs',
@@ -43,15 +44,6 @@ module.exports = {
         deviceBreakpointMap: {
             l: '1220px',
             xl: '1440px',
-        },
-        buttonTextSizeMap: {
-            xxs: 'xxs',
-            xs: 'xs',
-            s: 's',
-            m: 's',
-            l: 's',
-            xl: 's',
-            xxl: 's',
         },
         fontSizeMap: {
             xxs: '12px',

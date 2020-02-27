@@ -1,6 +1,6 @@
 export default {
     AccountRegistry: {
-        name: 'AccountRegistry',
+        name: 'Behaviour20200106',
         events: {
             registerExtension: 'RegisterExtension',
         },
@@ -13,7 +13,7 @@ export default {
     ACE: {
         name: 'ACE',
         events: {
-            сreateNoteRegistry: 'CreateNoteRegistry',
+            createNoteRegistry: 'CreateNoteRegistry',
         },
     },
     ZkAsset: {
@@ -26,5 +26,8 @@ export default {
     },
     ERC20: {
         name: 'ERC20',
+    },
+    IERC20Permit: {
+        name: 'IERC20Permit',
     },
 };

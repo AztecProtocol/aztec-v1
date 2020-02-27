@@ -33,6 +33,6 @@ export default async function deposit({
 
     return {
         ...response,
-        success: !!(response && response.txReceipt),
+        success: !!(response && response.success),
     };
 }

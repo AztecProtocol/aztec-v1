@@ -14,6 +14,7 @@ import {
 import i18n from '~/ui/helpers/i18n';
 import ensureMinPendingTime from '~/ui/utils/ensureMinPendingTime';
 import ListItem from '~/ui/components/ListItem';
+import ErrorBlock from '~/ui/components/ErrorBlock';
 import {
     colorMap,
     iconSizeMap,
@@ -85,7 +86,12 @@ class StepContentHelper extends PureComponent {
             cancelTextKey,
             submitText,
             submitTextKey,
+            showTaskList,
         } = steps[currentStep];
+
+        const transactionError = showTaskList
+            && error
+            && (error.key || '').startsWith('transaction.gsn.error');
 
         return {
             title: title || defaultTitle,
@@ -98,11 +104,12 @@ class StepContentHelper extends PureComponent {
             submitTextKey,
             submitMessage: this.renderSubmitMessage(),
             loading,
-            error,
+            error: transactionError ? null : error,
             childError,
             onPrevious,
-            onNext: this.handleGoNext,
+            onNext: transactionError ? null : this.handleGoNext,
             onRetry: this.handleRetry,
+            hideFooter: !!transactionError,
         };
     }
 
@@ -241,10 +248,25 @@ class StepContentHelper extends PureComponent {
             currentTask,
             error,
             loading,
+            onRetryWithMetaMask,
         } = this.props;
         const {
             tasks,
         } = this.getCurrentStep();
+
+        if (error && (error.key || '').startsWith('transaction.gsn.error')) {
+            return (
+                <Block padding="xl 0">
+                    <ErrorBlock
+                        message={error.message || i18n.t(error.key)}
+                        leftButtonText="Try with MetaMask"
+                        onClickLeftButton={onRetryWithMetaMask}
+                        rightButtonText="Retry"
+                        onClickRightButton={this.handleRetry}
+                    />
+                </Block>
+            );
+        }
 
         return (
             <Block padding="m xl">
@@ -320,12 +342,14 @@ StepContentHelper.propTypes = {
     onPrevious: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired,
     onRetryTask: PropTypes.func.isRequired,
+    onRetryWithMetaMask: PropTypes.func,
 };
 
 StepContentHelper.defaultProps = {
     title: '',
     titleKey: 'deposit.title',
     error: null,
+    onRetryWithMetaMask: null,
 };
 
 export default StepContentHelper;

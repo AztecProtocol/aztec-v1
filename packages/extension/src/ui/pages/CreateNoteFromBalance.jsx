@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import settings from '~/background/utils/settings';
 import {
     valueOf,
 } from '~/utils/note';
@@ -42,8 +41,8 @@ const CreateNoteFromBalance = ({
     currentAccount,
     assetAddress,
     amount: inputAmount,
-    numberOfInputNotes: customNumberOfInputNotes,
-    numberOfOutputNotes: customNumberOfOutputNotes,
+    numberOfInputNotes,
+    numberOfOutputNotes,
     userAccess,
 }) => {
     const {
@@ -62,14 +61,8 @@ const CreateNoteFromBalance = ({
         const userAccessAccounts = userAccess
             ? await apis.account.batchGetExtensionAccount(userAccess)
             : [];
-        const sender = isGSNAvailable ? proxyContract : currentAddress;
+        const sender = proxyContract;
         const amount = parseInputAmount(inputAmount);
-        const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-            ? customNumberOfInputNotes
-            : await settings('NUMBER_OF_INPUT_NOTES');
-        const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-            ? customNumberOfOutputNotes
-            : await settings('NUMBER_OF_OUTPUT_NOTES');
         const transactions = [
             {
                 amount,
@@ -79,6 +72,7 @@ const CreateNoteFromBalance = ({
 
         return {
             steps,
+            retryWithMetaMaskStep: createNoteFromBalanceSteps.metamask.slice(-1)[0],
             assetAddress,
             currentAddress,
             asset,
@@ -91,6 +85,7 @@ const CreateNoteFromBalance = ({
             spender: sender,
             transactions,
             gsnConfig,
+            isGSNAvailable,
         };
     };
 

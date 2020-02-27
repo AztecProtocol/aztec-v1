@@ -1,5 +1,4 @@
 import ClientSubscriptionService from '~/background/services/ClientSubscriptionService';
-import userModel from '~/database/models/user';
 import {
     ensureKeyvault, // TODO rename this also checks session
     ensureDomainPermission,
@@ -16,10 +15,8 @@ import base from './base';
 
 const backgroundResolvers = {
     Query: {
-        user: ensureDomainPermission(async (_, args) => ({
-            account: await userModel.get({
-                id: (args.id || args.currentAddress),
-            }),
+        user: ensureDomainPermission(async (_, args) => fetchAztecAccount({
+            address: args.address || args.id,
         })),
         asset: ensureDomainPermission(async (_, args) => fetchAsset({
             address: args.id || args.address,

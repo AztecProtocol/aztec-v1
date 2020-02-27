@@ -10,6 +10,7 @@ const backgroundContracts = [
     'AccountRegistry',
     'ZkAsset',
     'ERC20',
+    'IERC20Permit',
 ];
 
 export default async function setupNetworkConfig({
@@ -25,7 +26,7 @@ export default async function setupNetworkConfig({
         account,
     } = Web3Service;
     const networkName = getNetworkName(networkId);
-    const networkAddresses = contractAddresses[networkName] || {};
+    const networkAddresses = contractAddresses[networkName.toLowerCase()] || {};
     const customAddresses = {
         ...contractAddresses,
         ...networkAddresses,

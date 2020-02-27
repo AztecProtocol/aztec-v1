@@ -6,19 +6,18 @@ import arraySum from './arraySum';
 export default function validate({
     sortedValues,
     minSum,
-    numberOfNotes,
+    numberOfNotes = null,
     allowLessNumberOfNotes = true,
 }) {
-    if (!numberOfNotes) {
-        return [];
-    }
-
-    const maxSet = sortedValues.slice(-numberOfNotes);
+    const count = numberOfNotes === null
+        ? sortedValues.length
+        : numberOfNotes;
+    const maxSet = sortedValues.slice(-count);
     const maxSum = arraySum(maxSet);
     if (minSum > maxSum) {
         throw argsError('note.pick.minSum', {
             messageOptions: {
-                count: numberOfNotes,
+                count: numberOfNotes || '',
             },
             numberOfNotes,
             value: minSum,
@@ -30,7 +29,7 @@ export default function validate({
     ) {
         throw argsError('note.pick.count', {
             messageOptions: {
-                count: numberOfNotes,
+                count: numberOfNotes || '',
             },
             numberOfNotes,
             totalNotes: sortedValues.length,

@@ -5,7 +5,10 @@ const requiredContracts = [
     'AccountRegistry',
 ];
 
-export default function validateContractConfigs(contractsConfig, networkId) {
+export default function validateContractConfigs({
+    networkId,
+    contractsConfig,
+}) {
     const invalidContracts = requiredContracts.filter((contractName) => {
         const {
             address,

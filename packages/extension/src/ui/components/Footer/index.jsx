@@ -68,6 +68,7 @@ const Footer = ({
                     testId="button-step-previous"
                     className={styles.button}
                     theme="white"
+                    size="xl"
                     text={cancelText || i18n.t('cancel')}
                     onSubmit={onPrevious}
                     disabled={loading || disableOnPrevious}
@@ -78,6 +79,7 @@ const Footer = ({
                 <Button
                     testId="button-step-next"
                     className={styles.button}
+                    size="xl"
                     text={nextText || i18n.t('next')}
                     onSubmit={onNext}
                     loading={loading}

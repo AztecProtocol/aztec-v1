@@ -165,7 +165,10 @@ class App extends PureComponent {
             }, minDelayTime);
         } else {
             this.setState(
-                nextState,
+                {
+                    ...nextState,
+                    loading: true,
+                },
                 ensureMinPendingTime(() => this.goToPage(route), minDelayTime),
             );
         }

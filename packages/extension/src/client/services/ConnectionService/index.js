@@ -37,9 +37,14 @@ import backgroundFrame from './backgroundFrame';
 
 class ConnectionService {
     constructor() {
+        this.callbackMapping = {};
+        this.disconnectRequestId = null;
+    }
+
+    async init() {
         this.clientId = randomId();
         this.setInitialVars();
-        backgroundFrame.init();
+        await backgroundFrame.init();
     }
 
     setInitialVars() {
@@ -65,20 +70,50 @@ class ConnectionService {
     async disconnect() {
         if (!this.port) return;
 
+        let requestId = this.disconnectRequestId;
+        let callbackKey = `${requestId}-disconnect`;
+        if (requestId) {
+            await new Promise((resolve) => {
+                if (!this.callbackMapping[callbackKey]) {
+                    this.callbackMapping[callbackKey] = [];
+                }
+                this.callbackMapping[callbackKey].push(resolve);
+            });
+            return;
+        }
+
+        requestId = randomId();
+        this.disconnectRequestId = requestId;
+        callbackKey = `${requestId}-disconnect`;
+
+        backgroundFrame.close();
+
         await this.postToBackground({
             type: clientDisconnectEvent,
+            requestId,
         });
 
+        this.disconnectRequestId = null;
         this.setInitialVars();
+
+        if (this.callbackMapping[callbackKey]) {
+            this.callbackMapping[callbackKey].forEach((cb) => {
+                cb();
+            });
+        }
     }
 
     async openConnection(clientProfile) {
+        if (this.port) {
+            errorLog('Connection to background has been established');
+        }
         const {
             apiKey,
         } = clientProfile;
         this.apiKey = apiKey;
 
         const frame = await backgroundFrame.ensureCreated();
+        const requestId = randomId();
 
         const backgroundResponse = fromEvent(window, 'message')
             .pipe(
@@ -89,7 +124,7 @@ class ConnectionService {
 
         frame.contentWindow.postMessage({
             type: connectionRequestEvent,
-            requestId: randomId(),
+            requestId,
             clientId: this.clientId,
             sender: 'WEB_CLIENT',
             clientProfile,
@@ -112,6 +147,7 @@ class ConnectionService {
         this.port.onmessage = ({ data }) => {
             const {
                 type,
+                requestId,
             } = data;
             switch (type) {
                 case uiOpenEvent:
@@ -130,6 +166,9 @@ class ConnectionService {
                     this.handleReceiveResponse(data);
                     break;
                 default:
+            }
+            if (this.callbackMapping[requestId] && this.callbackMapping[requestId][type]) {
+                this.callbackMapping[requestId][type].forEach(cb => cb());
             }
         };
     }
@@ -174,6 +213,7 @@ class ConnectionService {
     async postToBackground({
         type,
         data,
+        requestId: customRequestId,
     }) {
         if (!this.port) {
             return {
@@ -181,7 +221,7 @@ class ConnectionService {
             };
         }
 
-        const requestId = randomId();
+        const requestId = customRequestId || randomId();
         this.port.postMessage({
             type,
             clientId: this.clientId,
