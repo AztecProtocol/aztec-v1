@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
+import "../../../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
 
 /**
   * @title TestBehaviourEpoch

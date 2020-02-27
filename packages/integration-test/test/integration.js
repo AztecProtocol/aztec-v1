@@ -24,6 +24,8 @@ const Setup = require('../src/setup');
 contract('Integration', (accounts) => {
     let aztecAccount;
     let ace;
+    let accountRegistryManager;
+    let behaviour20200207;
     let dividendValidator;
     let erc20;
     let joinSplitValidator;
@@ -48,6 +50,8 @@ contract('Integration', (accounts) => {
 
         ({
             ACE: ace,
+            AccountRegistryManager: accountRegistryManager,
+            Behaviour20200207: behaviour20200207,
             Dividend: dividendValidator,
             ERC20Mintable: erc20,
             FactoryAdjustable201907: upgradeFactory,
@@ -388,6 +392,39 @@ contract('Integration', (accounts) => {
                     .then(resolve);
             });
             expect(logs.length).to.not.equal(0);
+        });
+    });
+
+    describe('Account Registry', async () => {
+        before(function checkIfConfigured() {
+            if (!setup.config.runAccountRegistryTests) {
+                console.log('Tests not configured');
+                this.skip();
+            }
+        });
+
+        it('should perform an upgrade of the behaviour contract', async () => {
+            const existingProxyAddress = await accountRegistryManager.proxyAddress.call();
+            const upgradeBehaviourAddress = behaviour20200207.address;
+            const { receipt } = await accountRegistryManager.upgradeAccountRegistry(upgradeBehaviourAddress, opts);
+            expect(receipt.status).to.equal(true);
+
+            const postUpgradeProxy = await accountRegistryManager.proxyAddress.call();
+            expect(postUpgradeProxy).to.equal(existingProxyAddress);
+
+            const newBehaviourAddress = await accountRegistryManager.getImplementation.call();
+            const expectedNewBehaviourAddress = behaviour20200207.address;
+            expect(newBehaviourAddress).to.equal(expectedNewBehaviourAddress);
+        });
+
+        it('should set the GSN signer on the upgraded behaviour', async () => {
+            const proxyContract = await setup.getProxyContract('Behaviour20200207');
+            const { receipt } = await proxyContract.setGSNSigner(opts);
+            expect(receipt.status).to.equal(true);
+
+            const recoveredGSNSigner = await proxyContract.GSNSigner(opts);
+            const expectedGSNSigner = '0x5323B6bbD3421983323b3f4f0B11c2D6D3bCE1d8';
+            expect(recoveredGSNSigner).to.equal(expectedGSNSigner);
         });
     });
 });

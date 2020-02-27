@@ -3,6 +3,7 @@ import * as ethUtil from 'ethereumjs-util';
 import Web3Service from '~/client/services/Web3Service';
 import registerExtension, { generateTypedData } from './registerExtension';
 import signNote from './signNote';
+import permitSchema from './permitSchema';
 import signProof from './signProof';
 
 const handleAction = async (action, params) => {
@@ -39,7 +40,6 @@ const handleAction = async (action, params) => {
             const signature = ethUtil.toBuffer(result);
             const sigParams = ethUtil.fromRpcSig(signature);
             const publicKey = ethUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
-
 
             response = {
                 signature: result,
@@ -101,7 +101,39 @@ const handleAction = async (action, params) => {
 
             break;
         }
+        case 'metamask.eip712.permit': {
+            const {
+                allowed,
+                expiry,
+                nonce,
+                spender,
+                verifyingContract,
+            } = params;
+
+            const permit = permitSchema({
+                allowed,
+                expiry,
+                nonce,
+                spender,
+                holder: address,
+                verifyingContract,
+                chainId: Web3Service.networkId,
+            });
+            const method = 'eth_signTypedData_v4';
+            const { result } = await Web3Service.sendAsync({
+                method,
+                params: [address, permit],
+                from: address,
+            });
+
+            response = {
+                signature: result,
+            };
+
+            break;
+        }
         default:
+            break;
     }
 
     return response;

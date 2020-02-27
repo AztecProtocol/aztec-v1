@@ -279,6 +279,7 @@ class Web3Service {
         fromAddress,
         args,
         web3 = this.web3,
+        gasPrice,
     }) => {
         const methodSetting = (args.length
             && typeof args[args.length - 1] === 'object'
@@ -297,8 +298,9 @@ class Web3Service {
         if (type === 'call') {
             return method(...methodArgs).call({
                 from: fromAddress,
-                gas: estimatedGas,
                 ...methodSetting,
+                gas: estimatedGas,
+                gasPrice,
             });
         }
 
@@ -306,6 +308,7 @@ class Web3Service {
             const options = {
                 from: fromAddress,
                 ...methodSetting,
+                gasPrice,
                 gas: estimatedGas,
             };
 
@@ -372,6 +375,7 @@ class Web3Service {
                             this.abis[contractName],
                             contractAddress || this.getAddress(contractName),
                         );
+
                         gsnContract.setProvider(gsnProvider);
 
                         return {

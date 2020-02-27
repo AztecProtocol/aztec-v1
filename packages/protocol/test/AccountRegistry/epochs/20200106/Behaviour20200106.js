@@ -10,11 +10,11 @@ const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistry = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
 
-const createSignature = require('../helpers/AccountRegistryManager');
+const createSignature = require('../../../helpers/AccountRegistry/AccountRegistryManager');
 
 const { ACCOUNT_REGISTRY_SIGNATURE } = devUtils.constants.eip712;
 
-contract('AccountRegistry', (accounts) => {
+contract('AccountRegistry: Behaviour20200106', (accounts) => {
     let registryContract;
 
     beforeEach(async () => {

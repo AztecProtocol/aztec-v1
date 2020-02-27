@@ -1,11 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
-
-import "../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
+import "../../../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
 
 /**
-  * @title TestBehaviour
-  * @author AZTEC
-  * @dev Deploys a TestBehaviour
  * Copyright 2020 Spilsbury Holdings Ltd 
  *
  * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
@@ -19,10 +15,15 @@ import "../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
-contract TestBehaviour is Behaviour20200106 {
-    uint256 public epoch = 2;
+contract TestAccountMapping is Behaviour20200106 {
+    constructor(address _aceAddress, address _trustedGSNSignerAddress) public {
+        Behaviour20200106.initialize(_aceAddress, _trustedGSNSignerAddress);
+    }
+    function setAccountMapping(address _address, bytes memory _linkedPublicKey) public {
+        accountMapping[_address] = _linkedPublicKey;
+    }
 
-    function newFeature() pure public returns (bool) {
-        return true;
+    function setAccountAliasMapping(address _address, address _aliasAddress) public {
+        userToAZTECAccountMapping[_address] = _aliasAddress;
     }
 }

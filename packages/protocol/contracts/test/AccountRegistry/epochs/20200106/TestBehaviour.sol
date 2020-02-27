@@ -1,6 +1,11 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+import "../../../../AccountRegistry/epochs/20200106/Behaviour20200106.sol";
+
 /**
+  * @title TestBehaviour
+  * @author AZTEC
+  * @dev Deploys a TestBehaviour
  * Copyright 2020 Spilsbury Holdings Ltd 
  *
  * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
@@ -14,23 +19,10 @@ pragma solidity >=0.5.0 <0.6.0;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
-contract IAccountRegistryManager {
-    address payable public proxyAddress;
-    uint256 public latestEpoch;
+contract TestBehaviour is Behaviour20200106 {
+    uint256 public epoch = 2;
 
-    function getImplementation() external;
-
-    function isOwner() external view;
-
-    function renounceOwnership() external;
-
-    function transferOwnership(address newOwner) external;
- 
-    function upgradeAccountRegistry(address newBehaviourAddress) external;
-    
-    event CreateProxy(address indexed proxyAddress, address indexed proxyAdmin);
-
-    event UpdateLatestEpoch(uint256 newLatestEpoch);
-
-    event UpgradeAccountRegistry(address indexed proxyAddress, address indexed newBehaviourAddress);
+    function newFeature() pure public returns (string memory) {
+        return 'new feature';
+    }
 }

@@ -10,6 +10,7 @@ const backgroundContracts = [
     'AccountRegistry',
     'ZkAsset',
     'ERC20',
+    'IERC20Permit',
 ];
 
 export default async function setupNetworkConfig({

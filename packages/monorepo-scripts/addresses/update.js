@@ -15,6 +15,8 @@ const deployedContracts = [
     'ACE',
     'AccountRegistryManager',
     'Behaviour20200106',
+    'Behaviour20200207',
+    'Behaviour20200220',
     'Dividend',
     'ERC20Mintable',
     'FactoryAdjustable201907',

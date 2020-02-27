@@ -29,12 +29,14 @@ export default async function makeAsset(asset) {
         icon,
         symbol,
         decimals,
+        supportsPermit,
     } = linkedTokenAddress
         ? makeToken(linkedTokenAddress)
         : {};
 
     return {
         ...assetObj,
+        supportsPermit,
         name,
         icon,
         symbol,
