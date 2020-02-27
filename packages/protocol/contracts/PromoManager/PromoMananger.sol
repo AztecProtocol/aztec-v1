@@ -10,7 +10,6 @@ import "@aztec/protocol/contracts/AccountRegistry/GSNRecipientTimestampSignature
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
-import "../interfaces/IERC20Mintable.sol";
 
 /**
  * @title InterestPool implementation
@@ -50,15 +49,14 @@ contract PromoManager is GSNRecipientTimestampSignature {
 
     uint24 JOIN_SPLIT_PROOF = 65793;
 
-    IERC20Mintable DAI;
     IZkAsset zkDAI;
     bytes32 unallocatedNoteHash;
     struct Note {
         address owner;
         bytes32 noteHash;
     }
- /**
-     * @dev Throws if called by any account other than the owner.
+    /**
+    * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
         require(isOwner(), "Ownable: caller is not the owner");
@@ -66,7 +64,7 @@ contract PromoManager is GSNRecipientTimestampSignature {
     }
 
     /**
-     * @dev Returns true if the caller is the current owner.
+    * @dev Returns true if the caller is the current owner.
      */
     function isOwner() public view returns (bool) {
         return _msgSender() == _owner;
@@ -78,21 +76,33 @@ contract PromoManager is GSNRecipientTimestampSignature {
     }
 
 
+    constructor(
+        address _aceAddress,
+        address _trustedGSNSignerAddress, 
+        address _zkDaiAddress
+    ) public {
 
-    function initialize(address _aceAddress, address _trustedGSNSignerAddress, address _daiAddress, address
-                        _zkDaiAddress, bytes32 _unallocatedNoteHash) initializer public {
         GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
-        DAI = IERC20Mintable(_daiAddress);
-        _owner = _msgSender();
+
+        _owner = msg.sender;
         zkDAI = IZkAsset(_zkDaiAddress);
         ace = IACE(_aceAddress);
-        unallocatedNoteHash = _unallocatedNoteHash;
+
+    }
+
+
+
+    function initialize( bytes32 _unallocatedNoteHash) initializer onlyOwner public {
+        // make this constant and remove all variables we know before hand in a constructor
+
+        // initialise function should be only owner
+        unallocatedNoteHash = _unallocatedNoteHash; // initialise as the zero value note
     }
 
 
     /**
-     * @dev Sets a mapping of a code hash to a noteHash 
-     **/
+    * @dev Sets a mapping of a code hash to a noteHash 
+    **/
 
     function setCodes(bytes32[] memory _codeHashes, bytes memory _proofData) public onlyOwner {
         (bytes memory _proofOutputs) = ace.validateProof(JOIN_SPLIT_PROOF, address(this), _proofData);
@@ -117,7 +127,6 @@ contract PromoManager is GSNRecipientTimestampSignature {
     function claim2(string memory _code, uint256 _challenge, bytes memory _proofData) public {
         bytes32 codeCommitHash = keccak256(abi.encode(_code, _challenge, _msgSender()));
         bytes32 codeHash = keccak256(abi.encode(_code));
-        emit LogBytes(codeHash);
         require(userCommitToCode[codeCommitHash] == _msgSender(), 'code');
         require(!codeRedemptions[codeHash], 'code redeemed');
         codeRedemptions[codeHash] = true;

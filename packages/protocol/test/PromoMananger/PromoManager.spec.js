@@ -42,7 +42,7 @@ contract('PromoManager', async (accounts) => {
             const opts = { from: accounts[0], gas: 4700000 };
 
             // [fundNote] = await helpers.getNotesForAccount(managerAccount, [totalValue]);
-            promoManager = await PromoManager.new();
+            promoManager = await PromoManager.new(ace.address, managerAccount.addreess, zkAsset.address );
             fundNote = await note.create(managerAccount.publicKey, 100);
             fundNote.owner = promoManager.address;
             zkAsset = await ZkAsset.new(ace.address, erc20.address, scalingFactor);
@@ -63,13 +63,13 @@ contract('PromoManager', async (accounts) => {
 
             it('should initialise with a note hash', async () => {
 
-                const {receipt} = await promoManager.initialize(ace.address, managerAccount.address,erc20.address, zkAsset.address, fundNote.noteHash);
+                const {receipt} = await promoManager.initialize( fundNote.noteHash);
                 expect(receipt.status).to.equal(true);
 
             });
 
             it('should be able to call setCodes', async () => {
-                await promoManager.initialize(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
+                const {receipt} = await promoManager.initialize( fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
                 code1.owner = promoManager.address;
                 remainder.owner = promoManager.address;
@@ -89,7 +89,7 @@ contract('PromoManager', async (accounts) => {
 
             it('should be able to call claim1 a code', async () => {
 
-                await promoManager.initialize(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
+                const {receipt} = await promoManager.initialize( fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
                 code1.owner = promoManager.address;
                 remainder.owner = promoManager.address;
@@ -112,7 +112,7 @@ contract('PromoManager', async (accounts) => {
             });
             it('should be able to call claim2 a code', async () => {
 
-                await promoManager.initialize(ace.address, managerAccount.address, erc20.address, zkAsset.address, fundNote.noteHash);
+                const {receipt} = await promoManager.initialize( fundNote.noteHash);
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
                 code1.owner = promoManager.address;
                 remainder.owner = promoManager.address;
