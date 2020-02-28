@@ -56,7 +56,9 @@ const registerExtension = async (request, connection) => {
         linkedPublicKey,
         spendingPublicKey,
     } = account || {};
-    const compressedPublicKey = `0x${EthCrypto.publicKey.compress(spendingPublicKey.slice(2))}`;
+    const compressedPublicKey = spendingPublicKey
+        ? `0x${EthCrypto.publicKey.compress(spendingPublicKey.slice(2))}`
+        : '';
 
     return {
         account: !address
