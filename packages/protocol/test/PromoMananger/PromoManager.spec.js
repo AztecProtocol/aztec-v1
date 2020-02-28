@@ -122,13 +122,14 @@ contract('PromoManager', async (accounts) => {
                 const {receipt} = await promoManager.setCodes([keccak256(Web3EthAbi.encodeParameters(['string'], ['1234']))], proofDataSetCodes);
                 expect(receipt.status).to.equal(true);
 
-                const {receipt: receipt2} = await promoManager.claim1(keccak256(Web3EthAbi.encodeParameters(['string', 'uint256', 'address'], ['1234', 55, accounts[0]])));
+                const {receipt: receipt2} = await promoManager.claim1(keccak256(Web3EthAbi.encodeParameters(['string', 'uint256', 'address'], ['1234', 55, accounts[0]])), accounts[0]);
 
                 expect(receipt2.status).to.equal(true);
                 const [code1New] = await helpers.getNotesForAccount(managerAccount, [10]);
+                code1New.owner = accounts[0];
                 const proof2 = new JoinSplitProof([code1], [code1New], promoManager.address,0 ,accounts[0]);
                 const proofData2 = proof2.encodeABI(promoManager.address);
-                const {receipt: receipt3} = await promoManager.claim2('1234', 55, proofData2);
+                const {receipt: receipt3} = await promoManager.claim2('1234', 55, accounts[0], proofData2);
                 expect(receipt3.status).to.equal(true);
             });
         });
