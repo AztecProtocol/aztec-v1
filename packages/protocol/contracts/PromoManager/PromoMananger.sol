@@ -124,16 +124,16 @@ contract PromoManager is GSNRecipientTimestampSignature {
         unallocatedNoteHash = _noteCoderToStruct(_proofOutputNotes.get(0)).noteHash;
     }
 
-    function claim1(bytes32 _codeHash, address _owner) public {
+    function claim1(bytes32 _codeHash, address _noteOwner) public {
         require(_owner != address(0), 'bad address');
         require(address(userCommitToCode[_codeHash]) == address(0));
-        userCommitToCode[_codeHash] = _owner;
+        userCommitToCode[_codeHash] = _noteOwner;
     }
 
-    function claim2(string memory _code, uint256 _challenge, address _owner, bytes memory _proofData) public {
-        bytes32 codeCommitHash = keccak256(abi.encode(_code, _challenge, _owner));
+    function claim2(string memory _code, uint256 _challenge, address _noteOwner, bytes memory _proofData) public {
+        bytes32 codeCommitHash = keccak256(abi.encode(_code, _challenge, _noteOwner));
         bytes32 codeHash = keccak256(abi.encode(_code));
-        require(userCommitToCode[codeCommitHash] == _owner, 'code');
+        require(userCommitToCode[codeCommitHash] == _noteOwner, 'code');
         require(!codeRedemptions[codeHash], 'code redeemed');
         codeRedemptions[codeHash] = true;
 
@@ -146,7 +146,7 @@ contract PromoManager is GSNRecipientTimestampSignature {
         uint256 numberOfNotes = _proofOutputNotes.getLength();
         for (uint256 i = 0; i < numberOfNotes; i += 1) {
             (address owner,,) = _proofOutputNotes.get(i).extractNote();
-            require(owner == _owner, "Cannot deposit note to other account if sender is not the same as owner.");
+            require(owner == _noteOwner, "Cannot deposit note to other account if sender is not the same as owner.");
         }
         
         zkDAI.confidentialApprove(codeToTotalNotes[codeHash], address(this), true, '');

@@ -116,7 +116,11 @@ contract('PromoManager', async (accounts) => {
                 const [code1,remainder] = await helpers.getNotesForAccount(managerAccount, [10, 90]);
                 code1.owner = promoManager.address;
                 remainder.owner = promoManager.address;
-                const proofSetCodes = new JoinSplitProof([fundNote], [remainder, code1], promoManager.address,0 ,accounts[0]);
+                const viewKeyFund = fundNote.getView();
+                console.log(viewKeyFund);
+                const resotredFund = await note.fromViewKey(viewKeyFund);
+                resotredFund.owner = promoManager.address;
+                const proofSetCodes = new JoinSplitProof([resotredFund], [remainder, code1], promoManager.address,0 ,accounts[0]);
                 const proofDataSetCodes = proofSetCodes.encodeABI(promoManager.address);
 
                 const {receipt} = await promoManager.setCodes([keccak256(Web3EthAbi.encodeParameters(['string'], ['1234']))], proofDataSetCodes);
@@ -125,9 +129,14 @@ contract('PromoManager', async (accounts) => {
                 const {receipt: receipt2} = await promoManager.claim1(keccak256(Web3EthAbi.encodeParameters(['string', 'uint256', 'address'], ['1234', 55, accounts[0]])), accounts[0]);
 
                 expect(receipt2.status).to.equal(true);
-                const [code1New] = await helpers.getNotesForAccount(managerAccount, [10]);
+                const [code1New, note2] = await helpers.getNotesForAccount(managerAccount, [5, 5]);
                 code1New.owner = accounts[0];
-                const proof2 = new JoinSplitProof([code1], [code1New], promoManager.address,0 ,accounts[0]);
+                note2.owner = accounts[0];
+                const viewKey = code1.getView();
+                console.log(viewKey);
+                const note4 = await note.fromViewKey(viewKey);
+                note4.owner = promoManager.address;
+                const proof2 = new JoinSplitProof([note4], [code1New, note2], promoManager.address,0 ,accounts[0]);
                 const proofData2 = proof2.encodeABI(promoManager.address);
                 const {receipt: receipt3} = await promoManager.claim2('1234', 55, accounts[0], proofData2);
                 expect(receipt3.status).to.equal(true);
