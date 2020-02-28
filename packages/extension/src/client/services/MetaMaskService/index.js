@@ -39,7 +39,8 @@ const handleAction = async (action, params) => {
             const hash = ethSigUtil.TypedDataUtils.sign(generateTypedData(params));
             const signature = ethUtil.toBuffer(result);
             const sigParams = ethUtil.fromRpcSig(signature);
-            const publicKey = ethUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
+            let publicKey = ethUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
+            publicKey = ethUtil.bufferToHex(publicKey);
 
             response = {
                 signature: result,
