@@ -4,8 +4,10 @@ import {
     Block,
     Text,
 } from '@aztec/guacamole-ui';
+import {
+    formatNumber,
+} from '~/utils/format';
 import i18n from '~/ui/helpers/i18n';
-import formatNumber from '~/ui/utils/formatNumber';
 import {
     assetShape,
 } from '~/ui/config/propTypes';

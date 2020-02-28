@@ -7,4 +7,9 @@ export default async request => query(request, assetQuery(`
     scalingFactor
     canAdjustSupply
     canConvert
+    token {
+        address
+        name
+        decimals
+    }
 `));
