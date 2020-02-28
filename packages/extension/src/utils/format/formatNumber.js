@@ -34,14 +34,14 @@ const formatFraction = (fractionValue, decimals) => {
         .replace(/0{1,}$/, '');
 };
 
-export default function formatNumber(value, decimals) {
+export default function formatNumber(value, decimals, formatInteger = true) {
     let strVal = `${value}`;
     if (decimals > 0 && !isFloatValue(strVal)) {
         strVal = shiftRight10(strVal, decimals);
     }
 
     const [intValue, fractionValue] = strVal.split('.');
-    const intStr = formatInt(intValue);
+    const intStr = formatInteger ? formatInt(intValue) : intValue;
     const fractionStr = formatFraction(fractionValue, decimals);
 
     return fractionStr
