@@ -7,6 +7,7 @@ export default {
     ],
     TRANSFER_PROOF: [
         'amount',
+        'outputNotes',
     ],
     CREATE_NOTE_FROM_BALANCE_PROOF: [
         'notes',
