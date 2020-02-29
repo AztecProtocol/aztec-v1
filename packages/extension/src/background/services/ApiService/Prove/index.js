@@ -36,7 +36,21 @@ export default async function triggerProofUi(query, connection) {
     const dataKeys = responseDataKeys[proofType];
     if (dataKeys) {
         dataKeys.forEach((key) => {
-            formatData[key] = data[key];
+            switch (typeof key) {
+                case 'string':
+                    formatData[key] = data[key];
+                    break;
+                case 'function': {
+                    const res = key(data);
+                    if (res) {
+                        Object.keys(res).forEach((resKey) => {
+                            formatData[resKey] = res[resKey];
+                        });
+                    }
+                    break;
+                }
+                default:
+            }
         });
     }
 
