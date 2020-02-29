@@ -1,7 +1,7 @@
 const inputAmountType = {
     type: 'integer',
     size: {
-        gt: 0,
+        gte: 0,
     },
 };
 
