@@ -6,6 +6,11 @@ import settings from '~/background/utils/settings';
 import responseDataKeys from './responseDataKeys';
 import JoinSplit from './JoinSplit';
 
+const proofWithInputNotes = [
+    'TRANSFER_PROOF',
+    'WITHDRAW_PROOF',
+];
+
 const triggerProofUi = async (query, connection) => {
     const {
         data: {
@@ -86,8 +91,9 @@ export default async function prove(query, connection) {
                 const numberOfOutputNotes = customNumberOfOutputNotes !== undefined
                     ? customNumberOfOutputNotes
                     : await settings('NUMBER_OF_OUTPUT_NOTES');
-                const inputAmount = amount
-                    || (transactions || []).reduce((sum, tx) => sum + tx.amount, 0);
+                const inputAmount = proofWithInputNotes.indexOf(proofType) < 0
+                    ? 0
+                    : amount || (transactions || []).reduce((sum, tx) => sum + tx.amount, 0);
                 const proof = await JoinSplit({
                     ...args,
                     inputAmount,
