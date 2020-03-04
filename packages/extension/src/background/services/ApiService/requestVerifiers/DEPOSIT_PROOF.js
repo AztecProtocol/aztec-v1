@@ -1,6 +1,9 @@
 import BN from 'bn.js';
 import Web3Service from '~/helpers/Web3Service';
 import {
+    warnLogProduction,
+} from '~/utils/log';
+import {
     argsError,
 } from '~/utils/error';
 import Asset from '~/background/database/models/asset';
@@ -10,7 +13,23 @@ export default async function verifyDepositRequest({
     assetAddress,
     transactions,
     userAccess,
+    returnProof,
+    sender,
+    publicOwner,
 }) {
+    if ((sender || publicOwner) && !returnProof) {
+        const invalidArgs = [];
+        if (sender) {
+            invalidArgs.push('sender');
+        }
+        if (publicOwner) {
+            invalidArgs.push('publicOwner');
+        }
+        warnLogProduction(argsError('input.returnProof.only', {
+            args: invalidArgs.join(', '),
+        }));
+    }
+
     const {
         networkId,
         account: {

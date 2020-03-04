@@ -77,6 +77,7 @@ export default async function prove(query, connection) {
         returnData = await triggerProofUi(query, connection);
     } else {
         switch (proofType) {
+            case 'DEPOSIT_PROOF':
             case 'TRANSFER_PROOF': {
                 const {
                     transactions,

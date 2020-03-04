@@ -164,22 +164,30 @@ export default class ZkAsset {
      * Deposit
      *
      * - transactions ([Transaction!]!)
-     *       amount (Int!):                The equivalent note value to deposit.
-     *       to (Address!):                The output note owner.
-     *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
+     *       amount (Int!):                  The equivalent note value to deposit.
+     *       to (Address!):                  The output note owner.
+     *       numberOfOutputNotes (Int):      Number of output notes of this transaction.
      * - options (Object)
-     *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
-     *                                     Unless numberOfOutputNotes is defined in that transaction.
-     *                                     Will use default value in setting if undefined.
-     *       userAccess ([Address!]):      The addresses that are able to see the real note value.
+     *       numberOfOutputNotes (Int):      Number of new notes for each transaction.
+     *                                       Unless numberOfOutputNotes is defined in that transaction.
+     *                                       Will use default value in setting if undefined.
+     *       userAccess ([Address!]):        The addresses that are able to see the real note value.
+     *       returnProof (Bool):             Return a JoinSplit Proof instead of sending it.
+     *       sender (Address):               The proof sender. Available only when returnProof is true.
+     *       publicOwner (Address):          The owner of ERC token. Available only when returnProof is true.
      *
      * @returns (Object)
      * - success (Boolean!)
      * - outputNotes ([Note!])               Notes deposited into the recipient account.
+     * - proof (JoinSplitProof)              Not empty if `returnProof` is set to true.
+     *
      */
     deposit = async (transactions, {
         numberOfOutputNotes,
         userAccess = [],
+        returnProof,
+        sender,
+        publicOwner,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -195,6 +203,9 @@ export default class ZkAsset {
                 transactions: parseInputTransactions(transactions),
                 numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
                 userAccess,
+                returnProof,
+                sender,
+                publicOwner,
             },
         );
     };
