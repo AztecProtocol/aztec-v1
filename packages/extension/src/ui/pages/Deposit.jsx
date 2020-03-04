@@ -70,7 +70,8 @@ const Deposit = ({
         const erc20Amount = asset.scalingFactor.mul(new BN(amount));
         const requestedAllowance = erc20Amount;
         if (approvedERC20Allowance.gte(requestedAllowance)) {
-            steps = steps.filter(({ name }) => name !== 'approveERC20' || 'permitERC20');
+            steps = steps.filter(({ name }) => name !== 'approveERC20'
+              && name !== 'permitERC20');
         }
 
         return {
