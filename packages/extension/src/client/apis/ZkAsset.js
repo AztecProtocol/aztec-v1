@@ -174,8 +174,8 @@ export default class ZkAsset {
      *       userAccess ([Address!]):      The addresses that are able to see the real note value.
      *
      * @returns (Object)
-     * - success (Boolean)
-     * - amount (Int)
+     * - success (Boolean!)
+     * - outputNotes ([Note!])               Notes deposited into the recipient account.
      */
     deposit = async (transactions, {
         numberOfOutputNotes,
@@ -212,7 +212,6 @@ export default class ZkAsset {
      *
      * @returns (Object)
      * - success (Boolean)
-     * - amount (Int)
      */
     withdraw = async (amount, {
         to,
@@ -262,7 +261,6 @@ export default class ZkAsset {
     *
     * @returns (Object)
     * - success (Boolean!)
-    * - amount (Int!)
     * - outputNotes ([Note!])               Notes sent to the recipient, i.e, output notes in the proof excluding remainder note.
     * - proof (JoinSplitProof)              Not empty if `returnProof` is set to true.
     *

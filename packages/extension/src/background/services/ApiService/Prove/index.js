@@ -95,7 +95,6 @@ export default async function prove(query, connection) {
                 });
                 returnData = {
                     success: !!proof,
-                    amount: inputAmount,
                     proof,
                 };
                 break;

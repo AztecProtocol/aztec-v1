@@ -1,12 +1,9 @@
 export default {
     DEPOSIT_PROOF: [
-        'amount',
+        'outputNotes',
     ],
-    WITHDRAW_PROOF: [
-        'amount',
-    ],
+    WITHDRAW_PROOF: [],
     TRANSFER_PROOF: [
-        'amount',
         ({ outputNotes, remainderNote }) => {
             if (!outputNotes) return outputNotes;
 
