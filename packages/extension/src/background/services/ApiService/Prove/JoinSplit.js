@@ -8,9 +8,6 @@ import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~/config/constants';
 import {
-    errorLog,
-} from '~/utils/log';
-import {
     createNote,
     createNotes,
     fromViewingKey,
@@ -23,7 +20,7 @@ import asyncMap from '~/utils/asyncMap';
 import asyncForEach from '~/utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
 import Web3Service from '~/helpers/Web3Service';
-import accountsQuery from '~/background/services/GraphQLService/Queries/accountsQuery';
+import userQuery from '~/background/services/GraphQLService/Queries/userQuery';
 import pickNotesFromBalance from '~/background/services/GraphQLService/resolvers/utils/pickNotesFromBalance';
 import decryptViewingKey from '~/background/services/GraphQLService/resolvers/utils/decryptViewingKey';
 import query from '../utils/query';
@@ -129,32 +126,38 @@ const getAccountMapping = async ({
     userAccess,
 }) => {
     const accountMapping = {};
-    const addresses = (transactions || []).map(({ to }) => to);
+
+    let addresses = (transactions || []).map(({ to }) => to);
     addresses.push(currentAddress);
     if (userAccess) {
         addresses.push(...userAccess);
     }
+    addresses = uniq(addresses);
 
-    const request = {
-        domain: window.location.origin,
-        data: {
-            args: {
-                where: {
-                    address_in: uniq(addresses),
+    const accounts = [];
+    await Promise.all(addresses.map(async (address) => {
+        const request = {
+            domain: window.location.origin,
+            data: {
+                args: {
+                    id: address,
                 },
             },
-        },
-    };
-
-    const {
-        accounts: {
-            accounts,
-        },
-    } = await query(request, accountsQuery(`
-        address
-        linkedPublicKey
-        spendingPublicKey
-    `));
+        };
+        const {
+            user: {
+                account,
+                error,
+            },
+        } = await query(request, userQuery(`
+            address
+            linkedPublicKey
+            spendingPublicKey
+        `));
+        if (account && !error) {
+            accounts.push(account);
+        }
+    }));
 
     accounts.forEach((account) => {
         accountMapping[account.address] = account;
@@ -168,7 +171,7 @@ export default async function JoinSplit({
     sender,
     publicOwner,
     transactions,
-    amount,
+    inputAmount,
     userAccess,
     numberOfInputNotes,
     numberOfOutputNotes,
@@ -178,14 +181,6 @@ export default async function JoinSplit({
             address: currentAddress,
         },
     } = Web3Service;
-
-    let inputAmount = amount;
-    if (transactions && transactions.length) {
-        inputAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
-        if (amount && inputAmount !== amount) {
-            errorLog(`Input amount (${amount}) does not match total transactions (${inputAmount}).`);
-        }
-    }
 
     let inputNotes = [];
     let inputValues = [];

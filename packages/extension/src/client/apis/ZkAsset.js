@@ -260,13 +260,12 @@ export default class ZkAsset {
     *       sender (Address):               The proof sender. Available only when returnProof is true.
     *       publicOwner (Address):          The owner of ERC token. Available only when returnProof is true.
     *
-    * @returns (Object | JoinSplitProof)
+    * @returns (Object)
+    * - success (Boolean!)
+    * - amount (Int!)
+    * - outputNotes ([Note!])               Notes sent to the recipient, i.e, output notes in the proof excluding remainder note.
+    * - proof (JoinSplitProof)              Not empty if `returnProof` is set to true.
     *
-    * Object
-    *
-    * - success (Boolean)
-    * - amount (Int)
-    * - outputNotes ([Note!]!)              Notes sent to the recipient, i.e, output notes in the proof excluding remainder note.
     */
     send = async (transactions, {
         numberOfInputNotes,
