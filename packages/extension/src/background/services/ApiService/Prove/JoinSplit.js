@@ -185,7 +185,7 @@ export default async function JoinSplit({
     let inputNotes = [];
     let inputValues = [];
     let extraAmount = 0;
-    if (inputAmount > 0) {
+    if (inputAmount > 0 || numberOfInputNotes > 0) {
         inputNotes = await getInputNotes({
             assetAddress,
             currentAddress,

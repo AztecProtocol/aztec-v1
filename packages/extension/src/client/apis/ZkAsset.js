@@ -215,12 +215,14 @@ export default class ZkAsset {
      *
      * Withdraw
      *
-     * - amount (Int!):                    The note value to withdraw.
+     * - amount (Int!):                      The note value to withdraw.
      * - options (Object)
-     *       to (Address):                 The linked token owner.
-     *                                     Will use current address if undefined.
-     *       numberOfInputNotes (Int):     Number of notes to be destroyed.
-     *                                     Will use default value in setting if undefined.
+     *       to (Address):                   The linked token owner.
+     *                                       Will use current address if undefined.
+     *       numberOfInputNotes (Int):       Number of notes to be destroyed.
+     *                                       Will use default value in setting if undefined.
+     *       returnProof (Bool):             Return a JoinSplit Proof instead of sending it.
+     *       sender (Address):               The proof sender. Available only when returnProof is true.
      *
      * @returns (Object)
      * - success (Boolean)
@@ -228,6 +230,8 @@ export default class ZkAsset {
     withdraw = async (amount, {
         to,
         numberOfInputNotes,
+        returnProof,
+        sender,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -246,7 +250,10 @@ export default class ZkAsset {
                 assetAddress: this.address,
                 amount: parseInputInteger(amount),
                 to: to || address,
+                publicOwner: to || address,
                 numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                returnProof,
+                sender,
             },
         );
     };
