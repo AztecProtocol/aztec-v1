@@ -68,7 +68,9 @@ export default async function verifyDepositRequest({
         });
     }
 
-    const addresses = transactions.map(({ to }) => to);
+    const addresses = transactions
+        .filter(({ aztecAccountNotRequired }) => !aztecAccountNotRequired)
+        .map(({ to }) => to);
     if (userAccess && userAccess.length > 0) {
         userAccess.forEach((address) => {
             if (addresses.indexOf(address) < 0) {

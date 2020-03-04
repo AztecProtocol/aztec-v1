@@ -167,6 +167,7 @@ export default class ZkAsset {
      *       amount (Int!):                  The equivalent note value to deposit.
      *       to (Address!):                  The output note owner.
      *       numberOfOutputNotes (Int):      Number of output notes of this transaction.
+     *       aztecAccountNotRequired (Bool): Not to enforce recipient to have an aztec account if set to true.
      * - options (Object)
      *       numberOfOutputNotes (Int):      Number of new notes for each transaction.
      *                                       Unless numberOfOutputNotes is defined in that transaction.

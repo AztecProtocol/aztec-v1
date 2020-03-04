@@ -20,6 +20,7 @@ export default async function deposit({
     sender,
     numberOfOutputNotes,
     userAccessAccounts,
+    currentAddress,
 }) {
     const numberOfNotes = numberOfOutputNotes > 0
         ? numberOfOutputNotes
@@ -27,10 +28,12 @@ export default async function deposit({
 
     const accountMapping = {};
     const addresses = transactions.map(({ to }) => to);
+    addresses.push(currentAddress);
     const accounts = await batchGetExtensionAccount(addresses);
     accounts.forEach((account) => {
         accountMapping[account.address] = account;
     });
+    const currentAccount = accountMapping[currentAddress];
 
     const outputTransactionNotes = await Promise.all(
         transactions.map(async ({
@@ -46,10 +49,12 @@ export default async function deposit({
                 linkedPublicKey,
                 spendingPublicKey,
             } = accountMapping[to];
-            const ownerAccess = {
-                address: to,
-                linkedPublicKey,
-            };
+            const ownerAccess = !linkedPublicKey
+                ? null
+                : {
+                    address: to,
+                    linkedPublicKey,
+                };
             const userAccess = !userAccessAccounts.length
                 ? ownerAccess
                 : uniqBy(
@@ -58,10 +63,10 @@ export default async function deposit({
                         ownerAccess,
                     ],
                     'address',
-                );
+                ).filter(a => a);
             const notes = await createNotes(
                 noteValues,
-                spendingPublicKey,
+                spendingPublicKey || currentAccount.spendingPublicKey,
                 to,
                 userAccess,
             );

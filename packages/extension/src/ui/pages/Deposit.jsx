@@ -78,6 +78,7 @@ const Deposit = ({
             steps,
             retryWithMetaMaskStep: depositSteps.metamask.slice(-1)[0],
             currentAccount,
+            currentAddress,
             assetAddress,
             asset,
             transactions: parsedTransactions,

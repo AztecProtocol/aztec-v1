@@ -166,7 +166,6 @@ export default {
         stepConfirmForGSN,
         stepSendViaGSNPermit,
     ],
-
     metamask: [
         stepApproveERC20,
         stepConfirm,
