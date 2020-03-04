@@ -30,13 +30,17 @@ export default async function generateApis(hasPermission = false) {
             web3[name] = (...args) => Web3Service[name](...args);
         });
     } else if (window.ethereum) {
-        const web3Instance = new Web3(window.ethereum);
-        networkId = await web3Instance.eth.net.getId();
-        const [address] = await web3Instance.eth.getAccounts();
-        if (address) {
-            account = {
-                address,
-            };
+        try {
+            const web3Instance = new Web3(window.ethereum);
+            networkId = await web3Instance.eth.net.getId();
+            const [address] = await web3Instance.eth.getAccounts();
+            if (address) {
+                account = {
+                    address,
+                };
+            }
+        } catch (e) {
+            web3.error = e;
         }
     }
 
