@@ -87,6 +87,12 @@ signer.generateDAIDomainParams = (chainId, verifyingContract) => {
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
 signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, spenderApproval, privateKey) => {
+    if (verifyingContract === '0x7dd4e19395c47753370a7e20b3788546958b2ea6') {
+        console.warn('The signature you are generating can be replayed once on this zkAsset');
+        console.warn('To avoid unexpected behaviour, submit the signature returned by this function and');
+        console.warn('the signature returned by signNoteForConfidentialApprove() with extra');
+        console.warn('flag flip=true as the last parameter as two seperate calls to the zkAsset');
+    }
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.NOTE_SIGNATURE;
     const message = {
@@ -117,6 +123,12 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
 signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approval, privateKey) => {
+    if (verifyingContract === '0x7dd4e19395c47753370a7e20b3788546958b2ea6') {
+        console.warn('The signature you are generating can be replayed once on this zkAsset');
+        console.warn('To avoid unexpected behaviour, submit the signature returned by this function and');
+        console.warn('the signature returned by signApprovalForProof() with extra flag flip=true as the last parameter');
+        console.warn('as two seperate calls to the zkAsset');
+    }
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.PROOF_SIGNATURE;
     const proofHash = keccak256(proofOutputs);
