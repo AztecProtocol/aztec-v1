@@ -35,6 +35,7 @@ export default gql`
     type User {
         id: ID!
         address: String!
+        publicKey: String
         spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: String

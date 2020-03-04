@@ -2,19 +2,16 @@ import apollo from '~/ui/apis/helpers/apollo';
 
 export default async function getExtensionAccount(address) {
     const {
-        account: accountResponse,
+        user,
     } = await apollo.query(`
-        account(address: "${address}") {
-            account {
-                address
-                linkedPublicKey
-                spendingPublicKey
-            }
+        user(address: "${address}") {
+            address
+            linkedPublicKey
+            spendingPublicKey
         }
     `) || {};
 
-    const { account } = accountResponse || {};
-    if (!account) {
+    if (!user) {
         return {
             address,
             linkedPublicKey: '',
@@ -22,5 +19,5 @@ export default async function getExtensionAccount(address) {
         };
     }
 
-    return account;
+    return user;
 }

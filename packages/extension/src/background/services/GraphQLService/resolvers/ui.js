@@ -14,9 +14,14 @@ const uiResolvers = {
                 .call(address),
     },
     Query: {
-        user: async (_, { address }) => fetchAztecAccount({
-            address,
-        }),
+        user: async (_, { address }) => {
+            const {
+                account,
+            } = await fetchAztecAccount({
+                address,
+            }) || {};
+            return account;
+        },
         asset: async (_, { id }) => {
             const {
                 asset,
