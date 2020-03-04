@@ -34,8 +34,9 @@ class DepositContent extends StepContentHelper {
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
-        const approved = steps.every(({ name }) => name !== 'approveERC20' && name !== 'permitERC20')
-            || isStepAfter(steps, currentStepName, 'approveERC20') || isStepAfter(steps, currentStepName, 'permitERC20');
+        const notBeforeStep = stepName => steps.every(({ name }) => name !== stepName)
+            || isStepAfter(steps, currentStepName, stepName);
+        const approved = notBeforeStep('approveERC20') && notBeforeStep('permitERC20');
 
         const {
             name: assetName,
