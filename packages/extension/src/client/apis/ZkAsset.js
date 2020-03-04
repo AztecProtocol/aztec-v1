@@ -248,7 +248,7 @@ export default class ZkAsset {
     *       amount (Int!):                  The note value to send.
     *       to (Address!):                  The output note owner.
     *       numberOfOutputNotes (Int):      Number of output notes of this transaction.
-    *       aztecAccountNotRequired (Bool): Not to enforce receipient to have an aztec account if set to true.
+    *       aztecAccountNotRequired (Bool): Not to enforce recipient to have an aztec account if set to true.
     * - options (Object)
     *       numberOfInputNotes (Int):       Number of notes to be destroyed.
     *                                       Will use default value in setting if undefined.
@@ -256,15 +256,25 @@ export default class ZkAsset {
     *                                       Unless numberOfOutputNotes is defined in that transaction.
     *                                       Will use default value in setting if undefined.
     *       userAccess ([Address!]):        The addresses that are able to see the real note value.
+    *       returnProof (Bool):             Return a JoinSplit Proof instead of sending it.
+    *       sender (Address):               The proof sender. Available only when returnProof is true.
+    *       publicOwner (Address):          The owner of ERC token. Available only when returnProof is true.
     *
-    * @returns (Object)
+    * @returns (Object | JoinSplitProof)
+    *
+    * Object
+    *
     * - success (Boolean)
     * - amount (Int)
+    * - outputNotes ([Note!]!)              Notes sent to the recipient, i.e, output notes in the proof excluding remainder note.
     */
     send = async (transactions, {
         numberOfInputNotes,
         numberOfOutputNotes,
         userAccess,
+        returnProof,
+        sender,
+        publicOwner,
     } = {}) => ConnectionService.query(
         'constructProof',
         {
@@ -274,6 +284,9 @@ export default class ZkAsset {
             numberOfInputNotes: parseInputInteger(numberOfInputNotes),
             numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
             userAccess,
+            returnProof,
+            sender,
+            publicOwner,
         },
     );
 

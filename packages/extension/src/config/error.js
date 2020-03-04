@@ -103,5 +103,8 @@ export default {
     },
     input: {
         invalid: 'Invalid input.',
+        returnProof: {
+            only: 'Argument [%{args}] will be ignored when `returnProof` is false.',
+        },
     },
 };

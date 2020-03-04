@@ -1,4 +1,7 @@
 import {
+    warnLogProduction,
+} from '~/utils/log';
+import {
     argsError,
 } from '~/utils/error';
 import ensureInputNotes from '../utils/ensureInputNotes';
@@ -9,7 +12,23 @@ export default async function verifyTransferRequest({
     transactions,
     numberOfInputNotes,
     userAccess,
+    returnProof,
+    sender,
+    publicOwner,
 }) {
+    if ((sender || publicOwner) && !returnProof) {
+        const invalidArgs = [];
+        if (sender) {
+            invalidArgs.push('sender');
+        }
+        if (publicOwner) {
+            invalidArgs.push('publicOwner');
+        }
+        warnLogProduction(argsError('input.returnProof.only', {
+            args: invalidArgs.join(', '),
+        }));
+    }
+
     const totalAmount = transactions
         .reduce((sum, { amount }) => sum + amount, 0);
 

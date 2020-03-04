@@ -2,9 +2,11 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~/utils/filterStream';
+import settings from '~/background/utils/settings';
 import responseDataKeys from './responseDataKeys';
+import JoinSplit from './JoinSplit';
 
-export default async function triggerProofUi(query, connection) {
+const triggerProofUi = async (query, connection) => {
     const {
         data: {
             args: {
@@ -30,7 +32,7 @@ export default async function triggerProofUi(query, connection) {
         return data;
     }
 
-    const formatData = {
+    const returnData = {
         success: data.success || false,
     };
     const dataKeys = responseDataKeys[proofType];
@@ -38,13 +40,13 @@ export default async function triggerProofUi(query, connection) {
         dataKeys.forEach((key) => {
             switch (typeof key) {
                 case 'string':
-                    formatData[key] = data[key];
+                    returnData[key] = data[key];
                     break;
                 case 'function': {
                     const res = key(data);
                     if (res) {
                         Object.keys(res).forEach((resKey) => {
-                            formatData[resKey] = res[resKey];
+                            returnData[resKey] = res[resKey];
                         });
                     }
                     break;
@@ -54,7 +56,43 @@ export default async function triggerProofUi(query, connection) {
         });
     }
 
+    return returnData;
+};
+
+export default async function prove(query, connection) {
+    const {
+        data: {
+            args,
+        },
+    } = query;
+    const {
+        proofType,
+        returnProof,
+    } = args;
+
+    let returnData;
+    if (!returnProof) {
+        returnData = await triggerProofUi(query, connection);
+    } else {
+        switch (proofType) {
+            case 'TRANSFER_PROOF': {
+                const {
+                    numberOfOutputNotes: customNumberOfOutputNotes,
+                } = args;
+                const numberOfOutputNotes = customNumberOfOutputNotes !== undefined
+                    ? customNumberOfOutputNotes
+                    : await settings('NUMBER_OF_OUTPUT_NOTES');
+                returnData = await JoinSplit({
+                    ...args,
+                    numberOfOutputNotes,
+                });
+                break;
+            }
+            default:
+        }
+    }
+
     return {
-        proof: formatData,
+        returnData,
     };
 }
