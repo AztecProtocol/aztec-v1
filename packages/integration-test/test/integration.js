@@ -403,7 +403,7 @@ contract('Integration', (accounts) => {
             }
         });
 
-        it('should perform an upgrade of the behaviour contract', async () => {
+        it.skip('should perform an upgrade of the behaviour contract', async () => {
             const existingProxyAddress = await accountRegistryManager.proxyAddress.call();
             const upgradeBehaviourAddress = behaviour20200207.address;
             const { receipt } = await accountRegistryManager.upgradeAccountRegistry(upgradeBehaviourAddress, opts);
@@ -417,7 +417,7 @@ contract('Integration', (accounts) => {
             expect(newBehaviourAddress).to.equal(expectedNewBehaviourAddress);
         });
 
-        it('should set the GSN signer on the upgraded behaviour', async () => {
+        it.skip('should set the GSN signer on the upgraded behaviour', async () => {
             const proxyContract = await setup.getProxyContract('Behaviour20200207');
             const { receipt } = await proxyContract.setGSNSigner(opts);
             expect(receipt.status).to.equal(true);
