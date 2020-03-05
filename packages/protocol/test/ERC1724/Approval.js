@@ -7,7 +7,7 @@ const {
 const secp256k1 = require('@aztec/secp256k1');
 const BN = require('bn.js');
 const truffleAssert = require('truffle-assertions');
-const { randomHex, keccak256, padRight } = require('web3-utils');
+const { randomHex, keccak256 } = require('web3-utils');
 
 const helpers = require('../helpers/ERC1724');
 const { generateFactoryId } = require('../helpers/Factory');
@@ -21,23 +21,6 @@ const JoinSplitValidatorInterface = artifacts.require('./JoinSplitInterface');
 const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/FactoryBase201907');
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
-
-function makeReplaySignature(signatureToReplay) {
-    const [r, s, v] = signatureToReplay
-        .slice(2)
-        .match(/.{1,64}/g);
-    const secp256k1n = new BN("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
-    const hex28 = (new BN(28)).toString(16);
-    const hex27 = (new BN(27)).toString(16);
-
-    const flippedS = secp256k1n
-        .sub(new BN(s, 16))
-        .toString(16);
-    const flippedV = (v === '1b') ? padRight(hex28.slice(-2), 64) : padRight(hex27.slice(-2), 64);
-
-    const reconstructedSig = r + flippedS + flippedV;
-    return `0x${reconstructedSig.slice(0, 130)}`
-}
 
 contract('Approval', (accounts) => {
     let ace;
@@ -540,7 +523,7 @@ contract('Approval', (accounts) => {
             // and use to reverse the revoke permission action
             spenderApproval = true;
 
-            const replaySig = makeReplaySignature(approvalSignature);
+            const replaySig = signer.makeReplaySignature(approvalSignature);
             await truffleAssert.reverts(
                 zkAssetOwnable.confidentialApprove(testNote.noteHash, spenderAddress, spenderApproval, replaySig),
                 'revert signature recovery failed',
@@ -631,7 +614,7 @@ contract('Approval', (accounts) => {
 
             // Attempt replay attack - take the previously used grant permission sig,
             // and use to reverse the revoke permission action
-            const replaySig = makeReplaySignature(proofApprovalSignature);
+            const replaySig = signer.makeReplaySignature(proofApprovalSignature);
 
             await truffleAssert.reverts(
                 zkAssetOwnableTest.callApproveProof(
