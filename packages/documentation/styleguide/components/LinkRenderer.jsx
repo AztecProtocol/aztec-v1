@@ -3,22 +3,18 @@ import PropTypes from 'prop-types';
 import cx from 'clsx';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 
-const styles = ({
-  fontSize,
-}) => ({
+const styles = () => ({
   link: {
-    fontWeight: 300,
-    fontSize: fontSize.small,
-    color: '#1E1B2B',
     '&, &:link, &:visited': {
       fontSize: 'inherit',
       color: 'inherit',
       fontFamily: 'Gill Sans',
       textDecoration: 'none',
+      opacity: 0.85,
     },
     '&:hover, &:active': {
       isolate: false,
-      opacity: 0.7,
+      opacity: 1,
       cursor: 'pointer',
     },
   },

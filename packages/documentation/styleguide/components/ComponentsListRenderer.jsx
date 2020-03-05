@@ -12,20 +12,19 @@ import {
   spacingMap,
   colorMap,
   roundedCornerMap,
+  fontSizeMap,
+  fontWeightMap,
 } from '../../src/styles/guacamole-vars';
 import sectionsConfig from '../config/sections';
 
 const styles = () => ({
   root: {
     padding: [[0, spacingMap.m]],
-    fontWeight: 400,
-    fontSize: 16,
-    color: 'white !important',
   },
   item: {
     padding: [[spacingMap.xs, spacingMap.xs]],
-    fontWeight: 400,
-    fontSize: 16,
+    fontSize: fontSizeMap.xs,
+    fontWeight: fontWeightMap.light,
     color: 'white !important',
   },
   label: {
@@ -52,12 +51,14 @@ const styles = () => ({
     height: '100%',
   },
   selected: {
-    fontWeight: 500,
+    fontWeight: fontWeightMap.semibold,
     color: 'white !important',
+    '& a': {
+      opacity: '1 !important',
+    },
   },
   child: {
-    fontWeight: 300,
-    fontSize: 14,
+    fontSize: fontSizeMap.xxs,
     color: 'white !important',
   },
 });
@@ -96,7 +97,7 @@ export const ComponentsListRenderer = ({
         const displayName = visibleName || defaultVisibleName;
 
         const isChild = !content || !content.props.items.length;
-        const isItemSelected = `/#/${windowHash}` === href;
+        const isItemSelected = `/#/${windowHash}` === decodeURI(href);
         const isAbleToToggle = !disableToggle && !!heading;
         const showContent = isOpen[defaultVisibleName]
           || disableToggle
