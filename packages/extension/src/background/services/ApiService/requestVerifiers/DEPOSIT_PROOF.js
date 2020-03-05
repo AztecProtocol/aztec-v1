@@ -6,6 +6,10 @@ import {
 import {
     argsError,
 } from '~/utils/error';
+import {
+    formatNumber,
+} from '~/utils/format';
+import getTokenInfo from '~/utils/getTokenInfo';
 import Asset from '~/background/database/models/asset';
 import validateAccounts from '../utils/validateAccounts';
 
@@ -61,10 +65,16 @@ export default async function verifyDepositRequest({
     balance = new BN(balance);
 
     if (balance.lt(erc20Amount)) {
+        const {
+            decimals,
+        } = getTokenInfo(linkedTokenAddress) || {};
+        const formattedBalance = formatNumber(balance, decimals || 0);
+        const formattedERC20Amonut = formatNumber(erc20Amount, decimals || 0);
+
         return argsError('erc20.deposit.balance.notEnough', {
-            balance: balance.toString(),
-            erc20Amount: erc20Amount.toString(),
-            amount: notesValue,
+            balance: formattedBalance,
+            erc20Amount: formattedERC20Amonut,
+            notesValue,
         });
     }
 
