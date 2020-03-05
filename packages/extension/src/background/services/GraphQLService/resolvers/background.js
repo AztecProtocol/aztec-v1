@@ -18,6 +18,9 @@ const backgroundResolvers = {
         user: ensureDomainPermission(async (_, args) => fetchAztecAccount({
             address: args.address || args.id,
         })),
+        users: ensureDomainPermission(async (_, args, ctx) => ({
+            accounts: await getAccounts(args, ctx),
+        })),
         asset: ensureDomainPermission(async (_, args) => fetchAsset({
             address: args.id || args.address,
         })),

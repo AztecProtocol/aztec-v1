@@ -76,6 +76,10 @@ export default gql`
         success: Boolean
         error: Error
     }
+    input User_filter {
+        address: String
+        address_in: [String!]
+    }
     input Account_filter {
         address: String
         address_in: [String!]

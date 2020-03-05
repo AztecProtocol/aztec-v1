@@ -322,13 +322,14 @@ class ConnectionService {
         });
     }
 
-    async query(queryName, args = {}) {
+    async query(queryName, args = {}, queryStr) {
         const {
             data,
         } = await this.postToBackground({
             type: clientRequestEvent,
             data: {
                 query: queryName,
+                queryStr,
                 args,
                 site: getSiteData(),
             },
@@ -345,8 +346,11 @@ class ConnectionService {
             return null;
         }
 
-        if (data[dataKey].error) {
-            throw new ApiError(data);
+        const {
+            error,
+        } = data[dataKey] || {};
+        if (error) {
+            throw new ApiError(data[dataKey]);
         }
 
         return data[dataKey];
