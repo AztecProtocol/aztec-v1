@@ -2,18 +2,16 @@
 
 const {
     JoinSplitProof,
-    note,
     signer,
 } = require('aztec.js');
-const { constants, proofs } =require('@aztec/dev-utils');
-const { generateAccount } = require('@aztec/secp256k1');
+const { proofs } =require('@aztec/dev-utils');
 const truffleAssert = require('truffle-assertions');
-const { randomHex, toChecksumAddress } = require('web3-utils');
+const { randomHex } = require('web3-utils');
 
 const ACE = artifacts.require('./ACE');
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
-const Behaviour20200220 = artifacts.require('./Behaviour20200106/epochs/20200106/Behaviour20200220');
-const Behaviour20200305 = artifacts.require('./Behaviour20200106/epochs/20200106/Behaviour20200220');
+const Behaviour20200220 = artifacts.require('./Behaviour20200220');
+const Behaviour20200305 = artifacts.require('./Behaviour20200305');
 const ERC20Mintable = artifacts.require('ERC20Mintable');
 const ZkAsset = artifacts.require('ZkAssetOwnable');
 const {
@@ -22,12 +20,9 @@ const {
     getOwnerPrivateKey,
 } = require('../../../helpers/AccountRegistry/epochs/20200106/Behaviour20200106');
 
-const standardAccount = require('../../../helpers/getOwnerAccount');
-const timetravel = require('../../../timeTravel');
-
 contract.only('Behaviour20200305', async (accounts) => {
-    const [userAddress, anotherUserAddress, senderAddress] = accounts;
-    let behaviour20200220;
+    const [userAddress,, senderAddress] = accounts;
+    let behaviour20200305;
     let manager;
     let proxyContract;
     let erc20;
@@ -38,8 +33,6 @@ contract.only('Behaviour20200305', async (accounts) => {
     const opts = { from: accounts[0] };
     const updatedGSNSignerAddress = '0x5323B6bbD3421983323b3f4f0B11c2D6D3bCE1d8';
     const initialAmount = 100;
-
-    const chainID = 4;
 
     beforeEach(async () => {
         ace = await ACE.deployed();
@@ -76,7 +69,7 @@ contract.only('Behaviour20200305', async (accounts) => {
     });
 
     describe('Success states', async () => {
-        it('should call confidential approve twice if the a second signature is passed in', async () => {
+        it('should call confidential approve twice if a second signature is passed in', async () => {
 
             const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();
             const publicOwner = proxyAddress;
@@ -134,13 +127,10 @@ contract.only('Behaviour20200305', async (accounts) => {
                 }),
             );
 
-
             await truffleAssert.reverts(
                 zkAsset.approveProof(proofs.JOIN_SPLIT_PROOF, transferProofData, delegatedAddress, true, proofSignature2),
                 'signature has already been used'
             );
-
-
         });
 
     });
@@ -198,10 +188,6 @@ contract.only('Behaviour20200305', async (accounts) => {
                 expect(noteOwner).to.equal(userAddress);
             }),
         );
-
-
-
     });
-
 });
 

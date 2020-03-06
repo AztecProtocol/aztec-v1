@@ -7,7 +7,6 @@
 
 import BN from 'bn.js';
 import { constants, proofs } from '@aztec/dev-utils';
-import BN from 'bn.js';
 
 import secp256k1 from '@aztec/secp256k1';
 import typedData from '@aztec/typed-data';

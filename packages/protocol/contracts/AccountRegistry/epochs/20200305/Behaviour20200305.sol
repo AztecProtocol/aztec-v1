@@ -1,16 +1,11 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "../20200207/Behaviour20200207.sol";
+import "../20200220/Behaviour20200220.sol";
 import "../../../interfaces/IERC20Permit.sol";
 
 /**
- * @title Behaviour20200220 implementation
+ * @title Behaviour20200305 implementation
  * @author AZTEC
- * @dev This behaviour contract overloads the deposit() account registry method, with a deposit() 
- * implementation that is compatible with the DAI permit() function.
- * 
- * Note the behaviour contract version naming convention is based on the date on which the contract
- * was created, in the format: YYYYMMDD
  * 
  * Copyright 2020 Spilsbury Holdings Ltd 
  *
@@ -25,7 +20,7 @@ import "../../../interfaces/IERC20Permit.sol";
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
-contract Behaviour20200220 is Behaviour20200207 {
+contract Behaviour20200305 is Behaviour20200220 {
     /**
     * @dev epoch number, used for version control in upgradeability. The naming convention is based on the
     * date on which the contract was created, in the format: YYYYMMDD
@@ -39,7 +34,7 @@ contract Behaviour20200220 is Behaviour20200207 {
     * @param _proofData - data generated from proof construction, which is used to validate the proof
     * @param _spender - address that will be spending the notes
     * @param _proofSignature - EIP712 signature used to approve/revoke permission for the proof
-    * @param _proofSignature2 - EIP712 signature with be s bit flipped for replay protection of ZkDai 
+    * @param _proofSignature2 - EIP712 signature with be s bit flipped for replay protection of ZkDai
     * to be spent
     */
     function confidentialTransferFrom(
