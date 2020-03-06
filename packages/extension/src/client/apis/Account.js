@@ -1,3 +1,7 @@
+import {
+    note as noteUtils,
+} from 'aztec.js';
+import uniq from 'lodash/uniq';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiError from '~/client/utils/ApiError';
@@ -18,6 +22,49 @@ class Account {
 
     get registered() {
         return !!this.linkedPublicKey;
+    }
+
+    /**
+    *
+    * createNote
+    *
+    * - value (Int!):                   The note value to send.
+    * - userAccess ([Address!]):       The addresses that are able to see the real note value.
+    *
+    * @returns (Note)
+    *
+    */
+    async createNote(value, userAccess = []) {
+        if (!this.registered) {
+            throw new ApiError('user.unregistered', {
+                fn: 'createNote',
+            });
+        }
+
+        let noteAccess = [];
+        if (userAccess && userAccess.length) {
+            ({
+                accounts: noteAccess,
+            } = await ConnectionService.query(
+                'users',
+                {
+                    where: {
+                        address_in: uniq(userAccess),
+                    },
+                },
+                `
+                    address
+                    linkedPublicKey
+                `,
+            ) || {});
+        }
+
+        return noteUtils.create(
+            this.spendingPublicKey,
+            value,
+            noteAccess,
+            this.address,
+        );
     }
 
     async encryptMessage(message) {

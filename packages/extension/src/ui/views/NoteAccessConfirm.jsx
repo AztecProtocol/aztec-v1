@@ -5,10 +5,12 @@ import {
     Text,
 } from '@aztec/guacamole-ui';
 import {
+    formatNumber,
+} from '~/utils/format';
+import {
     assetShape,
 } from '~/ui/config/propTypes';
 import i18n from '~/ui/helpers/i18n';
-import formatNumber from '~/ui/utils/formatNumber';
 import PopupContent from '~/ui/components/PopupContent';
 import Ticket from '~/ui/components/Ticket';
 import ListRow from '~/ui/components/ListRow';

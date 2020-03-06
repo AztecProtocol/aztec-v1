@@ -18,9 +18,10 @@ export default async function createNote(value, publicKey, owner, access) {
             accessArr = [access];
         }
     }
-    const compressedPublicKey = EthCrypto.publicKey.compress(
-        publicKey.slice(2),
-    );
 
-    return noteUtils.create(`0x${compressedPublicKey}`, value, accessArr, owner);
+    const compressedPublicKey = publicKey.length === 68
+        ? publicKey
+        : `0x${EthCrypto.publicKey.compress(publicKey.slice(2))}`;
+
+    return noteUtils.create(compressedPublicKey, value, accessArr, owner);
 }

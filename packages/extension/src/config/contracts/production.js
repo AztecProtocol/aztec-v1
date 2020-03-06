@@ -1,4 +1,4 @@
-import AccountRegistry from '~contracts/IAccountRegistryBehaviour.json';
+import AccountRegistry from '~contracts/Behaviour20200220.json';
 import AccountRegistryManager from '~contracts/IAccountRegistryManager.json';
 import ACE from '~contracts/IACE.json';
 import IERC20 from '~contracts/IERC20Mintable.json';

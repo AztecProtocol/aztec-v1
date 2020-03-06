@@ -1,4 +1,8 @@
 import BN from 'bn.js';
+import {
+    tokenToNoteValue,
+    noteToTokenValue,
+} from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
@@ -13,6 +17,7 @@ const dataProperties = [
     'scalingFactor',
     'canAdjustSupply',
     'canConvert',
+    'token',
 ];
 
 export default class ZkAsset {
@@ -159,22 +164,31 @@ export default class ZkAsset {
      * Deposit
      *
      * - transactions ([Transaction!]!)
-     *       amount (Int!):                The equivalent note value to deposit.
-     *       to (Address!):                The output note owner.
-     *       numberOfOutputNotes (Int):    Number of output notes of this transaction.
+     *       amount (Int!):                  The equivalent note value to deposit.
+     *       to (Address!):                  The output note owner.
+     *       numberOfOutputNotes (Int):      Number of output notes of this transaction.
+     *       aztecAccountNotRequired (Bool): Not to enforce recipient to have an aztec account if set to true.
      * - options (Object)
-     *       numberOfOutputNotes (Int):    Number of new notes for each transaction.
-     *                                     Unless numberOfOutputNotes is defined in that transaction.
-     *                                     Will use default value in setting if undefined.
-     *       userAccess ([Address!]):      The addresses that are able to see the real note value.
+     *       numberOfOutputNotes (Int):      Number of new notes for each transaction.
+     *                                       Unless numberOfOutputNotes is defined in that transaction.
+     *                                       Will use default value in setting if undefined.
+     *       userAccess ([Address!]):        The addresses that are able to see the real note value.
+     *       returnProof (Bool):             Return a JoinSplit Proof instead of sending it.
+     *       sender (Address):               The proof sender. Available only when returnProof is true.
+     *       publicOwner (Address):          The owner of ERC token. Available only when returnProof is true.
      *
      * @returns (Object)
-     * - success (Boolean)
-     * - amount (Int)
+     * - success (Boolean!)
+     * - outputNotes ([Note!])               Notes deposited into the recipient account.
+     * - proof (JoinSplitProof)              Not empty if `returnProof` is set to true.
+     *
      */
     deposit = async (transactions, {
         numberOfOutputNotes,
         userAccess = [],
+        returnProof,
+        sender,
+        publicOwner,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -190,6 +204,9 @@ export default class ZkAsset {
                 transactions: parseInputTransactions(transactions),
                 numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
                 userAccess,
+                returnProof,
+                sender,
+                publicOwner,
             },
         );
     };
@@ -198,20 +215,23 @@ export default class ZkAsset {
      *
      * Withdraw
      *
-     * - amount (Int!):                    The note value to withdraw.
+     * - amount (Int!):                      The note value to withdraw.
      * - options (Object)
-     *       to (Address):                 The linked token owner.
-     *                                     Will use current address if undefined.
-     *       numberOfInputNotes (Int):     Number of notes to be destroyed.
-     *                                     Will use default value in setting if undefined.
+     *       to (Address):                   The linked token owner.
+     *                                       Will use current address if undefined.
+     *       numberOfInputNotes (Int):       Number of notes to be destroyed.
+     *                                       Will use default value in setting if undefined.
+     *       returnProof (Bool):             Return a JoinSplit Proof instead of sending it.
+     *       sender (Address):               The proof sender. Available only when returnProof is true.
      *
      * @returns (Object)
      * - success (Boolean)
-     * - amount (Int)
      */
     withdraw = async (amount, {
         to,
         numberOfInputNotes,
+        returnProof,
+        sender,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -230,7 +250,10 @@ export default class ZkAsset {
                 assetAddress: this.address,
                 amount: parseInputInteger(amount),
                 to: to || address,
+                publicOwner: to || address,
                 numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                returnProof,
+                sender,
             },
         );
     };
@@ -243,7 +266,7 @@ export default class ZkAsset {
     *       amount (Int!):                  The note value to send.
     *       to (Address!):                  The output note owner.
     *       numberOfOutputNotes (Int):      Number of output notes of this transaction.
-    *       aztecAccountNotRequired (Bool): Not to enforce receipient to have an aztec account if set to true.
+    *       aztecAccountNotRequired (Bool): Not to enforce recipient to have an aztec account if set to true.
     * - options (Object)
     *       numberOfInputNotes (Int):       Number of notes to be destroyed.
     *                                       Will use default value in setting if undefined.
@@ -251,15 +274,23 @@ export default class ZkAsset {
     *                                       Unless numberOfOutputNotes is defined in that transaction.
     *                                       Will use default value in setting if undefined.
     *       userAccess ([Address!]):        The addresses that are able to see the real note value.
+    *       returnProof (Bool):             Return a JoinSplit Proof instead of sending it.
+    *       sender (Address):               The proof sender. Available only when returnProof is true.
+    *       publicOwner (Address):          The owner of ERC token. Available only when returnProof is true.
     *
     * @returns (Object)
-    * - success (Boolean)
-    * - amount (Int)
+    * - success (Boolean!)
+    * - outputNotes ([Note!])               Notes sent to the recipient, i.e, output notes in the proof excluding remainder note.
+    * - proof (JoinSplitProof)              Not empty if `returnProof` is set to true.
+    *
     */
     send = async (transactions, {
         numberOfInputNotes,
         numberOfOutputNotes,
         userAccess,
+        returnProof,
+        sender,
+        publicOwner,
     } = {}) => ConnectionService.query(
         'constructProof',
         {
@@ -269,6 +300,9 @@ export default class ZkAsset {
             numberOfInputNotes: parseInputInteger(numberOfInputNotes),
             numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
             userAccess,
+            returnProof,
+            sender,
+            publicOwner,
         },
     );
 
@@ -426,4 +460,48 @@ export default class ZkAsset {
             numberOfNotes: parseInputInteger(numberOfNotes),
         },
     );
+
+    /**
+    *
+    * toNoteValue
+    *
+    * - tokenValue (Number! or String!)
+    *
+    * @returns
+    * - noteValue (String!)
+    */
+    toNoteValue = (tokenValue) => {
+        const {
+            decimals,
+        } = this.token || {};
+
+        return tokenToNoteValue({
+            value: tokenValue,
+            scalingFactor: this.scalingFactor,
+            decimals: decimals || 0,
+        });
+    };
+
+    /**
+    *
+    * toTokenValue
+    *
+    * - noteValue (Number! or String!)
+    * - format (Bool)                       The output value will be formatted if true
+    *
+    * @returns
+    * - tokenValue (String!)
+    */
+    toTokenValue = (noteValue, format = false) => {
+        const {
+            decimals,
+        } = this.token || {};
+
+        return noteToTokenValue({
+            value: noteValue,
+            scalingFactor: this.scalingFactor,
+            decimals: decimals || 0,
+            format,
+        });
+    };
 }

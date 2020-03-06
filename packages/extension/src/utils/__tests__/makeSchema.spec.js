@@ -622,7 +622,7 @@ describe('makeSchema', () => {
         });
     });
 
-    it('acccept custom compare function', () => {
+    it('accept custom compare function', () => {
         const schema = makeSchema({
             oct: {
                 type: ['string', 'number'],
@@ -697,5 +697,148 @@ describe('makeSchema', () => {
                 hex: invalidHex,
             })).toMatch(/hex/);
         });
+    });
+
+    it('can generate custom error message', () => {
+        const customError = (errorType, data) => {
+            const {
+                val,
+                path,
+                valType,
+            } = data;
+            switch (errorType) {
+                case 'type':
+                    return `Invalid type '${valType}' supplied to '${path}'.`;
+                case 'value':
+                    return `Invalid value '${val}' supplied to '${path}'.`;
+                case 'regexp':
+                    return `Invalid string '${val}' supplied to '${path}'.`;
+                default:
+            }
+            return '';
+        };
+
+        const schema = makeSchema({
+            scoreboard: {
+                type: 'array',
+                each: {
+                    name: {
+                        type: 'string',
+                        match: /^[a-z]+$/i,
+                        error: (_, { val }) => `Name can only contain a - z, got '${val}'.`,
+                    },
+                    score: {
+                        type: 'integer',
+                        size: {
+                            lte: 10,
+                        },
+                        error: customError,
+                    },
+                },
+            },
+        });
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: 'Pika01',
+                    score: 10,
+                },
+            ],
+        })).toBe("Name can only contain a - z, got 'Pika01'.");
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: 'Pika',
+                    score: 10,
+                },
+                {
+                    name: 'Eevee',
+                    score: 9.5,
+                },
+            ],
+        })).toBe("Invalid type 'number' supplied to 'scoreboard.1.score'.");
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: 'Pika',
+                    score: 11,
+                },
+                {
+                    name: 'Eevee',
+                    score: 9,
+                },
+            ],
+        })).toBe("Invalid value '11' supplied to 'scoreboard.0.score'.");
+    });
+
+    it('show default error if custom error function returns nothing', () => {
+        const schema = makeSchema({
+            scoreboard: {
+                type: 'array',
+                each: {
+                    name: {
+                        type: 'string',
+                        match: /^[a-z]+$/i,
+                        error: (_, { val }) => {
+                            if (val === '') {
+                                return 'Name cannot be empty.';
+                            }
+                            return '';
+                        },
+                    },
+                    score: {
+                        type: 'integer',
+                        size: {
+                            lte: 10,
+                        },
+                        error: (_, { val }) => {
+                            if ((val | 0) !== val) { // eslint-disable-line no-bitwise
+                                return 'Score cannot be floating point number.';
+                            }
+                            return '';
+                        },
+                    },
+                },
+            },
+        });
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: '',
+                    score: 10,
+                },
+            ],
+        })).toBe('Name cannot be empty.');
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: 'Pika01',
+                    score: 10,
+                },
+            ],
+        })).toMatch(/Invalid value `Pika01`/);
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: 'Pika',
+                    score: 9.5,
+                },
+            ],
+        })).toBe('Score cannot be floating point number.');
+
+        expect(schema.validate({
+            scoreboard: [
+                {
+                    name: 'Pika',
+                    score: 11,
+                },
+            ],
+        })).toMatch(/Invalid value `11`/);
     });
 });

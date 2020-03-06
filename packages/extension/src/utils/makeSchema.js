@@ -34,7 +34,7 @@ const typeValidators = {
         && val === (val | 0), // eslint-disable-line no-bitwise
 };
 
-const validateType = (targetType, val, path) => {
+const validateType = (targetType, val, path, errorMsg) => {
     const typeConfig = Array.isArray(targetType) ? targetType : [targetType];
     const valType = typeOf(val);
     const isValid = typeConfig.some((type) => {
@@ -69,7 +69,12 @@ const validateType = (targetType, val, path) => {
         if (typeConfig.length > 1) {
             expectedTypes = `one of [${expectedTypes}]`;
         }
-        return `Invalid value \`${val}\` of type '${valType}' supplied to '${path}', expected ${expectedTypes}.`;
+        return (errorMsg && errorMsg('type', {
+            val,
+            valType,
+            expectedTypes,
+            path,
+        })) || `Invalid value \`${val}\` of type '${valType}' supplied to '${path}', expected ${expectedTypes}.`;
     }
     return null;
 };
@@ -97,7 +102,7 @@ const compMapping = {
     },
 };
 
-const validateValue = (name, size, val, valSize, path) => {
+const validateValue = (name, size, val, valSize, path, errorMsg) => {
     let compVars = {};
     let customComp;
     if (typeOf(size) === 'number') {
@@ -126,7 +131,13 @@ const validateValue = (name, size, val, valSize, path) => {
                 isValid = exec(valSize, targetValue);
             }
             if (!isValid) {
-                error = `Invalid value \`${val}\` supplied to '${path}', expected ${name} to be ${text} ${targetValue}.`;
+                error = (errorMsg && errorMsg('value', {
+                    val,
+                    targetValue,
+                    path,
+                    name,
+                    cmp: text,
+                })) || `Invalid value \`${val}\` supplied to '${path}', expected ${name} to be ${text} ${targetValue}.`;
             }
             return error;
         });
@@ -134,9 +145,13 @@ const validateValue = (name, size, val, valSize, path) => {
     return error;
 };
 
-const validateRegExp = (pattern, val, path) => {
+const validateRegExp = (pattern, val, path, errorMsg) => {
     if (!val.match(pattern)) {
-        return `Invalid value \`${val}\` supplied to '${path}', expected to match ${pattern}.`;
+        return (errorMsg && errorMsg('regexp', {
+            val,
+            path,
+            pattern,
+        })) || `Invalid value \`${val}\` supplied to '${path}', expected to match ${pattern}.`;
     }
 
     return null;
@@ -153,6 +168,7 @@ const validate = (config, val, path = '') => {
         length,
         size,
         match,
+        error: errorMsg,
     } = config;
 
     if (isNotDefined(val)) {
@@ -163,7 +179,7 @@ const validate = (config, val, path = '') => {
     }
 
     if (!type || typeOf(type) === 'object') {
-        error = validateType('object', val, path);
+        error = validateType('object', val, path, errorMsg);
         if (!error) {
             const objVal = val || {};
             Object.keys(config).some((name) => {
@@ -174,14 +190,14 @@ const validate = (config, val, path = '') => {
         return error;
     }
 
-    error = validateType(type, val, path);
+    error = validateType(type, val, path, errorMsg);
     if (error) {
         return error;
     }
 
-    error = (!isNotDefined(length) && validateValue('length', length, val, lengthOf(val), path))
-        || (!isNotDefined(size) && validateValue('size', size, val, sizeOf(val), path))
-        || (!isNotDefined(match) && validateRegExp(match, val, path))
+    error = (!isNotDefined(length) && validateValue('length', length, val, lengthOf(val), path, errorMsg))
+        || (!isNotDefined(size) && validateValue('size', size, val, sizeOf(val), path, errorMsg))
+        || (!isNotDefined(match) && validateRegExp(match, val, path, errorMsg))
         || null;
     if (error) {
         return error;

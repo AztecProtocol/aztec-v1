@@ -2,6 +2,7 @@ import registerExtension from './RegisterExtension';
 import registerDomain from './RegisterDomain';
 import account from './Account';
 import user from './Account/user';
+import users from './Account/users';
 import encryptMessage from './Account/encrypt';
 import decryptMessage from './Account/decrypt';
 import prove from './Prove';
@@ -19,6 +20,7 @@ const apis = {
     registerDomain,
     account,
     user,
+    users,
     encryptMessage,
     decryptMessage,
     asset,

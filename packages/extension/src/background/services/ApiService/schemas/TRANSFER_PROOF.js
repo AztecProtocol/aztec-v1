@@ -21,4 +21,9 @@ export default makeSchema({
         type: 'array',
         each: addressType,
     },
+    returnProof: {
+        type: 'boolean',
+    },
+    sender: addressType,
+    publicOwner: addressType,
 });

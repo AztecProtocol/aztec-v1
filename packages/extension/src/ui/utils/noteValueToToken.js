@@ -1,5 +1,6 @@
-import BN from 'bn.js';
-import formatNumber from './formatNumber';
+import {
+    noteToTokenValue,
+} from '~/utils/transformData';
 
 export default function noteValueToToken(noteValue, asset, format = true) {
     const {
@@ -7,12 +8,10 @@ export default function noteValueToToken(noteValue, asset, format = true) {
         decimals,
     } = asset;
 
-    let tokenValue = new BN(noteValue);
-    if (scalingFactor) {
-        tokenValue = scalingFactor.mul(tokenValue);
-    }
-
-    return format
-        ? formatNumber(tokenValue, decimals)
-        : tokenValue;
+    return noteToTokenValue({
+        value: noteValue,
+        scalingFactor,
+        decimals,
+        format,
+    });
 }
