@@ -1,5 +1,6 @@
 import ethSigUtil from 'eth-sig-util';
 import * as ethUtil from 'ethereumjs-util';
+import { signer } from 'aztec.js';
 import Web3Service from '~/client/services/Web3Service';
 import registerExtension, { generateTypedData } from './registerExtension';
 import signNote from './signNote';
@@ -30,6 +31,7 @@ const handleAction = async (action, params) => {
         case 'metamask.register.extension': {
             const eip712Data = registerExtension(params);
             const method = 'eth_signTypedData_v4';
+
             const { result } = await Web3Service.sendAsync({
                 method,
                 params: [address, eip712Data],
@@ -47,33 +49,6 @@ const handleAction = async (action, params) => {
                 publicKey,
             };
 
-            break;
-        }
-        case 'metamask.eip712.signNotes': {
-            const {
-                assetAddress,
-                noteHashes,
-                challenge,
-                sender,
-            } = params;
-            const signatures = (await Promise.all(noteHashes.map(async (noteHash) => {
-                const noteSchema = signNote({
-                    assetAddress,
-                    noteHash,
-                    challenge,
-                    sender,
-                });
-                const method = 'eth_signTypedData_v4';
-                return Web3Service.sendAsync({
-                    method,
-                    params: [address, noteSchema],
-                    from: address,
-                });
-            }))).map(({ result }) => result);
-
-            response = {
-                signatures,
-            };
             break;
         }
         case 'metamask.eip712.signProof': {
@@ -97,7 +72,8 @@ const handleAction = async (action, params) => {
             });
 
             response = {
-                signature: result,
+                signature1: result,
+                signature2: signer.makeReplaySignature(result),
             };
 
             break;
