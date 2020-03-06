@@ -15,12 +15,12 @@ export const buttonSizeMap = {
 };
 export const buttonTextSizeMap = {
   xxs: 'xxs',
-  xs: 'xs',
-  s: 's',
-  m: 's',
+  xs: 'xxs',
+  s: 'xxs',
+  m: 'xs',
   l: 's',
-  xl: 's',
-  xxl: 's',
+  xl: 'm',
+  xxl: 'm',
 };
 export const buttonSpacingHSizeMap = {
   xxs: 'm',
@@ -37,14 +37,14 @@ export const colorMap = {
   primary: '#898BF6',
   'primary-light': 'rgba(137, 139, 246, 0.7)',
   'primary-lighter': 'rgba(137, 139, 246, 0.45)',
-  'primary-lightest': 'rgb(244, 245, 254)',
+  'primary-lightest': '#f2f7fd',
   black: '#000000',
   'grey-darker': 'rgba(2, 1, 8, 0.88)',
   'grey-dark': 'rgba(0, 0, 0, 0.7)',
   grey: 'rgba(0, 0, 0, 0.45)',
   'grey-light': 'rgba(0, 0, 0, 0.2)',
   'grey-lighter': 'rgba(0, 0, 0, 0.1)',
-  'grey-lightest': '#e8e7e7',
+  'grey-lightest': '#F9fbfd',
   white: '#FFFFFF',
   'white-light': 'rgba(255, 255, 255, 0.85)',
   'white-lighter': 'rgba(255, 255, 255, 0.5)',
@@ -62,7 +62,6 @@ export const colorMap = {
   yellow: '#FACB00',
   orange: '#E57300',
   brown: '#49311A',
-  clear: 'rgba(255,255,255, 0)',
 };
 export const darkBackgroundColors = [
   'primary',
@@ -87,7 +86,7 @@ export const defaultShadowColor = 'rgba(0, 0, 0, 0.1)';
 export const defaultBorderColorName = 'grey-lighter';
 export const defaultBorderColor = 'rgba(0, 0, 0, 0.1)';
 export const defaultHoverBackgroundColorName = 'grey-lightest';
-export const defaultHoverBackgroundColor = '#e8e7e7';
+export const defaultHoverBackgroundColor = '#F9fbfd';
 export const defaultTextColorName = 'grey-darker';
 export const defaultTextColor = '#221635';
 export const defaultLabelColorName = 'grey';
@@ -103,6 +102,16 @@ export const svgProgressThemeBgMap = {
   primary: 'primary-lightest',
   secondary: 'secondary-lightest',
   white: 'white-lighter',
+};
+export const loaderThemeColorMap = {
+  primary: 'primary-lightest',
+  secondary: 'secondary-lightest',
+  white: 'white',
+};
+export const loaderThemeInvertedColorMap = {
+  primary: 'white',
+  secondary: 'white',
+  white: 'grey-lighter',
 };
 export const iconSizeMap = {
   xxs: '12px',
@@ -151,9 +160,9 @@ export const darkInputValueColor = '#FFFFFF';
 export const darkInputPlaceholderColorName = 'white-lighter';
 export const darkInputPlaceholderColor = 'rgba(255, 255, 255, 0.5)';
 export const inlineInputBgColorName = 'grey-lightest';
-export const inlineInputBgColor = '#e8e7e7';
+export const inlineInputBgColor = '#F9fbfd';
 export const inlineInputActiveBgColorName = 'grey-lightest';
-export const inlineInputActiveBgColor = '#e8e7e7';
+export const inlineInputActiveBgColor = '#F9fbfd';
 export const inlineInputActiveOutlineColorName = 'secondary-light';
 export const inlineInputActiveOutlineColor = '#222261';
 export const inlineInputValueColorName = 'grey-dark';
@@ -263,20 +272,20 @@ export const badgeSizeMap = {
 };
 export const defaultFontFamily = '\'Gill Sans\', sans-serif';
 export const fontSizeMap = {
-  xxs: '14px',
-  xs: '15px',
-  s: '17px',
+  xxs: '12px',
+  xs: '14px',
+  s: '16px',
   m: '22px',
   l: '32px',
-  xl: '40px',
-  xxl: '50px',
+  xl: '42px',
+  xxl: '52px',
 };
 export const lineHeightMap = {
-  xxs: '24px',
-  xs: '26px',
+  xxs: '20px',
+  xs: '24px',
   s: '32px',
-  m: '38px',
-  l: '46px',
+  m: '36px',
+  l: '48px',
   xl: '58px',
   xxl: '66px',
 };

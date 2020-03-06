@@ -2,7 +2,11 @@ require('babel-polyfill');
 require('@babel/register');
 const path = require('path');
 const webpackConfig = require('./webpack.config').default;
-const { fontSizeMap, defaultBorderColor, colorMap } = require('./src/styles/guacamole-vars');
+const {
+  fontSizeMap,
+  defaultBorderColor,
+  colorMap,
+} = require('./src/styles/guacamole-vars');
 
 module.exports = {
   title: 'AZTEC Docs',

@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@aztec/contract-addresses": "1.16.1",
-    "@aztec/guacamole-ui": "^1.1.2",
+    "@aztec/guacamole-ui": "^1.2.0",
     "@babel/core": "^7.4.0",
     "@babel/node": "^7.2.2",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
