@@ -14,8 +14,8 @@ HTML=$(cat "$TEMPLATE_PATH/$TEMPLATE_NAME");
 
 # Need first argument to be package
 if [[ $PACKAGES_TO_PREPARE == *$1* ]]; then
-    if [[ ! -z  "$SERVE_LOCATION" ]]; then
-        echo "${HTML/\{\{SDK_SERVING_URL\}\}/$SERVE_LOCATION}" > "$TEMPLATE_PATH/index.html"
+    if [[ ! -z  "$2" ]]; then
+        echo "${HTML/\{\{SDK_SERVING_URL\}\}/$2}" > "$TEMPLATE_PATH/index.html"
     else
         echo "${HTML/\{\{SDK_SERVING_URL\}\}/$DEFAULT_SERVE_LOCATION}" > "$TEMPLATE_PATH/index.html"
     fi

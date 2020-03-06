@@ -1,6 +1,6 @@
 export default {
     AccountRegistry: {
-        name: 'Behaviour20200106',
+        name: 'Behaviour20200220',
         events: {
             registerExtension: 'RegisterExtension',
         },

@@ -6,7 +6,7 @@
         "**/*.scss"
     ],
     "license": "LGPL-3.0",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "author": "AZTEC",
     "bugs": {
         "url": "https://github.com/AztecProtocol/AZTEC/issues"
@@ -92,6 +92,7 @@
     "scripts": {
         "copy": "babel-node scripts/run copy",
         "deploy:contracts": "babel-node scripts/run deploy",
+        "deploy:staging": "babel-node scripts/run deployStaging",
         "has:changed": "bash ../monorepo-scripts/ci/hasChanged.sh extension",
         "generate:styles": "guacamole generateStyles",
         "generate:testData": "babel-node ./tests/generateTestData",
@@ -100,6 +101,7 @@
         "build:dev": "webpack --config webpack.dev.js",
         "build": "yarn build:prod",
         "build:prod": "webpack --config webpack.prod.js",
+        "build:integration": "webpack --config webpack.integration.js",
         "start:ganache": "babel-node scripts/run start",
         "start:ui": "babel-node ./src/ui/mock/devServer",
         "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && babel-node scripts/run integrationTests",

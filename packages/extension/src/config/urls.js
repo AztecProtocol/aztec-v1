@@ -9,10 +9,10 @@ const production = {
 };
 
 const staging = {
-    origin: 'https://staging.aztecprotocol.com',
-    public: 'https://staging.aztecprotocol.com/sdk/public',
-    background: 'https://staging.aztecprotocol.com/sdk/background.html',
-    ui: 'https://staging.aztecprotocol.com/sdk/ui.html',
+    origin: 'https://staging-sdk.aztecprotocol.com',
+    public: 'https://staging-sdk.aztecprotocol.com/sdk/public',
+    background: 'https://staging-sdk.aztecprotocol.com/sdk/background.html',
+    ui: 'https://staging-sdk.aztecprotocol.com/sdk/ui.html',
     apiKeyQuota,
 };
 
@@ -29,7 +29,7 @@ function getConfig() {
         return production;
     }
 
-    if (process.env.NODE_ENV === 'integration') {
+    if (process.env.NODE_ENV === 'integration' && process.env.SERVE_LOCATION) {
         return staging;
     }
 

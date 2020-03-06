@@ -33,12 +33,12 @@ export default function taskFactory(
         wait = false,
         interactive = false,
     } = {},
-    env = process.env,
 ) {
     const fn = (args, {
         silent = true,
         waitForReady = !!isReadyPredicate,
         waitForExit = wait,
+        env = process.env,
     } = {}) => new Promise((resolve) => {
         let ready = false;
         log(`> Spawn ${executable} ${cmd}...`);
