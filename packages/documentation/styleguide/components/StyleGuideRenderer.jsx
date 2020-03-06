@@ -4,7 +4,7 @@ import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import {
   colorMap,
 } from '../../src/styles/guacamole-vars';
-import '@aztec/guacamole-ui/dist/styles/guacamole.css';
+import '../../src/styles/guacamole.css';
 import '../../src/styles/reset.scss';
 
 const xsmall = '@media (max-width: 600px)';

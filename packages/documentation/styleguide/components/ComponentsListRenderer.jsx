@@ -58,7 +58,7 @@ const styles = () => ({
     },
   },
   child: {
-    fontSize: fontSizeMap.xxs,
+    fontSize: fontSizeMap.xs,
     color: 'white !important',
   },
 });

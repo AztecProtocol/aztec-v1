@@ -89,7 +89,9 @@ class LiveDocUpdate extends Component {
 
     return (
       <div>
-        <MethodDescription {...parsedDescription} />
+        {!!(parsedDescription && parsedDescription.description) && (
+          <MethodDescription {...parsedDescription} />
+        )}
         {parsedArguments.length > 0 && <MethodArgumentRenderer methods={parsedArguments} />}
         {parsedReturns.length > 0 && <MethodReturnRenderer methods={parsedReturns} />}
       </div>

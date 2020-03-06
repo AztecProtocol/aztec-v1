@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
 import { useStyleGuideContext } from 'react-styleguidist/lib/client/rsg-components/Context';
 import { Block } from '@aztec/guacamole-ui';
-
 import ExamplesRenderer from './ExamplesRenderer';
-import Playground from './Playground';
+import SdkPlayground from './SdkPlayground';
 import LiveDocUpdate from './LiveDocUpdate';
 
-export default function Examples({ examples, name, exampleMode }) {
+const Examples = ({
+  name,
+  examples,
+}) => {
   const { codeRevision } = useStyleGuideContext();
 
   let liveDocUpdate;
@@ -24,18 +26,18 @@ export default function Examples({ examples, name, exampleMode }) {
           switch (example.type) {
             case 'code':
               return (
-                <Playground
+                <SdkPlayground
+                  key={`${codeRevision}/${+index}`}
                   code={example.content}
-                  evalInContext={example.evalInContext}
-                  key={`${codeRevision}/${index}`}
-                  name={name}
-                  index={index}
-                  settings={example.settings}
-                  exampleMode={exampleMode}
                 />
               );
             case 'markdown':
-              return <Markdown text={example.content} key={index} />;
+              return (
+                <Markdown
+                  key={+index}
+                  text={example.content}
+                />
+              );
             default:
               return null;
           }
@@ -43,10 +45,11 @@ export default function Examples({ examples, name, exampleMode }) {
       </ExamplesRenderer>
     </Block>
   );
-}
+};
 
 Examples.propTypes = {
-  examples: PropTypes.array.isRequired,
   name: PropTypes.string.isRequired,
-  exampleMode: PropTypes.string.isRequired,
+  examples: PropTypes.array.isRequired,
 };
+
+export default Examples;
