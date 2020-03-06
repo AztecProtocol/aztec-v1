@@ -1,24 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
+import {
+  Block,
+} from '@aztec/guacamole-ui';
 
-const styles = () => ({
-  // Just default jss-isolate rules
-  root: {},
-});
-
-export function ExamplesRenderer({ classes, name, children }) {
+export function ExamplesRenderer({ name, children }) {
   return (
-    <article className={classes.root} data-testid={`${name}-examples`}>
+    <Block
+      data-testid={`${name}-examples`}
+      padding="l 0"
+    >
       {children}
-    </article>
+    </Block>
   );
 }
 
 ExamplesRenderer.propTypes = {
-  classes: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   children: PropTypes.node,
 };
 
-export default Styled(styles)(ExamplesRenderer);
+ExamplesRenderer.defaultProps = {
+  children: null,
+};
+
+export default ExamplesRenderer;

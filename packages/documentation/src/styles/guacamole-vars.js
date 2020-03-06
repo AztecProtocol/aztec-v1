@@ -37,14 +37,14 @@ export const colorMap = {
   primary: '#898BF6',
   'primary-light': 'rgba(137, 139, 246, 0.7)',
   'primary-lighter': 'rgba(137, 139, 246, 0.45)',
-  'primary-lightest': '#f2f7fd',
+  'primary-lightest': 'rgb(244, 245, 254)',
   black: '#000000',
   'grey-darker': 'rgba(2, 1, 8, 0.88)',
   'grey-dark': 'rgba(0, 0, 0, 0.7)',
   grey: 'rgba(0, 0, 0, 0.45)',
   'grey-light': 'rgba(0, 0, 0, 0.2)',
   'grey-lighter': 'rgba(0, 0, 0, 0.1)',
-  'grey-lightest': '#F9fbfd',
+  'grey-lightest': 'rgb(246, 250, 255)',
   white: '#FFFFFF',
   'white-light': 'rgba(255, 255, 255, 0.85)',
   'white-lighter': 'rgba(255, 255, 255, 0.5)',
@@ -86,7 +86,7 @@ export const defaultShadowColor = 'rgba(0, 0, 0, 0.1)';
 export const defaultBorderColorName = 'grey-lighter';
 export const defaultBorderColor = 'rgba(0, 0, 0, 0.1)';
 export const defaultHoverBackgroundColorName = 'grey-lightest';
-export const defaultHoverBackgroundColor = '#F9fbfd';
+export const defaultHoverBackgroundColor = 'rgb(246, 250, 255)';
 export const defaultTextColorName = 'grey-darker';
 export const defaultTextColor = '#221635';
 export const defaultLabelColorName = 'grey';
@@ -160,9 +160,9 @@ export const darkInputValueColor = '#FFFFFF';
 export const darkInputPlaceholderColorName = 'white-lighter';
 export const darkInputPlaceholderColor = 'rgba(255, 255, 255, 0.5)';
 export const inlineInputBgColorName = 'grey-lightest';
-export const inlineInputBgColor = '#F9fbfd';
+export const inlineInputBgColor = 'rgb(246, 250, 255)';
 export const inlineInputActiveBgColorName = 'grey-lightest';
-export const inlineInputActiveBgColor = '#F9fbfd';
+export const inlineInputActiveBgColor = 'rgb(246, 250, 255)';
 export const inlineInputActiveOutlineColorName = 'secondary-light';
 export const inlineInputActiveOutlineColor = '#222261';
 export const inlineInputValueColorName = 'grey-dark';
@@ -276,18 +276,18 @@ export const fontSizeMap = {
   xs: '14px',
   s: '16px',
   m: '22px',
-  l: '32px',
-  xl: '42px',
-  xxl: '52px',
+  l: '28px',
+  xl: '32px',
+  xxl: '42px',
 };
 export const lineHeightMap = {
   xxs: '20px',
   xs: '24px',
   s: '32px',
   m: '36px',
-  l: '48px',
-  xl: '58px',
-  xxl: '66px',
+  l: '42px',
+  xl: '48px',
+  xxl: '58px',
 };
 export const fontWeightMap = {
   light: 300,

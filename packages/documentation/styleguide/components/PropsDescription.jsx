@@ -42,7 +42,7 @@ const PropsDescription = ({
   description,
 }) => (
   <Offset
-    margin="s 0"
+    top="s"
   >
     <div className={classes.description}>
       <Markdown text={description} />

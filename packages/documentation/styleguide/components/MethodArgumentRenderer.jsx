@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  Block,
+} from '@aztec/guacamole-ui';
 import Name from 'react-styleguidist/lib/client/rsg-components/Name';
 import Table from 'react-styleguidist/lib/client/rsg-components/Table';
 import Type from 'react-styleguidist/lib/client/rsg-components/Type';
@@ -35,11 +38,13 @@ const columns = [
 
 function MethodArgumentRenderer({ methods }) {
   return (
-    <Table
-      columns={columns}
-      rows={methods}
-      getRowKey={getRowKey}
-    />
+    <Block padding="l 0">
+      <Table
+        columns={columns}
+        rows={methods}
+        getRowKey={getRowKey}
+      />
+    </Block>
   );
 }
 

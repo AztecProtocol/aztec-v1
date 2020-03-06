@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import parse from 'comment-parser';
 import PropTypes from 'prop-types';
+import {
+  Block,
+} from '@aztec/guacamole-ui';
 import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
 import MethodReturnRenderer from './MethodReturnRenderer';
@@ -88,13 +91,15 @@ class LiveDocUpdate extends Component {
     const { parsedArguments, parsedReturns, parsedDescription } = this.state;
 
     return (
-      <div>
+      <Block
+        padding="l 0"
+      >
         {!!(parsedDescription && parsedDescription.description) && (
           <MethodDescription {...parsedDescription} />
         )}
         {parsedArguments.length > 0 && <MethodArgumentRenderer methods={parsedArguments} />}
         {parsedReturns.length > 0 && <MethodReturnRenderer methods={parsedReturns} />}
-      </div>
+      </Block>
     );
   }
 }

@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
-import { useStyleGuideContext } from 'react-styleguidist/lib/client/rsg-components/Context';
 import { Block } from '@aztec/guacamole-ui';
-import ExamplesRenderer from './ExamplesRenderer';
 import SdkPlayground from './SdkPlayground';
 import LiveDocUpdate from './LiveDocUpdate';
 
@@ -11,39 +9,56 @@ const Examples = ({
   name,
   examples,
 }) => {
-  const { codeRevision } = useStyleGuideContext();
-
   let liveDocUpdate;
   if (name.includes('.')) {
     liveDocUpdate = <LiveDocUpdate name={name} />;
   }
 
   return (
-    <Block>
+    <div>
       {liveDocUpdate}
-      <ExamplesRenderer name={name}>
+      <Block
+        padding="l 0"
+      >
         {examples.map((example, index) => {
+          let contentNode;
           switch (example.type) {
             case 'code':
-              return (
-                <SdkPlayground
-                  key={`${codeRevision}/${+index}`}
-                  code={example.content}
-                />
+              contentNode = (
+                <Block
+                  key={`demo-${+index}`}
+                  bottom="xxl"
+                >
+                  <SdkPlayground
+                    code={example.content}
+                  />
+                </Block>
               );
+              break;
             case 'markdown':
-              return (
+              contentNode = (
                 <Markdown
-                  key={+index}
+                  key={`md-${+index}`}
                   text={example.content}
                 />
               );
+              break;
             default:
               return null;
           }
+
+          return (
+            <Block
+              key={`${name}-${+index}`}
+              testId={`${name}-${index}`}
+              padding="l 0"
+            >
+              {contentNode}
+            </Block>
+          );
         })}
-      </ExamplesRenderer>
-    </Block>
+      </Block>
+    </div>
   );
 };
 
