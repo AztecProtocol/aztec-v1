@@ -144,23 +144,64 @@ contract.only('Behaviour20200305', async (accounts) => {
         });
 
     });
-    // it('should still be able to transfer if one signature is passed', async () => {
-    //     const holderAccount = generateAccount();
-    //     const { address: userAddress } = holderAccount;
-    //     const spender = randomHex(20);
+    it('should still be able to transfer if one signature is passed', async () => {
+        const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();
+        const publicOwner = proxyAddress;
 
-    //     const { receipt } = await proxyContract.methods['confidentialTransferFrom(uint24,address,bytes,address,bytes)'](
-    //         JOIN_SPLIT_PROOF,
-    //         zkAsset.address,
-    //         proofData,
-    //         userAddress,
-    //         signature,
-    //     );
+        const depositProof = new JoinSplitProof(inputNotes, outputNotes, proxyAddress, publicValue, publicOwner);
+        await erc20.approve(proxyAddress, depositAmount, { from: userAddress });
 
-    //     console.log(receipt);
+        const depositProofData = depositProof.encodeABI(zkAsset.address);
+        const depositProofHash = depositProof.hash;
+        await proxyContract.deposit(zkAsset.address, userAddress, depositProofHash, depositProofData, depositAmount, {
+            from: userAddress,
+        });
+
+        // Use created output notes in a confidentialTransferFrom() call
+        const delegatedAddress = proxyAddress;
+        const transferInputNotes = outputNotes;
+        const transferOutputNotes = await generateOutputNotes([25, 25]);
+        const transferPublicValue = 0;
+        const transferPublicOwner = publicOwner;
+
+        const transferProof = new JoinSplitProof(
+            transferInputNotes,
+            transferOutputNotes,
+            delegatedAddress,
+            transferPublicValue,
+            transferPublicOwner,
+        );
+        const transferProofData = transferProof.encodeABI(zkAsset.address);
+        const delegatedAddressPrivateKey = getOwnerPrivateKey();
+
+        const proofSignature = signer.signApprovalForProof(
+            zkAsset.address,
+            transferProof.eth.outputs,
+            delegatedAddress,
+            true,
+            delegatedAddressPrivateKey,
+        );
+
+        const { receipt } = await proxyContract.confidentialTransferFrom(
+            proofs.JOIN_SPLIT_PROOF,
+            zkAsset.address,
+            transferProofData,
+            delegatedAddress,
+            proofSignature,
+        );
+        expect(receipt.status).to.equal(true);
+
+        await Promise.all(
+            transferOutputNotes.map(async (individualNote) => {
+                const { status, noteOwner } = await ace.getNote(zkAsset.address, individualNote.noteHash);
+                expect(status.toNumber()).to.equal(1);
+                expect(noteOwner).to.equal(userAddress);
+            }),
+        );
 
 
-    // });
+
+    });
 
 });
 
