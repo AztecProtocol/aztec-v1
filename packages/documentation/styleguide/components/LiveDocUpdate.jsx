@@ -1,14 +1,28 @@
 import React, { Component } from 'react';
-import parse from 'comment-parser';
 import PropTypes from 'prop-types';
 import {
   Block,
 } from '@aztec/guacamole-ui';
+import parse from 'comment-parser';
+import {
+  zkAssetApis,
+  zkNoteApis,
+} from '../config/apis';
 import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
 import MethodReturnRenderer from './MethodReturnRenderer';
 import parseTagsForAPI from '../utils/parseTagsForAPI';
-import { zkAssetURL, noteURL } from '../consts';
+
+const getApiType = (name) => {
+  if (zkAssetApis.indexOf(name) >= 0) {
+    return 'ZkAsset';
+  }
+  if (zkNoteApis.indexOf(name) >= 0) {
+    return 'ZkNote';
+  }
+
+  return '';
+};
 
 class LiveDocUpdate extends Component {
   state = {
@@ -18,7 +32,7 @@ class LiveDocUpdate extends Component {
   };
 
   componentDidMount() {
-    this.parseGitDocs();
+    this.parseSource();
   }
 
   componentDidUpdate(prevProps) {
@@ -26,69 +40,53 @@ class LiveDocUpdate extends Component {
     const { name } = this.props;
 
     if (prevName !== name && name.includes('.')) {
-      this.parseGitDocs();
+      this.parseSource();
     }
   }
 
-  parseGitDocs = async () => {
-    const url = this.selectAPIURL();
-    const response = await fetch(url);
-    const apiText = await response.text();
+  parseSource = async () => {
+    const {
+      name,
+    } = this.props;
 
+    const apiType = getApiType(name);
+    if (!apiType) return;
+
+    const urlPath = process.env.NODE_ENV === 'development'
+      ? '../../public'
+      : '';
+    const response = await fetch(`${urlPath}/apis/${apiType}.js`);
+    const apiText = await response.text();
     const parsedTags = parse(apiText.toString());
-    const { name } = this.props;
 
     let APItags;
     try {
       APItags = parseTagsForAPI(name, parsedTags);
     } catch (error) {
-      throw new Error('Could not fetch docs for this API method');
+      throw new Error(`Could not fetch docs for API method '${name}'.`);
     }
 
-    const parsedArguments = APItags.tags.filter(tag => tag.tag !== 'returns' && tag.tag !== 'function' && tag.tag !== 'description');
+    const parsedArguments = APItags.tags.filter(({ tag }) => tag !== 'returns'
+      && tag !== 'function'
+      && tag !== 'description');
 
-    const parsedReturns = APItags.tags.filter(tag => tag.tag === 'returns');
+    const parsedReturns = APItags.tags.filter(({ tag }) => tag === 'returns');
 
-    const parsedDescription = APItags.tags.filter(tag => tag.tag === 'description');
+    const parsedDescription = APItags.tags.filter(({ tag }) => tag === 'description');
 
-    this.setState({ parsedArguments, parsedReturns, parsedDescription: parsedDescription[0] });
+    this.setState({
+      parsedArguments,
+      parsedReturns,
+      parsedDescription: parsedDescription[0],
+    });
   };
 
-  selectAPIURL() {
-    const { name } = this.props;
-
-    const noteApis = [
-      '.equal',
-      '.greaterThanOrEqualTo',
-      '.export',
-      '.grantAccess',
-      '.lessThan',
-      '.lessThanOrEqualTo',
-      '.greaterThan',
-    ];
-    const zkAssetApis = [
-      '.deposit',
-      '.send',
-      '.withdraw',
-      '.balance',
-      '.createNoteFromBalance',
-      '.fetchNotesFromBalance',
-      '.balanceOfLinkedToken',
-      '.totalSupplyOfLinkedToken',
-      '.allowanceOfLinkedToken',
-    ];
-
-    let url;
-    if (zkAssetApis.indexOf(name) > -1) {
-      url = zkAssetURL;
-    } else if (noteApis.indexOf(name) > -1) {
-      url = noteURL;
-    }
-    return url;
-  }
-
   render() {
-    const { parsedArguments, parsedReturns, parsedDescription } = this.state;
+    const {
+      parsedArguments,
+      parsedReturns,
+      parsedDescription,
+    } = this.state;
 
     return (
       <Block
