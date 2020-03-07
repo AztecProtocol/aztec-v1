@@ -44,12 +44,14 @@ export default {
                 eq: 'Target note value should be equal to its comparison note value.',
                 gt: 'Target note value should be greater than its comparison note value.',
                 gte: 'Target note value should be greater than or equal to its comparison note value.',
+                lt: 'Target note value should be less than its comparison note value.',
+                lte: 'Target note value should be less than or equal to its comparison note value.',
             },
         },
-        utilityNote: {
+        remainderNote: {
             wrong: {
-                type: 'Utility note is not a valid AZTEC note',
-                value: 'Utility note has incorrect value.',
+                type: 'Remainder note is not a valid AZTEC note',
+                value: 'Remainder note has incorrect value.',
             },
         },
     },

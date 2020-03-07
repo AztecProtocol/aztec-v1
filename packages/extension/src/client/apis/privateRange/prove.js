@@ -15,13 +15,15 @@ const valuesValidators = {
     eq: diff => diff === 0,
     gt: diff => diff > 0,
     gte: diff => diff >= 0,
+    lt: diff => diff < 0,
+    lte: diff => diff <= 0,
 };
 
 export default async function provePrivateRange({
     type = 'gt',
     originalNote: inputOriginNote,
     comparisonNote: inputComparisonNote,
-    utilityNote: inputUtilityNote = null,
+    remainderNote: inputRemainderNote = null,
     sender: customSender,
 }) {
     if (!inputOriginNote
@@ -47,26 +49,26 @@ export default async function provePrivateRange({
         throw new ApiError(`input.note.not.${type}`);
     }
 
-    let utilityNote = inputUtilityNote
-        ? await toAztecNote(inputUtilityNote)
+    let remainderNote = inputRemainderNote
+        ? await toAztecNote(inputRemainderNote)
         : null;
-    if (!utilityNote) {
+    if (!remainderNote) {
         const {
             account: notesSender,
         } = await ConnectionService.query('account') || {};
-        utilityNote = await createNote(
+        remainderNote = await createNote(
             diff,
             notesSender.spendingPublicKey,
             notesSender.address,
             notesSender.linkedPublicKey,
         );
-    } else if (!(utilityNote instanceof noteUtils.Note)) {
-        throw new ApiError('input.utilityNote.wrong.type', {
-            note: utilityNote,
+    } else if (!(remainderNote instanceof noteUtils.Note)) {
+        throw new ApiError('input.remainderNote.wrong.type', {
+            note: remainderNote,
         });
-    } else if (valueOf(utilityNote) !== diff) {
-        throw new ApiError('input.utilityNote.wrong.value', {
-            note: utilityNote,
+    } else if (valueOf(remainderNote) !== diff) {
+        throw new ApiError('input.remainderNote.wrong.value', {
+            note: remainderNote,
             expectedValue: diff,
         });
     }
@@ -76,7 +78,7 @@ export default async function provePrivateRange({
     const proof = new PrivateRangeProof(
         originalNote,
         comparisonNote,
-        utilityNote,
+        remainderNote,
         sender,
     );
 
