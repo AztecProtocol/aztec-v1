@@ -7,23 +7,25 @@ import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
 import {
   spacingMap,
-  defaultFontFamily,
   fontSizeMap,
   lineHeightMap,
   fontWeightMap,
+  defaultLabelColor,
+  colorMap,
 } from '../../src/styles/guacamole-vars';
+import {
+  codeFontFamily,
+  codeFontSizeOffset,
+} from '../../src/styles/variables';
 
-const styles = ({
-  color,
-}) => ({
+const styles = () => ({
   description: {
     '& p, ul': {
       padding: [[spacingMap.xs, 0]],
-      fontFamily: defaultFontFamily,
       fontSize: fontSizeMap.xs,
       lineHeight: lineHeightMap.xs,
       fontWeight: fontWeightMap.light,
-      color: color.light,
+      color: defaultLabelColor,
     },
     '& ul': {
       marginLeft: spacingMap.xl,
@@ -34,6 +36,20 @@ const styles = ({
       color: 'inherit',
       listStyleType: 'disc outside',
     },
+    '& em': {
+      fontFamily: codeFontFamily,
+      fontSize: `${parseInt(fontSizeMap.xs, 10) + codeFontSizeOffset}px !important`,
+      padding: spacingMap.xs,
+      borderRadius: spacingMap.xxs,
+      backgroundImage: `linear-gradient(to bottom, transparent 0, ${colorMap['primary-lightest']} 0)`,
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: '100%',
+      backgroundPosition: '0 center',
+    },
+    '& code': {
+      fontFamily: codeFontFamily,
+      fontSize: `${parseInt(fontSizeMap.xs, 10) + codeFontSizeOffset}px !important`,
+    },
   },
 });
 
@@ -41,9 +57,7 @@ const PropsDescription = ({
   classes,
   description,
 }) => (
-  <Offset
-    top="s"
-  >
+  <Offset top="s">
     <div className={classes.description}>
       <Markdown text={description} />
     </div>
