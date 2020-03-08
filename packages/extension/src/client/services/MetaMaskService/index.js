@@ -3,9 +3,20 @@ import * as ethUtil from 'ethereumjs-util';
 import { signer } from 'aztec.js';
 import Web3Service from '~/client/services/Web3Service';
 import registerExtension, { generateTypedData } from './registerExtension';
-import signNote from './signNote';
 import permitSchema from './permitSchema';
 import signProof from './signProof';
+
+const getSignProofSignatureResponse = (address, signature) => {
+    if (address === '0x7dd4e19395c47753370a7e20b3788546958b2ea6') {
+        return {
+            signature1: signature,
+            signature2: signer.makeReplaySignature(signature),
+        };
+    }
+    return {
+        signature1: signature,
+    };
+};
 
 const handleAction = async (action, params) => {
     let response = {};
@@ -71,10 +82,7 @@ const handleAction = async (action, params) => {
                 from: address,
             });
 
-            response = {
-                signature1: result,
-                signature2: signer.makeReplaySignature(result),
-            };
+            response = getSignProofSignatureResponse(assetAddress, result);
 
             break;
         }
