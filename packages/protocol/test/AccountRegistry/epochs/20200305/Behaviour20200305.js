@@ -13,14 +13,16 @@ const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegis
 const Behaviour20200220 = artifacts.require('./Behaviour20200220');
 const Behaviour20200305 = artifacts.require('./Behaviour20200305');
 const ERC20Mintable = artifacts.require('ERC20Mintable');
-const ZkAsset = artifacts.require('ZkAssetOwnable');
+
+const ZkAssetMalleable = artifacts.require('ZkAssetMalleable');
+
 const {
     generateOutputNotes,
     generateDepositProofInputs,
     getOwnerPrivateKey,
 } = require('../../../helpers/AccountRegistry/epochs/20200106/Behaviour20200106');
 
-contract.only('Behaviour20200305', async (accounts) => {
+contract('Behaviour20200305', async (accounts) => {
     const [userAddress,, senderAddress] = accounts;
     let behaviour20200305;
     let manager;
@@ -38,7 +40,7 @@ contract.only('Behaviour20200305', async (accounts) => {
         ace = await ACE.deployed();
         erc20 = await ERC20Mintable.new({ from: senderAddress });
         await erc20.mint(userAddress, initialAmount, { from: senderAddress });
-        zkAsset = await ZkAsset.new(ace.address, erc20.address, 1, {
+        zkAsset = await ZkAssetMalleable.new(ace.address, erc20.address, 1, {
             from: accounts[2],
         });
 
@@ -132,7 +134,6 @@ contract.only('Behaviour20200305', async (accounts) => {
                 'signature has already been used'
             );
         });
-
     });
     it('should still be able to transfer if one signature is passed', async () => {
         const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();

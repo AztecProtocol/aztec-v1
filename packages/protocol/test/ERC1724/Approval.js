@@ -22,7 +22,7 @@ const BaseFactory = artifacts.require('./noteRegistry/epochs/201907/base/Factory
 
 JoinSplitValidator.abi = JoinSplitValidatorInterface.abi;
 
-contract.only('Approval', (accounts) => {
+contract('Approval', (accounts) => {
     let ace;
     let erc20;
     let zkAssetOwnable;
