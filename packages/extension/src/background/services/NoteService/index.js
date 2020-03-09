@@ -4,8 +4,11 @@ import {
 import ApiSessionManager from './helpers/ApiSessionManager';
 import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';
+import excludeValues from './utils/pickNotes/excludeValues';
+import excludeNoteKeys from './utils/pickNotes/excludeNoteKeys';
 import pickNotesInRange from './utils/pickNotesInRange';
 import getNotesByKeys from './utils/getNotesByKeys';
+import getKeysByNoteHashes from './utils/getKeysByNoteHashes';
 
 const manager = new ApiSessionManager('1');
 
@@ -51,6 +54,7 @@ export default {
         {
             numberOfNotes = null,
             allowLessNumberOfNotes = true,
+            excludedNotes = null,
         } = {},
     ) => {
         if (numberOfNotes !== null && numberOfNotes <= 0) {
@@ -78,8 +82,12 @@ export default {
 
                 try {
                     const sortedValues = getSortedValues();
+                    const excludedValues = excludedNotes
+                        ? excludedNotes.map(({ value }) => value)
+                        : [];
+                    const validValues = excludeValues(sortedValues, excludedValues);
                     validate({
-                        sortedValues,
+                        sortedValues: validValues,
                         minSum,
                         numberOfNotes,
                         allowLessNumberOfNotes,
@@ -100,6 +108,7 @@ export default {
         {
             numberOfNotes = null,
             allowLessNumberOfNotes = true,
+            excludedNotes = null,
         } = {},
     ) => {
         if (numberOfNotes !== null && numberOfNotes <= 0) {
@@ -124,9 +133,21 @@ export default {
                 }
 
                 const sortedValues = getSortedValues();
+                const excludedValues = excludedNotes
+                    ? excludedNotes.map(({ value }) => value)
+                    : [];
+                const excludedKeys = excludedNotes
+                    ? await getKeysByNoteHashes(excludedNotes.map(({ noteHash }) => noteHash))
+                    : [];
+                const excludedKeyValuePairs = excludedKeys.map((key, i) => ({
+                    key,
+                    value: excludedNotes[i].value,
+                }));
+                const validValues = excludeValues(sortedValues, excludedValues);
+                const validNoteValues = excludeNoteKeys(noteValues, excludedKeyValuePairs);
                 const noteKeyData = pickNotes({
-                    noteValues,
-                    sortedValues,
+                    sortedValues: validValues,
+                    noteValues: validNoteValues,
                     minSum,
                     numberOfNotes,
                     allowLessNumberOfNotes,

@@ -9,6 +9,7 @@ export default async function pickNotesFromBalance(args) {
         amount,
         owner,
         numberOfNotes,
+        excludedNotes = null,
     } = args;
     const {
         networkId,
@@ -24,6 +25,7 @@ export default async function pickNotesFromBalance(args) {
         amount,
         {
             numberOfNotes,
+            excludedNotes,
         },
     );
 
