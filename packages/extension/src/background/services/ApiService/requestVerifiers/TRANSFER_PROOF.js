@@ -4,8 +4,8 @@ import {
 import {
     argsError,
 } from '~/utils/error';
-import ensureInputNotes from '../utils/ensureInputNotes';
-import validateAccounts from '../utils/validateAccounts';
+import validateAccounts from './utils/validateAccounts';
+import ensureInputNotes from './utils/ensureInputNotes';
 
 export default async function verifyTransferRequest({
     assetAddress,
