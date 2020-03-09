@@ -1,14 +1,11 @@
 import {
     argsError,
 } from '~/utils/error';
-import {
-    get,
-} from '~/utils/storage';
-import Note from '~/background/database/models/note';
 import ApiSessionManager from './helpers/ApiSessionManager';
 import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';
 import pickNotesInRange from './utils/pickNotesInRange';
+import getNotesByKeys from './utils/getNotesByKeys';
 
 const manager = new ApiSessionManager('1');
 
@@ -135,19 +132,7 @@ export default {
                     allowLessNumberOfNotes,
                 });
 
-                const notes = await Promise.all(noteKeyData.map(async ({
-                    key,
-                    value,
-                }) => {
-                    const noteHash = await get(key);
-                    const note = await Note.get({ networkId }, noteHash);
-                    return {
-                        ...note,
-                        value,
-                    };
-                }));
-
-                return notes;
+                return getNotesByKeys(noteKeyData, { networkId });
             },
         );
     },
@@ -189,19 +174,7 @@ export default {
                     allowLessNumberOfNotes: true,
                 });
 
-                const notes = await Promise.all(noteKeyData.map(async ({
-                    key,
-                    value,
-                }) => {
-                    const noteHash = await get(key);
-                    const note = await Note.get({ networkId }, noteHash);
-                    return {
-                        ...note,
-                        value,
-                    };
-                }));
-
-                return notes;
+                return getNotesByKeys(noteKeyData, { networkId });
             },
         );
     },
