@@ -322,14 +322,14 @@ class ConnectionService {
         });
     }
 
-    async query(queryName, args = {}, queryStr) {
+    async query(queryName, args = {}, requestedFields) {
         const {
             data,
         } = await this.postToBackground({
             type: clientRequestEvent,
             data: {
                 query: queryName,
-                queryStr,
+                requestedFields,
                 args,
                 site: getSiteData(),
             },

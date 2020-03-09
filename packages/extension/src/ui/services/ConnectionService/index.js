@@ -56,12 +56,17 @@ export default {
         data,
     }) => {
         const currentUser = await AuthService.getCurrentUser();
+        const {
+            requestedFields,
+            ...args
+        } = data;
         return manager.postToBackground({
             type: sendQueryEvent,
             data: {
                 query,
+                requestedFields,
                 args: {
-                    ...data,
+                    ...args,
                     domain: window.location.origin,
                     currentAddress: currentUser.address,
                 },
