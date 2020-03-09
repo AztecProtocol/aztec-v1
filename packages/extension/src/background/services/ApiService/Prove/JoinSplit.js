@@ -1,15 +1,9 @@
 import {
-    JoinSplitProof,
     ProofUtils,
 } from 'aztec.js';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 import {
-    METADATA_AZTEC_DATA_LENGTH,
-} from '~/config/constants';
-import {
-    createNote,
-    createNotes,
     fromViewingKey,
     valueOf,
 } from '~/utils/note';
@@ -23,6 +17,7 @@ import Web3Service from '~/helpers/Web3Service';
 import userQuery from '~/background/services/GraphQLService/Queries/userQuery';
 import pickNotesFromBalance from '~/background/services/GraphQLService/resolvers/utils/pickNotesFromBalance';
 import decryptViewingKey from '~/background/services/GraphQLService/resolvers/utils/decryptViewingKey';
+import settings from '~/background/utils/settings';
 import query from '../utils/query';
 
 const getInputNotes = async ({
@@ -48,16 +43,17 @@ const getInputNotes = async ({
             notes,
             async ({
                 viewingKey,
-                metadata,
             }) => {
                 const decryptedViewingKey = await decryptViewingKey(viewingKey);
-                const note = await fromViewingKey(
-                    decryptedViewingKey,
-                    currentAddress,
-                );
-                const customData = metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2);
-                note.setMetaData(`0x${customData}`);
-                return note;
+                const note = await fromViewingKey(decryptedViewingKey);
+                return {
+                    noteHash: note.noteHash,
+                    noteData: [
+                        decryptedViewingKey,
+                        currentAddress,
+                    ],
+                    value: valueOf(note),
+                };
             },
         );
     } catch (e) {
@@ -108,13 +104,12 @@ const getOutputNotes = async ({
                 ],
                 'address',
             ).filter(a => a);
-        const newNotes = await createNotes(
-            values,
+        values.forEach(value => outputNotes.push([
+            value,
             spendingPublicKey || currentAccount.spendingPublicKey,
             to,
             userAccessArray,
-        );
-        outputNotes.push(...newNotes);
+        ]));
     });
 
     return outputNotes;
@@ -170,11 +165,11 @@ export default async function JoinSplit({
     assetAddress,
     sender,
     publicOwner,
-    transactions,
-    inputAmount,
-    userAccess,
+    inputTransactions,
+    outputTransactions,
     numberOfInputNotes,
-    numberOfOutputNotes,
+    numberOfOutputNotes: customNumberOfOutputNotes,
+    userAccess,
 }) {
     const {
         account: {
@@ -182,24 +177,39 @@ export default async function JoinSplit({
         },
     } = Web3Service;
 
-    let inputNotes = [];
-    let inputValues = [];
+    const inputNotes = [];
+    const inputValues = [];
     let extraAmount = 0;
-    if (inputAmount > 0 || numberOfInputNotes > 0) {
-        inputNotes = await getInputNotes({
-            assetAddress,
-            currentAddress,
-            inputAmount,
-            numberOfInputNotes,
-        });
+    if (inputTransactions) {
+        const inputAmount = inputTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        if (sdkPickedAmount > 0
+            || sdkPickedNumberOfInputNotes > 0
+            || !noteHashes // input amount might be 0
+            || !noteHashes.length
+        ) {
+            const sdkPickedNotesData = await getInputNotes({
+                assetAddress,
+                currentAddress,
+                inputAmount: Math.max(sdkPickedAmount, 0),
+                numberOfInputNotes: sdkPickedNumberOfInputNotes > 0
+                    ? sdkPickedNumberOfInputNotes
+                    : null,
+            });
+            sdkPickedNotesData.forEach(({
+                noteData,
+                value,
+            }) => {
+                inputNotes.push(noteData);
+                inputValues.push(value);
+            });
+        }
 
-        inputValues = inputNotes.map(note => valueOf(note));
         const inputNotesSum = inputValues.reduce((accum, value) => accum + value, 0);
         extraAmount = inputNotesSum - inputAmount;
     }
 
     const accountMapping = await getAccountMapping({
-        transactions,
+        transactions: outputTransactions,
         currentAddress,
         userAccess,
     });
@@ -207,18 +217,21 @@ export default async function JoinSplit({
     let outputNotes = [];
     let outputValues = [];
 
-    if (transactions && transactions.length) {
+    if (outputTransactions) {
+        const numberOfOutputNotes = customNumberOfOutputNotes > 0
+            ? customNumberOfOutputNotes
+            : await settings('NUMBER_OF_OUTPUT_NOTES');
         const userAccessAccounts = !userAccess
             ? []
             : userAccess.map(address => accountMapping[address]);
         outputNotes = await getOutputNotes({
-            transactions,
+            transactions: outputTransactions,
             numberOfOutputNotes,
             currentAddress,
             accountMapping,
             userAccessAccounts,
         });
-        outputValues = outputNotes.map(note => valueOf(note));
+        outputValues = outputNotes.map(noteData => noteData[0]);
     }
 
     if (extraAmount > 0) {
@@ -226,14 +239,13 @@ export default async function JoinSplit({
             spendingPublicKey,
             linkedPublicKey,
         } = accountMapping[currentAddress];
-        const remainderNote = await createNote(
+        outputValues.push(extraAmount);
+        outputNotes.push([
             extraAmount,
             spendingPublicKey,
             currentAddress,
             linkedPublicKey,
-        );
-        outputValues.push(extraAmount);
-        outputNotes.push(remainderNote);
+        ]);
     }
 
     const publicValue = ProofUtils.getPublicValue(
@@ -241,11 +253,11 @@ export default async function JoinSplit({
         outputValues,
     );
 
-    return new JoinSplitProof(
+    return [
         inputNotes,
         outputNotes,
         sender || currentAddress,
         publicValue,
         publicOwner || currentAddress,
-    );
+    ];
 }

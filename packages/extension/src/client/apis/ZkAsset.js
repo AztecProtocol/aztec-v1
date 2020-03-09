@@ -2,6 +2,7 @@ import BN from 'bn.js';
 import {
     tokenToNoteValue,
     noteToTokenValue,
+    recoverJoinSplitProof,
 } from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
@@ -381,20 +382,38 @@ export default class ZkAsset {
         returnProof,
         sender,
         publicOwner,
-    } = {}) => ConnectionService.query(
-        'constructProof',
-        {
-            proofType: 'TRANSFER_PROOF',
-            assetAddress: this.address,
-            transactions: parseInputTransactions(transactions),
-            numberOfInputNotes: parseInputInteger(numberOfInputNotes),
-            numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
-            userAccess,
-            returnProof,
-            sender,
-            publicOwner,
-        },
-    );
+    } = {}) => {
+        const data = await ConnectionService.query(
+            'constructProof',
+            {
+                proofType: 'TRANSFER_PROOF',
+                assetAddress: this.address,
+                transactions: parseInputTransactions(transactions),
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
+                userAccess,
+                returnProof,
+                sender,
+                publicOwner,
+            },
+        );
+
+        if (!returnProof) {
+            return data;
+        }
+
+        const {
+            success,
+            proofData,
+        } = data;
+
+        return {
+            success,
+            proof: proofData
+                ? await recoverJoinSplitProof(data.proofData)
+                : null,
+        };
+    };
 
     /**
      *

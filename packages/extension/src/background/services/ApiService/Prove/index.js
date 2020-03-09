@@ -2,13 +2,17 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~/utils/filterStream';
-import settings from '~/background/utils/settings';
 import responseDataKeys from './responseDataKeys';
 import JoinSplit from './JoinSplit';
 
 const proofWithInputNotes = [
-    'TRANSFER_PROOF',
     'WITHDRAW_PROOF',
+    'TRANSFER_PROOF',
+];
+
+const proofWithOutputNotes = [
+    'DEPOSIT_PROOF',
+    'TRANSFER_PROOF',
 ];
 
 const triggerProofUi = async (query, connection) => {
@@ -86,22 +90,30 @@ export default async function prove(query, connection) {
                 const {
                     transactions,
                     amount,
-                    numberOfOutputNotes: customNumberOfOutputNotes,
+                    to,
                 } = args;
-                const numberOfOutputNotes = customNumberOfOutputNotes !== undefined
-                    ? customNumberOfOutputNotes
-                    : await settings('NUMBER_OF_OUTPUT_NOTES');
-                const inputAmount = proofWithInputNotes.indexOf(proofType) < 0
-                    ? 0
-                    : amount || (transactions || []).reduce((sum, tx) => sum + tx.amount, 0);
-                const proof = await JoinSplit({
+                let inputTransactions;
+                let outputTransactions;
+                if (proofWithInputNotes.indexOf(proofType) >= 0) {
+                    inputTransactions = transactions
+                        || [ // WITHDRAW_PROOF does not have transactions
+                            {
+                                amount,
+                                to,
+                            },
+                        ];
+                }
+                if (proofWithOutputNotes.indexOf(proofType) >= 0) {
+                    outputTransactions = transactions;
+                }
+                const proofData = await JoinSplit({
                     ...args,
-                    inputAmount,
-                    numberOfOutputNotes,
+                    inputTransactions,
+                    outputTransactions,
                 });
                 returnData = {
-                    success: !!proof,
-                    proof,
+                    success: !!proofData,
+                    proofData,
                 };
                 break;
             }
@@ -109,7 +121,5 @@ export default async function prove(query, connection) {
         }
     }
 
-    return {
-        returnData,
-    };
+    return returnData;
 }
