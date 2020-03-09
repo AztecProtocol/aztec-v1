@@ -6,7 +6,7 @@ import Note from '~/background/database/models/note';
 import syncLatestNoteOnChain from './syncLatestNoteOnChain';
 import getViewingKeyFromMetadata from './getViewingKeyFromMetadata';
 
-export default async function syncNoteInfo(args, ctx) {
+export default async function syncNoteInfo(args) {
     const {
         id: noteId,
     } = args;
@@ -16,16 +16,16 @@ export default async function syncNoteInfo(args, ctx) {
     }
 
     const {
-        user: { address: userAddress },
-    } = ctx;
-    const {
         networkId,
+        account: {
+            address: currentAddress,
+        },
     } = Web3Service;
 
     let note = await Note.get({ networkId }, noteId);
     if (!note) {
         note = await syncLatestNoteOnChain({
-            account: userAddress,
+            account: currentAddress,
             noteId,
         });
     }
