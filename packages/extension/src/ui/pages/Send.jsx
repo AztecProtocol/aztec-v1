@@ -6,7 +6,6 @@ import {
 import {
     emptyIntValue,
 } from '~/ui/config/settings';
-import apis from '~/ui/apis';
 import getGSNConfig from '~/ui/helpers/getGSNConfig';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
@@ -20,6 +19,7 @@ const Send = ({
     transactions,
     numberOfInputNotes,
     numberOfOutputNotes,
+    noteHashes,
     userAccess,
 }) => {
     const fetchInitialData = async () => {
@@ -37,22 +37,22 @@ const Send = ({
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-        const userAccessAccounts = userAccess
-            ? await apis.account.batchGetExtensionAccount(userAccess)
-            : [];
 
         return {
             steps,
             retryWithMetaMaskStep: sendSteps.metamask.slice(-1)[0],
+            proofType: 'TRANSFER_PROOF',
             assetAddress,
             currentAddress,
             asset,
             sender,
             spender: sender,
+            publicOwner: currentAddress,
             transactions: parsedTransactions,
             numberOfInputNotes,
             numberOfOutputNotes,
-            userAccessAccounts,
+            noteHashes,
+            userAccess,
             amount,
             isGSNAvailable,
         };
@@ -75,12 +75,14 @@ Send.propTypes = {
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
+    noteHashes: PropTypes.arrayOf(PropTypes.string),
     userAccess: PropTypes.arrayOf(PropTypes.string),
 };
 
 Send.defaultProps = {
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
+    noteHashes: [],
     userAccess: [],
 };
 

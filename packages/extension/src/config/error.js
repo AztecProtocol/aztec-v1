@@ -98,6 +98,13 @@ export default {
             },
         },
     },
+    transaction: {
+        noteHash: {
+            amount: 'Total note value is not enough to make a transaction of %{amount}.',
+            owner: 'Cannot send a transaction with note owned by another user.',
+            destroyed: 'Cannot send a transaction with destroyed note.',
+        },
+    },
     data: {
         graphql: 'Something went wrong fetching graphQL data',
     },

@@ -14,17 +14,57 @@ import asyncMap from '~/utils/asyncMap';
 import asyncForEach from '~/utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
 import Web3Service from '~/helpers/Web3Service';
+import GraphQLService from '~/background/services/GraphQLService';
+import notesQuery from '~/background/services/GraphQLService/Queries/notesQuery';
 import userQuery from '~/background/services/GraphQLService/Queries/userQuery';
 import pickNotesFromBalance from '~/background/services/GraphQLService/resolvers/utils/pickNotesFromBalance';
 import decryptViewingKey from '~/background/services/GraphQLService/resolvers/utils/decryptViewingKey';
 import settings from '~/background/utils/settings';
 import query from '../utils/query';
 
+const getExistingNotes = async ({
+    noteHashes,
+    currentAddress,
+}) => {
+    const {
+        data: {
+            notes: {
+                notes,
+            },
+        },
+    } = await GraphQLService.query({
+        query: notesQuery(`
+            noteHash
+            decryptedViewingKey
+            value
+        `),
+        variables: {
+            where: {
+                noteHash_in: noteHashes,
+            },
+        },
+    }) || {};
+
+    return Promise.all(notes.map(async ({
+        noteHash,
+        decryptedViewingKey,
+        value,
+    }) => ({
+        noteHash,
+        noteData: [
+            decryptedViewingKey,
+            currentAddress,
+        ],
+        value,
+    })));
+};
+
 const getInputNotes = async ({
     assetAddress,
     currentAddress,
     inputAmount,
     numberOfInputNotes,
+    excludedNotes = [],
 }) => {
     let inputNotes;
 
@@ -32,6 +72,7 @@ const getInputNotes = async ({
         assetId: assetAddress,
         amount: inputAmount,
         numberOfNotes: numberOfInputNotes,
+        excludedNotes,
     });
 
     if (!notes) {
@@ -167,6 +208,7 @@ export default async function JoinSplit({
     publicOwner,
     inputTransactions,
     outputTransactions,
+    noteHashes,
     numberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
     userAccess,
@@ -179,9 +221,30 @@ export default async function JoinSplit({
 
     const inputNotes = [];
     const inputValues = [];
+    let userPickedNotesData = [];
     let extraAmount = 0;
     if (inputTransactions) {
         const inputAmount = inputTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        let sdkPickedAmount = inputAmount;
+        let sdkPickedNumberOfInputNotes = numberOfInputNotes || 0;
+
+        if (noteHashes && noteHashes.length) {
+            userPickedNotesData = await getExistingNotes({
+                noteHashes,
+                currentAddress,
+            });
+            userPickedNotesData.forEach(({
+                noteData,
+                value,
+            }) => {
+                inputNotes.push(noteData);
+                inputValues.push(value);
+                sdkPickedAmount -= value;
+            });
+
+            sdkPickedNumberOfInputNotes -= noteHashes.length;
+        }
+
         if (sdkPickedAmount > 0
             || sdkPickedNumberOfInputNotes > 0
             || !noteHashes // input amount might be 0
@@ -194,6 +257,13 @@ export default async function JoinSplit({
                 numberOfInputNotes: sdkPickedNumberOfInputNotes > 0
                     ? sdkPickedNumberOfInputNotes
                     : null,
+                excludedNotes: userPickedNotesData.map(({
+                    noteHash,
+                    value,
+                }) => ({
+                    noteHash,
+                    value,
+                })),
             });
             sdkPickedNotesData.forEach(({
                 noteData,

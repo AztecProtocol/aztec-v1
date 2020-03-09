@@ -1,6 +1,7 @@
 import makeSchema from '~/utils/makeSchema';
 import addressType from './types/address';
 import transactionsType from './types/transactions';
+import noteHashType from './types/noteHash';
 
 export default makeSchema({
     assetAddress: addressType.isRequired,
@@ -16,6 +17,10 @@ export default makeSchema({
         size: {
             gte: 1,
         },
+    },
+    noteHashes: {
+        type: 'array',
+        each: noteHashType,
     },
     userAccess: {
         type: 'array',

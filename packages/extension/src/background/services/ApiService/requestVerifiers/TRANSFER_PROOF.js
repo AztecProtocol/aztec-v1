@@ -6,11 +6,13 @@ import {
 } from '~/utils/error';
 import validateAccounts from './utils/validateAccounts';
 import ensureInputNotes from './utils/ensureInputNotes';
+import validateNoteHashes from './utils/validateNoteHashes';
 
 export default async function verifyTransferRequest({
     assetAddress,
     transactions,
     numberOfInputNotes,
+    noteHashes,
     userAccess,
     returnProof,
     sender,
@@ -39,6 +41,17 @@ export default async function verifyTransferRequest({
     });
     if (noteError) {
         return noteError;
+    }
+
+    if (noteHashes) {
+        const noteHashError = validateNoteHashes(noteHashes, {
+            assetAddress,
+            amount: totalAmount,
+            numberOfInputNotes,
+        });
+        if (noteHashError) {
+            return noteHashError;
+        }
     }
 
     const addresses = transactions
