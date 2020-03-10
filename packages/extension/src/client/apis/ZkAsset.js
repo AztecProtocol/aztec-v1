@@ -390,7 +390,7 @@ export default class ZkAsset {
      *   Unless `numberOfOutputNotes` is defined in that transaction.
      *   Will use default value in sdk settings if undefined.
      *
-     * - *noteHashes* ([String]): Notes to be destroyed.
+     * - *inputNoteHashes* ([String]): Notes to be destroyed.
      *   Their total value should be larger than or equal to the total transaction amount
      *   if `numberOfInputNotes` is defined and is equal to the array size.
      *   Otherwise, the sdk will pick extra notes if necessary.
@@ -415,7 +415,7 @@ export default class ZkAsset {
     send = async (transactions, {
         numberOfInputNotes,
         numberOfOutputNotes,
-        noteHashes,
+        inputNoteHashes,
         userAccess,
         returnProof,
         sender,
@@ -433,7 +433,7 @@ export default class ZkAsset {
                 transactions: parseInputTransactions(transactions),
                 numberOfInputNotes: parseInputInteger(numberOfInputNotes),
                 numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
-                noteHashes,
+                inputNoteHashes,
                 userAccess,
                 returnProof,
                 sender,

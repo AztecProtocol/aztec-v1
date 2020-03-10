@@ -12,7 +12,7 @@ export default async function verifyTransferRequest({
     assetAddress,
     transactions,
     numberOfInputNotes,
-    noteHashes,
+    inputNoteHashes,
     userAccess,
     returnProof,
     sender,
@@ -43,8 +43,8 @@ export default async function verifyTransferRequest({
         return noteError;
     }
 
-    if (noteHashes) {
-        const noteHashError = validateNoteHashes(noteHashes, {
+    if (inputNoteHashes) {
+        const noteHashError = validateNoteHashes(inputNoteHashes, {
             assetAddress,
             amount: totalAmount,
             numberOfInputNotes,

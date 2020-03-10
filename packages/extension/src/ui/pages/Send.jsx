@@ -19,7 +19,7 @@ const Send = ({
     transactions,
     numberOfInputNotes,
     numberOfOutputNotes,
-    noteHashes,
+    inputNoteHashes,
     userAccess,
 }) => {
     const fetchInitialData = async () => {
@@ -51,7 +51,7 @@ const Send = ({
             transactions: parsedTransactions,
             numberOfInputNotes,
             numberOfOutputNotes,
-            noteHashes,
+            inputNoteHashes,
             userAccess,
             amount,
             isGSNAvailable,
@@ -75,14 +75,14 @@ Send.propTypes = {
     transactions: PropTypes.arrayOf(inputTransactionShape).isRequired,
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
-    noteHashes: PropTypes.arrayOf(PropTypes.string),
+    inputNoteHashes: PropTypes.arrayOf(PropTypes.string),
     userAccess: PropTypes.arrayOf(PropTypes.string),
 };
 
 Send.defaultProps = {
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
-    noteHashes: [],
+    inputNoteHashes: [],
     userAccess: [],
 };
 

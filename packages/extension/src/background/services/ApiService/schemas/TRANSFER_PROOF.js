@@ -18,7 +18,7 @@ export default makeSchema({
             gte: 1,
         },
     },
-    noteHashes: {
+    inputNoteHashes: {
         type: 'array',
         each: noteHashType,
     },

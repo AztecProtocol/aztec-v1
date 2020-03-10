@@ -221,7 +221,7 @@ export default async function JoinSplit({
     publicOwner,
     inputTransactions,
     outputTransactions,
-    noteHashes,
+    inputNoteHashes,
     numberOfInputNotes,
     numberOfOutputNotes: customNumberOfOutputNotes,
     userAccess,
@@ -241,9 +241,9 @@ export default async function JoinSplit({
         let sdkPickedAmount = inputAmount;
         let sdkPickedNumberOfInputNotes = numberOfInputNotes || 0;
 
-        if (noteHashes && noteHashes.length) {
+        if (inputNoteHashes && inputNoteHashes.length) {
             userPickedNotesData = await getExistingNotes({
-                noteHashes,
+                noteHashes: inputNoteHashes,
                 currentAddress,
             });
             userPickedNotesData.forEach((noteData) => {
@@ -253,13 +253,13 @@ export default async function JoinSplit({
                 sdkPickedAmount -= value;
             });
 
-            sdkPickedNumberOfInputNotes -= noteHashes.length;
+            sdkPickedNumberOfInputNotes -= inputNoteHashes.length;
         }
 
         if (sdkPickedAmount > 0
             || sdkPickedNumberOfInputNotes > 0
-            || !noteHashes // input amount might be 0
-            || !noteHashes.length
+            || !inputNoteHashes // input amount might be 0
+            || !inputNoteHashes.length
         ) {
             const sdkPickedNotesData = await getInputNotes({
                 assetAddress,
