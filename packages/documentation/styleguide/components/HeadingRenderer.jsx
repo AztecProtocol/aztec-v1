@@ -3,49 +3,49 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Styled from 'react-styleguidist/lib/client/rsg-components/Styled';
 import {
+  spacingMap,
+  defaultTextColor,
+  fontSizeMap,
+  lineHeightMap,
   fontWeightMap,
 } from '../../src/styles/guacamole-vars';
 
-const styles = ({
-  fontFamily,
-  fontSize,
-}) => ({
+const styles = () => ({
   heading: {
-    margin: 0,
-    color: '#1E1B2B',
-    fontFamily: fontFamily.base,
-    fontSize: fontSize.h2,
-    fontWeight: fontWeightMap.light,
+    color: defaultTextColor,
   },
   heading1: {
-    fontSize: fontSize.h2,
-    color: '#1E1B2B',
-    margin: '8px 0px',
+    padding: `${spacingMap.xl} 0`,
+    fontSize: fontSizeMap.xl,
+    lineHeight: lineHeightMap.xl,
+    fontWeight: fontWeightMap.light,
   },
   heading2: {
-    fontSize: fontSize.h3,
-    color: '#1E1B2B',
-    margin: '8px 0px',
+    padding: `${spacingMap.l} 0`,
+    fontSize: fontSizeMap.l,
+    lineHeight: lineHeightMap.l,
+    fontWeight: fontWeightMap.light,
   },
   heading3: {
-    fontSize: fontSize.h4,
-    color: '#1E1B2B',
-    margin: '8px 0px',
+    padding: `${spacingMap.l} 0`,
+    fontSize: fontSizeMap.m,
+    lineHeight: lineHeightMap.m,
+    fontWeight: fontWeightMap.light,
   },
   heading4: {
-    fontSize: fontSize.h5,
-    color: '#1E1B2B',
-    margin: '8px 0px',
+    padding: `${spacingMap.m} 0`,
+    fontSize: fontSizeMap.s,
+    lineHeight: lineHeightMap.s,
   },
   heading5: {
-    fontSize: fontSize.h6,
-    color: '#1E1B2B',
-    margin: '8px 0px',
+    padding: `${spacingMap.s} 0`,
+    fontSize: fontSizeMap.xs,
+    lineHeight: lineHeightMap.xs,
   },
   heading6: {
-    fontSize: fontSize.h6,
-    color: '#1E1B2B',
-    margin: '8px 0px',
+    padding: `${spacingMap.s} 0`,
+    fontSize: fontSizeMap.xxs,
+    lineHeight: lineHeightMap.xxs,
   },
 });
 

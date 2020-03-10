@@ -16,3 +16,13 @@ $overlay-theme-bg-map: (
   'white': 'white-lighter',
 );
 
+$code-font-family: Consolas, "Liberation Mono", Menlo, monospace;
+$code-font-size-map: (
+  'xxs': 10px,
+  'xs': 12px,
+  's': 13px,
+  'm': 20px,
+  'l': 26px,
+  'xl': 30px,
+  'xxl': 40px,
+);

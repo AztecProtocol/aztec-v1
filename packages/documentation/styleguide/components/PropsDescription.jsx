@@ -15,7 +15,7 @@ import {
 } from '../../src/styles/guacamole-vars';
 import {
   codeFontFamily,
-  codeFontSizeOffset,
+  codeFontSizeMap,
 } from '../../src/styles/variables';
 
 const styles = () => ({
@@ -36,19 +36,21 @@ const styles = () => ({
       color: 'inherit',
       listStyleType: 'disc outside',
     },
-    '& em': {
-      fontFamily: codeFontFamily,
-      fontSize: `${parseInt(fontSizeMap.xs, 10) + codeFontSizeOffset}px !important`,
-      padding: spacingMap.xs,
-      borderRadius: spacingMap.xxs,
-      backgroundImage: `linear-gradient(to bottom, transparent 0, ${colorMap['primary-lightest']} 0)`,
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: '100%',
-      backgroundPosition: '0 center',
-    },
-    '& code': {
-      fontFamily: codeFontFamily,
-      fontSize: `${parseInt(fontSizeMap.xs, 10) + codeFontSizeOffset}px !important`,
+    '& p, ul, div': { // override the styles in ParaRenderer
+      '& em': {
+        fontFamily: codeFontFamily,
+        fontSize: `${codeFontSizeMap.xs} !important`,
+        padding: spacingMap.xs,
+        borderRadius: spacingMap.xxs,
+        backgroundImage: `linear-gradient(to bottom, transparent 0, ${colorMap['primary-lightest']} 0)`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100%',
+        backgroundPosition: '0 center',
+      },
+      '& code': {
+        fontFamily: codeFontFamily,
+        fontSize: `${codeFontSizeMap.xs} !important`,
+      },
     },
   },
 });
