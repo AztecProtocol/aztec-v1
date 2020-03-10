@@ -173,6 +173,11 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
+              name: '.subscribeToBalance',
+              content: 'styleguide/categories/WebSDK/ZkAsset/subscribeToBalance.md',
+              exampleMode: 'hide',
+            },
+            {
               name: '.createNoteFromBalance',
               content: 'styleguide/categories/WebSDK/ZkAsset/createNoteFromBalance.md',
               exampleMode: 'hide',
@@ -197,6 +202,16 @@ module.exports = {
               content: 'styleguide/categories/WebSDK/ZkAsset/totalSupplyOfLinkedToken.md',
               exampleMode: 'hide',
             },
+            {
+              name: '.toNoteValue',
+              content: 'styleguide/categories/WebSDK/ZkAsset/toNoteValue.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.toTokenValue',
+              content: 'styleguide/categories/WebSDK/ZkAsset/toTokenValue.md',
+              exampleMode: 'hide',
+            },
           ],
           sectionDepth: 1,
           usageMode: 'hide',
@@ -211,11 +226,6 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
-              name: '.equal',
-              content: 'styleguide/categories/WebSDK/Note/equal.md',
-              exampleMode: 'hide',
-            },
-            {
               name: '.export',
               content: 'styleguide/categories/WebSDK/Note/export.md',
               exampleMode: 'hide',
@@ -223,6 +233,11 @@ module.exports = {
             {
               name: '.grantAccess',
               content: 'styleguide/categories/WebSDK/Note/grantAccess.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.equal',
+              content: 'styleguide/categories/WebSDK/Note/equal.md',
               exampleMode: 'hide',
             },
             {

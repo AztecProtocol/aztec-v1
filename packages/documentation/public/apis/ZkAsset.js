@@ -240,7 +240,7 @@ export default class ZkAsset {
      *
      * - *publicOwner* (Address): The owner of ERC token. Available only when `returnProof` is true.
      *
-     * @returns {Object} txSwummary Transaction summary information containing:
+     * @returns {Object} txSummary Transaction summary information containing:
      *
      * - *success* (Boolean): Describes whether the transaction was successful.
      *
@@ -587,15 +587,17 @@ export default class ZkAsset {
     };
 
     /**
-    *
-    * toTokenValue
-    *
-    * - noteValue (Number! or String!)
-    * - format (Boolean)                       The output value will be formatted if true
-    *
-    * @returns
-    * - tokenValue (String!)
-    */
+     *
+     * @function zkAsset.toTokenValue
+     * @description Description: Convert note value to its equivalent ERC20 token value.
+     *
+     * @param {Integer|String|BigNumber} noteValue Value of note to be converted.
+     *
+     * @param {Boolean} format Optional parameter to format the output string.
+     *
+     * @returns {String} tokenValue Equivalent ERC20 token value of `noteValue`.
+     *
+     */
     toTokenValue = (noteValue, format = false) => {
         const {
             decimals,

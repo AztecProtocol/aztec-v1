@@ -13,9 +13,12 @@ export const zkAssetApis = [
   '.send',
   '.withdraw',
   '.balance',
+  '.subscribeToBalance',
   '.createNoteFromBalance',
   '.fetchNotesFromBalance',
   '.balanceOfLinkedToken',
   '.allowanceOfLinkedToken',
   '.totalSupplyOfLinkedToken',
+  '.toNoteValue',
+  '.toTokenValue',
 ];
