@@ -122,7 +122,15 @@ export default async function prove(query, connection) {
                         outputNotes,
                         remainderNote,
                     } = proofData;
-                    returnData.outputNotes = outputNotes.filter(note => note !== remainderNote);
+                    returnData.outputNotes = outputNotes
+                        .filter(note => note !== remainderNote)
+                        .map(({
+                            noteHash,
+                            value,
+                        }) => ({
+                            noteHash,
+                            value,
+                        }));
                 }
                 break;
             }
