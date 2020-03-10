@@ -12,7 +12,7 @@ export default {
   'zkAsset-introduction': {
     visibleName: 'zkAsset',
   },
-  note: {
+  zkNote: {
     isStatic: true,
   },
   'note-introduction': {

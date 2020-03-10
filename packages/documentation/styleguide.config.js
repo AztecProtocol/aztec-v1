@@ -202,7 +202,7 @@ module.exports = {
           usageMode: 'hide',
         },
         {
-          name: 'note',
+          name: 'zkNote',
           pagePerSection: true,
           sections: [
             {
