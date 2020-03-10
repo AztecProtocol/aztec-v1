@@ -1,6 +1,7 @@
 import makeSchema from '~/utils/makeSchema';
 import addressType from './types/address';
 import inputAmountType from './types/inputAmount';
+import noteHashType from './types/noteHash';
 
 export default makeSchema({
     assetAddress: addressType.isRequired,
@@ -16,6 +17,10 @@ export default makeSchema({
         size: {
             gte: 1,
         },
+    },
+    inputNoteHashes: {
+        type: 'array',
+        each: noteHashType,
     },
     returnProof: {
         type: 'boolean',

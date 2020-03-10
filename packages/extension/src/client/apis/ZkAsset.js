@@ -309,6 +309,11 @@ export default class ZkAsset {
      * - *numberOfInputNotes* (Integer): Number of notes to be destroyed.
      *   The sdk will pick a random number of notes if undefined.
      *
+     * - *inputNoteHashes* ([NoteHash]): Notes to be destroyed.
+     *   Their total value should be larger than or equal to the total transaction amount
+     *   if `numberOfInputNotes` is defined and is equal to the array size.
+     *   Otherwise, the sdk will pick extra notes if necessary.
+     *
      * - *returnProof* (Boolean): Return the JoinSplit proof instead of sending it.
      *
      * - *sender* (Address): The proof sender. Available only when `returnProof` is true.
@@ -323,6 +328,7 @@ export default class ZkAsset {
     withdraw = async (amount, {
         to,
         numberOfInputNotes,
+        inputNoteHashes,
         returnProof,
         sender,
     } = {}) => {
@@ -348,6 +354,7 @@ export default class ZkAsset {
                 to: to || address,
                 publicOwner: to || address,
                 numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                inputNoteHashes,
                 returnProof,
                 sender,
             },
@@ -390,7 +397,7 @@ export default class ZkAsset {
      *   Unless `numberOfOutputNotes` is defined in that transaction.
      *   Will use default value in sdk settings if undefined.
      *
-     * - *inputNoteHashes* ([String]): Notes to be destroyed.
+     * - *inputNoteHashes* ([NoteHash]): Notes to be destroyed.
      *   Their total value should be larger than or equal to the total transaction amount
      *   if `numberOfInputNotes` is defined and is equal to the array size.
      *   Otherwise, the sdk will pick extra notes if necessary.

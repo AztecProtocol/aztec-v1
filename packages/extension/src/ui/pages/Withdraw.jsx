@@ -19,6 +19,7 @@ const Withdraw = ({
     amount,
     to,
     numberOfInputNotes,
+    inputNoteHashes,
 }) => {
     const fetchInitialData = async () => {
         const {
@@ -51,6 +52,7 @@ const Withdraw = ({
             spender: sender,
             sender,
             numberOfInputNotes,
+            inputNoteHashes,
             isGSNAvailable,
         };
     };
@@ -72,10 +74,12 @@ Withdraw.propTypes = {
     amount: inputAmountType.isRequired,
     to: PropTypes.string.isRequired,
     numberOfInputNotes: PropTypes.number,
+    inputNoteHashes: PropTypes.arrayOf(PropTypes.string),
 };
 
 Withdraw.defaultProps = {
     numberOfInputNotes: emptyIntValue,
+    inputNoteHashes: [],
 };
 
 export default Withdraw;
