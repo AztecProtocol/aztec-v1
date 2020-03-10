@@ -110,7 +110,12 @@ class SdkPlayground extends PureComponent {
       <html>
         <head>
           <script>
-          ${asyncCompiledCode};
+            const delayRun = (time) => {
+              setTimeout(async () => {
+                ${asyncCompiledCode};
+              }, time);
+            };
+            delayRun(500); // wait for hookConsoleLogs to be called
           </script>
         </head>
         <body></body>
