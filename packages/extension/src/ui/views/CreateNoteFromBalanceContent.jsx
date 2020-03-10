@@ -34,7 +34,7 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
             asset,
             amount,
             currentAddress,
-            userAccessAccounts,
+            userAccess,
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
@@ -46,11 +46,11 @@ class CreateNoteFromBalanceContent extends StepContentHelper {
         } = asset;
 
         const tokenValue = noteValueToToken(amount, asset);
-        const userAccess = userAccessAccounts.length > 0
-            ? userAccessAccounts
+        const userAccessArray = userAccess.length > 0
+            ? userAccess.map(address => ({ address }))
             : [{ address: currentAddress }];
 
-        const recipients = userAccess.map(({
+        const recipients = userAccessArray.map(({
             address,
         }) => ({
             address,
@@ -160,9 +160,7 @@ CreateNoteFromBalanceContent.propTypes = {
     currentAddress: PropTypes.string.isRequired,
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
-    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    })).isRequired,
+    userAccess: PropTypes.arrayOf(PropTypes.string),
     spender: PropTypes.string.isRequired,
     proofHash: PropTypes.string,
 };
@@ -170,6 +168,7 @@ CreateNoteFromBalanceContent.propTypes = {
 CreateNoteFromBalanceContent.defaultProps = {
     titleKey: 'note.access.grant.title',
     proofHash: '',
+    userAccess: [],
 };
 
 export default CreateNoteFromBalanceContent;

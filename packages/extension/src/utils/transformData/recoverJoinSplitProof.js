@@ -2,7 +2,6 @@ import {
     JoinSplitProof,
 } from 'aztec.js';
 import recoverNote from './recoverNote';
-import recoverNewNote from './recoverNewNote';
 
 export default async function recoverJoinSplitProof({
     inputNotes: inputNotesData,
@@ -12,7 +11,7 @@ export default async function recoverJoinSplitProof({
     publicOwner,
 }) {
     const inputNotes = await Promise.all(inputNotesData.map(recoverNote));
-    const outputNotes = await Promise.all(outputNotesData.map(recoverNewNote));
+    const outputNotes = await Promise.all(outputNotesData.map(recoverNote));
 
     return new JoinSplitProof(
         inputNotes,

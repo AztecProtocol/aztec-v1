@@ -3,7 +3,6 @@ import {
     tokenToNoteValue,
     noteToTokenValue,
     recoverJoinSplitProof,
-    recoverNewNote,
 } from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
@@ -264,7 +263,11 @@ export default class ZkAsset {
             });
         }
 
-        return ConnectionService.query(
+        const {
+            success,
+            outputNotes,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'DEPOSIT_PROOF',
@@ -277,6 +280,19 @@ export default class ZkAsset {
                 publicOwner,
             },
         );
+
+        let proof;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            outputNotes,
+            proof,
+        };
     };
 
     /**
@@ -320,7 +336,10 @@ export default class ZkAsset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query(
+        const {
+            success,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'WITHDRAW_PROOF',
@@ -333,6 +352,18 @@ export default class ZkAsset {
                 sender,
             },
         );
+
+        let proof = null;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            proof,
+        };
     };
 
     /**
@@ -390,7 +421,11 @@ export default class ZkAsset {
         sender,
         publicOwner,
     } = {}) => {
-        const data = await ConnectionService.query(
+        const {
+            success,
+            outputNotes,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'TRANSFER_PROOF',
@@ -406,18 +441,8 @@ export default class ZkAsset {
             },
         );
 
-        const {
-            success,
-            outputNotes: outputNotesData,
-            proofData,
-        } = data;
-
-        const outputNotes = outputNotesData
-            ? await Promise.all(outputNotesData.map(recoverNewNote))
-            : null;
-
         let proof;
-        if (returnProof) {
+        if (proofData) {
             proof = proofData
                 ? await recoverJoinSplitProof(proofData)
                 : null;

@@ -9,6 +9,13 @@ import {
 import {
     randomSumArray,
 } from '~/utils/random';
+import {
+    createNote,
+    createNotes,
+} from '~/utils/note';
+import {
+    aztecNoteToData,
+} from '~/utils/transformData';
 import asyncForEach from '~/utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
 import Web3Service from '~/helpers/Web3Service';
@@ -19,20 +26,18 @@ import pickNotesFromBalanceQuery from '~/background/services/GraphQLService/Quer
 import settings from '~/background/utils/settings';
 import query from '../utils/query';
 
-const toNoteData = ({
+const inputNoteToData = ({
     noteHash,
     decryptedViewingKey,
     metadata,
     value,
     owner,
 }) => {
-    const customData = metadata
-        ? metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2)
-        : '';
+    const customData = (metadata || '').slice(METADATA_AZTEC_DATA_LENGTH + 2);
     return {
         noteHash,
         decryptedViewingKey,
-        metadata: customData,
+        metadata: customData ? `0x${customData}` : '',
         value,
         owner,
     };
@@ -62,7 +67,7 @@ const getExistingNotes = async ({
         },
     }) || {};
 
-    return notes.map(note => toNoteData({
+    return notes.map(note => inputNoteToData({
         ...note,
         owner: currentAddress,
     }));
@@ -105,7 +110,7 @@ const getInputNotes = async ({
         throw new ApiError('note.pick.empty');
     }
 
-    return notes.map(note => toNoteData({
+    return notes.map(note => inputNoteToData({
         ...note,
         owner: currentAddress,
     }));
@@ -150,12 +155,15 @@ const getOutputNotes = async ({
                 ],
                 'address',
             ).filter(a => a);
-        values.forEach(value => outputNotes.push({
-            value,
-            spendingPublicKey: spendingPublicKey || currentAccount.spendingPublicKey,
+        const notes = await createNotes(
+            values,
+            spendingPublicKey || currentAccount.spendingPublicKey,
             to,
-            userAccess: userAccessArray,
-        }));
+            userAccessArray,
+        );
+        notes.forEach((note) => {
+            outputNotes.push(aztecNoteToData(note));
+        });
     });
 
     return outputNotes;
@@ -311,15 +319,13 @@ export default async function JoinSplit({
             spendingPublicKey,
             linkedPublicKey,
         } = accountMapping[currentAddress];
-        remainderNote = {
-            value: extraAmount,
+        const note = await createNote(
+            extraAmount,
             spendingPublicKey,
-            to: currentAddress,
-            userAccess: [{
-                address: currentAddress,
-                linkedPublicKey,
-            }],
-        };
+            currentAddress,
+            linkedPublicKey,
+        );
+        remainderNote = aztecNoteToData(note);
         outputValues.push(extraAmount);
         outputNotes.push(remainderNote);
     }

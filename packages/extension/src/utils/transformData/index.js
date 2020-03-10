@@ -2,8 +2,8 @@ import transformAssetFromBlock from './transformAssetFromBlock';
 import parseValue from './parseValue';
 import tokenToNoteValue from './tokenToNoteValue';
 import noteToTokenValue from './noteToTokenValue';
+import aztecNoteToData from './aztecNoteToData';
 import recoverNote from './recoverNote';
-import recoverNewNote from './recoverNewNote';
 import recoverJoinSplitProof from './recoverJoinSplitProof';
 
 export {
@@ -11,7 +11,7 @@ export {
     parseValue,
     tokenToNoteValue,
     noteToTokenValue,
+    aztecNoteToData,
     recoverNote,
-    recoverNewNote,
     recoverJoinSplitProof,
 };

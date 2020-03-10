@@ -36,9 +36,16 @@ const Withdraw = ({
         return {
             steps,
             retryWithMetaMaskStep: withdrawSteps.metamask.slice(-1)[0],
+            proofType: 'WITHDRAW_PROOF',
             assetAddress,
             asset,
             currentAddress,
+            transactions: [
+                {
+                    amount: parseInputAmount(amount),
+                    to,
+                },
+            ],
             amount: parseInputAmount(amount),
             publicOwner: to,
             spender: sender,
