@@ -7,21 +7,17 @@ import parse from 'comment-parser';
 import {
   zkAssetApis,
   zkNoteApis,
+  userApis,
 } from '../config/apis';
 import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
 import MethodReturnRenderer from './MethodReturnRenderer';
 import parseTagsForAPI from '../utils/parseTagsForAPI';
 
-const getApiType = (name) => {
-  if (zkAssetApis.indexOf(name) >= 0) {
-    return 'ZkAsset';
-  }
-  if (zkNoteApis.indexOf(name) >= 0) {
-    return 'ZkNote';
-  }
-
-  return '';
+const apiTypeMapping = {
+  ZkAsset: zkAssetApis,
+  ZkNote: zkNoteApis,
+  Account: userApis,
 };
 
 class LiveDocUpdate extends Component {
@@ -49,7 +45,8 @@ class LiveDocUpdate extends Component {
       name,
     } = this.props;
 
-    const apiType = getApiType(name);
+    const apiType = Object.keys(apiTypeMapping)
+      .find(type => apiTypeMapping[type].indexOf(name) >= 0);
     if (!apiType) return;
 
     const urlPath = process.env.NODE_ENV === 'development'

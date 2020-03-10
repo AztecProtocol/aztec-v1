@@ -18,6 +18,9 @@ export default {
   'note-introduction': {
     visibleName: 'note',
   },
+  user: {
+    isStatic: true,
+  },
   'Reference Specification': {
     isStatic: true,
   },

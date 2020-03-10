@@ -22,3 +22,9 @@ export const zkAssetApis = [
   '.toNoteValue',
   '.toTokenValue',
 ];
+
+export const userApis = [
+  '.createNote',
+  '.encryptMessage',
+  '.decryptMessage',
+];
