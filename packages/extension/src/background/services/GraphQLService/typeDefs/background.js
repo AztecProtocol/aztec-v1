@@ -73,8 +73,7 @@ const backgroundTypes = gql`
             amount: Int!
             owner: String
             numberOfNotes: Int
-            currentAddress: String!
-            domain: String!
+            excludedNotes: [Input_excluded_note!]
         ): NotesApiResponse
         fetchNotesFromBalance(
             assetAddress: String!

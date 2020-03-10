@@ -32,7 +32,7 @@ const backgroundResolvers = {
         notes: toApiResponse(async (args, ctx) => ({
             notes: await syncNotesInfo(args, ctx),
         })),
-        pickNotesFromBalance: ensureDomainPermission(async (_, args) => ({
+        pickNotesFromBalance: toApiResponse(async args => ({
             notes: await pickNotesFromBalance(args),
         })),
         fetchNotesFromBalance: ensureDomainPermission(async (_, args) => ({

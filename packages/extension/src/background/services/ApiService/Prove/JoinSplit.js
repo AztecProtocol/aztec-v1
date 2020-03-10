@@ -4,23 +4,41 @@ import {
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 import {
-    fromViewingKey,
-    valueOf,
-} from '~/utils/note';
+    METADATA_AZTEC_DATA_LENGTH,
+} from '~/config/constants';
 import {
     randomSumArray,
 } from '~/utils/random';
-import asyncMap from '~/utils/asyncMap';
 import asyncForEach from '~/utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
 import Web3Service from '~/helpers/Web3Service';
 import GraphQLService from '~/background/services/GraphQLService';
 import notesQuery from '~/background/services/GraphQLService/Queries/notesQuery';
 import userQuery from '~/background/services/GraphQLService/Queries/userQuery';
-import pickNotesFromBalance from '~/background/services/GraphQLService/resolvers/utils/pickNotesFromBalance';
-import decryptViewingKey from '~/background/services/GraphQLService/resolvers/utils/decryptViewingKey';
+import pickNotesFromBalanceQuery from '~/background/services/GraphQLService/Queries/pickNotesFromBalanceQuery';
 import settings from '~/background/utils/settings';
 import query from '../utils/query';
+
+const toNoteData = ({
+    noteHash,
+    decryptedViewingKey,
+    metadata,
+    value,
+    owner,
+}) => {
+    const customData = metadata
+        ? metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2)
+        : '';
+    return {
+        noteHash,
+        value,
+        noteData: [
+            decryptedViewingKey,
+            owner,
+            customData,
+        ],
+    };
+};
 
 const getExistingNotes = async ({
     noteHashes,
@@ -45,18 +63,10 @@ const getExistingNotes = async ({
         },
     }) || {};
 
-    return Promise.all(notes.map(async ({
-        noteHash,
-        decryptedViewingKey,
-        value,
-    }) => ({
-        noteHash,
-        noteData: [
-            decryptedViewingKey,
-            currentAddress,
-        ],
-        value,
-    })));
+    return notes.map(note => toNoteData({
+        ...note,
+        owner: currentAddress,
+    }));
 };
 
 const getInputNotes = async ({
@@ -66,44 +76,40 @@ const getInputNotes = async ({
     numberOfInputNotes,
     excludedNotes = [],
 }) => {
-    let inputNotes;
-
-    const notes = await pickNotesFromBalance({
-        assetId: assetAddress,
-        amount: inputAmount,
-        numberOfNotes: numberOfInputNotes,
-        excludedNotes,
-    });
+    const {
+        data: {
+            pickNotesFromBalance: {
+                notes,
+                error,
+            },
+        },
+    } = await GraphQLService.query({
+        query: pickNotesFromBalanceQuery(`
+            noteHash,
+            decryptedViewingKey
+            value
+            metadata
+        `),
+        variables: {
+            assetId: assetAddress,
+            amount: inputAmount,
+            owner: currentAddress,
+            numberOfNotes: numberOfInputNotes,
+            excludedNotes,
+        },
+    }) || {};
 
     if (!notes) {
+        if (error) {
+            throw error;
+        }
         throw new ApiError('note.pick.empty');
     }
 
-    try {
-        inputNotes = await asyncMap(
-            notes,
-            async ({
-                viewingKey,
-            }) => {
-                const decryptedViewingKey = await decryptViewingKey(viewingKey);
-                const note = await fromViewingKey(decryptedViewingKey);
-                return {
-                    noteHash: note.noteHash,
-                    noteData: [
-                        decryptedViewingKey,
-                        currentAddress,
-                    ],
-                    value: valueOf(note),
-                };
-            },
-        );
-    } catch (e) {
-        throw new ApiError('note.viewingKey.recover', {
-            notes,
-        });
-    }
-
-    return inputNotes;
+    return notes.map(note => toNoteData({
+        ...note,
+        owner: currentAddress,
+    }));
 };
 
 const getOutputNotes = async ({

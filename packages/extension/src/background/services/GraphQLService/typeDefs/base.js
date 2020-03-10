@@ -87,6 +87,10 @@ export default gql`
     input Note_filter {
         noteHash_in: [String!]
     }
+    input Input_excluded_note {
+        noteHash: String
+        value: Int
+    }
     type Query {
         root: String
     }
