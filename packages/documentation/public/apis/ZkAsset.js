@@ -2,6 +2,7 @@ import BN from 'bn.js';
 import {
     tokenToNoteValue,
     noteToTokenValue,
+    recoverJoinSplitProof,
 } from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
@@ -262,7 +263,11 @@ export default class ZkAsset {
             });
         }
 
-        return ConnectionService.query(
+        const {
+            success,
+            outputNotes,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'DEPOSIT_PROOF',
@@ -275,6 +280,19 @@ export default class ZkAsset {
                 publicOwner,
             },
         );
+
+        let proof;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            outputNotes,
+            proof,
+        };
     };
 
     /**
@@ -291,6 +309,11 @@ export default class ZkAsset {
      * - *numberOfInputNotes* (Integer): Number of notes to be destroyed.
      *   The sdk will pick a random number of notes if undefined.
      *
+     * - *inputNoteHashes* ([NoteHash]): Notes to be destroyed.
+     *   Their total value should be larger than or equal to the total transaction amount
+     *   if `numberOfInputNotes` is defined and is equal to the array size.
+     *   Otherwise, the sdk will pick extra notes if necessary.
+     *
      * - *returnProof* (Boolean): Return the JoinSplit proof instead of sending it.
      *
      * - *sender* (Address): The proof sender. Available only when `returnProof` is true.
@@ -305,6 +328,7 @@ export default class ZkAsset {
     withdraw = async (amount, {
         to,
         numberOfInputNotes,
+        inputNoteHashes,
         returnProof,
         sender,
     } = {}) => {
@@ -318,7 +342,10 @@ export default class ZkAsset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query(
+        const {
+            success,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'WITHDRAW_PROOF',
@@ -327,10 +354,23 @@ export default class ZkAsset {
                 to: to || address,
                 publicOwner: to || address,
                 numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                inputNoteHashes,
                 returnProof,
                 sender,
             },
         );
+
+        let proof = null;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            proof,
+        };
     };
 
     /**
@@ -357,6 +397,11 @@ export default class ZkAsset {
      *   Unless `numberOfOutputNotes` is defined in that transaction.
      *   Will use default value in sdk settings if undefined.
      *
+     * - *inputNoteHashes* ([NoteHash]): Notes to be destroyed.
+     *   Their total value should be larger than or equal to the total transaction amount
+     *   if `numberOfInputNotes` is defined and is equal to the array size.
+     *   Otherwise, the sdk will pick extra notes if necessary.
+     *
      * - *userAccess* ([Address]): The addresses that are able to see the real note value.
      *
      * - *returnProof* (Boolean): Return the JoinSplit proof instead of sending it.
@@ -377,24 +422,45 @@ export default class ZkAsset {
     send = async (transactions, {
         numberOfInputNotes,
         numberOfOutputNotes,
+        inputNoteHashes,
         userAccess,
         returnProof,
         sender,
         publicOwner,
-    } = {}) => ConnectionService.query(
-        'constructProof',
-        {
-            proofType: 'TRANSFER_PROOF',
-            assetAddress: this.address,
-            transactions: parseInputTransactions(transactions),
-            numberOfInputNotes: parseInputInteger(numberOfInputNotes),
-            numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
-            userAccess,
-            returnProof,
-            sender,
-            publicOwner,
-        },
-    );
+    } = {}) => {
+        const {
+            success,
+            outputNotes,
+            proofData,
+        } = await ConnectionService.query(
+            'constructProof',
+            {
+                proofType: 'TRANSFER_PROOF',
+                assetAddress: this.address,
+                transactions: parseInputTransactions(transactions),
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
+                inputNoteHashes,
+                userAccess,
+                returnProof,
+                sender,
+                publicOwner,
+            },
+        );
+
+        let proof;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            outputNotes,
+            proof,
+        };
+    };
 
     /**
      *

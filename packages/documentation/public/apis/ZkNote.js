@@ -166,6 +166,7 @@ export default class ZkNote {
 
         const originalNote = await this.export();
         return provePrivateRange({
+            type: 'gt',
             originalNote,
             comparisonNote,
             remainderNote,
@@ -201,8 +202,9 @@ export default class ZkNote {
 
         const originalNote = await this.export();
         return provePrivateRange({
-            originalNote: comparisonNote,
-            comparisonNote: originalNote,
+            type: 'lt',
+            originalNote,
+            comparisonNote,
             remainderNote,
             sender,
         });
@@ -272,9 +274,9 @@ export default class ZkNote {
 
         const originalNote = await this.export();
         return provePrivateRange({
-            type: 'gte',
-            originalNote: comparisonNote,
-            comparisonNote: originalNote,
+            type: 'lte',
+            originalNote,
+            comparisonNote,
             remainderNote,
             sender,
         });
