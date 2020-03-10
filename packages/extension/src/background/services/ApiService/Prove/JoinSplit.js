@@ -31,12 +31,10 @@ const toNoteData = ({
         : '';
     return {
         noteHash,
+        decryptedViewingKey,
+        metadata: customData,
         value,
-        noteData: [
-            decryptedViewingKey,
-            owner,
-            customData,
-        ],
+        owner,
     };
 };
 
@@ -54,6 +52,7 @@ const getExistingNotes = async ({
         query: notesQuery(`
             noteHash
             decryptedViewingKey
+            metadata
             value
         `),
         variables: {
@@ -151,12 +150,12 @@ const getOutputNotes = async ({
                 ],
                 'address',
             ).filter(a => a);
-        values.forEach(value => outputNotes.push([
+        values.forEach(value => outputNotes.push({
             value,
-            spendingPublicKey || currentAccount.spendingPublicKey,
+            spendingPublicKey: spendingPublicKey || currentAccount.spendingPublicKey,
             to,
-            userAccessArray,
-        ]));
+            userAccess: userAccessArray,
+        }));
     });
 
     return outputNotes;
@@ -239,10 +238,8 @@ export default async function JoinSplit({
                 noteHashes,
                 currentAddress,
             });
-            userPickedNotesData.forEach(({
-                noteData,
-                value,
-            }) => {
+            userPickedNotesData.forEach((noteData) => {
+                const { value } = noteData;
                 inputNotes.push(noteData);
                 inputValues.push(value);
                 sdkPickedAmount -= value;
@@ -271,10 +268,8 @@ export default async function JoinSplit({
                     value,
                 })),
             });
-            sdkPickedNotesData.forEach(({
-                noteData,
-                value,
-            }) => {
+            sdkPickedNotesData.forEach((noteData) => {
+                const { value } = noteData;
                 inputNotes.push(noteData);
                 inputValues.push(value);
             });
@@ -307,21 +302,26 @@ export default async function JoinSplit({
             accountMapping,
             userAccessAccounts,
         });
-        outputValues = outputNotes.map(noteData => noteData[0]);
+        outputValues = outputNotes.map(({ value }) => value);
     }
 
+    let remainderNote;
     if (extraAmount > 0) {
         const {
             spendingPublicKey,
             linkedPublicKey,
         } = accountMapping[currentAddress];
-        outputValues.push(extraAmount);
-        outputNotes.push([
-            extraAmount,
+        remainderNote = {
+            value: extraAmount,
             spendingPublicKey,
-            currentAddress,
-            linkedPublicKey,
-        ]);
+            to: currentAddress,
+            userAccess: [{
+                address: currentAddress,
+                linkedPublicKey,
+            }],
+        };
+        outputValues.push(extraAmount);
+        outputNotes.push(remainderNote);
     }
 
     const publicValue = ProofUtils.getPublicValue(
@@ -329,11 +329,12 @@ export default async function JoinSplit({
         outputValues,
     );
 
-    return [
+    return {
         inputNotes,
         outputNotes,
-        sender || currentAddress,
+        sender: sender || currentAddress,
         publicValue,
-        publicOwner || currentAddress,
-    ];
+        publicOwner: publicOwner || currentAddress,
+        remainderNote,
+    };
 }

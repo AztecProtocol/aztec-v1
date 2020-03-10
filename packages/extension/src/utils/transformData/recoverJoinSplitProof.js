@@ -4,13 +4,13 @@ import {
 import recoverNote from './recoverNote';
 import recoverNewNote from './recoverNewNote';
 
-export default async function recoverJoinSplitProof([
-    inputNotesData,
-    outputNotesData,
+export default async function recoverJoinSplitProof({
+    inputNotes: inputNotesData,
+    outputNotes: outputNotesData,
     sender,
     publicValue,
     publicOwner,
-]) {
+}) {
     const inputNotes = await Promise.all(inputNotesData.map(recoverNote));
     const outputNotes = await Promise.all(outputNotesData.map(recoverNewNote));
 

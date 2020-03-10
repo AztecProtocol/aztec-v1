@@ -92,9 +92,11 @@ export default async function prove(query, connection) {
                     amount,
                     to,
                 } = args;
+                const hasInputNotes = proofWithInputNotes.indexOf(proofType) >= 0;
+                const hasOutputNotes = proofWithOutputNotes.indexOf(proofType) >= 0;
                 let inputTransactions;
                 let outputTransactions;
-                if (proofWithInputNotes.indexOf(proofType) >= 0) {
+                if (hasInputNotes) {
                     inputTransactions = transactions
                         || [ // WITHDRAW_PROOF does not have transactions
                             {
@@ -103,7 +105,7 @@ export default async function prove(query, connection) {
                             },
                         ];
                 }
-                if (proofWithOutputNotes.indexOf(proofType) >= 0) {
+                if (hasOutputNotes) {
                     outputTransactions = transactions;
                 }
                 const proofData = await JoinSplit({
@@ -115,6 +117,13 @@ export default async function prove(query, connection) {
                     success: !!proofData,
                     proofData,
                 };
+                if (hasOutputNotes) {
+                    const {
+                        outputNotes,
+                        remainderNote,
+                    } = proofData;
+                    returnData.outputNotes = outputNotes.filter(note => note !== remainderNote);
+                }
                 break;
             }
             default:

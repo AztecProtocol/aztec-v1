@@ -1,8 +1,5 @@
 import { keccak256 } from 'web3-utils';
 import {
-    valueOf,
-} from '~/utils/note';
-import {
     recoverJoinSplitProof,
 } from '~/utils/transformData';
 import ConnectionService from '~/ui/services/ConnectionService';
@@ -17,7 +14,6 @@ export default async function joinSplit({
     userAccess,
     numberOfInputNotes,
     numberOfOutputNotes,
-    amount,
 }) {
     const {
         proofData,
@@ -41,23 +37,9 @@ export default async function joinSplit({
 
     const proofHash = keccak256(proof.eth.outputs);
 
-    const {
-        inputNotes,
-        outputNotes,
-    } = proof;
-
-    let remainderNote;
-    const inputAmount = inputNotes
-        .reduce((sum, note) => sum + valueOf(note), 0);
-    if (inputAmount > amount) {
-        remainderNote = outputNotes[outputNotes.length - 1];
-    }
-
     return {
         proof,
         proofHash,
-        inputNotes,
-        outputNotes,
-        remainderNote,
+        proofData,
     };
 }

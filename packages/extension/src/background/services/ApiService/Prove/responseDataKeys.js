@@ -4,14 +4,15 @@ export default {
     ],
     WITHDRAW_PROOF: [],
     TRANSFER_PROOF: [
-        ({ outputNotes, remainderNote }) => {
-            if (!outputNotes) return outputNotes;
+        ({ proofData }) => {
+            const {
+                outputNotes,
+                remainderNote,
+            } = proofData || {};
+            if (!outputNotes) return null;
 
             return {
-                outputNotes: outputNotes.filter((note) => {
-                    if (!remainderNote) return true;
-                    return note.noteHash !== remainderNote.noteHash;
-                }),
+                outputNotes: outputNotes.filter(note => note !== remainderNote),
             };
         },
     ],

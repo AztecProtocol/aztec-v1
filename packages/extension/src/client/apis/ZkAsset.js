@@ -3,6 +3,7 @@ import {
     tokenToNoteValue,
     noteToTokenValue,
     recoverJoinSplitProof,
+    recoverNewNote,
 } from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
@@ -405,20 +406,27 @@ export default class ZkAsset {
             },
         );
 
-        if (!returnProof) {
-            return data;
-        }
-
         const {
             success,
+            outputNotes: outputNotesData,
             proofData,
         } = data;
 
+        const outputNotes = outputNotesData
+            ? await Promise.all(outputNotesData.map(recoverNewNote))
+            : null;
+
+        let proof;
+        if (returnProof) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
         return {
             success,
-            proof: proofData
-                ? await recoverJoinSplitProof(data.proofData)
-                : null,
+            outputNotes,
+            proof,
         };
     };
 
