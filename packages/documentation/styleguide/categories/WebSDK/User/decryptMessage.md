@@ -12,7 +12,7 @@ console.info(`recovered message: "${message}"`);
 // recovered message: "elephants can't jump"
 ```
 
-Will not be able to decrypt a string encrypted for other users.
+### Will not be able to decrypt a string encrypted for other users.
 
 ```js
 const thirdPartyAddress = '';

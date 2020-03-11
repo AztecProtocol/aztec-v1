@@ -145,6 +145,34 @@ module.exports = {
           exampleMode: 'hide',
         },
         {
+          name: 'user',
+          pagePerSection: true,
+          sections: [
+            {
+              name: 'Introduction',
+              content: 'styleguide/categories/WebSDK/User/index.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.createNote',
+              content: 'styleguide/categories/WebSDK/User/createNote.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.encryptMessage',
+              content: 'styleguide/categories/WebSDK/User/encryptMessage.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.decryptMessage',
+              content: 'styleguide/categories/WebSDK/User/decryptMessage.md',
+              exampleMode: 'hide',
+            },
+          ],
+          sectionDepth: 1,
+          usageMode: 'hide',
+        },
+        {
           name: 'zkAsset',
           sections: [
             {
@@ -258,34 +286,6 @@ module.exports = {
             {
               name: '.lessThanOrEqualTo',
               content: 'styleguide/categories/WebSDK/Note/lessThanOrEqualTo.md',
-              exampleMode: 'hide',
-            },
-          ],
-          sectionDepth: 1,
-          usageMode: 'hide',
-        },
-        {
-          name: 'user',
-          pagePerSection: true,
-          sections: [
-            {
-              name: 'Introduction',
-              content: 'styleguide/categories/WebSDK/User/index.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: '.createNote',
-              content: 'styleguide/categories/WebSDK/User/createNote.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: '.encryptMessage',
-              content: 'styleguide/categories/WebSDK/User/encryptMessage.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: '.decryptMessage',
-              content: 'styleguide/categories/WebSDK/User/decryptMessage.md',
               exampleMode: 'hide',
             },
           ],

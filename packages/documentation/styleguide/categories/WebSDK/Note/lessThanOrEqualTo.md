@@ -1,26 +1,19 @@
 ## Examples
-### 1) Construct a proof that a note's value is less than or equal to another note
+
+### Construct a proof that a note's value is less than or equal to another note.
 
 ```js
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
-
-// Fetch the zkAsset
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
 
-// Fetch your notes
-const allNotes = await asset.fetchNotesFromBalance();
+const [note1, note2] = await asset.fetchNotesFromBalance({ numberOfNotes: 2 });
+const myNote1 = await window.aztec.zkNote(note1.noteHash);
+const myNote2 = await window.aztec.zkNote(note2.noteHash);
 
-// Get the particular notes to compare - [change the example indices to change notes to compare]
-const noteHash = allNotes[0].noteHash;
-const comparisonNoteHash = allNotes[1].noteHash;
+const [smallerNote, largerNote] = myNote1.value <= myNote2.value
+  ? [myNote1, myNote2]
+  : [myNote2, myNote1];
 
-const note = await window.aztec.zkNote(noteHash)
-const comparisonNote = await window.aztec.zkNote(comparisonNoteHash)
-
-// Generate the lessThan proof - will create a proof if note <= comparisonNote, and fail if not
-const lessThanOrEqualToProof = await note.lessThan(comparisonNote);
-console.info({ lessThanOrEqualToProof });
+const proof = await smallerNote.lessThanOrEqualTo(largerNote);
+console.info({ proof });
 ```

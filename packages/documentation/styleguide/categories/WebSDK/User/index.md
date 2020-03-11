@@ -12,12 +12,12 @@ Once the sdk is enabled, you can also get the account of current user from `azte
 console.info('currentUser:', window.aztec.account);
 ```
 
-A valid `Account` instance for a registered AZTEC user has the following data and methods on it:
+### An `Account` instance for a registered AZTEC user has the following data and methods on it:
 
-- `user.address`
-- `user.linkedPublicKey`
-- `user.spendingPublicKey`
-- `user.registered`
-- [`async user.createNote(value, userAccess)`](/#/SDK/user/.createNote)
-- [`async user.encryptMessage(message)`](/#/SDK/user/.encryptMessage)
-- [`async user.decryptMessage(message)`](/#/SDK/user/.decryptMessage)
+- _registered_ (Boolean)
+- _address_ (Address)
+- _linkedPublicKey_ (String)
+- _spendingPublicKey_ (String)
+- [`async createNote()`](/#/SDK/user/.createNote)
+- [`async encryptMessage()`](/#/SDK/user/.encryptMessage)
+- [`async decryptMessage()`](/#/SDK/user/.decryptMessage)

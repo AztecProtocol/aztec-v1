@@ -1,6 +1,5 @@
 ## Examples
 
-
 ### Display different messages based on the balance.
 
 ```js static
@@ -18,9 +17,6 @@ const showBalance = (balance) => {
 // Listen to balance changes
 asset.subscribeToBalance(showBalance);
 ```
-
-&nbsp;
-&nbsp;
 
 ### Unsubscribe when the listener is not needed or is no longer available.
 

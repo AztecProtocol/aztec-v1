@@ -1,26 +1,23 @@
 ## Examples
-### 1) Construct a proof that a note's value is greater than a comparison note
+
+### Construct a proof that a note's value is greater than a comparison note.
 
 ```js
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
-
-// Fetch the zkAsset
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
 
-// Fetch your notes
-const allNotes = await asset.fetchNotesFromBalance();
+const [note] = await asset.fetchNotesFromBalance({
+  numberOfNotes: 1,
+  greaterThan: 0,
+});
+const myNote = await window.aztec.zkNote(note.noteHash);
+const value = myNote.value;
 
-// Get the particular notes to compare - [change the example indices to change notes to compare]
-const noteHash = allNotes[0].noteHash;
-const comparisonNoteHash = allNotes[1].noteHash;
+// Create a raw AZTEC note for another user that has less value
+const thirdPartyAddress = '';
+const user = await window.aztec.user(thirdPartyAddress);
+const anotherNote = await user.createNote(value - 1);
 
-const note = await window.aztec.zkNote(noteHash)
-const comparisonNote = await window.aztec.zkNote(comparisonNoteHash)
-
-// Generate the greaterThan proof - will create a proof if note > comparisonNote, and fail if not
-const greaterThanProof = await note.greaterThan(comparisonNote);
-console.info({ greaterThanProof });
+const proof = await myNote.greaterThan(anotherNote);
+console.info({ proof });
 ```

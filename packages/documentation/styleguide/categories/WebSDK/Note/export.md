@@ -1,22 +1,15 @@
 ## Examples
-### 1) Export a note and return the aztec.js note class instance, so it can be used in proofs
-```js
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
 
-// Fetch the zkAsset
+### Export a note and return the aztec.js note class instance, so it can be used in proofs.
+
+```js
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
 
-// Fetch your notes
-const allNotes = await asset.fetchNotesFromBalance();
-
-// Get the particular note
-const particularNoteHash = allNotes[0].noteHash;
-const note = await window.aztec.zkNote(particularNoteHash)
+const [note] = await asset.fetchNotesFromBalance({ numberOfNotes: 1 });
+const zkNote = await window.aztec.zkNote(note.noteHash);
 
 // Export the note
-const exportedNote = await note.export();
+const exportedNote = await zkNote.export();
 console.info({ exportedNote });
 ```

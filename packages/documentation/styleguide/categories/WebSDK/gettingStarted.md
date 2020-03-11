@@ -1,5 +1,3 @@
-## Getting started
-
 ### 1) Install the SDK in your dapp
 The SDK first needs to be installed into your dapp. This is done by adding one line of JavaScript to your Dapp
 
@@ -16,19 +14,18 @@ window.aztec = {
 ```
 
 ### 2) Enable the SDK
+
 The SDK now needs to be enabled in order for it to be used in your dapp. This is achieved by calling the _enable()_ method, which itself takes one optional argument - _options_. _options_ is an object with three possible properties:
 - _web3Provider_ : custom provider alternative to that injected by the browser
-- _contractAddresses_: used when the SDK is interacting with contracts deployed locally on Ganache. Two addresses need manually supplying: 
+- _contractAddresses_: used when the SDK is interacting with contracts deployed locally on Ganache. Two addresses need manually supplying:
   - _ace_
   - _aztecAccountRegistry_
   Documentation support for this is being added in Q2.
 - _apiKey_ : issued in accordance with the AZTEC free transaction programme, used for free transactions mediated by the Gas Station Network (GSN)
 
-&nbsp 
-&nbsp 
-&nbsp 
 
-An example _options_ object to use the SDK on Rinkeby will therefore look like:
+#### An example _options_ object to use the SDK on Rinkeby will therefore look like:
+
 ```js static
 const options = {
     web3Provider: window.web3.currentProvider, // change this value to use a different web3 provider
@@ -41,7 +38,7 @@ const options = {
 }
 ```
 
-Calling _enable()_ will perform 3 key actions:
+#### Calling _enable()_ will perform 3 key actions:
 
 1. Create a keypair for the user, that is used for encrypting and decrypting AZTEC note viewing keys
 2. Store the keypair in an encrypted keyvault in local storage of aztecprotocol.com, encrypted with the user's password
@@ -50,9 +47,12 @@ Calling _enable()_ will perform 3 key actions:
 The function returns a promise which resolves to the full AZTEC api if all checks pass. Run the below code to see an example of the SDK being enabled, and the UI from a user's perspective:
 
 ```js
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
+const apiKey = '';
 
-// Enable the SDK
-const result = await window.aztec.enable({ apiKey });
-console.info('SDK successfully enabled');
+try {
+  await window.aztec.enable({ apiKey });
+  console.info('SDK successfully enabled');
+} catch (e) {
+  console.info('Failed to enable SDK.');
+}
 ```

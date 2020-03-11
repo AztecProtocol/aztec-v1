@@ -63,7 +63,7 @@ export default class ZkAsset {
      * @function zkAsset.totalSupplyOfLinkedToken
      * @description Description: Get the total supply of the ERC20 token linked to the ZkAsset
      *
-     * @returns {Integer} totalSupply Token number of ERC20 tokens
+     * @returns {BigNumber} totalSupply Token number of ERC20 tokens
      *
      */
     async totalSupplyOfLinkedToken() {
