@@ -1,6 +1,5 @@
 import {
     PrivateRangeProof,
-    note as noteUtils,
 } from 'aztec.js';
 import {
     createNote,
@@ -49,35 +48,40 @@ export default async function provePrivateRange({
         throw new ApiError(`input.note.not.${type}`);
     }
 
+    const remainderValue = Math.abs(diff);
     let remainderNote = inputRemainderNote
         ? await toAztecNote(inputRemainderNote)
         : null;
+    if (inputRemainderNote && !remainderNote) {
+        throw new ApiError('input.remainderNote.wrong.type', {
+            note: remainderNote,
+        });
+    }
     if (!remainderNote) {
         const {
             account: notesSender,
         } = await ConnectionService.query('account') || {};
         remainderNote = await createNote(
-            diff,
+            remainderValue,
             notesSender.spendingPublicKey,
             notesSender.address,
             notesSender.linkedPublicKey,
         );
-    } else if (!(remainderNote instanceof noteUtils.Note)) {
-        throw new ApiError('input.remainderNote.wrong.type', {
-            note: remainderNote,
-        });
-    } else if (valueOf(remainderNote) !== diff) {
+    } else if (valueOf(remainderNote) !== remainderValue) {
         throw new ApiError('input.remainderNote.wrong.value', {
             note: remainderNote,
-            expectedValue: diff,
+            expectedValue: remainderValue,
         });
     }
 
     const sender = customSender || Web3Service.account.address;
+    const [largerNote, smallerNote] = diff >= 0
+        ? [originalNote, comparisonNote]
+        : [comparisonNote, originalNote];
 
     const proof = new PrivateRangeProof(
-        originalNote,
-        comparisonNote,
+        largerNote,
+        smallerNote,
         remainderNote,
         sender,
     );
