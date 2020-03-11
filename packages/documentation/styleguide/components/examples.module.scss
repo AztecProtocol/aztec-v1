@@ -35,6 +35,17 @@
     font-size: map-get($code-font-size-map, 's') !important;
   }
 
+  @each $key, $size in $code-font-size-map {
+    $i: index(($code-font-size-map), ($key $size));
+    @if $i < 7 {
+      h#{7 - $i} {
+        code {
+          font-size: map-get($code-font-size-map, $key) !important;
+        }
+      }
+    }
+  }
+
   strong {
     padding: 0 map-get($spacing-map, 'xxs');
     font-family: $code-font-family !important;

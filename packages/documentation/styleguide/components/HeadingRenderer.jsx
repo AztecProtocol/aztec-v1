@@ -36,6 +36,7 @@ const styles = () => ({
     padding: `${spacingMap.m} 0`,
     fontSize: fontSizeMap.s,
     lineHeight: lineHeightMap.s,
+    fontWeight: fontWeightMap.light,
   },
   heading5: {
     padding: `${spacingMap.s} 0`,
