@@ -1,7 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "../../ERC1724/ZkAsset.sol";
-import "../../libs/MetaDataUtils.sol";
 
 /**
  * @title ZkAssetBaseTest
