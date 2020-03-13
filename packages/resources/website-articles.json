@@ -1,0 +1,60 @@
+[
+  {
+    "title": "Section A",
+    "content": [
+      {
+        "coverPhoto": "https://images.unsplash.com/photo-1567361808960-dec9cb578182?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=771&q=80%20771w",
+        "title": "Lorem ipsum dolor sit amet",
+        "caption": "Quisque id augue placerat, imperdiet tellus quis, vulputate orci.",
+        "description": "Nunc quis tristique sem. Ut pellentesque, velit in mattis aliquet, tellus lectus posuere leo, ac euismod enim arcu sit amet lectus. Quisque id augue placerat, imperdiet tellus quis, vulputate orci. Sed condimentum rutrum fringilla. Donec convallis in mi eu molestie.",
+        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "paperLink": "https://eprint.iacr.org/2019/953.pdf"
+      },
+      {
+        "coverPhoto": "https://images.unsplash.com/photo-1548092372-0d1bd40894a3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80 750w",
+        "title": "Donec vel urna fringilla",
+        "caption": "Interdum et malesuada fames ac ante ipsum primis in faucibus.",
+        "description": "Sed ullamcorper magna fermentum posuere rutrum. Ut porta dui ligula. Aliquam cursus tempus massa, eget faucibus nisl interdum vitae.",
+        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "paperLink": "https://eprint.iacr.org/2019/953.pdf"
+      },
+      {
+        "coverPhoto": "https://images.unsplash.com/photo-1518277980269-c1eb88ad9693?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80 750w",
+        "title": "Nam vestibulum erat eu ex tristique",
+        "caption": "Class aptent taciti sociosqu ad litora torquent per conubia nostra.",
+        "description": "Phasellus eget urna nec turpis rutrum fringilla. Quisque ac orci vestibulum, aliquam erat sit amet, vehicula ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "paperLink": "https://eprint.iacr.org/2019/953.pdf"
+      },
+      {
+        "coverPhoto": "https://images.unsplash.com/photo-1543286386-713bdd548da4?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80%20750w",
+        "title": "Cras nulla nunc",
+        "caption": "Suspendisse sed sem nunc. Nunc sollicitudin bibendum magna et hendrerit.",
+        "description": "Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed pharetra sapien non vehicula pulvinar. Interdum et malesuada fames ac ante ipsum primis in faucibus.",
+        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "paperLink": "https://eprint.iacr.org/2019/953.pdf"
+      }
+    ]
+  },
+  {
+    "title": "Section B",
+    "content": [
+      {
+        "coverPhoto": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=752&q=80 752w",
+        "title": "Donec iaculis sagittis augue eu tempus",
+        "caption": "",
+        "description": "Duis at orci hendrerit, tempor erat ac, cursus velit. Donec porta sapien ex, pharetra commodo felis pretium sed.",
+        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "paperLink": ""
+      },
+      {
+        "coverPhoto": "https://images.unsplash.com/photo-1550645612-83f5d594b671?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80 750w",
+        "title": "Proin non lacus nec orci suscipit sagittis",
+        "caption": "",
+        "description": "Vivamus eu aliquam est. Pellentesque euismod est nulla, at dapibus enim rutrum eget. Aenean quis dui eget sem pretium semper id ac justo.",
+        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "paperLink": ""
+      }
+    ]
+  }
+]
