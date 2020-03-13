@@ -11,7 +11,7 @@
         "paperLink": "https://eprint.iacr.org/2019/953.pdf"
       },
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1548092372-0d1bd40894a3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80 750w",
+        "coverPhoto": "https://images.unsplash.com/photo-1548092372-0d1bd40894a3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "Donec vel urna fringilla",
         "caption": "Interdum et malesuada fames ac ante ipsum primis in faucibus.",
         "description": "Sed ullamcorper magna fermentum posuere rutrum. Ut porta dui ligula. Aliquam cursus tempus massa, eget faucibus nisl interdum vitae.",
@@ -19,7 +19,7 @@
         "paperLink": "https://eprint.iacr.org/2019/953.pdf"
       },
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1518277980269-c1eb88ad9693?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80 750w",
+        "coverPhoto": "https://images.unsplash.com/photo-1518277980269-c1eb88ad9693?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "Nam vestibulum erat eu ex tristique",
         "caption": "Class aptent taciti sociosqu ad litora torquent per conubia nostra.",
         "description": "Phasellus eget urna nec turpis rutrum fringilla. Quisque ac orci vestibulum, aliquam erat sit amet, vehicula ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
@@ -40,7 +40,7 @@
     "title": "Section B",
     "content": [
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=752&q=80 752w",
+        "coverPhoto": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=752&q=80",
         "title": "Donec iaculis sagittis augue eu tempus",
         "caption": "",
         "description": "Duis at orci hendrerit, tempor erat ac, cursus velit. Donec porta sapien ex, pharetra commodo felis pretium sed.",
@@ -48,7 +48,7 @@
         "paperLink": ""
       },
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1550645612-83f5d594b671?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80 750w",
+        "coverPhoto": "https://images.unsplash.com/photo-1550645612-83f5d594b671?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "Proin non lacus nec orci suscipit sagittis",
         "caption": "",
         "description": "Vivamus eu aliquam est. Pellentesque euismod est nulla, at dapibus enim rutrum eget. Aenean quis dui eget sem pretium semper id ac justo.",
