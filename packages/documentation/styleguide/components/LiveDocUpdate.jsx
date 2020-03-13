@@ -6,6 +6,7 @@ import {
 } from '@aztec/guacamole-ui';
 import MethodArgumentRenderer from './MethodArgumentRenderer';
 import MethodDescription from './MethodDescription';
+import MethodExplanation from './MethodExplanation';
 import MethodReturnRenderer from './MethodReturnRenderer';
 import parseTagsForAPI from '../utils/parseTagsForAPI';
 import { zkAssetURL, noteURL } from '../consts';
@@ -97,6 +98,7 @@ class LiveDocUpdate extends Component {
         {!!(parsedDescription && parsedDescription.description) && (
           <MethodDescription {...parsedDescription} />
         )}
+        {<MethodExplanation />}
         {parsedArguments.length > 0 && <MethodArgumentRenderer methods={parsedArguments} />}
         {parsedReturns.length > 0 && <MethodReturnRenderer methods={parsedReturns} />}
       </Block>

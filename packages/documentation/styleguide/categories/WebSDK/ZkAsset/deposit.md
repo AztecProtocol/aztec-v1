@@ -1,6 +1,5 @@
 ## Examples
 ### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user. 
-Place your Ethereum address in the `user` variable
 ```js
 // Get the injected address
 const userAddress = '';
