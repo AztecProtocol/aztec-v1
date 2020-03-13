@@ -30,6 +30,7 @@ const webpackConfig = (env = 'development', {
       alias: {
         'rsg-components/Examples/Examples': './Examples',
         'rsg-components/Examples/ExamplesRenderer': './ExamplesRenderer',
+        'rsg-components/Markdown/MarkdownHeading': path.resolve(__dirname, 'styleguide/components/MarkdownHeading'),
       },
     },
     resolveLoader: {

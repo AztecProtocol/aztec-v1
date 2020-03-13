@@ -17,14 +17,17 @@ import {
   toChecksumAddress,
 } from 'web3-utils';
 import {
+  AZTEC_API_KEY,
   DEMO_ZK_ASSET_ADDRESS,
+  DEMO_ZK_DAI_ADDRESS,
+  DEMO_THIRD_PARTY_ADDRESS,
 } from '../../config/aztec';
 import {
   PERMITTED_LOGS,
   CONSOLE_STYLES,
 } from '../../config/console';
 import compileCode from '../../utils/compileCode';
-import useAssetInCode from './utils/useAssetInCode';
+import replaceVarInCode from './utils/replaceVarInCode';
 import SdkPlaygroundControls from './SdkPlaygroundControls';
 import styles from './sdk-playground.module.scss';
 
@@ -42,8 +45,14 @@ class SdkPlayground extends PureComponent {
       return null;
     }
 
+    let newCode = code;
+    newCode = replaceVarInCode(newCode, 'apiKey', AZTEC_API_KEY);
+    newCode = replaceVarInCode(newCode, 'zkAssetAddress', zkAssetAddress);
+    newCode = replaceVarInCode(newCode, 'zkDaiAddress', DEMO_ZK_DAI_ADDRESS);
+    newCode = replaceVarInCode(newCode, 'thirdPartyAddress', DEMO_THIRD_PARTY_ADDRESS);
+
     return {
-      code: useAssetInCode(code, zkAssetAddress),
+      code: newCode,
       initialCode: code,
       logs: [],
     };
@@ -101,7 +110,12 @@ class SdkPlayground extends PureComponent {
       <html>
         <head>
           <script>
-          ${asyncCompiledCode};
+            const delayRun = (time) => {
+              setTimeout(async () => {
+                ${asyncCompiledCode};
+              }, time);
+            };
+            delayRun(500); // wait for hookConsoleLogs to be called
           </script>
         </head>
         <body></body>
@@ -140,18 +154,6 @@ class SdkPlayground extends PureComponent {
       },
       this.doRunCode,
     );
-  };
-
-  handleRefreshAssetCode = () => {
-    const {
-      code,
-      zkAssetAddress,
-    } = this.state;
-    const updatedCode = useAssetInCode(code, zkAssetAddress);
-
-    this.setState({
-      code: updatedCode,
-    });
   };
 
   handleRefreshAccountCode = (account) => {

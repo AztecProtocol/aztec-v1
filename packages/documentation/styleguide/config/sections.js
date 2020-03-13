@@ -12,10 +12,16 @@ export default {
   'zkAsset-introduction': {
     visibleName: 'zkAsset',
   },
-  note: {
+  zkNote: {
     isStatic: true,
   },
   'note-introduction': {
     visibleName: 'note',
+  },
+  user: {
+    isStatic: true,
+  },
+  'Reference Specification': {
+    isStatic: true,
   },
 };

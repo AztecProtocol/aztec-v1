@@ -4,6 +4,7 @@ import Markdown from 'react-styleguidist/lib/client/rsg-components/Markdown';
 import { Block } from '@aztec/guacamole-ui';
 import SdkPlayground from './SdkPlayground';
 import LiveDocUpdate from './LiveDocUpdate';
+import styles from './examples.module.scss';
 
 const Examples = ({
   name,
@@ -27,6 +28,7 @@ const Examples = ({
               contentNode = (
                 <Block
                   key={`demo-${+index}`}
+                  top="xl"
                   bottom="xxl"
                 >
                   <SdkPlayground
@@ -37,25 +39,21 @@ const Examples = ({
               break;
             case 'markdown':
               contentNode = (
-                <Markdown
+                <div
                   key={`md-${+index}`}
-                  text={example.content}
-                />
+                  className={styles.markdown}
+                >
+                  <Markdown
+                    text={example.content}
+                  />
+                </div>
               );
               break;
             default:
               return null;
           }
 
-          return (
-            <Block
-              key={`${name}-${+index}`}
-              testId={`${name}-${index}`}
-              padding="l 0"
-            >
-              {contentNode}
-            </Block>
-          );
+          return contentNode;
         })}
       </Block>
     </div>

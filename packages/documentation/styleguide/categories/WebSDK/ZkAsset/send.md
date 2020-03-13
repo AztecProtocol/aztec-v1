@@ -1,38 +1,26 @@
 ## Examples
-### Confidentially send value of 30units to another Ethereum address
+
+### Confidentially send value of 30units to another Ethereum address.
+
 ```js
-// Get the injected address
-const addressToDeposit = window.ethereum.selectedAddress;
-const addressToSend = window.ethereum.selectedAddress;
+const thirdPartyAddress = '';
 
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
-
-// // Fetch the zkAsset
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
-console.info(asset)
 
-// // Deposit funds into the ZkAsset
-const depositAmount = 50;
-await asset.deposit(
-  [
-    {
-      to: addressToDeposit,
-      amount: depositAmount,
-    },
-  ],
-  {},
-);
+const balanceBeforeSend = await asset.balance();
+console.info({ balanceBeforeSend });
 
 // Send funds
 const sendAmount = 30;
-await asset.send([
+const response = await asset.send([
   {
-    to: addressToSend,
+    to: thirdPartyAddress,
     amount: sendAmount,
   },
-], {})
-console.info('sent funds confidentially');
+]);
+console.info(response);
+
+const balanceAfterSend = await asset.balance();
+console.info({ balanceAfterSend });
 ```

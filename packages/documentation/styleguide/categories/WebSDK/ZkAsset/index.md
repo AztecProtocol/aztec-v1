@@ -2,7 +2,7 @@
 
 ```js
 // Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
+const apiKey = '';
 const result = await window.aztec.enable({ apiKey });
 
 // Fetch the zkAsset
@@ -12,17 +12,27 @@ const asset = await window.aztec.zkAsset(zkAssetAddress);
 console.info(asset);
 ```
 
-The `zkAsset` has the following methods on it:
-- `async zkAsset.balance()`
-- `async zkAsset.deposit()`
-- `async zkAsset.send()`
-- `async zkAsset.withdraw()`
-- `async zkAsset.createNotesFromBalance()`
-- `async zkAsset.fetchNotesFromBalance()`
-- `async zkAsset.allowanceOfLinkedtoken()`
-- `async zkAsset.totalSupplyOfLinkedtoken()`
+&nbsp
+&nbsp
 
+### The `zkAsset` has the following data and methods on it:
 
-
-
-
+- _valid_ (Boolean)
+- _address_ (Address)
+- _linkedTokenAddress_ (Address)
+- _scalingFactor_ (String)
+- _canAdjustSupply_ (Boolean)
+- _canConvert_ (Boolean)
+- _token_ (Object): A token object contains `address`, `name`, and `decimals`
+- [`async deposit()`](/#/SDK/zkAsset/.deposit)
+- [`async send()`](/#/SDK/zkAsset/.send)
+- [`async withdraw()`](/#/SDK/zkAsset/.withdraw)
+- [`async balance()`](/#/SDK/zkAsset/.balance)
+- [`async subscribeToBalance()`](/#/SDK/zkAsset/.subscribeToBalance)
+- [`async createNotesFromBalance()`](/#/SDK/zkAsset/.createNotesFromBalance)
+- [`async fetchNotesFromBalance()`](/#/SDK/zkAsset/.fetchNotesFromBalance)
+- [`async balanceOfLinkedToken()`](/#/SDK/zkAsset/.balanceOfLinkedToken)
+- [`async allowanceOfLinkedtoken()`](/#/SDK/zkAsset/.allowanceOfLinkedtoken)
+- [`async totalSupplyOfLinkedtoken()`](/#/SDK/zkAsset/.totalSupplyOfLinkedtoken)
+- [`async toNoteValue()`](/#/SDK/zkAsset/.toNoteValue)
+- [`async toTokenValue()`](/#/SDK/zkAsset/.toTokenValue)

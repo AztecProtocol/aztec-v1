@@ -1,26 +1,20 @@
 ## Examples
-### 1) Grant note view access to a third party
-```js
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
 
-// Fetch the zkAsset
+### Grant note view access to a third party.
+
+```js
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
 
-// Fetch notes
-const notes = await asset.fetchNotesFromBalance();
+const [note] = await asset.fetchNotesFromBalance({ numberOfNotes: 1 });
+const myNote = await window.aztec.zkNote(note.noteHash);
 
-const noteHash = notes[0].noteHash;
-const noteToGrantAccess = await window.aztec.zkNote(noteHash);
-console.info({ noteToGrantAccess })
-
-// Select the addresses to grant access
+const thirdPartyAddress = '';
 const addressToGrantAccess = [
-  window.ethereum.selectedAddress, // [change to grant access to different addresses]
+  thirdPartyAddress,
+  // Add more addresses to grant access
 ];
 
-const grantSuccess = await noteToGrantAccess.grantAccess(addressToGrantAccess);
+const grantSuccess = await myNote.grantAccess(addressToGrantAccess);
 console.info({ grantSuccess });
 ```

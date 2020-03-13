@@ -145,6 +145,34 @@ module.exports = {
           exampleMode: 'hide',
         },
         {
+          name: 'user',
+          pagePerSection: true,
+          sections: [
+            {
+              name: 'Introduction',
+              content: 'styleguide/categories/WebSDK/User/index.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.createNote',
+              content: 'styleguide/categories/WebSDK/User/createNote.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.encryptMessage',
+              content: 'styleguide/categories/WebSDK/User/encryptMessage.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.decryptMessage',
+              content: 'styleguide/categories/WebSDK/User/decryptMessage.md',
+              exampleMode: 'hide',
+            },
+          ],
+          sectionDepth: 1,
+          usageMode: 'hide',
+        },
+        {
           name: 'zkAsset',
           sections: [
             {
@@ -173,6 +201,11 @@ module.exports = {
               exampleMode: 'hide',
             },
             {
+              name: '.subscribeToBalance',
+              content: 'styleguide/categories/WebSDK/ZkAsset/subscribeToBalance.md',
+              exampleMode: 'hide',
+            },
+            {
               name: '.createNoteFromBalance',
               content: 'styleguide/categories/WebSDK/ZkAsset/createNoteFromBalance.md',
               exampleMode: 'hide',
@@ -197,22 +230,27 @@ module.exports = {
               content: 'styleguide/categories/WebSDK/ZkAsset/totalSupplyOfLinkedToken.md',
               exampleMode: 'hide',
             },
+            {
+              name: '.toNoteValue',
+              content: 'styleguide/categories/WebSDK/ZkAsset/toNoteValue.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.toTokenValue',
+              content: 'styleguide/categories/WebSDK/ZkAsset/toTokenValue.md',
+              exampleMode: 'hide',
+            },
           ],
           sectionDepth: 1,
           usageMode: 'hide',
         },
         {
-          name: 'note',
+          name: 'zkNote',
           pagePerSection: true,
           sections: [
             {
               name: 'Introduction',
               content: 'styleguide/categories/WebSDK/Note/index.md',
-              exampleMode: 'hide',
-            },
-            {
-              name: '.equal',
-              content: 'styleguide/categories/WebSDK/Note/equal.md',
               exampleMode: 'hide',
             },
             {
@@ -223,6 +261,11 @@ module.exports = {
             {
               name: '.grantAccess',
               content: 'styleguide/categories/WebSDK/Note/grantAccess.md',
+              exampleMode: 'hide',
+            },
+            {
+              name: '.equal',
+              content: 'styleguide/categories/WebSDK/Note/equal.md',
               exampleMode: 'hide',
             },
             {

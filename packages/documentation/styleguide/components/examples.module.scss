@@ -1,0 +1,89 @@
+@import '../../src/styles/variables';
+@import '../../src/styles/functions';
+
+.markdown {
+  ul, ol {
+    margin: 0 !important;
+    padding: map-get($spacing-map, 'l') 0 map-get($spacing-map, 'l') map-get($spacing-map, 'xl') !important;
+  }
+
+  li {
+    padding: map-get($spacing-map, 'xs') 0 !important;
+    font-weight: map-get($font-weight-map, 'light') !important;
+
+    ul, ol {
+      padding-top: map-get($spacing-map, 'xs') !important;
+      padding-bottom: map-get($spacing-map, 'xs') !important;
+    }
+  }
+
+  em {
+    padding: map-get($spacing-map, 'xs');
+    font-family: $code-font-family !important;
+    font-size: map-get($code-font-size-map, 'xs') !important;
+    font-style: normal !important;
+    border-radius: map-get($rounded-corner-map, 'xs');
+    background-image: linear-gradient(to bottom, transparent 0, map-get($color-map, 'primary-lightest') 0);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: 0 center;
+  }
+
+  code {
+    padding: 0 map-get($spacing-map, 'xxs');
+    font-family: $code-font-family !important;
+    font-size: map-get($code-font-size-map, 's') !important;
+  }
+
+  @each $key, $size in $code-font-size-map {
+    $i: index(($code-font-size-map), ($key $size));
+    @if $i < 7 {
+      h#{7 - $i} {
+        code {
+          font-size: map-get($code-font-size-map, $key) !important;
+        }
+      }
+    }
+  }
+
+  strong {
+    padding: 0 map-get($spacing-map, 'xxs');
+    font-family: $code-font-family !important;
+    font-size: map-get($code-font-size-map, 's') !important;
+    font-weight: map-get($font-weight-map, 'semibold') !important;
+  }
+
+  a {
+    &, &:active, &:visited {
+      color: $default-link-color !important;
+      cursor: pointer !important;
+      opacity: 1 !important;
+    }
+
+    * {
+      cursor: pointer !important;
+    }
+
+    &:hover {
+      color: get-darken-color($default-link-color, 20%) !important;
+    }
+  }
+
+  table {
+    margin: map-get($spacing-map, 'l') 0 !important;
+
+    th {
+      font-size: map-get($font-size-map, 'xs') !important;
+      font-weight: map-get($font-weight-map, 'normal') !important;
+    }
+
+    td {
+      font-weight: map-get($font-weight-map, 'light') !important;
+    }
+  }
+
+  pre {
+    margin-top: map-get($spacing-map, 'xl') !important;
+    margin-bottom: map-get($spacing-map, 'xl') !important;
+  }
+}

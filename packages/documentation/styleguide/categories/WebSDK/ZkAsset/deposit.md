@@ -1,68 +1,56 @@
 ## Examples
-### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user. 
+
+### Convert 50 ERC20 tokens into zero-knowledge notes, owned by the user.
+
 ```js
-// Get the injected address
-const userAddress = '';
-
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
-
-// Fetch the zkAsset
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
-console.info( asset );
 
-const userPreDepositBalance = await asset.balance();
-console.info({ userPreDepositBalance });
+// Get the current user's address
+const userAddress = window.aztec.account.address;
+
+const balanceBeforeDeposit = await asset.balance();
+console.info({ balanceBeforeDeposit });
 
 // Deposit funds into the ZkAsset
 const depositAmount = 50;
-await asset.deposit(
+const response = await asset.deposit(
   [
     {
       to: userAddress,
       amount: depositAmount,
     },
   ],
-  {},
 );
+console.info(response);
 
-const userPostDepositBalance = userPreDepositBalance + depositAmount;
-console.info({ userPostDepositBalance });
+const balanceAfterDeposit = await asset.balance();
+console.info({ balanceAfterDeposit });
 ```
 
-### Give a third party zero-knowledge notes worth 50 ERC20 tokens
+### Give a third party zero-knowledge notes worth 50 ERC20 tokens.
 
 ```js
-// Get the injected address
 const thirdPartyAddress = '';
 
-// Enable the SDK
-const apiKey = '071MZEA-WFWMGX4-JJ2C5C1-AVY458F';
-await window.aztec.enable({ apiKey });
-
-// Fetch the zkAsset
 const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
-console.info( asset );
 
-
-const preDepositBalance = await asset.balance();
-console.info({ preDepositBalance });
+const balanceBeforeDeposit = await asset.balance();
+console.info({ balanceBeforeDeposit });
 
 // Deposit funds into the ZkAsset
 const depositAmount = 50;
-await asset.deposit(
+const response = await asset.deposit(
   [
     {
       to: thirdPartyAddress,
       amount: depositAmount,
     },
   ],
-  {},
 );
+console.info(response);
 
-const postDepositBalance = preDepositBalance + depositAmount;
-console.info({ postDepositBalance });
+const balanceAfterDeposit = await asset.balance();
+console.info({ balanceAfterDeposit });
 ```

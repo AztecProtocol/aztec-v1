@@ -17,7 +17,7 @@ module.exports = {
       'grey-lightest': 'rgb(246, 250, 255)',
     },
     defaultTextColor: '#221635',
-    defaultLabelColor: '#9699BA',
+    defaultLabelColorName: 'grey-dark',
     defaultLinkColor: '#898BF6',
     pageSpacingKeyMap: {
       xxl: 'xxl',
