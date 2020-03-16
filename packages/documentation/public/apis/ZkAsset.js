@@ -214,6 +214,14 @@ export default class ZkAsset {
      *
      * @function zkAsset.deposit
      * @description Description: Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
+     * 
+     * Uses a joinSplit zero-knowledge proof, to convert public DAI tokens into zkDAI tokens.
+     *
+     * Under the hood, it takes the given number of public DAI tokens, zero input notes and constructs the appropriate number of output notes to represent zkDAI. The output notes ultimately represent zkDAI. The proof must satisfy a balancing relationship - the sum of input values must equal the sum of output notes.
+     *
+     * The proof is sent as an Ethereum transaction to the blockchain, where it is validated. DAI is then transferred from the owner's Ethereum address to the AZTEC Cryptography Engine (ACE) smart contract. The relevant owner(s) is then simulatenously granted the corresponding quantity of zkDAI, represented on chain as AZTEC notes and stored in the note registry of the ZkAsset.
+     *
+     * The result of successfully calling this method is that the user's DAI balance is decremented by the number of tokens they deposited, and the receiver's zkDAI balance is incremented accordingly.
      *
      * @param {[Transaction]} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
      *
@@ -300,6 +308,12 @@ export default class ZkAsset {
      * @function zkAsset.withdraw
      * @description Description: Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens.
      *
+     * Uses a joinSplit zero-knowledge proof to convert zkDAI back into public DAI tokens.
+     *
+     * The method selects notes from the user's balance and passes them as inputs to the proof. There are no output notes (given that the user is withdrawing into public DAI) and a number of public DAI tokens specified.
+     *
+     * Once the proof is validated, the input notes representing the zkDAI are destroyed in the note registry and DAI tokens transferred from the AZTEC cryptography engine (ACE) smart contract to the designated owner of the DAI
+     *
      * @param {Integer} amount Units of value being withdrawn - will equal the number of ERC20 tokens the `to` address receives.
      *
      * @param {Object} options Optional arguments to be passed:
@@ -377,6 +391,14 @@ export default class ZkAsset {
      *
      * @function zkAsset.send
      * @description Description: Send funds confidentially to another Ethereum address.
+     *
+     * Uses a joinSplit zero-knowledge proof, to send zkDAI from one user to another user.
+     *
+     * The method takes as input notes representing the zkDAI balance to be transferred, and creates output notes with appropriate owners to represent the zkDAI balance that has been transferred. The total input zkDAI balance must equal the total output zkDAI balance - the SDK selects the combination of notes to make this the case.
+     *
+     * The proof is then sent as an Ethereum transaction to the blockchain and validated. Upon successfull validation, the input zkDAI notes are destroyed and output zkDAI notes created.
+     *
+     * The SDK listens for the appropriate events to update the sender and receiver's balances appropriately.
      *
      * @param {[Transaction]} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
      *

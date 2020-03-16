@@ -24,9 +24,13 @@ console.info(asset);
 - _canAdjustSupply_ (Boolean)
 - _canConvert_ (Boolean)
 - _token_ (Object): A token object contains `address`, `name`, and `decimals`
+
+Main APIs:
 - [`async deposit()`](/#/SDK/zkAsset/.deposit)
 - [`async send()`](/#/SDK/zkAsset/.send)
 - [`async withdraw()`](/#/SDK/zkAsset/.withdraw)
+
+Utilities:
 - [`async balance()`](/#/SDK/zkAsset/.balance)
 - [`async subscribeToBalance()`](/#/SDK/zkAsset/.subscribeToBalance)
 - [`async createNotesFromBalance()`](/#/SDK/zkAsset/.createNotesFromBalance)

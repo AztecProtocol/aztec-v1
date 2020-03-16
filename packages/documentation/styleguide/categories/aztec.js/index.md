@@ -1,4 +1,4 @@
-`aztec.js` is the main Aztec low level npm package and is what the SDK relies on. It is written in JavaScript and it's principle responsibility is to construct zero-knowledge proofs. To this end, it exposes following proof construction methods:
+`aztec.js` is the main Aztec low level npm package and is what the SDK relies on. It is written in JavaScript and it's principle responsibility is to construct zero-knowledge proofs. To this end, it exposes the following proof construction methods:
 
 - JoinSplitProof()
 - DividendProof()

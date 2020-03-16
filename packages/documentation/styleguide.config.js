@@ -126,9 +126,33 @@ module.exports = {
   sections: [
     {
       name: 'Introduction',
-      content: 'styleguide/categories/Introduction.md',
+      content: 'styleguide/categories/Introduction/index.md',
       exampleMode: 'collapse',
       usageMode: 'collapse',
+      pagePerSection: true,
+      sections: [
+        {
+          name: 'UTXO model',
+          content: 'styleguide/categories/Introduction/utxoModel.md',
+          exampleMode: 'hide',
+        },
+        {
+          name: 'JoinSplit Proof',
+          content: 'styleguide/categories/Introduction/joinSplitProof.md',
+          exampleMode: 'hide',
+        },
+        {
+          name: 'Core smart contract architecture',
+          content: 'styleguide/categories/Introduction/coreArchitecture.md',
+          exampleMode: 'hide',
+        },
+        {
+          name: 'Standard flow',
+          content: 'styleguide/categories/Introduction/standardFlow.md',
+          exampleMode: 'hide',
+        },
+      ],
+      sectionDepth: 1,
     },
     {
       name: 'SDK',
@@ -258,7 +282,7 @@ module.exports = {
             },
           ],
           sectionDepth: 2,
-          usageMode: 'hide',
+          usageMode: 'collapse',
         },
         {
           name: 'zkNote',
@@ -315,6 +339,8 @@ module.exports = {
     {
       name: 'aztec.js',
       content: 'styleguide/categories/aztec.js/index.md',
+      exampleMode: 'hide',
+      usageMode: 'hide',
     },
     {
       name: 'Examples',
