@@ -58,8 +58,6 @@ contract('ZkAssetOwnable', (accounts) => {
         ace = await ACE.at(ACE.address);
         erc20 = await ERC20Mintable.new({ from: accounts[0] });
 
-        erc20 = await ERC20Mintable.new();
-
         zkAssetOwnable = await ZkAssetOwnable.new(ace.address, erc20.address, scalingFactor);
         await zkAssetOwnable.setProofs(epoch, filter);
         zkAssetOwnableTest = await ZkAssetOwnableTest.new();

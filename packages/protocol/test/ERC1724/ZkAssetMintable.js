@@ -70,7 +70,6 @@ contract('ZkAssetMintable', (accounts) => {
             ace = await ACE.at(ACE.address);
             erc20 = await ERC20Mintable.new({ from: accounts[0] });
 
-            erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
         });
 
@@ -315,7 +314,6 @@ contract('ZkAssetMintable', (accounts) => {
             ace = await ACE.at(ACE.address);
             erc20 = await ERC20Mintable.new({ from: accounts[0] });
 
-            erc20 = await ERC20Mintable.new();
             scalingFactor = new BN(10);
         });
 
