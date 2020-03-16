@@ -1,6 +1,6 @@
 [
   {
-    "title": "Section A",
+    "title": "Research Techniques",
     "content": [
       {
         "coverPhoto": "https://images.unsplash.com/photo-1567361808960-dec9cb578182?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=771&q=80%20771w",
@@ -37,7 +37,7 @@
     ]
   },
   {
-    "title": "Section B",
+    "title": "Primers",
     "content": [
       {
         "coverPhoto": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=752&q=80",
