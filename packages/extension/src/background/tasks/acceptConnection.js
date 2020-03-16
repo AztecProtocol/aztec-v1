@@ -4,34 +4,41 @@ import {
     backgroundReadyEvent,
     uiCloseEvent,
 } from '~/config/event';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
 import {
     permissionError,
 } from '~/utils/error';
+import {
+    errorLog,
+} from '~/utils/log';
 import Connection from '../utils/connection';
+import migrateIndexedDB from './migrateIndexedDB';
 import setupNetworkConfig from './setupNetworkConfig';
 
-const {
-    origin: uiSourceOrigin,
-} = new URL(urls.ui);
+const resourceOrigin = getResourceUrl('origin');
 
 export default function acceptConnection() {
     window.parent.postMessage({
         type: backgroundReadyEvent,
     }, '*');
 
-    const connection = Connection;
+    const connection = new Connection();
     let networkConfig;
 
     window.addEventListener('message', async (event) => {
         if (event.data.type === connectionRequestEvent) {
             const {
+                requestId,
                 clientProfile,
             } = event.data;
 
             if (clientProfile) {
                 try {
+                    await migrateIndexedDB();
                     networkConfig = await setupNetworkConfig(clientProfile);
+                    connection.initUi();
                 } catch (e) {
                     const error = e.code === 4001
                         ? permissionError('user.denied.auth')
@@ -40,7 +47,8 @@ export default function acceptConnection() {
                         error,
                     };
                 }
-            } else if (event.origin !== uiSourceOrigin) {
+            } else if (event.origin !== resourceOrigin) {
+                errorLog(`Invalid origin '${event.origin}'. Events can only be sent from '${resourceOrigin}'.`);
                 return;
             }
 
@@ -58,6 +66,7 @@ export default function acceptConnection() {
                 type: connectionApprovedEvent,
                 code: '200',
                 data: networkConfig,
+                requestId,
             }, '*', [channel.port2]);
         }
     });

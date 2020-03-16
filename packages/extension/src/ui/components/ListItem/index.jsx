@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 import {
     FlexBox,
     Block,
@@ -16,6 +17,7 @@ import {
     profileShape,
 } from '~/ui/config/propTypes';
 import ProfileIcon from '~/ui/components/ProfileIcon';
+import styles from './li.scss';
 
 const spacingMapping = {
     xxs: 's',
@@ -63,7 +65,7 @@ const ListItem = ({
                     size={size}
                 />
                 <Block
-                    className="flex-free-expand"
+                    className={classnames('flex-free-expand', styles.content)}
                     align="left"
                     left={spacingMapping[contentSpacingSize || size]}
                 >
@@ -85,7 +87,10 @@ const ListItem = ({
             nowrap
         >
             {profileNode}
-            <Block left="m">
+            <Block
+                className="flex-fixed"
+                left="m"
+            >
                 <Text
                     size={textSize || size}
                 >

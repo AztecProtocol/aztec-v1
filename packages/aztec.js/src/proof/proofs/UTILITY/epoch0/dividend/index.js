@@ -26,7 +26,7 @@ class DividendProof66561 extends Proof {
     constructor(notionalNote, residualNote, targetNote, sender, za, zb) {
         const publicValue = constants.ZERO_BN;
         const publicOwner = constants.addresses.ZERO_ADDRESS;
-        super(ProofType.DIVIDEND.name, [notionalNote], [residualNote, targetNote], sender, publicValue, publicOwner);
+        super(ProofType.DIVIDEND.name, [notionalNote], [targetNote, residualNote], sender, publicValue, publicOwner);
 
         this.za = new BN(za);
         this.zb = new BN(zb);

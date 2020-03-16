@@ -1,3 +1,9 @@
+import {
+    NUMBER_OF_INPUT_NOTES,
+} from '~/config/settings';
+import {
+    randomInt,
+} from '~/utils/random';
 import validate from './validate';
 import getStartIndex from './getStartIndex';
 import pickValues from './pickValues';
@@ -8,19 +14,32 @@ export default function pickNotes({
     sortedValues,
     noteValues,
     minSum,
-    numberOfNotes: count = 1,
+    numberOfNotes = null,
     allowLessNumberOfNotes = true,
 }) {
-    if (!count) {
+    if (numberOfNotes !== null && numberOfNotes <= 0) {
         return [];
     }
 
-    validate({
-        sortedValues,
-        minSum,
-        numberOfNotes: count,
-        allowLessNumberOfNotes,
-    });
+    let count = numberOfNotes || NUMBER_OF_INPUT_NOTES;
+    while (count > 0) {
+        try {
+            validate({
+                sortedValues,
+                minSum,
+                numberOfNotes: count,
+                allowLessNumberOfNotes,
+            });
+            break;
+        } catch (error) {
+            count += randomInt(1, NUMBER_OF_INPUT_NOTES);
+            if (numberOfNotes !== null
+                || count > sortedValues.length
+            ) {
+                throw error;
+            }
+        }
+    }
 
     if (sortedValues.length < count) {
         const notes = [];

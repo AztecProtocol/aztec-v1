@@ -1,78 +1,103 @@
 import apis from '~uiModules/apis';
-import CreateNoteFromBalanceConfirm from '~/ui/views/CreateNoteFromBalanceConfirm';
-import SignNotes from '~/ui/views/SignNotes';
-import TransactionSend from '~/ui/views/TransactionSend';
 
-const stepProve = {
-    titleKey: 'note.create.fromBalance',
-    submitTextKey: 'note.create.fromBalance.submit',
-    content: CreateNoteFromBalanceConfirm,
-    tasks: [],
+const stepApprove = {
+    name: 'approve',
+    descriptionKey: 'note.access.grant.description',
+    tasks: [
+        {
+            run: apis.proof.createNoteFromBalance,
+        },
+    ],
+    submitTextKey: 'note.access.grant.submit',
 };
 
 const stepSign = {
-    titleKey: 'note.sign.title',
-    submitTextKey: 'note.sign.submit',
-    content: SignNotes,
+    name: 'signNotes',
+    descriptionKey: 'note.access.sign.description',
     tasks: [
         {
             type: 'sign',
-            name: 'approve',
-            run: apis.note.signNotes,
-        },
-    ],
-};
-
-const stepBatchSign = {
-    ...stepSign,
-    tasks: [
-        {
-            type: 'sign',
-            name: 'approve',
             run: apis.note.signProof,
         },
     ],
+    autoStart: true,
+    submitTextKey: 'transaction.sign.submit',
+};
+
+const stepConfirm = {
+    name: 'confirm',
+    descriptionKey: 'note.access.confirm.description',
+    tasks: [],
+    submitTextKey: 'transaction.send.submit',
+};
+
+const stepConfirmViaGSN = {
+    ...stepConfirm,
+    descriptionKey: 'transaction.gsn.send.description',
 };
 
 const stepSend = {
-    titleKey: 'transaction.send',
-    submitTextKey: 'transaction.send.submit',
-    content: TransactionSend,
-    contentProps: {
-        descriptionKey: 'transaction.send.explain',
-    },
+    name: 'send',
+    descriptionKey: 'note.access.send.description',
     tasks: [
         {
-            name: 'send',
-            run: apis.asset.confidentialTransfer,
+            titleKey: 'transaction.step.create.proof',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.sign',
+            run: apis.mock,
+        },
+        {
+            type: 'sign',
+            titleKey: 'note.access.grant.step',
+            run: apis.asset.confidentialTransferFrom,
+        },
+        {
+            titleKey: 'transaction.confirmed',
         },
     ],
+    showTaskList: true,
+    autoStart: true,
+    submitTextKey: 'transaction.send.submit',
 };
 
 const stepSendViaGSN = {
-    titleKey: 'transaction.gsn.send',
-    submitTextKey: 'transaction.gsn.send.submit',
-    content: TransactionSend,
-    contentProps: {
-        descriptionKey: 'transaction.gsn.send.explain',
-    },
+    name: 'send',
+    descriptionKey: 'transaction.gsn.send.description',
     tasks: [
         {
-            name: 'send',
+            titleKey: 'transaction.step.create.proof',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.sign',
+            run: apis.mock,
+        },
+        {
+            titleKey: 'transaction.step.relay',
             run: apis.asset.confidentialTransferFrom,
         },
+        {
+            titleKey: 'transaction.confirmed',
+        },
     ],
+    showTaskList: true,
+    autoStart: true,
+    submitTextKey: 'transaction.gsn.send.submit',
 };
 
 export default {
     gsn: [
-        stepProve,
-        stepBatchSign,
+        stepApprove,
+        stepSign,
+        stepConfirmViaGSN,
         stepSendViaGSN,
     ],
     metamask: [
-        stepProve,
+        stepApprove,
         stepSign,
+        stepConfirm,
         stepSend,
     ],
 };

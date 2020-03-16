@@ -82,6 +82,7 @@ const Restore = ({
     currentAccount,
 }) => (
     <AnimatedTransaction
+        testId="steps-restore"
         initialStep={initialStep}
         steps={steps}
         initialData={{

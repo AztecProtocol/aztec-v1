@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
+    FlexBox,
     Block,
     Text,
 } from '@aztec/guacamole-ui';
@@ -14,12 +15,17 @@ import styles from './blocks.scss';
 const EntityBlock = ({
     className,
     title,
+    titleFootnote,
     content,
     contentFootnote,
-    hideContentFootnote,
     profile,
+    extraContent,
     children,
     layer,
+    hideTitile,
+    hideTitleFootnote,
+    hideContentFootnote,
+    hideExtra,
 }) => (
     <div
         className={classnames(
@@ -27,53 +33,76 @@ const EntityBlock = ({
             styles.block,
             {
                 [styles[`block-layer-${layer}`]]: layer > 0,
+                [styles['fx-hide-title']]: hideTitile,
+                [styles['fx-hide-title-footnote']]: hideTitleFootnote,
+                [styles['fx-hide-content-footnote']]: hideContentFootnote,
+                [styles['fx-hide-extra']]: hideExtra,
             },
         )}
     >
-        <Block padding="xs l">
-            {!!title && (
-                <Block
-                    className={styles['block-title']}
-                    padding="xs xs 0"
-                >
-                    <Text
-                        text={title}
-                        size="xxs"
-                        color="label"
-                    />
-                </Block>
-            )}
-            {!!(profile && content) && (
-                <Block
-                    className={styles['block-content']}
-                    padding="xs"
-                >
-                    <ListItem
-                        profile={profile}
-                        content={(!!content && (
+        {!!(title || profile || content) && (
+            <Block padding="xs l">
+                {!!title && (
+                    <Block
+                        className={styles['block-title']}
+                        padding="xs xs 0"
+                    >
+                        <FlexBox
+                            valign="center"
+                        >
                             <Text
-                                text={content}
-                                color="default"
+                                className="flex-free-expand"
+                                text={title}
+                                size="xxs"
+                                color="label"
                             />
-                        )) || null}
-                        footnote={(!!contentFootnote && (
-                            <div
-                                className={classnames(
-                                    styles['content-footnote'],
-                                    {
-                                        [styles.hide]: hideContentFootnote,
-                                    },
-                                )}
-                            >
-                                {contentFootnote}
-                            </div>
-                        )) || null}
-                        size="s"
-                        textSize="m"
-                    />
+                            {!!titleFootnote && (
+                                <div
+                                    className={classnames(
+                                        'flex-fixed',
+                                        styles['title-footnote'],
+                                    )}
+                                >
+                                    {titleFootnote}
+                                </div>
+                            )}
+                        </FlexBox>
+                    </Block>
+                )}
+                {!!(profile || content) && (
+                    <Block
+                        className={styles['block-content']}
+                        padding="xs"
+                    >
+                        <ListItem
+                            profile={profile}
+                            content={(!!content && (
+                                <Text
+                                    text={content}
+                                    color="default"
+                                />
+                            )) || null}
+                            footnote={(!!contentFootnote && (
+                                <div
+                                    className={styles['content-footnote']}
+                                >
+                                    {contentFootnote}
+                                </div>
+                            )) || null}
+                            size="s"
+                            textSize="m"
+                        />
+                    </Block>
+                )}
+            </Block>
+        )}
+        {!!extraContent && (
+            <div className={styles['block-extra']}>
+                <Block padding="s l">
+                    {extraContent}
                 </Block>
-            )}
-        </Block>
+            </div>
+        )}
         {children}
     </div>
 );
@@ -81,6 +110,10 @@ const EntityBlock = ({
 EntityBlock.propTypes = {
     className: PropTypes.string,
     title: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.node,
+    ]),
+    titleFootnote: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.node,
     ]),
@@ -92,21 +125,30 @@ EntityBlock.propTypes = {
         PropTypes.string,
         PropTypes.node,
     ]),
-    hideContentFootnote: PropTypes.bool,
     profile: profileShape,
+    extraContent: PropTypes.node,
     children: PropTypes.node,
     layer: PropTypes.number,
+    hideTitile: PropTypes.bool,
+    hideTitleFootnote: PropTypes.bool,
+    hideContentFootnote: PropTypes.bool,
+    hideExtra: PropTypes.bool,
 };
 
 EntityBlock.defaultProps = {
     className: '',
     title: '',
+    titleFootnote: null,
     content: null,
     contentFootnote: null,
-    hideContentFootnote: false,
     profile: null,
+    extraContent: null,
     children: null,
-    layer: 0,
+    layer: 1,
+    hideContentFootnote: false,
+    hideTitile: false,
+    hideTitleFootnote: false,
+    hideExtra: false,
 };
 
 export default EntityBlock;

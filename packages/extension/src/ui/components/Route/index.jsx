@@ -3,16 +3,12 @@ import PropTypes from 'prop-types';
 import {
     Route,
 } from 'react-router-dom';
-import {
-    gsnConfigShape,
-} from '~/ui/config/propTypes';
 
 const CustomRoute = ({
     path,
     currentAccount,
     action,
     Component,
-    gsnConfig,
     goToPage,
 }) => (
     <Route
@@ -20,7 +16,6 @@ const CustomRoute = ({
         component={() => (
             <Component
                 {...action}
-                gsnConfig={gsnConfig}
                 currentAccount={currentAccount}
                 goToPage={goToPage}
             />
@@ -37,7 +32,6 @@ CustomRoute.propTypes = {
     action: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
     Component: PropTypes.func.isRequired,
     goToPage: PropTypes.func.isRequired,
-    gsnConfig: gsnConfigShape.isRequired,
 };
 
 export default CustomRoute;

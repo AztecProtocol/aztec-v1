@@ -99,6 +99,7 @@ const PopupContent = ({
                         >
                             <TextButton
                                 {...footerLink}
+                                testId="link-footer"
                                 Link={Link}
                                 color="label"
                                 size="xxs"

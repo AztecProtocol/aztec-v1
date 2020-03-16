@@ -1,4 +1,8 @@
-import * as aztec from 'aztec.js';
+import {
+    JoinSplitProof,
+    ProofUtils,
+} from 'aztec.js';
+import uniqBy from 'lodash/uniqBy';
 import {
     randomSumArray,
 } from '~/utils/random';
@@ -9,11 +13,6 @@ import settings from '~/background/utils/settings';
 import {
     batchGetExtensionAccount,
 } from '~/ui/apis/account';
-
-const {
-    JoinSplitProof,
-    ProofUtils,
-} = aztec;
 
 export default async function deposit({
     transactions,
@@ -26,15 +25,19 @@ export default async function deposit({
         ? numberOfOutputNotes
         : await settings('NUMBER_OF_OUTPUT_NOTES');
 
+    const accountMapping = {};
     const addresses = transactions.map(({ to }) => to);
     const accounts = await batchGetExtensionAccount(addresses);
+    accounts.forEach((account) => {
+        accountMapping[account.address] = account;
+    });
 
     const outputTransactionNotes = await Promise.all(
         transactions.map(async ({
             amount,
             to,
             numberOfOutputNotes: txNumberOfOutputNotes,
-        }, i) => {
+        }) => {
             const noteValues = randomSumArray(
                 amount,
                 txNumberOfOutputNotes || numberOfNotes,
@@ -42,20 +45,20 @@ export default async function deposit({
             const {
                 linkedPublicKey,
                 spendingPublicKey,
-            } = accounts[i] || {};
+            } = accountMapping[to];
             const ownerAccess = {
                 address: to,
                 linkedPublicKey,
             };
-            const userAccess = !userAccessAccounts
+            const userAccess = !userAccessAccounts.length
                 ? ownerAccess
-                : [
-                    ...userAccessAccounts,
-                    ownerAccess,
-                ].filter((access, idx, arr) => idx === arr.findIndex(({
-                    address,
-                }) => address === access.address));
-
+                : uniqBy(
+                    [
+                        ...userAccessAccounts,
+                        ownerAccess,
+                    ],
+                    'address',
+                );
             const notes = await createNotes(
                 noteValues,
                 spendingPublicKey,

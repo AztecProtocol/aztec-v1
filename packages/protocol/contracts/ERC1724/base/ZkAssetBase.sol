@@ -2,9 +2,11 @@ pragma solidity >=0.5.0 <0.6.0;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import "../../ACE/ACE.sol";
+import "../../libs/NoteUtils.sol";
+import "../../interfaces/IACE.sol";
 import "../../interfaces/IAZTEC.sol";
 import "../../interfaces/IZkAsset.sol";
+import "../../interfaces/IERC20Mintable.sol";
 import "../../libs/LibEIP712.sol";
 import "../../libs/MetaDataUtils.sol";
 import "../../libs/ProofUtils.sol";
@@ -14,8 +16,20 @@ import "../../libs/ProofUtils.sol";
  * @author AZTEC
  * @dev A contract defining the standard interface and behaviours of a confidential asset.
  * The ownership values and transfer values are encrypted.
- * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
- **/
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
 contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     using NoteUtils for bytes;
     using SafeMath for uint256;
@@ -52,7 +66,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         ")"
     ));
 
-    ACE public ace;
+    IACE public ace;
     IERC20Mintable public linkedToken;
 
     mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
@@ -73,7 +87,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
             keccak256(bytes(EIP712_DOMAIN_VERSION)),
             bytes32(uint256(address(this)))
         ));
-        ace = ACE(_aceAddress);
+        ace = IACE(_aceAddress);
         linkedToken = IERC20Mintable(_linkedTokenAddress);
         ace.createNoteRegistry(
             _linkedTokenAddress,
@@ -99,7 +113,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     *
     * @param _proofId - id of proof to be validated. Needs to be a balanced proof.
     * @param _proofData - bytes variable outputted from a proof verification contract, representing
-    * transfer instructions for the ACE
+    * transfer instructions for the IACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(uint24 _proofId, bytes memory _proofData, bytes memory _signatures) public {
@@ -119,7 +133,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * destroying input notes.
     *
     * @param _proofData - bytes variable outputted from a proof verification contract, representing
-    * transfer instructions for the ACE
+    * transfer instructions for the IACE
     * @param _signatures - array of the ECDSA signatures over all inputNotes
     */
     function confidentialTransfer(bytes memory _proofData, bytes memory _signatures) public {
@@ -149,7 +163,10 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         bytes32 signatureHash = keccak256(abi.encodePacked(_signature));
         require(signatureLog[signatureHash] != true, "signature has already been used");
-        signatureLog[signatureHash] = true;
+        // Only need to prevent replay from calls where msg.sender isn't owner of note.
+        if (_signature.length != 0) {
+            signatureLog[signatureHash] = true;
+        }
 
         bytes32 _hashStruct = keccak256(abi.encode(
                 NOTE_SIGNATURE_TYPEHASH,
@@ -260,24 +277,28 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     function extractSignature(bytes memory _signatures, uint _i) internal pure returns (
         bytes memory _signature
     ){
-        bytes32 v;
         bytes32 r;
         bytes32 s;
+        uint8 v;
+
         assembly {
             // memory map of signatures
             // 0x00 - 0x20 : length of signature array
-            // 0x20 - 0x40 : first sig, v
-            // 0x40 - 0x60 : first sig, r
-            // 0x60 - 0x80 : first sig, s
-            // 0x80 - 0xa0 : second sig, v
+            // 0x20 - 0x40 : first sig, r
+            // 0x40 - 0x60 : first sig, s
+            // 0x61 - 0x62 : first sig, v
+            // 0x62 - 0x82 : second sig, r
             // and so on...
-            // Length of a signature = 0x60
+            // Length of a signature = 0x41
 
-            v := mload(add(add(_signatures, 0x20), mul(_i, 0x60)))
-            r := mload(add(add(_signatures, 0x40), mul(_i, 0x60)))
-            s := mload(add(add(_signatures, 0x60), mul(_i, 0x60)))
+            let sigLength := 0x41
+
+            r := mload(add(add(_signatures, 0x20), mul(_i, sigLength)))
+            s := mload(add(add(_signatures, 0x40), mul(_i, sigLength)))
+            v := mload(add(add(_signatures, 0x41), mul(_i, sigLength)))
         }
-        _signature = abi.encode(v, r, s);
+
+        _signature = abi.encodePacked(r, s, v);
     }
 
     /**
@@ -289,7 +310,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
     * _proofOutput is being submitted. _proof contains three concatenated uint8 variables:
     * 1) epoch number 2) category number 3) ID number for the proof
     * @param _proofOutput - output of a zero-knowledge proof validation contract. Represents
-    * transfer instructions for the ACE
+    * transfer instructions for the IACE
     */
     function confidentialTransferFrom(uint24 _proof, bytes memory _proofOutput) public {
         (bytes memory inputNotes,
@@ -449,8 +470,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         // if customData has been set, approve the relevant addresses
         if (uint256(metaDataLength) > 0x61) {
-            address[] memory extractedAddresses = new address[](uint256(numAddresses));
-
             for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
                 address extractedAddress = extractAddress(metaData, i);
                 bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));

@@ -54,6 +54,19 @@ signer.generateZKAssetDomainParams = (verifyingContract) => {
 };
 
 /**
+ * Generate EIP712 domain parameters for DAI token
+ * @method generateDAIDomainParams
+ * @param
+ */
+signer.generateDAIDomainParams = (chainId, verifyingContract) => {
+    return {
+        ...constants.eip712.DAI_DOMAIN_PARAMS,
+        chainId,
+        verifyingContract,
+    };
+};
+
+/**
  * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a
  * ZkAsset. The ZkAsset.confidentialApprove() method must be called when granting note spending permission
  * to a third party and is required in order for ZkAsset.confidentialTransferFrom() to be successful.
@@ -131,7 +144,7 @@ signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approva
  * for each note, and they are all concatenated together
  */
 signer.signMultipleNotesForConfidentialTransfer = (verifyingContract, noteOwnerAccounts, notes, challenge, sender) => {
-    const signaturesArray = noteOwnerAccounts.map((inputNoteOwner, index) => {
+    const unformattedSignature = noteOwnerAccounts.map((inputNoteOwner, index) => {
         return signer.signNoteForConfidentialTransfer(
             verifyingContract,
             inputNoteOwner,
@@ -140,7 +153,8 @@ signer.signMultipleNotesForConfidentialTransfer = (verifyingContract, noteOwnerA
             sender,
         );
     });
-    return `0x${signaturesArray.join('')}`;
+
+    return `0x${unformattedSignature.join('')}`;
 };
 
 /**
@@ -170,7 +184,8 @@ signer.signNoteForConfidentialTransfer = (verifyingContract, noteOwnerAccount, n
 
     const { privateKey } = noteOwnerAccount;
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
-    return unformattedSignature;
+
+    return `${unformattedSignature.slice(0, 130)}`;
 };
 
 /**
@@ -198,6 +213,34 @@ signer.signNoteACEDomain = (verifyingContract, spender, privateKey) => {
     const { unformattedSignature, encodedTypedData } = signer.signTypedData(domain, schema, message, privateKey);
     const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
     return { signature, encodedTypedData };
+};
+
+/**
+ * Allows a user to create a signature for use in the DAI.permit() function. Creates an EIP712 ECDSA
+ * signature
+ *
+ * @method signPermit
+ * @param {Object} holderAccount - address that owns the tokens, which is approving a spender to spend
+ * @param {Address} spender - address being approved to spend the tokens
+ * @param {Number} nonce - nonce of the transaction. Used for replay protection in the DAI token contract
+ * @param {Number} expiry - unix timestamp corresponding to the upper boundary for when the permit is valid
+ * @param {Bool} allowed - whether approval is being granted or revoked
+ */
+signer.signPermit = (chainId, verifyingContract, holderAccount, spender, nonce, expiry, allowed) => {
+    const { address: holder, privateKey } = holderAccount;
+    const domain = signer.generateDAIDomainParams(chainId, verifyingContract);
+    const schema = constants.eip712.PERMIT_SIGNATURE;
+
+    const message = {
+        holder,
+        spender,
+        nonce,
+        expiry,
+        allowed,
+    };
+
+    const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
+    return `0x${unformattedSignature.slice(0, 130)}`;
 };
 
 /**

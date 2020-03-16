@@ -1,4 +1,7 @@
-import * as aztec from 'aztec.js';
+import {
+    PrivateRangeProof,
+    note as noteUtils,
+} from 'aztec.js';
 import {
     createNote,
     valueOf,
@@ -7,10 +10,6 @@ import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiError from '~/client/utils/ApiError';
 import toAztecNote from '../utils/toAztecNote';
-
-const {
-    PrivateRangeProof,
-} = aztec;
 
 const valuesValidators = {
     eq: diff => diff === 0,
@@ -61,7 +60,7 @@ export default async function provePrivateRange({
             notesSender.address,
             notesSender.linkedPublicKey,
         );
-    } else if (!(utilityNote instanceof aztec.note.Note)) {
+    } else if (!(utilityNote instanceof noteUtils.Note)) {
         throw new ApiError('input.utilityNote.wrong.type', {
             note: utilityNote,
         });

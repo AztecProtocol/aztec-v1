@@ -12,14 +12,13 @@ import {
 } from '~/utils/format';
 import i18n from '~/ui/helpers/i18n';
 import noteValueToToken from '~/ui/utils/noteValueToToken';
-import formatNumber from '~/ui/utils/formatNumber';
 import isStepAfter from '~/ui/utils/isStepAfter';
 import StepContentHelper from '~/ui/views/handlers/StepContentHelper';
 import StepContent from '~/ui/components/StepContent';
 import AnimatedBlocks from '~/ui/components/AnimatedBlocks';
 import SignatureRequestBlock from '~/ui/components/SignatureRequestBlock';
 import BlockStatus from '~/ui/components/AnimatedBlocks/BlockStatus';
-import ReceipientList from '~/ui/components/ReceipientList';
+import RecipientList from '~/ui/components/RecipientList';
 import HashText from '~/ui/components/HashText';
 
 class WithdrawContent extends StepContentHelper {
@@ -42,13 +41,13 @@ class WithdrawContent extends StepContentHelper {
 
         const tokenValue = noteValueToToken(amount, asset);
 
-        const receipients = [
+        const recipients = [
             {
                 address: publicOwner,
                 footnote: (
                     <Text
                         className="text-code"
-                        text={formatNumber(noteValueToToken(amount, asset))}
+                        text={noteValueToToken(amount, asset)}
                         color="label"
                         weight="semibold"
                     />
@@ -60,7 +59,7 @@ class WithdrawContent extends StepContentHelper {
             {
                 title: [
                     symbol
-                        ? `Zk${symbol}`
+                        ? i18n.t('zkSymbol', { symbol })
                         : capitalize(i18n.singular('zkAsset')),
                     ' (',
                     <HashText
@@ -74,7 +73,7 @@ class WithdrawContent extends StepContentHelper {
                     ')',
                 ],
                 content: symbol
-                    ? `${tokenValue} Zk${symbol}`
+                    ? `${tokenValue} ${i18n.t('zkSymbol', { symbol })}`
                     : i18n.count('zkToken', tokenValue, true),
                 profile: {
                     ...asset,
@@ -100,8 +99,7 @@ class WithdrawContent extends StepContentHelper {
                     : i18n.count('token', tokenValue, true),
                 contentFootnote: (
                     <BlockStatus
-                        text={i18n.t('deposit.approve.allowance')}
-                        iconName="check"
+                        text={i18n.t('withdraw.approve.allowance')}
                     />
                 ),
                 hideContentFootnote: !approved,
@@ -109,17 +107,18 @@ class WithdrawContent extends StepContentHelper {
                     ...asset,
                     type: 'token',
                 },
-                extraContent: <ReceipientList receipients={receipients} />,
+                extraContent: (
+                    <RecipientList recipients={recipients} />
+                ),
             },
         ];
     }
 
     renderSignature() {
         const {
-            proof: {
-                proofHash,
-                spender,
-            },
+            proofHash,
+            spender,
+            loading,
         } = this.props;
         const step = this.getCurrentStep();
         const signed = step.name === 'confirm';
@@ -132,6 +131,7 @@ class WithdrawContent extends StepContentHelper {
             <SignatureRequestBlock
                 signatures={signatures}
                 signed={signed}
+                loading={loading && !signed}
             />
         );
     }
@@ -161,7 +161,7 @@ class WithdrawContent extends StepContentHelper {
                         {this.renderSignature()}
                     </Block>
                 )}
-                {step.blockStyle === 'sealed' && this.renderTaskList()}
+                {step.showTaskList && this.renderTaskList()}
             </StepContent>
         );
     }
@@ -171,10 +171,8 @@ WithdrawContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     publicOwner: PropTypes.string.isRequired,
-    proof: PropTypes.shape({
-        proofHash: PropTypes.string.isRequired,
-        spender: PropTypes.string.isRequired,
-    }),
+    spender: PropTypes.string.isRequired,
+    proofHash: PropTypes.string,
 };
 
 WithdrawContent.defaultProps = {

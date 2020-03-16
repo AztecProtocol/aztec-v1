@@ -52,6 +52,7 @@ const MockRoute = ({
         initialStep,
         step,
         Content,
+        gsnConfig: customGsnConfig,
     } = getConfigByName(nameArr) || {};
     const initialData = getInitialDataByName(nameArr);
     const {
@@ -76,8 +77,9 @@ const MockRoute = ({
                 currentAccount={currentAccount || {
                     address: addresses[0],
                 }}
-                gsnConfig={gsnConfig}
+                gsnConfig={customGsnConfig || gsnConfig}
                 initialStep={initialStep}
+                goToPage={() => {}}
             />
         );
     } else {

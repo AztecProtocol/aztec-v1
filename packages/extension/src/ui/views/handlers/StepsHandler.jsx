@@ -25,6 +25,7 @@ class StepsHandler extends PureComponent {
         super(props);
         const {
             steps,
+            retryWithMetaMaskStep,
             initialStep,
             initialTask,
             initialData,
@@ -38,6 +39,7 @@ class StepsHandler extends PureComponent {
 
         this.state = {
             steps,
+            retryWithMetaMaskStep,
             currentStep: initialStep,
             currentTask: initialTask,
             data: initialData,
@@ -45,7 +47,6 @@ class StepsHandler extends PureComponent {
             pendingInitialFetch: !!fetchInitialData,
             loading: false,
             error: null,
-            childError: null,
         };
     }
 
@@ -53,16 +54,23 @@ class StepsHandler extends PureComponent {
         this.fetchInitialData();
     }
 
-    handleSubmit = async () => {
+    handleSubmit = async (childData) => {
         const {
             loading,
+            data: prevData,
         } = this.state;
         if (loading) {
             return;
         }
 
         this.setState(
-            { loading: true },
+            {
+                loading: true,
+                data: {
+                    ...prevData,
+                    ...childData,
+                },
+            },
             this.validateSubmitData,
         );
     };
@@ -219,29 +227,9 @@ class StepsHandler extends PureComponent {
                 currentTask,
                 data,
             },
-            this.runTask,
+            ensureMinPendingTime(this.runTask, 300),
         );
     };
-
-    updateParentState = (childState) => {
-        const {
-            data: prevData,
-            error,
-        } = this.state;
-        if (error) return;
-
-        const {
-            error: childError,
-            ...childData
-        } = childState;
-        this.setState({
-            data: {
-                ...prevData,
-                ...childData,
-            },
-            childError,
-        });
-    }
 
     handleRetryStep = () => {
         this.setState({
@@ -254,6 +242,31 @@ class StepsHandler extends PureComponent {
         this.setState(
             {
                 error: null,
+                loading: true,
+            },
+            ensureMinPendingTime(this.runTask, 600),
+        );
+    };
+
+    handleRetryWithMetaMask = () => {
+        const {
+            steps,
+            retryWithMetaMaskStep,
+            data,
+        } = this.state;
+
+        this.setState(
+            {
+                steps: !retryWithMetaMaskStep
+                    ? steps
+                    : steps.slice(0, -1).concat(retryWithMetaMaskStep),
+                data: {
+                    ...data,
+                    isGSNAvailable: false,
+                },
+                currentTask: -1,
+                error: null,
+                loading: true,
             },
             ensureMinPendingTime(this.runTask, 600),
         );
@@ -277,11 +290,13 @@ class StepsHandler extends PureComponent {
 
         const {
             steps,
+            retryWithMetaMaskStep,
             ...newData
         } = await fetchInitialData();
 
         const {
             steps: initialSteps,
+            retryWithMetaMaskStep: initialRetryStep,
             currentStep,
             history: prevHistory,
         } = this.state;
@@ -294,6 +309,7 @@ class StepsHandler extends PureComponent {
 
         this.setState({
             steps: steps || initialSteps,
+            retryWithMetaMaskStep: retryWithMetaMaskStep || initialRetryStep,
             data,
             history,
             pendingInitialFetch: false,
@@ -305,33 +321,10 @@ class StepsHandler extends PureComponent {
             onSubmit,
         } = this.props;
         const {
-            steps,
-            currentStep,
             data: prevData,
         } = this.state;
-        const {
-            onSubmit: stepOnSubmit,
-        } = steps[currentStep];
 
         let data = prevData;
-        if (stepOnSubmit) {
-            const {
-                error: childError,
-                ...extraData
-            } = await stepOnSubmit(data) || {};
-            if (childError) {
-                this.setState({
-                    loading: false,
-                    childError,
-                });
-                return;
-            }
-            data = {
-                ...data,
-                ...extraData,
-            };
-        }
-
         if (onSubmit) {
             const {
                 error,
@@ -455,13 +448,17 @@ class StepsHandler extends PureComponent {
 
         const {
             steps,
+            retryWithMetaMaskStep,
             currentStep,
             currentTask,
             data,
             loading,
             error,
-            childError,
         } = this.state;
+
+        const onRetryWithMetaMask = data.isGSNAvailable && retryWithMetaMaskStep
+            ? this.handleRetryWithMetaMask
+            : null;
 
         return (
             <Content
@@ -471,17 +468,19 @@ class StepsHandler extends PureComponent {
                 currentTask={currentTask}
                 loading={loading}
                 error={error}
-                childError={childError}
-                updateParentState={this.updateParentState}
                 onPrevious={this.handleGoBack}
                 onNext={this.handleSubmit}
                 onRetryTask={this.handleRetryTask}
                 onRetryStep={this.handleRetryStep}
+                onRetryWithMetaMask={onRetryWithMetaMask}
             />
         );
     }
 
     render() {
+        const {
+            testId,
+        } = this.props;
         const {
             pendingInitialFetch,
         } = this.state;
@@ -492,6 +491,7 @@ class StepsHandler extends PureComponent {
 
         return (
             <FlexBox
+                testId={testId}
                 direction="column"
                 expand
                 stretch
@@ -505,7 +505,9 @@ class StepsHandler extends PureComponent {
 }
 
 StepsHandler.propTypes = {
+    testId: PropTypes.string,
     steps: PropTypes.arrayOf(transactionStepShape),
+    retryWithMetaMaskStep: transactionStepShape,
     Content: PropTypes.func,
     initialStep: PropTypes.number,
     initialTask: PropTypes.number,
@@ -521,7 +523,9 @@ StepsHandler.propTypes = {
 };
 
 StepsHandler.defaultProps = {
+    testId: undefined,
     steps: [],
+    retryWithMetaMaskStep: null,
     Content: null,
     initialStep: 0,
     initialTask: -1,

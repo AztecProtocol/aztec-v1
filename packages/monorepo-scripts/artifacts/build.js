@@ -35,13 +35,12 @@ const isDuplicate = async (filename) => {
         return false;
     }
     const previousContent = JSON.parse(await fs.readFile(path.join(ARTIFACTS_DIR, filename), 'utf-8'));
+
     return (
-        content.abi === previousContent.abi &&
         content.bytecode === previousContent.bytecode &&
-        content.compiler === previousContent.compiler &&
+        content.compiler.version === previousContent.compiler.version &&
         content.deployedBytecode === previousContent.deployedBytecode &&
-        content.schemaVersion === previousContent.schemaVersion &&
-        content.updatedAt === previousContent.updatedAt
+        content.schemaVersion === previousContent.schemaVersion
     );
 };
 
@@ -53,8 +52,6 @@ const buildArtifacts = async () => {
         if (!fs.existsSync(ARTIFACTS_DIR)) {
             fs.mkdir(ARTIFACTS_DIR);
         }
-        await fs.remove(ARTIFACTS_DIR_AUX);
-        await fs.mkdir(ARTIFACTS_DIR_AUX);
 
         let filenames = await fs.readdir(CONTRACTS_DIR);
         filenames = filenames.filter((filename) => {
@@ -67,12 +64,10 @@ const buildArtifacts = async () => {
             /* eslint-disable no-await-in-loop */
             if (!(await isDuplicate(filename))) {
                 const artifact = await cherrypickContractJson(filename);
-                await fs.writeFile(path.join(ARTIFACTS_DIR_AUX, filename), JSON.stringify(artifact, null, 4));
+                await fs.writeFile(path.join(ARTIFACTS_DIR, filename), JSON.stringify(artifact, null, 4));
             }
         }
-        await fs.remove(ARTIFACTS_DIR);
-        await fs.rename(ARTIFACTS_DIR_AUX, ARTIFACTS_DIR);
-        await fs.remove(ARTIFACTS_DIR_AUX);
+
         console.log('Successfully generated artifacts in the contract-artifacts package');
     } catch (err) {
         console.error('Failed with error:', err);

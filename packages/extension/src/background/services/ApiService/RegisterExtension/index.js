@@ -26,7 +26,9 @@ const registerExtension = async (request, connection) => {
     let {
         userPermission: { account = {} },
     } = await query(request, userPermissionQuery(`
+        address
         linkedPublicKey
+        spendingPublicKey
         blockNumber
     `)) || {};
 
@@ -39,7 +41,7 @@ const registerExtension = async (request, connection) => {
             } = {},
         } = await registerExtensionUi(request, connection));
 
-        if (account.linkedPublicKey) {
+        if (!error && account.linkedPublicKey) {
             // query again to start EventService and NoteService
             await query(request, userPermissionQuery(`
                 linkedPublicKey
@@ -48,8 +50,20 @@ const registerExtension = async (request, connection) => {
         }
     }
 
+    const {
+        address,
+        linkedPublicKey,
+        spendingPublicKey,
+    } = account || {};
+
     return {
-        account,
+        account: !address
+            ? null
+            : {
+                address,
+                linkedPublicKey,
+                spendingPublicKey,
+            },
         error,
     };
 };

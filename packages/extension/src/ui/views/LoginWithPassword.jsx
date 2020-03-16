@@ -72,21 +72,24 @@ const LoginWithPassword = ({
                     />
                 </Block>
             </Block>
-            <TextInput
-                setInputRef={setInputRef}
-                theme="inline"
-                type={visible ? 'text' : 'password'}
-                placeholder={i18n.t('account.login.password.placeholder')}
-                value={password}
-                icon={inputIconMapping[visible ? 'hide' : 'show']}
-                onClickIcon={() => updateVisible(!visible)}
-                onChange={(val) => {
-                    updateParentState({
-                        password: val,
-                        error: null,
-                    });
-                }}
-            />
+            <Block align="left">
+                <TextInput
+                    testId="input-password"
+                    setInputRef={setInputRef}
+                    theme="inline"
+                    type={visible ? 'text' : 'password'}
+                    placeholder={i18n.t('account.login.password.placeholder')}
+                    value={password}
+                    icon={inputIconMapping[visible ? 'hide' : 'show']}
+                    onClickIcon={() => updateVisible(!visible)}
+                    onChange={(val) => {
+                        updateParentState({
+                            password: val,
+                            error: null,
+                        });
+                    }}
+                />
+            </Block>
         </PopupContent>
     );
 };

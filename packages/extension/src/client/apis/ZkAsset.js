@@ -1,7 +1,10 @@
+import BN from 'bn.js';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
 import ApiError from '~/client/utils/ApiError';
+import parseInputTransactions from '~/client/utils/parseInputTransactions';
+import parseInputInteger from '~/client/utils/parseInputInteger';
 import SubscriptionManager from './SubscriptionManager';
 
 const dataProperties = [
@@ -15,30 +18,22 @@ const dataProperties = [
 export default class ZkAsset {
     constructor({
         id,
+        ...asset
     } = {}) {
+        dataProperties.forEach((key) => {
+            this[key] = asset[key];
+        });
         this.id = id;
+        this.subscriptions = new SubscriptionManager();
+    }
+
+    get valid() {
+        return !!this.address;
     }
 
     isValid() {
         return !!this.address;
     }
-
-    init = async () => {
-        if (this.isValid()) return;
-
-        const { asset } = await ConnectionService.query(
-            'asset',
-            { id: this.id },
-        ) || {};
-
-        if (asset) {
-            dataProperties.forEach((key) => {
-                this[key] = asset[key];
-            });
-        }
-
-        this.subscriptions = new SubscriptionManager();
-    };
 
     /**
      * @function zkAsset.balance
@@ -68,7 +63,7 @@ export default class ZkAsset {
             });
         }
 
-        let totalSupply;
+        let totalSupply = 0;
         try {
             totalSupply = await Web3Service
                 .useContract('ERC20')
@@ -79,7 +74,7 @@ export default class ZkAsset {
             throw new ContractError('erc20.totalSupply');
         }
 
-        return totalSupply | 0; // eslint-disable-line no-bitwise
+        return new BN(totalSupply);
     }
 
     /**
@@ -118,7 +113,7 @@ export default class ZkAsset {
             });
         }
 
-        return balance | 0; // eslint-disable-line no-bitwise
+        return new BN(balance);
     };
 
     /**
@@ -165,7 +160,7 @@ export default class ZkAsset {
             });
         }
 
-        return allowance | 0; // eslint-disable-line no-bitwise
+        return new BN(allowance);
     };
 
     subscribeToBalance = async (subscriber) => {
@@ -226,8 +221,8 @@ export default class ZkAsset {
             {
                 proofType: 'DEPOSIT_PROOF',
                 assetAddress: this.address,
-                transactions,
-                numberOfOutputNotes,
+                transactions: parseInputTransactions(transactions),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
                 userAccess,
             },
         );
@@ -270,9 +265,9 @@ export default class ZkAsset {
             {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
-                amount,
+                amount: parseInputInteger(amount),
                 to: to || address,
-                numberOfInputNotes,
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
             },
         );
     };
@@ -315,9 +310,9 @@ export default class ZkAsset {
         {
             proofType: 'TRANSFER_PROOF',
             assetAddress: this.address,
-            transactions,
-            numberOfInputNotes,
-            numberOfOutputNotes,
+            transactions: parseInputTransactions(transactions),
+            numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+            numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
             userAccess,
         },
     );
@@ -438,10 +433,10 @@ export default class ZkAsset {
             {
                 proofType: 'CREATE_NOTE_FROM_BALANCE_PROOF',
                 assetAddress: this.address,
-                amount,
+                amount: parseInputInteger(amount),
                 userAccess,
-                numberOfInputNotes,
-                numberOfOutputNotes,
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
             },
         ) || {};
 
@@ -478,10 +473,10 @@ export default class ZkAsset {
         'fetchNotesFromBalance',
         {
             assetAddress: this.address,
-            greaterThan,
-            lessThan,
-            equalTo,
-            numberOfNotes,
+            greaterThan: parseInputInteger(greaterThan),
+            lessThan: parseInputInteger(lessThan),
+            equalTo: parseInputInteger(equalTo),
+            numberOfNotes: parseInputInteger(numberOfNotes),
         },
     );
 }

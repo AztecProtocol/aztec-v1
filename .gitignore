@@ -26,6 +26,7 @@ npm-debug.log*
 scTopics
 yarn-debug.log*
 yarn-error.log*
+*.pem
 
 # packages
 packages/aztec.js/package-lock.json
@@ -49,5 +50,5 @@ packages/aws-lambda/.aws-sam/
 packages/aws-lambda/signer/template.yaml
 packages/aws-lambda/signer/packaged_dev.yaml
 packages/aws-lambda/signer/packaged_prod.yaml
-packages/aws-lambda/template.yaml
 packages/aws-lambda/packaged_dev.yaml
+packages/aws-lambda/template.yaml

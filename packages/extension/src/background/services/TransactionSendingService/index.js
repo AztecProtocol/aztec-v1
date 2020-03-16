@@ -2,9 +2,12 @@ import {
     GSNProvider,
 } from '@openzeppelin/gsn-provider';
 import Web3Service from '~/helpers/Web3Service';
+import {
+    errorLogProduction,
+} from '~/utils/log';
 import retrieveSigningInfo from '~/utils/retrieveSigningInfo';
-import approveFunction from '~/utils/approveGSNFunction';
 import { getProviderUrl } from '~/utils/network';
+import makeApproveFunction from './makeApproveFunction';
 
 const sendTransaction = async (query, connection) => {
     const {
@@ -25,7 +28,7 @@ const sendTransaction = async (query, connection) => {
         const gsnProvider = new GSNProvider(providerUrl, {
             pollInterval: 1 * 1000,
             signKey: signingInfo.privateKey,
-            approveFunction: approveFunction(query, connection),
+            approveFunction: makeApproveFunction(query, connection),
         });
         const receipt = await Web3Service
             .useContract(contract)
@@ -39,11 +42,23 @@ const sendTransaction = async (query, connection) => {
         return {
             ...query,
             data: {
+                success: !!receipt,
                 txReceipt: receipt,
             },
             responseId,
         };
-    } catch (error) {
+    } catch (e) {
+        errorLogProduction(e);
+        let error;
+        if (e.message.match(/relayer/)) {
+            error = {
+                key: 'transaction.gsn.error.relayer',
+            };
+        } else {
+            error = {
+                key: 'transaction.gsn.error',
+            };
+        }
         return {
             ...query,
             data: {
@@ -52,8 +67,6 @@ const sendTransaction = async (query, connection) => {
         };
     }
 };
-
-// TODO change this to use the gas station network
 
 export default {
     sendTransaction,

@@ -70,6 +70,7 @@ export default {
         viewingKey: {
             encrypt: 'Failed to encrypt viewing key.',
             recover: 'Failed to recover note from its viewing key.',
+            noAccess: 'Please allow at least one user to have access to the note.',
         },
         pick: {
             sum: {

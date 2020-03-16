@@ -198,6 +198,35 @@ describe('Signer', () => {
             expect(publicKeyRecover).to.equal(publicKey.slice(4));
         });
 
+        it('signMultipleNotesForConfidentialTransfer() should produce a well formatted signature', async () => {
+            const firstAztecAccount = secp256k1.generateAccount();
+            const secondAztecAccount = secp256k1.generateAccount();
+            const noteOwnerAccounts = [firstAztecAccount, secondAztecAccount];
+
+            const spender = randomHex(20);
+            const verifyingContract = randomHex(20);
+            const challenge = randomHex(20);
+
+            const testNotes = [
+                await note.create(firstAztecAccount.publicKey, 10),
+                await note.create(secondAztecAccount.publicKey, 20),
+            ];
+
+            const signatures = signer.signMultipleNotesForConfidentialTransfer(
+                verifyingContract,
+                noteOwnerAccounts,
+                testNotes,
+                challenge,
+                spender,
+            );
+
+            const expectedNumSignatures = noteOwnerAccounts.length;
+            const expectedSignatureLength = 130;
+
+            const expectedTotalLength = expectedSignatureLength * expectedNumSignatures;
+            expect(signatures.slice(2).length).to.equal(expectedTotalLength);
+        });
+
         it('signNoteForConfidentialApprove() should produce same signature as MetaMask signing function', async () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
@@ -206,25 +235,12 @@ describe('Signer', () => {
             const testNoteValue = 10;
             const testNote = await note.create(aztecAccount.publicKey, testNoteValue);
 
+            const domain = signer.generateZKAssetDomainParams(verifyingContract);
+            const { types, primaryType } = constants.eip712.NOTE_SIGNATURE;
             const metaMaskTypedData = {
-                domain: {
-                    name: 'ZK_ASSET',
-                    version: '1',
-                    verifyingContract,
-                },
-                types: {
-                    NoteSignature: [
-                        { name: 'noteHash', type: 'bytes32' },
-                        { name: 'spender', type: 'address' },
-                        { name: 'spenderApproval', type: 'bool' },
-                    ],
-                    EIP712Domain: [
-                        { name: 'name', type: 'string' },
-                        { name: 'version', type: 'string' },
-                        { name: 'verifyingContract', type: 'address' },
-                    ],
-                },
-                primaryType: 'NoteSignature',
+                domain,
+                types,
+                primaryType,
                 message: {
                     noteHash: testNote.noteHash,
                     spender,
@@ -251,8 +267,8 @@ describe('Signer', () => {
             const aztecAccount = secp256k1.generateAccount();
             const spender = randomHex(20);
             const verifyingContract = randomHex(20);
-
             const joinSplitProof = randomHex(20);
+            const proofHash = keccak256(joinSplitProof);
 
             const aztecSignature = signer.signApprovalForProof(
                 verifyingContract,
@@ -262,41 +278,54 @@ describe('Signer', () => {
                 aztecAccount.privateKey,
             );
 
-            const proofHash = keccak256(joinSplitProof);
-
-            const message = {
-                proofHash,
-                spender,
-                approval: true,
-            };
-
+            const domain = signer.generateZKAssetDomainParams(verifyingContract);
+            const { types, primaryType } = constants.eip712.PROOF_SIGNATURE;
             const metaMaskTypedData = {
-                domain: {
-                    name: 'ZK_ASSET',
-                    version: '1',
-                    verifyingContract,
+                domain,
+                types,
+                primaryType,
+                message: {
+                    proofHash,
+                    spender,
+                    approval: true,
                 },
-                types: {
-                    ProofSignature: [
-                        { name: 'proofHash', type: 'bytes32' },
-                        { name: 'spender', type: 'address' },
-                        { name: 'approval', type: 'bool' },
-                    ],
-                    EIP712Domain: [
-                        { name: 'name', type: 'string' },
-                        { name: 'version', type: 'string' },
-                        { name: 'verifyingContract', type: 'address' },
-                    ],
-                },
-                primaryType: 'ProofSignature',
-                message,
             };
 
             // eth-sig-util is the MetaMask signing package
             const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(aztecAccount.privateKey.slice(2), 'hex'), {
                 data: metaMaskTypedData,
             });
+            expect(aztecSignature).to.equal(metaMaskSignature);
+        });
 
+        it('signPermit() should produce same signature as MetaMask signing function', async () => {
+            const verifyingContract = randomHex(20);
+            const holderAccount = secp256k1.generateAccount();
+            const spender = randomHex(20);
+            const nonce = 5;
+            const expiry = 10;
+            const allowed = true;
+            const chainId = 4;
+            const aztecSignature = signer.signPermit(chainId, verifyingContract, holderAccount, spender, nonce, expiry, allowed);
+
+            const domain = signer.generateDAIDomainParams(chainId, verifyingContract);
+            const { types, primaryType } = constants.eip712.PERMIT_SIGNATURE;
+            const metaMaskTypedData = {
+                domain,
+                types,
+                primaryType,
+                message: {
+                    holder: holderAccount.address,
+                    spender,
+                    nonce,
+                    expiry,
+                    allowed,
+                },
+            };
+            // eth-sig-util is the MetaMask signing package
+            const metaMaskSignature = ethSigUtil.signTypedData_v4(Buffer.from(holderAccount.privateKey.slice(2), 'hex'), {
+                data: metaMaskTypedData,
+            });
             expect(aztecSignature).to.equal(metaMaskSignature);
         });
     });

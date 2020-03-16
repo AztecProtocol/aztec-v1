@@ -2,19 +2,19 @@ import * as aztec from 'aztec.js';
 import {
     warnLog,
 } from '~/utils/log';
-import EventListeners from '~/utils/EventListeners';
-import Web3Service from '~/client/services/Web3Service';
-import ConnectionService from '~/client/services/ConnectionService';
-import ApiPermissionService from '~/client/services/ApiPermissionService';
+import ApiManager from './ApiManager';
+
+let manager;
 
 class Aztec {
     constructor() {
-        // TODO - assign mock modules that show warnings when calling apis before enabled
-        this.web3 = null;
-        this.zkAsset = null;
-        this.zkNote = null;
+        manager = new ApiManager();
 
-        this.eventListeners = new EventListeners(['profileChanged']);
+        manager.setApis = (apis) => {
+            Object.keys(apis).forEach((apiName) => {
+                this[apiName] = apis[apiName];
+            });
+        };
 
         Object.keys(aztec).forEach((name) => {
             if (this[name]) {
@@ -25,150 +25,40 @@ class Aztec {
         });
     }
 
-    addListener(eventName, callback) {
-        this.eventListeners.add(eventName, callback);
+    async generateInitialApis() { // eslint-disable-line class-methods-use-this
+        await manager.generateDefaultApis();
     }
 
-    removeListener(eventName, callback) {
-        this.eventListeners.remove(eventName, callback);
+    get enabled() { // eslint-disable-line class-methods-use-this
+        return !!manager.aztecAccount;
+    }
+
+    get account() { // eslint-disable-line class-methods-use-this
+        return manager.aztecAccount;
+    }
+
+    get autoRefreshOnProfileChange() { // eslint-disable-line class-methods-use-this
+        return manager.autoRefreshOnProfileChange;
+    }
+
+    set autoRefreshOnProfileChange(autoRefresh) { // eslint-disable-line class-methods-use-this
+        manager.autoRefreshOnProfileChange = autoRefresh;
+    }
+
+    addListener(eventName, callback) { // eslint-disable-line class-methods-use-this
+        manager.eventListeners.add(eventName, callback);
+    }
+
+    removeListener(eventName, callback) { // eslint-disable-line class-methods-use-this
+        manager.eventListeners.remove(eventName, callback);
     }
 
     enable = async (
         options = {},
         callback = null,
-    ) => new Promise(async (resolve, reject) => {
-        const {
-            apiKey = '',
-            providerUrl = '',
-            contractAddresses = {
-                ACE: '',
-                AccountRegistry: '',
-            },
-            autoRefreshOnProfileChange = true,
-        } = options;
-        let networkSwitchedDuringStart = false;
+    ) => manager.enable(options, callback);
 
-        const doResolved = (shouldReject = false, error = null) => {
-            if (!networkSwitchedDuringStart) {
-                this.eventListeners.notify(
-                    'profileChanged',
-                    'aztecAccountChanged',
-                    !shouldReject && !error,
-                    error,
-                );
-            }
-
-            if (!shouldReject) {
-                resolve(!!error);
-            } else if (!callback) {
-                reject(error);
-            }
-        };
-
-        if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange((changedType, newTypeValue) => {
-                networkSwitchedDuringStart = true;
-
-                this.eventListeners.notify('profileChanged', changedType, newTypeValue);
-
-                this.refreshSession(options, (success, error) => {
-                    if (callback) {
-                        callback(!error, error);
-                    }
-                    const shouldReject = !!error && !callback;
-                    doResolved(shouldReject, error);
-                });
-            });
-        }
-
-        const networkConfig = await ConnectionService.openConnection({
-            apiKey,
-            providerUrl,
-            contractAddresses,
-        });
-
-        if (networkSwitchedDuringStart) {
-            // this statement is true if:
-            //   - user allows metamask to access current page
-            //   - user switches address
-            // while opening connection
-            return;
-        }
-
-        try {
-            const {
-                networkId,
-                contractsConfig,
-                error,
-            } = networkConfig || {};
-
-            if (error) {
-                throw error;
-            }
-
-            ApiPermissionService.validateContractConfigs(contractsConfig, networkId);
-
-            await Web3Service.init(networkConfig);
-
-            await ApiPermissionService.ensurePermission();
-        } catch (error) {
-            if (!networkSwitchedDuringStart) {
-                if (callback) {
-                    callback(false, error);
-                }
-                const shouldReject = !callback;
-                doResolved(shouldReject, error);
-            }
-            return;
-        }
-
-        if (networkSwitchedDuringStart) {
-            // resolve has been pass to another enable() and should be triggered there
-            return;
-        }
-
-        const apis = ApiPermissionService.generateApis();
-        Object.keys(apis).forEach((name) => {
-            if (this[name]) {
-                warnLog(`Api '${name}' is already in Aztec.`);
-                return;
-            }
-            this[name] = apis[name];
-        });
-
-        if (autoRefreshOnProfileChange) {
-            Web3Service.bindProfileChange((changedType, newTypeValue) => {
-                this.eventListeners.notify('profileChanged', changedType, newTypeValue);
-
-                this.refreshSession(options, (success, error) => {
-                    this.eventListeners.notify(
-                        'profileChanged',
-                        'aztecAccountChanged',
-                        success,
-                        error,
-                    );
-                });
-            });
-        }
-
-        if (callback) {
-            callback(true, null);
-        }
-
-        doResolved();
-    });
-
-    async disable() {
-        this.web3 = null;
-        this.zkAsset = null;
-        this.zkNote = null;
-        await ConnectionService.disconnect();
-    }
-
-    refreshSession = async (options, cb) => {
-        await this.disable();
-        return this.enable(options, cb);
-    }
+    disable = async () => manager.disable();
 }
 
 export default Aztec;

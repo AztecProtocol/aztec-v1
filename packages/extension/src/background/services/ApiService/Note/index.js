@@ -14,6 +14,7 @@ export default async (request) => {
         owner {
             address
         }
+        viewingKey
         status
     `));
 

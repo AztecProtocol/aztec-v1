@@ -12,7 +12,8 @@ import {
 import AssetManager from './AssetManager';
 
 export default class ApiSessionManager {
-    constructor() {
+    constructor(noteServiceVersion) {
+        this.version = noteServiceVersion;
         this.networkId = null;
         this.owner = {
             address: '',
@@ -29,6 +30,7 @@ export default class ApiSessionManager {
         this.networkId = networkId;
         this.owner = owner;
         this.assetManager = new AssetManager({
+            version: this.version,
             networkId,
             owner,
             maxAssets: defaultMaxAssets,

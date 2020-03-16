@@ -8,6 +8,7 @@ import {
 import dataKey from '~/utils/dataKey';
 
 export default async function recoverSummaryFromStorage(
+    version,
     networkId,
     owner,
 ) {
@@ -16,6 +17,7 @@ export default async function recoverSummaryFromStorage(
         linkedPrivateKey,
     } = owner;
     const encryptedSummary = await get(dataKey('userAssets', {
+        version,
         user: userAddress,
         network: networkId,
     })) || {};
@@ -31,6 +33,7 @@ export default async function recoverSummaryFromStorage(
     });
 
     const priority = await get(dataKey('userAssetPriority', {
+        version,
         user: userAddress,
         network: networkId,
     })) || [];

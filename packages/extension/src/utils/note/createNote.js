@@ -1,4 +1,7 @@
-import * as aztec from 'aztec.js';
+import {
+    note as noteUtils,
+} from 'aztec.js';
+import EthCrypto from 'eth-crypto';
 
 export default async function createNote(value, publicKey, owner, access) {
     let accessArr;
@@ -15,6 +18,9 @@ export default async function createNote(value, publicKey, owner, access) {
             accessArr = [access];
         }
     }
+    const compressedPublicKey = EthCrypto.publicKey.compress(
+        publicKey.slice(2),
+    );
 
-    return aztec.note.create(publicKey, value, accessArr, owner);
+    return noteUtils.create(`0x${compressedPublicKey}`, value, accessArr, owner);
 }

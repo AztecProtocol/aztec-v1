@@ -1,11 +1,14 @@
 import Dexie from 'dexie';
+import {
+    networkDbPrefix,
+} from '~/config/database';
 
 const dbs = {};
 const registerModelsCallbacks = [];
 
 const ensureDB = (networkId) => {
     if (!dbs[networkId]) {
-        const db = new Dexie(`aztec_network_${networkId}`);
+        const db = new Dexie(`${networkDbPrefix}_${networkId}`);
 
         dbs[networkId] = db;
 

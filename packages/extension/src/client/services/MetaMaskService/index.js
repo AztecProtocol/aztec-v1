@@ -1,11 +1,9 @@
 import ethSigUtil from 'eth-sig-util';
-import EthCrypto from 'eth-crypto';
+import * as ethUtil from 'ethereumjs-util';
 import Web3Service from '~/client/services/Web3Service';
-import {
-    SIGNING_PROVIDER,
-} from '~/config/constants';
-import registerExtension from './registerExtension';
+import registerExtension, { generateTypedData } from './registerExtension';
 import signNote from './signNote';
+import permitSchema from './permitSchema';
 import signProof from './signProof';
 
 const handleAction = async (action, params) => {
@@ -29,53 +27,25 @@ const handleAction = async (action, params) => {
                 .send(...data);
             break;
         }
-        case 'gsn.sign.transaction': {
-            const {
-                apiKey,
-                networkId,
-                ...data
-            } = params;
-            const result = await window.fetch(`${SIGNING_PROVIDER}/Stage/${networkId}/${apiKey}`, {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                mode: 'cors', // no-cors, *cors, same-origin
-                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: 'same-origin', // include, *same-origin, omit
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: JSON.stringify({ data }), // body data type must match "Content-Type" header
-            });
-            const {
-                data: {
-                    approvalData,
-                },
-            } = await result.json();
-
-            response = { approvalData };
-            break;
-        }
         case 'metamask.register.extension': {
             const eip712Data = registerExtension(params);
-            const method = 'eth_signTypedData_v3';
+            const method = 'eth_signTypedData_v4';
             const { result } = await Web3Service.sendAsync({
                 method,
                 params: [address, eip712Data],
                 from: address,
             });
 
-            const publicKey = ethSigUtil.extractPublicKey({
-                data: eip712Data,
-                sig: result,
-            });
-            const compressedPublicKey = EthCrypto.publicKey.compress(
-                publicKey.slice(2),
-            );
+            const hash = ethSigUtil.TypedDataUtils.sign(generateTypedData(params));
+            const signature = ethUtil.toBuffer(result);
+            const sigParams = ethUtil.fromRpcSig(signature);
+            const publicKey = ethUtil.ecrecover(hash, sigParams.v, sigParams.r, sigParams.s);
 
             response = {
                 signature: result,
-                publicKey: `0x${compressedPublicKey}`,
+                publicKey,
             };
+
             break;
         }
         case 'metamask.eip712.signNotes': {
@@ -92,7 +62,7 @@ const handleAction = async (action, params) => {
                     challenge,
                     sender,
                 });
-                const method = 'eth_signTypedData_v3';
+                const method = 'eth_signTypedData_v4';
                 return Web3Service.sendAsync({
                     method,
                     params: [address, noteSchema],
@@ -131,20 +101,48 @@ const handleAction = async (action, params) => {
 
             break;
         }
+        case 'metamask.eip712.permit': {
+            const {
+                allowed,
+                expiry,
+                nonce,
+                spender,
+                verifyingContract,
+            } = params;
+
+            const permit = permitSchema({
+                allowed,
+                expiry,
+                nonce,
+                spender,
+                holder: address,
+                verifyingContract,
+                chainId: Web3Service.networkId,
+            });
+            const method = 'eth_signTypedData_v4';
+            const { result } = await Web3Service.sendAsync({
+                method,
+                params: [address, permit],
+                from: address,
+            });
+
+            response = {
+                signature: result,
+            };
+
+            break;
+        }
         default:
+            break;
     }
 
     return response;
 };
 
-export default async function MetaMaskService(query) {
+export default async function MetaMaskService(action, params) {
     let response;
     let error;
     try {
-        const {
-            action,
-            params,
-        } = query.data;
         response = await handleAction(action, params);
         ({
             error,
@@ -154,11 +152,8 @@ export default async function MetaMaskService(query) {
     }
 
     return {
-        ...query,
-        response: {
-            ...response,
-            error,
-            success: !error,
-        },
+        ...response,
+        error,
+        success: !error,
     };
 }

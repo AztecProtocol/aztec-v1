@@ -29,6 +29,8 @@ export default gql`
         address: String!
         linkedPublicKey: String
         spendingPublicKey: String
+        lastSynced: String
+        blockNumber: BigInt
     }
     type User {
         id: ID!

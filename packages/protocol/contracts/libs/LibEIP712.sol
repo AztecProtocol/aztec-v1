@@ -4,8 +4,20 @@ pragma solidity >=0.5.0 <0.6.0;
 /**
  * @title Library of EIP712 utility constants and functions
  * @author AZTEC
- * Copyright Spilsbury Holdings Ltd 2019. All rights reserved.
- **/
+ *
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**/
 contract LibEIP712 {
 
     // EIP712 Domain Name value
@@ -90,6 +102,7 @@ contract LibEIP712 {
             mstore(_signature, _message)
 
             // load 'v' - we need it for a condition check
+            // add 0x60 to jump over 3 words - length of bytes array, r and s
             let v := mload(add(_signature, 0x60))
             v := shr(248, v) // bitshifting, to resemble padLeft
 
@@ -117,10 +130,8 @@ contract LibEIP712 {
             mstore(add(_signature, 0x20), v)
             result := and(
                 and(
-                    // validate signature length == 0x41 or 0x60 bytes. 
-                    // will be 0x41 if one signature was provided, 0x60 if multiple signatures 
-                    // have been provided - due to the relevant signature creation functions
-                    or(eq(byteLength, 0x41), eq(byteLength, 0x60)),
+                    // validate signature length == 0x41
+                    eq(byteLength, 0x41),
                     // validate v == 27 or v == 28
                     or(eq(v, 27), eq(v, 28))
                 ),

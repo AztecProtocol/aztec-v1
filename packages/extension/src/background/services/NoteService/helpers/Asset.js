@@ -39,6 +39,7 @@ import saveToStorage from '../utils/saveToStorage';
 export default class Asset {
     constructor({
         assetId,
+        version,
         networkId,
         owner,
         noteBucketCache,
@@ -49,6 +50,7 @@ export default class Asset {
         notesPerDecryptionBatch = defaultNotesPerDecryptionBatch,
     }) {
         this.id = assetId;
+        this.version = version;
         this.networkId = networkId;
         this.owner = owner;
 
@@ -167,6 +169,7 @@ export default class Asset {
 
     async restore() {
         const noteValues = await recoverAssetNotesFromStorage(
+            this.version,
             this.networkId,
             this.owner,
             this.id,
@@ -206,7 +209,7 @@ export default class Asset {
             const destroyed = isDestroyed(status);
             let key = await get(noteHash);
 
-            if (destroyed ^ !!key) { // eslint-disable-line no-bitwise
+            if (destroyed && !key) {
                 if (blockNumber > this.lastSynced) {
                     this.lastSynced = blockNumber;
                 }
@@ -294,6 +297,7 @@ export default class Asset {
             };
         }
         await saveToStorage(
+            this.version,
             this.networkId,
             this.owner,
             data,

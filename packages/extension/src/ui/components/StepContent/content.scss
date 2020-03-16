@@ -15,7 +15,8 @@ $footer-min-height: map-get($button-size-map, 'xl');
 .content-wrapper {
   position: relative;
   height: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .content {
@@ -59,6 +60,5 @@ $footer-min-height: map-get($button-size-map, 'xl');
 
 .footer-button {
   flex: 1;
-  height: $footer-min-height !important;
   border-radius: 0 !important;
 }

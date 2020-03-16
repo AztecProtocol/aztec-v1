@@ -1,11 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import settings from '~/background/utils/settings';
 import {
     valueOf,
 } from '~/utils/note';
 import {
-    gsnConfigShape,
     inputAmountType,
 } from '~/ui/config/propTypes';
 import {
@@ -15,7 +13,9 @@ import parseInputAmount from '~/ui/utils/parseInputAmount';
 import apis from '~uiModules/apis';
 import makeAsset from '~/ui/utils/makeAsset';
 import returnAndClose from '~/ui/helpers/returnAndClose';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
+import getGSNConfig from '~/ui/helpers/getGSNConfig';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
 
 const handleClose = (accumData) => {
@@ -38,35 +38,31 @@ const handleClose = (accumData) => {
 };
 
 const CreateNoteFromBalance = ({
-    initialStep,
     currentAccount,
     assetAddress,
     amount: inputAmount,
-    numberOfInputNotes: customNumberOfInputNotes,
-    numberOfOutputNotes: customNumberOfOutputNotes,
+    numberOfInputNotes,
+    numberOfOutputNotes,
     userAccess,
-    gsnConfig,
 }) => {
     const {
         address: currentAddress,
     } = currentAccount;
-    const {
-        isGSNAvailable,
-        proxyContract,
-    } = gsnConfig;
-    const steps = createNoteFromBalanceSteps[isGSNAvailable ? 'gsn' : 'metamask'];
 
     const fetchInitialData = async () => {
+        const gsnConfig = await getGSNConfig();
+        const {
+            isGSNAvailable,
+            proxyContract,
+        } = gsnConfig;
+        const steps = createNoteFromBalanceSteps[isGSNAvailable ? 'gsn' : 'metamask'];
+
         const asset = await makeAsset(assetAddress);
-        const userAccessAccounts = await apis.account.batchGetExtensionAccount(userAccess);
-        const sender = isGSNAvailable ? proxyContract : currentAddress;
+        const userAccessAccounts = userAccess
+            ? await apis.account.batchGetExtensionAccount(userAccess)
+            : [];
+        const sender = proxyContract;
         const amount = parseInputAmount(inputAmount);
-        const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-            ? customNumberOfInputNotes
-            : await settings('NUMBER_OF_INPUT_NOTES');
-        const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-            ? customNumberOfOutputNotes
-            : await settings('NUMBER_OF_OUTPUT_NOTES');
         const transactions = [
             {
                 amount,
@@ -74,51 +70,36 @@ const CreateNoteFromBalance = ({
             },
         ];
 
-        const {
-            proof,
-            inputNotes,
-            outputNotes,
-            remainderNote,
-        } = await apis.proof.createNoteFromBalance({
+        return {
+            steps,
+            retryWithMetaMaskStep: createNoteFromBalanceSteps.metamask.slice(-1)[0],
             assetAddress,
             currentAddress,
-            sender,
-            amount,
-            transactions,
-            publicOwner: currentAddress,
-            numberOfInputNotes,
-            numberOfOutputNotes,
-            userAccessAccounts,
-            gsnConfig,
-        });
-
-        return {
-            assetAddress,
             asset,
             sender,
             amount,
             numberOfInputNotes,
             numberOfOutputNotes,
             userAccessAccounts,
-            proof,
-            inputNotes,
-            outputNotes,
-            remainderNote,
+            publicOwner: currentAddress,
+            spender: sender,
+            transactions,
+            gsnConfig,
+            isGSNAvailable,
         };
     };
 
     return (
-        <AnimatedTransaction
-            initialStep={initialStep}
-            steps={steps}
+        <StepsHandler
+            testId="steps-create-note"
             fetchInitialData={fetchInitialData}
             onExit={handleClose}
+            Content={CreateNoteFromBalanceContent}
         />
     );
 };
 
 CreateNoteFromBalance.propTypes = {
-    initialStep: PropTypes.number,
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
     }).isRequired,
@@ -127,11 +108,9 @@ CreateNoteFromBalance.propTypes = {
     numberOfInputNotes: PropTypes.number,
     numberOfOutputNotes: PropTypes.number,
     userAccess: PropTypes.arrayOf(PropTypes.string),
-    gsnConfig: gsnConfigShape.isRequired,
 };
 
 CreateNoteFromBalance.defaultProps = {
-    initialStep: 0,
     numberOfInputNotes: emptyIntValue,
     numberOfOutputNotes: emptyIntValue,
     userAccess: [],

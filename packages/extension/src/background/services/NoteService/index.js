@@ -10,7 +10,7 @@ import validate from './utils/pickNotes/validate';
 import pickNotes from './utils/pickNotes';
 import pickNotesInRange from './utils/pickNotesInRange';
 
-const manager = new ApiSessionManager();
+const manager = new ApiSessionManager('1');
 
 export default {
     initWithUser: async (
@@ -52,11 +52,11 @@ export default {
         assetId,
         minSum,
         {
-            numberOfNotes = 1,
+            numberOfNotes = null,
             allowLessNumberOfNotes = true,
         } = {},
     ) => {
-        if (numberOfNotes <= 0) {
+        if (numberOfNotes !== null && numberOfNotes <= 0) {
             return null;
         }
 
@@ -71,7 +71,7 @@ export default {
                 if (balance < minSum) {
                     return argsError('note.pick.sum', {
                         messageOptions: {
-                            count: numberOfNotes,
+                            count: numberOfNotes || '',
                         },
                         balance,
                         numberOfNotes,
@@ -101,11 +101,11 @@ export default {
         assetId,
         minSum,
         {
-            numberOfNotes = 1,
+            numberOfNotes = null,
             allowLessNumberOfNotes = true,
         } = {},
     ) => {
-        if (numberOfNotes <= 0) {
+        if (numberOfNotes !== null && numberOfNotes <= 0) {
             return [];
         }
 

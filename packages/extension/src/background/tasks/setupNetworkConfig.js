@@ -1,9 +1,7 @@
 import {
-    set,
-} from '~/utils/storage';
-import {
     getContract,
     getProxyAddress,
+    getNetworkName,
 } from '~/utils/network';
 import Web3Service from '~/helpers/Web3Service';
 
@@ -12,10 +10,10 @@ const backgroundContracts = [
     'AccountRegistry',
     'ZkAsset',
     'ERC20',
+    'IERC20Permit',
 ];
 
 export default async function setupNetworkConfig({
-    apiKey,
     providerUrl = '',
     contractAddresses = {},
 }) {
@@ -27,30 +25,36 @@ export default async function setupNetworkConfig({
         networkId,
         account,
     } = Web3Service;
+    const networkName = getNetworkName(networkId);
+    const networkAddresses = contractAddresses[networkName.toLowerCase()] || {};
+    const customAddresses = {
+        ...contractAddresses,
+        ...networkAddresses,
+    };
 
     const contractsConfig = await Promise.all(backgroundContracts.map(async (contractName) => {
         const {
             contract,
-            address,
+            address: defaultAddress,
             isProxyContract,
         } = getContract(contractName, networkId);
-        let proxyAddress;
-        if (isProxyContract) {
-            proxyAddress = await getProxyAddress(contractName, networkId);
+        let address = customAddresses[contractName]
+            || defaultAddress;
+        if (!address && isProxyContract) {
+            address = await getProxyAddress(
+                contractName,
+                networkId,
+                customAddresses,
+            );
         }
+
         return {
             name: contractName,
             config: contract,
-            address: contractAddresses[contractName]
-                || isProxyContract ? proxyAddress : address,
+            address,
         };
     }));
     Web3Service.registerContractsConfig(contractsConfig);
-
-    await set({
-        apiKey,
-        networkId,
-    });
 
     return {
         networkId,

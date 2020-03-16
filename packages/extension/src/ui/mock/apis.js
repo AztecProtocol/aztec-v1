@@ -5,13 +5,8 @@ import {
 import sleep from '~/utils/sleep';
 import realApis from '~/ui/apis';
 import {
-    emptyIntValue,
-} from '~/ui/config/settings';
-import {
     addresses,
     assets,
-    randomRawNote,
-    generate,
 } from './data';
 
 const mock = async (data) => {
@@ -22,6 +17,20 @@ const mock = async (data) => {
         timestamp: Date.now(),
     };
     return fakeData;
+};
+
+const mockSigningApi = (message) => {
+    const signed = window.confirm(message);
+    let error = null;
+    if (!signed) {
+        error = {
+            message: 'User denied transaction.',
+        };
+    }
+    return {
+        success: !error,
+        error,
+    };
 };
 
 const mergeApis = (defaultApis, customApis = {}) => {
@@ -42,10 +51,7 @@ export default mergeApis(realApis, {
         getCurrentUser: () => ({
             address: addresses[0],
         }),
-        createKeyStore: () => ({
-            linkedPublicKey: 'linked_public_key',
-        }),
-        generateLinkedPublicKey: realApis.auth.generateLinkedPublicKey,
+        linkAccountToMetaMask: () => mockSigningApi('Link accounts?'),
     },
     account: {
         getExtensionAccount: address => ({
@@ -65,60 +71,42 @@ export default mergeApis(realApis, {
         approveERC20Allowance: ({
             requestedAllowance,
         }) => {
-            const signed = window.confirm('Approve ERC20 Allowance?');
+            const {
+                error,
+            } = mockSigningApi('Approve ERC20 Allowance?');
             return {
-                requestedAllowance: signed ? requestedAllowance : 0,
-                error: signed ? null : {
-                    message: 'User denied transaction.',
-                },
+                requestedAllowance: !error ? requestedAllowance : 0,
+                error,
             };
+        },
+        confidentialTransfer: () => mockSigningApi('Run confidentialTransfer?'),
+        deposit: ({
+            isGSNAvailable,
+        }) => {
+            if (isGSNAvailable) {
+                return mock();
+            }
+            return mockSigningApi('Deposit?');
+        },
+        updateNoteMetadata: ({
+            isGSNAvailable,
+        }) => {
+            if (isGSNAvailable) {
+                return mock();
+            }
+            return mockSigningApi('Update note metadata?');
         },
     },
     note: {
         fetchNote: noteHash => ({
             noteHash,
-            value: randomInt(100),
+            value: randomInt(10000),
             asset: assets[0],
         }),
-        signProof: () => {
-            const approval = window.confirm('Sign notes?');
-            return {
-                approval,
-                error: approval ? null : {
-                    message: 'User denied transaction.',
-                },
-            };
-        },
+        signNotes: () => mockSigningApi('Sign notes?'),
+        signProof: () => mockSigningApi('Sign proof?'),
     },
-    proof: {
-        createNoteFromBalance: ({
-            numberOfInputNotes: customNumberOfInputNotes,
-            numberOfOutputNotes: customNumberOfOutputNotes,
-        }) => {
-            const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
-                ? customNumberOfInputNotes
-                : 5;
-            const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
-                ? customNumberOfOutputNotes
-                : 5;
-            const remainderNote = numberOfOutputNotes > 0
-                ? randomRawNote()
-                : null;
-            const inputNotes = generate(numberOfInputNotes, randomRawNote);
-            const outputNotes = generate(numberOfOutputNotes, randomRawNote);
-            if (remainderNote) {
-                outputNotes.push(remainderNote);
-            }
-
-            return {
-                proof: {
-                    inputNotes,
-                    outputNotes,
-                },
-                inputNotes,
-                outputNotes,
-                remainderNote,
-            };
-        },
+    ace: {
+        publicApprove: () => mockSigningApi('Run publicApprove?'),
     },
 });

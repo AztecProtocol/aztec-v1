@@ -1,48 +1,52 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-    gsnConfigShape,
-} from '~/ui/config/propTypes';
-import AnimatedTransaction from '~/ui/views/handlers/AnimatedTransaction';
-import { linkAccountSteps } from '~/ui/config/steps';
+import getGSNConfig from '~/ui/helpers/getGSNConfig';
+import StepsHandler from '~/ui/views/handlers/StepsHandler';
+import RegisterContent from '~/ui/views/RegisterContent';
+import registerSteps from '~/ui/steps/register';
+import apis from '~uiModules/apis';
 
 const RegisterAddress = ({
     currentAccount,
-    initialStep,
-    initialData,
-    gsnConfig,
 }) => {
-    const {
-        isGSNAvailable,
-    } = gsnConfig;
-    const steps = linkAccountSteps[isGSNAvailable ? 'gsn' : 'metamask'];
+    const fetchInitialData = async () => {
+        const gsnConfig = await getGSNConfig();
+        const {
+            isGSNAvailable,
+        } = gsnConfig;
+        const steps = registerSteps[isGSNAvailable ? 'gsn' : 'metamask'].slice(1);
+
+        const {
+            keyStore,
+            pwDerivedKey,
+            AZTECaddress,
+        } = await apis.auth.getAccountKeys();
+
+        return {
+            ...currentAccount,
+            steps,
+            retryWithMetaMaskStep: registerSteps.metamask.slice(-1)[0],
+            keyStore,
+            pwDerivedKey,
+            AZTECaddress,
+            isGSNAvailable,
+        };
+    };
 
     return (
-        <AnimatedTransaction
-            steps={steps}
-            initialStep={initialStep}
-            initialData={{
-                ...initialData,
-                ...currentAccount,
-                isGSNAvailable,
-            }}
+        <StepsHandler
+            testId="steps-register-address"
+            fetchInitialData={fetchInitialData}
+            Content={RegisterContent}
         />
     );
 };
 
 RegisterAddress.propTypes = {
-    initialStep: PropTypes.number,
-    initialData: PropTypes.object, // eslint-disable-line react/forbid-prop-types
     currentAccount: PropTypes.shape({
         address: PropTypes.string.isRequired,
         linkedPublicKey: PropTypes.string.isRequired,
     }).isRequired,
-    gsnConfig: gsnConfigShape.isRequired,
-};
-
-RegisterAddress.defaultProps = {
-    initialStep: 0,
-    initialData: {},
 };
 
 export default RegisterAddress;

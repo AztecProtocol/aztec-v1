@@ -4,16 +4,23 @@ import {
     FlexBox,
     Block,
     Text,
-    Icon,
+    SVG,
+    Loader,
 } from '@aztec/guacamole-ui';
 import {
-    colorNames,
+    colorMap,
+    iconSizeMap,
 } from '~/ui/styles/guacamole-vars';
+import checkGlyph from '~/ui/images/tick.svg';
+
+const statusColorMap = {
+    check: 'primary',
+    loading: 'label',
+};
 
 const BlockStatus = ({
+    status,
     text,
-    iconName,
-    iconColor,
 }) => (
     <FlexBox
         valign="center"
@@ -22,29 +29,39 @@ const BlockStatus = ({
         <Block padding="0 xs">
             <Text
                 text={text}
-                size="xs"
-                color="label"
+                size="xxs"
+                color={statusColorMap[status]}
             />
         </Block>
-        <Icon
-            name={iconName}
-            color={iconColor}
-            size="s"
-        />
+        {status === 'check' && (
+            <SVG
+                glyph={checkGlyph}
+                fill={colorMap.primary}
+                width={iconSizeMap.s}
+                height={iconSizeMap.s}
+            />
+        )}
+        {status === 'loading' && (
+            <Block padding="0 xxs">
+                <Loader
+                    theme="primary"
+                    size="xxs"
+                />
+            </Block>
+        )}
     </FlexBox>
 );
 
 BlockStatus.propTypes = {
+    status: PropTypes.oneOf(['check', 'loading']),
     text: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.node,
     ]).isRequired,
-    iconName: PropTypes.string.isRequired,
-    iconColor: PropTypes.oneOf(colorNames),
 };
 
 BlockStatus.defaultProps = {
-    iconColor: 'primary',
+    status: 'check',
 };
 
 export default BlockStatus;

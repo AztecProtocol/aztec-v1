@@ -5,9 +5,12 @@ const { keccak256, randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
 const Behaviour20200106 = artifacts.require('./AccountRegistry/epochs/20200106/Behaviour20200106');
-const TestBehaviour = artifacts.require('./test/AccountRegistry/TestBehaviour');
-const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/TestBehaviourEpoch');
-const createSignature = require('../helpers/AccountRegistryManager');
+const Behaviour20200207 = artifacts.require('./Behaviour20200207/epochs/20200207/Behaviour20200207');
+const TestBehaviour = artifacts.require('./test/AccountRegistry/epochs/20200106/TestBehaviour');
+const TestBehaviourEpoch = artifacts.require('./test/AccountRegistry/epochs/20200106/TestBehaviourEpoch');
+const TestFnOverload = artifacts.require('./test/AccountRegistry/epochs/20200106/TestFnOverload');
+
+const createSignature = require('../helpers/AccountRegistry/AccountRegistryManager');
 
 contract('Account registry manager', async (accounts) => {
     const owner = accounts[0];
@@ -115,10 +118,9 @@ contract('Account registry manager', async (accounts) => {
             it('should successfully register account mapping', async () => {
                 // register an account with the extension, which will be put in storage under accountMapping
                 const proxyAddress = await manager.proxyAddress.call();
-                const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
+                const { address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
                 const proxyContract = await Behaviour20200106.at(proxyAddress);
-                const AZTECaddress = randomHex(20);
 
                 await proxyContract.registerAZTECExtension(address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig);
                 const storedLinkedPublicKey = await proxyContract.accountMapping.call(address);
@@ -140,16 +142,39 @@ contract('Account registry manager', async (accounts) => {
 
                 const proxyContract = await TestBehaviour.at(existingProxy);
                 const isNewFeatureImplemented = await proxyContract.newFeature();
-                expect(isNewFeatureImplemented).to.equal(true);
+                expect(isNewFeatureImplemented).to.equal('new feature');
+            });
+
+            it('should set a state variable on an upgraded behaviour contract', async () => {
+                const behaviour20200207 = await Behaviour20200207.new();
+
+                await manager.upgradeAccountRegistry(behaviour20200207.address);
+                const proxyAddress = await manager.proxyAddress();
+                const proxyContract = await Behaviour20200207.at(proxyAddress);
+
+                await proxyContract.setGSNSigner();
+                const recoveredGSNSigner = await proxyContract.GSNSigner();
+                const expectedGSNSigner = '0x5323B6bbD3421983323b3f4f0B11c2D6D3bCE1d8';
+                expect(recoveredGSNSigner).to.equal(expectedGSNSigner);
+            });
+
+            it('should overload a function on an upgraded behaviour contract', async () => {
+                const testFnOverload = await TestFnOverload.new();
+
+                await manager.upgradeAccountRegistry(testFnOverload.address);
+                const proxyAddress = await manager.proxyAddress();
+                const proxyContract = await TestFnOverload.at(proxyAddress);
+
+                const result = await proxyContract.newFeature();
+                expect(result).to.equal('function overload');
             });
 
             it('should keep state after upgrade', async () => {
                 // register an account with the extension, which will be put in storage under accountMapping
                 const proxyAddress = await manager.proxyAddress.call();
-                const { address, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
+                const { address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig } = createSignature(proxyAddress);
 
                 const proxyContract = await Behaviour20200106.at(proxyAddress);
-                const AZTECaddress = randomHex(20);
 
                 await proxyContract.registerAZTECExtension(address, AZTECaddress, linkedPublicKey, spendingPublicKey, sig);
 

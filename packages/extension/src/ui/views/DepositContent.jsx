@@ -12,13 +12,12 @@ import {
 } from '~/utils/format';
 import i18n from '~/ui/helpers/i18n';
 import noteValueToToken from '~/ui/utils/noteValueToToken';
-import formatNumber from '~/ui/utils/formatNumber';
 import isStepAfter from '~/ui/utils/isStepAfter';
 import StepContentHelper from '~/ui/views/handlers/StepContentHelper';
 import StepContent from '~/ui/components/StepContent';
 import AnimatedBlocks from '~/ui/components/AnimatedBlocks';
 import BlockStatus from '~/ui/components/AnimatedBlocks/BlockStatus';
-import ReceipientList from '~/ui/components/ReceipientList';
+import RecipientList from '~/ui/components/RecipientList';
 import HashText from '~/ui/components/HashText';
 
 class DepositContent extends StepContentHelper {
@@ -29,10 +28,14 @@ class DepositContent extends StepContentHelper {
             asset,
             amount,
             transactions,
+            userAccessAccounts,
+            loading,
+            error,
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
-        const approved = isStepAfter(steps, currentStepName, 'approveERC20');
+        const approved = steps.every(({ name }) => name !== 'approveERC20' && name !== 'permitERC20')
+            || isStepAfter(steps, currentStepName, 'approveERC20') || isStepAfter(steps, currentStepName, 'permitERC20');
 
         const {
             name: assetName,
@@ -41,7 +44,7 @@ class DepositContent extends StepContentHelper {
 
         const tokenValue = noteValueToToken(amount, asset);
 
-        const receipients = transactions.map(({
+        const recipients = transactions.map(({
             to,
             amount: txAmount,
         }) => ({
@@ -49,7 +52,7 @@ class DepositContent extends StepContentHelper {
             footnote: (
                 <Text
                     className="text-code"
-                    text={formatNumber(noteValueToToken(txAmount, asset))}
+                    text={noteValueToToken(txAmount, asset)}
                     color="label"
                     weight="semibold"
                 />
@@ -76,11 +79,11 @@ class DepositContent extends StepContentHelper {
                     : i18n.count('token', tokenValue, true),
                 contentFootnote: (
                     <BlockStatus
+                        status={approved ? 'check' : 'loading'}
                         text={i18n.t('deposit.approve.allowance')}
-                        iconName="check"
                     />
                 ),
-                hideContentFootnote: !approved,
+                hideContentFootnote: !approved && (!loading || !!error),
                 profile: {
                     ...asset,
                     type: 'token',
@@ -89,7 +92,7 @@ class DepositContent extends StepContentHelper {
             {
                 title: [
                     symbol
-                        ? `Zk${symbol}`
+                        ? i18n.t('zkSymbol', { symbol })
                         : capitalize(i18n.singular('zkAsset')),
                     ' (',
                     <HashText
@@ -103,13 +106,28 @@ class DepositContent extends StepContentHelper {
                     ')',
                 ],
                 content: symbol
-                    ? `${tokenValue} Zk${symbol}`
+                    ? `${tokenValue} ${i18n.t('zkSymbol', { symbol })}`
                     : i18n.count('zkToken', tokenValue, true),
                 profile: {
                     ...asset,
                     type: 'asset',
                 },
-                extraContent: <ReceipientList receipients={receipients} />,
+                extraContent: [
+                    <RecipientList
+                        key="recipients"
+                        recipients={recipients}
+                    />,
+                    currentStep === 0 && userAccessAccounts.length
+                        ? (
+                            <RecipientList
+                                key="access"
+                                title={i18n.t('note.access.user')}
+                                description={i18n.t('note.access.user.description')}
+                                recipients={userAccessAccounts}
+                            />
+                        )
+                        : null,
+                ],
             },
         ];
     }
@@ -128,7 +146,7 @@ class DepositContent extends StepContentHelper {
                     blocks={blocks}
                     sealedIcon="aztec"
                 />
-                {step.blockStyle === 'sealed' && this.renderTaskList()}
+                {step.showTaskList && this.renderTaskList()}
             </StepContent>
         );
     }
@@ -138,10 +156,14 @@ DepositContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
+    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
+        address: PropTypes.string.isRequired,
+    })),
 };
 
 DepositContent.defaultProps = {
     titleKey: 'deposit.title',
+    userAccessAccounts: [],
 };
 
 export default DepositContent;

@@ -25,9 +25,14 @@ export default function validateParameters(query, args) {
 
     const errorMsg = schema.validate(args);
     if (errorMsg) {
-        return argsError('input.invalid', {
-            message: errorMsg,
-        });
+        const errorResp = argsError('input.invalid');
+        return {
+            ...errorResp,
+            error: {
+                ...errorResp.error,
+                message: errorMsg,
+            },
+        };
     }
 
     return null;

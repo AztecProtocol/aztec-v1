@@ -11,16 +11,36 @@ export default {
     hash: 'Note Hash',
     value: 'Value',
     access: {
+        recipient: {
+            title: 'Access',
+        },
         grant: {
-            _: 'Grant Access',
-            title: 'Grant Note Access',
-            submit: 'Grant',
-            explain: 'This will allow the address to see the value of this note and construct proofs using this note. It will not be able to spend this note without your approval via MetaMask.',
+            title: 'Grant Access',
+            step: 'Granting Access',
+            description: `This will grant another user view access to a portion of your balance.
+                It will not allow the zkTokens to be spent without a signature from your MetaMask account.
+            `,
+            submit: 'Grant Access',
         },
-        share: {
-            _: 'Share with',
+        sign: {
+            description: `A MetaMask signature is required to grant access to zkTokens.
+                The signature should contain the following values:
+            `,
         },
-        invalidAccounts: 'Error: All accounts must have registered the AZTEC extension',
+        confirm: {
+            description: `If everything looks good hit send!
+            `,
+        },
+        send: {
+            description: `If everything looks good hit send!
+            `,
+        },
+        user: {
+            _: 'Access',
+            description: `The above user will be granted view access to the new zkTokens.
+                It will not allow the zkTokens to be spent without a signature from their recipient's MetaMask account.
+            `,
+        },
     },
     sign: {
         title: 'Approve Note Spending',

@@ -65,7 +65,7 @@ module.exports = {
             },
         });
     },
-    down: (queryInterface, DataTypes) => {
+    down: (queryInterface) => {
         return queryInterface.dropTable('Transactions');
     },
 };

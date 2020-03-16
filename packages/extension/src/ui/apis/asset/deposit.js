@@ -4,9 +4,9 @@ export default async function deposit({
     currentAccount: {
         address: currentAddress,
     },
+    erc20Amount,
     assetAddress,
     proof,
-    amount,
     isGSNAvailable,
 }) {
     const proofHash = proof.hash;
@@ -20,7 +20,7 @@ export default async function deposit({
             currentAddress,
             proofHash,
             proofData,
-            amount,
+            erc20Amount.toString(),
         ],
     };
 
@@ -33,6 +33,6 @@ export default async function deposit({
 
     return {
         ...response,
-        success: !!(response && response.txReceipt),
+        success: !!(response && response.success),
     };
 }

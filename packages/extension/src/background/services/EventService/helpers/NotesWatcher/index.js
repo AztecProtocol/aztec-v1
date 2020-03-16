@@ -201,6 +201,7 @@ class Watcher {
             onData,
             onError,
         } = await NoteSubscription.subscribe({
+            owner: address,
             fromBlock: lastSyncedBlock + 1,
             fromAssets,
             networkId,
@@ -210,20 +211,24 @@ class Watcher {
             if (groupedNotes.isEmpty()) {
                 return;
             }
+
             const {
                 createNotes,
-                destroyNotes,
                 updateNotes,
+                destroyNotes,
             } = groupedNotes;
+            const newNotes = [
+                ...createNotes,
+                ...updateNotes,
+                ...destroyNotes,
+            ].filter(({ owner }) => owner === address);
+
             NoteService.addNotes(
                 networkId,
                 address,
-                [
-                    ...createNotes,
-                    ...destroyNotes,
-                    ...updateNotes,
-                ].filter(({ owner }) => owner === address),
+                newNotes,
             );
+
             this.saveQueue.push({
                 name: 'Save Notes',
                 groupedNotes,

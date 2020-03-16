@@ -24,10 +24,13 @@ import {
     sendActionEvent,
     sendQueryEvent,
 } from '~/config/event';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
 import Iframe from '~/utils/Iframe';
 import {
     warnLog,
+    errorLog,
 } from '~/utils/log';
 import {
     permissionError,
@@ -67,12 +70,14 @@ class Connection {
         this.containerId = 'aztec-popup-ui';
         this.uiFrame = new Iframe({
             id: 'AZTECSDK-POPUP',
-            src: urls.ui,
+            src: getResourceUrl('ui'),
             width: '100%',
             height: '100%',
             onReadyEventName: uiReadyEvent,
             containerId: this.containerId,
         });
+
+        this.uiRequestQueue = [];
 
         // send the messages to the client
         merge(this.clientAction$, this.clientResponse$).pipe(
@@ -110,16 +115,27 @@ class Connection {
                     },
                 } = action;
 
+                await this.ensureUiRequestOrder(requestId);
+
                 const loadingElem = document.getElementById('aztec-popup-placeholder');
                 loadingElem.style.display = 'block';
 
                 const uiContainer = document.getElementById(this.containerId);
                 uiContainer.style.display = 'none';
-                uiContainer.innerHTML = ''; // clear previous ui
 
                 const {
                     webClientId,
                 } = this.requests[requestId];
+
+                this.ClientResponseSubject.next({
+                    type: uiOpenEvent,
+                    requestId,
+                    webClientId,
+                });
+
+                // wait until the iframe is ready before opening the ui
+                // because creating iframe will block other processes and make the loading animation look aweful
+                const frame = await this.uiFrame.ensureCreated();
 
                 this.openUi({
                     requestId,
@@ -132,13 +148,6 @@ class Connection {
                     },
                 });
 
-                this.ClientResponseSubject.next({
-                    type: uiOpenEvent,
-                    requestId,
-                    webClientId,
-                });
-
-                const frame = await this.uiFrame.init();
                 frame.contentWindow.postMessage({
                     type: sendActionEvent,
                     action: {
@@ -146,6 +155,7 @@ class Connection {
                         data: args,
                     },
                 }, '*');
+
                 loadingElem.style.display = 'none';
                 uiContainer.style.display = 'block';
                 this.uiFrame.open();
@@ -182,12 +192,7 @@ class Connection {
                         webClientId,
                     } = this.requests[requestId]);
                 }
-                this.closeUi();
-                this.ClientResponseSubject.next({
-                    type: uiCloseEvent,
-                    requestId,
-                    webClientId,
-                });
+                this.closeUi(data);
 
                 const {
                     abort,
@@ -264,11 +269,9 @@ class Connection {
                     type: clientResponseEvent,
                 });
 
-                this.closeUi();
-
-                this.ClientResponseSubject.next({
-                    ...data,
-                    type: uiCloseEvent,
+                const ids = this.uiRequestQueue.map(({ requestId }) => requestId);
+                ids.forEach((requestId) => {
+                    this.closeUi({ requestId }, false);
                 });
 
                 const {
@@ -426,13 +429,16 @@ class Connection {
         });
     }
 
+    async initUi() {
+        const frame = await this.uiFrame.init();
+        return !!frame;
+    }
+
     abortUi({
         requestId,
         webClientId,
     }) {
-        this.closeUi();
-        this.ClientResponseSubject.next({
-            type: uiCloseEvent,
+        this.closeUi({
             requestId,
             webClientId,
         });
@@ -447,16 +453,94 @@ class Connection {
         this.removeRequest(requestId);
     }
 
-    closeUi = () => {
+    closeUi = ({
+        requestId,
+        webClientId,
+    }, closeBackground = true) => {
+        if (!this.uiRequestQueue.length) {
+            return false;
+        }
+        const request = this.uiRequestQueue.shift();
+        if (request.requestId !== requestId) {
+            errorLog('Request not run in order.');
+            this.uiRequestQueue.unshift(request);
+            return false;
+        }
+        if (this.uiRequestQueue.length) {
+            const {
+                requestId: nextRequestId,
+                resolve,
+            } = this.uiRequestQueue.shift();
+            this.uiRequestQueue.unshift({
+                requestId: nextRequestId,
+            });
+            resolve();
+            return false;
+        }
+
         const event = new CustomEvent('closeAztec');
         window.dispatchEvent(event);
+
+        this.uiFrame.frame.contentWindow.postMessage({
+            type: sendActionEvent,
+            action: {
+                type: 'closed',
+            },
+        }, '*');
+
+        if (closeBackground) {
+            // wait for the fade-out animation to finish before closing the backgroundFrame
+            setTimeout(() => {
+                if (!this.uiRequestQueue.length) {
+                    this.ClientResponseSubject.next({
+                        type: uiCloseEvent,
+                        requestId,
+                        webClientId,
+                    });
+                }
+            }, 500);
+        }
+
+        return true;
     }
 
     openUi = (detail) => {
-        const event = new CustomEvent('openAztec', {
-            detail,
+        if (!this.uiRequestQueue.length) {
+            return false;
+        }
+        if (this.uiRequestQueue[0].requestId !== detail.requestId) {
+            errorLog('Request not run in order.');
+            return false;
+        }
+        if (this.uiRequestQueue[0].resolve) {
+            errorLog('UI open request not resolved.');
+            return false;
+        }
+        if (this.uiRequestQueue.length === 1) {
+            const event = new CustomEvent('openAztec', {
+                detail,
+            });
+            window.dispatchEvent(event);
+            return true;
+        }
+
+        return false;
+    }
+
+    async ensureUiRequestOrder(requestId) {
+        if (!this.uiRequestQueue.length) {
+            this.uiRequestQueue.push({
+                requestId,
+            });
+            return null;
+        }
+
+        return new Promise((resolve) => {
+            this.uiRequestQueue.push({
+                requestId,
+                resolve,
+            });
         });
-        window.dispatchEvent(event);
     }
 
     removeRequest(requestId) {
@@ -477,4 +561,4 @@ class Connection {
     }
 }
 
-export default new Connection();
+export default Connection;

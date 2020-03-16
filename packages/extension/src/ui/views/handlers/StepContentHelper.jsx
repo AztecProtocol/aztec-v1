@@ -5,6 +5,7 @@ import {
     Text,
     Icon,
     Loader,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     transactionStepShape,
@@ -13,6 +14,12 @@ import {
 import i18n from '~/ui/helpers/i18n';
 import ensureMinPendingTime from '~/ui/utils/ensureMinPendingTime';
 import ListItem from '~/ui/components/ListItem';
+import ErrorBlock from '~/ui/components/ErrorBlock';
+import {
+    colorMap,
+    iconSizeMap,
+} from '~/ui/styles/guacamole-vars';
+import checkGlyph from '~/ui/images/tick.svg';
 
 class StepContentHelper extends PureComponent {
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -30,7 +37,7 @@ class StepContentHelper extends PureComponent {
         const nextTask = steps[currentStep].tasks[currentTask + 1] || {};
 
         let explicitTaskType = prevExplicitTaskType;
-        if (loading && currentTask === -1 && nextTask.type === 'sign') {
+        if (loading && nextTask.type === 'sign') {
             explicitTaskType = 'sign';
         } else if (currentStep !== prevStep
             || currentTask !== prevTask
@@ -49,6 +56,8 @@ class StepContentHelper extends PureComponent {
         super(props);
 
         this.state = {
+            data: {},
+            error: null,
             explicitTaskType: '',
             prevStep: 0,
             prevTask: -1,
@@ -63,10 +72,11 @@ class StepContentHelper extends PureComponent {
             currentStep,
             loading,
             error,
-            childError,
             onPrevious,
-            updateParentState,
         } = this.props;
+        const {
+            error: childError,
+        } = this.state;
         const {
             title,
             titleKey,
@@ -76,7 +86,12 @@ class StepContentHelper extends PureComponent {
             cancelTextKey,
             submitText,
             submitTextKey,
+            showTaskList,
         } = steps[currentStep];
+
+        const transactionError = showTaskList
+            && error
+            && (error.key || '').startsWith('transaction.gsn.error');
 
         return {
             title: title || defaultTitle,
@@ -89,12 +104,12 @@ class StepContentHelper extends PureComponent {
             submitTextKey,
             submitMessage: this.renderSubmitMessage(),
             loading,
-            error,
+            error: transactionError ? null : error,
             childError,
             onPrevious,
-            onNext: this.handleGoNext,
+            onNext: transactionError ? null : this.handleGoNext,
             onRetry: this.handleRetry,
-            updateParentState,
+            hideFooter: !!transactionError,
         };
     }
 
@@ -133,25 +148,27 @@ class StepContentHelper extends PureComponent {
 
     handleRetry = () => {
         const {
-            onRetryStep,
             onRetryTask,
         } = this.props;
-        const {
-            explicitTaskType,
-        } = this.state;
 
-        if (explicitTaskType) {
-            onRetryTask();
-            return;
-        }
-
-        onRetryStep();
+        onRetryTask();
     };
 
     handleGoNext = () => {
+        const error = this.validateSubmitData();
+        if (error) {
+            this.setState({
+                error,
+            });
+            return;
+        }
+
         const {
             onNext,
         } = this.props;
+        const {
+            data,
+        } = this.state;
 
         const nextTask = this.getNextTask();
         const nextTaskType = nextTask && nextTask.type;
@@ -160,16 +177,44 @@ class StepContentHelper extends PureComponent {
                 {
                     explicitTaskType: nextTaskType,
                 },
-                ensureMinPendingTime(onNext, 1000),
+                ensureMinPendingTime(() => onNext(data), 1000),
             );
             return;
         }
 
-        onNext();
+        onNext(data);
     };
+
+    validateSubmitData() { // eslint-disable-line class-methods-use-this
+        return null;
+    }
+
+    updateData(data) {
+        const {
+            data: prevData,
+        } = this.state;
+
+        this.setState({
+            data: {
+                ...prevData,
+                ...data,
+            },
+        });
+    }
+
+    clearError() {
+        this.setState({
+            error: null,
+        });
+    }
 
     renderSubmitMessage() {
         let submitMessage = null;
+        const {
+            steps,
+            currentStep,
+            loading,
+        } = this.props;
         const {
             explicitTaskType,
         } = this.state;
@@ -185,6 +230,14 @@ class StepContentHelper extends PureComponent {
                     />
                 );
             }
+        } else if (loading && currentStep === steps.length - 1) {
+            submitMessage = (
+                <Text
+                    text={i18n.t('transaction.autoClose')}
+                    color="label"
+                    size="xs"
+                />
+            );
         }
 
         return submitMessage;
@@ -193,10 +246,27 @@ class StepContentHelper extends PureComponent {
     renderTaskList() {
         const {
             currentTask,
+            error,
+            loading,
+            onRetryWithMetaMask,
         } = this.props;
         const {
             tasks,
         } = this.getCurrentStep();
+
+        if (error && (error.key || '').startsWith('transaction.gsn.error')) {
+            return (
+                <Block padding="xl 0">
+                    <ErrorBlock
+                        message={error.message || i18n.t(error.key)}
+                        leftButtonText="Try with MetaMask"
+                        onClickLeftButton={onRetryWithMetaMask}
+                        rightButtonText="Retry"
+                        onClickRightButton={this.handleRetry}
+                    />
+                </Block>
+            );
+        }
 
         return (
             <Block padding="m xl">
@@ -208,22 +278,34 @@ class StepContentHelper extends PureComponent {
                     const isFinished = i <= currentTask
                         || (!run && (i === currentTask + 1));
                     let statusIcon = null;
-                    if (isFinished) {
+                    if (error && i === currentTask + 1) {
                         statusIcon = (
                             <Icon
-                                name="check"
-                                color="primary"
-                                size="m"
+                                name="error"
+                                color="red"
+                                size="s"
                             />
                         );
-                    } else if (i === currentTask + 1) {
+                    } else if (isFinished) {
+                        statusIcon = (
+                            <SVG
+                                glyph={checkGlyph}
+                                fill={colorMap.primary}
+                                width={iconSizeMap.s}
+                                height={iconSizeMap.s}
+                            />
+                        );
+                    } else if (i === currentTask + 1 && loading) {
                         statusIcon = (
                             <Loader
                                 size="xxs"
-                                theme="secondary"
+                                theme="primary"
                             />
                         );
                     }
+
+                    const highlight = i < currentTask + 1
+                      || (i === currentTask + 1 && loading);
 
                     return (
                         <Block
@@ -234,7 +316,7 @@ class StepContentHelper extends PureComponent {
                                 content={(
                                     <Text
                                         text={title || i18n.t(titleKey)}
-                                        color={i > currentTask + 1 ? 'label' : 'default'}
+                                        color={highlight ? 'default' : 'label'}
                                         size="xs"
                                     />
                                 )}
@@ -257,20 +339,17 @@ StepContentHelper.propTypes = {
     currentTask: PropTypes.number.isRequired,
     loading: PropTypes.bool.isRequired,
     error: errorShape,
-    childError: errorShape,
     onPrevious: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired,
-    onRetryStep: PropTypes.func.isRequired,
     onRetryTask: PropTypes.func.isRequired,
-    updateParentState: PropTypes.func,
+    onRetryWithMetaMask: PropTypes.func,
 };
 
 StepContentHelper.defaultProps = {
     title: '',
     titleKey: 'deposit.title',
     error: null,
-    childError: null,
-    updateParentState: null,
+    onRetryWithMetaMask: null,
 };
 
 export default StepContentHelper;

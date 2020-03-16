@@ -5,6 +5,7 @@ export default {
     token: 'token',
     zkToken: 'zkToken',
     zkAsset: 'zkAsset',
+    zkSymbol: 'zk%{symbol}',
     click: {
         to: {
             copy: 'Click to copy',
@@ -33,5 +34,6 @@ export default {
         back: 'Go Back',
     },
     retry: 'Retry',
+    pending: 'Pending',
     poweredBy: 'Powered by',
 };

@@ -1,6 +1,5 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "../../../interfaces/IZkAsset.sol";
@@ -16,13 +15,25 @@ import "../../GSNRecipientTimestampSignature.sol";
  * @author AZTEC
  * Note the behaviour contract version naming convention is based on the date on which the contract
  * was created, in the format: YYYYMMDD
-    * Copyright Spilbury Holdings Ltd 2019. All rights reserved.
+ * 
+ * Copyright 2020 Spilsbury Holdings Ltd 
+ *
+ * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
-contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZTEC, LibEIP712 {
+contract Behaviour20200106 is GSNRecipientTimestampSignature, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
 
     /**
-    * @dev epoch number, used for version control in upgradeability. The naming convention is based on the 
+    * @dev epoch number, used for version control in upgradeability. The naming convention is based on the
     * date on which the contract was created, in the format: YYYYMMDD
     */
     uint256 public epoch = 20200106;
@@ -34,20 +45,21 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
     struct AZTECAccount {
         address account;
         bytes linkedPublicKey;
+        address AZTECaddress;
     }
 
     string private constant EIP712_DOMAIN  = "EIP712Domain(string name,string version,address verifyingContract)";
-    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey)";
+    string private constant SIGNATURE_TYPE = "AZTECAccount(address account,bytes linkedPublicKey,address AZTECaddress)";
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
     bytes32 private constant SIGNATURE_TYPEHASH = keccak256(abi.encodePacked(SIGNATURE_TYPE));
 
     event Addresses(address accountAddress, address signerAddress);
-    
+
     event RegisterExtension(
         address indexed account,
         bytes linkedPublicKey,
-        bytes spendingPublicKey 
+        bytes spendingPublicKey
     );
 
     event GSNTransactionProcessed(bytes32 indexed signatureHash, bool indexed success, uint actualCharge);
@@ -63,7 +75,6 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
     */
     function initialize(address _aceAddress, address _trustedGSNSignerAddress) initializer public {
         ace = ACEModule.ACE(_aceAddress);
-        GSNRecipient.initialize();
         GSNRecipientTimestampSignature.initialize(_trustedGSNSignerAddress);
     }
 
@@ -86,8 +97,9 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
             keccak256(abi.encode(
                 SIGNATURE_TYPEHASH,
                 _AZTECAccount.account,
-                keccak256(bytes(_AZTECAccount.linkedPublicKey)
-        )))));
+                keccak256(bytes(_AZTECAccount.linkedPublicKey)),
+                _AZTECAccount.AZTECaddress
+        ))));
     }
 
     /**
@@ -95,7 +107,7 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
      * sender is the ethereum address in question
      * @param _account - address to which the linkedPublicKey is being registered
      * @param _linkedPublicKey - an additional public key which the sender wishes to link to the _account
-     * @param _spendingPublicKey - the Ethereum public key associated with the Ethereum address 
+     * @param _spendingPublicKey - the Ethereum public key associated with the Ethereum address
      * @param _signature - an EIP712 compatible signature of the account & linkedPublicKey
      */
     function registerAZTECExtension(
@@ -112,13 +124,15 @@ contract Behaviour20200106 is GSNRecipient, GSNRecipientTimestampSignature, IAZT
         signatureLog[signatureHash] = true;
 
         address signer = recoverSignature(
-            hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey)),
+            hashAZTECAccount(AZTECAccount(_account, _linkedPublicKey, _AZTECaddress)),
             _signature
         );
+        require(_account == address(uint160(uint256(keccak256(_spendingPublicKey)))),
+            'address does not match public key');
         require(_account == signer, 'signer must be the account');
         accountMapping[_account] = _linkedPublicKey;
         userToAZTECAccountMapping[_account] = _AZTECaddress;
-        
+
         emit Addresses(_account, signer);
         emit RegisterExtension(_account, _linkedPublicKey, _spendingPublicKey);
     }

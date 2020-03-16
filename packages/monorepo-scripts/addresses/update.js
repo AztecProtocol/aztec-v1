@@ -9,11 +9,14 @@ const CONTRACT_ADDRESSES_PATH = path.join(PACKAGES_PATH, 'contract-addresses');
 const CONTRACTS_DIR = path.join(PACKAGES_PATH, 'protocol', 'build', 'contracts');
 const RINKEBY_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'rinkeby.json');
 const ROPSTEN_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'ropsten.json');
+// const MAINNET_ADDRESSES_FILE = path.join(CONTRACT_ADDRESSES_PATH, 'addresses', 'mainnet.json');
 
 const deployedContracts = [
     'ACE',
     'AccountRegistryManager',
     'Behaviour20200106',
+    'Behaviour20200207',
+    'Behaviour20200220',
     'Dividend',
     'ERC20Mintable',
     'FactoryAdjustable201907',
@@ -29,6 +32,7 @@ const deployedContracts = [
 
 const rinkebyAddresses = {};
 const ropstenAddresses = {};
+// const mainnetAddresses = {};
 
 const extractNetworkAddress = async (filename) => {
     const filenameWithoutExtension = filename.replace('.json', '');
@@ -49,11 +53,18 @@ const extractNetworkAddress = async (filename) => {
         throw new Error(`Ropsten address not found for ${filenameWithoutExtension}`);
     }
     ropstenAddresses[filenameWithoutExtension] = content.networks[NetworkId.Ropsten].address;
+
+    // // Mainnet
+    // if (!content.networks[NetworkId.Mainnet]) {
+    //     throw new Error(`Mainnet address not found for ${filenameWithoutExtension}`);
+    // }
+    // mainnetAddresses[filenameWithoutExtension] = content.networks[NetworkId.Mainnet].address;
 };
 
 const updateTestnetJsons = async () => {
     await fs.writeFile(RINKEBY_ADDRESSES_FILE, JSON.stringify(rinkebyAddresses, null, 4));
     await fs.writeFile(ROPSTEN_ADDRESSES_FILE, JSON.stringify(ropstenAddresses, null, 4));
+    // await fs.writeFile(MAINNET_ADDRESSES_FILE, JSON.stringify(mainnetAddresses, null, 4));
 };
 
 const updateAddresses = async () => {

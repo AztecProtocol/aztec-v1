@@ -1,10 +1,16 @@
 import contractMetadataMapping from 'eth-contract-metadata';
-import urls from '~/config/urls';
+import {
+    getResourceUrl,
+} from '~/utils/versionControl';
+
+import supportsPermit from '~/config/supportsPermitSignature';
+
+const publicResourcePath = getResourceUrl('public');
 
 const formatIconUrl = (icon) => {
     if (!icon) return '';
 
-    return `${urls.public}/tokens/${icon}`;
+    return `${publicResourcePath}/tokens/${icon}`;
 };
 
 export default function makeToken(address) {
@@ -20,5 +26,6 @@ export default function makeToken(address) {
         symbol,
         decimals,
         icon: formatIconUrl(logo),
+        supportsPermit: supportsPermit[address],
     };
 }

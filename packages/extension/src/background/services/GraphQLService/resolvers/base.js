@@ -27,7 +27,7 @@ export default {
         value: async ({ viewingKey }) => {
             const decryptedViewingKey = await decryptViewingKey(viewingKey);
             if (!decryptedViewingKey) {
-                return null;
+                return 0;
             }
             return valueFromViewingKey(decryptedViewingKey);
         },

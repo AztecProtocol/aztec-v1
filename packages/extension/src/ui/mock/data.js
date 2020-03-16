@@ -6,8 +6,6 @@ import {
     randomId,
     randomInt,
 } from '~/utils/random';
-import daiIcon from '~/ui/images/tokens/dai.png';
-import usdcIcon from '~/ui/images/tokens/usdc.png';
 import compoundLogo from './images/compound.png';
 
 export const generate = (count, generator) => {
@@ -19,6 +17,11 @@ export const generate = (count, generator) => {
 };
 
 export const randomAddress = () => `0x${randomId(40)}`;
+
+export const randomAccount = () => ({
+    address: randomAddress(),
+    linkedPublicKey: `0x${randomId(64)}`,
+});
 
 export const randomRawNote = () => ({
     noteHash: `0x${randomId()}`,
@@ -48,35 +51,23 @@ export const addresses = [
 
 export const assets = [
     {
-        name: 'Dai Stablecoin',
-        symbol: 'DAI',
-        decimals: 18,
-        scalingFactor: new BN('10000000000000000'),
         address: randomAddress(),
+        scalingFactor: new BN('10000000000000000'),
         linkedTokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-        icon: daiIcon,
-        balance: 0.51232,
     },
     {
-        name: 'USD Coin',
-        symbol: 'USDC',
-        decimals: 6,
-        scalingFactor: new BN(1),
         address: randomAddress(),
+        scalingFactor: new BN(1),
         linkedTokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        icon: usdcIcon,
-        balance: 2832.21,
     },
     {
         address: randomAddress(),
         linkedTokenAddress: '',
-        balance: 0,
     },
     ...generate(5, () => ({
-        scalingFactor: new BN(1),
         address: randomAddress(),
+        scalingFactor: new BN(1),
         linkedTokenAddress: randomAddress(),
-        balance: 0,
     })),
 ];
 
@@ -104,8 +95,13 @@ export const domains = [
 ];
 
 export const gsnConfig = {
-    isGSNAvailable: false,
+    isGSNAvailable: true,
     proxyContract: randomAddress(),
+};
+
+export const invalidGSNConfig = {
+    isGSNAvailable: false,
+    proxyContract: '',
 };
 
 export const notes = [
@@ -120,13 +116,3 @@ export const notes = [
         asset: assets[1],
     },
 ];
-
-export const depositTransactions = generate(2, i => ({
-    amount: randomInt(1, 10000),
-    to: addresses[i + 1],
-}));
-
-export const sendTransactions = generate(3, () => ({
-    amount: randomInt(1, 100),
-    to: addresses[randomInt(1, addresses.length - 1)],
-}));

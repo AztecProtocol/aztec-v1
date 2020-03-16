@@ -39,6 +39,7 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
 @mixin folded-block() {
   .block-title {
     transform: scaleY(0);
+    opacity: 0;
   }
 
   .block-title {
@@ -131,6 +132,8 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
   position: relative;
   z-index: 1; // avoid popup in title to get overlapped by content
   transform: scaleY(1);
+  max-height: 1000px;
+  opacity: 1;
   transition: all $block-transition-duration / 2 ease-out;
 }
 
@@ -144,7 +147,7 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
 .sealed-icon {
   $sealed-icon-size: map-get($avatar-sizes-map, 'l');
   position: absolute;
-  top: map-get($spacing-map, 'xxl');
+  bottom: $block-spacing;
   right: $block-padding-h;
   display: flex;
   align-items: center;
@@ -160,9 +163,40 @@ $profile-icon-size: map-get($avatar-sizes-map, 'm');
 
 .content-footnote {
   display: block;
+}
 
-  &.hide {
+.fx-hide-title {
+  .block-title {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  .block-content {
+    $original-padding: map-get($spacing-map, 'xs');
+    $offset-padding: map-get($spacing-map, 'xxs');
+    padding-top: $original-padding + $offset-padding;
+    padding-bottom: $original-padding + $offset-padding;
+  }
+}
+
+.fx-hide-title-footnote {
+  .title-footnote {
     display: none;
+  }
+}
+
+.fx-hide-content-footnote {
+  .content-footnote {
+    // TODO - make the transition smoother
+    display: none;
+  }
+}
+
+.fx-hide-extra {
+  .block-extra {
+    max-height: 0px;
+    overflow: hidden;
   }
 }
 

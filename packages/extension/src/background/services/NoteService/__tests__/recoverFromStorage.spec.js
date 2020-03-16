@@ -2,6 +2,7 @@ import {
     userAccount,
 } from '~testHelpers/testUsers';
 import {
+    randomInt,
     randomId,
 } from '~/utils/random';
 import * as storage from '~/utils/storage';
@@ -20,6 +21,7 @@ beforeEach(() => {
 });
 
 describe('recoverFromStorage', () => {
+    const version = randomInt();
     const networkId = randomId(10);
     const owner = userAccount;
 
@@ -39,6 +41,7 @@ describe('recoverFromStorage', () => {
 
     it('recover asset note values data from storage', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -49,6 +52,7 @@ describe('recoverFromStorage', () => {
         );
 
         const recovered = await recoverFromStorage(
+            version,
             networkId,
             owner,
         );
@@ -63,6 +67,7 @@ describe('recoverFromStorage', () => {
     it('only recover assetNotes whose key is in priority', async () => {
         const newPriority = priority.slice(1, 2);
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -73,6 +78,7 @@ describe('recoverFromStorage', () => {
         );
 
         const recovered = await recoverFromStorage(
+            version,
             networkId,
             owner,
         );
@@ -89,6 +95,7 @@ describe('recoverFromStorage', () => {
 
     it('only recover assetNotes in the same network', async () => {
         await saveToStorage(
+            version,
             networkId,
             owner,
             {
@@ -112,6 +119,7 @@ describe('recoverFromStorage', () => {
         };
         const priorityB = [sameAsset, 'newAsset'];
         await saveToStorage(
+            version,
             anotherNetwork,
             owner,
             {
@@ -122,6 +130,7 @@ describe('recoverFromStorage', () => {
         );
 
         const recoveredA = await recoverFromStorage(
+            version,
             networkId,
             owner,
         );
@@ -132,6 +141,7 @@ describe('recoverFromStorage', () => {
         });
 
         const recoveredB = await recoverFromStorage(
+            version,
             anotherNetwork,
             owner,
         );
@@ -144,6 +154,7 @@ describe('recoverFromStorage', () => {
 
     it('get empty object if there is no encrypted data in storage', async () => {
         const recovered = await recoverFromStorage(
+            version,
             networkId,
             owner,
         );

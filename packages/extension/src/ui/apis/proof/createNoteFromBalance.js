@@ -1,4 +1,9 @@
-import * as aztec from 'aztec.js';
+import {
+    JoinSplitProof,
+    ProofUtils,
+} from 'aztec.js';
+import { keccak256 } from 'web3-utils';
+import uniqBy from 'lodash/uniqBy';
 import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~/config/constants';
@@ -46,7 +51,7 @@ export default async function createNoteFromBalance({
 
     const numberOfInputNotes = !Object.is(customNumberOfInputNotes, emptyIntValue)
         ? customNumberOfInputNotes
-        : await settings('NUMBER_OF_INPUT_NOTES');
+        : undefined;
 
     const numberOfOutputNotes = !Object.is(customNumberOfOutputNotes, emptyIntValue)
         ? customNumberOfOutputNotes
@@ -112,14 +117,14 @@ export default async function createNoteFromBalance({
     const extraAmount = sum - inputAmount;
 
     const addresses = (transactions || []).map(({ to }) => to);
-    if (extraAmount > 0) {
-        addresses.push(currentAddress);
-    }
+    addresses.push(currentAddress);
     const accountMapping = {};
     const accounts = await batchGetExtensionAccount(addresses);
     accounts.forEach((account) => {
         accountMapping[account.address] = account;
     });
+
+    const currentAccount = accountMapping[currentAddress];
 
     const outputValues = [];
     const outputNotes = [];
@@ -128,7 +133,7 @@ export default async function createNoteFromBalance({
         const {
             spendingPublicKey,
             linkedPublicKey,
-        } = accountMapping[currentAddress];
+        } = currentAccount;
         remainderNote = await createNote(
             extraAmount,
             spendingPublicKey,
@@ -156,21 +161,24 @@ export default async function createNoteFromBalance({
                 spendingPublicKey,
             } = accountMapping[to];
             outputValues.push(...values);
-            const ownerAccess = {
-                address: to,
-                linkedPublicKey,
-            };
-            const userAccess = !userAccessAccounts
+            const ownerAccess = !linkedPublicKey
+                ? null
+                : {
+                    address: to,
+                    linkedPublicKey,
+                };
+            const userAccess = !userAccessAccounts.length
                 ? ownerAccess
-                : [
-                    ...userAccessAccounts,
-                    ownerAccess,
-                ].filter((access, i, arr) => i === arr.findIndex(({
-                    address,
-                }) => address === access.address));
+                : uniqBy(
+                    [
+                        ...userAccessAccounts,
+                        ownerAccess,
+                    ],
+                    'address',
+                ).filter(a => a);
             const newNotes = await createNotes(
                 values,
-                spendingPublicKey,
+                spendingPublicKey || currentAccount.spendingPublicKey,
                 to,
                 userAccess,
             );
@@ -178,10 +186,6 @@ export default async function createNoteFromBalance({
         });
     }
 
-    const {
-        JoinSplitProof,
-        ProofUtils,
-    } = aztec;
     const publicValue = ProofUtils.getPublicValue(
         inputValues,
         outputValues,
@@ -195,8 +199,11 @@ export default async function createNoteFromBalance({
         publicOwner,
     );
 
+    const proofHash = keccak256(proof.eth.outputs);
+
     return {
         proof,
+        proofHash,
         inputNotes,
         outputNotes,
         remainderNote,

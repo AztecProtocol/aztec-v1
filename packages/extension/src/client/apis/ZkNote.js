@@ -7,42 +7,33 @@ import provePrivateRange from '~/client/apis/privateRange/prove';
 const dataProperties = [
     'noteHash',
     'value',
+    'viewingKey',
     'owner',
+    'asset',
     'status',
 ];
 
 export default class ZkNote {
     constructor({
         id,
+        ...note
     } = {}) {
+        dataProperties.forEach((key) => {
+            this[key] = note[key];
+        });
         this.id = id;
     }
 
-    isValid() {
-        return !!this.noteHash && this.value !== null;
+    get valid() {
+        return typeof this.value === 'number';
     }
 
-    async init() {
-        if (this.isValid()) return;
+    get visible() {
+        return !!this.viewingKey;
+    }
 
-        let note;
-        try {
-            note = await ConnectionService.query(
-                'note',
-                { id: this.id },
-            );
-        } catch (error) {
-            // developers can use this.isValid() to check if a note exists
-            if (error.key !== 'note.not.found') {
-                throw error;
-            }
-        }
-
-        if (note) {
-            dataProperties.forEach((key) => {
-                this[key] = note[key];
-            });
-        }
+    get destroyed() {
+        return this.status === 'DESTROYED';
     }
 
     /**
@@ -51,7 +42,7 @@ export default class ZkNote {
      * @returns {Class} Note Exported note class
      */
     async export() {
-        if (!this.isValid()) {
+        if (!this.visible) {
             return null;
         }
 
@@ -83,6 +74,12 @@ export default class ZkNote {
      * @returns {Bool} successStatus Boolean describing whether the granting of view access was successfull
      */
     async grantAccess(addresses) {
+        if (!this.visible
+            || this.destroyed
+        ) {
+            return false;
+        }
+
         const addressList = typeof addresses === 'string'
             ? [addresses]
             : addresses;
@@ -114,15 +111,19 @@ export default class ZkNote {
      *
      * @returns {Class} PrivateRangeProof Class with the constructed proof
      */
-    async equal(note, {
+    async equal(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
+        if (!this.visible) {
+            return false;
+        }
+
         const originalNote = await this.export();
         return provePrivateRange({
             type: 'eq',
             originalNote,
-            comparisonNote: note,
+            comparisonNote,
             utilityNote,
             sender,
         });
@@ -143,14 +144,18 @@ export default class ZkNote {
      *
      * @returns {Class} PrivateRangeProof Class with the constructed proof
      */
-    async greaterThan(note, {
+    async greaterThan(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
+        if (!this.visible) {
+            return false;
+        }
+
         const originalNote = await this.export();
         return provePrivateRange({
             originalNote,
-            comparisonNote: note,
+            comparisonNote,
             utilityNote,
             sender,
         });
@@ -171,14 +176,18 @@ export default class ZkNote {
      *
      * @returns {Class} PrivateRangeProof Class with the constructed proof
      */
-    async lessThan(note, {
+    async lessThan(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
-        const comparisonNote = await this.export();
+        if (!this.visible) {
+            return false;
+        }
+
+        const originalNote = await this.export();
         return provePrivateRange({
-            originalNote: note,
-            comparisonNote,
+            originalNote: comparisonNote,
+            comparisonNote: originalNote,
             utilityNote,
             sender,
         });
@@ -200,15 +209,19 @@ export default class ZkNote {
      *
      * @returns {Class} PrivateRangeProof Class with the constructed proof
      */
-    async greaterThanOrEqualTo(note, {
+    async greaterThanOrEqualTo(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
+        if (!this.visible) {
+            return false;
+        }
+
         const originalNote = await this.export();
         return provePrivateRange({
             type: 'gte',
             originalNote,
-            comparisonNote: note,
+            comparisonNote,
             utilityNote,
             sender,
         });
@@ -230,15 +243,19 @@ export default class ZkNote {
      *
      * @returns {Class} PrivateRangeProof Class with the constructed proof
      */
-    async lessThanOrEqualTo(note, {
+    async lessThanOrEqualTo(comparisonNote, {
         sender = '',
         utilityNote = null,
     } = {}) {
-        const comparisonNote = await this.export();
+        if (!this.visible) {
+            return false;
+        }
+
+        const originalNote = await this.export();
         return provePrivateRange({
             type: 'gte',
-            originalNote: note,
-            comparisonNote,
+            originalNote: comparisonNote,
+            comparisonNote: originalNote,
             utilityNote,
             sender,
         });

@@ -1,13 +1,19 @@
+const apiKeyQuota = 'https://bv9t4hwozi.execute-api.us-east-1.amazonaws.com/Stage/{networkId}/{apiKey}';
+
 const production = {
-    public: 'http://sdk.aztecprotocol.com/public',
-    background: 'http://sdk.aztecprotocol.com/public/background.html',
-    ui: 'http://sdk.aztecprotocol.com/public/ui.html',
+    origin: 'https://sdk.aztecprotocol.com',
+    public: 'https://sdk.aztecprotocol.com/{version}/sdk/public',
+    background: 'https://sdk.aztecprotocol.com/{version}/sdk/background.html',
+    ui: 'https://sdk.aztecprotocol.com/{version}/sdk/ui.html',
+    apiKeyQuota,
 };
 
 const development = {
-    public: 'http://localhost:5555/sdk/public',
-    background: 'http://localhost:5555/sdk/public/background.html',
-    ui: 'http://localhost:5555/sdk/public/ui.html',
+    origin: 'https://localhost:5555',
+    public: 'https://localhost:5555/sdk/public',
+    background: 'https://localhost:5555/sdk/public/background.html',
+    ui: 'https://localhost:5555/sdk/public/ui.html',
+    apiKeyQuota,
 };
 
 const config = process.env.NODE_ENV === 'production'

@@ -18,7 +18,7 @@ import Loading from '~/ui/views/Loading';
 import routes from '~uiModules/config/routes';
 import actions from '~/ui/config/actions';
 import getAuthRoute from '~/ui/utils/getAuthRoute';
-import getGsnConfig from '~/utils/getGSNConfig';
+import ensureMinPendingTime from '~/ui/utils/ensureMinPendingTime';
 import './styles/guacamole.css';
 import './styles/ui.scss';
 
@@ -34,7 +34,6 @@ class App extends PureComponent {
         this.state = {
             loading: !mock,
             currentAccount: null,
-            gsnConfig: {},
             action: null,
             nextRoute: '',
         };
@@ -53,15 +52,33 @@ class App extends PureComponent {
         } = this.props;
         if (mock) return;
 
-        const action = await ConnectionService.openConnection();
-        await this.loadInitialStates(action);
+        await ConnectionService.openConnection(this.handleNewAction);
     }
 
     componentDidUpdate() {
         this.confirmRedirect();
     }
 
+    handleNewAction = (action) => {
+        if (action.type === 'closed') {
+            this.setState({
+                loading: true,
+                nextRoute: '',
+            });
+        } else {
+            this.loadActionStates(action);
+        }
+    };
+
     goToPage = (route) => {
+        if (route === 'loading') {
+            this.setState({
+                loading: true,
+                nextRoute: '',
+            });
+            return;
+        }
+
         const {
             history,
         } = this.props;
@@ -80,8 +97,9 @@ class App extends PureComponent {
     confirmRedirect() {
         const {
             nextRoute,
+            loading,
         } = this.state;
-        if (nextRoute && this.isCurrentPage(nextRoute)) {
+        if (loading && nextRoute && this.isCurrentPage(nextRoute)) {
             this.setState({
                 nextRoute: '',
                 loading: false,
@@ -89,10 +107,10 @@ class App extends PureComponent {
         }
     }
 
-    async loadInitialStates(action) {
+    async loadActionStates(action) {
         if (!action) return;
 
-        const gsnConfig = await getGsnConfig();
+        const startTime = Date.now();
 
         const {
             type,
@@ -133,24 +151,27 @@ class App extends PureComponent {
                 currentAccount.linkedPublicKey = localLinkedPublicKey;
             }
         }
-        if (!this.isCurrentPage(route)) {
-            this.setState(
-                {
-                    nextRoute: route,
-                    action: actionData,
-                    currentAccount,
-                    gsnConfig,
-                },
-                () => this.goToPage(route),
-            );
-            return;
-        }
 
-        this.setState({
-            loading: false,
+        const nextState = {
+            nextRoute: route,
             action: actionData,
             currentAccount,
-        });
+        };
+
+        const minDelayTime = Math.max(0, 2000 - (Date.now() - startTime));
+        if (this.isCurrentPage(route)) {
+            setTimeout(() => {
+                this.setState(nextState);
+            }, minDelayTime);
+        } else {
+            this.setState(
+                {
+                    ...nextState,
+                    loading: true,
+                },
+                ensureMinPendingTime(() => this.goToPage(route), minDelayTime),
+            );
+        }
     }
 
     renderRoutes(config, parent = {}) {
@@ -162,7 +183,6 @@ class App extends PureComponent {
         const {
             currentAccount,
             action,
-            gsnConfig,
         } = this.state;
 
         Object.keys(config).forEach((subName) => {
@@ -195,11 +215,10 @@ class App extends PureComponent {
                         key={path}
                         name={name}
                         path={path}
-                        gsnConfig={gsnConfig}
                         currentAccount={currentAccount}
                         action={action}
-                        goToPage={this.goToPage}
                         Component={Component}
+                        goToPage={this.goToPage}
                     />
                 );
                 if (name === '_') {

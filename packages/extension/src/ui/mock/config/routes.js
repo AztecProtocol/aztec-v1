@@ -1,21 +1,24 @@
 import Home from '~/ui/views/Home';
 import Loading from '~/ui/views/Loading';
-import Register from '~/ui/pages/Register';
-import RegisterAddress from '~/ui/pages/RegisterAddress';
+import RegisterContent from '~/ui/views/RegisterContent';
 import DomainPermission from '~/ui/pages/DomainPermission';
 import Restore from '~/ui/pages/Restore';
 import Login from '~/ui/pages/Login';
-import NoteAccess from '~/ui/pages/NoteAccess';
 import Icons from '~/ui/views/playground/Icons';
 import DepositContent from '~/ui/views/DepositContent';
 import WithdrawContent from '~/ui/views/WithdrawContent';
+import SendContent from '~/ui/views/SendContent';
+import CreateNoteFromBalanceContent from '~/ui/views/CreateNoteFromBalanceContent';
+import GrantNoteAccessContent from '~/ui/views/GrantNoteAccessContent';
+import registerSteps from '~/ui/steps/register';
 import depositSteps from '~/ui/steps/deposit';
 import withdrawSteps from '~/ui/steps/withdraw';
+import sendSteps from '~/ui/steps/send';
 import createNoteFromBalanceSteps from '~/ui/steps/createNoteFromBalance';
+import grantNoteAccessSteps from '~/ui/steps/grantNoteAccess';
 import {
-    registerSteps,
-    sendSteps,
-} from '~/ui/config/steps';
+    invalidGSNConfig,
+} from '../data';
 
 export default {
     _: {
@@ -27,34 +30,39 @@ export default {
     },
     register: {
         path: 'register',
-        Component: Register,
+        Content: RegisterContent,
+        steps: registerSteps.gsn,
+        initialStep: 0,
         routes: {
-            backup: {
-                path: 'backup',
-                step: registerSteps.gsn[1],
-            },
-            password: {
-                path: 'password',
-                step: registerSteps.gsn[2],
-            },
             link: {
                 path: 'link-account',
-                step: registerSteps.gsn[3],
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 1,
+            },
+            sign: {
+                path: 'sign',
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 2,
             },
             confirm: {
                 path: 'confirm',
-                step: registerSteps.gsn[4],
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 3,
+            },
+            send: {
+                path: 'send',
+                Content: RegisterContent,
+                steps: registerSteps.gsn,
+                initialStep: 4,
             },
             address: {
                 path: 'address',
-                Component: RegisterAddress,
-                routes: {
-                    confirm: {
-                        path: 'confirm',
-                        Component: RegisterAddress,
-                        initialStep: 1,
-                    },
-                },
+                Content: RegisterContent,
+                steps: registerSteps.gsn.slice(1),
+                initialStep: 0,
             },
             domain: {
                 path: 'domain',
@@ -100,6 +108,19 @@ export default {
                 steps: depositSteps.gsn,
                 initialStep: 2,
             },
+            MetaMask: {
+                path: 'metamask',
+                Content: DepositContent,
+                steps: depositSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
+            },
+            publicApprove: {
+                path: 'public-approve',
+                Content: DepositContent,
+                steps: depositSteps.gsnTransfer,
+                initialStep: 0,
+            },
         },
     },
     withdraw: {
@@ -126,41 +147,101 @@ export default {
                 steps: withdrawSteps.gsn,
                 initialStep: 3,
             },
+            MetaMask: {
+                path: 'metamask',
+                Content: WithdrawContent,
+                steps: withdrawSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
+            },
         },
     },
     send: {
         path: 'send',
-        step: sendSteps.gsn[0],
+        Content: SendContent,
+        steps: sendSteps.gsn,
+        initialStep: 0,
         routes: {
             sign: {
                 path: 'sign',
-                step: sendSteps.gsn[1],
+                Content: SendContent,
+                steps: sendSteps.gsn,
                 initialStep: 1,
+            },
+            confirm: {
+                path: 'confirm',
+                Content: SendContent,
+                steps: sendSteps.gsn,
+                initialStep: 2,
             },
             send: {
                 path: 'send',
-                step: sendSteps.gsn[2],
-                initialStep: 2,
+                Content: SendContent,
+                steps: sendSteps.gsn,
+                initialStep: 3,
+            },
+            MetaMask: {
+                path: 'metamask',
+                Content: SendContent,
+                steps: sendSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
             },
         },
     },
     createNote: {
         path: 'create-note',
-        step: createNoteFromBalanceSteps.gsn[0],
+        Content: CreateNoteFromBalanceContent,
+        steps: createNoteFromBalanceSteps.gsn,
+        initialStep: 0,
         routes: {
             sign: {
                 path: 'sign',
-                step: createNoteFromBalanceSteps.gsn[1],
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.gsn,
+                initialStep: 1,
+            },
+            confirm: {
+                path: 'confirm',
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.gsn,
+                initialStep: 2,
             },
             send: {
                 path: 'send',
-                step: createNoteFromBalanceSteps.gsn[2],
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.gsn,
+                initialStep: 3,
+            },
+            MetaMask: {
+                path: 'metamask',
+                Content: CreateNoteFromBalanceContent,
+                steps: createNoteFromBalanceSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
             },
         },
     },
     noteAccess: {
         path: 'note-access',
-        Component: NoteAccess,
+        Content: GrantNoteAccessContent,
+        steps: grantNoteAccessSteps.gsn,
+        initialStep: 0,
+        routes: {
+            send: {
+                path: 'send',
+                Content: GrantNoteAccessContent,
+                steps: grantNoteAccessSteps.gsn,
+                initialStep: 1,
+            },
+            MetaMask: {
+                path: 'metamask',
+                Content: GrantNoteAccessContent,
+                steps: grantNoteAccessSteps.metamask,
+                initialStep: 0,
+                gsnConfig: invalidGSNConfig,
+            },
+        },
     },
     playground: {
         path: 'playground',

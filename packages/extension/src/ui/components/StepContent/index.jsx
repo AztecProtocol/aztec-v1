@@ -35,6 +35,7 @@ const StepContent = ({
     disableOnPrevious,
     disableOnNext,
     loading,
+    hideFooter,
     error,
     childError,
     onPrevious,
@@ -123,6 +124,7 @@ const StepContent = ({
                                 >
                                     <TextButton
                                         {...footnote}
+                                        testId="link-footer"
                                         Link={Link}
                                         color="label"
                                         size="xxs"
@@ -132,23 +134,25 @@ const StepContent = ({
                         </Block>
                     )}
                 </div>
-                <Footer
-                    prevText={cancelText
-                        || (cancelTextKey && i18n.t(cancelTextKey))
-                        || ''}
-                    nextText={submitText
-                        || (submitTextKey && i18n.t(submitTextKey))
-                        || ''}
-                    submitType={submitType}
-                    submitMessage={submitMessage}
-                    disableOnPrevious={disableOnPrevious}
-                    disableOnNext={disableOnNext}
-                    loading={loading}
-                    error={error}
-                    onPrevious={onPrevious}
-                    onNext={onNext}
-                    onRetry={onRetry}
-                />
+                {!hideFooter && (
+                    <Footer
+                        prevText={cancelText
+                            || (cancelTextKey && i18n.t(cancelTextKey))
+                            || ''}
+                        nextText={submitText
+                            || (submitTextKey && i18n.t(submitTextKey))
+                            || ''}
+                        submitType={submitType}
+                        submitMessage={submitMessage}
+                        disableOnPrevious={disableOnPrevious}
+                        disableOnNext={disableOnNext}
+                        loading={loading}
+                        error={error}
+                        onPrevious={onPrevious}
+                        onNext={onNext}
+                        onRetry={onRetry}
+                    />
+                )}
             </FlexBox>
         </div>
     );
@@ -180,6 +184,7 @@ StepContent.propTypes = {
     onNext: PropTypes.func,
     onRetry: PropTypes.func,
     loading: PropTypes.bool,
+    hideFooter: PropTypes.bool,
     error: errorShape,
     childError: errorShape,
 };
@@ -203,6 +208,7 @@ StepContent.defaultProps = {
     onNext: null,
     onRetry: null,
     loading: false,
+    hideFooter: false,
     error: null,
     childError: null,
 };

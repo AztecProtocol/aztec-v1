@@ -2,14 +2,17 @@ import React, { PureComponent } from 'react';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {
-    Block,
-    Icon,
+    SVG,
 } from '@aztec/guacamole-ui';
 import {
     animatedBlockType,
     profileShape,
 } from '~/ui/config/propTypes';
+import {
+    iconSizeMap,
+} from '~/ui/styles/guacamole-vars';
 import AztecSvg from '~/ui/components/AztecSvg';
+import linkGlyph from '~/ui/images/link.svg';
 import EntityBlock from './EntityBlock';
 import styles from './blocks.scss';
 
@@ -91,27 +94,7 @@ class AnimatedBlocks extends PureComponent {
                     },
                 )}
             >
-                {!!sealedIcon && type === 'sealed' && (
-                    <div className={styles['sealed-icon']}>
-                        {sealedIcon === 'aztec' && (
-                            <AztecSvg
-                                theme="light"
-                                size="s"
-                            />
-                        )}
-                        {sealedIcon !== 'aztec' && (
-                            <Icon
-                                name={sealedIcon}
-                                size="m"
-                                color="white"
-                            />
-                        )}
-                    </div>
-                )}
-                {blocks.map(({
-                    extraContent,
-                    ...block
-                }, i) => (
+                {blocks.map((block, i) => (
                     <div
                         key={+i}
                         className={classnames(
@@ -122,15 +105,28 @@ class AnimatedBlocks extends PureComponent {
                             },
                         )}
                     >
-                        <EntityBlock {...block}>
-                            {!!extraContent && (
-                                <div className={styles['block-extra']}>
-                                    <Block padding="l xl">
-                                        {extraContent}
-                                    </Block>
-                                </div>
-                            )}
-                        </EntityBlock>
+                        <EntityBlock
+                            layer={0}
+                            {...block}
+                        />
+                        {!!sealedIcon && type === 'sealed' && i === 0 && (
+                            <div className={styles['sealed-icon']}>
+                                {sealedIcon === 'aztec' && (
+                                    <AztecSvg
+                                        theme="light"
+                                        size="s"
+                                    />
+                                )}
+                                {sealedIcon === 'link' && (
+                                    <SVG
+                                        glyph={linkGlyph}
+                                        color="white"
+                                        width={iconSizeMap.m}
+                                        height={iconSizeMap.m}
+                                    />
+                                )}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -139,7 +135,7 @@ class AnimatedBlocks extends PureComponent {
 }
 
 AnimatedBlocks.propTypes = {
-    type: PropTypes.oneOf(animatedBlockType).isRequired,
+    type: PropTypes.oneOf(animatedBlockType),
     blocks: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.oneOfType([
             PropTypes.string,
@@ -161,6 +157,7 @@ AnimatedBlocks.propTypes = {
 };
 
 AnimatedBlocks.defaultProps = {
+    type: '',
     sealedIcon: '',
 };
 

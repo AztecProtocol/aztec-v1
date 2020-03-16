@@ -1,10 +1,8 @@
 ## Aztec.js
 
-This library contains methods required to construct AZTEC zero-knowledge proofs, and to create the required [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) signatures in order to spend AZTEC notes.
+This library contains the methods required to construct AZTEC zero-knowledge proofs.
 
-**IMPORTANT: The deployed AZTEC smart contracts use a trusted setup created by AZTEC in-house and should only be used for testing and development purposes. We will be launching a multiparty computation protocol to create a trusted setup that is secured by the wider Ethereum community, where only one person has to act honestly for the setup database to be secure. If you wish to participate please let us know at hello@aztecprotocol.com**
-
-This repository is under active development, with our interfaces and smart contracts changing substantially as we prepare our Cryptography Engine. If you want to investigate the smart contracts and tooling that created our first zero-knowledge AZTEC transactions, please clone from the [`release-0.1.0`](https://github.com/AztecProtocol/AZTEC/tree/release-0.1.0) branch.
+It also contains various utility functions, such as methods to appropriately ABI encode the proofs and to construct the EIP712 signatures [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) required to spend AZTEC notes.
 
 ## Usage
 
@@ -73,9 +71,9 @@ const validatorAddress = '0x76581320dCdFFC93E2FFFF7DADfE668Ba55796a9';
 
 const accounts = [secp256k1.generateAccount(), secp256k1.generateAccount()];
 
-const inputNotes = [note.create(accounts[0].publicKey, 80), note.create(accounts[0].publicKey, 60)];
+const inputNotes = [await note.create(accounts[0].publicKey, 80), await note.create(accounts[0].publicKey, 60)];
 
-const outputNotes = [note.create(accounts[1].publicKey, 50), note.create(accounts[1].publicKey, 100)];
+const outputNotes = [await note.create(accounts[1].publicKey, 50), await note.create(accounts[1].publicKey, 100)];
 
 const publicValue = -10; // input notes contain 10 fewer than output notes = deposit of 10 public tokens
 const sender = accounts[0].address; // address of transaction sender

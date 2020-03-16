@@ -1,6 +1,6 @@
 {
   "name": "@aztec/typed-data",
-  "description": "JavaScript library for working with typed structured data as defined by EIP-712",
+  "description": "JavaScript library for working with EIP-712 style typed structured data",
   "version": "0.0.0-semantically-released",
   "author": "AZTEC",
   "bugs": {

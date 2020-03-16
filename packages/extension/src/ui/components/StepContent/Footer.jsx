@@ -98,9 +98,16 @@ class Footer extends PureComponent {
             nextError,
         } = this.state;
 
-        const error = nextError || currentError || prevError;
+        let error = nextError || currentError || prevError;
         if (!error) {
             return null;
+        }
+
+        if (!error.message) {
+            error = {
+                ...error,
+                message: i18n.t(error.key, error.response),
+            };
         }
 
         const isFetal = error.fetal;
@@ -117,13 +124,13 @@ class Footer extends PureComponent {
                 padding="xs"
             >
                 <Text
-                    text={error.message
-                      || i18n.t(error.key, error.response)}
+                    text={error.message}
                     color="red"
                     size="xxs"
                 />
                 <Block top="xxs">
                     <TextButton
+                        testId={`button-step-${isFetal ? 'close' : 'retry'}`}
                         theme="underline"
                         text={i18n.t(isFetal ? 'close' : 'retry')}
                         size="m"
@@ -210,8 +217,10 @@ class Footer extends PureComponent {
             >
                 {!!(onPrevious && prevText) && (
                     <Button
+                        testId="button-step-previous"
                         className={styles['footer-button']}
                         theme="white"
+                        size="xl"
                         text={prevText}
                         onSubmit={onPrevious}
                         disabled={loading || disableOnPrevious}
@@ -220,7 +229,9 @@ class Footer extends PureComponent {
                 )}
                 {!!(onNext && nextText) && (
                     <Button
+                        testId="button-step-next"
                         className={styles['footer-button']}
+                        size="xl"
                         text={nextText}
                         onSubmit={onNext}
                         loading={loading}

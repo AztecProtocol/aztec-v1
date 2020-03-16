@@ -10,9 +10,6 @@ import {
     START_EVENTS_SYNCING_BLOCK,
 } from '~/config/constants';
 import {
-    get,
-} from '~/utils/storage';
-import {
     createAccount,
     fetchAccount,
 } from './utils/account';
@@ -23,6 +20,7 @@ import {
 import {
     fetchNotes,
 } from './utils/note';
+import Web3Service from '~/helpers/Web3Service';
 import Note from '~/background/database/models/note';
 import Account from '~/background/database/models/account';
 import Asset from '~/background/database/models/asset';
@@ -380,7 +378,7 @@ class EventService {
     }) => {
         const currentNetworkId = networkId !== null
             ? networkId
-            : await get('networkId');
+            : Web3Service.networkId;
         let error = null;
         let asset = await Asset.get(
             { networkId: currentNetworkId },

@@ -2,7 +2,9 @@ import {
     warnLog,
 } from '~/utils/log';
 import dataKeyConfig from '~/config/dataKey';
-import formatStrPattern from '~/utils/formatStrPattern';
+import {
+    formatStrPattern,
+} from '~/utils/format';
 
 export default function dataKey(type, data, config = dataKeyConfig) {
     const pattern = typeof type === 'string' && type.match(/{([^{}]+)}/)
