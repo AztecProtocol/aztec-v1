@@ -470,8 +470,6 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
 
         // if customData has been set, approve the relevant addresses
         if (uint256(metaDataLength) > 0x61) {
-            address[] memory extractedAddresses = new address[](uint256(numAddresses));
-
             for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
                 address extractedAddress = extractAddress(metaData, i);
                 bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));
