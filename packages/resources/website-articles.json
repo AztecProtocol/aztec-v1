@@ -32,19 +32,19 @@
     "title": "Benchmarks",
     "content": [
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=752&q=80",
-        "title": "Donec iaculis sagittis augue eu tempus",
-        "caption": "",
-        "description": "Duis at orci hendrerit, tempor erat ac, cursus velit. Donec porta sapien ex, pharetra commodo felis pretium sed.",
-        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "coverPhoto": "https://images.unsplash.com/photo-1486303394622-2e168a275e36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+        "title": "TurboPLONK Benchmarks II",
+        "caption": "5x faster than Groth16 over Pedersen hashes",
+        "description": "Demonstrating fast proof construction times over Pedersen hashes",
+        "link": "https://medium.com/aztec-protocol/plonk-benchmarks-ii-5x-faster-than-groth16-on-pedersen-hashes-ea5285353db0",
         "paperLink": ""
       },
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1550645612-83f5d594b671?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
-        "title": "Proin non lacus nec orci suscipit sagittis",
-        "caption": "",
-        "description": "Vivamus eu aliquam est. Pellentesque euismod est nulla, at dapibus enim rutrum eget. Aenean quis dui eget sem pretium semper id ac justo.",
-        "link": "https://medium.com/aztec-protocol/the-hunting-of-the-snark-1-3-a610c28317c7",
+        "coverPhoto": "https://images.unsplash.com/photo-1508962914676-134849a727f0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+        "title": "TurboPLONK Benchmarks II",
+        "caption": "The results of our PLONK implementation on MiMC Hashes",
+        "description": "Aztec's PLONK implementation delivers fast proof construction times over MiMC hashes",
+        "link": "https://medium.com/aztec-protocol/plonk-benchmarks-2-5x-faster-than-groth16-on-mimc-9e1009f96dfe",
         "paperLink": ""
       }
     ]
