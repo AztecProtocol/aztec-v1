@@ -55,7 +55,7 @@
       {
         "coverPhoto": "https://enterindotblog.files.wordpress.com/2017/01/1538673.jpg?w=750",
         "title": "Why Hashes Dominate in SNARKs",
-        "caption": "An explanation of SNARKs are benchmarked on how quickly they validate hashes",
+        "caption": "Explaining why SNARKs are benchmarked by their performance over hashes",
         "description": "ZK-SNARK private assets are usually administrated using a pair of Merkle trees, a dense 'new note' tree and a sparse nullifier tree. This article explains the rationale for this architecture.",
         "link": "https://medium.com/aztec-protocol/why-hashes-dominate-in-snarks-b20a555f074c",
         "paperLink": ""
