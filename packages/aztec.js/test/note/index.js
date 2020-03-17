@@ -110,7 +110,7 @@ describe('Note', () => {
             expect(metaData.slice(130, 196)).to.equal(customData.slice(2));
         });
 
-        it.only('should add note access when creating note', async () => {
+        it('should add note access when creating note', async () => {
             const access = [
                 {
                     address: userAccount.address,

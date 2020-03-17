@@ -344,7 +344,7 @@ module.exports = {
         },
         {
             name: ' Specification',
-            content: 'styleguide/categories/Specification/Contents.md',
+            content: 'styleguide/categories/Specification/index.md',
             pagePerSection: true,
             sectionDepth: 2,
             sections: [

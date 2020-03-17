@@ -59,7 +59,7 @@ const confidentialApprove = async (zkAssetMintable, delegateAddress, indexes, no
     );
 };
 
-contract.only('ZkAssetMintable', (accounts) => {
+contract('ZkAssetMintable', (accounts) => {
     describe('Success States', () => {
         let ace;
         let erc20;

@@ -131,7 +131,7 @@ jobs:
             - run:
                 name: "Publish Docs"
                 command: yarn publish:docs
-    deploy-docs-sdk:
+    deploy-docs:
         working_directory: ~/repo
         executor: aws-cli/default
         steps:
@@ -140,16 +140,15 @@ jobs:
             - restore_cache:
                 keys:
                     - repo-{{ .Environment.CIRCLE_SHA1 }}
-            - run: echo "current dir is" ${pwd} 
             - run: 
                 name: Delete old docs
-                command: aws s3 rm s3://aztec-test-doc-deploy --recursive
+                command: aws s3 rm s3://${AWS_DOCS_BUCKET} --recursive
             - run:
                 name: Upload new docs
-                command: aws s3 cp ./packages/documentation/public s3://aztec-test-doc-deploy --recursive --metadata-directive REPLACE --cache-control "max-age=3600" --acl public-read
-            # - run:
-            #     - name: Clear cache
-            #     - command: aws cloudfront create-invalidation --distribution-id ${AWS_CLOUDFRONT_DISTRIBUTION} --paths "/*"
+                command: aws s3 cp ./packages/documentation/public s3://${AWS_DOCS_BUCKET} --recursive --metadata-directive REPLACE --cache-control "max-age=3600" --acl public-read
+            - run:
+                name: Clear cache
+                command: aws cloudfront create-invalidation --distribution-id ${AWS_DOCS_CLOUDFRONT} --paths "/*"
     release:
         working_directory: ~/repo
         docker:
@@ -208,15 +207,16 @@ workflows:
                     branches:
                         only:
                             - develop
-            - deploy-docs-sdk:
+            - deploy-docs:
                 requires:
-                    - build
+                    - lint
+                    - test
                 context: aws
-                #     - test
-                # filters:
-                #     branches:
-                #         only:
-                #             - develop
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - develop
             - release:
                 requires:
                     - lint
