@@ -5,7 +5,7 @@
  * @returns {string}
  */
 export function unquote(string) {
-  return string && string.replace(/^['"]|['"]$/g, '');
+    return string && string.replace(/^['"]|['"]$/g, '');
 }
 
 /**
@@ -15,17 +15,17 @@ export function unquote(string) {
  * @returns {object}
  */
 export function getType(prop) {
-  if (prop.flowType) {
-    if (prop.flowType.name === 'union' && prop.flowType.elements.every((elem) => elem.name === 'literal')) {
-      return {
-        ...prop.flowType,
-        name: 'enum',
-        value: prop.flowType.elements,
-      };
+    if (prop.flowType) {
+        if (prop.flowType.name === 'union' && prop.flowType.elements.every((elem) => elem.name === 'literal')) {
+            return {
+                ...prop.flowType,
+                name: 'enum',
+                value: prop.flowType.elements,
+            };
+        }
+        return prop.flowType;
     }
-    return prop.flowType;
-  }
-  return prop.type;
+    return prop.type;
 }
 
 /**
@@ -35,5 +35,5 @@ export function getType(prop) {
  * @returns {string}
  */
 export function showSpaces(string) {
-  return string && string.replace(/^\s|\s$/g, '␣');
+    return string && string.replace(/^\s|\s$/g, '␣');
 }

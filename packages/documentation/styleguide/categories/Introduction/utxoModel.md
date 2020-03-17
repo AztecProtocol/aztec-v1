@@ -5,5 +5,3 @@ AZTEC utilises a UTXO model like that of Bitcoin, where the UTXOs are called `no
 
 <img src="../../images/utxoModel.png" width="50%">
 &nbsp
-
-

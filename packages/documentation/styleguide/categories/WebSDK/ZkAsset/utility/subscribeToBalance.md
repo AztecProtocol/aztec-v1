@@ -9,9 +9,7 @@ const asset = await window.aztec.zkAsset(zkAssetAddress);
 
 // Create a function that renders a message to the page
 const showBalance = (balance) => {
-  document.getElementById('asset-balance').innerHTML = balance < 10
-    ? 'Insufficient funds'
-    : `Available funds: ${balance}`;
+    document.getElementById('asset-balance').innerHTML = balance < 10 ? 'Insufficient funds' : `Available funds: ${balance}`;
 };
 
 // Listen to balance changes
@@ -22,12 +20,12 @@ asset.subscribeToBalance(showBalance);
 
 ```js static
 class Wallet extends React.Component {
-  componentDidMount() {
-    this.asset.subscribeToBalance(this.updateBalance);
-  }
+    componentDidMount() {
+        this.asset.subscribeToBalance(this.updateBalance);
+    }
 
-  componentWillUnmount() {
-    this.asset.unsubscribeToBalance(this.updateBalance);
-  }
+    componentWillUnmount() {
+        this.asset.unsubscribeToBalance(this.updateBalance);
+    }
 }
 ```

@@ -4,15 +4,16 @@ An AZTEC note is the fundamental encrypted representation of value in the AZTEC 
 
 The SDK abstracts away the complexities of using notes for standard functionality, such as: _send()_, _deposit()_ or _withdraw()_.
 
-However if as a developer you wish to work with more advanced AZTEC zero-knowledge proofs such as the dividend or privateRange proofs, then you will need to work directly with notes as described in the protocol specification: `https://github.com/AztecProtocol/specification `.
+However if as a developer you wish to work with more advanced AZTEC zero-knowledge proofs such as the dividend or privateRange proofs, then you will need to work directly with notes as described in the protocol specification: `https://github.com/AztecProtocol/specification`.
 
 ## Note object properties
 
 Notes returned by the SDK have four properties on them:
-- noteHash: the hash of the note, a unique identifier
-- value: the value which the note represents
-- owner: the Ethereum address that owns the note. Ownership is defined as having both the private key and viewing key to the note
-- status: status defining whether the note is spent or unspent. If unspent (and therefore available for spending) it will return 'CREATED', if spent (and therefore unavailable for spending) 'DESTROYED'.
+
+-   noteHash: the hash of the note, a unique identifier
+-   value: the value which the note represents
+-   owner: the Ethereum address that owns the note. Ownership is defined as having both the private key and viewing key to the note
+-   status: status defining whether the note is spent or unspent. If unspent (and therefore available for spending) it will return 'CREATED', if spent (and therefore unavailable for spending) 'DESTROYED'.
 
 These properties are demonstrated in the below demo code:
 
@@ -38,17 +39,17 @@ console.info({ zkNote });
 
 ### The `ZkNote` exposed by the SDK has the following data and methods:
 
-- _valid_ (Boolean)
-- _visible_ (Boolean)
-- _destroyed_ (Boolean)
-- _noteHash_ (NoteHash)
-- _value_ (Integer)
-- _viewingKey_ (String)
-- _owner_ (Object)
-- [`async export()`](/#/SDK/zkNote/.export)
-- [`async grantAccess()`](/#/SDK/zkNote/.grantAccess)
-- [`async equal()`](/#/SDK/zkNote/.equal)
-- [`async greaterThan()`](/#/SDK/zkNote/.greaterThan)
-- [`async greaterThanOrEqualTo()`](/#/SDK/zkNote/.greaterThanOrEqualTo)
-- [`async lessThan()`](/#/SDK/zkNote/.lessThan)
-- [`async lessThanOrEqualTo()`](/#/SDK/zkNote/.lessThanOrEqualTo)
+-   _valid_ (Boolean)
+-   _visible_ (Boolean)
+-   _destroyed_ (Boolean)
+-   _noteHash_ (NoteHash)
+-   _value_ (Integer)
+-   _viewingKey_ (String)
+-   _owner_ (Object)
+-   [`async export()`](/#/SDK/zkNote/.export)
+-   [`async grantAccess()`](/#/SDK/zkNote/.grantAccess)
+-   [`async equal()`](/#/SDK/zkNote/.equal)
+-   [`async greaterThan()`](/#/SDK/zkNote/.greaterThan)
+-   [`async greaterThanOrEqualTo()`](/#/SDK/zkNote/.greaterThanOrEqualTo)
+-   [`async lessThan()`](/#/SDK/zkNote/.lessThan)
+-   [`async lessThanOrEqualTo()`](/#/SDK/zkNote/.lessThanOrEqualTo)

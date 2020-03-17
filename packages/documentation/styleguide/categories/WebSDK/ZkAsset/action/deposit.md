@@ -14,14 +14,12 @@ console.info({ balanceBeforeDeposit });
 
 // Deposit funds into the ZkAsset
 const depositAmount = 50;
-const response = await asset.deposit(
-  [
+const response = await asset.deposit([
     {
-      to: userAddress,
-      amount: depositAmount,
+        to: userAddress,
+        amount: depositAmount,
     },
-  ],
-);
+]);
 console.info(response);
 
 const balanceAfterDeposit = await asset.balance();
@@ -41,14 +39,12 @@ console.info({ balanceBeforeDeposit });
 
 // Deposit funds into the ZkAsset
 const depositAmount = 50;
-const response = await asset.deposit(
-  [
+const response = await asset.deposit([
     {
-      to: thirdPartyAddress,
-      amount: depositAmount,
+        to: thirdPartyAddress,
+        amount: depositAmount,
     },
-  ],
-);
+]);
 console.info(response);
 
 const balanceAfterDeposit = await asset.balance();

@@ -1,11 +1,12 @@
 ## Creating a note registry
+
 An instance of a note registry is created inside ACE, via `createNoteRegistry(address _linkedTokenAddress, uint256 _scalingFactor, bool _canAdjustSupply, bool _canConvert)`.
 
-The `_canAdjustSupply` flag defines whether the note registry owner an directly modify the note registry state by minting and burning AZTEC notes. The `_canConvert` flags defines whether ERC20 tokens from `_linkedTokenAddress` can be converted into AZTEC notes. If `_canConvert` is `false`, then `_linkedTokenAddress = address(0)` and the asset is a fully private asset.  
+The `_canAdjustSupply` flag defines whether the note registry owner an directly modify the note registry state by minting and burning AZTEC notes. The `_canConvert` flags defines whether ERC20 tokens from `_linkedTokenAddress` can be converted into AZTEC notes. If `_canConvert` is `false`, then `_linkedTokenAddress = address(0)` and the asset is a fully private asset.
 
-For a given note registry, only the owner can call `ACE.updateNoteRegistry`, `ACE.mint` or `ACE.burn`. Traditionally this is imagined to be a `zkAsset` smart contract. This allows the `zkAsset` contract to have absolute control over what types of proof can be used to update the note registry, as well as the conditions under which updates can occur (if extra validation logic is required, for example).  
+For a given note registry, only the owner can call `ACE.updateNoteRegistry`, `ACE.mint` or `ACE.burn`. Traditionally this is imagined to be a `zkAsset` smart contract. This allows the `zkAsset` contract to have absolute control over what types of proof can be used to update the note registry, as well as the conditions under which updates can occur (if extra validation logic is required, for example).
 
-## Note Registry Variables  
+## Note Registry Variables
 
 ### `NoteRegistryBehaviour behaviour`
 
@@ -19,7 +20,7 @@ Address of the linked `ERC20` token, cast with the required interface `IERC20Min
 
 Unique ID of the latest note registry factory contract version.
 
-### `uint256 totalSupply`  
+### `uint256 totalSupply`
 
 This variable represents the total amount of tokens that currently reside within `ACE` as a result of tokens being converted into AZTEC notes, for a given note registry.
 
@@ -27,40 +28,35 @@ This variable represents the total amount of tokens that currently reside within
 
 Total number of tokens supplemented to the ACE, as a result of tokens being transferred when conversion of minted notes to public value was attempted and there were not sufficient tokens held by ACE.
 
-### `mapping (address => mapping(bytes32 => uint256)) publicApprovals` 
+### `mapping (address => mapping(bytes32 => uint256)) publicApprovals`
 
 Mapping of `publicOwner` => `proofHash` => number of tokens approved to be spent on behalf of that `proof` and `publicOwner`.
 
-
-
-
-
-
 It should be noted that the various `NoteRegistryBehaviour` versions may have a different set of variables, as specified in the relevant interface contract. These can include:
 
-### `bytes32 confidentialTotalMinted`  
+### `bytes32 confidentialTotalMinted`
 
-This variable is the keccak256 hash of an AZTEC UTXO note that defines the total amount of value that a note registry has directly minted.  
+This variable is the keccak256 hash of an AZTEC UTXO note that defines the total amount of value that a note registry has directly minted.
 
-When a note registry is created, this note is set to be an AZTEC UTXO note that has a value of `0` and a viewing key of `1`. 
+When a note registry is created, this note is set to be an AZTEC UTXO note that has a value of `0` and a viewing key of `1`.
 
-### `bytes32 confidentialTotalBurned`  
+### `bytes32 confidentialTotalBurned`
 
 This variable is the kecckak256 hash of an AZTEC UTXO note that defines the total amount of value that a note registry has directly burned.
 
-When a note registry is created, this note is set to be an AZTEC UTXO note that has a value of `0` and a viewing key of `1`. 
+When a note registry is created, this note is set to be an AZTEC UTXO note that has a value of `0` and a viewing key of `1`.
 
-### `uint256 scalingFactor`  
+### `uint256 scalingFactor`
 
-If this registry permits conversions from AZTEC notes into tokens, `scalingFactor` defines the number of tokens that an AZTEC note value of `1` maps to.  
+If this registry permits conversions from AZTEC notes into tokens, `scalingFactor` defines the number of tokens that an AZTEC note value of `1` maps to.
 
 This is required because the maximum value of an AZTEC note is approximately `2^26` (it is dependent on ACE's common reference string) - there is an associated loss of precision when converting a `256` bit variable into a `26` bit variable.
 
-### `ERC20 linkedToken`  
+### `ERC20 linkedToken`
 
 This is the address of the registry's linked ERC20 token. Only one token can be linked to an address.
 
-### ` canAdjustSupply`
+### `canAdjustSupply`
 
 Flag determining whether the note registry has minting and burning priviledges.
 
@@ -68,32 +64,30 @@ Flag determining whether the note registry has minting and burning priviledges.
 
 Flag determining whether the note registry has public to private, and vice versa, conversion priviledges.
 
-
-
 ## Implementation and upgradeability
 
 In order to guarantee the correct implementation of any operation affecting the state of note registries within the AZTEC ecosystem, all of the data and behaviour relating to note registries is encapsulated in the AZTEC Cryptography Engine.
 
 However, it is likely that the behaviour of note registries will need to be modified in the future in order to accomodate potential functionality improvements such as added support for new types of linked public tokens, mixers etc. To allow this to happen without requiring a hard fork, note registries have been made upgradeable and broken out from the immutable ACE contract into their own upgradeable modules.
 
-Various considerations were taken into account when designing this architecture. 
+Various considerations were taken into account when designing this architecture.
 
 Firstly, the data stored in these registries is obviously very sensitive, and valuable. Upgrades should be rare, backwards compatible, and no upgrade should result in funds becoming inaccessible, partly or wholly un-spendable, or otherwise compromised.
 
-In addition, despite being encapsulated inside of ACE, note registries are owned by ZkAssets. These asset owners should have complete agency over their implementation and so the only entities which should be allowed to upgrade the note registry associated to a particular ZkAsset is its owner. 
+In addition, despite being encapsulated inside of ACE, note registries are owned by ZkAssets. These asset owners should have complete agency over their implementation and so the only entities which should be allowed to upgrade the note registry associated to a particular ZkAsset is its owner.
 
-The implementation of all behaviour which affects the state of all note registries should also be controlled and vetted by the owner of ACE, and ZkAsset owners should not be able to upgrade to arbitrary implementations. This is to protect the integrity of the registries. 
+The implementation of all behaviour which affects the state of all note registries should also be controlled and vetted by the owner of ACE, and ZkAsset owners should not be able to upgrade to arbitrary implementations. This is to protect the integrity of the registries.
 
 The upgrade pattern, or any individual upgrade itself, should also not compromise the hard link between a ZkAsset and its note registry (i.e. no non-authorised contract or account should be able to affect the state of the note registry through an upgrade or because note registries are upgradeable).
 
-Of the various upgradeability patterns available, the unstructured storage proxy pattern developed by Open Zeppelin is used. The foundation of this pattern is to seperate the storage of the note registry, which defines the set of valid notes, from the logic, behaviour and methods of the note registry. There are four base contracts involved in this implementation: `Behaviour.sol`, `AdminUpgradeabilityProxy.sol`, `Factory.sol` and `NoteRegistryManager.sol`. 
+Of the various upgradeability patterns available, the unstructured storage proxy pattern developed by Open Zeppelin is used. The foundation of this pattern is to seperate the storage of the note registry, which defines the set of valid notes, from the logic, behaviour and methods of the note registry. There are four base contracts involved in this implementation: `Behaviour.sol`, `AdminUpgradeabilityProxy.sol`, `Factory.sol` and `NoteRegistryManager.sol`.
 
 ### Behaviour contract - `Behaviour.sol`
 
 The behaviour contract defines the methods and contains the logic of the note registry. It is this contract that is the mutable, upgradeable contract and the method whereby the implementation of note registry methods is upgraded. All behaviour contracts must abide by a set minimum API in order to maintain compatibility with ACE:
 
-``` static solidity
-/** 
+```static solidity
+/**
  * @title/**
  * @title NoteRegistryBehaviour interface which defines the base API
         which must be implemented for every behaviour contract.
@@ -255,16 +249,17 @@ contract NoteRegistryBehaviour is Ownable, IAZTEC {
 }
 ```
 
-
 ### Storage/proxy contract - `AdminUpgradeabilityProxy.sol`
 
 The storage contract is referred to as the Proxy and it has four main responsibilities:
-- Store the storage variables which define the set of unspent notes
-- Implement the delegation of calls to behaviour contracts via delegatecall(). In this way, note registry functionality on the behaviour contract is executed in the context of the calling proxy storage contract - allowing behaviour methods access to notes
-- Point the proxy to an upgraded behaviour implementation. This functionality is protected by an authorisation mechanism
-- Faciliate a possible change of admin
+
+-   Store the storage variables which define the set of unspent notes
+-   Implement the delegation of calls to behaviour contracts via delegatecall(). In this way, note registry functionality on the behaviour contract is executed in the context of the calling proxy storage contract - allowing behaviour methods access to notes
+-   Point the proxy to an upgraded behaviour implementation. This functionality is protected by an authorisation mechanism
+-   Faciliate a possible change of admin
 
 The interface is defined as:
+
 ```
 /**
  * @title ProxyAdmin
@@ -278,14 +273,15 @@ contract ProxyAdmin {
     function changeAdmin(address _newAdmin) external;
 }
 ```
+
 In order to facilitate the process of upgrading the behaviour contract to a new instance, there are two further classes of contracts: factory contracts and the note registry manager.
 
 ### Factory contracts: `Factory.sol`
 
 Factory contracts are used to deploy and link an upgraded behaviour instance to ACE. They are owned by the ACE and there is a factory contract for each type of behaviour instance that can be deployed: adjustable and mixed.
 
-``` static solidity
-/** 
+```static solidity
+/**
  * @title/**
  * @title NoteRegistryFactory
  * @author AZTEC
@@ -311,22 +307,24 @@ contract NoteRegistryFactory is IAZTEC, Ownable  {
 ```
 
 It is important to detail the versioning system used to keep track of the various factory versions - each factory is associated with a unique ID. The purpose of this ID is to identify the following properties of the factory and the resulting deployed behaviour contract:
-- Epoch - the version number
-- Cryptosystem - the crypto system that the note registry is interfacing with
-- Asset type - the type of asset that the note registry belongs to i.e. is it convertable, adjustable, various combinations of these
+
+-   Epoch - the version number
+-   Cryptosystem - the crypto system that the note registry is interfacing with
+-   Asset type - the type of asset that the note registry belongs to i.e. is it convertable, adjustable, various combinations of these
 
 Each of these variables is represented by a `uint8`, which are then packed together into a `uint24` to give the unique factory ID. Epoch number can only ever increase and all newly deployed behaviours must be backwards compatible.
 
 ### Note registry manager - `NoteRegistryManager.sol`
 
 The note registry manager is inherited by ACE. Its responsibilities include:
-- Define the methods uses to deploy and upgrade registries
-- Define the methods uses to enact state changes sent by the owner of a registry
-- Manage the list of factories that are available
+
+-   Define the methods uses to deploy and upgrade registries
+-   Define the methods uses to enact state changes sent by the owner of a registry
+-   Manage the list of factories that are available
 
 An overview of this architecture is provided below:
 
-![Note-registry-architecture-overview](https://github.com/AztecProtocol/specification/blob/master/noteregistryArchitecture.png?raw=true)  
+![Note-registry-architecture-overview](https://github.com/AztecProtocol/specification/blob/master/noteregistryArchitecture.png?raw=true)
 
 ## How an upgrade works
 
@@ -335,7 +333,7 @@ The above system of smart contracts can be used to deploy both non-upgradeable a
 ### Deploying a new non-upgradeble ZkAsset
 
 1. A user deploys a ZkAsset contract, feeding in constructor arguments aceAddress, erc20Address, ERC20_SCALING_FACTOR, canAdjustSupply.
-2. The ZkAsset calls ACE, telling it to instantiate a note registry 
+2. The ZkAsset calls ACE, telling it to instantiate a note registry
 3. ACE, through the NoteRegistryManager, finds the latest Factory, and tells it to deploy a new Proxy contract, and then to deploy a new Behaviour contract, passing the address of the Proxy contract in its constructor.
 4. Once deployed, the Factory transfers ownership of the Behaviour to ACE
 5. The Factory returns the address of the new Behaviour contract, and ACE adds to a mapping from address of ZkAsset to NoteRegistry.
@@ -347,7 +345,7 @@ The above system of smart contracts can be used to deploy both non-upgradeable a
 
 ### Upgrading a ZkAsset's Noteregistry
 
-![Upgrade-zkAsset-note-registry](https://github.com/AztecProtocol/specification/blob/master/upgradeZkAssetNoteRegistry.png?raw=true)  
+![Upgrade-zkAsset-note-registry](https://github.com/AztecProtocol/specification/blob/master/upgradeZkAssetNoteRegistry.png?raw=true)
 
 1. The Owner of a ZkAsset makes a call to upgrade its NoteRegistry, giving a specific unique id of a particular factory.
 2. The ZkAsset calls ACE, telling it to upgrade its NoteRegistry, and passing it a specific version to use.
@@ -359,11 +357,12 @@ The above system of smart contracts can be used to deploy both non-upgradeable a
 8. ACE tells the old Factory to abdicate control over the Proxy contract in favour of the new Factory
 
 ## Controlled release
+
 In order to build liquidity in particular assets when AZTEC launches, a slow release period feature has been added in which some assets will be available whilst others will be available after this fixed slow release period ends. The relevant note registry epochs are 2 and 3, implemented in behaviour contracts `Behaviour201911.sol` and `Behaviour201912.sol`.
 
 Assets that have a note registry version of epoch 2 (Behaviour201911) will be **unavailable** during the slow release period:
 
-``` static solidity
+```static solidity
 contract Behaviour201911 is Behaviour201907 {
     uint256 public constant slowReleaseEnd = 1585699199;
     bool public isAvailableDuringSlowRelease = false;
@@ -397,15 +396,13 @@ contract Behaviour201911 is Behaviour201907 {
 }
 ```
 
-The slow release period length is defined by the variable `slowReleaseEnd`, after which the asset will automatically become available. `slowReleaseEnd` is set to the unix timestamp of 1585699199, which corresponds to the 31st March 2020, 23:59:59 UTC. The restricting of availability up to this point is defined through the use of the function modifier `onlyIfAvailable()` which modifiers the behaviour of the key `updateNoteRegistry()` function. 
+The slow release period length is defined by the variable `slowReleaseEnd`, after which the asset will automatically become available. `slowReleaseEnd` is set to the unix timestamp of 1585699199, which corresponds to the 31st March 2020, 23:59:59 UTC. The restricting of availability up to this point is defined through the use of the function modifier `onlyIfAvailable()` which modifiers the behaviour of the key `updateNoteRegistry()` function.
 
 It is also possible for the `ZkAsset` owner to make the asset available earlier than the end of the burn-in period, by calling the `makeAvailable()` method.
 
-
-
 Assets that have a note registry version of epoch 3 (Behaviour201912) will be **available** during the slow release period. They have no concept of the `onlyIfAvailable()` modifier:
 
-``` static solidity
+```static solidity
 contract Behaviour201912 is Behaviour201911 {
     // redefining to always pass
     modifier onlyIfAvailable() {
@@ -433,11 +430,10 @@ contract Behaviour201912 is Behaviour201911 {
 
 ## Current note registry versions
 
-There are currently three versions/epochs of the note registry behaviour contract. Each inherits from the previous contract epoch and adds additional functionality. This is summarised below: 
+There are currently three versions/epochs of the note registry behaviour contract. Each inherits from the previous contract epoch and adds additional functionality. This is summarised below:
 
 | Epoch | Contract            | Functionality                                        |
-|-------|---------------------|------------------------------------------------------|
+| ----- | ------------------- | ---------------------------------------------------- |
 | 1     | Behaviour201907.sol | Base note registry behaviour implementation          |
 | 2     | Behaviour201911.sol | Asset that is unavailable during slow release period |
 | 3     | Behaviour201912.sol | Asset that is available during slow release period‌  |
-

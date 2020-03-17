@@ -1,3 +1,3 @@
 module.exports = {
-  plugins: [require('autoprefixer')], // eslint-disable-line global-require
+    plugins: [require('autoprefixer')], // eslint-disable-line global-require
 };

@@ -17,26 +17,28 @@ console.info(asset);
 
 ### The `zkAsset` has the following data and methods on it:
 
-- _valid_ (Boolean)
-- _address_ (Address)
-- _linkedTokenAddress_ (Address)
-- _scalingFactor_ (String)
-- _canAdjustSupply_ (Boolean)
-- _canConvert_ (Boolean)
-- _token_ (Object): A token object contains `address`, `name`, and `decimals`
+-   _valid_ (Boolean)
+-   _address_ (Address)
+-   _linkedTokenAddress_ (Address)
+-   _scalingFactor_ (String)
+-   _canAdjustSupply_ (Boolean)
+-   _canConvert_ (Boolean)
+-   _token_ (Object): A token object contains `address`, `name`, and `decimals`
 
 Main APIs:
-- [`async deposit()`](/#/SDK/zkAsset/.deposit)
-- [`async send()`](/#/SDK/zkAsset/.send)
-- [`async withdraw()`](/#/SDK/zkAsset/.withdraw)
+
+-   [`async deposit()`](/#/SDK/zkAsset/.deposit)
+-   [`async send()`](/#/SDK/zkAsset/.send)
+-   [`async withdraw()`](/#/SDK/zkAsset/.withdraw)
 
 Utilities:
-- [`async balance()`](/#/SDK/zkAsset/.balance)
-- [`async subscribeToBalance()`](/#/SDK/zkAsset/.subscribeToBalance)
-- [`async createNotesFromBalance()`](/#/SDK/zkAsset/.createNotesFromBalance)
-- [`async fetchNotesFromBalance()`](/#/SDK/zkAsset/.fetchNotesFromBalance)
-- [`async balanceOfLinkedToken()`](/#/SDK/zkAsset/.balanceOfLinkedToken)
-- [`async allowanceOfLinkedtoken()`](/#/SDK/zkAsset/.allowanceOfLinkedtoken)
-- [`async totalSupplyOfLinkedtoken()`](/#/SDK/zkAsset/.totalSupplyOfLinkedtoken)
-- [`async toNoteValue()`](/#/SDK/zkAsset/.toNoteValue)
-- [`async toTokenValue()`](/#/SDK/zkAsset/.toTokenValue)
+
+-   [`async balance()`](/#/SDK/zkAsset/.balance)
+-   [`async subscribeToBalance()`](/#/SDK/zkAsset/.subscribeToBalance)
+-   [`async createNotesFromBalance()`](/#/SDK/zkAsset/.createNotesFromBalance)
+-   [`async fetchNotesFromBalance()`](/#/SDK/zkAsset/.fetchNotesFromBalance)
+-   [`async balanceOfLinkedToken()`](/#/SDK/zkAsset/.balanceOfLinkedToken)
+-   [`async allowanceOfLinkedtoken()`](/#/SDK/zkAsset/.allowanceOfLinkedtoken)
+-   [`async totalSupplyOfLinkedtoken()`](/#/SDK/zkAsset/.totalSupplyOfLinkedtoken)
+-   [`async toNoteValue()`](/#/SDK/zkAsset/.toNoteValue)
+-   [`async toTokenValue()`](/#/SDK/zkAsset/.toTokenValue)

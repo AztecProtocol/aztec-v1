@@ -14,10 +14,10 @@ console.info('currentUser:', window.aztec.account);
 
 ### An `Account` instance for a registered AZTEC user has the following data and methods on it:
 
-- _registered_ (Boolean)
-- _address_ (Address)
-- _linkedPublicKey_ (String)
-- _spendingPublicKey_ (String)
-- [`async createNote()`](/#/SDK/user/.createNote)
-- [`async encryptMessage()`](/#/SDK/user/.encryptMessage)
-- [`async decryptMessage()`](/#/SDK/user/.decryptMessage)
+-   _registered_ (Boolean)
+-   _address_ (Address)
+-   _linkedPublicKey_ (String)
+-   _spendingPublicKey_ (String)
+-   [`async createNote()`](/#/SDK/user/.createNote)
+-   [`async encryptMessage()`](/#/SDK/user/.encryptMessage)
+-   [`async decryptMessage()`](/#/SDK/user/.decryptMessage)

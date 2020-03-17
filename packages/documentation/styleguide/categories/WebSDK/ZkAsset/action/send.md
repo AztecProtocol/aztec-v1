@@ -14,10 +14,10 @@ console.info({ balanceBeforeSend });
 // Send funds
 const sendAmount = 30;
 const response = await asset.send([
-  {
-    to: thirdPartyAddress,
-    amount: sendAmount,
-  },
+    {
+        to: thirdPartyAddress,
+        amount: sendAmount,
+    },
 ]);
 console.info(response);
 

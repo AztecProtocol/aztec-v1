@@ -15,14 +15,14 @@ const wrapCodeInFragment = (code) => `<React.Fragment>${code}</React.Fragment>;`
  * 3. Compile code using Buble
  */
 export default function compileCode(code, compilerConfig, onError) {
-  try {
-    const wrappedCode = startsWithJsx(code) ? wrapCodeInFragment(code) : code;
-    const compiledCode = compile(wrappedCode, { ...compilerConfig, transforms: { asyncAwait: false } });
-    return transpileImports(compiledCode);
-  } catch (err) {
-    if (onError) {
-      onError(err);
+    try {
+        const wrappedCode = startsWithJsx(code) ? wrapCodeInFragment(code) : code;
+        const compiledCode = compile(wrappedCode, { ...compilerConfig, transforms: { asyncAwait: false } });
+        return transpileImports(compiledCode);
+    } catch (err) {
+        if (onError) {
+            onError(err);
+        }
     }
-  }
-  return '';
+    return '';
 }

@@ -7,8 +7,8 @@ const zkAssetAddress = '';
 const asset = await window.aztec.zkAsset(zkAssetAddress);
 
 const [note] = await asset.fetchNotesFromBalance({
-  numberOfNotes: 1,
-  greaterThan: 0,
+    numberOfNotes: 1,
+    greaterThan: 0,
 });
 const myNote = await window.aztec.zkNote(note.noteHash);
 const value = myNote.value;

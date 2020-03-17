@@ -1,100 +1,77 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Hook,
-  Console,
-  Decode,
-  Unhook,
-} from 'console-feed';
-import {
-  Block,
-} from '@aztec/guacamole-ui';
+import { Hook, Console, Decode, Unhook } from 'console-feed';
+import { Block } from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
-import {
-  keccak256,
-  toChecksumAddress,
-} from 'web3-utils';
-import {
-  AZTEC_API_KEY,
-  DEMO_ZK_ASSET_ADDRESS,
-  DEMO_ZK_DAI_ADDRESS,
-  DEMO_THIRD_PARTY_ADDRESS,
-} from '../../config/aztec';
-import {
-  PERMITTED_LOGS,
-  CONSOLE_STYLES,
-} from '../../config/console';
+import { keccak256, toChecksumAddress } from 'web3-utils';
+import { AZTEC_API_KEY, DEMO_ZK_ASSET_ADDRESS, DEMO_ZK_DAI_ADDRESS, DEMO_THIRD_PARTY_ADDRESS } from '../../config/aztec';
+import { PERMITTED_LOGS, CONSOLE_STYLES } from '../../config/console';
 import compileCode from '../../utils/compileCode';
 import replaceVarInCode from './utils/replaceVarInCode';
 import SdkPlaygroundControls from './SdkPlaygroundControls';
 import styles from './sdk-playground.module.scss';
 
 class SdkPlayground extends PureComponent {
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const {
-      initialCode,
-      zkAssetAddress,
-    } = prevState;
-    const {
-      code,
-    } = nextProps;
+    static getDerivedStateFromProps(nextProps, prevState) {
+        const { initialCode, zkAssetAddress } = prevState;
+        const { code } = nextProps;
 
-    if (initialCode === code) {
-      return null;
+        if (initialCode === code) {
+            return null;
+        }
+
+        let newCode = code;
+        newCode = replaceVarInCode(newCode, 'apiKey', AZTEC_API_KEY);
+        newCode = replaceVarInCode(newCode, 'zkAssetAddress', zkAssetAddress);
+        newCode = replaceVarInCode(newCode, 'zkDaiAddress', DEMO_ZK_DAI_ADDRESS);
+        newCode = replaceVarInCode(newCode, 'thirdPartyAddress', DEMO_THIRD_PARTY_ADDRESS);
+
+        return {
+            code: newCode,
+            initialCode: code,
+            logs: [],
+        };
     }
 
-    let newCode = code;
-    newCode = replaceVarInCode(newCode, 'apiKey', AZTEC_API_KEY);
-    newCode = replaceVarInCode(newCode, 'zkAssetAddress', zkAssetAddress);
-    newCode = replaceVarInCode(newCode, 'zkDaiAddress', DEMO_ZK_DAI_ADDRESS);
-    newCode = replaceVarInCode(newCode, 'thirdPartyAddress', DEMO_THIRD_PARTY_ADDRESS);
+    handleChangeCode = debounce((code) => {
+        this.setState({ code });
+    }, 100);
 
-    return {
-      code: newCode,
-      initialCode: code,
-      logs: [],
+    state = {
+        iframeId: 0,
+        logs: [],
+        code: '',
+        initialCode: '',
+        isRunning: false,
+        zkAssetAddress: DEMO_ZK_ASSET_ADDRESS,
     };
-  }
 
-  handleChangeCode = debounce((code) => {
-    this.setState({ code });
-  }, 100);
+    componentWillUnmount() {
+        // Clear pending changes
+        Unhook(window.console);
+    }
 
-  state = {
-    iframeId: 0,
-    logs: [],
-    code: '',
-    initialCode: '',
-    isRunning: false,
-    zkAssetAddress: DEMO_ZK_ASSET_ADDRESS,
-  };
+    setIframeRef = (ref) => {
+        this.iframeRef = ref;
+    };
 
-  componentWillUnmount() {
-    // Clear pending changes
-    Unhook(window.console);
-  }
+    setConsoleRef = (ref) => {
+        this.consoleRef = ref;
+    };
 
-  setIframeRef = (ref) => {
-    this.iframeRef = ref;
-  };
+    generateIframeContent = () => {
+        const { compilerConfig } = this.props;
+        const { code } = this.state;
 
-  setConsoleRef = (ref) => {
-    this.consoleRef = ref;
-  };
+        // all calls to window.aztec need to go to the parent window,
+        // as SDK not loaded in this iframe
+        const compiledCode = compileCode(code, compilerConfig, console.log)
+            .replace(/window.aztec/g, 'window.parent.aztec')
+            .replace(/window.ethereum/g, 'window.parent.ethereum');
 
-  generateIframeContent = () => {
-    const { compilerConfig } = this.props;
-    const { code } = this.state;
-
-    // all calls to window.aztec need to go to the parent window,
-    // as SDK not loaded in this iframe
-    const compiledCode = compileCode(code, compilerConfig, console.log)
-      .replace(/window.aztec/g, 'window.parent.aztec')
-      .replace(/window.ethereum/g, 'window.parent.ethereum');
-
-    const asyncCompiledCode = `
+        const asyncCompiledCode = `
       const code = async () => {
         try {
           ${compiledCode};
@@ -106,7 +83,7 @@ class SdkPlayground extends PureComponent {
       code();
     `;
 
-    const iframeDoc = `
+        const iframeDoc = `
       <html>
         <head>
           <script>
@@ -122,189 +99,142 @@ class SdkPlayground extends PureComponent {
       </html>
     `;
 
-    return iframeDoc;
-  };
+        return iframeDoc;
+    };
 
-  handleStartLogging = async () => new Promise((resolve) => {
-    this.setState(
-      {
-        logs: [],
-      },
-      () => {
-        const frameConsole = this.hookConsoleLogs();
-        resolve(frameConsole);
-      },
-    );
-  });
+    handleStartLogging = async () =>
+        new Promise((resolve) => {
+            this.setState(
+                {
+                    logs: [],
+                },
+                () => {
+                    const frameConsole = this.hookConsoleLogs();
+                    resolve(frameConsole);
+                },
+            );
+        });
 
-  handleRunCode = () => {
-    const {
-      isRunning,
-      code,
-    } = this.state;
-    if (isRunning) return;
+    handleRunCode = () => {
+        const { isRunning, code } = this.state;
+        if (isRunning) return;
 
-    const iframeId = keccak256(code).slice(5);
-
-    this.setState(
-      {
-        iframeId,
-        isRunning: true,
-        logs: [],
-      },
-      this.doRunCode,
-    );
-  };
-
-  handleRefreshAccountCode = (account) => {
-    const {
-      code,
-    } = this.state;
-    const {
-      address,
-    } = account || {};
-    const userAddress = (address && toChecksumAddress(address)) || '';
-    const updatedCode = code.replace(
-      /userAddress = '(0x)?[0-9a-f]{0,}'/g,
-      `userAddress = '${userAddress}'`,
-    );
-
-    this.setState({
-      code: updatedCode,
-    });
-  };
-
-  hookConsoleLogs() {
-    const frameConsole = this.iframeRef.contentWindow.console;
-    Unhook(frameConsole);
-    Hook(frameConsole, (log) => {
-      const decodedLog = Decode(log);
-      if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
-        const {
-          logs: prevLogs,
-        } = this.state;
+        const iframeId = keccak256(code).slice(5);
 
         this.setState(
-          {
-            logs: [
-              ...prevLogs,
-              decodedLog,
-            ],
-          },
-          this.scrollLogs,
+            {
+                iframeId,
+                isRunning: true,
+                logs: [],
+            },
+            this.doRunCode,
         );
-      }
-    });
-    return frameConsole;
-  }
+    };
 
-  scrollLogs() {
-    if (this.consoleRef) {
-      this.consoleRef.scrollTop = this.consoleRef.scrollHeight;
+    handleRefreshAccountCode = (account) => {
+        const { code } = this.state;
+        const { address } = account || {};
+        const userAddress = (address && toChecksumAddress(address)) || '';
+        const updatedCode = code.replace(/userAddress = '(0x)?[0-9a-f]{0,}'/g, `userAddress = '${userAddress}'`);
+
+        this.setState({
+            code: updatedCode,
+        });
+    };
+
+    hookConsoleLogs() {
+        const frameConsole = this.iframeRef.contentWindow.console;
+        Unhook(frameConsole);
+        Hook(frameConsole, (log) => {
+            const decodedLog = Decode(log);
+            if (PERMITTED_LOGS.indexOf(decodedLog.method) > -1) {
+                const { logs: prevLogs } = this.state;
+
+                this.setState(
+                    {
+                        logs: [...prevLogs, decodedLog],
+                    },
+                    this.scrollLogs,
+                );
+            }
+        });
+        return frameConsole;
     }
-  }
 
-  async doRunCode() {
-    await this.compileCodeInIframe();
-    this.setState({
-      isRunning: false,
-    });
-  }
-
-  async compileCodeInIframe() {
-    this.iframeRef.srcdoc = this.generateIframeContent();
-    const iframeLoaded = new Promise((resolve) => {
-      this.iframeRef.onload = resolve;
-    });
-    await iframeLoaded;
-
-    this.hookConsoleLogs();
-
-    return new Promise((resolve) => {
-      window.addEventListener('message', (event) => {
-        if (event.data === 'EXAMPLE_RAN') {
-          resolve(event);
+    scrollLogs() {
+        if (this.consoleRef) {
+            this.consoleRef.scrollTop = this.consoleRef.scrollHeight;
         }
-      });
-    });
-  }
+    }
 
-  render() {
-    const {
-      isRunning,
-      iframeId,
-      logs,
-      code,
-      zkAssetAddress,
-    } = this.state;
+    async doRunCode() {
+        await this.compileCodeInIframe();
+        this.setState({
+            isRunning: false,
+        });
+    }
 
-    return (
-      <>
-        <iframe
-          ref={this.setIframeRef}
-          id={iframeId}
-          title="code"
-          height="0"
-          width="0"
-          style={{ display: 'none' }}
-        />
-        <Block
-          className={styles.wrapper}
-          background="white"
-          borderRadius="xs"
-          hasBorder
-        >
-          <SdkPlaygroundControls
-            zkAssetAddress={zkAssetAddress}
-            onRunCode={this.handleRunCode}
-            isRunning={isRunning}
-            frameConsole={(this.iframeRef && this.iframeRef.contentWindow.console) || null}
-            setupLogingInIframe={this.handleStartLogging}
-            onChangeAccount={this.handleRefreshAccountCode}
-          >
-            <div
-              className={classnames(
-                styles.code,
-                {
-                  [styles.codeRunning]: isRunning,
-                },
-              )}
-            >
-              <Editor
-                code={code}
-                onChange={this.handleChangeCode}
-              />
-            </div>
-            {logs.length > 0 && (
-              <Block
-                className={styles.logs}
-                padding="m s"
-                background="grey-darker"
-              >
-                <div ref={this.setConsoleRef}>
-                  <Console
-                    logs={logs}
-                    variant="dark"
-                    filter={PERMITTED_LOGS}
-                    styles={CONSOLE_STYLES}
-                  />
-                </div>
-              </Block>
-            )}
-          </SdkPlaygroundControls>
-        </Block>
-      </>
-    );
-  }
+    async compileCodeInIframe() {
+        this.iframeRef.srcdoc = this.generateIframeContent();
+        const iframeLoaded = new Promise((resolve) => {
+            this.iframeRef.onload = resolve;
+        });
+        await iframeLoaded;
+
+        this.hookConsoleLogs();
+
+        return new Promise((resolve) => {
+            window.addEventListener('message', (event) => {
+                if (event.data === 'EXAMPLE_RAN') {
+                    resolve(event);
+                }
+            });
+        });
+    }
+
+    render() {
+        const { isRunning, iframeId, logs, code, zkAssetAddress } = this.state;
+
+        return (
+            <>
+                <iframe ref={this.setIframeRef} id={iframeId} title="code" height="0" width="0" style={{ display: 'none' }} />
+                <Block className={styles.wrapper} background="white" borderRadius="xs" hasBorder>
+                    <SdkPlaygroundControls
+                        zkAssetAddress={zkAssetAddress}
+                        onRunCode={this.handleRunCode}
+                        isRunning={isRunning}
+                        frameConsole={(this.iframeRef && this.iframeRef.contentWindow.console) || null}
+                        setupLogingInIframe={this.handleStartLogging}
+                        onChangeAccount={this.handleRefreshAccountCode}
+                    >
+                        <div
+                            className={classnames(styles.code, {
+                                [styles.codeRunning]: isRunning,
+                            })}
+                        >
+                            <Editor code={code} onChange={this.handleChangeCode} />
+                        </div>
+                        {logs.length > 0 && (
+                            <Block className={styles.logs} padding="m s" background="grey-darker">
+                                <div ref={this.setConsoleRef}>
+                                    <Console logs={logs} variant="dark" filter={PERMITTED_LOGS} styles={CONSOLE_STYLES} />
+                                </div>
+                            </Block>
+                        )}
+                    </SdkPlaygroundControls>
+                </Block>
+            </>
+        );
+    }
 }
 
 SdkPlayground.propTypes = {
-  code: PropTypes.string.isRequired, // eslint-disable-line react/no-unused-prop-types
-  compilerConfig: PropTypes.object,
+    code: PropTypes.string.isRequired, // eslint-disable-line react/no-unused-prop-types
+    compilerConfig: PropTypes.object,
 };
 
 SdkPlayground.defaultProps = {
-  compilerConfig: {},
+    compilerConfig: {},
 };
 
 export default SdkPlayground;

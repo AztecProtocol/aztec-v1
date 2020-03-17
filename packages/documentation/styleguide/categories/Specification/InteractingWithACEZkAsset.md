@@ -1,6 +1,6 @@
 The `zkAsset.sol` contract is an implementation of a confidential token, that follows the [EIP-1724 standard](https://github.com/ethereum/EIPs/issues/1724). It is designed as a template that confidential digital asset builders can follow, to create an AZTEC-compatible asset. All `ZkAssets` must follow the following minimum interface:
 
-``` static solidity
+```static solidity
 pragma solidity >=0.5.0 <0.6.0;
 /**
  * @title IZkAsset
@@ -130,37 +130,37 @@ interface IZkAsset {
 
 ```
 
-## Creating a confidential asset  
+## Creating a confidential asset
 
 A `zkAsset` contract must instantiate a note registry inside `ACE` via `ACE.createNoteRegistry`. If the asset is a mixed, the contract address of the linked `ERC20` token must be supplied.
 
 ## Issuing a confidential transaction: confidentialTransfer
 
-The primary method of unilateral value transfer occurs via `zkAsset.confidentialTransfer(bytes _proofData, bytes _signatures)`. In this method, the `joinSplit` AZTEC proof is used to enact a value transfer. The beneficiaries of the transaction are defined entirely by the contents of `bytes _proofData`.  
+The primary method of unilateral value transfer occurs via `zkAsset.confidentialTransfer(bytes _proofData, bytes _signatures)`. In this method, the `joinSplit` AZTEC proof is used to enact a value transfer. The beneficiaries of the transaction are defined entirely by the contents of `bytes _proofData`.
 
-Both `ACE.validateProof(data)` and `ACE.updateNoteRegistry(proofOutput)` must be called, with `proofOutput` being extracted from `ACE.validateProof`'s return data.  
+Both `ACE.validateProof(data)` and `ACE.updateNoteRegistry(proofOutput)` must be called, with `proofOutput` being extracted from `ACE.validateProof`'s return data.
 
-## Issuing delegated confidential transactions: confidentialTransferFrom  
+## Issuing delegated confidential transactions: confidentialTransferFrom
 
-The `confidentialTransferFrom(uint24 __proof, bytes _proofOutput)` method is used to perform a delegated transfer. As opposed to `confidentialTransfer`, `confidentialTransferFrom` can use any proof supported by `ACE` (assuming the `zkAsset` contract accepts this type of proof).  
+The `confidentialTransferFrom(uint24 __proof, bytes _proofOutput)` method is used to perform a delegated transfer. As opposed to `confidentialTransfer`, `confidentialTransferFrom` can use any proof supported by `ACE` (assuming the `zkAsset` contract accepts this type of proof).
 
 ## Permissioning
+
 It is the responsibility of the `zkAsset` to perform the required permissioning checks when value transfer occurs. The permissioning mechanism used in a `confidentialTransfer()` call is different to that used for a `confidentialTransferFrom()` call.
 
-The `confidentialTransfer` method takes a set of EIP712 ECDSA `signatures` over each `inputNote` that is involved in the transfer. These are then validated in the method `confidentialTransferInternal()`. 
+The `confidentialTransfer` method takes a set of EIP712 ECDSA `signatures` over each `inputNote` that is involved in the transfer. These are then validated in the method `confidentialTransferInternal()`.
 
 However, this method is not suitable for a delegated transfer calling `confidentialTransferFrom()`. In this case, the note 'owners' may be smart contracts and so unable to create digitial signatures. Therefore, for `confidentialTransferFrom()` to be used, a permission granting function `confidentialApprove()` must be called on every input note that is consumed.
 
 There are two flavours of this permissioning granting function: `confidentialApprove()` and `approveProof()`. The first allows permission to be granted for an individual note, the second allows permission to be granted for a particular proof and so in a single call potentially approve multiple notes for spending.
 
+### confidentialApprove()
 
-### confidentialApprove()  
-
-The `confidentialApprove(bytes32 _noteHash, address _spender, bool _status, bytes memory _signature)` method gives the `_spender` address permission to use an AZTEC note, whose hash is defined by `_noteHash`, to be used in a zero-knowledge proof.  
+The `confidentialApprove(bytes32 _noteHash, address _spender, bool _status, bytes memory _signature)` method gives the `_spender` address permission to use an AZTEC note, whose hash is defined by `_noteHash`, to be used in a zero-knowledge proof.
 
 The method has the following interface:
 
-``` static solidity
+```static solidity
 /**
 * @dev Note owner approving a third party, another address, to spend the note on
 * owner's behalf. This is necessary to allow the confidentialTransferFrom() method
@@ -181,26 +181,27 @@ function confidentialApprove(
 ) public {}
 ```
 
-The `_signature` is an ECDSA signature over an EIP712 message. This signature is signed by the `noteOwner` of the AZTEC note being approved.  If `_signature = bytes(0x00)`, then `msg.sender` is expected to be the `noteOwner` of the AZTEC note being approved.  
+The `_signature` is an ECDSA signature over an EIP712 message. This signature is signed by the `noteOwner` of the AZTEC note being approved. If `_signature = bytes(0x00)`, then `msg.sender` is expected to be the `noteOwner` of the AZTEC note being approved.
 
 The method validates the signature and, if this passes, updates a mapping of `noteHash` => `_spender` => `_spenderApproval`:
 
-``` static solidity
+```static solidity
 mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
 ```
 
-This mapping will later be checked when an attempt is made to spend the note. 
+This mapping will later be checked when an attempt is made to spend the note.
 
-It should be noted that the `confidentialApprove()` interface is designed to facilitate stealth addresses. For a stealth address, it is unlikely that the address will have any Ethereum funds to pay for gas costs, and a meta-transaction style transaction is required. In this situation, `msg.sender` will not map to the owner of the note and so an ECDSA signatue is used.  
+It should be noted that the `confidentialApprove()` interface is designed to facilitate stealth addresses. For a stealth address, it is unlikely that the address will have any Ethereum funds to pay for gas costs, and a meta-transaction style transaction is required. In this situation, `msg.sender` will not map to the owner of the note and so an ECDSA signatue is used.
 
 For other uses, such as a smart contract or a non-stealth address, a direct transaction sent by the correct `msg.sender` is possible by sending a null signature.
 
 ### approveProof()
+
 This allows spending permission to be granted to multiple notes in a single atomic function call. This is useful for delegating note control over `n` notes in a single transaction, rather than having to make `n` `confidentialApprove()` calls.
 
 The method has the following interface:
 
-``` static solidity
+```static solidity
 /**
  * @dev Note owner can approve a third party address, such as a smart contract,
  * to spend a proof on their behalf. This allows a batch approval of notes
@@ -220,40 +221,39 @@ function approveProof(
 ) external {
 ```
 
-`_proofSignature` is a signature over the proof generated by the private key of the owner of the notes in question. The method extracts the notes from the `_proofOutputs` object and checks that each note's `noteOwner` matches the address recovered from the `_proofSignature`. 
+`_proofSignature` is a signature over the proof generated by the private key of the owner of the notes in question. The method extracts the notes from the `_proofOutputs` object and checks that each note's `noteOwner` matches the address recovered from the `_proofSignature`.
 
 It then updates the following mapping of `keccak256(proofOutputs)` => `spender` address => `_approval` status:
 
-``` static solidity
+```static solidity
 mapping(bytes32 => mapping(address => bool)) public confidentialApproved;
 ```
 
 Later when this proof and associated notes are used in a `confidentialTransferFrom()` transaction, the `confidentialApproved` mapping is queried. Firstly, it is checked if:
 
-``` static solidity
+```static solidity
 confidentialApproved[proofHash][msg.sender] != true
 ```
 
 If this is the case then the notes were approved for spending via the `approveProof()` method and the transaction proceeds. If this is not `true`, then for each `inputNote` (notes to be spent) the following is checked:
 
-``` static solidity
+```static solidity
 confidentialApproved[noteHash][msg.sender] == true
 ```
 
-
-
 ### Granting note view key access
+
 AZTEC notes contain a `metaData` field, with a specification as outlined in the note ABI discussion. One of the principal uses of this data field, is to store encrypted viewing keys - to allow note view access to be granted to third parties. The `metaData` of a note is not stored in storage, rather it is emitted as an event along with the successful creation of a note:
 
-``` static solidity
+```static solidity
 emit CreateNote(noteOwner, noteHash, metadata);
 ```
 
 It may be desirable to grant note view key access to parties, beyond those for which an encrypted viewing key was initially provided when the note was created. To facilitate this, the `ZkAssetBase.sol` has an `updateNoteMetaData()` method:
 
-``` static solidity
+```static solidity
 /**
-* @dev Update the metadata of a note that already exists in storage. 
+* @dev Update the metadata of a note that already exists in storage.
 * @param noteHash - hash of a note, used as a unique identifier for the note
 * @param metaData - metadata to update the note with
 */
@@ -277,18 +277,19 @@ function updateNoteMetaData(bytes32 noteHash, bytes memory metaData) public {
 }
 ```
 
-The purpose of this method is to ultimately emit a new event `UpdateNoteMetaData(noteOwner, noteHash, metaData)` with updated `metaData`.The `metaData` is the updated `metaData` which contains the encrypted  viewing keys for all parties that are to be granted note view access. 
+The purpose of this method is to ultimately emit a new event `UpdateNoteMetaData(noteOwner, noteHash, metaData)` with updated `metaData`.The `metaData` is the updated `metaData` which contains the encrypted viewing keys for all parties that are to be granted note view access.
 
 #### Permissioning
+
 The permissioning of this function is of critical importance - as being able to call this function allows note view access to be given to an arbitrary address. To this end, there is a `require()` statement which enforces that one of the two valid groups of users are calling this function. It will revert if not.
 
-The first category of permissioned caller is the `noteOwner`. A note owner should have complete agency over to whom they grant view key access to their note. 
+The first category of permissioned caller is the `noteOwner`. A note owner should have complete agency over to whom they grant view key access to their note.
 
-The second category of permissioned callers are those Ethereum addresses that are being granted view key access in the `metaData`. These addresses are explicitly  stated in the `approvedAddresses` section of `metaData`. 
+The second category of permissioned callers are those Ethereum addresses that are being granted view key access in the `metaData`. These addresses are explicitly stated in the `approvedAddresses` section of `metaData`.
 
-To enact this check, an `addressID` is first calculated - the `keccak256` hash of `msg.sender` and the hash of the note in question. We then make use of the `noteAccess`  mapping declared in the `ZkAsset`:
+To enact this check, an `addressID` is first calculated - the `keccak256` hash of `msg.sender` and the hash of the note in question. We then make use of the `noteAccess` mapping declared in the `ZkAsset`:
 
-``` static solidity
+```static solidity
 mapping(bytes32 => uint256) public noteAccess;
 ```
 
@@ -296,20 +297,21 @@ This is a mapping of `addressIDs` to a `uint256` , where the `uint256` is the `b
 
 We then compare `noteAccess[addressID]` to the value stored in `metaDataTimeLog[noteHash]`. `metaDataTimeLog` is a second mapping of the form:
 
-``` static solidity
+```static solidity
 mapping(bytes32 => uint256) public metaDataTimeLog;
 ```
 
-It is a mapping of  `noteHash` to the `block.timestamp` when the method `setMetaDataTimeLog()` was last called. This mapping is used to keep track of when the metaData for a particular note was last updated. 
+It is a mapping of `noteHash` to the `block.timestamp` when the method `setMetaDataTimeLog()` was last called. This mapping is used to keep track of when the metaData for a particular note was last updated.
 
 By checking that `noteAccess[addressID] >= metaDataTimeLog[noteHash]` we satisfy two conditions. Firstly, that `msg.sender` is an address which has been previously approved view access in the `metaData` of a note. Secondly, that `msg.sender` still has view access to a note and has not since been revoked (by metaData being updated and not including this Ethereum address as an approved address).
 
 ### setProofs()
-It should be noted that ZkAssets which are ownable and inherit from the `ZkAssetOwnable.sol` contract have a concept of 'supporting proofs'. The owner is able to choose which proofs the `ZkAsset` supports and can interact with. 
+
+It should be noted that ZkAssets which are ownable and inherit from the `ZkAssetOwnable.sol` contract have a concept of 'supporting proofs'. The owner is able to choose which proofs the `ZkAsset` supports and can interact with.
 
 This is achieved through the `setProofs()` function, restricted to `onlyOwner`:
 
-``` static solidity
+```static solidity
 function setProofs(
     uint8 _epoch,
     uint256 _proofs
@@ -318,24 +320,24 @@ function setProofs(
 }
 ```
 
-In order for a `ZkAsset` to be able to listen to and interact with a particular proof, it must be first registered with this function. 
+In order for a `ZkAsset` to be able to listen to and interact with a particular proof, it must be first registered with this function.
 
-By default, all `ZkAssetOwnable` contracts have the basic unilateral transfer `joinSplit` proof enabled in their constructor. 
-
+By default, all `ZkAssetOwnable` contracts have the basic unilateral transfer `joinSplit` proof enabled in their constructor.
 
 ## Types of ZkAssets
-There are various types of `zkAsset`s, which are differentiated based on the flags `canAdjustSupply`, `canConvert` and whether or not the asset is ownable. 
+
+There are various types of `zkAsset`s, which are differentiated based on the flags `canAdjustSupply`, `canConvert` and whether or not the asset is ownable.
 
 `canAdjustSupply` determines whether the asset is able to mint or burn whilst `canConvert` determines whether public ERC20 tokens can be converted into AZTEC notes and vice versa. These flags are not exposed to the user instantiating the asset and are instead hardcoded into the constructor of the asset or derived from existing properties. `canAdjustSupply` is hardcoded into the constructor of the relevant asset, whilst `canConvert` is derived from whether a `linkedTokenAddress` was set in the asset's constructor.
 
 These flags give rise to the contracts whose properties are summarised in the below table:
 
-| Contract | canAdjustSupply | canConvert | Ownable |
-| --- | --- | --- | --- |  
-| ZkAsset | N | P | N |
-| ZkAssetAdjustable | Y | P | N |
-| ZkAssetMintable | Y | P | Y |
-| ZkAssetBurnable | Y | P | Y |
-| ZkAssetOwnable | N | P | Y |
+| Contract          | canAdjustSupply | canConvert | Ownable |
+| ----------------- | --------------- | ---------- | ------- |
+| ZkAsset           | N               | P          | N       |
+| ZkAssetAdjustable | Y               | P          | N       |
+| ZkAssetMintable   | Y               | P          | Y       |
+| ZkAssetBurnable   | Y               | P          | Y       |
+| ZkAssetOwnable    | N               | P          | Y       |
 
 where `Y` is yes, `N` no and `P` is possible (it is at the discretion of the instantiator). `ZkAssetMintable` is only able to mint, `ZkAssetBurnable` is only able to burn, whilst `ZkAssetAdjustable` is able to both mint and burn.

@@ -32,7 +32,7 @@ console.info({ balanceBeforeWithdraw });
 // Withdraw funds to a different address
 const withdrawAmount = 10;
 const response = await asset.withdraw(withdrawAmount, {
-  to: thirdPartyAddress,
+    to: thirdPartyAddress,
 });
 console.info(response);
 

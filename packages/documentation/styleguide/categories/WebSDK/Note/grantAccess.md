@@ -11,8 +11,8 @@ const myNote = await window.aztec.zkNote(note.noteHash);
 
 const thirdPartyAddress = '';
 const addressToGrantAccess = [
-  thirdPartyAddress,
-  // Add more addresses to grant access
+    thirdPartyAddress,
+    // Add more addresses to grant access
 ];
 
 const grantSuccess = await myNote.grantAccess(addressToGrantAccess);

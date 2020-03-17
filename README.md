@@ -30,11 +30,11 @@
 All AZTEC documentation is available on the documentation website: https://docs.aztecprotocol.com
 
 This contains docs for the:
-- SDK
-- aztec.js
-- Starter kits, demos and code examples
-- Protocol specification
 
+-   SDK
+-   aztec.js
+-   Starter kits, demos and code examples
+-   Protocol specification
 
 ## Packages :package:
 
