@@ -19,7 +19,7 @@
         "paperLink": "https://eprint.iacr.org/2020/081.pdf"
       },
       {
-        "coverPhoto": "https://images.unsplash.com/photo-1518277980269-c1eb88ad9693?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+        "coverPhoto": "https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "PLONK",
         "caption": "Permutations over Lagrange-bases for Oecumenical Noninteractive arguments of Knowledge",
         "description": "A highly efficient universal SNARK, introducing a new circuit arithmetisation and the notion of 'selector polynomials', bound together by a permutation argument",
