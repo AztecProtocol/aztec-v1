@@ -6,15 +6,15 @@
         "coverPhoto": "https://images.unsplash.com/photo-1529148482759-b35b25c5f217?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "PLOOKUP",
         "caption": "A simplified polynomial protocol for lookup tables",
-        "description": "A technique using lookup tables to enable logic on 8-bit binary strings, enabling efficient hash verification of non-SNARK-friendly hashes e.g. SHA-256",
-        "link": "",
+        "description": "A technique using lookup tables to enable logic on 8-bit binary strings, enabling efficient hash verification of non-SNARK-friendly hashes e.g. SHA-256. Summary by co-author Dan Boneh.",
+        "link": "https://hackmd.io/@dabo/B1U4kx8XI",
         "paperLink": "https://eprint.iacr.org/2020/315.pdf"
       },
       {
         "coverPhoto": "https://images.unsplash.com/photo-1508974462591-3c124867fdf8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "SHPLONK",
         "caption": "Efficient polynomial commitment schemes for multiple points and polynomials",
-        "description": "This new scheme abstracts the Kate polynomial commitment scheme to enable one committed point to prove that a number of polynomials have been evaluated at each of a fixed set of points",
+        "description": "This new scheme abstracts the Kate polynomial commitment scheme to enable one committed point to prove that a number of polynomials have been evaluated at each of a fixed set of points. Summary by Ariel Gabizon, Aztec Chief Scientist.",
         "link": "https://hackmd.io/@tompocock/shplonk",
         "paperLink": "https://eprint.iacr.org/2020/081.pdf"
       },
@@ -22,7 +22,7 @@
         "coverPhoto": "https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "PLONK",
         "caption": "Permutations over Lagrange-bases for Oecumenical Noninteractive arguments of Knowledge",
-        "description": "A highly efficient universal SNARK, introducing a new circuit arithmetisation and the notion of 'selector polynomials', bound together by a permutation argument",
+        "description": "A highly efficient universal SNARK, introducing a new circuit arithmetisation and the notion of 'selector polynomials', bound together by a permutation argument.",
         "link": "",
         "paperLink": "https://eprint.iacr.org/2019/953.pdf"
       }
