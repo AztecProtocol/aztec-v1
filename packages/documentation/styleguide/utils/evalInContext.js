@@ -1,3 +1,4 @@
+// eslint-disable-next-line consistent-return
 export default async (code) => {
     // eslint-disable-next-line no-new-func
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;

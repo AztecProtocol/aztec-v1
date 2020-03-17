@@ -133,12 +133,6 @@ const webpackConfig = (env = 'development', { locale = 'en' } = {}) => {
                                 },
                             },
                         },
-                        // {
-                        //   loader: 'jsToSass-loader',
-                        //   options: {
-                        //     entry: path.resolve(__dirname, 'src/config/index.js'),
-                        //   },
-                        // },
                     ],
                 },
                 {

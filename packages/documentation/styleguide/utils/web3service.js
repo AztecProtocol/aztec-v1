@@ -83,7 +83,7 @@ class Web3Service {
             contractAddress = network && network.address;
         }
         if (!contractAddress) {
-            console.log(`Contract object "${contractName}" doesn't have an address.
+            console.log(`Contract object "${contractName}" doesn't have an address.\n\
                 Please deploy it first or use 'registerInterface' instead.
             `);
             return null;
@@ -215,7 +215,7 @@ class Web3Service {
         });
     }
 
-    triggerMethod = async (type, { method, contractAddress, fromAddress, args }) => {
+    async triggerMethod(type, { method, contractAddress, fromAddress, args }) {
         const methodSetting =
             (args.length &&
                 typeof args[args.length - 1] === 'object' &&
@@ -298,7 +298,7 @@ class Web3Service {
                 reject(error);
             });
         });
-    };
+    }
 
     useContract(contractName, contractAddress = null) {
         return {

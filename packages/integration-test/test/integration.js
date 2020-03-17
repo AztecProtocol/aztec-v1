@@ -1,4 +1,4 @@
-/* global expect, web3, contract, it:true */
+/* global expect, web3, contract */
 const {
     BurnProof,
     DividendProof,

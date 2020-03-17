@@ -1,6 +1,5 @@
 // @flow
 import { transform } from 'buble';
-import { BubleOptions } from 'buble';
 import transpileImports from './transpileImports';
 
 const compile = (code, config) => transform(code, config).code;

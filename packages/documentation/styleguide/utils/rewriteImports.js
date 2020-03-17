@@ -1,3 +1,6 @@
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-plusplus */
+/* eslint-disable prefer-template */
 // Temporary copy to fix
 // https://github.com/lukeed/rewrite-imports/issues/10
 
@@ -20,6 +23,7 @@ function generate(keys, dep, base, fn) {
             .pop()
             .replace(/\W/g, '_') +
         '$' +
+        // eslint-disable-next-line no-use-before-define
         num++; // uniqueness
     const name = alias(tmp).name;
 

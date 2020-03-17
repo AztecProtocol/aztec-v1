@@ -11,6 +11,12 @@ import { DisplayModes, ExampleModes } from '../consts';
 const EXAMPLE_TAB_CODE_EDITOR = 'rsg-code-editor';
 
 class Playground extends Component {
+    handleChange = debounce((code) => {
+        this.setState({
+            code,
+        });
+    }, this.context.config.previewDelay);
+
     static propTypes = {
         code: PropTypes.string.isRequired,
         evalInContext: PropTypes.func.isRequired,
@@ -19,16 +25,10 @@ class Playground extends Component {
         exampleMode: PropTypes.string.isRequired,
         settings: PropTypes.object,
     };
+
     static defaultProps = {
         settings: {},
     };
-    static contextType = Context;
-
-    handleChange = debounce((code) => {
-        this.setState({
-            code,
-        });
-    }, this.context.config.previewDelay);
 
     state = {
         code: this.props.code,
@@ -63,12 +63,12 @@ class Playground extends Component {
         }));
     };
 
+    static contextType = Context;
+
     render() {
         const { code, activeTab } = this.state;
-        const { evalInContext, index, name, settings, exampleMode } = this.props;
+        const { evalInContext, index, name, settings } = this.props;
         const { displayMode } = this.context;
-        // const isExampleHidden = exampleMode === ExampleModes.hide;
-        // const isEditorHidden = settings.noeditor || isExampleHidden;
         const preview = <Preview code={code} evalInContext={evalInContext} name={name} />;
 
         return (
@@ -79,7 +79,6 @@ class Playground extends Component {
                     padded={!!settings.padded}
                     preview={preview}
                     previewProps={settings.props || {}}
-                    // tabButtons={<Slot name="exampleTabButtons" active={activeTab} props={{ onClick: this.handleTabChange }} />}
                     tabBody={
                         <Slot
                             name="exampleTabs"
@@ -98,11 +97,6 @@ class Playground extends Component {
                 />
             </div>
         );
-        // this was at the top of the return
-        // isEditorHidden ? (
-        //   <Para>{preview}</Para>
-        // ) : (
-        // );
     }
 }
 

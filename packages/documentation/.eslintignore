@@ -1,8 +1,10 @@
 # ignored directories
-node_modules/*
-**/dist/*
-**/fonts/*
-/public/apis/*
+*/node_modules/*
+dist/*
+fonts/*
+*/build/*
+public/*
+src/*
 
 # ignored extensions
 **/*.json
