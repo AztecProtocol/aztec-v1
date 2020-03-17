@@ -19,14 +19,14 @@ pragma solidity >=0.5.0 <= 0.6.0;
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **/
 
-contract MetaDataUtils {
+library MetaDataUtils {
     /**
     * @dev Extract a single approved address from the metaData
     * @param metaData - metaData containing addresses according to the schema defined in x
     * @param addressPos - indexer for the desired address, the one to be extracted
     * @return desiredAddress - extracted address specified by the inputs to this function
     */
-    function extractAddress(bytes memory metaData, uint256 addressPos) public returns (address desiredAddress) {
+    function extractAddress(bytes memory metaData, uint256 addressPos) pure internal returns (address desiredAddress) {
         /**
         * Memory map of metaData. This is the ABI encoding of metaData, supplied by the client
         * The first word of any dynamic bytes array within this map, is the number of discrete elements in that 

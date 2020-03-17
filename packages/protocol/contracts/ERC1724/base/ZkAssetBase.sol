@@ -30,7 +30,7 @@ import "../../libs/ProofUtils.sol";
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **/
-contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
+contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712 {
     using NoteUtils for bytes;
     using SafeMath for uint256;
     using ProofUtils for uint24;
@@ -471,7 +471,7 @@ contract ZkAssetBase is IZkAsset, IAZTEC, LibEIP712, MetaDataUtils {
         // if customData has been set, approve the relevant addresses
         if (uint256(metaDataLength) > 0x61) {
             for (uint256 i = 0; i < uint256(numAddresses); i += 1) {
-                address extractedAddress = extractAddress(metaData, i);
+                address extractedAddress = MetaDataUtils.extractAddress(metaData, i);
                 bytes32 addressID = keccak256(abi.encodePacked(extractedAddress, noteHash));
                 noteAccess[addressID] = block.timestamp;
             }

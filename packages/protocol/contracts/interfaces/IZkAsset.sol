@@ -100,15 +100,6 @@ interface IZkAsset {
     */
     function confidentialTransfer(uint24 _proofId, bytes calldata _proofData, bytes calldata _signatures) external;
 
-
-    /**
-    * @dev Extract a single approved address from the metaData
-    * @param metaData - metaData containing addresses according to the schema defined in x
-    * @param addressPos - indexer for the desired address, the one to be extracted
-    * @return desiredAddress - extracted address specified by the inputs to this function
-    */
-    function extractAddress(bytes calldata metaData, uint256 addressPos) external returns (address desiredAddress);
-
     /**
     * @dev Update the metadata of a note that already exists in storage.
     * @param noteHash - hash of a note, used as a unique identifier for the note
