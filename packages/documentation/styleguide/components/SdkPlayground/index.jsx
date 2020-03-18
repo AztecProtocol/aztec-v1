@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Hook, Console, Decode, Unhook } from 'console-feed';
-import { Block } from '@aztec/guacamole-ui';
+import { Block, FlexBox, TextButton } from '@aztec/guacamole-ui';
 import debounce from 'lodash/debounce';
 import Editor from 'react-styleguidist/lib/client/rsg-components/Editor';
 import classnames from 'classnames';
@@ -198,6 +198,9 @@ class SdkPlayground extends PureComponent {
         return (
             <>
                 <iframe ref={this.setIframeRef} id={iframeId} title="code" height="0" width="0" style={{ display: 'none' }} />
+                <FlexBox align="flex-end">
+                    <TextButton size="s" href="https://discord.gg/65pgmS" text="Need help? Join our DISCORD!" />
+                </FlexBox>
                 <Block className={styles.wrapper} background="white" borderRadius="xs" hasBorder>
                     <SdkPlaygroundControls
                         zkAssetAddress={zkAssetAddress}
