@@ -7,8 +7,9 @@
   },
   "description": "AZTEC Protocol documentation based on React Styleguidist",
   "scripts": {
-    "build": "truffle compile --all && styleguidist build",
+    "build": "truffle compile --all && styleguidist build && yarn copy",
     "clean": "shx rm -rf ./build  ./dist ./public || true",
+    "copy": "find ../extension/src/client/apis -iregex '.(ZkNote|Account|ZkAsset).' -exec cp {} ./public/apis \\;",
     "generateStyles": "guacamole generateStyles",
     "lint": "eslint --ignore-path .eslintignore .",
     "start": "yarn styleguide",
