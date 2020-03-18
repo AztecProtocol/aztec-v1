@@ -19,6 +19,7 @@ const Withdraw = ({
     amount,
     to,
     numberOfInputNotes,
+    inputNoteHashes,
 }) => {
     const fetchInitialData = async () => {
         const {
@@ -36,14 +37,22 @@ const Withdraw = ({
         return {
             steps,
             retryWithMetaMaskStep: withdrawSteps.metamask.slice(-1)[0],
+            proofType: 'WITHDRAW_PROOF',
             assetAddress,
             asset,
             currentAddress,
+            transactions: [
+                {
+                    amount: parseInputAmount(amount),
+                    to,
+                },
+            ],
             amount: parseInputAmount(amount),
             publicOwner: to,
             spender: sender,
             sender,
             numberOfInputNotes,
+            inputNoteHashes,
             isGSNAvailable,
         };
     };
@@ -65,10 +74,12 @@ Withdraw.propTypes = {
     amount: inputAmountType.isRequired,
     to: PropTypes.string.isRequired,
     numberOfInputNotes: PropTypes.number,
+    inputNoteHashes: PropTypes.arrayOf(PropTypes.string),
 };
 
 Withdraw.defaultProps = {
     numberOfInputNotes: emptyIntValue,
+    inputNoteHashes: [],
 };
 
 export default Withdraw;

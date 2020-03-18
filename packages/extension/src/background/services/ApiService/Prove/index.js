@@ -2,13 +2,17 @@ import {
     uiReturnEvent,
 } from '~/config/event';
 import filterStream from '~/utils/filterStream';
-import settings from '~/background/utils/settings';
 import responseDataKeys from './responseDataKeys';
 import JoinSplit from './JoinSplit';
 
 const proofWithInputNotes = [
-    'TRANSFER_PROOF',
     'WITHDRAW_PROOF',
+    'TRANSFER_PROOF',
+];
+
+const proofWithOutputNotes = [
+    'DEPOSIT_PROOF',
+    'TRANSFER_PROOF',
 ];
 
 const triggerProofUi = async (query, connection) => {
@@ -86,30 +90,53 @@ export default async function prove(query, connection) {
                 const {
                     transactions,
                     amount,
-                    numberOfOutputNotes: customNumberOfOutputNotes,
+                    to,
                 } = args;
-                const numberOfOutputNotes = customNumberOfOutputNotes !== undefined
-                    ? customNumberOfOutputNotes
-                    : await settings('NUMBER_OF_OUTPUT_NOTES');
-                const inputAmount = proofWithInputNotes.indexOf(proofType) < 0
-                    ? 0
-                    : amount || (transactions || []).reduce((sum, tx) => sum + tx.amount, 0);
-                const proof = await JoinSplit({
+                const hasInputNotes = proofWithInputNotes.indexOf(proofType) >= 0;
+                const hasOutputNotes = proofWithOutputNotes.indexOf(proofType) >= 0;
+                let inputTransactions;
+                let outputTransactions;
+                if (hasInputNotes) {
+                    inputTransactions = transactions
+                        || [ // WITHDRAW_PROOF does not have transactions
+                            {
+                                amount,
+                                to,
+                            },
+                        ];
+                }
+                if (hasOutputNotes) {
+                    outputTransactions = transactions;
+                }
+                const proofData = await JoinSplit({
                     ...args,
-                    inputAmount,
-                    numberOfOutputNotes,
+                    inputTransactions,
+                    outputTransactions,
                 });
                 returnData = {
-                    success: !!proof,
-                    proof,
+                    success: !!proofData,
+                    proofData,
                 };
+                if (hasOutputNotes) {
+                    const {
+                        outputNotes,
+                        remainderNote,
+                    } = proofData;
+                    returnData.outputNotes = outputNotes
+                        .filter(note => note !== remainderNote)
+                        .map(({
+                            noteHash,
+                            value,
+                        }) => ({
+                            noteHash,
+                            value,
+                        }));
+                }
                 break;
             }
             default:
         }
     }
 
-    return {
-        returnData,
-    };
+    return returnData;
 }

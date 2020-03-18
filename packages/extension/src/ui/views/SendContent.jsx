@@ -30,7 +30,7 @@ class SendContent extends StepContentHelper {
             asset,
             amount,
             transactions,
-            userAccessAccounts,
+            userAccess,
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
@@ -94,13 +94,13 @@ class SendContent extends StepContentHelper {
                     title={i18n.t('send.recipient')}
                     recipients={recipients}
                 />,
-                currentStep === 0 && userAccessAccounts.length
+                currentStep === 0 && userAccess.length
                     ? (
                         <RecipientList
                             key="access"
                             title={i18n.t('note.access.user')}
                             description={i18n.t('note.access.user.description')}
-                            recipients={userAccessAccounts}
+                            recipients={userAccess.map(address => ({ address }))}
                         />
                     )
                     : null,
@@ -165,9 +165,7 @@ SendContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
-    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    })),
+    userAccess: PropTypes.arrayOf(PropTypes.string),
     spender: PropTypes.string.isRequired,
     proofHash: PropTypes.string,
 };
@@ -175,7 +173,7 @@ SendContent.propTypes = {
 SendContent.defaultProps = {
     titleKey: 'send.title',
     proofHash: '',
-    userAccessAccounts: [],
+    userAccess: [],
 };
 
 export default SendContent;

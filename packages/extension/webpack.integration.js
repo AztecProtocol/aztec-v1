@@ -2,7 +2,6 @@ const webpack = require('webpack');
 const merge = require('webpack-merge');
 const TerserPlugin = require('terser-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const packageJson = require('./package.json');
 const common = require('./webpack.common.js');
 
 const commonProduction = {
@@ -21,7 +20,7 @@ const commonProduction = {
     plugins: [
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': "'integration'",
-            'process.env.SERVE_LOCATION': "'https://staging-sdk.aztecprotocol.com/sdk/aztec.js'",
+            'process.env.SERVE_LOCATION': "'https://staging-sdk.aztecprotocol.com/staging/sdk/aztec.js'",
             __DEV__: false,
         }),
         new webpack.ContextReplacementPlugin(
@@ -31,12 +30,12 @@ const commonProduction = {
         new HtmlWebpackPlugin({ // Also generate a test.html
             filename: 'ui.html',
             template: './templates/ui.html',
-            version: packageJson.version,
+            version: 'staging',
         }),
         new HtmlWebpackPlugin({ // Also generate a test.html
             filename: 'background.html',
             template: './templates/background.html',
-            version: packageJson.version,
+            version: 'staging',
         }),
     ],
 };

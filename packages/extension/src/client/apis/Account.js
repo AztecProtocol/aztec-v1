@@ -25,15 +25,17 @@ class Account {
     }
 
     /**
-    *
-    * createNote
-    *
-    * - value (Int!):                   The note value to send.
-    * - userAccess ([Address!]):       The addresses that are able to see the real note value.
-    *
-    * @returns (Note)
-    *
-    */
+     *
+     * @function user.createNote
+     * @description Description: Create an AZTEC note owned by the user.
+     *
+     * @param {Integer} value Value of the note.
+     *
+     * @param {[Address]} userAccess Optional array of address that will be granted view access to the note value.
+     *
+     * @returns {AztecNote} note An AZTEC note owned by the user.
+     *
+     */
     async createNote(value, userAccess = []) {
         if (!this.registered) {
             throw new ApiError('user.unregistered', {
@@ -67,6 +69,16 @@ class Account {
         );
     }
 
+    /**
+     *
+     * @function user.encryptMessage
+     * @description Description: Encrypt a message using the user's public key.
+     *
+     * @param {String} message Message to be encrypted.
+     *
+     * @returns {HexString} encrypted An encrypted message.
+     *
+     */
     async encryptMessage(message) {
         if (!this.registered) {
             throw new ApiError('user.unregistered', {
@@ -86,6 +98,17 @@ class Account {
         return encrypted;
     }
 
+    /**
+     *
+     * @function user.decryptMessage
+     * @description Description: Decrypt a message using the user's private key.
+     * This method is available only for current user.
+     *
+     * @param {HexString} encrypted An encrypted message.
+     *
+     * @returns {String} message The decrypted message.
+     *
+     */
     async decryptMessage(message) {
         if (this.address !== Web3Service.account.address) {
             throw new ApiError('user.logout', {

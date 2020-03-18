@@ -84,6 +84,13 @@ export default gql`
         address: String
         address_in: [String!]
     }
+    input Note_filter {
+        noteHash_in: [String!]
+    }
+    input Input_excluded_note {
+        noteHash: String
+        value: Int
+    }
     type Query {
         root: String
     }

@@ -48,6 +48,11 @@ export const getHost = () => {
 
 
 export default async function launchGSN() {
+    if (process.env.SERVE_LOCATION) {
+        return {
+            kill: () => {},
+        };
+    }
     const relayUrl = `${getHost()}:${DEFAULT_GSN_RELAYER_PORT}`;
     const port = getPort(0);
     const host = getHost();

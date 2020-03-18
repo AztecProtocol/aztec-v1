@@ -61,10 +61,31 @@ const clientApi = async (request, connection) => {
 
     return {
         ...request,
-        data,
+        data: query === 'constructProof'
+            ? { data }
+            : data,
     };
 };
 
+const uiApi = async (request) => {
+    const {
+        data: {
+            query,
+        },
+    } = request;
+
+    const data = await apis[query](request);
+
+    return {
+        ...request,
+        response: data,
+    };
+};
+
+const apiExists = query => !!apis[query];
+
 export default {
     clientApi,
+    uiApi,
+    apiExists,
 };

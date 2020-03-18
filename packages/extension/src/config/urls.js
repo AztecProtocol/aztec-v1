@@ -10,9 +10,9 @@ const production = {
 
 const staging = {
     origin: 'https://staging-sdk.aztecprotocol.com',
-    public: 'https://staging-sdk.aztecprotocol.com/sdk/public',
-    background: 'https://staging-sdk.aztecprotocol.com/sdk/background.html',
-    ui: 'https://staging-sdk.aztecprotocol.com/sdk/ui.html',
+    public: 'https://staging-sdk.aztecprotocol.com/{version}/sdk/public',
+    background: 'https://staging-sdk.aztecprotocol.com/{version}/sdk/background.html',
+    ui: 'https://staging-sdk.aztecprotocol.com/{version}/sdk/ui.html',
     apiKeyQuota,
 };
 

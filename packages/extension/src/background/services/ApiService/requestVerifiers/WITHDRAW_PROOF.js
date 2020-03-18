@@ -4,14 +4,16 @@ import {
 import {
     argsError,
 } from '~/utils/error';
-import ensureInputNotes from '../utils/ensureInputNotes';
-import validateAccounts from '../utils/validateAccounts';
+import validateAccounts from './utils/validateAccounts';
+import ensureInputNotes from './utils/ensureInputNotes';
+import validateNoteHashes from './utils/validateNoteHashes';
 
 export default async function verifyWithdrawRequest({
     assetAddress,
     amount,
     to,
     numberOfInputNotes,
+    inputNoteHashes,
     returnProof,
     sender,
 }) {
@@ -28,6 +30,17 @@ export default async function verifyWithdrawRequest({
     });
     if (noteError) {
         return noteError;
+    }
+
+    if (inputNoteHashes) {
+        const noteHashError = validateNoteHashes(inputNoteHashes, {
+            assetAddress,
+            amount,
+            numberOfInputNotes,
+        });
+        if (noteHashError) {
+            return noteHashError;
+        }
     }
 
     const invalidAddressError = await validateAccounts([to]);

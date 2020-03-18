@@ -1,5 +1,4 @@
 import {
-    JoinSplitProof,
     ProofUtils,
 } from 'aztec.js';
 import uniq from 'lodash/uniq';
@@ -8,65 +7,113 @@ import {
     METADATA_AZTEC_DATA_LENGTH,
 } from '~/config/constants';
 import {
-    createNote,
-    createNotes,
-    fromViewingKey,
-    valueOf,
-} from '~/utils/note';
-import {
     randomSumArray,
 } from '~/utils/random';
-import asyncMap from '~/utils/asyncMap';
+import {
+    createNote,
+    createNotes,
+} from '~/utils/note';
+import {
+    aztecNoteToData,
+} from '~/utils/transformData';
 import asyncForEach from '~/utils/asyncForEach';
 import ApiError from '~/helpers/ApiError';
 import Web3Service from '~/helpers/Web3Service';
+import GraphQLService from '~/background/services/GraphQLService';
+import notesQuery from '~/background/services/GraphQLService/Queries/notesQuery';
 import userQuery from '~/background/services/GraphQLService/Queries/userQuery';
-import pickNotesFromBalance from '~/background/services/GraphQLService/resolvers/utils/pickNotesFromBalance';
-import decryptViewingKey from '~/background/services/GraphQLService/resolvers/utils/decryptViewingKey';
+import pickNotesFromBalanceQuery from '~/background/services/GraphQLService/Queries/pickNotesFromBalanceQuery';
+import settings from '~/background/utils/settings';
 import query from '../utils/query';
+
+const inputNoteToData = ({
+    noteHash,
+    decryptedViewingKey,
+    metadata,
+    value,
+    owner,
+}) => {
+    const customData = (metadata || '').slice(METADATA_AZTEC_DATA_LENGTH + 2);
+    return {
+        noteHash,
+        decryptedViewingKey,
+        metadata: customData ? `0x${customData}` : '',
+        value,
+        owner,
+    };
+};
+
+const getExistingNotes = async ({
+    noteHashes,
+    currentAddress,
+}) => {
+    const {
+        data: {
+            notes: {
+                notes,
+            },
+        },
+    } = await GraphQLService.query({
+        query: notesQuery(`
+            noteHash
+            decryptedViewingKey
+            metadata
+            value
+        `),
+        variables: {
+            where: {
+                noteHash_in: noteHashes,
+            },
+        },
+    }) || {};
+
+    return notes.map(note => inputNoteToData({
+        ...note,
+        owner: currentAddress,
+    }));
+};
 
 const getInputNotes = async ({
     assetAddress,
     currentAddress,
     inputAmount,
     numberOfInputNotes,
+    excludedNotes = [],
 }) => {
-    let inputNotes;
-
-    const notes = await pickNotesFromBalance({
-        assetId: assetAddress,
-        amount: inputAmount,
-        numberOfNotes: numberOfInputNotes,
-    });
+    const {
+        data: {
+            pickNotesFromBalance: {
+                notes,
+                error,
+            },
+        },
+    } = await GraphQLService.query({
+        query: pickNotesFromBalanceQuery(`
+            noteHash,
+            decryptedViewingKey
+            value
+            metadata
+        `),
+        variables: {
+            assetId: assetAddress,
+            amount: inputAmount,
+            owner: currentAddress,
+            numberOfNotes: numberOfInputNotes,
+            excludedNotes,
+        },
+    }) || {};
 
     if (!notes) {
+        if (error) {
+            throw error;
+        }
         throw new ApiError('note.pick.empty');
     }
 
-    try {
-        inputNotes = await asyncMap(
-            notes,
-            async ({
-                viewingKey,
-                metadata,
-            }) => {
-                const decryptedViewingKey = await decryptViewingKey(viewingKey);
-                const note = await fromViewingKey(
-                    decryptedViewingKey,
-                    currentAddress,
-                );
-                const customData = metadata.slice(METADATA_AZTEC_DATA_LENGTH + 2);
-                note.setMetaData(`0x${customData}`);
-                return note;
-            },
-        );
-    } catch (e) {
-        throw new ApiError('note.viewingKey.recover', {
-            notes,
-        });
-    }
-
-    return inputNotes;
+    return notes.map(note => inputNoteToData({
+        ...note,
+        owner: currentAddress,
+    }));
 };
 
 const getOutputNotes = async ({
@@ -108,13 +155,15 @@ const getOutputNotes = async ({
                 ],
                 'address',
             ).filter(a => a);
-        const newNotes = await createNotes(
+        const notes = await createNotes(
             values,
             spendingPublicKey || currentAccount.spendingPublicKey,
             to,
             userAccessArray,
         );
-        outputNotes.push(...newNotes);
+        notes.forEach((note) => {
+            outputNotes.push(aztecNoteToData(note));
+        });
     });
 
     return outputNotes;
@@ -170,11 +219,12 @@ export default async function JoinSplit({
     assetAddress,
     sender,
     publicOwner,
-    transactions,
-    inputAmount,
-    userAccess,
+    inputTransactions,
+    outputTransactions,
+    inputNoteHashes,
     numberOfInputNotes,
-    numberOfOutputNotes,
+    numberOfOutputNotes: customNumberOfOutputNotes,
+    userAccess,
 }) {
     const {
         account: {
@@ -182,24 +232,63 @@ export default async function JoinSplit({
         },
     } = Web3Service;
 
-    let inputNotes = [];
-    let inputValues = [];
+    const inputNotes = [];
+    const inputValues = [];
+    let userPickedNotesData = [];
     let extraAmount = 0;
-    if (inputAmount > 0 || numberOfInputNotes > 0) {
-        inputNotes = await getInputNotes({
-            assetAddress,
-            currentAddress,
-            inputAmount,
-            numberOfInputNotes,
-        });
+    if (inputTransactions) {
+        const inputAmount = inputTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+        let sdkPickedAmount = inputAmount;
+        let sdkPickedNumberOfInputNotes = numberOfInputNotes || 0;
 
-        inputValues = inputNotes.map(note => valueOf(note));
+        if (inputNoteHashes && inputNoteHashes.length) {
+            userPickedNotesData = await getExistingNotes({
+                noteHashes: inputNoteHashes,
+                currentAddress,
+            });
+            userPickedNotesData.forEach((noteData) => {
+                const { value } = noteData;
+                inputNotes.push(noteData);
+                inputValues.push(value);
+                sdkPickedAmount -= value;
+            });
+
+            sdkPickedNumberOfInputNotes -= inputNoteHashes.length;
+        }
+
+        if (sdkPickedAmount > 0
+            || sdkPickedNumberOfInputNotes > 0
+            || !inputNoteHashes // input amount might be 0
+            || !inputNoteHashes.length
+        ) {
+            const sdkPickedNotesData = await getInputNotes({
+                assetAddress,
+                currentAddress,
+                inputAmount: Math.max(sdkPickedAmount, 0),
+                numberOfInputNotes: sdkPickedNumberOfInputNotes > 0
+                    ? sdkPickedNumberOfInputNotes
+                    : null,
+                excludedNotes: userPickedNotesData.map(({
+                    noteHash,
+                    value,
+                }) => ({
+                    noteHash,
+                    value,
+                })),
+            });
+            sdkPickedNotesData.forEach((noteData) => {
+                const { value } = noteData;
+                inputNotes.push(noteData);
+                inputValues.push(value);
+            });
+        }
+
         const inputNotesSum = inputValues.reduce((accum, value) => accum + value, 0);
         extraAmount = inputNotesSum - inputAmount;
     }
 
     const accountMapping = await getAccountMapping({
-        transactions,
+        transactions: outputTransactions,
         currentAddress,
         userAccess,
     });
@@ -207,31 +296,36 @@ export default async function JoinSplit({
     let outputNotes = [];
     let outputValues = [];
 
-    if (transactions && transactions.length) {
+    if (outputTransactions) {
+        const numberOfOutputNotes = customNumberOfOutputNotes > 0
+            ? customNumberOfOutputNotes
+            : await settings('NUMBER_OF_OUTPUT_NOTES');
         const userAccessAccounts = !userAccess
             ? []
             : userAccess.map(address => accountMapping[address]);
         outputNotes = await getOutputNotes({
-            transactions,
+            transactions: outputTransactions,
             numberOfOutputNotes,
             currentAddress,
             accountMapping,
             userAccessAccounts,
         });
-        outputValues = outputNotes.map(note => valueOf(note));
+        outputValues = outputNotes.map(({ value }) => value);
     }
 
+    let remainderNote;
     if (extraAmount > 0) {
         const {
             spendingPublicKey,
             linkedPublicKey,
         } = accountMapping[currentAddress];
-        const remainderNote = await createNote(
+        const note = await createNote(
             extraAmount,
             spendingPublicKey,
             currentAddress,
             linkedPublicKey,
         );
+        remainderNote = aztecNoteToData(note);
         outputValues.push(extraAmount);
         outputNotes.push(remainderNote);
     }
@@ -241,11 +335,12 @@ export default async function JoinSplit({
         outputValues,
     );
 
-    return new JoinSplitProof(
+    return {
         inputNotes,
         outputNotes,
-        sender || currentAddress,
+        sender: sender || currentAddress,
         publicValue,
-        publicOwner || currentAddress,
-    );
+        publicOwner: publicOwner || currentAddress,
+        remainderNote,
+    };
 }

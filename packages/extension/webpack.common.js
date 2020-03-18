@@ -106,7 +106,7 @@ module.exports = {
             path: './.env.development',
         }),
         new webpack.DefinePlugin({
-            SDK_VERSION: `'${packageJson.version}'`,
+            SDK_VERSION: `'staging'`,
         }),
     ],
 };

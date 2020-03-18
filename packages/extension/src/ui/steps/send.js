@@ -5,7 +5,7 @@ const stepApprove = {
     descriptionKey: 'send.approve.description',
     tasks: [
         {
-            run: apis.proof.transfer,
+            run: apis.proof.joinSplit,
         },
     ],
     submitTextKey: 'send.approve.submit',

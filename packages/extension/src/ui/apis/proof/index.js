@@ -1,11 +1,5 @@
-import createNoteFromBalance from './createNoteFromBalance';
-import deposit from './deposit';
-import withdraw from './withdraw';
-import transfer from './transfer';
+import joinSplit from './joinSplit';
 
 export {
-    createNoteFromBalance,
-    deposit,
-    withdraw,
-    transfer,
+    joinSplit, // eslint-disable-line import/prefer-default-export
 };

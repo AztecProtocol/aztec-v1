@@ -29,9 +29,11 @@ export default async function generateApis(hasPermission = false) {
         availableWeb3Apis.forEach((name) => {
             web3[name] = (...args) => Web3Service[name](...args);
         });
+        web3.eth = Web3Service.eth;
     } else if (window.ethereum) {
         try {
             const web3Instance = new Web3(window.ethereum);
+            web3.eth = web3Instance.eth;
             networkId = await web3Instance.eth.net.getId();
             const [address] = await web3Instance.eth.getAccounts();
             if (address) {

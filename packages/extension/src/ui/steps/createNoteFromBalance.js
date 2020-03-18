@@ -5,7 +5,7 @@ const stepApprove = {
     descriptionKey: 'note.access.grant.description',
     tasks: [
         {
-            run: apis.proof.createNoteFromBalance,
+            run: apis.proof.joinSplit,
         },
     ],
     submitTextKey: 'note.access.grant.submit',

@@ -11,7 +11,7 @@ import {
 } from '~/utils/format';
 import getTokenInfo from '~/utils/getTokenInfo';
 import Asset from '~/background/database/models/asset';
-import validateAccounts from '../utils/validateAccounts';
+import validateAccounts from './utils/validateAccounts';
 
 export default async function verifyDepositRequest({
     assetAddress,
