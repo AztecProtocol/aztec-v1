@@ -37,9 +37,12 @@ export default class ZkNote {
     }
 
     /**
+     *
      * @function note.export
-     * @description note.export Description: Export an aztec.js note instance for use in proofs
-     * @returns {Class} Note Exported note class
+     * @description Description: Export an aztec.js note instance for use in proofs.
+     *
+     * @returns {AztecNote} note An AZTEC note.
+     *
      */
     async export() {
         if (!this.visible) {
@@ -66,12 +69,14 @@ export default class ZkNote {
     }
 
     /**
+     *
      * @function note.grantAccess
-     * @description note.grantAccess Description: Grant note view access to an array of Ethereum addresses
+     * @description Description: Grant note view access to an array of Ethereum addresses.
      *
-     * @param {Array} addresses Array of Ethereum addresses that are to be granted note view access
+     * @param {[Address]} addresses Array of Ethereum addresses that are to be granted note view access.
      *
-     * @returns {Bool} successStatus Boolean describing whether the granting of view access was successfull
+     * @returns {Boolean} success Boolean describing whether the granting of view access was successfull.
+     *
      */
     async grantAccess(addresses) {
         if (!this.visible
@@ -98,18 +103,22 @@ export default class ZkNote {
     }
 
     /**
-     * @function note.equal
-     * @description note.equal Description: Construct a proof that the note is equal to a particular value
      *
-     * @param {Object} note AZTEC note that is being compared
+     * @function note.equal
+     * @description Description: Construct a proof that the note is equal to a particular value.
+     *
+     * @param {ZkNote|AztecNote} comparisonNote Note that is being compared.
+     *
      * @param {Object} options Optional parameters to be passed:
      *
-     * - (Address) sender: The proof sender. Will use current address if empty
+     * - *sender* (Address): The proof sender. Will use current address if empty.
      *
-     * - (Object) utilityNote: Helper note used to construct the proof. Value of this note is the value that the note
-     * should be equal to
+     * - *remainderNote* (ZkNote|AztecNote): Helper note to make the equation hold.
+     *   In this api, its value should be 0.
+     *   The sdk will construct one if not provided.
      *
-     * @returns {Class} PrivateRangeProof Class with the constructed proof
+     * @returns {PrivateRangeProof} proof Instance of the constructed proof.
+     *
      */
     async equal(comparisonNote, {
         sender = '',
@@ -132,17 +141,20 @@ export default class ZkNote {
     /**
      *
      * @function note.greaterThan
-     * @description note.greaterThan Description: Construct a proof that the note is greater than a particular value
+     * @description Description: Construct a proof that the note is greater than a particular value.
      *
-     * @param {Object} note AZTEC note that is being compared
+     * @param {ZkNote|AztecNote} comparisonNote Note that is being compared.
+     *
      * @param {Object} options Optional parameters to be passed:
      *
-     * - (Address) sender: The proof sender. Will use current address if empty
+     * - *sender* (Address): The proof sender. Will use current address if empty.
      *
-     * - (Object) utilityNote: Helper note used to construct the proof. Value of this note is the value that you are proving
-     * the input note is greater than
+     * - *remainderNote* (ZkNote|AztecNote): Helper note to make the equation hold.
+     *   In this api, its value should be the value of the original zkNote minus the value of `comparisonNote`.
+     *   The sdk will construct one if not provided.
      *
-     * @returns {Class} PrivateRangeProof Class with the constructed proof
+     * @returns {PrivateRangeProof} proof Instance of the constructed proof.
+     *
      */
     async greaterThan(comparisonNote, {
         sender = '',
@@ -164,17 +176,20 @@ export default class ZkNote {
     /**
      *
      * @function note.lessThan
-     * @description note.lessThan Description: Construct a proof that the note value is less than a particular value
+     * @description Description: Construct a proof that the note value is less than a particular value.
      *
-     * @param {Object} note AZTEC note that is being compared
+     * @param {ZkNote|AztecNote} comparisonNote Note that is being compared.
+     *
      * @param {Object} options Optional parameters to be passed:
      *
-     * - (Address) sender: The proof sender. Will use current address if empty
+     * - *sender* (Address): The proof sender. Will use current address if empty.
      *
-     * - (Object) utilityNote: Helper note used to construct the proof. Value of this note is the value that you are proving
-     * the input note is less than
+     * - *remainderNote* (ZkNote|AztecNote): Helper note to make the equation hold.
+     *   In this api, its value should be the value of `comparisonNote` minus the value of the original zkNote.
+     *   The sdk will construct one if not provided.
      *
-     * @returns {Class} PrivateRangeProof Class with the constructed proof
+     * @returns {PrivateRangeProof} proof Instance of the constructed proof.
+     *
      */
     async lessThan(comparisonNote, {
         sender = '',
@@ -196,18 +211,20 @@ export default class ZkNote {
     /**
      *
      * @function note.greaterThanOrEqualTo
-     * @description note.greaterThanOrEqualTo Description: Construct a proof that the note value is greater than or
-     * equal to a particular value
+     * @description Description: Construct a proof that the note value is greater than or equal to a particular value.
      *
-     * @param {Object} note AZTEC note that is being compared
+     * @param {ZkNote|AztecNote} comparisonNote Note that is being compared.
+     *
      * @param {Object} options Optional parameters to be passed:
      *
-     * - (Address) sender: The proof sender. Will use current address if empty
+     * - *sender* (Address): The proof sender. Will use current address if empty.
      *
-     * - (Object) utilityNote: Helper note used to construct the proof. Value of this note is the value that you are proving
-     * the input note is greater than or equal to
+     * - *remainderNote* (ZkNote|AztecNote): Helper note to make the equation hold.
+     *   In this api, its value should be the value of the original zkNote minus the value of `comparisonNote`.
+     *   The sdk will construct one if not provided.
      *
-     * @returns {Class} PrivateRangeProof Class with the constructed proof
+     * @returns {PrivateRangeProof} proof Instance of the constructed proof.
+     *
      */
     async greaterThanOrEqualTo(comparisonNote, {
         sender = '',
@@ -230,18 +247,20 @@ export default class ZkNote {
     /**
      *
      * @function note.lessThanOrEqualTo
-     * @description note.lessThanOrEqualTo Description: Construct a proof that the note value is less than or
-     * equal to a particular value
+     * @description Description: Construct a proof that the note value is less than or equal to a particular value.
      *
-     * @param {Object} note AZTEC note that is being compared
+     * @param {ZkNote|AztecNote} comparisonNote Note that is being compared.
+     *
      * @param {Object} options Optional parameters to be passed:
      *
-     * - (Address) sender: The proof sender. Will use current address if empty
+     * - *sender* (Address): The proof sender. Will use current address if empty.
      *
-     * - (Object) utilityNote: Helper note used to construct the proof. Value of this note is the value that you are proving
-     * the input note is less than or equal to
+     * - *remainderNote* (ZkNote|AztecNote): Helper note to make the equation hold.
+     *   In this api, its value should be the value of `comparisonNote` minus the value of the original zkNote.
+     *   The sdk will construct one if not provided.
      *
-     * @returns {Class} PrivateRangeProof Class with the constructed proof
+     * @returns {PrivateRangeProof} proof Instance of the constructed proof.
+     *
      */
     async lessThanOrEqualTo(comparisonNote, {
         sender = '',

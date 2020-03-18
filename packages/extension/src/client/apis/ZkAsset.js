@@ -36,10 +36,12 @@ export default class ZkAsset {
     }
 
     /**
-     * @function zkAsset.balance
-     * @description zkAsset.balance: Get the balance of a ZkAsset
      *
-     * @returns {Integer} Balance Balance of the ZkAsset
+     * @function zkAsset.balance
+     * @description Description: Get the balance of a ZkAsset.
+     *
+     * @returns {Integer} balance Balance of the ZkAsset.
+     *
      */
     async balance() {
         const { balance } = await ConnectionService.query(
@@ -51,10 +53,12 @@ export default class ZkAsset {
     }
 
     /**
-     * @function zkAsset.totalSupplyOfLinkedToken
-     * @description zkAsset.totalSupplyOfLinkedToken Description: Get the total supply of the ERC20 token linked to the ZkAsset
      *
-     * @returns {Integer} totalSupply Token number of ERC20 tokens
+     * @function zkAsset.totalSupplyOfLinkedToken
+     * @description Description: Get the total supply of the ERC20 token linked to the ZkAsset
+     *
+     * @returns {BigNumber} totalSupply Token number of ERC20 tokens
+     *
      */
     async totalSupplyOfLinkedToken() {
         if (!this.linkedTokenAddress) {
@@ -79,10 +83,13 @@ export default class ZkAsset {
 
     /**
      * @function zkAsset.balanceOfLinkedToken
-     * @description zkAsset.balanceOfLinkedToken Description: Get the linked ERC20 token balance for an address
-     * @param {String} account Ethereum address for which the balance of the linked ERC20 token is being fetched
+     * @description Description: Get the linked ERC20 token balance for an address.
      *
-     * @returns {Integer} Balance Number of linked ERC20 tokens held by the `account`
+     * @param {String} account Optional Ethereum address for which the balance of the linked ERC20 token is being fetched.
+     * Will use the current user's address if not defined.
+     *
+     * @returns {BigNumber} balance Number of linked ERC20 tokens held by the `account`.
+     *
      */
     balanceOfLinkedToken = async (account) => {
         if (!this.linkedTokenAddress) {
@@ -117,12 +124,18 @@ export default class ZkAsset {
     };
 
     /**
-     * @function zkAsset.allowanceOfLinkedToken
-     * @description zkAsset.allowanceOfLinkedToken Description: Get the number of linked ERC20 tokens a spender is allowed to spend on behalf of an owner
-     * @param {String} owner Ethereum address which owns linked ERC20 tokens
-     * @param {String} spender Ethereum address that is expected to have previously been approved to spend ERC20 tokens on behalf of the owner
      *
-     * @returns {Integer} Allowance Number of linked ERC20 tokens the spender has been approved to spend on the owner's behalf
+     * @function zkAsset.allowanceOfLinkedToken
+     * @description Description: Get the number of linked ERC20 tokens a spender is allowed to spend on behalf of an owner.
+     *
+     * @param {String} owner Optional Ethereum address which owns linked ERC20 tokens.
+     * Will use the current user's address if not defined.
+     *
+     * @param {String} spender Optional Ethereum address that is expected to have previously been approved to spend ERC20 tokens on behalf of the owner.
+     * Will use the address of `ACE` contract if not defined.
+     *
+     * @returns {BigNumber} allowance Number of linked ERC20 tokens the spender has been approved to spend on the owner's behalf.
+     *
      */
     allowanceOfLinkedToken = async (owner = '', spender = '') => {
         if (!this.linkedTokenAddress) {
@@ -163,6 +176,16 @@ export default class ZkAsset {
         return new BN(allowance);
     };
 
+    /**
+     *
+     * @function zkAsset.subscribeToBalance
+     * @description Description: Get notified whenever the balance of an asset is changed.
+     *
+     * @param {Function} callback A listener, which will receive the new value whenever the balance is changed:
+     *
+     * - callback(*balance*): Where balance is an Integer.
+     *
+     */
     subscribeToBalance = async (subscriber) => {
         if (!this.isValid()) {
             return false;
@@ -182,29 +205,43 @@ export default class ZkAsset {
     );
 
     /**
-     *
      * @function zkAsset.deposit
-     * @description zkAsset.deposit Description: Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
+     * @description Description: Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
      *
-     * @param {Array} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
+     * @param {[Transaction]} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
      *
-     * - (Int) amount: Number of public ERC20 tokens being converted into notes
+     * - *amount* (Integer): Number of public ERC20 tokens being converted into notes.
      *
-     * - (String) to : Ethereum address to which the user is 'depositing' the zero-knowledge funds. The address will become the owner of the notes
+     * - *to* (Address): Ethereum address to which the user is 'depositing' the zero-knowledge funds.
+     *   The address will become the owner of the notes.
      *
-     * - (Int) (optional) numberOfOutputNotes: Number of output notes to create
+     * - *numberOfOutputNotes* (Integer) (optional): Number of output notes to create.
+     *
+     * - *aztecAccountNotRequired* (Boolean) (optional): Not to enforce recipient to have an aztec account.
+     *   Useful when depositing funds to a contract.
      *
      * @param {Object} options Optional parameters to be passed:
-     *       - (Int) numberOfOutputNotes: Number of new notes for each transaction.
-     *                                     Unless numberOfOutputNotes is defined in that transaction.
-     *                                     Will use default value in setting if undefined.
-     *       - (Array) userAccess: Addresses that have been granted view access to the note value
      *
-     * @returns {Object} txSwummary Transaction summary information containing:
+     * - *numberOfOutputNotes* (Integer): Number of new notes for each transaction.
+     *   Unless `numberOfOutputNotes` is defined in that transaction.
+     *   Will use default value in sdk settings if undefined.
      *
-     * - (Boolean) success: describes whether the transaction was successful
+     * - *userAccess* ([Address]): Addresses that have been granted view access to the note value.
      *
-     * - (Int) amount
+     * - *returnProof* (Boolean): Return the JoinSplit proof instead of sending it.
+     *
+     * - *sender* (Address): The proof sender. Available only when `returnProof` is true.
+     *
+     * - *publicOwner* (Address): The owner of ERC token. Available only when `returnProof` is true.
+     *
+     * @returns {Object} txSummary Transaction summary information containing:
+     *
+     * - *success* (Boolean): Describes whether the transaction was successful.
+     *
+     * - *outputNotes* ([Note]): Notes deposited into the recipient accounts.
+     *
+     * - *proof* (JoinSplitProof): Available when `returnProof` is set to true.
+     *
      */
     deposit = async (transactions, {
         numberOfOutputNotes,
@@ -231,20 +268,32 @@ export default class ZkAsset {
     /**
      *
      * @function zkAsset.withdraw
-     * @description zkasset.withdraw Description: Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens
+     * @description Description: Withdraw zero-knowledge funds into public form - convert notes into public ERC20 tokens.
      *
-     * @param {Int} amount Units of value being withdrawn - will equal the number of ERC20 tokens the `to` address receives
-     * @param {Object} options Optional arguments to be passed
+     * @param {Integer} amount Units of value being withdrawn - will equal the number of ERC20 tokens the `to` address receives.
      *
-     * - (String) to: Ethereum address to the ERC20 tokens should be sent, upon withdrawal. Will use current address if undefined.
+     * @param {Object} options Optional arguments to be passed:
      *
-     * - (Int) numberOfInputNotes: Number of notes to be destroyed. Will use default value in setting if undefined.
+     * - *to* (Address): Ethereum address to the ERC20 tokens should be sent, upon withdrawal. Will use current address if undefined.
+     *
+     * - *numberOfInputNotes* (Integer): Number of notes to be destroyed.
+     *   The sdk will pick a random number of notes if undefined.
+     *
+     * - *inputNoteHashes* ([NoteHash]): Notes to be destroyed.
+     *   Their total value should be larger than or equal to the total transaction amount
+     *   if `numberOfInputNotes` is defined and is equal to the array size.
+     *   Otherwise, the sdk will pick extra notes if necessary.
+     *
+     * - *returnProof* (Boolean): Return the JoinSplit proof instead of sending it.
+     *
+     * - *sender* (Address): The proof sender. Available only when `returnProof` is true.
      *
      * @returns {Object} txSummary Transaction summary information containing:
      *
-     * - (Boolean) success: describes whether the transaction was successful
+     * - *success* (Boolean): Describes whether the transaction was successful.
      *
-     * - (Int) amount
+     * - *proof* (JoinSplitProof): Available when `returnProof` is set to true.
+     *
      */
     withdraw = async (amount, {
         to,
@@ -273,34 +322,51 @@ export default class ZkAsset {
     };
 
     /**
-    *
-    * @function zkAsset.send
-    * @description zkAsset.send Description: Send funds confidentially to another Ethereum address
-    *
-    * @param {Array} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
-    *
-    * - (Int) amount: Units of value to transfer, where 1 unit is equivalent in value to 1 ERC20 token
-    *
-    * - (String) to: Ethereum address to which the user is sending zero-knowledge funds
-    *
-    * - (Int) (optional) numberOfOutputNotes: Number of output notes of this transaction.
-    *
-    * @returns {Object} options Optional arguments to be passed
-    * - (Int) numberOfInputNotes: Number of notes to be destroyed. Will use default value in setting if undefined.
-    *
-    *
-    * - (Int) numberOfOutputNotes:   Number of new notes for each transaction.
-    *                                      Unless numberOfOutputNotes is defined in that transaction.
-    *                                      Will use default value in setting if undefined.
-    *
-    * - (Array) userAccess: The addresses that are able to see the real note value.
-    *
-    * @returns {Object} txSummary Transaction summary information containing:
-    *
-    * - (Boolean) success: describes whether the transaction was successful
-    *
-    * - (Int) amount
-    */
+     *
+     * @function zkAsset.send
+     * @description Description: Send funds confidentially to another Ethereum address.
+     *
+     * @param {[Transaction]} transactions Transaction information which the user wants to have enacted. Each transaction object consists of:
+     *
+     * - *amount* (Integer): Units of value to transfer, where 1 unit is equivalent in value to 1 ERC20 token.
+     *
+     * - *to* (Address): Ethereum address to which the user is sending zero-knowledge funds.
+     *
+     * - *numberOfOutputNotes* (Integer) (optional): Number of output notes of this transaction.
+     *
+     * - *aztecAccountNotRequired* (Boolean) (optional): Not to enforce recipient to have an aztec account.
+     *
+     * @param {Object} options Optional arguments to be passed:
+     *
+     * - *numberOfInputNotes* (Integer): Number of notes to be destroyed.
+     *   The sdk will pick a random number of notes if undefined.
+     *
+     * - *numberOfOutputNotes* (Integer): Number of new notes for each transaction.
+     *   Unless `numberOfOutputNotes` is defined in that transaction.
+     *   Will use default value in sdk settings if undefined.
+     *
+     * - *inputNoteHashes* ([NoteHash]): Notes to be destroyed.
+     *   Their total value should be larger than or equal to the total transaction amount
+     *   if `numberOfInputNotes` is defined and is equal to the array size.
+     *   Otherwise, the sdk will pick extra notes if necessary.
+     *
+     * - *userAccess* ([Address]): The addresses that are able to see the real note value.
+     *
+     * - *returnProof* (Boolean): Return the JoinSplit proof instead of sending it.
+     *
+     * - *sender* (Address): The proof sender. Available only when `returnProof` is true.
+     *
+     * - *publicOwner* (Address): The owner of ERC token. Available only when `returnProof` is true.
+     *
+     * @returns {Object} txSummary Transaction summary information containing:
+     *
+     * - *success* (Boolean): Describes whether the transaction was successful.
+     *
+     * - *outputNotes* ([Note]): Notes sent to the recipient accounts.
+     *
+     * - *proof* (JoinSplitProof): Available when `returnProof` is set to true.
+     *
+     */
     send = async (transactions, {
         numberOfInputNotes,
         numberOfOutputNotes,
@@ -402,25 +468,28 @@ export default class ZkAsset {
     };
 
     /**
-    *
-    * @function zkAsset.createNoteFromBalance
-    * @description zkAsset.createNoteFromBalance Description: Manually create notes, with particular values drawn from the user's balance
-    *
-    * @param {Integer} amount Value of the note to be created
-    * @param {Object} options Optional arguments to be passed
-    *
-    * - (Array) userAccess:       The addresses that are able to see the real note value.
-    *
-    * - (Int) numberOfInputNotes:     Number of notes to be destroyed. Will use default value in setting if undefined.
-    *
-    * - (Int) numberOfOutputNotes:    Number of new notes for each transaction. Unless numberOfOutputNotes is defined in that transaction. Default value is 1.
-    *
-    * @returns {Array} Notes Arrray of note that have been created, where each note object contains:
-    *
-    * - (String) noteHash
-    *
-    * - (Int) value
-    */
+     *
+     * @function zkAsset.createNoteFromBalance
+     * @description Description: Manually create notes, with particular values drawn from the user's balance.
+     *
+     * @param {Integer} amount Total value of the notes to be created.
+     *
+     * @param {Object} options Optional arguments to be passed:
+     *
+     * - *userAccess* ([Address]): The addresses that are able to see the real value of the new notes.
+     *
+     * - *numberOfInputNotes* (Integer): Number of notes to be destroyed.
+     *   The sdk will pick a random number of notes if undefined.
+     *
+     * - *numberOfOutputNotes* (Integer): Number of new notes to be created. Default value is 1.
+     *
+     * @returns {[Note]} notes An Array of notes that have been created, where each note object contains:
+     *
+     * - *noteHash* (String)
+     *
+     * - *value* (Integer)
+     *
+     */
     createNoteFromBalance = async (amount, {
         userAccess = [],
         numberOfInputNotes,
@@ -444,26 +513,28 @@ export default class ZkAsset {
     };
 
     /**
-    *
-    * @function zkAsset.fetchNotesFromBalance
-    * @description zkAsset.fetchNotesfromBalance Description: Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query
-    *
-    * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch. If not supplied, will return
-    * all the notes owned by the user
-    * - (Int) equalTo: the exact value all notes need to match
-    *
-    * - (Int) greaterThan: if no equalTo parameter, the minimum value of notes returned
-    *
-    * - (Int) lessThan: if no equalTo parameter, the maximum value of notes returned
-    *
-    * - (Int) numberOfNotes: number of notes which match the query to return
-    *
-    * @returns {Array} notes: Fetched notes that satisfy the parameters of the fetch query. Each note is an object containing:
-    *
-    * - (String) noteHash
-    *
-    * - (Int) value
-    */
+     *
+     * @function zkAsset.fetchNotesFromBalance
+     * @description Description: Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query.
+     *
+     * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch.
+     * If not supplied, will return all the notes owned by the user.
+     *
+     * - *equalTo* (Integer): The exact value all notes need to match.
+     *
+     * - *greaterThan* (Integer): If no equalTo parameter, the minimum value of notes returned.
+     *
+     * - *lessThan* (Integer): If no equalTo parameter, the maximum value of notes returned.
+     *
+     * - *numberOfNotes* (Integer): Number of notes which match the query to return.
+     *
+     * @returns {[Note]} notes Fetched notes that satisfy the parameters of the fetch query. Each note is an object containing:
+     *
+     * - *noteHash* (String)
+     *
+     * - *value* (Integer)
+     *
+     */
     fetchNotesFromBalance = async ({
         greaterThan,
         lessThan,
