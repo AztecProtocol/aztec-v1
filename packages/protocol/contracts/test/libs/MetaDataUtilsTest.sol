@@ -23,7 +23,7 @@ import "../../libs/MetaDataUtils.sol";
 
 contract MetaDataUtilsTest {
     using MetaDataUtils for bytes;
-    
+
     /**
     * @dev Extract a single approved address from the metaData
     * @param metaData - metaData containing addresses according to the schema defined in x
