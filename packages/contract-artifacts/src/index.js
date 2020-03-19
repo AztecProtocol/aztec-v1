@@ -4,6 +4,7 @@ const AccountRegistryManager = require('../artifacts/AccountRegistryManager');
 const Behaviour20200106 = require('../artifacts/Behaviour20200106');
 const Behaviour20200207 = require('../artifacts/Behaviour20200207');
 const Behaviour20200220 = require('../artifacts/Behaviour20200220');
+const Behaviour20200305 = require('../artifacts/Behaviour20200305');
 const Dividend = require('../artifacts/Dividend');
 const DividendABIEncoder = require('../artifacts/DividendABIEncoder');
 const DividendInterface = require('../artifacts/DividendInterface');
@@ -52,6 +53,7 @@ module.exports = {
     Behaviour20200106,
     Behaviour20200207,
     Behaviour20200220,
+    Behaviour20200305,
     Dividend,
     DividendABIEncoder,
     DividendInterface,
