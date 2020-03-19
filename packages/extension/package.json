@@ -51,7 +51,7 @@
         "eth-sig-util": "^2.2.0",
         "ethereumjs-util": "^6.2.0",
         "ethereumjs-wallet": "^0.6.3",
-        "graphql": "^14.4.2",
+        "graphql": "14.4.2",
         "graphql-tag": "^2.10.1",
         "graphql-tools": "^4.0.4",
         "html-webpack-plugin": "^3.2.0",
@@ -105,6 +105,7 @@
         "start:ganache": "babel-node scripts/run start",
         "start:ui": "babel-node ./src/ui/mock/devServer",
         "test:integration": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && babel-node scripts/run integrationTests",
+        "test:staging": "rm -rf ./test/harness/screenshots && mkdir ./test/harness/screenshots && babel-node scripts/run launchStaging",
         "test:interactive": "cd ./test/harness/ && node --experimental-repl-await",
         "watch": "webpack --watch --config webpack.dev.js"
     },

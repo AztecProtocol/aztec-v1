@@ -31,7 +31,7 @@ contract('Extension', (accounts) => {
         await erc20.mint(user2, totalBalance);
         await erc20.approve(ace.address, totalBalance);
         await erc20.approve(ace.address, totalBalance, { from: user2 });
-        environment = await Environment.init();
+        environment = await Environment.init({ debug: true, observeTime: 0 });
     });
 
     after(async () => {

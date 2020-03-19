@@ -8,9 +8,9 @@ const commonProduction = {
     mode: 'production',
     devtool: '',
     resolve: {
-        alias: {
-            '~contracts': '@aztec/contract-artifacts/artifacts',
-        },
+        // alias: {
+        //     '~contracts': '@aztec/contract-artifacts/artifacts',
+        // },
     },
     optimization: {
         minimize: true,
@@ -19,7 +19,7 @@ const commonProduction = {
     },
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': "'integration'",
+            'process.env.NODE_ENV': "'production'",
             'process.env.SERVE_LOCATION': "'https://staging-sdk.aztecprotocol.com/staging/sdk/aztec.js'",
             __DEV__: false,
         }),

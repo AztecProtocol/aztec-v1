@@ -25,11 +25,11 @@ const development = {
 };
 
 function getConfig() {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && !process.env.SERVE_LOCATION) {
         return production;
     }
 
-    if (process.env.NODE_ENV === 'integration' && process.env.SERVE_LOCATION) {
+    if (process.env.SERVE_LOCATION) {
         return staging;
     }
 
