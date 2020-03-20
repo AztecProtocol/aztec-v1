@@ -211,8 +211,6 @@ workflows:
                 requires:
                     - lint
                     - test
-                context: aws
-                    - test
                 filters:
                     branches:
                         only:
