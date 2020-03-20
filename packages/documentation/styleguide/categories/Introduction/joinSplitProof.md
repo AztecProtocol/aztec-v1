@@ -7,7 +7,7 @@ In a `JoinSplit` proof particular notes are provided as inputs, and certain note
 Consider the below example as to how value can be transferred using a JoinSplit proof:
 
 &nbsp
-<img src="../../images/joinSplitImage.png" width="75%">
+<img src="../../../images/joinSplitImage.png" width="50%">
 &nbsp
 
 Alice wishes to confidentially transfer Bob 75 zkDAI. She starts off with 2 notes whose value sum to 100 zkDAI, whilst Bob starts off with no notes and no zkDAI.
