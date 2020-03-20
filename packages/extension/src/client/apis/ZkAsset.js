@@ -592,6 +592,42 @@ export default class ZkAsset {
 
     /**
      *
+     * @function zkAsset.transactions
+     * @description Description: Fetch the users transactions  for the `zkAsset` .
+     *
+     * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch.
+     * If not supplied, will return all the notes owned by the user.
+     *
+     * - *type* (String): The transaction type one of SEND, DEPOSIT, WITHDAW.
+     *
+     * @returns {[Tx]} transactions an array of transactions that satisfy the parameters of the fetch query. Each tx is an object containing:
+     *
+     * - *from* (String)
+     *
+     * - *to* (String)
+     *
+     * - *timestamp* (integer)
+     *
+     * - *value* (Integer)
+     *
+     * - *type* (String)
+     *
+     */
+
+    transactions = async ({
+        type,
+        fromBlock,
+    } = {}) => ConnectionService.query(
+        'fetchTransactions',
+        {
+            assetAddress: this.address,
+            type,
+            fromBlock,
+        },
+    );
+
+    /**
+     *
      * @function zkAsset.fetchNotesFromBalance
      * @description Description: Fetch the notes stored in the `zkAsset` that are owned by the user and match the given query.
      *

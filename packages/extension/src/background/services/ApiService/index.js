@@ -9,6 +9,7 @@ import prove from './Prove';
 import asset from './Asset';
 import assetBalance from './Asset/getBalance';
 import fetchNotesFromBalance from './Asset/fetchNotesFromBalance';
+import fetchTransactions from './Asset/fetchTransactions';
 import note from './Note';
 import noteWithViewingKey from './Note/exportViewingKey';
 import grantNoteAccess from './Note/grantNoteAccess';
@@ -26,6 +27,7 @@ const apis = {
     asset,
     assetBalance,
     fetchNotesFromBalance,
+    fetchTransactions,
     note,
     noteWithViewingKey,
     grantNoteAccess,
