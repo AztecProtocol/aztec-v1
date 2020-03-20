@@ -9,12 +9,12 @@ import signProof from './signProof';
 const getSignProofSignatureResponse = (address, signature) => {
     if (address === '0x7dd4e19395c47753370a7e20b3788546958b2ea6') {
         return {
-            signature1: signature,
+            signature,
             signature2: signer.makeReplaySignature(signature),
         };
     }
     return {
-        signature1: signature,
+        signature,
     };
 };
 
