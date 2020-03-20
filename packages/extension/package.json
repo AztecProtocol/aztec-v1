@@ -68,7 +68,7 @@
         "psl": "^1.2.0",
         "puppeteer": "^2.1.1",
         "react": "^16.8.6",
-        "react-dev-utils": "^9.0.3",
+        "react-dev-utils": "^10.2.0",
         "react-dom": "^16.8.6",
         "react-pose": "^4.0.9",
         "react-router-dom": "^5.0.1",
