@@ -6,8 +6,8 @@
         "coverPhoto": "https://images.unsplash.com/photo-1529148482759-b35b25c5f217?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
         "title": "PLOOKUP",
         "caption": "A simplified polynomial protocol for lookup tables",
-        "description": "A technique using lookup tables to enable logic on 8-bit binary strings, enabling efficient hash verification of non-SNARK-friendly hashes e.g. SHA-256. Summary by co-author Dan Boneh.",
-        "link": "https://hackmd.io/@dabo/B1U4kx8XI",
+        "description": "A technique using lookup tables to enable logic on 8-bit binary strings, enabling efficient hash verification of non-SNARK-friendly hashes e.g. SHA-256.",
+        "link": "",
         "paperLink": "https://eprint.iacr.org/2020/315.pdf"
       },
       {
@@ -23,7 +23,7 @@
         "title": "PLONK",
         "caption": "Permutations over Lagrange-bases for Oecumenical Noninteractive arguments of Knowledge",
         "description": "A highly efficient universal SNARK, introducing a new circuit arithmetisation and the notion of 'selector polynomials', bound together by a permutation argument.",
-        "link": "",
+        "link": "https://vitalik.ca/general/2019/09/22/plonk.html",
         "paperLink": "https://eprint.iacr.org/2019/953.pdf"
       }
     ]
