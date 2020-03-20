@@ -1,0 +1,28 @@
+@import './guacamole-vars';
+
+$color-primary: #7174FF;
+$color-primary-light: #808DFF;
+$color-primary-lighter: #9FC4FF;
+$color-primary-lightest: rgba(#9FC4FF, 0.1);
+// $color-primary: map-get($color-map, 'primary');
+// $color-primary-light: map-get($color-map, 'primary-light');
+// $color-primary-lighter: map-get($color-map, 'primary-lighter');
+// $color-primary-lightest: map-get($color-map, 'primary-lightest');
+
+$bg-gradient: linear-gradient(111deg, $color-primary-light 0%, $color-primary-lighter 60%, $color-primary-light 100%);
+$overlay-theme-bg-map: (
+  'primary': 'grey-darker',
+  'secondary': 'secondary-lightest',
+  'white': 'white-lighter',
+);
+
+$code-font-family: Consolas, "Liberation Mono", Menlo, monospace;
+$code-font-size-map: (
+  'xxs': 10px,
+  'xs': 12px,
+  's': 13px,
+  'm': 18px,
+  'l': 24px,
+  'xl': 28px,
+  'xxl': 38px,
+);

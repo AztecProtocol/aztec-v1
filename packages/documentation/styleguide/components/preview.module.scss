@@ -1,0 +1,165 @@
+@import '../../src/styles/variables.scss';
+
+.textArea {
+  width: 100%;
+  outline: none !important;
+  position: relative;
+  pointer-events: all;
+  max-height: 300px;
+  overflow-y: scroll;
+  div:first-of-type {
+    width: 100%;
+    textarea {
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
+      resize: none !important; /*remove the resize handle on the bottom right*/
+    }
+  }
+
+  &:after {
+    content: ' ';
+    transition: all ease 0.3s;
+    background: rgba(0,0,0,0.0);
+    position: absolute;
+    pointer-events: none;
+    top: 0px;
+    left: 0x;
+    width: 100%;
+    height: 100%;
+  }
+}
+.codeRunning{
+  pointer-events: none;
+  &:after {
+    content: 'Running...';
+    color: map-get($color-map, 'white');
+    transition: all ease 0.3s;
+    background: map-get($color-map, 'primary-lighter');
+    font-weight: 400;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    pointer-events: all;
+    top: 0px;
+    left: 0x;
+    width: 100%;
+    height: 100%;
+  }
+}
+.enableAztec{
+  pointer-events: none;
+  &:after {
+    content: 'AZTEC needs to be setup to use the interactive docs.';
+    color: map-get($color-map, 'white');
+    transition: all ease 0.3s;
+    background: rgba(137,139,246,0.72);
+    font-weight: 400;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    pointer-events: all;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.rinkeby {
+  pointer-events: none;
+  &:after {
+    content: 'Please select Rinkeby network to use examples.';
+    color: map-get($color-map, 'white');
+    transition: all ease 0.3s;
+    background: map-get($color-map, 'grey-darker');
+    font-weight: 400;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    pointer-events: all;
+    top: 0px;
+    left: 0x;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.web3Data {
+  pointer-events: none;
+  &:after {
+    content: 'Loading web3 data';
+    color: map-get($color-map, 'white');
+    transition: all ease 0.3s;
+    background: map-get($color-map, 'grey');
+    font-weight: 400;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    pointer-events: all;
+    top: 0px;
+    left: 0x;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.runCode {
+  border-radius: 0px 0px 3px 0px;
+  background: map-get($color-map, 'primary');
+  font-weight: 400;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.setupAZTEC {
+  border-radius: 0px 0px 3px 3px;
+  background: map-get($color-map, 'primary');
+  font-weight: 400;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  width: 100%;
+}
+.logs {
+  padding: 10px;
+  & > div {
+
+    max-height: 100px;
+    height: 100px;
+    overflow-y: scroll;
+  }
+}
+
+.testEth {
+  font-weight: 400;
+  padding-top: 0px;
+  border-radius: 0px 0px 0px 0px;
+  padding-bottom: 0px;
+  background: map-get($color-map, 'white-lighter');
+  line-height: 20px;
+  &:hover {
+    background: map-get($color-map, 'white-lightest') !important;
+  }
+}
+
+.group {
+  display: flex;
+  &:last-child:not(:first-child) {
+    border-left: 1px solid map-get($color-map, 'white-lighter') !important;
+    border-right: 1px solid map-get($color-map, 'white-lighter') !important;
+  }
+  button {
+    border: none !important;
+    margin-right: 1px;
+    cursor: pointer;
+  }
+}

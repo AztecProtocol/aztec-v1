@@ -1,0 +1,21 @@
+@function get-darken-color($color, $amount) {
+  @if map-has-key($color-map, $color) {
+    $color: get-color($color);
+  }
+
+  @if $color == white {
+    @return $color;
+  }
+
+  $opacity: alpha($color);
+  @if $opacity != 1 {
+    $rgb-color: rgb(red($color), green($color), blue($color));
+    @if $rgb-color == white {
+      @return rgba($rgb-color, $opacity * (100% + $amount) / 100%);
+    }
+
+    $color: mix($rgb-color, #ffffff, $opacity * 100%);
+  }
+
+  @return darken($color, $amount);
+}

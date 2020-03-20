@@ -1,0 +1,19 @@
+# ignored directories
+*/node_modules/*
+dist/*
+fonts/*
+*/build/*
+public/*
+src/*
+
+# ignored extensions
+**/*.json
+**/*.css
+**/*.scss
+**/*.md
+**/*.ejs
+**/*.ico
+**/*.svg
+**/*.lock
+**/*.log
+**/*.yml

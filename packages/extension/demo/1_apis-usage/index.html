@@ -74,6 +74,8 @@
         try {
           await window.aztec.enable({
             apiKey: 'ethglobalstarterkit',
+            contractAddresses: {
+            }
           });
         } catch (error) {
           console.error('Failed to enable aztec', error);

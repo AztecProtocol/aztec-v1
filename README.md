@@ -27,10 +27,14 @@
 
 ## Documentation :books:
 
-There are two key sources of documentation:
+All AZTEC documentation is available on the documentation website: https://docs.aztecprotocol.com
 
-1. Protocol specification: https://github.com/AztecProtocol/specification
-2. Our client side SDK: https://docs.aztecprotocol.com
+This contains docs for the:
+
+-   SDK
+-   aztec.js
+-   Starter kits, demos and code examples
+-   Protocol specification
 
 ## Packages :package:
 

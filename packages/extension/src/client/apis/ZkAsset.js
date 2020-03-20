@@ -211,7 +211,6 @@ export default class ZkAsset {
     );
 
     /**
-     *
      * @function zkAsset.deposit
      * @description Description: Deposit funds into zero-knowledge form - convert public ERC20 tokens into zero-knowledge AZTEC notes.
      *
@@ -473,7 +472,7 @@ export default class ZkAsset {
      *       makerAsk                   Note Hash of the makers ask
      *
      * - options
-     *       sender (Address):          The proof sender.
+     *       sender (String):          The proof sender.
      *       numberOfInputNotes (Int):  Number of notes picked from esisting pool.
      *                                  Will use extension's or user's setting if undefined.
      *       numberOfOutputNotes (Int): Number of new notes for each transaction.
@@ -498,7 +497,7 @@ export default class ZkAsset {
      *
     * - transactions ([Transaction!])   Transaction = { amount, to, numberOfOutputNotes }
      * - options
-     *       sender (Address):          The proof sender.
+     *       sender (String):          The proof sender.
      *                                  If empty, will use extension's current user.
      *       numberOfOutputNotes (Int): Number of new notes.
      *                                  If input amount is an array, this value will be ignored.
@@ -526,7 +525,7 @@ export default class ZkAsset {
      *
      * - notes ([Note!] or [AztecNote!])
      * - options
-     *       sender (Address):          The proof sender.
+     *       sender (String):          The proof sender.
      *                                  If empty, will use extension's current user.
      *       numberOfOutputNotes (Int): Number of new notes.
      *                                  If input amount is an array, this value will be ignored.

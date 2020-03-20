@@ -1,0 +1,84 @@
+@import '../../../src/styles/variables.scss';
+
+.wrapper {
+  overflow: hidden;
+}
+
+.code {
+  position: relative;
+  pointer-events: all;
+  line-height: 1.5;
+  border-bottom: rgba(0, 0, 0, 0.3);
+
+  div:first-of-type { // wrap in another level to override the important rules for textarea in Editor
+    textarea {
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
+      resize: none !important; /*remove the resize handle on the bottom right*/
+    }
+  }
+
+  pre {
+    padding: map-get($spacing-map, 'm');
+  }
+}
+
+.codeRunning {
+  pointer-events: none;
+
+  &:after {
+    content: 'Running...';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: map-get($color-map, 'white');
+    background: map-get($color-map, 'primary-lighter');
+    font-size: map-get($font-size-map, 's');
+    transition: all ease 0.3s;
+  }
+}
+
+.logs {
+  height: 120px;
+  overflow-y: scroll;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.controls {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: map-get($button-size-map, 'm');
+}
+
+%button {
+  border-radius: 0 !important;
+}
+
+.button {
+  @extend %button;
+}
+
+.flatButton {
+  @extend %button;
+  background: rgba(255, 255, 255, 0.2) !important;
+
+  &:hover, &:active {
+    background: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  &.disabled {
+    &:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+    }
+  }
+}
