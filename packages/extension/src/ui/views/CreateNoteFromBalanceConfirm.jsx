@@ -8,6 +8,9 @@ import {
     valueOf,
 } from '~/utils/note';
 import {
+    formatNumber,
+} from '~/utils/format';
+import {
     emptyIntValue,
 } from '~/ui/config/settings';
 import {
@@ -15,7 +18,6 @@ import {
     rawNoteShape,
 } from '~/ui/config/propTypes';
 import i18n from '~/ui/helpers/i18n';
-import formatNumber from '~/ui/utils/formatNumber';
 import PopupContent from '~/ui/components/PopupContent';
 import Connection from '~/ui/components/Connection';
 import ListItem from '~/ui/components/ListItem';

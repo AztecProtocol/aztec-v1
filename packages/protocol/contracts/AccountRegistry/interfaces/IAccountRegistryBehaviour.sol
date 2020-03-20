@@ -43,7 +43,8 @@ contract IAccountRegistryBehaviour {
         address _registryOwner,
         bytes calldata _proofData,
         address _spender,
-        bytes calldata _proofSignature   
+        bytes calldata _proofSignature,
+        bytes calldata _proofSignature2   
     ) external;
 
     function deposit(

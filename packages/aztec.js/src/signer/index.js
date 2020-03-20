@@ -5,6 +5,7 @@
  * @module signer
  */
 
+import BN from 'bn.js';
 import { constants, proofs } from '@aztec/dev-utils';
 
 import secp256k1 from '@aztec/secp256k1';
@@ -66,6 +67,19 @@ signer.generateDAIDomainParams = (chainId, verifyingContract) => {
     };
 };
 
+signer.makeReplaySignature = (signatureToReplay) => {
+    const [r, s, v] = signatureToReplay.slice(2).match(/.{1,64}/g);
+    const secp256k1n = new BN('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
+    const hex28 = new BN(28).toString(16);
+    const hex27 = new BN(27).toString(16);
+
+    const flippedS = secp256k1n.sub(new BN(s, 16)).toString(16);
+    const flippedV = v === '1b' ? padRight(hex28.slice(-2), 64) : padRight(hex27.slice(-2), 64);
+
+    const reconstructedSig = r + flippedS + flippedV;
+    return `0x${reconstructedSig.slice(0, 130)}`;
+};
+
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a
  * ZkAsset. The ZkAsset.confidentialApprove() method must be called when granting note spending permission
@@ -85,7 +99,13 @@ signer.generateDAIDomainParams = (chainId, verifyingContract) => {
  * @param {string} privateKey the private key of message signer
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
-signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, spenderApproval, privateKey) => {
+signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, spenderApproval, privateKey, flip = false) => {
+    if (verifyingContract === '0x7dd4e19395c47753370a7e20b3788546958b2ea6') {
+        console.warn('The signature you are generating can be replayed once on this zkAsset');
+        console.warn('To avoid unexpected behaviour, submit the signature returned by this function and');
+        console.warn('the signature returned by signNoteForConfidentialApprove() with extra');
+        console.warn('flag flip=true as the last parameter as two seperate calls to the zkAsset');
+    }
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.NOTE_SIGNATURE;
     const message = {
@@ -96,6 +116,9 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
 
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
     const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    if (flip) {
+        return signer.makeReplaySignature(signature);
+    }
     return signature;
 };
 
@@ -115,7 +138,13 @@ signer.signNoteForConfidentialApprove = (verifyingContract, noteHash, spender, s
  * @param {string} privateKey the private key of message signer
  * @returns {string} ECDSA signature parameters [r, s, v], formatted as 32-byte wide hex-strings
  */
-signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approval, privateKey) => {
+signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approval, privateKey, flip = false) => {
+    if (verifyingContract === '0x7dd4e19395c47753370a7e20b3788546958b2ea6') {
+        console.warn('The signature you are generating can be replayed once on this zkAsset');
+        console.warn('To avoid unexpected behaviour, submit the signature returned by this function and');
+        console.warn('the signature returned by signApprovalForProof() with extra flag flip=true as the last parameter');
+        console.warn('as two seperate calls to the zkAsset');
+    }
     const domain = signer.generateZKAssetDomainParams(verifyingContract);
     const schema = constants.eip712.PROOF_SIGNATURE;
     const proofHash = keccak256(proofOutputs);
@@ -127,6 +156,9 @@ signer.signApprovalForProof = (verifyingContract, proofOutputs, spender, approva
     };
     const { unformattedSignature } = signer.signTypedData(domain, schema, message, privateKey);
     const signature = `0x${unformattedSignature.slice(0, 130)}`; // extract r, s, v (v is just 1 byte, 2 characters)
+    if (flip) {
+        return signer.makeReplaySignature(signature);
+    }
     return signature;
 };
 

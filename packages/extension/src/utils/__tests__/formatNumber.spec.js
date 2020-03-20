@@ -1,5 +1,7 @@
 import BN from 'bn.js';
-import formatNumber from '../formatNumber';
+import {
+    formatNumber,
+} from '../format';
 
 describe('formatValue', () => {
     it('format token value with specific decimal', () => {

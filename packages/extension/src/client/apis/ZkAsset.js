@@ -1,4 +1,8 @@
 import BN from 'bn.js';
+import {
+    tokenToNoteValue,
+    noteToTokenValue,
+} from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
@@ -13,6 +17,7 @@ const dataProperties = [
     'scalingFactor',
     'canAdjustSupply',
     'canConvert',
+    'token',
 ];
 
 export default class ZkAsset {
@@ -426,4 +431,48 @@ export default class ZkAsset {
             numberOfNotes: parseInputInteger(numberOfNotes),
         },
     );
+
+    /**
+    *
+    * toNoteValue
+    *
+    * - tokenValue (Number! or String!)
+    *
+    * @returns
+    * - noteValue (String!)
+    */
+    toNoteValue = (tokenValue) => {
+        const {
+            decimals,
+        } = this.token || {};
+
+        return tokenToNoteValue({
+            value: tokenValue,
+            scalingFactor: this.scalingFactor,
+            decimals: decimals || 0,
+        });
+    };
+
+    /**
+    *
+    * toTokenValue
+    *
+    * - noteValue (Number! or String!)
+    * - format (Bool)                       The output value will be formatted if true
+    *
+    * @returns
+    * - tokenValue (String!)
+    */
+    toTokenValue = (noteValue, format = false) => {
+        const {
+            decimals,
+        } = this.token || {};
+
+        return noteToTokenValue({
+            value: noteValue,
+            scalingFactor: this.scalingFactor,
+            decimals: decimals || 0,
+            format,
+        });
+    };
 }

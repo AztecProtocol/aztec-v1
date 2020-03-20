@@ -40,6 +40,11 @@ export default gql`
         lastSynced: String
         blockNumber: BigInt
     }
+    type Token {
+        address: String!
+        name: String
+        decimals: Int
+    }
     type Asset {
         id: ID!
         address: String!
@@ -48,6 +53,7 @@ export default gql`
         scalingFactor: BigInt
         canAdjustSupply: Boolean
         canConvert: Boolean
+        token: Token
     }
     type Note {
         id: ID!

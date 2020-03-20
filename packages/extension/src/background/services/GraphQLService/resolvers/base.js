@@ -1,4 +1,5 @@
 import BigInt from 'apollo-type-bigint';
+import getTokenInfo from '~/utils/getTokenInfo';
 import fetchAsset from './utils/fetchAsset';
 import getAssetBalance from './utils/getAssetBalance';
 import decryptViewingKey from './utils/decryptViewingKey';
@@ -34,6 +35,14 @@ export default {
     },
     Asset: {
         balance: async ({ address }) => getAssetBalance(address),
+        token: ({ linkedTokenAddress: address }) => {
+            if (!address) return null;
+
+            return {
+                ...getTokenInfo(address),
+                address,
+            };
+        },
     },
     Query: {},
     Mutation: {},
