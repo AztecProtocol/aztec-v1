@@ -18,7 +18,7 @@ const uiTypes = gql`
     }
     extend type Query {
         user(
-            id: ID!
+            address: ID!
         ): User
         asset(
             id: ID!

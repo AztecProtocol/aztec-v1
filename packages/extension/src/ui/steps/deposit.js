@@ -33,7 +33,7 @@ const stepConfirm = {
     blockStyle: 'overlapped',
     tasks: [
         {
-            run: apis.proof.deposit,
+            run: apis.proof.joinSplit,
         },
     ],
     submitTextKey: 'transaction.send.submit',
@@ -166,7 +166,6 @@ export default {
         stepConfirmForGSN,
         stepSendViaGSNPermit,
     ],
-
     metamask: [
         stepApproveERC20,
         stepConfirm,

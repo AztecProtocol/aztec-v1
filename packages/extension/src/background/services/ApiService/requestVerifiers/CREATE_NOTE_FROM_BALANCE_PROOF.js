@@ -1,5 +1,5 @@
-import ensureInputNotes from '../utils/ensureInputNotes';
-import validateAccounts from '../utils/validateAccounts';
+import validateAccounts from './utils/validateAccounts';
+import ensureInputNotes from './utils/ensureInputNotes';
 
 export default async function verifyCreateNoteFromBalanceRequest({
     assetAddress,

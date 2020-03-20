@@ -1,5 +1,5 @@
 import accountsQuery from '~/background/services/GraphQLService/Queries/accountsQuery';
-import query from './query';
+import query from '../../utils/query';
 
 export default async function validateAccounts(addresses) {
     const request = {

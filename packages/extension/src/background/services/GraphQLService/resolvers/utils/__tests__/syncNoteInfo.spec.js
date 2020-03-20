@@ -14,6 +14,7 @@ import {
     randomInt,
 } from '~/utils/random';
 import noteModel from '~/background/database/models/note';
+import Web3Service from '~/helpers/Web3Service';
 import * as syncLatestNoteOnChain from '../syncLatestNoteOnChain';
 import syncNoteInfo from '../syncNoteInfo';
 import storyOf from './helpers/stories';
@@ -41,6 +42,9 @@ describe('syncNoteInfo', () => {
         .mockImplementation(() => noteData);
 
     beforeAll(() => {
+        Web3Service.networkId = 123;
+        Web3Service.account = userAccount;
+
         testNote = notes[randomInt(0, notes.length - 1)];
         const {
             hash,
@@ -65,6 +69,7 @@ describe('syncNoteInfo', () => {
     });
 
     afterAll(() => {
+        Web3Service.restore();
         syncNoteSpy.restore();
         noteModelSpy.restore();
     });

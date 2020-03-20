@@ -1,5 +1,6 @@
 import emptySchema from './emptySchema';
 import user from './user';
+import users from './users';
 import encryptMessage from './encryptMessage';
 import decryptMessage from './decryptMessage';
 import asset from './asset';
@@ -18,6 +19,7 @@ export default {
     registerDomain: emptySchema,
     account: emptySchema,
     user,
+    users,
     encryptMessage,
     decryptMessage,
     asset,

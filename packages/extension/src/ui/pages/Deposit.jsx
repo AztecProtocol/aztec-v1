@@ -9,7 +9,6 @@ import {
     inputTransactionShape,
 } from '~/ui/config/propTypes';
 import depositSteps from '~/ui/steps/deposit';
-import apis from '~/ui/apis';
 import getGSNConfig from '~/ui/helpers/getGSNConfig';
 import makeAsset from '~/ui/utils/makeAsset';
 import parseInputTransactions from '~/ui/utils/parseInputTransactions';
@@ -36,9 +35,6 @@ const Deposit = ({
         const asset = await makeAsset(assetAddress);
         const parsedTransactions = parseInputTransactions(transactions);
         const amount = parsedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-        const userAccessAccounts = userAccess
-            ? await apis.account.batchGetExtensionAccount(userAccess)
-            : [];
 
         let allowanceSpender = Web3Service.getAddress('AccountRegistry');
         let publicOwner = allowanceSpender;
@@ -70,13 +66,16 @@ const Deposit = ({
         const erc20Amount = asset.scalingFactor.mul(new BN(amount));
         const requestedAllowance = erc20Amount;
         if (approvedERC20Allowance.gte(requestedAllowance)) {
-            steps = steps.filter(({ name }) => name !== 'approveERC20' || 'permitERC20');
+            steps = steps.filter(({ name }) => name !== 'approveERC20'
+              && name !== 'permitERC20');
         }
 
         return {
             steps,
             retryWithMetaMaskStep: depositSteps.metamask.slice(-1)[0],
+            proofType: 'DEPOSIT_PROOF',
             currentAccount,
+            currentAddress,
             assetAddress,
             asset,
             transactions: parsedTransactions,
@@ -88,7 +87,7 @@ const Deposit = ({
             requestedAllowance,
             allowanceSpender,
             numberOfOutputNotes,
-            userAccessAccounts,
+            userAccess,
             isGSNAvailable,
         };
     };

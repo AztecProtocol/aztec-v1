@@ -26,5 +26,5 @@ export default function tokenToNoteValue({
         noteValue = noteValue.div(scalingRatio);
     }
 
-    return noteValue.toString();
+    return noteValue.toNumber();
 }

@@ -6,6 +6,8 @@ import generateSortedValues from '../utils/generateSortedValues';
 import pickNotes from '../utils/pickNotes';
 import getStartIndex from '../utils/pickNotes/getStartIndex';
 import pickKeysByValues from '../utils/pickNotes/pickKeysByValues';
+import excludeValues from '../utils/pickNotes/excludeValues';
+import excludeNoteKeys from '../utils/pickNotes/excludeNoteKeys';
 import * as validate from '../utils/pickNotes/validate';
 import * as pickValues from '../utils/pickNotes/pickValues';
 
@@ -61,6 +63,139 @@ describe('pickKeysByValues', () => {
             'n:3',
             'n:4',
         ]);
+    });
+});
+
+describe('excludeValues', () => {
+    const values = [
+        0,
+        0,
+        1,
+        2,
+        3,
+        3,
+        6,
+    ];
+
+    it('exclude values of notes from a value array', () => {
+        const excludes0 = [
+            0,
+            1,
+            2,
+        ];
+        expect(excludeValues(values, excludes0)).toEqual([
+            0,
+            3,
+            3,
+            6,
+        ]);
+
+        const excludes1 = [
+            0,
+            2,
+            19,
+        ];
+        expect(excludeValues(values, excludes1)).toEqual([
+            0,
+            1,
+            3,
+            3,
+            6,
+        ]);
+
+        const excludes2 = [
+            0,
+            0,
+            0,
+            0,
+        ];
+        expect(excludeValues(values, excludes2)).toEqual([
+            1,
+            2,
+            3,
+            3,
+            6,
+        ]);
+    });
+
+    it('returns original values if excludes is empty', () => {
+        expect(excludeValues(values, null)).toBe(values);
+        expect(excludeValues(values, [])).toBe(values);
+    });
+});
+
+describe('excludeNoteKeys', () => {
+    const noteValues = {
+        0: ['n:0', 'n:1'],
+        1: ['n:2', 'n:3', 'n:4'],
+        3: ['n:5'],
+    };
+
+    it('exclude note keys from noteValues object', () => {
+        const excludes0 = [
+            {
+                value: 0,
+                key: 'n:1',
+            },
+            {
+                value: 1,
+                key: 'n:2',
+            },
+            {
+                value: 3,
+                key: 'n:5',
+            },
+        ];
+        expect(excludeNoteKeys(noteValues, excludes0)).toEqual({
+            0: ['n:0'],
+            1: ['n:3', 'n:4'],
+            3: [],
+        });
+
+        const excludes1 = [
+            {
+                value: 0,
+                key: 'n:0',
+            },
+            {
+                value: 1,
+                key: 'n:12',
+            },
+            {
+                value: 3,
+                key: 'n:15',
+            },
+        ];
+        expect(excludeNoteKeys(noteValues, excludes1)).toEqual({
+            0: ['n:1'],
+            1: ['n:2', 'n:3', 'n:4'],
+            3: ['n:5'],
+        });
+
+        const excludes2 = [
+            {
+                value: 0,
+                key: 'n:13',
+            },
+            {
+                value: 0,
+                key: 'n:13',
+            },
+            {
+                value: 0,
+                key: 'n:17',
+            },
+        ];
+        expect(excludeNoteKeys(noteValues, excludes2)).toEqual({
+            0: ['n:0', 'n:1'],
+            1: ['n:2', 'n:3', 'n:4'],
+            3: ['n:5'],
+        });
+    });
+
+    it('returns original noteValues if excludes is empty', () => {
+        expect(excludeValues(noteValues, null)).toBe(noteValues);
+        expect(excludeValues(noteValues, [])).toBe(noteValues);
     });
 });
 

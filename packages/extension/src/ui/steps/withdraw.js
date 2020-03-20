@@ -6,7 +6,7 @@ const stepApprove = {
     descriptionKey: 'withdraw.approve.description',
     tasks: [
         {
-            run: apis.proof.withdraw,
+            run: apis.proof.joinSplit,
         },
     ],
     submitTextKey: 'withdraw.approve.submit',

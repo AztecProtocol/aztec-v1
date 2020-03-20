@@ -4,7 +4,7 @@ import query from '../utils/query';
 export default async (request) => {
     const {
         note,
-    } = await query(request, noteQuery(`
+    } = await query(request, noteQuery(request.data.requestedFields || `
         noteHash
         value
         asset {
