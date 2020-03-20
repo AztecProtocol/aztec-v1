@@ -7,6 +7,7 @@ export default async function signProof({
 }) {
     const {
         signature,
+        signature2,
         error,
     } = await ConnectionService.post({
         action: 'metamask.eip712.signProof',
@@ -29,5 +30,6 @@ export default async function signProof({
         spender: sender,
         approval: true,
         signature,
+        signature2,
     };
 }
