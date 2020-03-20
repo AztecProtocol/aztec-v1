@@ -31,6 +31,6 @@ contract MetaDataUtilsTest {
     * @return desiredAddress - extracted address specified by the inputs to this function
     */
     function extractAddress(bytes memory metaData, uint256 addressPos) public pure returns (address desiredAddress) {
-      return metaData.extractAddress(addressPos);
+        return metaData.extractAddress(addressPos);
     }
 }
