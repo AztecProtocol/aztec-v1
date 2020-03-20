@@ -10,8 +10,8 @@ const { randomHex, toChecksumAddress } = require('web3-utils');
 
 const ACE = artifacts.require('./ACE');
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
-const Behaviour20200106 = artifacts.require('./Behaviour20200106/epochs/20200106/Behaviour20200106');
-const Behaviour20200220 = artifacts.require('./Behaviour20200106/epochs/20200106/Behaviour20200220');
+const Behaviour20200106 = artifacts.require('./Behaviour20200106');
+const Behaviour20200220 = artifacts.require('./Behaviour20200220');
 const DAI = artifacts.require('./test/ERC20/DAI/Dai');
 const ZkAsset = artifacts.require('ZkAssetOwnable');
 

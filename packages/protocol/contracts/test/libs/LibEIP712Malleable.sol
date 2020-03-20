@@ -5,7 +5,7 @@ pragma solidity >=0.5.0 <0.6.0;
  * @title Library of EIP712 utility constants and functions
  * @author AZTEC
  *
- * Copyright 2020 Spilsbury Holdings Ltd 
+ * Copyright 2020 Spilsbury Holdings Ltd
  *
  * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,11 @@ pragma solidity >=0.5.0 <0.6.0;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **/
-contract LibEIP712 {
+
+/** 
+ * This contract removes a fix which made signature validation stricter.
+*/
+contract LibEIP712Malleable {
 
     // EIP712 Domain Name value
     string constant internal EIP712_DOMAIN_NAME = "AZTEC_CRYPTOGRAPHY_ENGINE";
@@ -131,14 +135,10 @@ contract LibEIP712 {
             mstore(add(_signature, 0x20), v)
             result := and(
                 and(
-                    // validate s is in lower half order
-                    lt(s, 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0),
-                    and(
-                        // validate signature length == 0x41
-                        eq(byteLength, 0x41),
-                        // validate v == 27 or v == 28
-                        or(eq(v, 27), eq(v, 28))
-                    )
+                    // validate signature length == 0x41
+                    eq(byteLength, 0x41),
+                    // validate v == 27 or v == 28
+                    or(eq(v, 27), eq(v, 28))
                 ),
                 // validate call to precompile succeeds
                 staticcall(gas, 0x01, _signature, 0x80, _signature, 0x20)

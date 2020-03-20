@@ -10,7 +10,8 @@ const {
 export default async function confidentialTransferFrom({
     assetAddress,
     proof,
-    signature = '0x',
+    signature1 = '0x',
+    signature2 = '',
     spender,
     isGSNAvailable,
 }) {
@@ -23,7 +24,8 @@ export default async function confidentialTransferFrom({
             assetAddress,
             proofData,
             spender,
-            signature,
+            signature1,
+            signature2,
         ],
     };
     const response = isGSNAvailable

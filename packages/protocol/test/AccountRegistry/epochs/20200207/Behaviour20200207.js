@@ -2,8 +2,8 @@
 const { randomHex } = require('web3-utils');
 
 const AccountRegistryManager = artifacts.require('./AccountRegistry/AccountRegistryManager');
-const Behaviour20200106 = artifacts.require('./Behaviour20200106/epochs/20200106/Behaviour20200106');
-const Behaviour20200207 = artifacts.require('./Behaviour20200207/epochs/20200207/Behaviour20200207');
+const Behaviour20200106 = artifacts.require('./Behaviour20200106');
+const Behaviour20200207 = artifacts.require('./Behaviour20200207');
 
 contract('AccountRegistry: Behaviour20200207', async (accounts) => {
     let behaviour20200106;
