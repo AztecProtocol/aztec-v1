@@ -5,4 +5,5 @@ export default async request => query(request, userQuery(`
     address
     linkedPublicKey
     spendingPublicKey
+    publicKey
 `));

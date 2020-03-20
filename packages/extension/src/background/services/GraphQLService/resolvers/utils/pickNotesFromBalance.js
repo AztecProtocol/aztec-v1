@@ -3,13 +3,13 @@ import NoteService from '~/background/services/NoteService';
 import Web3Service from '~/helpers/Web3Service';
 import getViewingKeyFromMetadata from './getViewingKeyFromMetadata';
 
-export default async function pickNotesFromBalance(args) {
-    const {
-        assetId,
-        amount,
-        owner,
-        numberOfNotes,
-    } = args;
+export default async function pickNotesFromBalance({
+    assetId,
+    amount,
+    owner,
+    numberOfNotes,
+    excludedNotes = null,
+}) {
     const {
         networkId,
         account: {
@@ -24,6 +24,7 @@ export default async function pickNotesFromBalance(args) {
         amount,
         {
             numberOfNotes,
+            excludedNotes,
         },
     );
 

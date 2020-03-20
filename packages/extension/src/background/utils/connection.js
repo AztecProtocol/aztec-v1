@@ -222,6 +222,9 @@ class Connection {
                         args,
                     },
                 } = data;
+                if (ApiService.apiExists(query)) {
+                    return from(ApiService.uiApi(data));
+                }
                 return from((async () => {
                     const {
                         requestedFields,

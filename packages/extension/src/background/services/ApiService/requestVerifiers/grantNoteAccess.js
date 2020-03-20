@@ -1,4 +1,4 @@
-import validateAccounts from '../utils/validateAccounts';
+import validateAccounts from './utils/validateAccounts';
 
 export default async function grantNoteAccess({
     addresses,

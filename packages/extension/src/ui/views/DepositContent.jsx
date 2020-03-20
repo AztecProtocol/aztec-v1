@@ -28,14 +28,15 @@ class DepositContent extends StepContentHelper {
             asset,
             amount,
             transactions,
-            userAccessAccounts,
+            userAccess,
             loading,
             error,
         } = this.props;
 
         const currentStepName = steps[currentStep].name;
-        const approved = steps.every(({ name }) => name !== 'approveERC20' && name !== 'permitERC20')
-            || isStepAfter(steps, currentStepName, 'approveERC20') || isStepAfter(steps, currentStepName, 'permitERC20');
+        const notBeforeStep = stepName => steps.every(({ name }) => name !== stepName)
+            || isStepAfter(steps, currentStepName, stepName);
+        const approved = notBeforeStep('approveERC20') && notBeforeStep('permitERC20');
 
         const {
             name: assetName,
@@ -117,13 +118,13 @@ class DepositContent extends StepContentHelper {
                         key="recipients"
                         recipients={recipients}
                     />,
-                    currentStep === 0 && userAccessAccounts.length
+                    currentStep === 0 && userAccess.length
                         ? (
                             <RecipientList
                                 key="access"
                                 title={i18n.t('note.access.user')}
                                 description={i18n.t('note.access.user.description')}
-                                recipients={userAccessAccounts}
+                                recipients={userAccess.map(address => ({ address }))}
                             />
                         )
                         : null,
@@ -156,14 +157,12 @@ DepositContent.propTypes = {
     asset: assetShape.isRequired,
     amount: PropTypes.number.isRequired,
     transactions: PropTypes.arrayOf(transactionShape).isRequired,
-    userAccessAccounts: PropTypes.arrayOf(PropTypes.shape({
-        address: PropTypes.string.isRequired,
-    })),
+    userAccess: PropTypes.arrayOf(PropTypes.string),
 };
 
 DepositContent.defaultProps = {
     titleKey: 'deposit.title',
-    userAccessAccounts: [],
+    userAccess: [],
 };
 
 export default DepositContent;

@@ -14,9 +14,14 @@ const uiResolvers = {
                 .call(address),
     },
     Query: {
-        user: async (_, { address }) => fetchAztecAccount({
-            address,
-        }),
+        user: async (_, { address }) => {
+            const {
+                account,
+            } = await fetchAztecAccount({
+                address,
+            }) || {};
+            return account;
+        },
         asset: async (_, { id }) => {
             const {
                 asset,
@@ -30,7 +35,7 @@ const uiResolvers = {
         }),
         note: async (_, args) => {
             const {
-                note: noteResponse,
+                note,
             } = await ConnectionService.query({
                 query: 'note',
                 data: {
@@ -46,10 +51,6 @@ const uiResolvers = {
                     `,
                 },
             });
-
-            const {
-                note,
-            } = noteResponse || {};
 
             if (!note) {
                 return null;

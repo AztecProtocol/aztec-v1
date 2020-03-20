@@ -3,8 +3,10 @@ import {
     ensureKeyvault, // TODO rename this also checks session
     ensureDomainPermission,
 } from '../decorators';
+import toApiResponse from '../utils/toApiResponse';
 import mergeResolvers from './utils/mergeResolvers';
 import syncUserInfo from './utils/syncUserInfo';
+import syncNotesInfo from './utils/syncNotesInfo';
 import getAccounts from './utils/getAccounts';
 import fetchAsset from './utils/fetchAsset';
 import fetchAztecAccount from './utils/fetchAztecAccount';
@@ -18,13 +20,19 @@ const backgroundResolvers = {
         user: ensureDomainPermission(async (_, args) => fetchAztecAccount({
             address: args.address || args.id,
         })),
+        users: ensureDomainPermission(async (_, args, ctx) => ({
+            accounts: await getAccounts(args, ctx),
+        })),
         asset: ensureDomainPermission(async (_, args) => fetchAsset({
             address: args.id || args.address,
         })),
         note: ensureDomainPermission(async (_, args, ctx) => ({
             note: await syncNoteInfo(args, ctx),
         })),
-        pickNotesFromBalance: ensureDomainPermission(async (_, args) => ({
+        notes: toApiResponse(async (args, ctx) => ({
+            notes: await syncNotesInfo(args, ctx),
+        })),
+        pickNotesFromBalance: toApiResponse(async args => ({
             notes: await pickNotesFromBalance(args),
         })),
         fetchNotesFromBalance: ensureDomainPermission(async (_, args) => ({

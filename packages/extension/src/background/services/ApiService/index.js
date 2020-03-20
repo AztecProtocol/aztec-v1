@@ -2,6 +2,7 @@ import registerExtension from './RegisterExtension';
 import registerDomain from './RegisterDomain';
 import account from './Account';
 import user from './Account/user';
+import users from './Account/users';
 import encryptMessage from './Account/encrypt';
 import decryptMessage from './Account/decrypt';
 import prove from './Prove';
@@ -19,6 +20,7 @@ const apis = {
     registerDomain,
     account,
     user,
+    users,
     encryptMessage,
     decryptMessage,
     asset,
@@ -59,10 +61,31 @@ const clientApi = async (request, connection) => {
 
     return {
         ...request,
-        data,
+        data: query === 'constructProof'
+            ? { data }
+            : data,
     };
 };
 
+const uiApi = async (request) => {
+    const {
+        data: {
+            query,
+        },
+    } = request;
+
+    const data = await apis[query](request);
+
+    return {
+        ...request,
+        response: data,
+    };
+};
+
+const apiExists = query => !!apis[query];
+
 export default {
     clientApi,
+    uiApi,
+    apiExists,
 };

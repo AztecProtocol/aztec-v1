@@ -3,20 +3,18 @@ import gql from 'graphql-tag';
 export default function pickNotesFromBalanceQuery(requestedFields) {
     return gql`
         query pickNotesFromBalanceQuery(
-            $assetId: String!,
-            $amount: Int!,
-            $owner: String!,
+            $assetId: String!
+            $amount: Int!
+            $owner: String!
             $numberOfNotes: Int
-            $domain: String!
-            $currentAddress: String!
+            $excludedNotes: [Input_excluded_note!]
         ) {
             pickNotesFromBalance(
-                domain: $domain,
-                currentAddress: $currentAddress,
                 assetId: $assetId,
                 amount: $amount,
                 owner: $owner,
                 numberOfNotes: $numberOfNotes
+                excludedNotes: $excludedNotes
             ) {
                 notes {
                     ${requestedFields}

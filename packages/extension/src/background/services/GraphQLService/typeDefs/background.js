@@ -12,6 +12,10 @@ const backgroundTypes = gql`
         error: Error
         action: Action
     }
+    type UsersApiResponse {
+        accounts: [User!]
+        error: Error
+    }
     type AccountsApiResponse {
         accounts: [Account!]
         error: Error
@@ -37,6 +41,11 @@ const backgroundTypes = gql`
             currentAddress: String!
             domain: String!
         ): UserAccountApiResponse
+        users(
+            where: User_filter!
+            currentAddress: String!
+            domain: String!
+        ): UsersApiResponse
         asset(
             id: ID!
             currentAddress: String!
@@ -56,13 +65,15 @@ const backgroundTypes = gql`
             currentAddress: String!
             domain: String!
         ): NoteApiResponse
+        notes(
+            where: Note_filter!
+        ): NotesApiResponse
         pickNotesFromBalance(
             assetId: ID!
             amount: Int!
             owner: String
             numberOfNotes: Int
-            currentAddress: String!
-            domain: String!
+            excludedNotes: [Input_excluded_note!]
         ): NotesApiResponse
         fetchNotesFromBalance(
             assetAddress: String!

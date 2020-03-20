@@ -122,7 +122,7 @@ export default class ZkNote {
      */
     async equal(comparisonNote, {
         sender = '',
-        utilityNote = null,
+        remainderNote = null,
     } = {}) {
         if (!this.visible) {
             return false;
@@ -133,7 +133,7 @@ export default class ZkNote {
             type: 'eq',
             originalNote,
             comparisonNote,
-            utilityNote,
+            remainderNote,
             sender,
         });
     }
@@ -158,7 +158,7 @@ export default class ZkNote {
      */
     async greaterThan(comparisonNote, {
         sender = '',
-        utilityNote = null,
+        remainderNote = null,
     } = {}) {
         if (!this.visible) {
             return false;
@@ -166,9 +166,10 @@ export default class ZkNote {
 
         const originalNote = await this.export();
         return provePrivateRange({
+            type: 'gt',
             originalNote,
             comparisonNote,
-            utilityNote,
+            remainderNote,
             sender,
         });
     }
@@ -193,7 +194,7 @@ export default class ZkNote {
      */
     async lessThan(comparisonNote, {
         sender = '',
-        utilityNote = null,
+        remainderNote = null,
     } = {}) {
         if (!this.visible) {
             return false;
@@ -201,9 +202,10 @@ export default class ZkNote {
 
         const originalNote = await this.export();
         return provePrivateRange({
-            originalNote: comparisonNote,
-            comparisonNote: originalNote,
-            utilityNote,
+            type: 'lt',
+            originalNote,
+            comparisonNote,
+            remainderNote,
             sender,
         });
     }
@@ -228,7 +230,7 @@ export default class ZkNote {
      */
     async greaterThanOrEqualTo(comparisonNote, {
         sender = '',
-        utilityNote = null,
+        remainderNote = null,
     } = {}) {
         if (!this.visible) {
             return false;
@@ -239,7 +241,7 @@ export default class ZkNote {
             type: 'gte',
             originalNote,
             comparisonNote,
-            utilityNote,
+            remainderNote,
             sender,
         });
     }
@@ -264,7 +266,7 @@ export default class ZkNote {
      */
     async lessThanOrEqualTo(comparisonNote, {
         sender = '',
-        utilityNote = null,
+        remainderNote = null,
     } = {}) {
         if (!this.visible) {
             return false;
@@ -272,10 +274,10 @@ export default class ZkNote {
 
         const originalNote = await this.export();
         return provePrivateRange({
-            type: 'gte',
-            originalNote: comparisonNote,
-            comparisonNote: originalNote,
-            utilityNote,
+            type: 'lte',
+            originalNote,
+            comparisonNote,
+            remainderNote,
             sender,
         });
     }

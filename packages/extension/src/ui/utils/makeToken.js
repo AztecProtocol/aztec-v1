@@ -1,31 +1,9 @@
-import contractMetadataMapping from 'eth-contract-metadata';
-import {
-    getResourceUrl,
-} from '~/utils/versionControl';
-
 import supportsPermit from '~/config/supportsPermitSignature';
-
-const publicResourcePath = getResourceUrl('public');
-
-const formatIconUrl = (icon) => {
-    if (!icon) return '';
-
-    return `${publicResourcePath}/tokens/${icon}`;
-};
+import getTokenInfo from '~/utils/getTokenInfo';
 
 export default function makeToken(address) {
-    const {
-        name = '',
-        symbol = '',
-        decimals = 0,
-        logo = '',
-    } = contractMetadataMapping[address] || {};
-
     return {
-        name,
-        symbol,
-        decimals,
-        icon: formatIconUrl(logo),
+        ...getTokenInfo(address),
         supportsPermit: supportsPermit[address],
     };
 }

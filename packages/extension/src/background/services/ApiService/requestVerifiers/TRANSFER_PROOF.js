@@ -1,15 +1,36 @@
 import {
+    warnLogProduction,
+} from '~/utils/log';
+import {
     argsError,
 } from '~/utils/error';
-import ensureInputNotes from '../utils/ensureInputNotes';
-import validateAccounts from '../utils/validateAccounts';
+import validateAccounts from './utils/validateAccounts';
+import ensureInputNotes from './utils/ensureInputNotes';
+import validateNoteHashes from './utils/validateNoteHashes';
 
 export default async function verifyTransferRequest({
     assetAddress,
     transactions,
     numberOfInputNotes,
+    inputNoteHashes,
     userAccess,
+    returnProof,
+    sender,
+    publicOwner,
 }) {
+    if ((sender || publicOwner) && !returnProof) {
+        const invalidArgs = [];
+        if (sender) {
+            invalidArgs.push('sender');
+        }
+        if (publicOwner) {
+            invalidArgs.push('publicOwner');
+        }
+        warnLogProduction(argsError('input.returnProof.only', {
+            args: invalidArgs.join(', '),
+        }));
+    }
+
     const totalAmount = transactions
         .reduce((sum, { amount }) => sum + amount, 0);
 
@@ -20,6 +41,17 @@ export default async function verifyTransferRequest({
     });
     if (noteError) {
         return noteError;
+    }
+
+    if (inputNoteHashes) {
+        const noteHashError = validateNoteHashes(inputNoteHashes, {
+            assetAddress,
+            amount: totalAmount,
+            numberOfInputNotes,
+        });
+        if (noteHashError) {
+            return noteHashError;
+        }
     }
 
     const addresses = transactions

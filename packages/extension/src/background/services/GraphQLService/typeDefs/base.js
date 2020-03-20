@@ -35,10 +35,16 @@ export default gql`
     type User {
         id: ID!
         address: String!
+        publicKey: String
         spendingPublicKey: String
         linkedPublicKey: String
         lastSynced: String
         blockNumber: BigInt
+    }
+    type Token {
+        address: String!
+        name: String
+        decimals: Int
     }
     type Asset {
         id: ID!
@@ -48,6 +54,7 @@ export default gql`
         scalingFactor: BigInt
         canAdjustSupply: Boolean
         canConvert: Boolean
+        token: Token
     }
     type Note {
         id: ID!
@@ -69,9 +76,20 @@ export default gql`
         success: Boolean
         error: Error
     }
+    input User_filter {
+        address: String
+        address_in: [String!]
+    }
     input Account_filter {
         address: String
         address_in: [String!]
+    }
+    input Note_filter {
+        noteHash_in: [String!]
+    }
+    input Input_excluded_note {
+        noteHash: String
+        value: Int
     }
     type Query {
         root: String

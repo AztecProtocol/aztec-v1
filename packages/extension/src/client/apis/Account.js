@@ -1,3 +1,7 @@
+import {
+    note as noteUtils,
+} from 'aztec.js';
+import uniq from 'lodash/uniq';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ApiError from '~/client/utils/ApiError';
@@ -18,6 +22,51 @@ class Account {
 
     get registered() {
         return !!this.linkedPublicKey;
+    }
+
+    /**
+     *
+     * @function user.createNote
+     * @description Description: Create an AZTEC note owned by the user.
+     *
+     * @param {Integer} value Value of the note.
+     *
+     * @param {[Address]} userAccess Optional array of address that will be granted view access to the note value.
+     *
+     * @returns {AztecNote} note An AZTEC note owned by the user.
+     *
+     */
+    async createNote(value, userAccess = []) {
+        if (!this.registered) {
+            throw new ApiError('user.unregistered', {
+                fn: 'createNote',
+            });
+        }
+
+        let noteAccess = [];
+        if (userAccess && userAccess.length) {
+            ({
+                accounts: noteAccess,
+            } = await ConnectionService.query(
+                'users',
+                {
+                    where: {
+                        address_in: uniq(userAccess),
+                    },
+                },
+                `
+                    address
+                    linkedPublicKey
+                `,
+            ) || {});
+        }
+
+        return noteUtils.create(
+            this.spendingPublicKey,
+            value,
+            noteAccess,
+            this.address,
+        );
     }
 
     /**

@@ -1,4 +1,9 @@
 import BN from 'bn.js';
+import {
+    tokenToNoteValue,
+    noteToTokenValue,
+    recoverJoinSplitProof,
+} from '~/utils/transformData';
 import Web3Service from '~/client/services/Web3Service';
 import ConnectionService from '~/client/services/ConnectionService';
 import ContractError from '~/client/utils/ContractError';
@@ -13,6 +18,7 @@ const dataProperties = [
     'scalingFactor',
     'canAdjustSupply',
     'canConvert',
+    'token',
 ];
 
 export default class ZkAsset {
@@ -246,6 +252,9 @@ export default class ZkAsset {
     deposit = async (transactions, {
         numberOfOutputNotes,
         userAccess = [],
+        returnProof,
+        sender,
+        publicOwner,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -253,7 +262,11 @@ export default class ZkAsset {
             });
         }
 
-        return ConnectionService.query(
+        const {
+            success,
+            outputNotes,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'DEPOSIT_PROOF',
@@ -261,8 +274,24 @@ export default class ZkAsset {
                 transactions: parseInputTransactions(transactions),
                 numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
                 userAccess,
+                returnProof,
+                sender,
+                publicOwner,
             },
         );
+
+        let proof;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            outputNotes,
+            proof,
+        };
     };
 
     /**
@@ -298,6 +327,9 @@ export default class ZkAsset {
     withdraw = async (amount, {
         to,
         numberOfInputNotes,
+        inputNoteHashes,
+        returnProof,
+        sender,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -309,16 +341,35 @@ export default class ZkAsset {
             address,
         } = Web3Service.account;
 
-        return ConnectionService.query(
+        const {
+            success,
+            proofData,
+        } = await ConnectionService.query(
             'constructProof',
             {
                 proofType: 'WITHDRAW_PROOF',
                 assetAddress: this.address,
                 amount: parseInputInteger(amount),
                 to: to || address,
+                publicOwner: to || address,
                 numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                inputNoteHashes,
+                returnProof,
+                sender,
             },
         );
+
+        let proof = null;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            proof,
+        };
     };
 
     /**
@@ -370,18 +421,45 @@ export default class ZkAsset {
     send = async (transactions, {
         numberOfInputNotes,
         numberOfOutputNotes,
+        inputNoteHashes,
         userAccess,
-    } = {}) => ConnectionService.query(
-        'constructProof',
-        {
-            proofType: 'TRANSFER_PROOF',
-            assetAddress: this.address,
-            transactions: parseInputTransactions(transactions),
-            numberOfInputNotes: parseInputInteger(numberOfInputNotes),
-            numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
-            userAccess,
-        },
-    );
+        returnProof,
+        sender,
+        publicOwner,
+    } = {}) => {
+        const {
+            success,
+            outputNotes,
+            proofData,
+        } = await ConnectionService.query(
+            'constructProof',
+            {
+                proofType: 'TRANSFER_PROOF',
+                assetAddress: this.address,
+                transactions: parseInputTransactions(transactions),
+                numberOfInputNotes: parseInputInteger(numberOfInputNotes),
+                numberOfOutputNotes: parseInputInteger(numberOfOutputNotes),
+                inputNoteHashes,
+                userAccess,
+                returnProof,
+                sender,
+                publicOwner,
+            },
+        );
+
+        let proof;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
+        return {
+            success,
+            outputNotes,
+            proof,
+        };
+    };
 
     /**
      *
@@ -550,4 +628,51 @@ export default class ZkAsset {
             numberOfNotes: parseInputInteger(numberOfNotes),
         },
     );
+
+    /**
+     *
+     * @function zkAsset.toNoteValue
+     * @description Description: Convert the ERC20 token value to its equivalent note value.
+     *
+     * @param {Integer|String|BigNumber} tokenValue Value of ERC20 token to be converted.
+     *
+     * @returns {Integer} noteValue Equivalent note value of `tokenValue`.
+     *
+     */
+    toNoteValue = (tokenValue) => {
+        const {
+            decimals,
+        } = this.token || {};
+
+        return tokenToNoteValue({
+            value: tokenValue,
+            scalingFactor: this.scalingFactor,
+            decimals: decimals || 0,
+        });
+    };
+
+    /**
+     *
+     * @function zkAsset.toTokenValue
+     * @description Description: Convert note value to its equivalent ERC20 token value.
+     *
+     * @param {Integer|String|BigNumber} noteValue Value of note to be converted.
+     *
+     * @param {Boolean} format Optional parameter to format the output string.
+     *
+     * @returns {String} tokenValue Equivalent ERC20 token value of `noteValue`.
+     *
+     */
+    toTokenValue = (noteValue, format = false) => {
+        const {
+            decimals,
+        } = this.token || {};
+
+        return noteToTokenValue({
+            value: noteValue,
+            scalingFactor: this.scalingFactor,
+            decimals: decimals || 0,
+            format,
+        });
+    };
 }
