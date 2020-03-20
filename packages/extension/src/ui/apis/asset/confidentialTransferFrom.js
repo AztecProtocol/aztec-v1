@@ -11,7 +11,7 @@ export default async function confidentialTransferFrom({
     assetAddress,
     proof,
     signature1 = '0x',
-    signature2 = '',
+    signature2 = '0x',
     spender,
     isGSNAvailable,
 }) {
