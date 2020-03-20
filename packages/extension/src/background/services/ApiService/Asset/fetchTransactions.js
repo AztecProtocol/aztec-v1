@@ -1,10 +1,8 @@
-import assetQuery from '~/background/services/GraphQLService/Queries/assetQuery';
 import noteQuery from '~/background/services/GraphQLService/Queries/noteQuery';
 import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
 } from '~/config/contractEvents';
-import valueFromViewingKey from '~/utils/note/valueFromViewingKey';
 import asyncMap from '~/utils/asyncMap';
 import query from '../utils/query';
 
@@ -61,6 +59,7 @@ export default async function fetchTransactions(request) {
             eventsByTxhash[transactionHash] = {
                 CreateNote: [],
                 DestroyNote: [],
+                blockNumber: rest.blockNumber,
             };
         }
         eventsByTxhash[transactionHash][event].push({
@@ -71,6 +70,8 @@ export default async function fetchTransactions(request) {
     const transactions = await asyncMap(Object.keys(eventsByTxhash), async (txHash) => {
         let type;
         const txEvents = eventsByTxhash[txHash];
+
+        const timestamp = (await Web3Service.web3.eth.getBlock(txEvents.blockNumber)).timestamp;
         if (txEvents.CreateNote.length && !txEvents.DestroyNote.length) {
             // this is easy its a deposit
             type = 'DEPOSIT';
@@ -81,7 +82,7 @@ export default async function fetchTransactions(request) {
         }
         if (txEvents.DestroyNote.length && txEvents.CreateNote.length) {
             // this is hard its either a send or a withdraw
-            const allOwner = events.CreateNote.every(event => event.returnValues.owner == currentAddress);
+            const allOwner = txEvents.CreateNote.every(event => event.returnValues.owner == currentAddress);
             type = allOwner ? 'WITHDRAW' : 'SEND';
         }
         // async map every note to get its value
@@ -105,10 +106,9 @@ export default async function fetchTransactions(request) {
             type,
             value: -outgoing + incoming,
             to: [...new Set(createValues.map(({ note: { note: { owner: { address } } } }) => address))],
-            // blockNumber: event.blockNumber,
+            timestamp,
         };
     });
 
-
-    return transactions;
+    return type ? transactions.filter(tx => tx.type == type) : transactions;
 }
