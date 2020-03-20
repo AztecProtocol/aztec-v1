@@ -1,4 +1,4 @@
-/* global artifacts, expect, web3, contract, it:true */
+/* global artifacts, expect, contract, it:true */
 const { JoinSplitProof, note, signer } = require('aztec.js');
 const {
     constants,
