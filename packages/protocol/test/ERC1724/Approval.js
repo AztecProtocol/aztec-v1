@@ -175,7 +175,6 @@ contract('Approval', (accounts) => {
         });
 
         it('should fail to replay approveProof() signature with flipped s', async () => {
-
             const { publicKey, privateKey } = secp256k1.generateAccount();
             const testNoteA = await note.create(publicKey, 10);
             const testNoteB = await note.create(publicKey, 40);
@@ -261,13 +260,7 @@ contract('Approval', (accounts) => {
             const replaySig = signer.makeReplaySignature(proofApprovalSignature);
 
             await truffleAssert.reverts(
-                zkAssetOwnableTest.callApproveProof(
-                    JOIN_SPLIT_PROOF,
-                    transferProof.eth.outputs,
-                    spender,
-                    true,
-                    replaySig,
-                ),
+                zkAssetOwnableTest.callApproveProof(JOIN_SPLIT_PROOF, transferProof.eth.outputs, spender, true, replaySig),
                 'revert signature recovery failed',
             );
             const loggedApprovalStatusB = await zkAssetOwnable.confidentialApproved.call(

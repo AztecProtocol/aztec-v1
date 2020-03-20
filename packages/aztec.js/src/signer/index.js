@@ -68,22 +68,17 @@ signer.generateDAIDomainParams = (chainId, verifyingContract) => {
 };
 
 signer.makeReplaySignature = (signatureToReplay) => {
-    const [r, s, v] = signatureToReplay
-        .slice(2)
-        .match(/.{1,64}/g);
-    const secp256k1n = new BN("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
-    const hex28 = (new BN(28)).toString(16);
-    const hex27 = (new BN(27)).toString(16);
+    const [r, s, v] = signatureToReplay.slice(2).match(/.{1,64}/g);
+    const secp256k1n = new BN('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16);
+    const hex28 = new BN(28).toString(16);
+    const hex27 = new BN(27).toString(16);
 
-    const flippedS = secp256k1n
-        .sub(new BN(s, 16))
-        .toString(16);
-    const flippedV = (v === '1b') ? padRight(hex28.slice(-2), 64) : padRight(hex27.slice(-2), 64);
+    const flippedS = secp256k1n.sub(new BN(s, 16)).toString(16);
+    const flippedV = v === '1b' ? padRight(hex28.slice(-2), 64) : padRight(hex27.slice(-2), 64);
 
     const reconstructedSig = r + flippedS + flippedV;
-    return `0x${reconstructedSig.slice(0, 130)}`
-}
-
+    return `0x${reconstructedSig.slice(0, 130)}`;
+};
 
 /**
  * Create an EIP712 ECDSA signature over an AZTEC note, suited for the confidentialApprove() method of a

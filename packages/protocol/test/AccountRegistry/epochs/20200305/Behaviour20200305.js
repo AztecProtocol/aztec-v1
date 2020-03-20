@@ -1,10 +1,7 @@
 /* globals contract, artifacts, expect */
 
-const {
-    JoinSplitProof,
-    signer,
-} = require('aztec.js');
-const { proofs } =require('@aztec/dev-utils');
+const { JoinSplitProof, signer } = require('aztec.js');
+const { proofs } = require('@aztec/dev-utils');
 const truffleAssert = require('truffle-assertions');
 const { randomHex } = require('web3-utils');
 
@@ -23,7 +20,7 @@ const {
 } = require('../../../helpers/AccountRegistry/epochs/20200106/Behaviour20200106');
 
 contract('Behaviour20200305', async (accounts) => {
-    const [userAddress,, senderAddress] = accounts;
+    const [userAddress, , senderAddress] = accounts;
     let behaviour20200305;
     let manager;
     let proxyContract;
@@ -72,7 +69,6 @@ contract('Behaviour20200305', async (accounts) => {
 
     describe('Success states', async () => {
         it('should call confidential approve twice if a second signature is passed in', async () => {
-
             const { inputNotes, outputNotes, publicValue, depositAmount } = await generateDepositProofInputs();
             const publicOwner = proxyAddress;
 
@@ -131,7 +127,7 @@ contract('Behaviour20200305', async (accounts) => {
 
             await truffleAssert.reverts(
                 zkAsset.approveProof(proofs.JOIN_SPLIT_PROOF, transferProofData, delegatedAddress, true, proofSignature2),
-                'signature has already been used'
+                'signature has already been used',
             );
         });
     });
@@ -191,4 +187,3 @@ contract('Behaviour20200305', async (accounts) => {
         );
     });
 });
-
