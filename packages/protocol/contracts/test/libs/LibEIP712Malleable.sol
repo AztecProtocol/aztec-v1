@@ -5,7 +5,7 @@ pragma solidity >=0.5.0 <0.6.0;
  * @title Library of EIP712 utility constants and functions
  * @author AZTEC
  *
- * Copyright 2020 Spilsbury Holdings Ltd 
+ * Copyright 2020 Spilsbury Holdings Ltd
  *
  * Licensed under the GNU Lesser General Public Licence, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
