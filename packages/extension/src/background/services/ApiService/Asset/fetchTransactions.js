@@ -3,6 +3,9 @@ import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
 } from '~/config/contractEvents';
+import {
+    noteToTokenValue,
+} from '~/utils/transformData';
 import asyncMap from '~/utils/asyncMap';
 import query from '../utils/query';
 
@@ -35,20 +38,23 @@ export default async function fetchTransactions(request) {
         owner: currentAddress,
     };
 
-    const destroyedNotes = await Web3Service
+    const createEvents = await Web3Service
         .useContract('ZkAsset')
         .at(assetAddress)
         .events(ZkAsset.createNote)
         .where(options);
-
-    const createdNotes = await Web3Service
+    const destroyEvents = await Web3Service
         .useContract('ZkAsset')
         .at(assetAddress)
         .events(ZkAsset.destroyNote)
         .where(options);
 
-
-    const events = [].concat(createdNotes, destroyedNotes);
+    const redeemEvents = await Web3Service
+        .useContract('ZkAsset')
+        .at(assetAddress)
+        .events('RedeemTokens')
+        .where(options);
+    const events = [].concat(destroyEvents, createEvents, redeemEvents);
     const eventsByTxhash = {};
     events.forEach(({
         transactionHash,
@@ -56,9 +62,10 @@ export default async function fetchTransactions(request) {
         ...rest
     }) => {
         if (!eventsByTxhash[transactionHash]) {
-            eventsByTxhash[transactionHash] = {
+            const timestamp = eventsByTxhash[transactionHash] = {
                 CreateNote: [],
                 DestroyNote: [],
+                RedeemTokens: [],
                 blockNumber: rest.blockNumber,
             };
         }
@@ -71,22 +78,9 @@ export default async function fetchTransactions(request) {
         let type;
         const txEvents = eventsByTxhash[txHash];
 
-        const timestamp = (await Web3Service.web3.eth.getBlock(txEvents.blockNumber)).timestamp;
-        if (txEvents.CreateNote.length && !txEvents.DestroyNote.length) {
-            // this is easy its a deposit
-            type = 'DEPOSIT';
-        }
-        if (txEvents.DestroyNote.length && !txEvents.CreateNote.length) {
-            // this is easy its a withdraw
-            type = 'WITHDRAW';
-        }
-        if (txEvents.DestroyNote.length && txEvents.CreateNote.length) {
-            // this is hard its either a send or a withdraw
-            const allOwner = txEvents.CreateNote.every(event => event.returnValues.owner == currentAddress);
-            type = allOwner ? 'WITHDRAW' : 'SEND';
-        }
+
+        const txTimestamp = (await Web3Service.web3.eth.getBlock(txEvents.blockNumber)).timestamp;
         // async map every note to get its value
-        //
         const createValues = await asyncMap(txEvents.CreateNote, ({ returnValues: { noteHash } }) => query({ ...request, data: { args: { id: noteHash } } }, noteQuery(`
        value,
        owner {
@@ -99,15 +93,44 @@ export default async function fetchTransactions(request) {
         const outgoing = destroyValues.reduce((accum, { note: { note: { value } } }) => value + accum, 0);
 
         const incoming = createValues.reduce((accum, { note: { note: { value } } }) => value + accum, 0);
+        let value = -outgoing + incoming;
+        if (txEvents.CreateNote.length && !txEvents.DestroyNote.length) {
+            // this is easy its a deposit
+            type = 'DEPOSIT';
+        }
+        if (txEvents.DestroyNote.length && !txEvents.CreateNote.length) {
+            // this is easy its a withdraw
+            type = 'WITHDRAW';
+        }
 
 
+        if (txEvents.DestroyNote.length && txEvents.CreateNote.length) {
+            // this is hard its either a send or a withdraw
+            const allOwner = txEvents.CreateNote.every(event => event.returnValues.owner == currentAddress);
+            type = allOwner && value ? 'WITHDRAW' : 'SEND';
+        }
+
+        if (txEvents.DestroyNote.length && txEvents.CreateNote.length && value == 0 && type == 'SEND') {
+            value = outgoing;
+        }
+
+        let to = [...new Set(createValues.map(({ note: { note: { owner: { address } } } }) => address))];
+
+        if (!to.length) {
+            to = [txEvents.RedeemTokens[0].returnValues.owner];
+        }
         return {
             txHash,
             type,
-            value: -outgoing + incoming,
-            to: [...new Set(createValues.map(({ note: { note: { owner: { address } } } }) => address))],
-            timestamp,
+            noteValue: value,
+            to,
+            timestamp: txTimestamp,
         };
+    });
+    transactions.sort((a, b) => {
+        if (a.timestamp > b.timestamp) return -1;
+        if (a.timestamp < b.timestamp) return 1;
+        return 0;
     });
 
     return { data: type ? transactions.filter(tx => tx.type == type) : transactions };
