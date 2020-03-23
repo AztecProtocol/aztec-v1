@@ -110,5 +110,5 @@ export default async function fetchTransactions(request) {
         };
     });
 
-    return type ? transactions.filter(tx => tx.type == type) : transactions;
+    return { data: type ? transactions.filter(tx => tx.type == type) : transactions };
 }
