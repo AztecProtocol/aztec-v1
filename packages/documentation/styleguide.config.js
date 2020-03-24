@@ -239,6 +239,11 @@ module.exports = {
                                     exampleMode: 'hide',
                                 },
                                 {
+                                    name: '.transactions',
+                                    content: 'styleguide/categories/WebSDK/ZkAsset/utility/transactions.md',
+                                    exampleMode: 'hide',
+                                },
+                                {
                                     name: '.createNoteFromBalance',
                                     content: 'styleguide/categories/WebSDK/ZkAsset/utility/createNoteFromBalance.md',
                                     exampleMode: 'hide',
