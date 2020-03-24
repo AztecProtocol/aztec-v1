@@ -291,32 +291,6 @@
             "constant": false,
             "inputs": [
                 {
-                    "internalType": "bytes",
-                    "name": "metaData",
-                    "type": "bytes"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "addressPos",
-                    "type": "uint256"
-                }
-            ],
-            "name": "extractAddress",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "desiredAddress",
-                    "type": "address"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
                     "internalType": "bytes32",
                     "name": "noteHash",
                     "type": "bytes32"
@@ -337,7 +311,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+        "version": "0.5.17+commit.d19bba13.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"
