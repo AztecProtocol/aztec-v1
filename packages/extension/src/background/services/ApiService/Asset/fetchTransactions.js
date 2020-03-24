@@ -22,10 +22,6 @@ export default async function fetchTransactions(request) {
         address: currentAddress,
     } = Web3Service.account;
 
-    // For deposit transactions we find all create note events and ensure that there are no destroy note events in the
-    // same block
-    //
-
     const options = {
         fromBlock,
         toBlock,
@@ -78,25 +74,43 @@ export default async function fetchTransactions(request) {
 
         const txTimestamp = (await Web3Service.web3.eth.getBlock(txEvents.blockNumber)).timestamp;
         // async map every note to get its value
-        const createValues = await asyncMap(txEvents.CreateNote, ({ returnValues: { noteHash } }) => query({ ...request, data: { args: { id: noteHash } } }, noteQuery(`
-       value,
-       owner {
-        address
-       }
-    `)));
-        const destroyValues = await asyncMap(txEvents.DestroyNote, ({ returnValues: { noteHash } }) => query({ ...request, data: { args: { id: noteHash } } }, noteQuery(`
-       value 
-    `)));
-        const outgoing = destroyValues
-            .reduce(
-                (accum, {
-                    note: {
-                        note: {
-                            value,
-                        },
+        const createValues = await asyncMap(txEvents.CreateNote,
+            ({
+                returnValues: { noteHash },
+            }) => query({
+                ...request,
+                data: {
+                    args: {
+                        id: noteHash,
                     },
-                }) => value + accum, 0,
-            );
+                },
+            },
+            noteQuery(`
+            value,
+            owner {
+                address
+            }
+            `)));
+        const destroyValues = await asyncMap(txEvents.DestroyNote, ({
+            returnValues: { noteHash },
+        }) => query({
+            ...request,
+            data: {
+                args: {
+                    id: noteHash,
+                },
+            },
+        }, noteQuery(`
+                value 
+             `)));
+        const outgoing = destroyValues
+            .reduce((accum, {
+                note: {
+                    note: {
+                        value,
+                    },
+                },
+            }) => value + accum, 0);
 
         const incoming = createValues
             .reduce((accum, {
