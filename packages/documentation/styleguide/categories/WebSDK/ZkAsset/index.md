@@ -34,6 +34,7 @@ Main APIs:
 Utilities:
 
 -   [`async balance()`](/#/SDK/zkAsset/.balance)
+-   [`async transactions()`](/#/SDK/zkAsset/.transactions)
 -   [`async subscribeToBalance()`](/#/SDK/zkAsset/.subscribeToBalance)
 -   [`async createNotesFromBalance()`](/#/SDK/zkAsset/.createNotesFromBalance)
 -   [`async fetchNotesFromBalance()`](/#/SDK/zkAsset/.fetchNotesFromBalance)
