@@ -58,6 +58,8 @@
     "packages/*"
   ],
   "dependencies": {
-    "@semantic-release/exec": "^4.0.0"
+    "@semantic-release/exec": "^4.0.0",
+    "eslint-plugin-react": "^7.19.0",
+    "global": "^4.4.0"
   }
 }
