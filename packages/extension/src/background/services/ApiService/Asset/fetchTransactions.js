@@ -3,9 +3,6 @@ import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
 } from '~/config/contractEvents';
-import {
-    noteToTokenValue,
-} from '~/utils/transformData';
 import asyncMap from '~/utils/asyncMap';
 import query from '../utils/query';
 
@@ -62,7 +59,7 @@ export default async function fetchTransactions(request) {
         ...rest
     }) => {
         if (!eventsByTxhash[transactionHash]) {
-            const timestamp = eventsByTxhash[transactionHash] = {
+            eventsByTxhash[transactionHash] = {
                 CreateNote: [],
                 DestroyNote: [],
                 RedeemTokens: [],
@@ -75,7 +72,7 @@ export default async function fetchTransactions(request) {
         });
     });
     const transactions = await asyncMap(Object.keys(eventsByTxhash), async (txHash) => {
-        let type;
+        let txType;
         const txEvents = eventsByTxhash[txHash];
 
 
@@ -90,38 +87,67 @@ export default async function fetchTransactions(request) {
         const destroyValues = await asyncMap(txEvents.DestroyNote, ({ returnValues: { noteHash } }) => query({ ...request, data: { args: { id: noteHash } } }, noteQuery(`
        value 
     `)));
-        const outgoing = destroyValues.reduce((accum, { note: { note: { value } } }) => value + accum, 0);
+        const outgoing = destroyValues
+            .reduce(
+                (accum, {
+                    note: {
+                        note: {
+                            value,
+                        },
+                    },
+                }) => value + accum, 0,
+            );
 
-        const incoming = createValues.reduce((accum, { note: { note: { value } } }) => value + accum, 0);
+        const incoming = createValues
+            .reduce((accum, {
+                note: {
+                    note: {
+                        value,
+                    },
+                },
+            }) => value + accum, 0);
+
+
         let value = -outgoing + incoming;
         if (txEvents.CreateNote.length && !txEvents.DestroyNote.length) {
             // this is easy its a deposit
-            type = 'DEPOSIT';
+            txType = 'DEPOSIT';
         }
         if (txEvents.DestroyNote.length && !txEvents.CreateNote.length) {
             // this is easy its a withdraw
-            type = 'WITHDRAW';
+            txType = 'WITHDRAW';
         }
 
 
         if (txEvents.DestroyNote.length && txEvents.CreateNote.length) {
             // this is hard its either a send or a withdraw
-            const allOwner = txEvents.CreateNote.every(event => event.returnValues.owner == currentAddress);
-            type = allOwner && value ? 'WITHDRAW' : 'SEND';
+            const allOwner = txEvents
+                .CreateNote.every(event => event.returnValues.owner === currentAddress);
+            txType = allOwner && value ? 'WITHDRAW' : 'SEND';
         }
 
-        if (txEvents.DestroyNote.length && txEvents.CreateNote.length && value == 0 && type == 'SEND') {
+        if (txEvents.DestroyNote.length
+            && txEvents.CreateNote.length
+            && value === 0 && txType === 'SEND') {
             value = outgoing;
         }
 
-        let to = [...new Set(createValues.map(({ note: { note: { owner: { address } } } }) => address))];
+        let to = [...new Set(createValues.map(({
+            note: {
+                note: {
+                    owner: {
+                        address,
+                    },
+                },
+            },
+        }) => address))];
 
         if (!to.length) {
             to = [txEvents.RedeemTokens[0].returnValues.owner];
         }
         return {
             txHash,
-            type,
+            type: txType,
             noteValue: value,
             to,
             timestamp: txTimestamp,
@@ -133,5 +159,5 @@ export default async function fetchTransactions(request) {
         return 0;
     });
 
-    return { data: type ? transactions.filter(tx => tx.type == type) : transactions };
+    return { data: type ? transactions.filter(tx => tx.type === type) : transactions };
 }
