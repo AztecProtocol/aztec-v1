@@ -6,7 +6,7 @@
         "**/*.scss"
     ],
     "license": "LGPL-3.0",
-    "version": "1.8.0",
+    "version": "1.11.0",
     "author": "AZTEC",
     "bugs": {
         "url": "https://github.com/AztecProtocol/AZTEC/issues"
