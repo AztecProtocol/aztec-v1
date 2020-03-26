@@ -16,5 +16,5 @@ package.json
 # packages
 packages/contract-addresses/addresses/
 packages/contract-artifacts/artifacts/
-packages/graph/
+packages/documentation/src/apis/
 packages/extension/
