@@ -15,10 +15,7 @@ export default class InstallerManager {
         }
         window.aztecCallback = this.handleAztecLoaded;
 
-        const readyStates = [
-            'complete',
-            'interactive',
-        ];
+        const readyStates = ['complete', 'interactive'];
 
         if (readyStates.indexOf(document.readyState) >= 0) {
             this.addSdkScript();

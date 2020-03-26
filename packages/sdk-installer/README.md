@@ -26,8 +26,7 @@ const startUsingAztec = () => {};
 installer.onLoad(startUsingAztec);
 ```
 
-_** Note that the webpage will fetch the SDK with the same version as the installer. So upgrade the installer regularly to get the latest version of the SDK._
-
+_\*\* Note that the webpage will fetch the SDK with the same version as the installer. So upgrade the installer regularly to get the latest version of the SDK._
 
 ### Using the SDK
 
@@ -45,4 +44,5 @@ await installer.aztec.enable();
 ```
 
 #### For the full AZTEC SDK usage
+
 Checkout the docs here: **[https://docs.aztecprotocol.com/](https://docs.aztecprotocol.com/)**

@@ -1,6 +1,4 @@
-import aztecSdkInsterller, {
-    SdkInstaller,
-} from '../src/installer';
+import aztecSdkInsterller, { SdkInstaller } from '../src/installer';
 import json from '../package.json';
 
 const { scriptId } = aztecSdkInsterller.manager;

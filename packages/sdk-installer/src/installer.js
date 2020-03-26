@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import json from '../package.json';
 import InstallManager from './InstallManager';
 
@@ -24,15 +25,13 @@ class AztecSdkInstaller {
         }
     }
 
-    onLoad(cb) { // eslint-disable-line class-methods-use-this
+    onLoad(cb) {
         manager.onLoad(cb);
     }
 }
 
 const SdkInstaller = process.env.NODE_ENV === 'test' ? AztecSdkInstaller : null;
 
-export {
-    SdkInstaller,
-};
+export { SdkInstaller };
 
 export default new AztecSdkInstaller();
