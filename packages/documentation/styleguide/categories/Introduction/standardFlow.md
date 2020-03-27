@@ -32,4 +32,4 @@ The below diagram gives an overview of how the key smart contract infrastructure
 &nbsp
 &nbsp
 
-<img src="../../images/architectureOverview.png" width="75%">
+<img src="../../../images/architectureOverview.png" width="50%">
