@@ -149,7 +149,7 @@ export default async function fetchTransactions(request) {
         const { logs } = await Web3Service.web3.eth.getTransactionReceipt(txHash);
         const decodedLogs = [];
         logs.forEach((log) => {
-            if (log.data !== '0x') {
+            if (log.data !== '0x' && log.address === assetAddress) {
                 try {
                     const decodedLog = Web3Service.web3.eth.abi.decodeLog(
                         [
@@ -171,7 +171,7 @@ export default async function fetchTransactions(request) {
                     );
                     decodedLogs.push(decodedLog);
                 } catch (e) {
-                    console.warn(e);
+                    // silently fail
                 }
             }
         });
