@@ -191,17 +191,16 @@ class EventService {
             assetsHandler(assets);
         }
         const options = {
-            // orderBy: 'blockNumber',
+            orderBy: 'blockNumber',
         };
 
-        // const lastSyncedAsset = await Asset.latest({ networkId }, options);
+        const lastSyncedAsset = await Asset.latest({ networkId }, options);
 
-        // TODO: Improve this for each network separately
         const lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
 
-        // if (lastSyncedAsset) {
-        //     lastSyncedBlock = lastSyncedAsset.blockNumber;
-        // }
+        if (lastSyncedAsset) {
+            lastSyncedBlock = lastSyncedAsset.blockNumber;
+        }
 
         manager.sync({
             lastSyncedBlock,
