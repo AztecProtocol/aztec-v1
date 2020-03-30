@@ -19,7 +19,7 @@ export default async function latest(
     }
 
     let matchingIds;
-    if (filterOptions) {
+    if (Object.keys(filterOptions).length) {
         const query = getDB(networkId)[modelName].where(filterOptions);
         matchingIds = new Set(await query.primaryKeys());
         if (!matchingIds.size) {

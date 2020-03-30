@@ -9,7 +9,7 @@ export default Model({
         'asset',
         'blockNumber',
         'owner',
-        // 'assetOwner',
+        '[asset+owner]',
     ],
     optionalFields: [
         // 'owner',
