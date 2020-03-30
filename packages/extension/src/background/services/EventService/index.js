@@ -196,7 +196,7 @@ class EventService {
 
         const lastSyncedAsset = await Asset.latest({ networkId }, options);
 
-        const lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
+        let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
 
         if (lastSyncedAsset) {
             lastSyncedBlock = lastSyncedAsset.blockNumber;
