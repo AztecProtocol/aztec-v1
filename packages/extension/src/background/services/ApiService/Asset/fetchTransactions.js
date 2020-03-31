@@ -47,7 +47,13 @@ export default async function fetchTransactions(request) {
         .at(assetAddress)
         .events('RedeemTokens')
         .where(options);
-    const events = [].concat(destroyEvents, createEvents, redeemEvents);
+    const convertEvents = await Web3Service
+        .useContract('ZkAsset')
+        .at(assetAddress)
+        .events('ConvertTokens')
+        .where(options);
+
+    const events = [].concat(destroyEvents, createEvents, redeemEvents, convertEvents);
     const eventsByTxhash = {};
     events.forEach(({
         transactionHash,
@@ -57,6 +63,7 @@ export default async function fetchTransactions(request) {
         if (!eventsByTxhash[transactionHash]) {
             eventsByTxhash[transactionHash] = {
                 CreateNote: [],
+                ConvertTokens: [],
                 DestroyNote: [],
                 RedeemTokens: [],
                 blockNumber: rest.blockNumber,
@@ -123,21 +130,15 @@ export default async function fetchTransactions(request) {
 
 
         let value = -outgoing + incoming;
-        if (txEvents.CreateNote.length && !txEvents.DestroyNote.length) {
+        if (txEvents.ConvertTokens.length) {
             // this is easy its a deposit
             txType = 'DEPOSIT';
-        }
-        if (txEvents.DestroyNote.length && !txEvents.CreateNote.length) {
-            // this is easy its a withdraw
+        } else if (txEvents.CreateNote.length && txEvents.DestroyNote.length === 0) {
+            txType = 'SEND';
+        } else if (txEvents.RedeemTokens.length) {
             txType = 'WITHDRAW';
-        }
-
-
-        if (txEvents.DestroyNote.length && txEvents.CreateNote.length) {
-            // this is hard its either a send or a withdraw
-            const allOwner = txEvents
-                .CreateNote.every(event => event.returnValues.owner === currentAddress);
-            txType = allOwner && value ? 'WITHDRAW' : 'SEND';
+        } else {
+            txType = 'SEND';
         }
 
         if (txEvents.DestroyNote.length
@@ -145,20 +146,49 @@ export default async function fetchTransactions(request) {
             && value === 0 && txType === 'SEND') {
             value = outgoing;
         }
+        const { logs } = await Web3Service.web3.eth.getTransactionReceipt(txHash);
+        const decodedLogs = [];
+        logs.forEach((log) => {
+            if (log.data !== '0x' && log.address === assetAddress) {
+                try {
+                    const decodedLog = Web3Service.web3.eth.abi.decodeLog(
+                        [
+                            {
+                                type: 'bytes32',
+                                name: 'noteHash',
+                                indexed: true,
+                            },
+                            {
+                                type: 'address',
+                                name: 'owner',
+                                indexed: true,
+                            }, {
+                                type: 'bytes',
+                                name: 'metaData',
+                            }],
+                        log.data,
+                        log.topics,
+                    );
+                    decodedLogs.push(decodedLog);
+                } catch (e) {
+                    // silently fail
+                }
+            }
+        });
 
-        let to = [...new Set(createValues.map(({
-            note: {
-                note: {
-                    owner: {
-                        address,
-                    },
-                },
-            },
-        }) => address))];
+        let to = [...new Set(decodedLogs.map(({
+            owner,
+        }) => owner))];
 
-        if (!to.length) {
+        if (to.indexOf(currentAddress) > -1 && to.length > 1) {
+            to.splice(to.indexOf(currentAddress), 1);
+        }
+
+
+        if (!to.length && txEvents.RedeemTokens.length) {
             to = [txEvents.RedeemTokens[0].returnValues.owner];
         }
+
         return {
             txHash,
             type: txType,
