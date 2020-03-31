@@ -9,7 +9,8 @@
   "scripts": {
     "build": "truffle compile --all && styleguidist build && yarn copyApis && yarn copyImages",
     "clean": "shx rm -rf ./build  ./dist ./public || true",
-    "copyApis": "find ../extension/src/client/apis -iregex '.(ZkNote|Account|ZkAsset).' -exec cp {} ./public/apis \\;",
+    "copyApis": "cp -r src/apis public/apis",
+    "copy:local": "find -E ../extension/src/client/apis -regex '.*(Zk|Account).*' -exec cp {} ./src/apis \\;",
     "copyImages": "cp -r ./images ./public",
     "generateStyles": "guacamole generateStyles",
     "lint": "eslint --ignore-path .eslintignore .",
