@@ -24,6 +24,31 @@
             "inputs": [
                 {
                     "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "signatureHash",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "bool",
+                    "name": "success",
+                    "type": "bool"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "actualCharge",
+                    "type": "uint256"
+                }
+            ],
+            "name": "GSNTransactionProcessed",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
                     "internalType": "address",
                     "name": "account",
                     "type": "address"
@@ -43,6 +68,21 @@
             ],
             "name": "RegisterExtension",
             "type": "event"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "GSNSigner",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
         },
         {
             "constant": true,
@@ -181,6 +221,11 @@
             "constant": false,
             "inputs": [
                 {
+                    "internalType": "uint24",
+                    "name": "_proofId",
+                    "type": "uint24"
+                },
+                {
                     "internalType": "address",
                     "name": "_registryOwner",
                     "type": "address"
@@ -191,23 +236,18 @@
                     "type": "bytes"
                 },
                 {
-                    "internalType": "bytes32[]",
-                    "name": "_noteHashes",
-                    "type": "bytes32[]"
-                },
-                {
                     "internalType": "address",
                     "name": "_spender",
                     "type": "address"
                 },
                 {
-                    "internalType": "bool[]",
-                    "name": "_spenderApprovals",
-                    "type": "bool[]"
+                    "internalType": "bytes",
+                    "name": "_proofSignature",
+                    "type": "bytes"
                 },
                 {
                     "internalType": "bytes",
-                    "name": "_batchSignature",
+                    "name": "_proofSignature2",
                     "type": "bytes"
                 }
             ],
@@ -261,6 +301,101 @@
                     "type": "address"
                 },
                 {
+                    "internalType": "address",
+                    "name": "_owner",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "_proofHash",
+                    "type": "bytes32"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "_proofData",
+                    "type": "bytes"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_value",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "signature",
+                    "type": "bytes"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "nonce",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "expiry",
+                    "type": "uint256"
+                }
+            ],
+            "name": "deposit",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "linkedTokenAddress",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "holder",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "nonce",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bool",
+                    "name": "allowed",
+                    "type": "bool"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "expiry",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "address",
+                    "name": "spender",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "signature",
+                    "type": "bytes"
+                }
+            ],
+            "name": "permit",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_registryOwner",
+                    "type": "address"
+                },
+                {
                     "internalType": "bytes32",
                     "name": "_proofHash",
                     "type": "bytes32"
@@ -276,12 +411,87 @@
             "payable": false,
             "stateMutability": "nonpayable",
             "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "relay",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "encodedFunction",
+                    "type": "bytes"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "transactionFee",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "gasPrice",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "gasLimit",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "nonce",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "approvalData",
+                    "type": "bytes"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "acceptRelayedCall",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "context",
+                    "type": "bytes"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "setGSNSigner",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
         }
     ],
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+        "version": "0.5.17+commit.d19bba13.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"

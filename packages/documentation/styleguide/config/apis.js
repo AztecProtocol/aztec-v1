@@ -13,6 +13,7 @@ export const zkAssetApis = [
     '.send',
     '.withdraw',
     '.balance',
+    '.transactions',
     '.subscribeToBalance',
     '.createNoteFromBalance',
     '.fetchNotesFromBalance',

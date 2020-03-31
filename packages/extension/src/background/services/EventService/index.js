@@ -190,10 +190,12 @@ class EventService {
             const assets = await this.syncedAssets({ networkId });
             assetsHandler(assets);
         }
+        const options = {
+            orderBy: 'blockNumber',
+        };
 
-        const lastSyncedAsset = await Asset.latest({ networkId });
+        const lastSyncedAsset = await Asset.latest({ networkId }, options);
 
-        // TODO: Improve this for each network separately
         let lastSyncedBlock = START_EVENTS_SYNCING_BLOCK;
 
         if (lastSyncedAsset) {
@@ -240,6 +242,7 @@ class EventService {
                 blockNumber: assetBlockNumber,
             } = asset;
             const options = {
+                orderBy: 'blockNumber',
                 filterOptions: {
                     asset: registryOwner,
                     owner: address,

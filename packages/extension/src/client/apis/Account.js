@@ -51,7 +51,7 @@ class Account {
                 'users',
                 {
                     where: {
-                        address_in: uniq(userAccess),
+                        address_in: uniq(userAccess).filter(a => a !== this.address),
                     },
                 },
                 `
@@ -60,6 +60,10 @@ class Account {
                 `,
             ) || {});
         }
+        noteAccess.push({
+            address: this.address,
+            linkedPublicKey: this.linkedPublicKey,
+        });
 
         return noteUtils.create(
             this.spendingPublicKey,

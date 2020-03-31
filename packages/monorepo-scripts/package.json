@@ -8,7 +8,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.16.0",
-    "multi-semantic-release": "AztecProtocol/multi-semantic-release"
+    "multi-semantic-release": "^1.1.2"
   },
   "engines": {
     "node": ">=8.3"

@@ -91,15 +91,33 @@
             "type": "function"
         },
         {
+            "constant": true,
+            "inputs": [],
+            "name": "isOwner",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "renounceOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
             "constant": false,
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "initialBehaviourAddress",
+                    "name": "newOwner",
                     "type": "address"
                 }
             ],
-            "name": "deployProxy",
+            "name": "transferOwnership",
             "outputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
@@ -124,7 +142,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+        "version": "0.5.17+commit.d19bba13.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"

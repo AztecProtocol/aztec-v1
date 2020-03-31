@@ -4,6 +4,7 @@ import users from './users';
 import encryptMessage from './encryptMessage';
 import decryptMessage from './decryptMessage';
 import asset from './asset';
+import fetchTransactions from './fetchTransactions';
 import assetBalance from './assetBalance';
 import fetchNotesFromBalance from './fetchNotesFromBalance';
 import note from './note';
@@ -28,6 +29,7 @@ export default {
     note,
     noteWithViewingKey,
     grantNoteAccess,
+    fetchTransactions,
     constructProof: {
         DEPOSIT_PROOF,
         WITHDRAW_PROOF,

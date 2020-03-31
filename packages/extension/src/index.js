@@ -1,6 +1,6 @@
 import Aztec from '~/client/Aztec';
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initializeAZTEC = async () => {
     const aztec = new Aztec();
     await aztec.generateInitialApis();
     delete aztec.generateInitialApis;
@@ -11,4 +11,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof window.aztecCallback === 'function') {
         window.aztecCallback();
     }
-});
+};
+
+const readyStates = [
+    'complete',
+    'interactive',
+];
+
+if (readyStates.indexOf(document.readyState) >= 0) {
+    initializeAZTEC();
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeAZTEC();
+    });
+}

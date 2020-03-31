@@ -825,7 +825,7 @@
     "bytecode": "0x",
     "compiler": {
         "name": "solc",
-        "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+        "version": "0.5.17+commit.d19bba13.Emscripten.clang"
     },
     "deployedBytecode": "0x",
     "schemaVersion": "3.0.19"

@@ -1,0 +1,32 @@
+{
+    "name": "@aztec/sdk-installer",
+    "description": "NPM package for AZTEC SDK",
+    "license": "LGPL-3.0",
+    "version": "1.10.1",
+    "author": "AZTEC",
+    "bugs": {
+        "url": "https://github.com/AztecProtocol/AZTEC/issues"
+    },
+    "main": "dist/installer.js",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "yarn transpile",
+        "lint": "eslint ./ --color",
+        "test": "jest ./tests",
+        "transpile": "BABEL_ENV=transpile babel src -d dist"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.2.3",
+        "@babel/core": "^7.4.0",
+        "@babel/node": "^7.2.2",
+        "@babel/plugin-proposal-class-properties": "^7.4.4",
+        "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+        "@babel/preset-env": "^7.4.4",
+        "babel-eslint": "^10.0.2",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.1.0",
+        "jest": "^25.1.0"
+    }
+}

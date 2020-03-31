@@ -12,5 +12,6 @@ export default Model({
         'scalingFactor',
         'canAdjustSupply',
         'canConvert',
+        '[blockNumber+registryOwner]',
     ],
 });
