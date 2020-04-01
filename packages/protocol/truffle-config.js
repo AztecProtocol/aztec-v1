@@ -80,7 +80,7 @@ switch (process.env.MODE) {
 }
 
 let ganacheSubprovider = {};
-ganacheSubprovider = new GanacheSubprovider({ mnemonic: process.env.TEST_MNEMONIC , time: new Date('2019-12-31')});
+ganacheSubprovider = new GanacheSubprovider({ mnemonic: process.env.TEST_MNEMONIC, time: new Date('2019-12-31') });
 engine.addProvider(ganacheSubprovider);
 
 engine.start((err) => {
