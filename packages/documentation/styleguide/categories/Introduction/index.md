@@ -2,7 +2,7 @@ AZTEC is a privacy engine for Ethereum, enabling confidential transactions over 
 
 This documentation site acts as a single source of information about the AZTEC protocol. It provides information about the:
 
--   [`SDK`](/#/SDK): high level developer SDK for building Dapps
+-   [`SDK`](/#/SDK/The%20role%20of%20the%20SDK): high level developer SDK for building Dapps
 -   [`aztec.js`](/#/aztec.js): low level JavaScript npm package, used for proof construction
 -   [`Examples`](/#/Examples): starter kits, demos and code examples for getting started
 -   [`Specification`](/#/Specification): technical protocol specification
