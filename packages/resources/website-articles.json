@@ -66,16 +66,8 @@
     "title": "From Other Authors",
     "content": [
       {
-        "coverPhoto": "https://www.thoughtco.com/thmb/S_ukLrjD-7n6IOsZ57qB8Hpfov0",
+        "coverPhoto": "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=750&amp;q=80",
         "title": "AES with PLOOKUP",
-        "caption": "Costing the AES hash using PLOOKUP techniques",
-        "description": "Daira Hopwood, Engineer & Protocol Designer at Electric Coin Company, considers the cost of implementing the AES block cipher using PLOOKUP",
-        "link": "https://hackmd.io/m0fnJ_lPTPahWAhfaiQA7Q",
-        "paperLink": ""
-      },
-      {
-        "coverPhoto": "https://www.thoughtco.com/thmb/S_ukLrjD-7n6IOsZ57qB8Hpfov0",
-        "title": "TEST",
         "caption": "Costing the AES hash using PLOOKUP techniques",
         "description": "Daira Hopwood, Engineer & Protocol Designer at Electric Coin Company, considers the cost of implementing the AES block cipher using PLOOKUP",
         "link": "https://hackmd.io/m0fnJ_lPTPahWAhfaiQA7Q",
