@@ -199,7 +199,7 @@ class SdkPlayground extends PureComponent {
             <>
                 <iframe ref={this.setIframeRef} id={iframeId} title="code" height="0" width="0" style={{ display: 'none' }} />
                 <FlexBox align="flex-end">
-                    <TextButton size="s" href="https://discord.gg/65pgmS" text="Need help? Join our DISCORD!" />
+                    <TextButton size="s" href="https://discord.gg/wtTgTZk" text="Need help? Join our DISCORD!" />
                 </FlexBox>
                 <Block className={styles.wrapper} background="white" borderRadius="xs" hasBorder>
                     <SdkPlaygroundControls
