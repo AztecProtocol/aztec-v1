@@ -1,6 +1,7 @@
 <!-- This is just a suggested template for bugs, feel free to scrap it if you're just suggesting or requesting a feature -->
 
 ## Expected Behaviour
+
 <!--- If you're describing a bug, tell us what should happen -->
 <!--- If you're suggesting a change/improvement, tell us how it should work -->
 

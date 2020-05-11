@@ -41,7 +41,7 @@
     "lerna": "lerna",
     "lint": "yarn wsrun --package $PKG --parallel -c lint",
     "prettier": "prettier --config .prettierrc --write '**/*.{js,jsx,json,md}'",
-    "prettier:ci": "prettier --config .prettierrc --list-different '**/*.{js,jsx,json,md}'",
+    "prettier:ci": "yarn prettier && prettier --config .prettierrc --list-different '**/*.{js,jsx,json,md}'",
     "publish:docs": "yarn wsrun --package $PKG --parallel -c --if has:changed publish:docs",
     "rebuild": "run-s clean build",
     "script:build:artifacts": "node ./packages/monorepo-scripts/artifacts/build.js",
