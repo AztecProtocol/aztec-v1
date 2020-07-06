@@ -255,7 +255,6 @@ export default class ZkAsset {
         returnProof,
         sender,
         publicOwner,
-        ...rest,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -289,7 +288,6 @@ export default class ZkAsset {
         }
 
         return {
-            ...rest,
             success,
             outputNotes,
             proof,
@@ -332,7 +330,6 @@ export default class ZkAsset {
         inputNoteHashes,
         returnProof,
         sender,
-        ...rest,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -370,7 +367,6 @@ export default class ZkAsset {
         }
 
         return {
-            ...rest,
             success,
             proof,
         };
@@ -435,7 +431,6 @@ export default class ZkAsset {
             success,
             outputNotes,
             proofData,
-            ...rest
         } = await ConnectionService.query(
             'constructProof',
             {
@@ -452,10 +447,17 @@ export default class ZkAsset {
             },
         );
 
+        let proof;
+        if (proofData) {
+            proof = proofData
+                ? await recoverJoinSplitProof(proofData)
+                : null;
+        }
+
         return {
-            ...rest,
             success,
             outputNotes,
+            proof,
         };
     };
 
@@ -587,45 +589,6 @@ export default class ZkAsset {
 
         return notes;
     };
-
-    /**
-     *
-     * @function zkAsset.transactions
-     * @description Description: Fetch the users transactions  for the `zkAsset` .
-     *
-     * @param {Object} query Optional query object that can be used to refine the parameters of the note fetch.
-     * If not supplied, will return all the notes owned by the user.
-     *
-     * - *type* (String): The transaction type one of SEND, DEPOSIT, WITHDAW.
-     * - *toBlock* (Integer): The transaction type one of SEND, DEPOSIT, WITHDAW.
-     * - *fromBlock* (Integer): The transaction type one of SEND, DEPOSIT, WITHDAW.
-     *
-     * @returns {[Tx]} transactions an array of transactions that satisfy the parameters of the fetch query. Each tx is an object containing:
-     *
-     *
-     * - *to* ([String]) : the address the transaction was sent to
-     *
-     * - *timestamp* (Integer)
-     *
-     * - *value* (Integer): the total value transfered
-     *
-     * - *type* (String): on of SEND, DEPOSIT, WITHDRAW
-     *
-     */
-
-    transactions = async ({
-        type,
-        fromBlock,
-        toBlock,
-    } = {}) => ConnectionService.query(
-        'fetchTransactions',
-        {
-            assetAddress: this.address,
-            type,
-            fromBlock,
-            toBlock,
-        },
-    );
 
     /**
      *
