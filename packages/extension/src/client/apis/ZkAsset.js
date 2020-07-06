@@ -255,6 +255,7 @@ export default class ZkAsset {
         returnProof,
         sender,
         publicOwner,
+        ...rest,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -288,6 +289,7 @@ export default class ZkAsset {
         }
 
         return {
+            ...rest,
             success,
             outputNotes,
             proof,
@@ -330,6 +332,7 @@ export default class ZkAsset {
         inputNoteHashes,
         returnProof,
         sender,
+        ...rest,
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -367,6 +370,7 @@ export default class ZkAsset {
         }
 
         return {
+            ...rest,
             success,
             proof,
         };
@@ -447,17 +451,10 @@ export default class ZkAsset {
             },
         );
 
-        let proof;
-        if (proofData) {
-            proof = proofData
-                ? await recoverJoinSplitProof(proofData)
-                : null;
-        }
 
         return {
             success,
             outputNotes,
-            proof,
         };
     };
 
