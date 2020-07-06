@@ -77,7 +77,6 @@ export default async function prove(query, connection) {
     } = query;
     const {
         proofType,
-        returnProof,
     } = args;
 
     let returnData = {};
