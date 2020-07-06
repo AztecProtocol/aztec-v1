@@ -255,7 +255,7 @@ export default class ZkAsset {
         returnProof,
         sender,
         publicOwner,
-        ...rest,
+        ...rest
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {
@@ -332,7 +332,7 @@ export default class ZkAsset {
         inputNoteHashes,
         returnProof,
         sender,
-        ...rest,
+        ...rest
     } = {}) => {
         if (!this.linkedTokenAddress) {
             throw new ApiError('zkAsset.private', {

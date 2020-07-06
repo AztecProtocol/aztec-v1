@@ -197,7 +197,7 @@ const getAccountMapping = async ({
             user: {
                 account,
                 error,
-            },
+            } = {},
         } = await query(request, userQuery(`
             address
             linkedPublicKey
@@ -207,6 +207,7 @@ const getAccountMapping = async ({
             accounts.push(account);
         }
     }));
+
 
     accounts.forEach((account) => {
         accountMapping[account.address] = account;
