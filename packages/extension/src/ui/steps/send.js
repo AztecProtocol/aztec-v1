@@ -88,6 +88,10 @@ const stepSendViaGSN = {
 };
 
 export default {
+    returnProof: [
+        stepApprove,
+        stepSignNotes,
+    ],
     gsn: [
         stepApprove,
         stepSignNotes,

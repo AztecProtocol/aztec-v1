@@ -431,6 +431,7 @@ export default class ZkAsset {
             success,
             outputNotes,
             proofData,
+            ...rest
         } = await ConnectionService.query(
             'constructProof',
             {
@@ -447,14 +448,12 @@ export default class ZkAsset {
             },
         );
 
-        let proof;
-        if (proofData) {
-            proof = proofData
-                ? await recoverJoinSplitProof(proofData)
-                : null;
-        }
+        const proof = proofData
+            ? await recoverJoinSplitProof(rest.proof)
+            : null;
 
         return {
+            ...rest,
             success,
             outputNotes,
             proof,
