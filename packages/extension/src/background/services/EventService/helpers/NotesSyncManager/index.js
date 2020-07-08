@@ -21,7 +21,7 @@ const infuraLimitError = {
 const uriTooLong = {
     code: -32603,
 };
-
+// eslint-disable-next-line
 const isInfuraLimitError = error => error && error.code === infuraLimitError.code || error.code === uriTooLong.code;
 
 const SYNCING_STATUS = {
