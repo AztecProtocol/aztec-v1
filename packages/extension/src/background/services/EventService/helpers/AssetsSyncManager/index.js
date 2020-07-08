@@ -14,6 +14,9 @@ class SyncManager {
     constructor() {
         this.config = {
             syncInterval: 5000, // ms
+            blocksPerRequest: 50, // ~ per 3 months (~6000 per day)
+            precisionDelta: 10, //
+            maxNumberOfAttempts: 5,
         };
         this.syncConfig = undefined;
         this.networks = new Map();

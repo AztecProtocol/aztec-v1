@@ -242,6 +242,13 @@ class Watcher {
 
         return subscription;
     }
+
+    handleFetchError = (error) => {
+        errorLog('Failed to sync CreateNote / UpdateMetadata / DestroyNote with web3.', error);
+        if (process.env.NODE_ENV === 'development') {
+            this.paused = true;
+        }
+    };
 }
 
 export default Watcher;
