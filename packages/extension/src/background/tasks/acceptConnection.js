@@ -36,7 +36,7 @@ export default function acceptConnection() {
 
             if (clientProfile) {
                 try {
-                    await migrateIndexedDB();
+                    // await migrateIndexedDB();
                     networkConfig = await setupNetworkConfig(clientProfile);
                     connection.initUi();
                 } catch (e) {
