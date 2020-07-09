@@ -1,14 +1,15 @@
 import networks from '~/config/networks';
 import {
     infuraProjectId,
-    infuraProviderUrlPattern,
+    infuraHttpProviderUrlPattern,
+    infuraWsProviderUrlPattern,
     defaultProviderUrl,
 } from '~/config/provider';
 import {
     formatStrPattern,
 } from '~/utils/format';
 
-export default function getProviderUrl(networkId, projectId = infuraProjectId) {
+export default function getProviderUrl(networkId, ws = false, projectId = infuraProjectId) {
     const networkKey = Object.keys(networks)
         .find(name => networks[name].id === networkId);
     const network = networks[networkKey];
@@ -20,7 +21,7 @@ export default function getProviderUrl(networkId, projectId = infuraProjectId) {
         networkName,
     } = network;
 
-    return formatStrPattern(infuraProviderUrlPattern, {
+    return formatStrPattern(ws ? infuraWsProviderUrlPattern : infuraHttpProviderUrlPattern, {
         networkName: networkName.toLowerCase(),
         projectId,
     });
