@@ -1,4 +1,9 @@
-const fetchOutputNotes = ({ proofData }) => {
+const fetchOutputNotes = ({
+    proofData,
+    proof,
+    signature,
+    signature2,
+}) => {
     const {
         outputNotes,
         remainderNote,
@@ -18,16 +23,28 @@ const fetchOutputNotes = ({ proofData }) => {
                 noteHash,
                 value,
             })),
+        proof,
+        signature,
+        signature2,
+
     };
 };
+
+const returnProof = ({ proof, signature, signature2 }) => ({
+    proof,
+    signature,
+    signature2,
+});
 
 export default {
     DEPOSIT_PROOF: [
         fetchOutputNotes,
+        returnProof,
     ],
     WITHDRAW_PROOF: [],
     TRANSFER_PROOF: [
         fetchOutputNotes,
+        returnProof,
     ],
     CREATE_NOTE_FROM_BALANCE_PROOF: [
         (data) => {

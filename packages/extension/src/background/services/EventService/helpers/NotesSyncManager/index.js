@@ -17,7 +17,12 @@ const infuraLimitError = {
     message: 'query returned more than 10000 results',
 };
 
-const isInfuraLimitError = error => error && error.code === infuraLimitError.code;
+
+const uriTooLong = {
+    code: -32603,
+};
+// eslint-disable-next-line
+const isInfuraLimitError = error => error && error.code === infuraLimitError.code || error.code === uriTooLong.code;
 
 const SYNCING_STATUS = {
     ACTIVE: 'ACTIVE',
@@ -30,7 +35,7 @@ const SYNCING_STATUS = {
 class SyncManager {
     constructor() {
         this.config = {
-            blocksPerRequest: 540000, // ~ per 3 months (~6000 per day)
+            blocksPerRequest: 6000 * 30, // ~ per 3 months (~6000 per day)
             precisionDelta: 10, //
             maxNumberOfAttempts: 5,
             networkId: null,
@@ -134,7 +139,7 @@ class SyncManager {
             lastSyncedBlock,
             assets,
             progressCallbacks,
-            retriedNumber = 0,
+            retriedNumber = 5,
         } = options;
 
         const syncAddress = this.addresses.get(address);

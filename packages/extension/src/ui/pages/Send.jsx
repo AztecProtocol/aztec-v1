@@ -21,6 +21,7 @@ const Send = ({
     numberOfOutputNotes,
     inputNoteHashes,
     userAccess,
+    returnProof,
 }) => {
     const fetchInitialData = async () => {
         const gsnConfig = await getGSNConfig();
@@ -31,7 +32,10 @@ const Send = ({
         const {
             address: currentAddress,
         } = currentAccount;
-        const steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
+        let steps = isGSNAvailable ? sendSteps.gsn : sendSteps.metamask;
+        if (returnProof) {
+            steps = sendSteps.returnProof;
+        }
         const sender = proxyContract;
 
         const asset = await makeAsset(assetAddress);
@@ -77,6 +81,7 @@ Send.propTypes = {
     numberOfOutputNotes: PropTypes.number,
     inputNoteHashes: PropTypes.arrayOf(PropTypes.string),
     userAccess: PropTypes.arrayOf(PropTypes.string),
+    returnProof: PropTypes.bool,
 };
 
 Send.defaultProps = {
@@ -84,6 +89,7 @@ Send.defaultProps = {
     numberOfOutputNotes: emptyIntValue,
     inputNoteHashes: [],
     userAccess: [],
+    returnProof: false,
 };
 
 export default Send;

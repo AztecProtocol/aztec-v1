@@ -73,14 +73,14 @@ export default async function prove(query, connection) {
         data: {
             args,
         },
+        sender,
     } = query;
     const {
         proofType,
-        returnProof,
     } = args;
 
     let returnData = {};
-    if (!returnProof) {
+    if (sender === 'WEB_CLIENT') {
         returnData = await triggerProofUi(query, connection);
     } else {
         switch (proofType) {

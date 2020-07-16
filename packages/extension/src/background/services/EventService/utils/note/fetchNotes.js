@@ -1,8 +1,10 @@
+import Web3 from 'web3';
 import Web3Service from '~/helpers/Web3Service';
 import {
     ZkAsset,
 } from '~/config/contracts';
 import decodeNoteLogs from './helpers/decodeNoteLogs';
+import { getProviderUrl } from '~/utils/network';
 
 export default async function fetchNotes({
     owner,
@@ -16,7 +18,9 @@ export default async function fetchNotes({
         ZkAsset.events.updateNoteMetaData,
     ],
 } = {}) {
-    const { abi, getPastLogs } = Web3Service.eth;
+    // TODO require network selection
+    const provider = new Web3.providers.HttpProvider(getProviderUrl(Web3Service.networkId));
+    const { abi, getPastLogs } = new Web3(provider).eth;
 
     const eventsTopics = events
         .map(e => ZkAsset.config.abi.find(({ name, type }) => name === e && type === 'event'))
