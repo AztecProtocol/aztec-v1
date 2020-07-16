@@ -1,4 +1,6 @@
 const merge = require('webpack-merge');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const common = require('./webpack.common.js');
 
 const config = {
@@ -14,6 +16,17 @@ const nodeConfig = merge(common, {
     },
     output: { filename: 'bundle.node.js' },
     target: 'node',
+    plugins: [
+        new CopyWebpackPlugin([
+            {
+                from: 'node_modules/@aztec/bn128/**/*.wasm',
+                to: '[name].[ext]',
+            },
+        ]),
+    ],
+    resolve: {
+        extensions: ['.js', '.json', '.wasm'],
+    },
 });
 
 const webConfig = merge(common, {
@@ -21,6 +34,9 @@ const webConfig = merge(common, {
     node: { crypto: true, fs: 'empty' },
     output: { filename: 'bundle.web.js' },
     target: 'web',
+    resolve: {
+        extensions: ['.js', '.json'],
+    },
 });
 
 module.exports = [nodeConfig, webConfig];
