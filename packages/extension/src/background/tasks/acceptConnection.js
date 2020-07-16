@@ -14,7 +14,7 @@ import {
     errorLog,
 } from '~/utils/log';
 import Connection from '../utils/connection';
-import migrateIndexedDB from './migrateIndexedDB';
+// import migrateIndexedDB from './migrateIndexedDB';
 import setupNetworkConfig from './setupNetworkConfig';
 
 const resourceOrigin = getResourceUrl('origin');
