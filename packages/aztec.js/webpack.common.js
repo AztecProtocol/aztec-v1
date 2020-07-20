@@ -37,7 +37,4 @@ module.exports = {
         maxAssetSize: 200000,
         maxEntrypointSize: 400000,
     },
-    resolve: {
-        extensions: ['.js', '.json'],
-    },
 };

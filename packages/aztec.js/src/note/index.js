@@ -307,10 +307,12 @@ export function encodeMetadata(noteArray) {
  * @returns {Note} created note instance
  */
 export async function fromEventLog(logNoteData, spendingKey = null) {
-    const publicKey = noteCoder.decodeNoteFromEventLog(logNoteData);
-    const newNote = new Note(publicKey, null);
+    const notePublicKey = noteCoder.decodeNoteFromEventLog(logNoteData);
+    const newNote = new Note(notePublicKey, null);
     if (spendingKey) {
         await newNote.derive(spendingKey);
+        const { address } = secp256k1.accountFromPrivateKey(spendingKey);
+        newNote.owner = address;
     }
     return newNote;
 }
