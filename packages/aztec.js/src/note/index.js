@@ -311,8 +311,8 @@ export async function fromEventLog(logNoteData, spendingKey = null) {
     const newNote = new Note(notePublicKey, null);
     if (spendingKey) {
         await newNote.derive(spendingKey);
-        const { publicKey } = secp256k1.accountFromPrivateKey(spendingKey);
-        newNote.owner = publicKey;
+        const { address } = secp256k1.accountFromPrivateKey(spendingKey);
+        newNote.owner = address;
     }
     return newNote;
 }
