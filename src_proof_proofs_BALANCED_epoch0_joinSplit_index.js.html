@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      src/proof/proofs/BALANCED/epoch0/joinSplit/index.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+  <link type="text/css" rel="stylesheet" href="styles/collapse.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      aztec.js
+    </h3>
+
+    
+
+    <h3>Classes</h3><ul><li id="BurnProof66305-nav"><a href="BurnProof66305.html">BurnProof66305</a></li><li id="DividendProof66561-nav"><a href="DividendProof66561.html">DividendProof66561</a></li><li id="JoinSplitFluidProof-nav"><a href="JoinSplitFluidProof.html">JoinSplitFluidProof</a><ul class='methods'><li data-type="method" id="JoinSplitFluidProof-constructChallenge-nav"><a href="JoinSplitFluidProof.html#constructChallenge">constructChallenge</a></li><li data-type="method" id="JoinSplitFluidProof-encodeABI-nav"><a href="JoinSplitFluidProof.html#encodeABI">encodeABI</a></li></ul></li><li id="JoinSplitProof65793-nav"><a href="JoinSplitProof65793.html">JoinSplitProof65793</a><ul class='methods'><li data-type="method" id="JoinSplitProof65793-constructBlindingFactors-nav"><a href="JoinSplitProof65793.html#constructBlindingFactors">constructBlindingFactors</a></li><li data-type="method" id="JoinSplitProof65793-constructBlindingScalars-nav"><a href="JoinSplitProof65793.html#constructBlindingScalars">constructBlindingScalars</a></li><li data-type="method" id="JoinSplitProof65793-constructSignatures-nav"><a href="JoinSplitProof65793.html#constructSignatures">constructSignatures</a></li><li data-type="method" id="JoinSplitProof65793-encodeABI-nav"><a href="JoinSplitProof65793.html#encodeABI">encodeABI</a></li></ul></li><li id="Keccak-nav"><a href="Keccak.html">Keccak</a><ul class='methods'><li data-type="method" id="Keccak-appendBN-nav"><a href="Keccak.html#appendBN">appendBN</a></li><li data-type="method" id="Keccak-appendPoint-nav"><a href="Keccak.html#appendPoint">appendPoint</a></li><li data-type="method" id="Keccak-keccak-nav"><a href="Keccak.html#keccak">keccak</a></li><li data-type="method" id="Keccak-redKeccak-nav"><a href="Keccak.html#redKeccak">redKeccak</a></li></ul></li><li id="MintProof66049-nav"><a href="MintProof66049.html">MintProof66049</a></li><li id="Note-nav"><a href="global.html#Note">Note</a><ul class='methods'><li data-type="method" id="Note-derive-nav"><a href="global.html#Note#derive">derive</a></li><li data-type="method" id="Note-ephemeralFromMetaData-nav"><a href="global.html#Note#ephemeralFromMetaData">ephemeralFromMetaData</a></li><li data-type="method" id="Note-exportEphemeralKey-nav"><a href="global.html#Note#exportEphemeralKey">exportEphemeralKey</a></li><li data-type="method" id="Note-exportMetaData-nav"><a href="global.html#Note#exportMetaData">exportMetaData</a></li><li data-type="method" id="Note-exportNote-nav"><a href="global.html#Note#exportNote">exportNote</a></li><li data-type="method" id="Note-getPublic-nav"><a href="global.html#Note#getPublic">getPublic</a></li><li data-type="method" id="Note-getView-nav"><a href="global.html#Note#getView">getView</a></li><li data-type="method" id="Note-grantViewAccess-nav"><a href="global.html#Note#grantViewAccess">grantViewAccess</a></li><li data-type="method" id="Note-setMetaData-nav"><a href="global.html#Note#setMetaData">setMetaData</a></li></ul></li><li id="PrivateRangeProof66562-nav"><a href="PrivateRangeProof66562.html">PrivateRangeProof66562</a><ul class='methods'><li data-type="method" id="PrivateRangeProof66562-checkBalancingRelationShipSatisfied-nav"><a href="PrivateRangeProof66562.html#checkBalancingRelationShipSatisfied">checkBalancingRelationShipSatisfied</a></li><li data-type="method" id="PrivateRangeProof66562-constructBlindingFactors-nav"><a href="PrivateRangeProof66562.html#constructBlindingFactors">constructBlindingFactors</a></li><li data-type="method" id="PrivateRangeProof66562-encodeABI-nav"><a href="PrivateRangeProof66562.html#encodeABI">encodeABI</a></li></ul></li><li id="Proof-nav"><a href="Proof.html">Proof</a><ul class='methods'><li data-type="method" id="Proof-constructChallengeRecurse-nav"><a href="Proof.html#constructChallengeRecurse">constructChallengeRecurse</a></li><li data-type="method" id="Proof-validateInputs-nav"><a href="Proof.html#validateInputs">validateInputs</a></li></ul></li><li id="PublicRangeProof66563-nav"><a href="PublicRangeProof66563.html">PublicRangeProof66563</a><ul class='methods'><li data-type="method" id="PublicRangeProof66563-checkBalancingRelationShipSatisfied-nav"><a href="PublicRangeProof66563.html#checkBalancingRelationShipSatisfied">checkBalancingRelationShipSatisfied</a></li><li data-type="method" id="PublicRangeProof66563-proofRelationChoice-nav"><a href="PublicRangeProof66563.html#proofRelationChoice">proofRelationChoice</a></li></ul></li><li id="Verifier-nav"><a href="Verifier.html">Verifier</a><ul class='methods'><li data-type="method" id="Verifier-extractData-nav"><a href="Verifier.html#extractData">extractData</a></li><li data-type="method" id="Verifier-hexToGroupPoint-nav"><a href="Verifier.html#hexToGroupPoint">hexToGroupPoint</a></li><li data-type="method" id="Verifier-hexToGroupScalar-nav"><a href="Verifier.html#hexToGroupScalar">hexToGroupScalar</a></li></ul></li></ul><h3>Modules</h3><ul><li id="noteCoder-nav"><a href="module-noteCoder.html">noteCoder</a><ul class='methods'><li data-type="method" id="noteCoder-decodeNoteFromEventLog-nav"><a href="module-noteCoder.html#~decodeNoteFromEventLog">decodeNoteFromEventLog</a></li><li data-type="method" id="noteCoder-encodeNotePublicKey-nav"><a href="module-noteCoder.html#~encodeNotePublicKey">encodeNotePublicKey</a></li></ul></li><li id="outputCoder-nav"><a href="module-outputCoder.html">outputCoder</a><ul class='methods'><li data-type="method" id="outputCoder-decodeNote-nav"><a href="module-outputCoder.html#~decodeNote">decodeNote</a></li><li data-type="method" id="outputCoder-decodeNotes-nav"><a href="module-outputCoder.html#~decodeNotes">decodeNotes</a></li><li data-type="method" id="outputCoder-decodeProofOutput-nav"><a href="module-outputCoder.html#~decodeProofOutput">decodeProofOutput</a></li><li data-type="method" id="outputCoder-decodeProofOutputs-nav"><a href="module-outputCoder.html#~decodeProofOutputs">decodeProofOutputs</a></li><li data-type="method" id="outputCoder-encodeNote-nav"><a href="module-outputCoder.html#~encodeNote">encodeNote</a></li><li data-type="method" id="outputCoder-encodeNotes-nav"><a href="module-outputCoder.html#~encodeNotes">encodeNotes</a></li><li data-type="method" id="outputCoder-encodeProofOutput-nav"><a href="module-outputCoder.html#~encodeProofOutput">encodeProofOutput</a></li><li data-type="method" id="outputCoder-encodeProofOutputs-nav"><a href="module-outputCoder.html#~encodeProofOutputs">encodeProofOutputs</a></li><li data-type="method" id="outputCoder-getInputNotes-nav"><a href="module-outputCoder.html#~getInputNotes">getInputNotes</a></li><li data-type="method" id="outputCoder-getMetadata-nav"><a href="module-outputCoder.html#~getMetadata">getMetadata</a></li><li data-type="method" id="outputCoder-getNote-nav"><a href="module-outputCoder.html#~getNote">getNote</a></li><li data-type="method" id="outputCoder-getOutputNotes-nav"><a href="module-outputCoder.html#~getOutputNotes">getOutputNotes</a></li><li data-type="method" id="outputCoder-getProofOutput-nav"><a href="module-outputCoder.html#~getProofOutput">getProofOutput</a></li><li data-type="method" id="outputCoder-hashProofOutput-nav"><a href="module-outputCoder.html#~hashProofOutput">hashProofOutput</a></li></ul></li><li id="setup-nav"><a href="module-setup.html">setup</a><ul class='methods'><li data-type="method" id="setup-compress-nav"><a href="module-setup.html#~compress">compress</a></li><li data-type="method" id="setup-decompress-nav"><a href="module-setup.html#~decompress">decompress</a></li><li data-type="method" id="setup-fetchPoint-nav"><a href="module-setup.html#~fetchPoint">fetchPoint</a></li></ul></li><li id="signer-nav"><a href="module-signer.html">signer</a><ul class='methods'><li data-type="method" id="signer-generateACEDomainParams-nav"><a href="module-signer.html#~generateACEDomainParams">generateACEDomainParams</a></li><li data-type="method" id="signer-generateDAIDomainParams-nav"><a href="module-signer.html#~generateDAIDomainParams">generateDAIDomainParams</a></li><li data-type="method" id="signer-generateZKAssetDomainParams-nav"><a href="module-signer.html#~generateZKAssetDomainParams">generateZKAssetDomainParams</a></li><li data-type="method" id="signer-signApprovalForProof-nav"><a href="module-signer.html#~signApprovalForProof">signApprovalForProof</a></li><li data-type="method" id="signer-signNoteACEDomain-nav"><a href="module-signer.html#~signNoteACEDomain">signNoteACEDomain</a></li><li data-type="method" id="signer-signNoteForConfidentialApprove-nav"><a href="module-signer.html#~signNoteForConfidentialApprove">signNoteForConfidentialApprove</a></li><li data-type="method" id="signer-signNoteForConfidentialTransfer-nav"><a href="module-signer.html#~signNoteForConfidentialTransfer">signNoteForConfidentialTransfer</a></li><li data-type="method" id="signer-signNotesForConfidentialTransfer-nav"><a href="module-signer.html#~signNotesForConfidentialTransfer">signNotesForConfidentialTransfer</a></li><li data-type="method" id="signer-signPermit-nav"><a href="module-signer.html#~signPermit">signPermit</a></li><li data-type="method" id="signer-signTypedData-nav"><a href="module-signer.html#~signTypedData">signTypedData</a></li></ul></li><li id="utils-nav"><a href="note.module_utils.html">utils</a><ul class='methods'><li data-type="method" id="utils-createSharedSecret-nav"><a href="note.module_utils.html#~createSharedSecret">createSharedSecret</a></li><li data-type="method" id="utils-getNoteHash-nav"><a href="note.module_utils.html#~getNoteHash">getNoteHash</a></li><li data-type="method" id="utils-getSharedSecret-nav"><a href="note.module_utils.html#~getSharedSecret">getSharedSecret</a></li></ul></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#balancedPublicValues">balancedPublicValues</a></li><li><a href="global.html#BurnProof">BurnProof</a></li><li><a href="global.html#checkPublicComparisonWellFormed">checkPublicComparisonWellFormed</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createZeroValueNote">createZeroValueNote</a></li><li><a href="global.html#derive">derive</a></li><li><a href="global.html#DividendProof">DividendProof</a></li><li><a href="global.html#encodeInputSignatures">encodeInputSignatures</a></li><li><a href="global.html#encodeMetadata">encodeMetadata</a></li><li><a href="global.html#encodeNote">encodeNote</a></li><li><a href="global.html#encodeOwners">encodeOwners</a></li><li><a href="global.html#encodeProofData">encodeProofData</a></li><li><a href="global.html#epoch">epoch</a></li><li><a href="global.html#fromEventLog">fromEventLog</a></li><li><a href="global.html#fromPublicKey">fromPublicKey</a></li><li><a href="global.html#fromViewKey">fromViewKey</a></li><li><a href="global.html#getProof">getProof</a></li><li><a href="global.html#isInteger">isInteger</a></li><li><a href="global.html#JoinSplitProof">JoinSplitProof</a></li><li><a href="global.html#MintProof">MintProof</a></li><li><a href="global.html#mockLightNoteSet">mockLightNoteSet</a></li><li><a href="global.html#mockNote">mockNote</a></li><li><a href="global.html#mockNoteSet">mockNoteSet</a></li><li><a href="global.html#noteSetOfValue">noteSetOfValue</a></li><li><a href="global.html#PrivateRangeProof">PrivateRangeProof</a></li><li><a href="global.html#PublicRangeProof">PublicRangeProof</a></li><li><a href="global.html#randomNoteValue">randomNoteValue</a></li><li><a href="global.html#setDefaultEpoch">setDefaultEpoch</a></li><li><a href="global.html#SwapProof">SwapProof</a></li><li><a href="global.html#userAccount">userAccount</a></li><li><a href="global.html#userAccount2">userAccount2</a></li><li><a href="global.html#validateEpochNum">validateEpochNum</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        src/proof/proofs/BALANCED/epoch0/joinSplit/index.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>import * as bn128 from '@aztec/bn128';
+import BN from 'bn.js';
+import { proofs } from '@aztec/dev-utils';
+import AbiCoder from 'web3-eth-abi';
+import { keccak256, padLeft } from 'web3-utils';
+import { inputCoder, outputCoder } from '../../../../../encoder';
+import Proof from '../../../../base/epoch0/proof';
+import ProofType from '../../../../base/types';
+import ProofUtils from '../../../../base/epoch0/utils';
+import signer from '../../../../../signer';
+
+class JoinSplitProof65793 extends Proof {
+    /**
+     * Constructs a joinSplit proof. This is the standard AZTEC zero-knowledge proof that can be used
+     * to convert ERC20 tokens into AZTEC notes and vice versa. It can also be used to transfer notes.
+     *
+     * @param {Object[]} inputNotes - array of input notes, to be removed from a note registry
+     * @param {Object[]} outputNotes - array of output notes, to be added to a note registry
+     * @param {string} sender - Ethereum address of the transaction sender
+     * @param {Number} publicValue - number of public ERC20 tokens being converted into notes or vice versa
+     * @param {string} publicOwner - Ethereum address of the publicValue owner
+     */
+    constructor(inputNotes, outputNotes, sender, publicValue, publicOwner) {
+        super(ProofType.JOIN_SPLIT.name, inputNotes, outputNotes, sender, publicValue, publicOwner);
+
+        this.constructBlindingScalars();
+        this.constructBlindingFactors();
+        this.constructChallenge();
+        this.constructData();
+        this.constructOutputs();
+    }
+
+    /**
+     * Generate blinding factors based on the previous blinding scalars
+     */
+    constructBlindingFactors() {
+        const inputNotesLength = this.m;
+        const reducer = this.rollingHash.redKeccak(); // "x" in the white paper
+        this.blindingFactors = this.notes.map((note, i) => {
+            const { bk, ba } = this.blindingScalars[i];
+            let B;
+            if (i &lt; inputNotesLength) {
+                B = note.gamma.mul(bk).add(bn128.h.mul(ba));
+            } else {
+                // Get next iteration of our rolling hash
+                const x = reducer.redPow(new BN(i + 1));
+                const xbk = bk.redMul(x);
+                const xba = ba.redMul(x);
+                B = note.gamma.mul(xbk).add(bn128.h.mul(xba));
+            }
+            return { B, bk, ba, reducer };
+        });
+    }
+
+    /**
+     * Generate random blinding scalars, conditional on the AZTEC join-split proof statement.
+     */
+    constructBlindingScalars() {
+        const notesLength = this.notes.length;
+        let bkAux = bn128.zeroBnRed;
+        this.blindingScalars = Array(notesLength)
+            .fill()
+            .map((_, i) => {
+                let bk = bn128.randomGroupScalar();
+                const ba = bn128.randomGroupScalar();
+                if (i === notesLength - 1) {
+                    if (this.m === notesLength) {
+                        bk = bn128.zeroBnRed.redSub(bkAux);
+                    } else {
+                        bk = bkAux;
+                    }
+                }
+                if (i + 1 > this.m) {
+                    bkAux = bkAux.redSub(bk);
+                } else {
+                    bkAux = bkAux.redAdd(bk);
+                }
+                return { bk, ba };
+            });
+    }
+
+    constructChallenge() {
+        this.constructChallengeRecurse([
+            this.sender,
+            this.publicValue,
+            this.m,
+            this.publicOwner,
+            this.notes,
+            this.blindingFactors,
+        ]);
+        this.challenge = this.challengeHash.redKeccak();
+    }
+
+    constructData() {
+        this.data = this.blindingFactors.map(({ bk, ba }, i) => {
+            const note = this.notes[i];
+            let kBar;
+
+            if (i &lt; this.notes.length - 1) {
+                kBar = note.k
+                    .redMul(this.challenge)
+                    .redAdd(bk)
+                    .fromRed();
+            } else {
+                kBar = this.publicValue;
+            }
+            const aBar = note.a
+                .redMul(this.challenge)
+                .redAdd(ba)
+                .fromRed();
+
+            const items = [
+                kBar,
+                aBar,
+                note.gamma.x.fromRed(),
+                note.gamma.y.fromRed(),
+                note.sigma.x.fromRed(),
+                note.sigma.y.fromRed(),
+            ];
+            return items.map((item) => `0x${padLeft(item.toString(16), 64)}`);
+        });
+    }
+
+    // TODO: normalise proof output encoding. In some places it's expected to use `encodeProofOutputs`
+    // while in others `encodeProofOutput`.
+    constructOutputs() {
+        const proofOutput = {
+            inputNotes: this.inputNotes,
+            outputNotes: this.outputNotes,
+            publicValue: this.publicValue,
+            publicOwner: this.publicOwner,
+            challenge: this.challengeHex,
+        };
+        this.output = outputCoder.encodeProofOutput(proofOutput);
+        this.outputs = outputCoder.encodeProofOutputs([proofOutput]);
+        this.hash = outputCoder.hashProofOutput(this.output);
+        this.validatedProofHash = keccak256(
+            AbiCoder.encodeParameters(['bytes32', 'uint24', 'address'], [this.hash, proofs.JOIN_SPLIT_PROOF, this.sender]),
+        );
+    }
+
+    /**
+     * Construct EIP712 signatures, giving permission for the input notes to be spent
+     * @param {string} verifyingContract Ethereum address of the ZkAsset contract, from which confidentialTransfer() is
+     * called
+     * @param {string[]} inputNoteOwners Ethereum accounts of input note owners
+     * @returns {string} array of signatures
+     */
+    constructSignatures(verifyingContract, inputNoteOwners) {
+        return signer.signMultipleNotesForConfidentialTransfer(
+            verifyingContract,
+            inputNoteOwners,
+            this.inputNotes,
+            this.challengeHex,
+            this.sender,
+        );
+    }
+
+    /**
+     * Encode the join-split proof as data for an Ethereum transaction
+     * @param {string} validator Ethereum address of the join-split validator contract
+     * @returns {Object} proof data and expected output
+     */
+    encodeABI(validator) {
+        if (!ProofUtils.isEthereumAddress(validator)) {
+            throw new Error('validator is not an Ethereum address');
+        }
+
+        const encodedParams = [
+            inputCoder.encodeProofData(this.data),
+            inputCoder.encodeOwners(this.inputNoteOwners),
+            inputCoder.encodeOwners(this.outputNoteOwners),
+            inputCoder.encodeMetaData(this.outputNotes),
+        ];
+
+        const length = 3 + encodedParams.length + 1;
+        const offsets = ProofUtils.getOffsets(length, encodedParams);
+        const abiEncodedParams = [
+            padLeft(this.m.toString(16), 64),
+            this.challengeHex.slice(2),
+            padLeft(this.publicOwner.slice(2), 64),
+            ...offsets,
+            ...encodedParams,
+        ];
+        return `0x${abiEncodedParams.join('').toLowerCase()}`;
+    }
+}
+
+export default JoinSplitProof65793;
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>
