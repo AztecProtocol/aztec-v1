@@ -16,7 +16,7 @@
     "@babel/runtime": "^7.5.5",
     "bn.js": "^4.11.8",
     "cross-fetch": "^3.0.2",
-    "enumify": "^1.0.4",
+    "enumify": "^2.0.0",
     "eth-sig-util": "^2.5.0",
     "ethereumjs-abi": "^0.6.7",
     "ethereumjs-util": "^6.1.0",
