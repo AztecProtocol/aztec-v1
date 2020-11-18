@@ -20,7 +20,7 @@
     "lerna": "^3.13.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.16.4",
-    "semantic-release": "^15.12.4",
+    "semantic-release": "^17.2.3",
     "shx": "^0.3.2",
     "wsrun": "^5.0.0"
   },
