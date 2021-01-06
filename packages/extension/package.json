@@ -121,7 +121,7 @@
         "@openzeppelin/cli": "^2.5.3",
         "babel-eslint": "^10.0.2",
         "babel-loader": "^8.0.6",
-        "babel-plugin-module-resolver": "^3.2.0",
+        "babel-plugin-module-resolver": "^4.1.0",
         "bundle-buddy-webpack-plugin": "^0.3.0",
         "chai": "^4.2.0",
         "css-loader": "^3.0.0",
