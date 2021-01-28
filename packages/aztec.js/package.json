@@ -31,7 +31,7 @@
     "babel-loader": "^8.0.5",
     "braintree-jsdoc-template": "^3.3.0",
     "chai": "^4.2.0",
-    "electron": "^7.0.0",
+    "electron": "^9.4.0",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^6.0.0",
