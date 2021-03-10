@@ -69,7 +69,7 @@
     "react": "^16.8.4",
     "react-css-modules": "^4.7.9",
     "react-custom-scrollbars": "^4.2.1",
-    "react-dev-utils": "^8.0.0",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.8.4",
     "react-group": "^3.0.2",
     "react-json-view": "^1.19.1",
