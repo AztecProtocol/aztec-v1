@@ -56,7 +56,7 @@
         "graphql-tools": "^4.0.4",
         "html-webpack-plugin": "^3.2.0",
         "jest": "^24.8.0",
-        "jspdf": "^1.5.3",
+        "jspdf": "^2.3.1",
         "kill-port": "^1.5.2",
         "lodash": "^4.17.14",
         "mini-css-extract-plugin": "^0.8.0",
