@@ -53,6 +53,6 @@
     "@babel/plugin-transform-runtime": "^7.6.2",
     "babel-eslint": "^10.0.3",
     "babel-plugin-module-resolver": "^3.2.0",
-    "got": "^9.6.0"
+    "got": "^11.8.2"
   }
 }
