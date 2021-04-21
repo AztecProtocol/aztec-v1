@@ -178,7 +178,9 @@ export default class Asset {
     }
 
     async getRawNotes() {
-        const notes = await this.rawNoteManager.fetchAndRemove(this.id);
+        let notes = await this.rawNoteManager.fetchAndRemove(this.id);
+        notes = notes
+            .filter((n1, i) => !notes.some((n2, j) => i !== j && n1.noteHash === n2.noteHash));
         if (!notes.length) return;
 
         for (let i = 0; i < notes.length; i += this.notesPerDecryptionBatch) {
