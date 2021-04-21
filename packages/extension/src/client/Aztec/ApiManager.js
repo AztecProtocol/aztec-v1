@@ -189,6 +189,7 @@ export default class ApiManager {
         const {
             apiKey = '',
             providerUrl = '',
+            accountlessProviderUrl = '',
             contractAddresses = {
                 ACE: '',
                 AccountRegistry: '',
@@ -211,7 +212,8 @@ export default class ApiManager {
             },
             async () => ConnectionService.openConnection({
                 apiKey,
-                providerUrl,
+                providerUrl: accountlessProviderUrl,
+                account: Web3Service.account,
                 contractAddresses,
             }),
             ({

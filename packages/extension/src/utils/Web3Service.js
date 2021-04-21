@@ -42,7 +42,6 @@ class Web3Service {
                 } else {
                     provider = new Web3.providers.HttpProvider(providerUrl);
                 }
-                await provider.enable();
             } else {
                 provider = window.ethereum;
                 if (!provider) {

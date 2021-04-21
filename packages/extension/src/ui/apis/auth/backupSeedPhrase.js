@@ -3,9 +3,8 @@ import i18n from '~/ui/helpers/i18n';
 
 const backup = async ({
     seedPhrase,
+    address,
 }) => {
-    const { selectedAddress } = window.ethereum;
-
     const doc = new JsPDF();
     doc.setFontType('bold');
     doc.setFontSize(24);
@@ -18,7 +17,7 @@ const backup = async ({
     doc.setFontType('bold');
     doc.text(i18n.t('register.backup.pdf.account'), 20, 62);
     doc.setFontType('light');
-    doc.text(selectedAddress, 70, 62);
+    doc.text(address, 70, 62);
     doc.setDrawColor('#ffffff');
     doc.setFillColor('#808DFF');
     doc.roundedRect(20, 70, 170, 65, 2, 2, 'FD');

@@ -15,15 +15,16 @@ const backgroundContracts = [
 
 export default async function setupNetworkConfig({
     providerUrl = '',
+    account,
     contractAddresses = {},
 }) {
     await Web3Service.init({
         providerUrl,
+        account,
     });
 
     const {
         networkId,
-        account,
     } = Web3Service;
     const networkName = getNetworkName(networkId);
     const networkAddresses = contractAddresses[networkName.toLowerCase()] || {};
