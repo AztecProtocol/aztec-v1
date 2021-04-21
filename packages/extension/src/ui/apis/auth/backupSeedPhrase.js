@@ -4,13 +4,7 @@ import i18n from '~/ui/helpers/i18n';
 const backup = async ({
     seedPhrase,
 }) => {
-    const {
-        web3: {
-            currentProvider: {
-                selectedAddress,
-            },
-        },
-    } = window;
+    const { selectedAddress } = window.ethereum;
 
     const doc = new JsPDF();
     doc.setFontType('bold');

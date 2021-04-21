@@ -42,20 +42,15 @@ class Web3Service {
                 } else {
                     provider = new Web3.providers.HttpProvider(providerUrl);
                 }
+                await provider.enable();
             } else {
                 provider = window.ethereum;
-            }
-            // TODO - to be removed
-            // https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange-(to-be-removed)
-            provider.autoRefreshOnNetworkChange = false;
+                if (!provider) {
+                    errorLog('Provider cannot be empty.');
+                    return;
+                }
 
-            if (!provider) {
-                errorLog('Provider cannot be empty.');
-                return;
-            }
-
-            if (typeof provider.enable === 'function') {
-                await provider.enable();
+                await provider.request({ method: 'eth_requestAccounts' });
             }
 
             web3 = new Web3(provider);

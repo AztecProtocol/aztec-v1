@@ -18,11 +18,6 @@ class ClientWeb3Service extends Web3Service {
             window.ethereum.on('chainChanged', (chainId) => {
                 this.eventListeners.notify('profile', 'chainChanged', chainId);
             });
-
-            // TODO - shall be removed in the future with autoRefreshOnNetworkChange
-            window.ethereum.on('networkChanged', (networkId) => {
-                this.eventListeners.notify('profile', 'networkChanged', networkId);
-            });
         }
     }
 

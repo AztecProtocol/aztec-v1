@@ -32,7 +32,6 @@ export default class ApiManager {
                             address: newTypeValue,
                         };
                         break;
-                    case 'networkChanged':
                     case 'chainChanged':
                         if (newTypeValue === 'loading') {
                             objValue = null;
