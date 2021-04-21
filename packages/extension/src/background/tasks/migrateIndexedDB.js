@@ -6,7 +6,7 @@ import {
 import asyncForEach from '~/utils/asyncForEach';
 import migrations from '~/background/database/migrations';
 
-export default async function migrateIndexedDB() {
+export default async function migrateIndexedDB(networkId) {
     const db = new Dexie(sdkSettingDbName);
     let table = db.migration;
     if (!table) {
@@ -47,7 +47,7 @@ export default async function migrateIndexedDB() {
             ) return;
 
             try {
-                await task();
+                await task(networkId);
             } catch (e) {
                 error = e;
             }

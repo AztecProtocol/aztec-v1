@@ -14,7 +14,7 @@ import {
     errorLog,
 } from '~/utils/log';
 import Connection from '../utils/connection';
-// import migrateIndexedDB from './migrateIndexedDB';
+import migrateIndexedDB from './migrateIndexedDB';
 import setupNetworkConfig from './setupNetworkConfig';
 
 const resourceOrigin = getResourceUrl('origin');
@@ -36,8 +36,8 @@ export default function acceptConnection() {
 
             if (clientProfile) {
                 try {
-                    // await migrateIndexedDB();
                     networkConfig = await setupNetworkConfig(clientProfile);
+                    await migrateIndexedDB(networkConfig.networkId);
                     connection.initUi();
                 } catch (e) {
                     const error = e.code === 4001
