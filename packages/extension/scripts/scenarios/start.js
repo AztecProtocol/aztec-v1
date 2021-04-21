@@ -5,7 +5,7 @@ import installCertificate from '../steps/installCertificate';
 import createCertificate from '../steps/createCertificate';
 import serveSDK from '../steps/serveSDK';
 import serveTemplate from '../steps/serveTemplate';
-import launchGSN from '../steps/launchGSN';
+// import launchGSN from '../steps/launchGSN';
 import copyContracts from '../steps/copyContracts';
 import watchSDK from '../steps/watchSDK';
 import launchBash from '../steps/launchBash';
@@ -23,7 +23,7 @@ export default new Scenario(
         installCertificate,
         serveSDK,
         serveTemplate,
-        launchGSN,
+        // launchGSN,
         copyContracts,
         watchSDK,
         launchBash,
