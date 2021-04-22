@@ -73,17 +73,8 @@ class EventService {
             return;
         }
 
+        log(`Add account to sync: ${address}(${networkId})`);
         this.networks[networkId][address] = account;
-
-        const config = this.autosyncConfig.get(networkId) || {};
-        if (config.status === AUTOSYNC_STATUS.STARTED) {
-            const fromAssets = await this.syncedAssets({ networkId });
-            this.syncNotes({
-                address,
-                networkId,
-                fromAssets,
-            });
-        }
     }
 
     removeAccountFromSyncing = async (
@@ -149,12 +140,15 @@ class EventService {
         this.syncAssets({
             networkId,
         }, (newAssets) => {
-            if (config.status === AUTOSYNC_STATUS.NOT_STARTED) return;
-            Object.values(this.currentAccounts(networkId)).forEach(({ address }) => this.syncNotes({
-                address,
-                networkId,
-                fromAssets: newAssets,
-            }));
+            if (config.status === AUTOSYNC_STATUS.NOT_STARTED || !newAssets.length) return;
+            Object.values(this.currentAccounts(networkId)).forEach(({ address }) => {
+                log(`Start syncing account: ${address}(${networkId})`, newAssets);
+                this.syncNotes({
+                    address,
+                    networkId,
+                    fromAssets: newAssets,
+                });
+            });
         });
 
         this.autosyncConfig.set(networkId, {

@@ -53,7 +53,7 @@ export default async function syncUserInfo(args, ctx) {
     const user = await AuthService.getRegisteredUser(userAddress);
     if (user) {
         const privateKey = decodePrivateKey(decodedKeyStore, pwDerivedKey);
-        EventService.addAccountToSync({
+        await EventService.addAccountToSync({
             address: user.address,
             networkId,
         });
