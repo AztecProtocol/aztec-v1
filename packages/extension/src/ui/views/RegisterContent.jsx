@@ -181,6 +181,14 @@ class RegisterContent extends StepContentHelper {
             <StepContent
                 {...stepConfig}
             >
+                <Block bottom="l">
+                    <Text
+                        size="s"
+                        color="red"
+                    >
+                        {'This project has been deprecated. Creating a new account is not encouraged.'}
+                    </Text>
+                </Block>
                 {contentNode}
                 {showSignature && (
                     <Block top="xl" bottom="s">
