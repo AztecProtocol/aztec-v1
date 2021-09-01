@@ -27,7 +27,7 @@
 
 ## Documentation :books:
 
-All AZTEC documentation is available on the documentation website: https://docs.aztecprotocol.com
+All AZTEC documentation is available on the documentation website: https://developers.aztec.network/
 
 This contains docs for the:
 
