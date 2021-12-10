@@ -115,6 +115,7 @@ export class Note {
      */
     async derive(spendingKey) {
         const sharedSecret = getSharedSecret(this.ephemeralFromMetaData().getPublic(), spendingKey);
+        console.log('sharedSecret', sharedSecret);
         this.a = new BN(sharedSecret.slice(2), 16).toRed(bn128.groupReduction);
         const gammaK = this.sigma.add(bn128.h.mul(this.a).neg());
         this.k = new BN(await bn128.recoverMessage(this.gamma, gammaK)).toRed(bn128.groupReduction);

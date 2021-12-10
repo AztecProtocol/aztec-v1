@@ -1,4 +1,4 @@
 export default {
-    nonce: 48,
-    ephemPublicKey: 64,
+    nonce: 64,
+    ephemPublicKey: 88,
 };

@@ -125,8 +125,8 @@ async function remoteFetch(inputValue) {
  * @returns {Object.<BN, BN>} x and y coordinates of signature point, in BN form
  */
 setup.fetchPoint = async (inputValue) => {
-    if ((process.env.NODE_ENV === 'TEST' || process.env.NODE_ENV === 'development') && process.env.LOCAL_DATABASE_PATH) {
-        return localFetch(inputValue, constants.TEST_K_MAX, process.env.LOCAL_DATABASE_PATH);
+    if ((process.env.NODE_ENV === 'TEST' || process.env.NODE_ENV === 'development') && process.env.REACT_APP_LOCAL_DATABASE_PATH) {
+        return localFetch(inputValue, constants.TEST_K_MAX, process.env.REACT_APP_LOCAL_DATABASE_PATH);
     }
     return remoteFetch(inputValue);
 };

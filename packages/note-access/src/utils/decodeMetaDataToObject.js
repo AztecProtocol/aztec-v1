@@ -14,14 +14,16 @@ const stripPrependedZeroes = (str) => str.replace(/^0{1,}/, '');
  * @returns {Object} metaDataObj - metaData in object form
  */
 export default function decodeMetaDataToObject(metaDataStr, config, startOffset = 0) {
+    console.log('startOffset', startOffset);
     const formattedMetaDataStr = metaDataStr.startsWith('0x') ? metaDataStr.slice(2) : metaDataStr;
     const offsetOfDynamicDataMapping = [];
     config.forEach((_, idx) => {
         const startOfVars = MIN_BYTES_VAR_LENGTH * idx;
         const dynamicVars = formattedMetaDataStr.substr(startOfVars, MIN_BYTES_VAR_LENGTH);
+        console.log('dynamicVars', dynamicVars);
         offsetOfDynamicDataMapping.push(2 * parseInt(dynamicVars, 16) - startOffset);
     });
-
+    console.log('offsetOfDynamicDataMapping', offsetOfDynamicDataMapping);
     const metaDataObj = {};
     config.forEach(({ name, length, _toString }, i) => {
         const data = [];
@@ -37,18 +39,21 @@ export default function decodeMetaDataToObject(metaDataStr, config, startOffset 
                 : endOfDynamicData - startOfDynamicData - MIN_BYTES_VAR_LENGTH;
 
         const numberOfDynamicData = parseInt(dataStr.slice(0, MIN_BYTES_VAR_LENGTH), 10);
-
+        console.log('decodeMetaDataToObject (name, length, lengthOfDynamicData, numberOfDynamicData)', name, length, lengthOfDynamicData, numberOfDynamicData);
         for (let j = 0; j < numberOfDynamicData; j += 1) {
             const dynamicData = dataStr.substr(lengthOfDynamicData * j + MIN_BYTES_VAR_LENGTH, lengthOfDynamicData);
+            console.log('dynamicData', dynamicData);
             let formattedData = length !== undefined ? dynamicData.slice(-length) : stripPrependedZeroes(dynamicData);
+            console.log('formattedData', formattedData);
             if (_toString) {
                 formattedData = _toString(formattedData).replace(/^0x/, '');
             }
             data.push(`0x${formattedData}`);
-        }
+        } 
         const isArrayData = length !== undefined;
         metaDataObj[name] = isArrayData ? data : data[0] || '';
     });
-
+    console.log('metaDataObj', metaDataObj);
+    
     return metaDataObj;
 }
